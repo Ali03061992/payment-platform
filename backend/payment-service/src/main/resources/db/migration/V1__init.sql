@@ -1,0 +1,60 @@
+-- Payment Service - schéma initial
+
+CREATE TABLE payments (
+  id               BIGINT AUTO_INCREMENT PRIMARY KEY,
+  reference        VARCHAR(64)   NOT NULL UNIQUE,
+  shop_id          BIGINT        NOT NULL,
+  supplier_id      BIGINT        NOT NULL,
+  currency         CHAR(3)       NOT NULL,
+  amount           DECIMAL(19,4) NOT NULL,
+  status           VARCHAR(20)   NOT NULL,
+  rejection_reason VARCHAR(500)  NULL,
+  created_by       BIGINT        NOT NULL,
+  version          BIGINT        NOT NULL DEFAULT 0,
+  created_at       DATETIME(6)   NOT NULL,
+  updated_at       DATETIME(6)   NOT NULL,
+  INDEX idx_payments_supplier (supplier_id),
+  INDEX idx_payments_shop (shop_id),
+  INDEX idx_payments_status (status),
+  INDEX idx_payments_created (created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE payment_events (
+  id         BIGINT AUTO_INCREMENT PRIMARY KEY,
+  payment_id BIGINT      NOT NULL,
+  action     VARCHAR(40) NOT NULL,
+  user_id    BIGINT      NULL,
+  timestamp  DATETIME(6) NOT NULL,
+  details    TEXT        NULL,
+  INDEX idx_payment_events_payment (payment_id),
+  CONSTRAINT fk_payment_events_payment FOREIGN KEY (payment_id) REFERENCES payments (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE audit_logs (
+  id              BIGINT AUTO_INCREMENT PRIMARY KEY,
+  user_id         BIGINT       NULL,
+  organization_id BIGINT       NULL,
+  action          VARCHAR(60)  NOT NULL,
+  entity_id       BIGINT       NULL,
+  timestamp       DATETIME(6)  NOT NULL,
+  details         TEXT         NULL,
+  INDEX idx_audit_action (action),
+  INDEX idx_audit_ts (timestamp),
+  INDEX idx_audit_org (organization_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE outbox_events (
+  id           BIGINT AUTO_INCREMENT PRIMARY KEY,
+  event_id     CHAR(36)     NOT NULL UNIQUE,
+  event_type   VARCHAR(120) NOT NULL,
+  aggregate_id VARCHAR(64)  NOT NULL,
+  payload      TEXT         NOT NULL,
+  created_at   DATETIME(6)  NOT NULL,
+  processed_at DATETIME(6)  NULL,
+  INDEX idx_outbox_processed (processed_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE processed_events (
+  event_id     CHAR(36)    PRIMARY KEY,
+  processed_at DATETIME(6) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

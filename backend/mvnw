@@ -1,0 +1,17 @@
+#!/bin/sh
+# Bootstrap Maven Wrapper - downloads Maven 3.9.16 on first use
+set -e
+
+MAVEN_VERSION=3.9.16
+MAVEN_HOME="$HOME/.m2/wrapper/dists/apache-maven-$MAVEN_VERSION/apache-maven-$MAVEN_VERSION"
+
+if [ ! -x "$MAVEN_HOME/bin/mvn" ]; then
+  echo "[mvnw] Downloading Maven $MAVEN_VERSION ..."
+  TMP_ZIP="${TMPDIR:-/tmp}/apache-maven-$MAVEN_VERSION-bin.zip"
+  curl -fsSL -o "$TMP_ZIP" "https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/$MAVEN_VERSION/apache-maven-$MAVEN_VERSION-bin.zip"
+  mkdir -p "$HOME/.m2/wrapper/dists"
+  unzip -q -o "$TMP_ZIP" -d "$HOME/.m2/wrapper/dists"
+  rm -f "$TMP_ZIP"
+fi
+
+exec "$MAVEN_HOME/bin/mvn" "$@"
