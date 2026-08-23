@@ -1,20 +1,23 @@
 package com.paymentplatform.shared.infrastructure.security;
 
-import com.nimbusds.jose.jwk.source.ImmutableSecret;
+import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.JWSHeader;
+import com.nimbusds.jose.JWSSigner;
+import com.nimbusds.jose.crypto.MACSigner;
+import com.nimbusds.jose.crypto.MACVerifier;
+import com.nimbusds.jwt.SignedJWT;
+import com.nimbusds.jwt.JWTClaimsSet;
 import com.paymentplatform.shared.domain.exception.UnauthorizedException;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.security.oauth2.jwt.JwtClaimsSet;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
-import org.springframework.security.oauth2.jwt.JwtEncoder;
-import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
-import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -27,14 +30,19 @@ public class JwtService {
     private static final String ISSUER = "payment-platform";
     private static final MacAlgorithm ALGORITHM = MacAlgorithm.HS256;
 
-    private final JwtEncoder encoder;
+    private final JWSSigner signer;
     private final JwtDecoder decoder;
     private final long expirationMinutes;
 
     public JwtService(SecurityProperties properties) {
-        SecretKeySpec key = new SecretKeySpec(
-                properties.secret().getBytes(StandardCharsets.UTF_8), "HmacSHA256");
-        this.encoder = new NimbusJwtEncoder(new ImmutableSecret<>(key));
+        byte[] secretBytes = properties.secret().getBytes(StandardCharsets.UTF_8);
+        SecretKeySpec key = new SecretKeySpec(secretBytes, "HmacSHA256");
+
+        try {
+            this.signer = new MACSigner(key);
+        } catch (Exception e) {
+            throw new IllegalStateException("Failed to create JWT signer", e);
+        }
         this.decoder = NimbusJwtDecoder.withSecretKey(key).macAlgorithm(ALGORITHM).build();
         this.expirationMinutes = properties.expiration() == null
                 ? 30
@@ -42,19 +50,29 @@ public class JwtService {
     }
 
     public String issue(AuthenticatedUser user) {
-        Instant now = Instant.now();
-        JwtClaimsSet.Builder claims = JwtClaimsSet.builder()
-                .issuer(ISSUER)
-                .issuedAt(now)
-                .expiresAt(now.plus(expirationMinutes, ChronoUnit.MINUTES))
-                .id(UUID.randomUUID().toString())
-                .subject(String.valueOf(user.userId()))
-                .claim("username", user.username())
-                .claim("roles", user.roles());
-        if (user.organizationId() != null) {
-            claims.claim("organizationId", user.organizationId());
+        try {
+            Instant now = Instant.now();
+            Instant expiry = now.plus(expirationMinutes, ChronoUnit.MINUTES);
+
+            JWTClaimsSet.Builder claimsBuilder = new JWTClaimsSet.Builder()
+                    .issuer(ISSUER)
+                    .issueTime(Date.from(now))
+                    .expirationTime(Date.from(expiry))
+                    .jwtID(UUID.randomUUID().toString())
+                    .subject(String.valueOf(user.userId()))
+                    .claim("username", user.username())
+                    .claim("roles", user.roles());
+            if (user.organizationId() != null) {
+                claimsBuilder.claim("organizationId", user.organizationId());
+            }
+
+            JWSHeader header = new JWSHeader(JWSAlgorithm.HS256);
+            SignedJWT signedJWT = new SignedJWT(header, claimsBuilder.build());
+            signedJWT.sign(signer);
+            return signedJWT.serialize();
+        } catch (Exception e) {
+            throw new UnauthorizedException("Erreur lors de la génération du JWT");
         }
-        return encoder.encode(JwtEncoderParameters.from(claims.build())).getTokenValue();
     }
 
     public long expirationSeconds() {

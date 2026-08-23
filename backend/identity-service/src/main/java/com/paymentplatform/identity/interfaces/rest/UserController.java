@@ -28,7 +28,7 @@ public class UserController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAuthority('ADMIN_MANAGE_USERS')")
+    @PreAuthorize("hasAuthority('ADMIN_MANAGE_USERS') or hasAuthority('SALES_MANAGE_ACCOUNTS')")
     public ResponseEntity<List<UserResponse>> list(@RequestParam(required = false) Long organizationId,
                                                    @RequestParam(required = false) String role,
                                                    @RequestParam(required = false) String statusFilter) {
@@ -44,13 +44,13 @@ public class UserController {
     }
 
     @PatchMapping("/{id}/activate")
-    @PreAuthorize("hasAuthority('ADMIN_MANAGE_USERS')")
+    @PreAuthorize("hasAuthority('ADMIN_MANAGE_USERS') or hasAuthority('SALES_MANAGE_ACCOUNTS')")
     public ResponseEntity<UserResponse> activate(@PathVariable long id) {
         return ResponseEntity.ok(status.activateUser(CurrentUser.id(), id));
     }
 
     @PatchMapping("/{id}/disable")
-    @PreAuthorize("hasAuthority('ADMIN_MANAGE_USERS')")
+    @PreAuthorize("hasAuthority('ADMIN_MANAGE_USERS') or hasAuthority('SALES_MANAGE_ACCOUNTS')")
     public ResponseEntity<UserResponse> disable(@PathVariable long id) {
         return ResponseEntity.ok(status.disableUser(CurrentUser.id(), id));
     }

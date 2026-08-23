@@ -17,4 +17,5 @@ public final class Permissions {
     public static final String SHOP_CANCEL_PAYMENTS = "SHOP_CANCEL_PAYMENTS";
     public static final String VIEW_PAYMENTS = "VIEW_PAYMENTS";
     public static final String VIEW_NOTIFICATIONS = "VIEW_NOTIFICATIONS";
+    public static final String SALES_MANAGE_ACCOUNTS = "SALES_MANAGE_ACCOUNTS";
 }

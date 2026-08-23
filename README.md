@@ -4,17 +4,17 @@ Plateforme professionnelle de gestion des paiements unitaires entre **fournisseu
 
 Architecture **microservices** appliquant **DDD**, **Clean/Hexagonal Architecture**, **SOLID** et **Clean Code**. Chaque microservice possède **sa propre base MySQL** ; les échanges inter-services sont événementiels (RabbitMQ) avec **Outbox Pattern** pour les événements critiques.
 
-## Stack (versions stables, août 2026)
+## Stack
 
 | Brique | Version |
 |---|---|
 | Java | 26 LTS |
-| Spring Boot | 4.1.0 (Spring Framework 7, Hibernate 7.2) |
-| Spring Cloud | 2025.1.2 "Oakwood" (compatible Boot 4.1) |
+| Spring Boot | 4.1.0 (Spring Framework 7, Hibernate 7.4) |
+| Spring Cloud | 2025.1.2 (compatible Boot 4.1) |
 | MySQL | 8.4 LTS |
 | RabbitMQ | 4.x |
-| Angular | 22.1 (Signals, zoneless) |
-| Outillage | Maven Wrapper, Flyway, OpenAPI, JUnit 5, Mockito, AssertJ, Testcontainers, Playwright |
+| Angular | 16 |
+| Docker | Multi-stage builds |
 
 ## Structure
 
@@ -26,33 +26,126 @@ payment-platform/
 │   ├── identity-service/           # utilisateurs, rôles, JWT, RBAC
 │   ├── organization-service/       # fournisseurs, boutiques, relations
 │   ├── payment-service/            # paiements, machine à états, audit, outbox
-│   ├── notification-service/       # notifications persistées + SSE temps réel
-│   └── api-gateway/                # point d'entrée unique : routing, JWT, CORS, rate-limit
-├── frontend/                       # Angular 22
+│   ├── notification-service/       # notifications persistées
+│   └── api-gateway/                # point d'entrée unique : routing, JWT, CORS
+├── payment-platform-ui/            # Angular 16 frontend
 ├── deploy/
-│   ├── docker-compose.yml          # tout l'infra : `docker compose up --build`
-│   └── nginx/                      # servira l'app Angular
-├── docs/                           # documentation complète (voir ci-dessous)
-└── .github/workflows/ci.yml        # pipeline CI/CD
+│   ├── docker-compose.yml          # orchestration complète
+│   ├── .env                        # variables d'environnement
+│   ├── run.ps1                     # démarrer le projet
+│   ├── stop.ps1                    # arrêter le projet
+│   ├── nginx/default.conf          # config Nginx (SPA + proxy API)
+│   └── mysql-init/                 # scripts d'initialisation MySQL
+└── docs/                           # documentation technique
 ```
 
-## Rôles
+## Démarrage rapide
 
-`SYSTEM_ADMIN`, `SUPPLIER_ADMIN`, `SUPPLIER_AGENT`, `SHOP_ADMIN`, `SHOP_AGENT`.
+### Prérequis
+- Docker Desktop avec WSL2 activé
 
-## Démarrage
+### Commands
 
 ```bash
-docker compose up --build
+# Démarrer tout le projet
+cd deploy
+.\run.ps1
+
+# Ou avec rebuild
+.\run.ps1 -Build
+
+# Arrêter (conserve les données)
+.\stop.ps1
+
+# Arrêter et supprimer les données
+.\stop.ps1 -Clean
 ```
 
-Puis ouvrir http://localhost:8080 (Angular) / http://localhost:8081 (Gateway Swagger).
+### Ou manuellement
+
+```bash
+cd deploy/
+docker compose up --build -d
+```
+
+## URLs & Ports
+
+| Service | URL | Description |
+|---|---|---|
+| **Angular App** | http://localhost:8080 | Frontend SPA |
+| **Inscription** | http://localhost:8080/register | Créer un compte |
+| **Connexion** | http://localhost:8080/login | Se connecter |
+| **API Gateway** | http://localhost:8081 | Entry point API |
+| **Swagger UI** | http://localhost:8081/swagger-ui.html | Documentation API |
+| **Adminer** | http://localhost:8086 | Interface web MySQL |
+| **RabbitMQ** | http://localhost:15673 | Management UI RabbitMQ |
+
+### Ports backend (internes, via gateway)
+
+| Service | Port interne | Accès |
+|---|---|---|
+| Identity Service | 8082 | Via gateway `/api/auth/**` |
+| Organization Service | 8083 | Via gateway `/api/organizations/**` |
+| Payment Service | 8084 | Via gateway `/api/payments/**` |
+| Notification Service | 8085 | Via gateway `/api/notifications/**` |
+
+### Infrastructure
+
+| Service | Port externe | Credentials |
+|---|---|---|
+| MySQL | 3307 | `payment_app` / `app-password-change-me` |
+| RabbitMQ AMQP | 5673 | `payment` / `rabbit-password-change-me` |
+| RabbitMQ Management | 15673 | `payment` / `rabbit-password-change-me` |
+
+## Comptes de démonstration
+
+| Compte | Rôle | Organisation |
+|---|---|---|
+| `system.admin` / `Admin@123` | SYSTEM_ADMIN | — |
+
+### Rôles disponibles à l'inscription
+
+| Rôle | Description |
+|---|---|
+| `SUPPLIER_ADMIN` | Administrateur fournisseur |
+| `SUPPLIER_AGENT` | Agent fournisseur |
+| `SHOP_ADMIN` | Administrateur boutique |
+| `SHOP_AGENT` | Agent boutique |
+
+## Rôles & Permissions
+
+| Rôle | Permissions |
+|---|---|
+| `SYSTEM_ADMIN` | Gérer organisations, utilisateurs, audit, stats |
+| `SUPPLIER_ADMIN` | Gérer agents & paiements fournisseur |
+| `SUPPLIER_AGENT` | Gérer paiements fournisseur |
+| `SHOP_ADMIN` | Gérer agents, créer/annuler paiements boutique |
+| `SHOP_AGENT` | Créer/annuler paiements boutique |
+
+## API Gateway Routes
+
+| Route | Service cible |
+|---|---|
+| `/api/auth/**` | Identity Service |
+| `/api/users/**` | Identity Service |
+| `/api/suppliers/{id}/agents/**` | Identity Service |
+| `/api/organizations/**` | Organization Service |
+| `/api/payments/**` | Payment Service |
+| `/api/notifications/**` | Notification Service |
+
+## Technologie
+
+- **Backend** : Java 26, Spring Boot 4.1, Spring Cloud Gateway, Hibernate 7.4, Flyway, RabbitMQ
+- **Frontend** : Angular 16, TypeScript
+- **Base de données** : MySQL 8.4 (une base par microservice)
+- **Infra** : Docker multi-stage, Docker Compose, Nginx
+- **Architecture** : DDD, Clean/Hexagonal, Event-Driven, Outbox Pattern
 
 ## Documentation
 
 | Sujet | Fichier |
 |---|---|
-| Architecture globale & décisions | [docs/architecture.md](docs/architecture.md) |
+| Architecture globale | [docs/architecture.md](docs/architecture.md) |
 | DDD (aggregates, entities, VOs) | [docs/ddd.md](docs/ddd.md) |
 | Bounded contexts | [docs/bounded-contexts.md](docs/bounded-contexts.md) |
 | Règles métier | [docs/business-rules.md](docs/business-rules.md) |
@@ -60,21 +153,5 @@ Puis ouvrir http://localhost:8080 (Angular) / http://localhost:8081 (Gateway Swa
 | API REST | [docs/api.md](docs/api.md) |
 | Sécurité (JWT, RBAC) | [docs/security.md](docs/security.md) |
 | Événements & Outbox | [docs/events.md](docs/events.md) |
-| Notifications temps réel | [docs/notifications.md](docs/notifications.md) |
-| Stratégie de tests | [docs/testing.md](docs/testing.md) |
 | Déploiement & CI/CD | [docs/deployment.md](docs/deployment.md) |
-
-## Comptes de démonstration (seed)
-
-| Compte | Rôle | Organisation |
-|---|---|---|
-| `system.admin` / `Admin@123` | SYSTEM_ADMIN | — |
-| `supplier.admin` / `Supplier@123` | SUPPLIER_ADMIN | Fournisseur ABC |
-| `shop.admin` / `Shop@123` | SHOP_ADMIN | Boutique Tunis Centre |
-| `shop.agent` / `Agent@123` | SHOP_AGENT | Boutique Tunis Centre |
-
-## CI/CD
-
-`.github/workflows/ci.yml` : compile → unit tests → integration tests (Testcontainers) → security tests → frontend tests → e2e (Playwright) → docker build. Le pipeline **échoue** si un test échoue.
-
-> Note : l'implémentation est conçue pour s'exécuter dans Docker (Testcontainers + Compose). Sans Docker Desktop (WSL2) installé, les tests d'intégration/E2E ne peuvent pas s'exécuter en local.
+| Guide développement local | [deploy/LOCAL_DEV.md](deploy/LOCAL_DEV.md) |

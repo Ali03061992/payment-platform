@@ -38,7 +38,8 @@ public class UserQueryUseCase {
                                    Long organizationId, String role, String status) {
         List<User> result;
         boolean isSystemAdmin = actorRoles.contains(RoleCode.SYSTEM_ADMIN.name());
-        if (isSystemAdmin) {
+        boolean isSales = actorRoles.contains(RoleCode.SALES.name());
+        if (isSystemAdmin || isSales) {
             result = organizationId == null ? users.findAll()
                     : users.findByOrganizationId(OrganizationId.of(organizationId));
         } else {

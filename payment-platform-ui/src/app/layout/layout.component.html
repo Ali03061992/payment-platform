@@ -1,0 +1,50 @@
+<div class="layout" [class.sidebar-collapsed]="!sidebarOpen">
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="logo">
+        <span class="logo-icon">💳</span>
+        <span class="logo-text" *ngIf="sidebarOpen">Payment Platform</span>
+      </div>
+      <button class="toggle-btn" (click)="toggleSidebar()">☰</button>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a *ngFor="let item of filteredNav"
+         [routerLink]="item.route"
+         routerLinkActive="active"
+         class="nav-item">
+        <span class="nav-icon">{{ item.icon }}</span>
+        <span class="nav-label" *ngIf="sidebarOpen">{{ item.label }}</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="user-info" *ngIf="sidebarOpen">
+        <div class="user-avatar">{{ getInitials() }}</div>
+        <div class="user-details">
+          <div class="user-name">{{ user?.firstName }} {{ user?.lastName }}</div>
+          <div class="user-role">{{ user?.roles?.[0] }}</div>
+        </div>
+      </div>
+      <button class="logout-btn" (click)="logout()">
+        <span>🚪</span>
+        <span *ngIf="sidebarOpen">Déconnexion</span>
+      </button>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <header class="top-bar">
+      <div class="page-title">
+        <h2>Bienvenue, {{ user?.firstName }}</h2>
+        <span class="breadcrumb">{{ user?.roles?.[0] }}</span>
+      </div>
+      <div class="header-actions">
+        <span class="status-badge active">En ligne</span>
+      </div>
+    </header>
+    <div class="content-area">
+      <router-outlet></router-outlet>
+    </div>
+  </main>
+</div>

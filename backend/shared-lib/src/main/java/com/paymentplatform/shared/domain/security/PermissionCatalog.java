@@ -11,6 +11,7 @@ import static com.paymentplatform.shared.domain.security.Permissions.ADMIN_MANAG
 import static com.paymentplatform.shared.domain.security.Permissions.ADMIN_MANAGE_USERS;
 import static com.paymentplatform.shared.domain.security.Permissions.ADMIN_VIEW_AUDIT;
 import static com.paymentplatform.shared.domain.security.Permissions.ADMIN_VIEW_STATS;
+import static com.paymentplatform.shared.domain.security.Permissions.SALES_MANAGE_ACCOUNTS;
 import static com.paymentplatform.shared.domain.security.Permissions.SHOP_CANCEL_PAYMENTS;
 import static com.paymentplatform.shared.domain.security.Permissions.SHOP_CREATE_PAYMENTS;
 import static com.paymentplatform.shared.domain.security.Permissions.SHOP_MANAGE_AGENTS;
@@ -31,7 +32,8 @@ public final class PermissionCatalog {
             RoleCode.SHOP_ADMIN, Set.of(SHOP_MANAGE_AGENTS, SHOP_CREATE_PAYMENTS, SHOP_CANCEL_PAYMENTS,
                     VIEW_PAYMENTS, VIEW_NOTIFICATIONS),
             RoleCode.SHOP_AGENT, Set.of(SHOP_CREATE_PAYMENTS, SHOP_CANCEL_PAYMENTS, VIEW_PAYMENTS,
-                    VIEW_NOTIFICATIONS));
+                    VIEW_NOTIFICATIONS),
+            RoleCode.SALES, Set.of(SALES_MANAGE_ACCOUNTS, VIEW_PAYMENTS, VIEW_NOTIFICATIONS));
 
     private PermissionCatalog() {
     }

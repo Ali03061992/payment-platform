@@ -1,0 +1,67 @@
+<div class="page-header">
+  <h1>➕ Ajouter un produit</h1>
+  <button class="btn btn-secondary" (click)="goBack()">← Retour</button>
+</div>
+
+<div class="form-card" *ngIf="!success">
+  <form (ngSubmit)="onSubmit()">
+    <div class="form-row">
+      <div class="form-group">
+        <label for="name">Nom du produit</label>
+        <input id="name" type="text" [(ngModel)]="form.name" name="name" required placeholder="Ex: T-shirt Premium">
+      </div>
+      <div class="form-group">
+        <label for="sku">SKU</label>
+        <input id="sku" type="text" [(ngModel)]="form.sku" name="sku" required placeholder="Ex: TS-001">
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="description">Description</label>
+      <input id="description" type="text" [(ngModel)]="form.description" name="description" placeholder="Description du produit">
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="unitPrice">Prix unitaire</label>
+        <input id="unitPrice" type="number" [(ngModel)]="form.unitPrice" name="unitPrice" required min="0" step="0.01" placeholder="0.00">
+      </div>
+      <div class="form-group">
+        <label for="currency">Devise</label>
+        <select id="currency" [(ngModel)]="form.currency" name="currency" required>
+          <option value="EUR">EUR (€)</option>
+          <option value="USD">USD ($)</option>
+          <option value="TND">TND</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="quantity">Quantité initiale</label>
+        <input id="quantity" type="number" [(ngModel)]="form.quantity" name="quantity" required min="0" placeholder="0">
+      </div>
+      <div class="form-group">
+        <label for="minQuantity">Seuil minimum</label>
+        <input id="minQuantity" type="number" [(ngModel)]="form.minQuantity" name="minQuantity" required min="0" placeholder="0">
+      </div>
+    </div>
+
+    <div *ngIf="error" class="alert alert-error">{{ error }}</div>
+
+    <button type="submit" class="btn btn-primary btn-block" [disabled]="loading">
+      {{ loading ? 'Création...' : 'Créer le produit' }}
+    </button>
+  </form>
+</div>
+
+<div class="success-card" *ngIf="success">
+  <div class="success-icon">✅</div>
+  <h2>Produit créé avec succès !</h2>
+  <div class="success-actions">
+    <button class="btn btn-primary" (click)="success = false; form = {name:'',sku:'',description:'',unitPrice:0,currency:'EUR',quantity:0,minQuantity:0}">
+      Ajouter un autre produit
+    </button>
+    <button class="btn btn-secondary" (click)="goBack()">Retour au stock</button>
+  </div>
+</div>

@@ -1,0 +1,49 @@
+<div class="page-header">
+  <h1>🔑 Activation / Désactivation des comptes</h1>
+</div>
+
+<div class="search-bar">
+  <input type="text" [(ngModel)]="searchQuery" placeholder="Rechercher par nom, email, username..." class="search-input">
+  <select [(ngModel)]="filterStatus" class="filter-select">
+    <option value="">Tous les statuts</option>
+    <option value="ACTIVE">Actif</option>
+    <option value="DISABLED">Désactivé</option>
+  </select>
+</div>
+
+<div *ngIf="successMessage" class="alert alert-success">{{ successMessage }}</div>
+<div *ngIf="error" class="alert alert-error">{{ error }}</div>
+
+<div *ngIf="loading" class="loading">Chargement...</div>
+
+<div class="cards-grid" *ngIf="!loading">
+  <div *ngFor="let user of filteredUsers" class="user-card" [class.disabled]="user.status === 'DISABLED'">
+    <div class="card-header">
+      <div class="avatar">{{ user.firstName[0] }}{{ user.lastName[0] }}</div>
+      <div class="card-info">
+        <div class="card-name">{{ user.firstName }} {{ user.lastName }}</div>
+        <div class="card-username">@{{ user.username }}</div>
+      </div>
+      <span class="status-badge" [class.active]="user.status === 'ACTIVE'" [class.disabled]="user.status === 'DISABLED'">
+        {{ user.status }}
+      </span>
+    </div>
+    <div class="card-details">
+      <div class="detail-row">📧 {{ user.email }}</div>
+      <div class="detail-row">🏷️ {{ user.roles[0] }}</div>
+      <div class="detail-row" *ngIf="user.phone">📱 {{ user.phone }}</div>
+    </div>
+    <div class="card-actions">
+      <button *ngIf="user.status === 'ACTIVE'" class="btn btn-danger btn-sm" (click)="disable(user)">
+        🚫 Désactiver
+      </button>
+      <button *ngIf="user.status === 'DISABLED'" class="btn btn-success btn-sm" (click)="activate(user)">
+        ✅ Activer
+      </button>
+    </div>
+  </div>
+
+  <div *ngIf="filteredUsers.length === 0" class="empty-state">
+    Aucun compte trouvé
+  </div>
+</div>

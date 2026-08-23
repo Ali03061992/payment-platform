@@ -3,8 +3,10 @@ package com.paymentplatform.identity.interfaces.rest;
 import com.paymentplatform.shared.infrastructure.security.CurrentUser;
 import com.paymentplatform.identity.application.dto.LoginRequest;
 import com.paymentplatform.identity.application.dto.LoginResponse;
+import com.paymentplatform.identity.application.dto.RegisterRequest;
 import com.paymentplatform.identity.application.dto.UserResponse;
 import com.paymentplatform.identity.application.usecase.AuthUseCase;
+import com.paymentplatform.identity.application.usecase.RegisterUseCase;
 import com.paymentplatform.identity.application.usecase.UserQueryUseCase;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -19,16 +21,23 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
 
     private final AuthUseCase auth;
+    private final RegisterUseCase register;
     private final UserQueryUseCase users;
 
-    public AuthController(AuthUseCase auth, UserQueryUseCase users) {
+    public AuthController(AuthUseCase auth, RegisterUseCase register, UserQueryUseCase users) {
         this.auth = auth;
+        this.register = register;
         this.users = users;
     }
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
         return ResponseEntity.ok(auth.login(request));
+    }
+
+    @PostMapping("/register")
+    public ResponseEntity<UserResponse> register(@Valid @RequestBody RegisterRequest request) {
+        return ResponseEntity.status(201).body(register.register(request));
     }
 
     @GetMapping("/me")
