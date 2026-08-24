@@ -1,0 +1,17 @@
+/* Component-specific styles only — global design system in styles.css */
+
+.result-count {
+  color: #8896ab;
+  font-size: 14px;
+}
+
+.actions { white-space: nowrap; }
+
+.clickable-row { cursor: pointer; }
+
+.payment-badge.draft { background: #eceff1; color: #546e7a; }
+.payment-badge.preparing { background: #e3f2fd; color: #1565c0; }
+.payment-badge.ready { background: #e8f5e9; color: #2e7d32; }
+.payment-badge.delivery { background: #fff3e0; color: #e65100; }
+.payment-badge.delivered { background: #e8f5e9; color: #2e7d32; }
+.payment-badge.accepted { background: #e0f7fa; color: #00695c; }

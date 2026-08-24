@@ -1,0 +1,20 @@
+/* Component-specific styles only — global design system in styles.css */
+
+code {
+  background: #f5f7fa;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 13px;
+  font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
+}
+
+.result-count {
+  color: #8896ab;
+  font-size: 14px;
+}
+
+.actions { white-space: nowrap; }
+.actions .btn { margin-right: 4px; }
+.actions .btn:last-child { margin-right: 0; }
+
+.empty { text-align: center; padding: 48px; color: #8896ab; }

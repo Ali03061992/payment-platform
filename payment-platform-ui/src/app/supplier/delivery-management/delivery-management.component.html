@@ -1,0 +1,122 @@
+<div class="page-header">
+  <h2>Mes livraisons</h2>
+</div>
+
+<div class="alert alert-success" *ngIf="successMsg">{{ successMsg }}</div>
+<div class="alert alert-error" *ngIf="errorMsg">{{ errorMsg }}</div>
+
+<div class="loading" *ngIf="loading">
+  <div class="spinner"></div>
+  <span>Chargement des livraisons...</span>
+</div>
+
+<div *ngIf="!loading">
+  <div class="section-header" *ngIf="pendingDeliveries.length > 0">
+    <h3>Livraisons en cours</h3>
+    <span class="result-count">{{ pendingDeliveries.length }} livraison(s)</span>
+  </div>
+
+  <div class="table-card" *ngIf="pendingDeliveries.length > 0">
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Référence</th>
+            <th>Boutique</th>
+            <th>Adresse</th>
+            <th>Total</th>
+            <th>Produits</th>
+            <th>Statut</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let d of pendingDeliveries">
+            <td><strong>{{ d.reference }}</strong></td>
+            <td>{{ d.shopId }}</td>
+            <td>{{ d.notes || '-' }}</td>
+            <td>{{ d.total | number:'1.2-2' }} {{ d.currency }}</td>
+            <td>{{ d.items?.length || 0 }} article(s)</td>
+            <td>
+              <span class="payment-badge" [ngClass]="statusClass(d.status)">
+                {{ statusLabel(d.status) }}
+              </span>
+            </td>
+            <td class="actions">
+              <button class="btn btn-sm btn-success" (click)="openDeliver(d)">Marquer livré</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="section-header" *ngIf="completedDeliveries.length > 0" style="margin-top: 32px;">
+    <h3>Livraisons terminées</h3>
+    <span class="result-count">{{ completedDeliveries.length }} livraison(s)</span>
+  </div>
+
+  <div class="table-card" *ngIf="completedDeliveries.length > 0">
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Référence</th>
+            <th>Boutique</th>
+            <th>Adresse</th>
+            <th>Total</th>
+            <th>Produits</th>
+            <th>Statut</th>
+            <th>Livré le</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let d of completedDeliveries">
+            <td><strong>{{ d.reference }}</strong></td>
+            <td>{{ d.shopId }}</td>
+            <td>{{ d.notes || '-' }}</td>
+            <td>{{ d.total | number:'1.2-2' }} {{ d.currency }}</td>
+            <td>{{ d.items?.length || 0 }} article(s)</td>
+            <td>
+              <span class="payment-badge" [ngClass]="statusClass(d.status)">
+                {{ statusLabel(d.status) }}
+              </span>
+            </td>
+            <td>{{ d.deliveredAt | date:'dd/MM/yyyy HH:mm' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="empty" *ngIf="deliveries.length === 0">
+    Aucune livraison assignée
+  </div>
+</div>
+
+<!-- Modal confirmation livraison -->
+<div class="modal-overlay" *ngIf="showDeliverModal" (click)="closeDeliver()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Confirmer la livraison</h3>
+      <button class="btn-close" (click)="closeDeliver()">&times;</button>
+    </div>
+    <div *ngIf="selectedOrder">
+      <p style="margin-bottom: 16px; color: #555;">
+        Commande <strong>{{ selectedOrder.reference }}</strong> — {{ selectedOrder.total | number:'1.2-2' }} {{ selectedOrder.currency }}
+      </p>
+      <form (ngSubmit)="confirmDeliver()">
+        <div class="form-group">
+          <label>ID de la personne qui a reçu</label>
+          <input type="number" [(ngModel)]="receivedBy" name="receivedBy" class="form-control" min="1" required placeholder="ID du destinataire">
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary" (click)="closeDeliver()">Annuler</button>
+          <button type="submit" class="btn btn-success" [disabled]="delivering || !receivedBy">
+            {{ delivering ? 'Confirmation...' : 'Confirmer la livraison' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

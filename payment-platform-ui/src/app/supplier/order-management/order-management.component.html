@@ -1,0 +1,168 @@
+<div class="page-header">
+  <h2>Gestion des commandes</h2>
+</div>
+
+<div class="alert alert-success" *ngIf="successMsg">{{ successMsg }}</div>
+<div class="alert alert-error" *ngIf="errorMsg">{{ errorMsg }}</div>
+
+<div class="loading" *ngIf="loading">
+  <div class="spinner"></div>
+  <span>Chargement des commandes...</span>
+</div>
+
+<div class="filters" *ngIf="!loading">
+  <select [(ngModel)]="filterStatus" class="form-control" style="max-width:200px;">
+    <option value="">Tous les statuts</option>
+    <option value="DRAFT">Brouillon</option>
+    <option value="CONFIRMED">Confirmé</option>
+    <option value="PREPARING">En préparation</option>
+    <option value="READY">Prêt</option>
+    <option value="IN_DELIVERY">En livraison</option>
+    <option value="DELIVERED">Livré</option>
+    <option value="CANCELLED">Annulé</option>
+  </select>
+  <span class="result-count">{{ filteredOrders.length }} résultat(s)</span>
+</div>
+
+<div class="table-card" *ngIf="!loading">
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr>
+          <th>Référence</th>
+          <th>Boutique</th>
+          <th>Date</th>
+          <th>Total</th>
+          <th>Statut</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let o of filteredOrders" class="clickable-row" (click)="viewDetail(o)">
+          <td><strong>{{ o.reference }}</strong></td>
+          <td>{{ o.shopId }}</td>
+          <td>{{ o.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
+          <td>{{ o.total | number:'1.2-2' }} {{ o.currency }}</td>
+          <td>
+            <span class="payment-badge" [ngClass]="statusClass(o.status)">
+              {{ statusLabel(o.status) }}
+            </span>
+          </td>
+          <td class="actions" (click)="$event.stopPropagation()">
+            <button class="btn btn-sm btn-warning" *ngIf="canPrepare(o)" (click)="prepare(o)">Préparer</button>
+            <button class="btn btn-sm btn-primary" *ngIf="canReady(o)" (click)="ready(o)">Prêt</button>
+            <button class="btn btn-sm btn-secondary" *ngIf="canAssign(o)" (click)="openAssign(o)">Assigner</button>
+            <button class="btn btn-sm btn-danger" *ngIf="canCancel(o)" (click)="cancel(o)">Annuler</button>
+          </td>
+        </tr>
+        <tr *ngIf="filteredOrders.length === 0">
+          <td colspan="6" class="empty">Aucune commande trouvée</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Détail commande -->
+<div class="modal-overlay" *ngIf="showDetail" (click)="closeDetail()">
+  <div class="modal-content modal-lg" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Commande {{ selectedOrder?.reference }}</h3>
+      <button class="btn-close" (click)="closeDetail()">&times;</button>
+    </div>
+    <div class="loading" *ngIf="loadingDetail" style="padding: 24px;">
+      <div class="spinner"></div>
+      <span>Chargement...</span>
+    </div>
+    <div *ngIf="selectedOrder && !loadingDetail">
+      <div class="detail-grid">
+        <div class="detail-card">
+          <div class="detail-label">Statut</div>
+          <div class="detail-value">
+            <span class="payment-badge" [ngClass]="statusClass(selectedOrder.status)">{{ statusLabel(selectedOrder.status) }}</span>
+          </div>
+        </div>
+        <div class="detail-card">
+          <div class="detail-label">Total</div>
+          <div class="detail-value amount">{{ selectedOrder.total | number:'1.2-2' }} {{ selectedOrder.currency }}</div>
+        </div>
+        <div class="detail-card">
+          <div class="detail-label">Boutique</div>
+          <div class="detail-value">{{ selectedOrder.shopId }}</div>
+        </div>
+        <div class="detail-card">
+          <div class="detail-label">Créé le</div>
+          <div class="detail-value">{{ selectedOrder.createdAt | date:'dd/MM/yyyy HH:mm:ss' }}</div>
+        </div>
+      </div>
+
+      <div class="table-card" style="margin-top: 16px;" *ngIf="selectedOrder && selectedOrder.items && selectedOrder.items.length > 0">
+        <h4 style="padding: 16px 20px 0;">Articles</h4>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Produit</th>
+                <th>Quantité</th>
+                <th>Prix unitaire</th>
+                <th>Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of selectedOrder.items">
+                <td><strong>{{ item.productName }}</strong></td>
+                <td>{{ item.quantity }}</td>
+                <td>{{ item.unitPrice | number:'1.2-2' }}</td>
+                <td>{{ item.lineTotal | number:'1.2-2' }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="table-card" style="margin-top: 16px;" *ngIf="selectedOrder && selectedOrder.events && selectedOrder.events.length > 0">
+        <h4 style="padding: 16px 20px 0;">Historique</h4>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Action</th>
+                <th>Date</th>
+                <th>Détails</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let e of selectedOrder.events">
+                <td><span class="payment-badge confirmed">{{ e.action }}</span></td>
+                <td>{{ e.timestamp | date:'dd/MM/yyyy HH:mm:ss' }}</td>
+                <td>{{ e.details || '-' }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Assign agent modal -->
+<div class="modal-overlay" *ngIf="showAssignModal" (click)="closeAssign()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Assigner un livreur</h3>
+      <button class="btn-close" (click)="closeAssign()">&times;</button>
+    </div>
+    <form (ngSubmit)="submitAssign()">
+      <div class="form-group">
+        <label>ID du livreur</label>
+        <input type="number" [(ngModel)]="assignAgentId" name="agentId" class="form-control" min="1" required placeholder="ID de l'agent">
+      </div>
+      <div class="form-actions">
+        <button type="button" class="btn btn-secondary" (click)="closeAssign()">Annuler</button>
+        <button type="submit" class="btn btn-primary" [disabled]="assigning || !assignAgentId">
+          {{ assigning ? 'Assignation...' : 'Assigner' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

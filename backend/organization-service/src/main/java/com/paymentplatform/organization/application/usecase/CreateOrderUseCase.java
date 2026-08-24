@@ -1,0 +1,129 @@
+package com.paymentplatform.organization.application.usecase;
+
+import com.paymentplatform.organization.application.dto.CreateOrderRequest;
+import com.paymentplatform.organization.application.dto.OrderItemRequest;
+import com.paymentplatform.organization.application.dto.OrderResponse;
+import com.paymentplatform.organization.domain.model.Order;
+import com.paymentplatform.organization.domain.model.OrderEvent;
+import com.paymentplatform.organization.domain.model.OrderItem;
+import com.paymentplatform.organization.domain.model.Product;
+import com.paymentplatform.organization.domain.model.SupplierShopRelation;
+import com.paymentplatform.organization.domain.repository.*;
+import com.paymentplatform.shared.domain.exception.ConflictException;
+import com.paymentplatform.shared.domain.exception.NotFoundException;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+
+@Service
+public class CreateOrderUseCase {
+
+    private final OrderRepository orders;
+    private final OrderItemRepository orderItems;
+    private final OrderEventRepository events;
+    private final ProductRepository products;
+    private final OrganizationRepository organizations;
+    private final SupplierShopRelationRepository relations;
+
+    public CreateOrderUseCase(OrderRepository orders, OrderItemRepository orderItems,
+                              OrderEventRepository events, ProductRepository products,
+                              OrganizationRepository organizations,
+                              SupplierShopRelationRepository relations) {
+        this.orders = orders;
+        this.orderItems = orderItems;
+        this.events = events;
+        this.products = products;
+        this.organizations = organizations;
+        this.relations = relations;
+    }
+
+    @Transactional
+    public OrderResponse execute(CreateOrderRequest request, long actorUserId, String actorRole) {
+        validateOrganizations(request.supplierId(), request.shopId());
+        validateRelation(request.supplierId(), request.shopId());
+
+        String source = "SUPPLIER".equals(actorRole) ? "SUPPLIER" : "SHOP";
+
+        Order order = Order.create(
+                request.supplierId(),
+                request.shopId(),
+                actorUserId,
+                actorRole,
+                source,
+                Boolean.TRUE.equals(request.asapPayment()),
+                request.currency()
+        );
+        if (request.notes() != null) {
+            order.setNotes(request.notes());
+        }
+
+        Order savedOrder = orders.save(order);
+
+        List<OrderItem> items = new ArrayList<>();
+        BigDecimal subtotal = BigDecimal.ZERO;
+
+        for (OrderItemRequest itemReq : request.items()) {
+            Product product = products.findById(itemReq.productId())
+                    .orElseThrow(() -> new NotFoundException("Produit non trouvé : " + itemReq.productId()));
+
+            int availableQty = product.getQuantity() - product.getReservedQty();
+            if (availableQty < itemReq.quantity()) {
+                throw new ConflictException("Stock insuffisant pour le produit " + product.getName()
+                        + " (disponible: " + availableQty + ", demandé: " + itemReq.quantity() + ")");
+            }
+
+            BigDecimal discount = itemReq.discount() != null ? itemReq.discount() : BigDecimal.ZERO;
+
+            OrderItem item = new OrderItem();
+            item.setOrderId(savedOrder.getId());
+            item.setProductId(product.getId());
+            item.setProductRef(product.getSku());
+            item.setProductName(product.getName());
+            item.setQuantity(itemReq.quantity());
+            item.setUnitPrice(product.getUnitPrice());
+            item.setDiscount(discount);
+
+            product.setReservedQty(product.getReservedQty() + itemReq.quantity());
+            products.save(product);
+
+            OrderItem savedItem = orderItems.save(item);
+            items.add(savedItem);
+            subtotal = subtotal.add(savedItem.getLineTotal());
+        }
+
+        savedOrder.setSubtotal(subtotal);
+        savedOrder.recalculateTotals();
+        orders.save(savedOrder);
+
+        events.save(OrderEvent.create(savedOrder.getId(), "ORDER_CREATED", actorUserId, null));
+
+        if ("SUPPLIER".equals(source)) {
+            savedOrder.confirm();
+            savedOrder.prepare();
+            orders.save(savedOrder);
+            events.save(OrderEvent.create(savedOrder.getId(), "ORDER_CONFIRMED", actorUserId, "Auto-confirmé (source SUPPLIER)"));
+            events.save(OrderEvent.create(savedOrder.getId(), "ORDER_PREPARING", actorUserId, "Auto-mis en préparation (source SUPPLIER)"));
+        }
+
+        return OrderResponse.from(savedOrder, items);
+    }
+
+    private void validateOrganizations(Long supplierId, Long shopId) {
+        organizations.findById(new com.paymentplatform.organization.domain.valueobject.OrganizationId(supplierId))
+                .orElseThrow(() -> new NotFoundException("Fournisseur non trouvé : " + supplierId));
+        organizations.findById(new com.paymentplatform.organization.domain.valueobject.OrganizationId(shopId))
+                .orElseThrow(() -> new NotFoundException("Boutique non trouvée : " + shopId));
+    }
+
+    private void validateRelation(Long supplierId, Long shopId) {
+        if (!relations.existsBySupplierIdAndShopIdAndStatus(
+                new com.paymentplatform.organization.domain.valueobject.OrganizationId(supplierId),
+                new com.paymentplatform.organization.domain.valueobject.OrganizationId(shopId),
+                com.paymentplatform.organization.domain.valueobject.RelationStatus.ACTIVE)) {
+            throw new ConflictException("Aucune relation active entre le fournisseur et la boutique");
+        }
+    }
+}

@@ -1,0 +1,89 @@
+/* Component-specific styles only — global design system in styles.css */
+
+code {
+  background: #f5f7fa;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 13px;
+  font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
+}
+
+.qty-cell { font-weight: 700; }
+
+.actions { white-space: nowrap; }
+.actions .btn { margin-right: 4px; }
+.actions .btn:last-child { margin-right: 0; }
+
+.empty { text-align: center; padding: 48px; color: #8896ab; }
+
+.stock-badge {
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.stock-ok { background: #e8f5e9; color: #2e7d32; }
+.stock-low { background: #fff3e0; color: #e65100; }
+.stock-out { background: #fce4ec; color: #c62828; }
+
+.movement-in { background: #e8f5e9; color: #2e7d32; }
+.movement-out { background: #fce4ec; color: #c62828; }
+.movement-adjust { background: #fff3e0; color: #e65100; }
+
+tr.low-stock { background: #fffde7; }
+tr.out-of-stock { background: #fce4ec; }
+
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: #fff;
+  border-radius: 12px;
+  padding: 24px;
+  width: 90%;
+  max-width: 480px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+}
+
+.modal-lg { max-width: 720px; }
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.modal-header h3 { margin: 0; font-size: 18px; }
+
+.btn-close {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #8896ab;
+  padding: 4px 8px;
+}
+
+.btn-close:hover { color: #333; }
+
+.form-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+
+@media (max-width: 768px) {
+  .modal-content { width: 95%; padding: 16px; }
+}

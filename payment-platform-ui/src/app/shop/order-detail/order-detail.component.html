@@ -1,0 +1,145 @@
+<div class="loading" *ngIf="loading">
+  <div class="spinner"></div>
+  <span>Chargement...</span>
+</div>
+
+<div *ngIf="order && !loading">
+  <div class="page-header">
+    <h2>Commande {{ order.reference }}</h2>
+    <a class="btn btn-secondary" routerLink="/dashboard/shop/orders">Retour</a>
+  </div>
+
+  <div class="alert alert-success" *ngIf="successMsg">{{ successMsg }}</div>
+  <div class="alert alert-error" *ngIf="errorMsg">{{ errorMsg }}</div>
+
+  <div class="detail-grid">
+    <div class="detail-card">
+      <div class="detail-label">Référence</div>
+      <div class="detail-value">{{ order.reference }}</div>
+    </div>
+    <div class="detail-card">
+      <div class="detail-label">Fournisseur ID</div>
+      <div class="detail-value">{{ order.supplierId }}</div>
+    </div>
+    <div class="detail-card">
+      <div class="detail-label">Statut</div>
+      <div class="detail-value">
+        <span class="payment-badge" [ngClass]="statusClass(order.status)">{{ statusLabel(order.status) }}</span>
+      </div>
+    </div>
+    <div class="detail-card">
+      <div class="detail-label">Total</div>
+      <div class="detail-value amount">{{ order.total | number:'1.2-2' }} {{ order.currency }}</div>
+    </div>
+    <div class="detail-card">
+      <div class="detail-label">Paiement ASAP</div>
+      <div class="detail-value">{{ order.asapPayment ? 'Oui' : 'Non' }}</div>
+    </div>
+    <div class="detail-card">
+      <div class="detail-label">Créé le</div>
+      <div class="detail-value">{{ order.createdAt | date:'dd/MM/yyyy HH:mm:ss' }}</div>
+    </div>
+    <div class="detail-card" *ngIf="order.deliveredAt">
+      <div class="detail-label">Livré le</div>
+      <div class="detail-value">{{ order.deliveredAt | date:'dd/MM/yyyy HH:mm:ss' }}</div>
+    </div>
+    <div class="detail-card" *ngIf="order.receivedAt">
+      <div class="detail-label">Reçu le</div>
+      <div class="detail-value">{{ order.receivedAt | date:'dd/MM/yyyy HH:mm:ss' }}</div>
+    </div>
+  </div>
+
+  <div class="action-bar" *ngIf="order.status === 'DELIVERED'">
+    <button class="btn btn-success" (click)="accept()">Accepter</button>
+    <button class="btn btn-primary" (click)="acceptAsap()">Accepter avec paiement ASAP</button>
+    <button class="btn btn-danger" (click)="cancel()">Annuler</button>
+  </div>
+
+  <div class="action-bar" *ngIf="order.status === 'PENDING' || order.status === 'CONFIRMED'">
+    <button class="btn btn-danger" (click)="cancel()">Annuler</button>
+  </div>
+
+  <div class="status-timeline" *ngIf="order.status !== 'CANCELLED'">
+    <h3>Progression</h3>
+    <div class="timeline">
+      <div *ngFor="let step of statusSteps" class="timeline-step"
+           [class.completed]="isStepCompleted(statusSteps.indexOf(step))"
+           [class.current]="isCurrentStep(step)">
+        <div class="step-dot"></div>
+        <div class="step-label">{{ statusLabel(step) }}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="info-box" *ngIf="order.status === 'CANCELLED'">
+    <strong>Statut :</strong> Cette commande a été annulée.
+  </div>
+
+  <div class="table-card" *ngIf="order.items.length > 0" style="margin-top:24px;">
+    <h3 style="padding:16px 20px 0;">Articles</h3>
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Produit</th>
+            <th>Quantité</th>
+            <th>Prix unitaire</th>
+            <th>Remise</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of order.items">
+            <td><strong>{{ item.productName }}</strong><br><small style="color:#8896ab;">{{ item.productRef }}</small></td>
+            <td>{{ item.quantity }}</td>
+            <td>{{ item.unitPrice | number:'1.2-2' }}</td>
+            <td>{{ item.discount > 0 ? item.discount + '%' : '-' }}</td>
+            <td><strong>{{ item.lineTotal | number:'1.2-2' }}</strong></td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr>
+            <td colspan="4" style="text-align:right;font-weight:600;">Sous-total</td>
+            <td><strong>{{ order.subtotal | number:'1.2-2' }} {{ order.currency }}</strong></td>
+          </tr>
+          <tr>
+            <td colspan="4" style="text-align:right;font-weight:600;">TVA ({{ order.taxRate }}%)</td>
+            <td><strong>{{ order.taxAmount | number:'1.2-2' }} {{ order.currency }}</strong></td>
+          </tr>
+          <tr>
+            <td colspan="4" style="text-align:right;font-weight:700;font-size:16px;">Total</td>
+            <td><strong style="font-size:16px;color:#0f3460;">{{ order.total | number:'1.2-2' }} {{ order.currency }}</strong></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </div>
+
+  <div class="table-card" style="margin-top:24px;" *ngIf="order.events.length > 0">
+    <h3 style="padding:16px 20px 0;">Historique des événements</h3>
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Action</th>
+            <th>Utilisateur</th>
+            <th>Date</th>
+            <th>Détails</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let e of order.events">
+            <td>
+              <span class="payment-badge" [ngClass]="statusClass(e.action.replace('ORDER_', ''))">
+                {{ actionLabel(e.action) }}
+              </span>
+            </td>
+            <td>{{ e.userId }}</td>
+            <td>{{ e.timestamp | date:'dd/MM/yyyy HH:mm:ss' }}</td>
+            <td>{{ e.details || '-' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

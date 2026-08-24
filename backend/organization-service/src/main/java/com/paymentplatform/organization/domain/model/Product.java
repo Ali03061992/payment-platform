@@ -36,6 +36,21 @@ public class Product {
     @Column(name = "min_quantity", nullable = false)
     private Integer minQuantity;
 
+    @Column(name = "reserved_qty", nullable = false)
+    private Integer reservedQty;
+
+    @Column(name = "category_id")
+    private Long categoryId;
+
+    @Column(name = "family_id")
+    private Long familyId;
+
+    @Column(name = "subfamily_id")
+    private Long subfamilyId;
+
+    @Column(nullable = false, length = 20)
+    private String unit;
+
     @Column(nullable = false, length = 20)
     private String status;
 
@@ -55,6 +70,8 @@ public class Product {
         if (status == null) status = "ACTIVE";
         if (quantity == null) quantity = 0;
         if (minQuantity == null) minQuantity = 0;
+        if (reservedQty == null) reservedQty = 0;
+        if (unit == null) unit = "unité";
     }
 
     @PreUpdate
@@ -84,4 +101,14 @@ public class Product {
     public Long getVersion() { return version; }
     public Instant getCreatedAt() { return createdAt; }
     public Instant getUpdatedAt() { return updatedAt; }
+    public Integer getReservedQty() { return reservedQty; }
+    public void setReservedQty(Integer reservedQty) { this.reservedQty = reservedQty; }
+    public Long getCategoryId() { return categoryId; }
+    public void setCategoryId(Long categoryId) { this.categoryId = categoryId; }
+    public Long getFamilyId() { return familyId; }
+    public void setFamilyId(Long familyId) { this.familyId = familyId; }
+    public Long getSubfamilyId() { return subfamilyId; }
+    public void setSubfamilyId(Long subfamilyId) { this.subfamilyId = subfamilyId; }
+    public String getUnit() { return unit; }
+    public void setUnit(String unit) { this.unit = unit; }
 }

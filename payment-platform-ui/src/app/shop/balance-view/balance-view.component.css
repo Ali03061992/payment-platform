@@ -1,0 +1,29 @@
+/* Component-specific styles only — global design system in styles.css */
+
+.positive { color: #2e7d32; }
+.negative { color: #c62828; }
+
+.clickable-row { cursor: pointer; }
+
+.status-badge.order { background: #e3f2fd; color: #1565c0; }
+.status-badge.payment { background: #e8f5e9; color: #2e7d32; }
+.status-badge.adjustment { background: #fff3e0; color: #e65100; }
+
+.ledger-panel {
+  margin-top: 32px;
+  border-top: 2px solid #e8ecf1;
+  padding-top: 24px;
+}
+
+.ledger-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.ledger-header h3 {
+  margin: 0;
+  font-size: 18px;
+  color: #1a1a2e;
+}

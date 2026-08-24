@@ -12,6 +12,7 @@ export class LayoutComponent {
   sidebarOpen = true;
 
   navItems: { label: string; icon: string; route: string; roles: string[] }[] = [
+    // System Admin
     { label: 'Tableau de bord', icon: '📊', route: '', roles: ['SYSTEM_ADMIN', 'SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_AGENT', 'SALES'] },
     { label: 'Gestion des utilisateurs', icon: '👥', route: 'admin/users', roles: ['SYSTEM_ADMIN'] },
     { label: 'Créer un compte', icon: '➕', route: 'admin/users/create', roles: ['SYSTEM_ADMIN'] },
@@ -20,10 +21,18 @@ export class LayoutComponent {
     { label: 'Boutiques', icon: '🏪', route: 'admin/shops', roles: ['SYSTEM_ADMIN'] },
     { label: 'Relations F-B', icon: '🔗', route: 'admin/relations', roles: ['SYSTEM_ADMIN'] },
     { label: 'Stats organisations', icon: '📈', route: 'admin/org-stats', roles: ['SYSTEM_ADMIN'] },
+    // Supplier
+    { label: 'Catalogue', icon: '📋', route: 'supplier/products', roles: ['SUPPLIER_ADMIN'] },
+    { label: 'Stock', icon: '📦', route: 'supplier/stock', roles: ['SUPPLIER_ADMIN', 'SUPPLIER_AGENT'] },
+    { label: 'Commandes', icon: '🛒', route: 'supplier/orders', roles: ['SUPPLIER_ADMIN'] },
+    { label: 'Livraisons', icon: '🚚', route: 'supplier/deliveries', roles: ['SUPPLIER_ADMIN', 'SUPPLIER_AGENT'] },
+    // Shop
+    { label: 'Mes commandes', icon: '🛒', route: 'shop/orders', roles: ['SHOP_ADMIN', 'SHOP_MANAGER', 'SHOP_AGENT'] },
+    { label: 'Nouvelle commande', icon: '➕', route: 'shop/orders/create', roles: ['SHOP_ADMIN', 'SHOP_MANAGER'] },
+    { label: 'Balance', icon: '💰', route: 'shop/balance', roles: ['SHOP_ADMIN', 'SHOP_MANAGER'] },
+    // Common
     { label: 'Paiements', icon: '💰', route: 'payments', roles: ['SYSTEM_ADMIN', 'SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_AGENT', 'SALES'] },
     { label: 'Stats paiements', icon: '📊', route: 'payments/stats', roles: ['SYSTEM_ADMIN', 'SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_AGENT', 'SALES'] },
-    { label: 'Gestion du stock', icon: '📦', route: 'supplier/stock', roles: ['SUPPLIER_ADMIN', 'SUPPLIER_AGENT'] },
-    { label: 'Ajouter un produit', icon: '➕', route: 'supplier/stock/create', roles: ['SUPPLIER_ADMIN'] },
   ];
 
   constructor(private loginService: LoginService, private router: Router) {
