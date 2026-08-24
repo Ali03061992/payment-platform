@@ -1,6 +1,6 @@
 <div class="page-header">
   <h1>📦 Gestion du stock</h1>
-  <a routerLink="/supplier/stock/create" class="btn btn-primary" *ngIf="true">➕ Ajouter un produit</a>
+  <a routerLink="create" class="btn btn-primary" *ngIf="true">➕ Ajouter un produit</a>
 </div>
 
 <div class="filters">
@@ -59,7 +59,7 @@
       <tr *ngIf="products.length === 0">
         <td colspan="7" class="empty">
           Aucun produit dans le stock
-          <br><a routerLink="/supplier/stock/create" class="empty-link">Ajouter un premier produit</a>
+          <br><a routerLink="create" class="empty-link">Ajouter un premier produit</a>
         </td>
       </tr>
     </tbody>

@@ -12,12 +12,12 @@ export class LayoutComponent {
   sidebarOpen = true;
 
   navItems: { label: string; icon: string; route: string; roles: string[] }[] = [
-    { label: 'Tableau de bord', icon: '📊', route: '/dashboard', roles: ['SYSTEM_ADMIN', 'SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_AGENT', 'SALES'] },
-    { label: 'Gestion des utilisateurs', icon: '👥', route: '/admin/users', roles: ['SYSTEM_ADMIN'] },
-    { label: 'Créer un compte', icon: '➕', route: '/admin/users/create', roles: ['SYSTEM_ADMIN'] },
-    { label: 'Activation comptes', icon: '🔑', route: '/sales/accounts', roles: ['SALES', 'SYSTEM_ADMIN'] },
-    { label: 'Gestion du stock', icon: '📦', route: '/supplier/stock', roles: ['SUPPLIER_ADMIN', 'SUPPLIER_AGENT'] },
-    { label: 'Ajouter un produit', icon: '➕', route: '/supplier/stock/create', roles: ['SUPPLIER_ADMIN'] },
+    { label: 'Tableau de bord', icon: '📊', route: '', roles: ['SYSTEM_ADMIN', 'SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_AGENT', 'SALES'] },
+    { label: 'Gestion des utilisateurs', icon: '👥', route: 'admin/users', roles: ['SYSTEM_ADMIN'] },
+    { label: 'Créer un compte', icon: '➕', route: 'admin/users/create', roles: ['SYSTEM_ADMIN'] },
+    { label: 'Activation comptes', icon: '🔑', route: 'sales/accounts', roles: ['SALES', 'SYSTEM_ADMIN'] },
+    { label: 'Gestion du stock', icon: '📦', route: 'supplier/stock', roles: ['SUPPLIER_ADMIN', 'SUPPLIER_AGENT'] },
+    { label: 'Ajouter un produit', icon: '➕', route: 'supplier/stock/create', roles: ['SUPPLIER_ADMIN'] },
   ];
 
   constructor(private loginService: LoginService, private router: Router) {

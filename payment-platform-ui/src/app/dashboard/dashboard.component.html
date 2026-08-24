@@ -57,15 +57,15 @@
 
     <div class="info-card" *ngIf="user?.roles?.includes('SYSTEM_ADMIN')">
       <h3>⚡ Actions rapides</h3>
-      <a routerLink="/admin/users" class="quick-action">👥 Gérer les utilisateurs</a>
-      <a routerLink="/admin/users/create" class="quick-action">➕ Créer un compte</a>
-      <a routerLink="/sales/accounts" class="quick-action">🔑 Activer / Désactiver</a>
+      <a routerLink="admin/users" class="quick-action">👥 Gérer les utilisateurs</a>
+      <a routerLink="admin/users/create" class="quick-action">➕ Créer un compte</a>
+      <a routerLink="sales/accounts" class="quick-action">🔑 Activer / Désactiver</a>
     </div>
 
     <div class="info-card" *ngIf="user?.roles?.includes('SUPPLIER_ADMIN')">
       <h3>⚡ Actions rapides</h3>
-      <a routerLink="/supplier/stock" class="quick-action">📦 Gérer le stock</a>
-      <a routerLink="/supplier/stock/create" class="quick-action">➕ Ajouter un produit</a>
+      <a routerLink="supplier/stock" class="quick-action">📦 Gérer le stock</a>
+      <a routerLink="supplier/stock/create" class="quick-action">➕ Ajouter un produit</a>
     </div>
   </div>
 </div>
