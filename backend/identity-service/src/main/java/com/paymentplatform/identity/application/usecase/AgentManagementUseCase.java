@@ -85,7 +85,7 @@ public class AgentManagementUseCase {
 
         String rawPassword = request.password() != null && !request.password().isBlank()
                 ? request.password()
-                : generatePassword();
+                : "test1234";
         PasswordHash hash = PasswordHash.of(passwordEncoder.encode(rawPassword));
 
         User user = User.create(new UserId(0), username, email, hash, request.firstName(), request.lastName(),

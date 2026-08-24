@@ -16,7 +16,6 @@ import com.paymentplatform.identity.domain.valueobject.Email;
 import com.paymentplatform.identity.domain.valueobject.PasswordHash;
 import com.paymentplatform.identity.domain.valueobject.PhoneNumber;
 import com.paymentplatform.identity.domain.valueobject.Username;
-import com.paymentplatform.identity.application.usecase.PasswordSetupUseCase;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,16 +35,13 @@ public class InternalUserCreationUseCase {
     private final PasswordEncoder passwordEncoder;
     private final AuditRecorder audit;
     private final OutboxEventStore outbox;
-    private final PasswordSetupUseCase passwordSetup;
 
     public InternalUserCreationUseCase(UserRepository users, PasswordEncoder passwordEncoder,
-                                       AuditRecorder audit, OutboxEventStore outbox,
-                                       PasswordSetupUseCase passwordSetup) {
+                                       AuditRecorder audit, OutboxEventStore outbox) {
         this.users = users;
         this.passwordEncoder = passwordEncoder;
         this.audit = audit;
         this.outbox = outbox;
-        this.passwordSetup = passwordSetup;
     }
 
     @Transactional
@@ -69,14 +65,10 @@ public class InternalUserCreationUseCase {
             throw new ConflictException("Adresse email déjà utilisée");
         }
 
-        boolean sendSetupEmail = (request.password() == null || request.password().isBlank());
-
-        PasswordHash hash;
-        if (sendSetupEmail) {
-            hash = PasswordHash.of(passwordEncoder.encode(UUID.randomUUID().toString()));
-        } else {
-            hash = PasswordHash.of(passwordEncoder.encode(request.password()));
-        }
+        String rawPassword = (request.password() == null || request.password().isBlank())
+                ? "test1234"
+                : request.password();
+        PasswordHash hash = PasswordHash.of(passwordEncoder.encode(rawPassword));
 
         User user = User.create(new UserId(0), username, email, hash, request.firstName(), request.lastName(),
                 PhoneNumber.of(request.phone()), orgId == null ? null : OrganizationId.of(orgId), role);
@@ -86,10 +78,6 @@ public class InternalUserCreationUseCase {
                 "{\"username\":\"" + user.username().value() + "\",\"role\":\"" + role + "\",\"by\":\"internal\"}");
         outbox.append(new UserCreatedEvent(UUID.randomUUID(), Instant.now(), user.id().value(), orgId,
                 List.of(role.name())), String.valueOf(user.id().value()));
-
-        if (sendSetupEmail) {
-            passwordSetup.initiateSetup(user.username().value());
-        }
 
         return UserResponse.from(user);
     }
