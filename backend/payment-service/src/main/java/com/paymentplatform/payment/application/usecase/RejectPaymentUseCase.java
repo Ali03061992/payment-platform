@@ -1,0 +1,51 @@
+package com.paymentplatform.payment.application.usecase;
+
+import com.paymentplatform.shared.infrastructure.audit.AuditActions;
+import com.paymentplatform.shared.infrastructure.audit.AuditRecorder;
+import com.paymentplatform.shared.infrastructure.outbox.OutboxEventStore;
+import com.paymentplatform.shared.domain.event.PaymentEvents.PaymentRejectedEvent;
+import com.paymentplatform.payment.application.dto.PaymentResponse;
+import com.paymentplatform.payment.application.dto.RejectPaymentRequest;
+import com.paymentplatform.payment.domain.model.Payment;
+import com.paymentplatform.payment.domain.repository.PaymentRepository;
+import com.paymentplatform.payment.domain.valueobject.RejectionReason;
+import com.paymentplatform.shared.domain.exception.NotFoundException;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.Instant;
+import java.util.UUID;
+
+@Service
+public class RejectPaymentUseCase {
+
+    private final PaymentRepository payments;
+    private final AuditRecorder audit;
+    private final OutboxEventStore outbox;
+
+    public RejectPaymentUseCase(PaymentRepository payments, AuditRecorder audit, OutboxEventStore outbox) {
+        this.payments = payments;
+        this.audit = audit;
+        this.outbox = outbox;
+    }
+
+    @Transactional
+    public PaymentResponse execute(long id, RejectPaymentRequest request, long actorUserId, Long organizationId) {
+        Payment payment = payments.findById(id)
+                .orElseThrow(() -> new NotFoundException("Paiement non trouvé : " + id));
+
+        RejectionReason reason = new RejectionReason(request.rejectionReason());
+        payment.reject(actorUserId, reason);
+        Payment saved = payments.save(payment);
+
+        audit.record(actorUserId, organizationId, AuditActions.PAYMENT_REJECTED,
+                id, "{\"reference\":\"" + saved.reference().value()
+                        + "\",\"reason\":\"" + reason.value() + "\"}");
+
+        outbox.append(new PaymentRejectedEvent(UUID.randomUUID(), Instant.now(),
+                saved.id(), saved.reference().value(), saved.shopId(), saved.supplierId(),
+                actorUserId, reason.value()), String.valueOf(saved.id()));
+
+        return PaymentResponse.from(saved);
+    }
+}

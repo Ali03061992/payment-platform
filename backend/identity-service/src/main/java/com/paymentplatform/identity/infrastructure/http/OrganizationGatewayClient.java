@@ -56,6 +56,7 @@ public class OrganizationGatewayClient implements OrganizationStatusPort {
         try {
             OrganizationStatus status = restClient.get()
                     .uri("/api/organizations/internal/{id}/status", organizationId)
+                    .header("X-Internal-Token", "dev-internal-secret-change-me")
                     .retrieve()
                     .body(OrganizationStatus.class);
             if (status == null) {

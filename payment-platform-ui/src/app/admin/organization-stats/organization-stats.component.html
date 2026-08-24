@@ -1,0 +1,19 @@
+<div class="page-header">
+  <h2>Statistiques des organisations</h2>
+</div>
+
+<div class="loading" *ngIf="loading">
+  <div class="spinner"></div>
+  <span>Chargement...</span>
+</div>
+
+<div class="stats-grid" *ngIf="stats">
+  <div class="stat-card">
+    <div class="stat-value">{{ stats.suppliers }}</div>
+    <div class="stat-label">Fournisseurs</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value">{{ stats.shops }}</div>
+    <div class="stat-label">Boutiques</div>
+  </div>
+</div>

@@ -16,6 +16,12 @@ export class LayoutComponent {
     { label: 'Gestion des utilisateurs', icon: '👥', route: 'admin/users', roles: ['SYSTEM_ADMIN'] },
     { label: 'Créer un compte', icon: '➕', route: 'admin/users/create', roles: ['SYSTEM_ADMIN'] },
     { label: 'Activation comptes', icon: '🔑', route: 'sales/accounts', roles: ['SALES', 'SYSTEM_ADMIN'] },
+    { label: 'Fournisseurs', icon: '🏭', route: 'admin/suppliers', roles: ['SYSTEM_ADMIN'] },
+    { label: 'Boutiques', icon: '🏪', route: 'admin/shops', roles: ['SYSTEM_ADMIN'] },
+    { label: 'Relations F-B', icon: '🔗', route: 'admin/relations', roles: ['SYSTEM_ADMIN'] },
+    { label: 'Stats organisations', icon: '📈', route: 'admin/org-stats', roles: ['SYSTEM_ADMIN'] },
+    { label: 'Paiements', icon: '💰', route: 'payments', roles: ['SYSTEM_ADMIN', 'SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_AGENT', 'SALES'] },
+    { label: 'Stats paiements', icon: '📊', route: 'payments/stats', roles: ['SYSTEM_ADMIN', 'SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_AGENT', 'SALES'] },
     { label: 'Gestion du stock', icon: '📦', route: 'supplier/stock', roles: ['SUPPLIER_ADMIN', 'SUPPLIER_AGENT'] },
     { label: 'Ajouter un produit', icon: '➕', route: 'supplier/stock/create', roles: ['SUPPLIER_ADMIN'] },
   ];

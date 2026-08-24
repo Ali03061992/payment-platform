@@ -1,0 +1,62 @@
+<div class="page-header">
+  <h2>Paiements</h2>
+  <button class="btn btn-primary" routerLink="/dashboard/payments/create">+ Nouveau paiement</button>
+</div>
+
+<div class="alert alert-error" *ngIf="errorMsg">{{ errorMsg }}</div>
+
+<div class="filters" *ngIf="!loading">
+  <select [(ngModel)]="filterStatus" class="form-control" style="max-width:200px;">
+    <option value="">Tous les statuts</option>
+    <option value="PENDING">En attente</option>
+    <option value="CONFIRMED">Confirmé</option>
+    <option value="REJECTED">Rejeté</option>
+    <option value="CANCELLED">Annulé</option>
+  </select>
+  <span class="result-count">{{ filteredPayments.length }} résultat(s)</span>
+</div>
+
+<div class="loading" *ngIf="loading">
+  <div class="spinner"></div>
+  <span>Chargement...</span>
+</div>
+
+<div class="table-card" *ngIf="!loading">
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr>
+          <th>Référence</th>
+          <th>Boutique</th>
+          <th>Fournisseur</th>
+          <th>Montant</th>
+          <th>Statut</th>
+          <th>Créé le</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let p of filteredPayments">
+          <td><strong>{{ p.reference }}</strong></td>
+          <td>{{ p.shopId }}</td>
+          <td>{{ p.supplierId }}</td>
+          <td>{{ p.amount | number:'1.2-2' }} {{ p.currency }}</td>
+          <td>
+            <span class="payment-badge" [ngClass]="statusClass(p.status)">
+              {{ statusLabel(p.status) }}
+            </span>
+          </td>
+          <td>{{ p.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
+          <td>
+            <button class="btn btn-sm btn-success" *ngIf="p.status === 'PENDING'" (click)="confirm(p.id)">Confirmer</button>
+            <button class="btn btn-sm btn-danger" *ngIf="p.status === 'PENDING'" (click)="cancel(p.id)">Annuler</button>
+            <a class="btn btn-sm btn-secondary" [routerLink]="['/dashboard/payments', p.id]">Détail</a>
+          </td>
+        </tr>
+        <tr *ngIf="filteredPayments.length === 0">
+          <td colspan="7" style="text-align:center;color:#8896ab;padding:32px;">Aucun paiement trouvé</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

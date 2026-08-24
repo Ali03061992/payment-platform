@@ -1,0 +1,88 @@
+<div class="loading" *ngIf="loading">
+  <div class="spinner"></div>
+  <span>Chargement...</span>
+</div>
+
+<div *ngIf="payment && !loading">
+  <div class="page-header">
+    <h2>Paiement {{ payment.reference }}</h2>
+    <a class="btn btn-secondary" routerLink="/dashboard/payments">Retour</a>
+  </div>
+
+  <div class="alert alert-success" *ngIf="successMsg">{{ successMsg }}</div>
+  <div class="alert alert-error" *ngIf="errorMsg">{{ errorMsg }}</div>
+
+  <div class="detail-grid">
+    <div class="detail-card">
+      <div class="detail-label">Référence</div>
+      <div class="detail-value">{{ payment.reference }}</div>
+    </div>
+    <div class="detail-card">
+      <div class="detail-label">Statut</div>
+      <div class="detail-value">
+        <span class="payment-badge" [ngClass]="payment.status.toLowerCase()">{{ statusLabel(payment.status) }}</span>
+      </div>
+    </div>
+    <div class="detail-card">
+      <div class="detail-label">Montant</div>
+      <div class="detail-value amount">{{ payment.amount | number:'1.2-2' }} {{ payment.currency }}</div>
+    </div>
+    <div class="detail-card">
+      <div class="detail-label">Boutique ID</div>
+      <div class="detail-value">{{ payment.shopId }}</div>
+    </div>
+    <div class="detail-card">
+      <div class="detail-label">Fournisseur ID</div>
+      <div class="detail-value">{{ payment.supplierId }}</div>
+    </div>
+    <div class="detail-card">
+      <div class="detail-label">Créé le</div>
+      <div class="detail-value">{{ payment.createdAt | date:'dd/MM/yyyy HH:mm:ss' }}</div>
+    </div>
+  </div>
+
+  <div class="info-box" *ngIf="payment.rejectionReason">
+    <strong>Motif de rejet :</strong> {{ payment.rejectionReason }}
+  </div>
+
+  <div class="action-bar" *ngIf="payment.status === 'PENDING'">
+    <button class="btn btn-success" (click)="confirm()">Confirmer</button>
+    <button class="btn btn-danger" (click)="showReject = !showReject">
+      {{ showReject ? 'Annuler' : 'Rejeter' }}
+    </button>
+    <button class="btn btn-secondary" (click)="cancel()">Annuler le paiement</button>
+  </div>
+
+  <div class="form-card" *ngIf="showReject" style="margin-top:16px;">
+    <h3 style="margin-bottom:12px;">Motif du rejet</h3>
+    <div class="form-group">
+      <textarea [(ngModel)]="rejectReason" class="form-control" rows="3"
+                placeholder="Décrivez le motif du rejet..." required></textarea>
+    </div>
+    <button class="btn btn-danger" [disabled]="!rejectReason.trim()" (click)="reject()">Confirmer le rejet</button>
+  </div>
+
+  <div class="table-card" style="margin-top:24px;" *ngIf="payment.events.length > 0">
+    <h3 style="padding:16px 20px 0;">Historique</h3>
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Action</th>
+            <th>Utilisateur</th>
+            <th>Date</th>
+            <th>Détails</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let e of payment.events">
+            <td><span class="payment-badge" [ngClass]="e.action.toLowerCase().replace('payment.', '')">{{ actionLabel(e.action) }}</span></td>
+            <td>{{ e.userId }}</td>
+            <td>{{ e.timestamp | date:'dd/MM/yyyy HH:mm:ss' }}</td>
+            <td>{{ e.details || '-' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

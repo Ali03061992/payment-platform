@@ -1,0 +1,77 @@
+<div class="page-header">
+  <h2>Relations Fournisseur-Boutique</h2>
+  <button class="btn btn-primary" (click)="showCreate = !showCreate">
+    {{ showCreate ? 'Annuler' : '+ Nouvelle relation' }}
+  </button>
+</div>
+
+<div class="alert alert-success" *ngIf="successMsg">{{ successMsg }}</div>
+<div class="alert alert-error" *ngIf="errorMsg">{{ errorMsg }}</div>
+
+<div class="form-card" *ngIf="showCreate" style="margin-bottom: 24px;">
+  <h3 style="margin-bottom: 16px;">Créer une relation</h3>
+  <form (ngSubmit)="create()">
+    <div class="form-row">
+      <div class="form-group">
+        <label>Fournisseur</label>
+        <select [(ngModel)]="selectedSupplierId" name="supplier" class="form-control" required>
+          <option [value]="0">-- Sélectionner --</option>
+          <option *ngFor="let s of suppliers" [value]="s.id">{{ s.name }}</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Boutique</label>
+        <select [(ngModel)]="selectedShopId" name="shop" class="form-control" required>
+          <option [value]="0">-- Sélectionner --</option>
+          <option *ngFor="let s of shops" [value]="s.id">{{ s.name }}</option>
+        </select>
+      </div>
+    </div>
+    <button class="btn btn-primary" [disabled]="creating || !selectedSupplierId || !selectedShopId">
+      {{ creating ? 'Création...' : 'Créer la relation' }}
+    </button>
+  </form>
+</div>
+
+<div class="loading" *ngIf="loading">
+  <div class="spinner"></div>
+  <span>Chargement...</span>
+</div>
+
+<div class="table-card" *ngIf="!loading">
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Fournisseur</th>
+          <th>Boutique</th>
+          <th>Statut</th>
+          <th>Créé le</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let r of relations">
+          <td>{{ r.id }}</td>
+          <td>{{ getSupplierName(r.supplierId) }}</td>
+          <td>{{ getShopName(r.shopId) }}</td>
+          <td>
+            <span class="status-badge" [class.active]="r.status === 'ACTIVE'" [class.disabled]="r.status === 'INACTIVE'">
+              {{ r.status === 'ACTIVE' ? 'Actif' : 'Inactif' }}
+            </span>
+          </td>
+          <td>{{ r.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
+          <td>
+            <button class="btn btn-sm btn-danger" *ngIf="r.status === 'ACTIVE'" (click)="deactivate(r.id)">
+              Désactiver
+            </button>
+          </td>
+        </tr>
+        <tr *ngIf="relations.length === 0">
+          <td colspan="6" style="text-align:center;color:#8896ab;padding:32px;">Aucune relation trouvée</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

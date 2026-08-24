@@ -39,6 +39,7 @@ public class SharedSecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/login", "/api/auth/register", "/api/auth/refresh",
                                 "/api/auth/password-setup/**",
+                                "/api/organizations/internal/**",
                                 "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html", "/actuator/health").permitAll()
                         .anyRequest().authenticated())
                 .exceptionHandling(ex -> ex

@@ -1,3 +1,5 @@
+/* Component-specific overrides for login page */
+
 .login-container {
   min-height: 100vh;
   display: flex;
@@ -16,7 +18,7 @@
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
 }
 
-h1 {
+.login-card h1 {
   margin: 0 0 8px 0;
   font-size: 28px;
   color: #1a1a2e;
@@ -30,11 +32,9 @@ h1 {
   font-size: 14px;
 }
 
-.form-group {
-  margin-bottom: 20px;
-}
+.login-card .form-group { margin-bottom: 20px; }
 
-label {
+.login-card label {
   display: block;
   margin-bottom: 6px;
   font-weight: 600;
@@ -42,53 +42,40 @@ label {
   color: #333;
 }
 
-input {
+.login-card input {
   width: 100%;
-  padding: 12px 14px;
+  padding: 14px 16px;
   border: 2px solid #e0e0e0;
-  border-radius: 8px;
+  border-radius: 10px;
   font-size: 15px;
   transition: border-color 0.2s, box-shadow 0.2s;
   box-sizing: border-box;
+  font-family: inherit;
 }
 
-input:focus {
+.login-card input:focus {
   outline: none;
   border-color: #0f3460;
   box-shadow: 0 0 0 3px rgba(15, 52, 96, 0.1);
 }
 
-.btn {
+.login-card .btn {
   padding: 14px 24px;
-  border: none;
-  border-radius: 8px;
   font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
+  border-radius: 10px;
 }
 
-.btn-primary {
+.login-card .btn-primary {
   background: linear-gradient(135deg, #0f3460, #1a1a2e);
   color: #fff;
 }
 
-.btn-primary:hover {
+.login-card .btn-primary:hover {
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(15, 52, 96, 0.3);
 }
 
-.btn-block {
-  width: 100%;
-  margin-top: 8px;
-}
-
-.btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  transform: none;
-  box-shadow: none;
-}
+.btn-block { width: 100%; margin-top: 8px; }
 
 .error-message {
   background: #fce4ec;
@@ -107,18 +94,5 @@ input:focus {
   color: #666;
 }
 
-.register-link a {
-  color: #0f3460;
-  text-decoration: none;
-  font-weight: 600;
-}
-
-.register-link a:hover {
-  text-decoration: underline;
-}
-
-@media (max-width: 480px) {
-  .login-card {
-    padding: 24px;
-  }
-}
+.register-link a { color: #0f3460; font-weight: 600; }
+.register-link a:hover { text-decoration: underline; }

@@ -1,0 +1,19 @@
+package com.paymentplatform.payment.domain.repository;
+
+import com.paymentplatform.payment.domain.model.Payment;
+import com.paymentplatform.payment.domain.model.PaymentStatus;
+
+import java.util.List;
+import java.util.Optional;
+
+public interface PaymentRepository {
+    Payment save(Payment payment);
+    Optional<Payment> findById(long id);
+    Optional<Payment> findByReference(String reference);
+    List<Payment> findAll();
+    List<Payment> findByShopId(long shopId);
+    List<Payment> findBySupplierId(long supplierId);
+    List<Payment> findByStatus(PaymentStatus status);
+    long countByStatus(PaymentStatus status);
+    boolean existsByReference(String reference);
+}

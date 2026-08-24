@@ -86,6 +86,7 @@ services:
       JWT_SECRET: ${JWT_SECRET}
       JWT_EXPIRATION: ${JWT_EXPIRATION}
       API_GATEWAY_URL: http://api-gateway:8081
+      INTERNAL_SECRET: dev-internal-secret-change-me
     depends_on:
       mysql:
         condition: service_healthy
@@ -112,6 +113,7 @@ services:
       JWT_SECRET: ${JWT_SECRET}
       JWT_EXPIRATION: ${JWT_EXPIRATION}
       API_GATEWAY_URL: http://api-gateway:8081
+      INTERNAL_SECRET: dev-internal-secret-change-me
     depends_on:
       mysql:
         condition: service_healthy

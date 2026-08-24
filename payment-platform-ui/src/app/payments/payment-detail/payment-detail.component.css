@@ -1,0 +1,5 @@
+/* Component-specific styles only — global design system in styles.css */
+
+.payment-badge.created { background: #e3f2fd; color: #1565c0; }
+
+.event-action { white-space: nowrap; }

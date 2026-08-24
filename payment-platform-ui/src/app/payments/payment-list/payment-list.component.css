@@ -1,0 +1,8 @@
+/* Component-specific styles only — global design system in styles.css */
+
+.result-count {
+  color: #8896ab;
+  font-size: 14px;
+}
+
+.actions { white-space: nowrap; }

@@ -1,3 +1,5 @@
+/* Component-specific overrides for register page */
+
 .register-container {
   min-height: 100vh;
   display: flex;
@@ -16,7 +18,7 @@
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
 }
 
-h1 {
+.register-card h1 {
   margin: 0 0 8px 0;
   font-size: 28px;
   color: #1a1a2e;
@@ -30,20 +32,16 @@ h1 {
   font-size: 14px;
 }
 
-.form-row {
+.register-card .form-row {
   display: flex;
   gap: 16px;
 }
 
-.form-row .form-group {
-  flex: 1;
-}
+.register-card .form-row .form-group { flex: 1; }
 
-.form-group {
-  margin-bottom: 20px;
-}
+.register-card .form-group { margin-bottom: 20px; }
 
-label {
+.register-card label {
   display: block;
   margin-bottom: 6px;
   font-weight: 600;
@@ -51,71 +49,63 @@ label {
   color: #333;
 }
 
-input, select {
+.register-card input,
+.register-card select {
   width: 100%;
-  padding: 12px 14px;
+  padding: 14px 16px;
   border: 2px solid #e0e0e0;
-  border-radius: 8px;
+  border-radius: 10px;
   font-size: 15px;
   transition: border-color 0.2s, box-shadow 0.2s;
   box-sizing: border-box;
+  font-family: inherit;
+  background: #fff;
+  color: #1a1a2e;
+  -webkit-appearance: none;
+  appearance: none;
 }
 
-input:focus, select:focus {
+.register-card input:focus,
+.register-card select:focus {
   outline: none;
   border-color: #0f3460;
   box-shadow: 0 0 0 3px rgba(15, 52, 96, 0.1);
 }
 
-.phone-input {
-  display: flex;
-  align-items: stretch;
-}
-
+.phone-input { display: flex; align-items: stretch; }
 .phone-prefix {
-  padding: 12px 14px;
+  padding: 14px 16px;
   background: #f5f7fa;
   border: 2px solid #e0e0e0;
   border-right: none;
-  border-radius: 8px 0 0 8px;
+  border-radius: 10px 0 0 10px;
   font-size: 15px;
   font-weight: 600;
   color: #333;
   display: flex;
   align-items: center;
 }
+.phone-field { border-radius: 0 10px 10px 0 !important; flex: 1; }
 
-.phone-field {
-  border-radius: 0 8px 8px 0 !important;
-  flex: 1;
-}
-
-.btn {
+.register-card .btn {
   padding: 14px 24px;
-  border: none;
-  border-radius: 8px;
   font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
+  border-radius: 10px;
 }
 
-.btn-primary {
+.register-card .btn-primary {
   background: linear-gradient(135deg, #0f3460, #1a1a2e);
   color: #fff;
 }
 
-.btn-primary:hover {
+.register-card .btn-primary:hover {
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(15, 52, 96, 0.3);
 }
 
-.btn-block {
-  width: 100%;
-  margin-top: 8px;
-}
+.btn-block { width: 100%; margin-top: 8px; }
 
-.btn:disabled {
+.register-card .btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
   transform: none;
@@ -132,39 +122,9 @@ input:focus, select:focus {
   border: 1px solid #f8bbd0;
 }
 
-.success-message {
-  text-align: center;
-  padding: 20px 0;
-}
+.success-message { text-align: center; padding: 20px 0; }
+.success-message h2 { color: #2e7d32; margin-bottom: 12px; }
 
-.success-message h2 {
-  color: #2e7d32;
-  margin-bottom: 12px;
-}
-
-.login-link {
-  text-align: center;
-  margin-top: 24px;
-  font-size: 14px;
-  color: #666;
-}
-
-.login-link a {
-  color: #0f3460;
-  text-decoration: none;
-  font-weight: 600;
-}
-
-.login-link a:hover {
-  text-decoration: underline;
-}
-
-@media (max-width: 480px) {
-  .register-card {
-    padding: 24px;
-  }
-
-  .form-row {
-    flex-direction: column;
-  }
-}
+.login-link { text-align: center; margin-top: 24px; font-size: 14px; color: #666; }
+.login-link a { color: #0f3460; font-weight: 600; }
+.login-link a:hover { text-decoration: underline; }

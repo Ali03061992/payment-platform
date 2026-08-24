@@ -31,6 +31,7 @@ app:
     expiration: ${JWT_EXPIRATION:30m}
   gateway:
     base-url: ${API_GATEWAY_URL:http://localhost:8081}
+  internal-secret: ${INTERNAL_SECRET:dev-internal-secret-change-me}
   outbox:
     relay-interval-ms: 1000
 
