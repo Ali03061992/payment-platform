@@ -13,10 +13,10 @@ export class LayoutComponent {
 
   navItems: { label: string; icon: string; route: string; roles: string[] }[] = [
     // System Admin
-    { label: 'Tableau de bord', icon: '📊', route: '', roles: ['SYSTEM_ADMIN', 'SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_AGENT', 'SALES'] },
+    { label: 'Tableau de bord', icon: '📊', route: '', roles: ['SYSTEM_ADMIN', 'SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_AGENT'] },
     { label: 'Gestion des utilisateurs', icon: '👥', route: 'admin/users', roles: ['SYSTEM_ADMIN'] },
     { label: 'Créer un compte', icon: '➕', route: 'admin/users/create', roles: ['SYSTEM_ADMIN'] },
-    { label: 'Activation comptes', icon: '🔑', route: 'sales/accounts', roles: ['SALES', 'SYSTEM_ADMIN'] },
+    { label: 'Activation comptes', icon: '🔑', route: 'sales/accounts', roles: ['SYSTEM_ADMIN'] },
     { label: 'Fournisseurs', icon: '🏭', route: 'admin/suppliers', roles: ['SYSTEM_ADMIN'] },
     { label: 'Boutiques', icon: '🏪', route: 'admin/shops', roles: ['SYSTEM_ADMIN'] },
     { label: 'Relations F-B', icon: '🔗', route: 'admin/relations', roles: ['SYSTEM_ADMIN'] },
@@ -31,8 +31,8 @@ export class LayoutComponent {
     { label: 'Nouvelle commande', icon: '➕', route: 'shop/orders/create', roles: ['SHOP_ADMIN', 'SHOP_MANAGER'] },
     { label: 'Balance', icon: '💰', route: 'shop/balance', roles: ['SHOP_ADMIN', 'SHOP_MANAGER'] },
     // Common
-    { label: 'Paiements', icon: '💰', route: 'payments', roles: ['SYSTEM_ADMIN', 'SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_AGENT', 'SALES'] },
-    { label: 'Stats paiements', icon: '📊', route: 'payments/stats', roles: ['SYSTEM_ADMIN', 'SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_AGENT', 'SALES'] },
+    { label: 'Paiements', icon: '💰', route: 'payments', roles: ['SYSTEM_ADMIN', 'SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_AGENT'] },
+    { label: 'Stats paiements', icon: '📊', route: 'payments/stats', roles: ['SYSTEM_ADMIN', 'SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_AGENT'] },
   ];
 
   constructor(private loginService: LoginService, private router: Router) {

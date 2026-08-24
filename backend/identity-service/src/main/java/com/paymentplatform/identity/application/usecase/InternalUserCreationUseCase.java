@@ -52,7 +52,7 @@ public class InternalUserCreationUseCase {
         if (role == RoleCode.SYSTEM_ADMIN && orgId != null) {
             throw new ConflictException("Un SYSTEM_ADMIN ne peut pas être rattaché à une organisation");
         }
-        if (role != RoleCode.SYSTEM_ADMIN && role != RoleCode.SALES && orgId == null) {
+        if (role != RoleCode.SYSTEM_ADMIN && orgId == null) {
             throw new ConflictException("Une organisation est requise pour le rôle " + role);
         }
 

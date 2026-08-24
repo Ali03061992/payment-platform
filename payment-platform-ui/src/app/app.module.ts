@@ -39,7 +39,7 @@ import { RoleGuard } from './core/role.guard';
 const adminRoles = ['SYSTEM_ADMIN'];
 const supplierRoles = ['SUPPLIER_ADMIN', 'SUPPLIER_AGENT'];
 const shopRoles = ['SHOP_ADMIN', 'SHOP_AGENT'];
-const allRoles = [...adminRoles, ...supplierRoles, ...shopRoles, 'SALES'];
+const allRoles = [...adminRoles, ...supplierRoles, ...shopRoles];
 
 const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
@@ -54,7 +54,7 @@ const routes: Routes = [
       { path: '', component: DashboardComponent },
       { path: 'admin/users', component: UserManagementComponent, canActivate: [RoleGuard], data: { roles: adminRoles } },
       { path: 'admin/users/create', component: CreateUserComponent, canActivate: [RoleGuard], data: { roles: adminRoles } },
-      { path: 'sales/accounts', component: AccountActivationComponent, canActivate: [RoleGuard], data: { roles: ['SALES', ...adminRoles] } },
+      { path: 'sales/accounts', component: AccountActivationComponent, canActivate: [RoleGuard], data: { roles: adminRoles } },
       { path: 'admin/suppliers', component: SupplierManagementComponent, canActivate: [RoleGuard], data: { roles: adminRoles } },
       { path: 'admin/shops', component: ShopManagementComponent, canActivate: [RoleGuard], data: { roles: adminRoles } },
       { path: 'admin/relations', component: RelationManagementComponent, canActivate: [RoleGuard], data: { roles: adminRoles } },

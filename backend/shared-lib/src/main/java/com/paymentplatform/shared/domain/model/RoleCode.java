@@ -6,8 +6,7 @@ public enum RoleCode {
     SUPPLIER_ADMIN,
     SUPPLIER_AGENT,
     SHOP_ADMIN,
-    SHOP_AGENT,
-    SALES;
+    SHOP_AGENT;
 
     public static RoleCode from(String value) {
         for (RoleCode role : values()) {

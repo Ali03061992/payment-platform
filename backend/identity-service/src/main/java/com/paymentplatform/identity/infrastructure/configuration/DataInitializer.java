@@ -44,16 +44,5 @@ public class DataInitializer implements ApplicationRunner {
             users.save(admin);
             log.info("Compte SYSTEM_ADMIN créé : {}", username);
         }
-
-        String salesUsername = "sales.admin";
-        String salesPassword = "Sales@123";
-        if (!users.existsByUsername(Username.of(salesUsername))) {
-            User sales = User.create(new UserId(0), Username.of(salesUsername),
-                    Email.of("sales.admin@payment-platform.local"),
-                    PasswordHash.of(passwordEncoder.encode(salesPassword)), "Sales", "Admin", new PhoneNumber(null),
-                    (OrganizationId) null, RoleCode.SALES);
-            users.save(sales);
-            log.info("Compte SALES créé : {}", salesUsername);
-        }
     }
 }

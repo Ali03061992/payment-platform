@@ -32,8 +32,7 @@ public class RegisterUseCase {
             RoleCode.SUPPLIER_ADMIN,
             RoleCode.SUPPLIER_AGENT,
             RoleCode.SHOP_ADMIN,
-            RoleCode.SHOP_AGENT,
-            RoleCode.SALES
+            RoleCode.SHOP_AGENT
     );
 
     private final UserRepository users;

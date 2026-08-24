@@ -28,13 +28,13 @@ public class UserController {
     }
 
     @PostMapping
-    @PreAuthorize("hasAuthority('ADMIN_MANAGE_USERS') or hasAuthority('SALES_MANAGE_ACCOUNTS')")
+    @PreAuthorize("hasAuthority('ADMIN_MANAGE_USERS')")
     public ResponseEntity<UserResponse> create(@Valid @RequestBody CreateInternalUserRequest request) {
         return ResponseEntity.status(201).body(creation.createInternalUser(request));
     }
 
     @GetMapping
-    @PreAuthorize("hasAuthority('ADMIN_MANAGE_USERS') or hasAuthority('SALES_MANAGE_ACCOUNTS')")
+    @PreAuthorize("hasAuthority('ADMIN_MANAGE_USERS')")
     public ResponseEntity<List<UserResponse>> list(@RequestParam(required = false) Long organizationId,
                                                    @RequestParam(required = false) String role,
                                                    @RequestParam(required = false) String statusFilter) {
@@ -50,13 +50,13 @@ public class UserController {
     }
 
     @PatchMapping("/{id}/activate")
-    @PreAuthorize("hasAuthority('ADMIN_MANAGE_USERS') or hasAuthority('SALES_MANAGE_ACCOUNTS')")
+    @PreAuthorize("hasAuthority('ADMIN_MANAGE_USERS')")
     public ResponseEntity<UserResponse> activate(@PathVariable long id) {
         return ResponseEntity.ok(status.activateUser(CurrentUser.id(), id));
     }
 
     @PatchMapping("/{id}/disable")
-    @PreAuthorize("hasAuthority('ADMIN_MANAGE_USERS') or hasAuthority('SALES_MANAGE_ACCOUNTS')")
+    @PreAuthorize("hasAuthority('ADMIN_MANAGE_USERS')")
     public ResponseEntity<UserResponse> disable(@PathVariable long id) {
         return ResponseEntity.ok(status.disableUser(CurrentUser.id(), id));
     }

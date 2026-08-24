@@ -16,7 +16,7 @@ export class DashboardComponent implements OnInit {
 
   ngOnInit(): void {
     this.user = this.loginService.getCurrentUser();
-    if (this.loginService.hasRole('SYSTEM_ADMIN', 'SALES')) {
+    if (this.loginService.hasRole('SYSTEM_ADMIN')) {
       this.userService.list().subscribe(users => {
         this.stats.totalUsers = users.length;
         this.stats.activeUsers = users.filter(u => u.status === 'ACTIVE').length;

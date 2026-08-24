@@ -4,7 +4,7 @@
     <p>Voici un aperçu de votre plateforme.</p>
   </div>
 
-  <div class="stats-grid" *ngIf="user?.roles?.includes('SYSTEM_ADMIN') || user?.roles?.includes('SALES')">
+  <div class="stats-grid" *ngIf="user?.roles?.includes('SYSTEM_ADMIN')">
     <div class="stat-card">
       <div class="stat-icon blue">👥</div>
       <div class="stat-info">
