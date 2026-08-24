@@ -14,7 +14,10 @@
 <div *ngIf="successMessage" class="alert alert-success">{{ successMessage }}</div>
 <div *ngIf="error" class="alert alert-error">{{ error }}</div>
 
-<div *ngIf="loading" class="loading">Chargement...</div>
+<div *ngIf="loading" class="loading">
+  <div class="spinner"></div>
+  <span>Chargement...</span>
+</div>
 
 <div class="cards-grid" *ngIf="!loading">
   <div *ngFor="let user of filteredUsers" class="user-card" [class.disabled]="user.status === 'DISABLED'">

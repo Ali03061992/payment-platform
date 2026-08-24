@@ -18,12 +18,13 @@
 }
 
 .filters select {
-  padding: 8px 12px;
+  padding: 10px 14px;
   border: 2px solid #e0e0e0;
   border-radius: 8px;
   font-size: 14px;
   background: #fff;
   cursor: pointer;
+  transition: border-color 0.2s;
 }
 
 .filters select:focus {
@@ -42,10 +43,13 @@
 .alert-error { background: #fce4ec; color: #c62828; border: 1px solid #f8bbd0; }
 
 .loading {
-  text-align: center;
-  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 48px;
   color: #8896ab;
-  font-size: 16px;
+  font-size: 14px;
 }
 
 .table-card {
@@ -55,6 +59,11 @@
   overflow: hidden;
 }
 
+.table-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
 table {
   width: 100%;
   border-collapse: collapse;
@@ -62,17 +71,18 @@ table {
 
 th {
   background: #f5f7fa;
-  padding: 12px 16px;
+  padding: 14px 16px;
   text-align: left;
   font-size: 12px;
   text-transform: uppercase;
   color: #8896ab;
   font-weight: 600;
   border-bottom: 2px solid #e8ecf1;
+  white-space: nowrap;
 }
 
 td {
-  padding: 12px 16px;
+  padding: 14px 16px;
   border-bottom: 1px solid #f0f2f5;
   font-size: 14px;
 }
@@ -82,10 +92,11 @@ tr:hover { background: #fafbfc; }
 .role-badge {
   background: #e3f2fd;
   color: #1565c0;
-  padding: 2px 10px;
+  padding: 4px 10px;
   border-radius: 12px;
   font-size: 12px;
   font-weight: 600;
+  white-space: nowrap;
 }
 
 .status-badge {
@@ -126,6 +137,18 @@ tr:hover { background: #fafbfc; }
 
 .empty {
   text-align: center;
-  padding: 40px;
+  padding: 48px;
   color: #8896ab;
+}
+
+@media (max-width: 768px) {
+  .filters {
+    flex-direction: column;
+  }
+
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
 }

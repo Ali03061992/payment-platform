@@ -1,6 +1,6 @@
 <div class="page-header">
-  <h1>📦 Gestion du stock</h1>
-  <a routerLink="create" class="btn btn-primary" *ngIf="true">➕ Ajouter un produit</a>
+  <h1>Gestion du stock</h1>
+  <a routerLink="create" class="btn btn-primary">+ Ajouter un produit</a>
 </div>
 
 <div class="filters">
@@ -14,54 +14,59 @@
 <div *ngIf="successMessage" class="alert alert-success">{{ successMessage }}</div>
 <div *ngIf="error" class="alert alert-error">{{ error }}</div>
 
-<div *ngIf="loading" class="loading">Chargement du stock...</div>
+<div *ngIf="loading" class="loading">
+  <div class="spinner"></div>
+  <span>Chargement du stock...</span>
+</div>
 
 <div class="table-card" *ngIf="!loading">
-  <table>
-    <thead>
-      <tr>
-        <th>SKU</th>
-        <th>Produit</th>
-        <th>Prix unitaire</th>
-        <th>Quantité</th>
-        <th>Seuil min</th>
-        <th>Statut stock</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let product of products" [class.low-stock]="getStockStatus(product) === 'LOW'" [class.out-of-stock]="getStockStatus(product) === 'OUT_OF_STOCK'">
-        <td><code>{{ product.sku }}</code></td>
-        <td>
-          <strong>{{ product.name }}</strong>
-          <div class="product-desc" *ngIf="product.description">{{ product.description }}</div>
-        </td>
-        <td>{{ product.unitPrice | number:'1.2-2' }} {{ product.currency }}</td>
-        <td class="qty-cell">
-          <button class="qty-btn" (click)="updateQuantity(product, -1)" [disabled]="product.quantity <= 0">−</button>
-          <span class="qty-value" [class.qty-zero]="product.quantity === 0">{{ product.quantity }}</span>
-          <button class="qty-btn" (click)="updateQuantity(product, 1)">+</button>
-        </td>
-        <td>{{ product.minQuantity }}</td>
-        <td>
-          <span class="stock-badge" [ngClass]="{
-            'stock-ok': getStockStatus(product) === 'OK',
-            'stock-low': getStockStatus(product) === 'LOW',
-            'stock-out': getStockStatus(product) === 'OUT_OF_STOCK'
-          }">
-            {{ getStockStatus(product) === 'OK' ? 'OK' : getStockStatus(product) === 'LOW' ? 'Bas' : 'Rupture' }}
-          </span>
-        </td>
-        <td class="actions">
-          <button class="btn btn-sm btn-danger" (click)="deleteProduct(product)">🗑️</button>
-        </td>
-      </tr>
-      <tr *ngIf="products.length === 0">
-        <td colspan="7" class="empty">
-          Aucun produit dans le stock
-          <br><a routerLink="create" class="empty-link">Ajouter un premier produit</a>
-        </td>
-      </tr>
-    </tbody>
-  </table>
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr>
+          <th>SKU</th>
+          <th>Produit</th>
+          <th>Prix unitaire</th>
+          <th>Quantité</th>
+          <th>Seuil min</th>
+          <th>Statut stock</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let product of products" [class.low-stock]="getStockStatus(product) === 'LOW'" [class.out-of-stock]="getStockStatus(product) === 'OUT_OF_STOCK'">
+          <td><code>{{ product.sku }}</code></td>
+          <td>
+            <strong>{{ product.name }}</strong>
+            <div class="product-desc" *ngIf="product.description">{{ product.description }}</div>
+          </td>
+          <td>{{ product.unitPrice | number:'1.2-2' }} {{ product.currency }}</td>
+          <td class="qty-cell">
+            <button class="qty-btn" (click)="updateQuantity(product, -1)" [disabled]="product.quantity <= 0">-</button>
+            <span class="qty-value" [class.qty-zero]="product.quantity === 0">{{ product.quantity }}</span>
+            <button class="qty-btn" (click)="updateQuantity(product, 1)">+</button>
+          </td>
+          <td>{{ product.minQuantity }}</td>
+          <td>
+            <span class="stock-badge" [ngClass]="{
+              'stock-ok': getStockStatus(product) === 'OK',
+              'stock-low': getStockStatus(product) === 'LOW',
+              'stock-out': getStockStatus(product) === 'OUT_OF_STOCK'
+            }">
+              {{ getStockStatus(product) === 'OK' ? 'OK' : getStockStatus(product) === 'LOW' ? 'Bas' : 'Rupture' }}
+            </span>
+          </td>
+          <td class="actions">
+            <button class="btn btn-sm btn-danger" (click)="deleteProduct(product)">Supprimer</button>
+          </td>
+        </tr>
+        <tr *ngIf="products.length === 0">
+          <td colspan="7" class="empty">
+            Aucun produit dans le stock
+            <br><a routerLink="create" class="empty-link">Ajouter un premier produit</a>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 </div>
