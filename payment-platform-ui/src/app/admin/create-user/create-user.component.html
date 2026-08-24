@@ -54,7 +54,7 @@
 <div class="success-card" *ngIf="success">
   <div class="success-icon">✅</div>
   <h2>Compte créé avec succès !</h2>
-  <p>L'utilisateur <strong>{{ form.username }}</p>
+  <p>L'utilisateur <strong>{{ form.username }}</strong> a été créé.</p>
   <div class="success-actions">
     <button class="btn btn-primary" (click)="success = false; form = {username:'',email:'',password:'',firstName:'',lastName:'',phone:'',role:'SHOP_AGENT'}">
       Créer un autre compte
