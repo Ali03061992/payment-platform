@@ -7,6 +7,7 @@ import { RouterModule, Routes } from '@angular/router';
 import { AppComponent } from './app.component';
 import { LoginComponent } from './login/login.component';
 import { RegisterComponent } from './register/register.component';
+import { PasswordSetupComponent } from './password-setup/password-setup.component';
 import { LayoutComponent } from './layout/layout.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { UserManagementComponent } from './admin/user-management/user-management.component';
@@ -23,6 +24,7 @@ const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
+  { path: 'setup-password', component: PasswordSetupComponent },
   {
     path: 'dashboard',
     component: LayoutComponent,
@@ -69,6 +71,7 @@ const routes: Routes = [
     AppComponent,
     LoginComponent,
     RegisterComponent,
+    PasswordSetupComponent,
     LayoutComponent,
     DashboardComponent,
     UserManagementComponent,

@@ -16,6 +16,7 @@ import com.paymentplatform.identity.domain.valueobject.Email;
 import com.paymentplatform.identity.domain.valueobject.PasswordHash;
 import com.paymentplatform.identity.domain.valueobject.PhoneNumber;
 import com.paymentplatform.identity.domain.valueobject.Username;
+import com.paymentplatform.identity.application.usecase.PasswordSetupUseCase;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,13 +36,16 @@ public class InternalUserCreationUseCase {
     private final PasswordEncoder passwordEncoder;
     private final AuditRecorder audit;
     private final OutboxEventStore outbox;
+    private final PasswordSetupUseCase passwordSetup;
 
     public InternalUserCreationUseCase(UserRepository users, PasswordEncoder passwordEncoder,
-                                       AuditRecorder audit, OutboxEventStore outbox) {
+                                       AuditRecorder audit, OutboxEventStore outbox,
+                                       PasswordSetupUseCase passwordSetup) {
         this.users = users;
         this.passwordEncoder = passwordEncoder;
         this.audit = audit;
         this.outbox = outbox;
+        this.passwordSetup = passwordSetup;
     }
 
     @Transactional
@@ -52,7 +56,7 @@ public class InternalUserCreationUseCase {
         if (role == RoleCode.SYSTEM_ADMIN && orgId != null) {
             throw new ConflictException("Un SYSTEM_ADMIN ne peut pas être rattaché à une organisation");
         }
-        if (role != RoleCode.SYSTEM_ADMIN && orgId == null) {
+        if (role != RoleCode.SYSTEM_ADMIN && role != RoleCode.SALES && orgId == null) {
             throw new ConflictException("Une organisation est requise pour le rôle " + role);
         }
 
@@ -65,7 +69,15 @@ public class InternalUserCreationUseCase {
             throw new ConflictException("Adresse email déjà utilisée");
         }
 
-        PasswordHash hash = PasswordHash.of(passwordEncoder.encode(request.password()));
+        boolean sendSetupEmail = (request.password() == null || request.password().isBlank());
+
+        PasswordHash hash;
+        if (sendSetupEmail) {
+            hash = PasswordHash.of(passwordEncoder.encode(UUID.randomUUID().toString()));
+        } else {
+            hash = PasswordHash.of(passwordEncoder.encode(request.password()));
+        }
+
         User user = User.create(new UserId(0), username, email, hash, request.firstName(), request.lastName(),
                 PhoneNumber.of(request.phone()), orgId == null ? null : OrganizationId.of(orgId), role);
         users.save(user);
@@ -74,6 +86,10 @@ public class InternalUserCreationUseCase {
                 "{\"username\":\"" + user.username().value() + "\",\"role\":\"" + role + "\",\"by\":\"internal\"}");
         outbox.append(new UserCreatedEvent(UUID.randomUUID(), Instant.now(), user.id().value(), orgId,
                 List.of(role.name())), String.valueOf(user.id().value()));
+
+        if (sendSetupEmail) {
+            passwordSetup.initiateSetup(user.username().value());
+        }
 
         return UserResponse.from(user);
     }

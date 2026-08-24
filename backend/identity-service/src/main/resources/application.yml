@@ -24,6 +24,17 @@ spring:
     port: ${RABBITMQ_PORT:5672}
     username: ${RABBITMQ_USER:payment}
     password: ${RABBITMQ_PASSWORD:rabbit-password-change-me}
+  mail:
+    host: ${SMTP_HOST:localhost}
+    port: ${SMTP_PORT:1025}
+    username: ${SMTP_USERNAME:}
+    password: ${SMTP_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: false
+          starttls:
+            enable: false
 
 app:
   security:
@@ -32,6 +43,12 @@ app:
   gateway:
     base-url: ${API_GATEWAY_URL:http://localhost:8081}
   internal-secret: ${INTERNAL_SECRET:dev-internal-secret-change-me}
+  mail:
+    from: ${MAIL_FROM:noreply@payment-platform.local}
+  frontend:
+    url: ${FRONTEND_URL:http://localhost:8080}
+  password-setup:
+    token-expiry-hours: 24
 
 springdoc:
   swagger-ui:

@@ -1,17 +1,15 @@
 package com.paymentplatform.identity.interfaces.rest;
 
 import com.paymentplatform.shared.infrastructure.security.CurrentUser;
+import com.paymentplatform.identity.application.dto.CreateInternalUserRequest;
 import com.paymentplatform.identity.application.dto.UserResponse;
+import com.paymentplatform.identity.application.usecase.InternalUserCreationUseCase;
 import com.paymentplatform.identity.application.usecase.UserQueryUseCase;
 import com.paymentplatform.identity.application.usecase.UserStatusUseCase;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -21,10 +19,18 @@ public class UserController {
 
     private final UserQueryUseCase query;
     private final UserStatusUseCase status;
+    private final InternalUserCreationUseCase creation;
 
-    public UserController(UserQueryUseCase query, UserStatusUseCase status) {
+    public UserController(UserQueryUseCase query, UserStatusUseCase status, InternalUserCreationUseCase creation) {
         this.query = query;
         this.status = status;
+        this.creation = creation;
+    }
+
+    @PostMapping
+    @PreAuthorize("hasAuthority('ADMIN_MANAGE_USERS') or hasAuthority('SALES_MANAGE_ACCOUNTS')")
+    public ResponseEntity<UserResponse> create(@Valid @RequestBody CreateInternalUserRequest request) {
+        return ResponseEntity.status(201).body(creation.createInternalUser(request));
     }
 
     @GetMapping

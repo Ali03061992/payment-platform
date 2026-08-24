@@ -7,12 +7,12 @@
   <form (ngSubmit)="onSubmit()">
     <div class="form-row">
       <div class="form-group">
-        <label for="firstName">Nom</label>
-        <input id="firstName" type="text" [(ngModel)]="form.firstName" name="firstName" required placeholder="Dupont">
+        <label for="lastName">Nom</label>
+        <input id="lastName" type="text" [(ngModel)]="form.lastName" name="lastName" required placeholder="Dupont">
       </div>
       <div class="form-group">
-        <label for="lastName">Prénom</label>
-        <input id="lastName" type="text" [(ngModel)]="form.lastName" name="lastName" required placeholder="Jean">
+        <label for="firstName">Prénom</label>
+        <input id="firstName" type="text" [(ngModel)]="form.firstName" name="firstName" required placeholder="Jean">
       </div>
     </div>
 
@@ -22,18 +22,16 @@
     </div>
 
     <div class="form-group">
-      <label for="email">Email</label>
+      <label for="email">Email <span class="required">*</span></label>
       <input id="email" type="email" [(ngModel)]="form.email" name="email" required placeholder="jean@exemple.com">
     </div>
 
     <div class="form-group">
       <label for="phone">Téléphone (optionnel)</label>
-      <input id="phone" type="tel" [(ngModel)]="form.phone" name="phone" placeholder="+33 6 12 34 56 78">
-    </div>
-
-    <div class="form-group">
-      <label for="password">Mot de passe</label>
-      <input id="password" type="password" [(ngModel)]="form.password" name="password" required minlength="8" placeholder="Minimum 8 caractères">
+      <div class="phone-input">
+        <span class="phone-prefix">+216</span>
+        <input id="phone" type="tel" [(ngModel)]="form.phone" name="phone" placeholder="XX XXX XXX" class="phone-field">
+      </div>
     </div>
 
     <div class="form-group">
@@ -41,6 +39,11 @@
       <select id="role" [(ngModel)]="form.role" name="role" required>
         <option *ngFor="let r of roles" [value]="r.value">{{ r.label }}</option>
       </select>
+    </div>
+
+    <div class="info-box">
+      <span class="info-icon">📧</span>
+      <span>Un email sera envoyé à l'utilisateur pour configurer son mot de passe.</span>
     </div>
 
     <div *ngIf="error" class="alert alert-error">{{ error }}</div>
@@ -55,8 +58,9 @@
   <div class="success-icon">✅</div>
   <h2>Compte créé avec succès !</h2>
   <p>L'utilisateur <strong>{{ form.username }}</strong> a été créé.</p>
+  <p class="email-sent">📧 Un email de configuration a été envoyé à <strong>{{ form.email }}</strong></p>
   <div class="success-actions">
-    <button class="btn btn-primary" (click)="success = false; form = {username:'',email:'',password:'',firstName:'',lastName:'',phone:'',role:'SHOP_AGENT'}">
+    <button class="btn btn-primary" (click)="success = false; form = {username:'',email:'',firstName:'',lastName:'',phone:'',role:'SHOP_AGENT'}">
       Créer un autre compte
     </button>
     <button class="btn btn-secondary" (click)="goBack()">Retour à la liste</button>

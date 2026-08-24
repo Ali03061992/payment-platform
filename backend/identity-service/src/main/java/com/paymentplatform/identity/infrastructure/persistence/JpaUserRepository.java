@@ -90,6 +90,7 @@ public class JpaUserRepository implements UserRepository {
         UserJpaEntity e = new UserJpaEntity();
         if (user.id().value() > 0) {
             e.setId(user.id().value());
+            e.setVersion(user.version());
         }
         e.setUsername(user.username().value());
         e.setEmail(user.email().value());
@@ -99,7 +100,6 @@ public class JpaUserRepository implements UserRepository {
         e.setPhone(user.phone() == null ? null : user.phone().value());
         e.setOrganizationId(user.organizationId() == null ? null : user.organizationId().value());
         e.setStatus(user.status().name());
-        e.setVersion(user.version() > 0 ? user.version() : null);
         e.setCreatedAt(user.createdAt());
         e.setUpdatedAt(user.updatedAt());
         e.setRoles(EnumSet.copyOf(user.roles()));

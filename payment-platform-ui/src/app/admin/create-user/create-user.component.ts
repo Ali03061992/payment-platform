@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
-import { AuthService } from '../../services/auth.service';
+import { UserService } from '../../services/user.service';
 
 @Component({
   selector: 'app-create-user',
@@ -11,7 +11,6 @@ export class CreateUserComponent {
   form = {
     username: '',
     email: '',
-    password: '',
     firstName: '',
     lastName: '',
     phone: '',
@@ -31,18 +30,18 @@ export class CreateUserComponent {
   success = false;
   loading = false;
 
-  constructor(private authService: AuthService, private router: Router) {}
+  constructor(private userService: UserService, private router: Router) {}
 
   onSubmit(): void {
     this.error = '';
     this.loading = true;
-    this.authService.register(this.form).subscribe({
+    this.userService.create(this.form).subscribe({
       next: () => { this.success = true; this.loading = false; },
       error: (err) => { this.error = err.error?.message || "Erreur lors de la création"; this.loading = false; }
     });
   }
 
   goBack(): void {
-    this.router.navigate(['/admin/users']);
+    this.router.navigate(['/dashboard/admin/users']);
   }
 }

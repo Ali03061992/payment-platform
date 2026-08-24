@@ -12,12 +12,12 @@
     <form *ngIf="!success" (ngSubmit)="onSubmit()">
       <div class="form-row">
         <div class="form-group">
-          <label for="firstName">Nom</label>
-          <input id="firstName" type="text" [(ngModel)]="form.firstName" name="firstName" required placeholder="Dupont">
+          <label for="lastName">Nom</label>
+          <input id="lastName" type="text" [(ngModel)]="form.lastName" name="lastName" required placeholder="Dupont">
         </div>
         <div class="form-group">
-          <label for="lastName">Prénom</label>
-          <input id="lastName" type="text" [(ngModel)]="form.lastName" name="lastName" required placeholder="Jean">
+          <label for="firstName">Prénom</label>
+          <input id="firstName" type="text" [(ngModel)]="form.firstName" name="firstName" required placeholder="Jean">
         </div>
       </div>
 
@@ -33,7 +33,10 @@
 
       <div class="form-group">
         <label for="phone">Téléphone (optionnel)</label>
-        <input id="phone" type="tel" [(ngModel)]="form.phone" name="phone" placeholder="+33 6 12 34 56 78">
+        <div class="phone-input">
+          <span class="phone-prefix">+216</span>
+          <input id="phone" type="tel" [(ngModel)]="form.phone" name="phone" placeholder="XX XXX XXX" class="phone-field">
+        </div>
       </div>
 
       <div class="form-group">

@@ -21,6 +21,10 @@ export class UserService {
     return this.http.get<User>(`${this.apiUrl}/${id}`);
   }
 
+  create(data: any): Observable<User> {
+    return this.http.post<User>(this.apiUrl, data);
+  }
+
   activate(id: number): Observable<User> {
     return this.http.patch<User>(`${this.apiUrl}/${id}/activate`, {});
   }

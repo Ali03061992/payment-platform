@@ -54,11 +54,17 @@ services:
       JWT_EXPIRATION: ${JWT_EXPIRATION}
       API_GATEWAY_URL: http://api-gateway:8081
       INTERNAL_SECRET: dev-internal-secret-change-me
+      SMTP_HOST: mailpit
+      SMTP_PORT: 1025
+      MAIL_FROM: noreply@payment-platform.local
+      FRONTEND_URL: http://localhost:8080
     depends_on:
       mysql:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
+      mailpit:
+        condition: service_started
     networks:
       - payment-net
 
@@ -150,6 +156,14 @@ services:
     environment:
       ADMINER_DEFAULT_SERVER: mysql
       ADMINER_DESIGN: pepa-linha-dark
+    networks:
+      - payment-net
+
+  mailpit:
+    image: axllent/mailpit
+    ports:
+      - "8025:8025"
+      - "1025:1025"
     networks:
       - payment-net
 
