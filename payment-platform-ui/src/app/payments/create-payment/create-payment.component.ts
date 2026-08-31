@@ -34,7 +34,7 @@ export class CreatePaymentComponent implements OnInit {
     if (!this.shopId || !this.supplierId || this.amount <= 0) return;
     this.creating = true;
     this.paymentService.create({ shopId: this.shopId, supplierId: this.supplierId, amount: this.amount, currency: this.currency }).subscribe({
-      next: () => this.router.navigate(['/dashboard/payments']),
+      next: (payment) => this.router.navigate(['/dashboard/payments', payment.id]),
       error: (err: any) => {
         this.errorMsg = err.error?.message || 'Erreur lors de la création';
         this.creating = false;

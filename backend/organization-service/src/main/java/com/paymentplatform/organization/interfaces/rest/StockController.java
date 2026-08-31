@@ -21,7 +21,7 @@ public class StockController {
     }
 
     @GetMapping("/products")
-    @PreAuthorize("hasAuthority('SUPPLIER_MANAGE_PRODUCTS') or hasAuthority('SUPPLIER_MANAGE_STOCK')")
+    @PreAuthorize("hasAnyAuthority('SUPPLIER_MANAGE_PRODUCTS','SUPPLIER_MANAGE_STOCK','SYSTEM_ADMIN')")
     public ResponseEntity<List<ProductResponse>> listProducts(
             @PathVariable Long supplierId,
             @RequestParam(required = false) String status) {
@@ -33,7 +33,7 @@ public class StockController {
     }
 
     @GetMapping("/products/{productId}")
-    @PreAuthorize("hasAuthority('SUPPLIER_MANAGE_PRODUCTS') or hasAuthority('SUPPLIER_MANAGE_STOCK')")
+    @PreAuthorize("hasAnyAuthority('SUPPLIER_MANAGE_PRODUCTS','SUPPLIER_MANAGE_STOCK','SYSTEM_ADMIN')")
     public ResponseEntity<ProductResponse> getProduct(@PathVariable Long supplierId, @PathVariable Long productId) {
         var current = CurrentUser.get();
         if (current.organizationId() != null && !current.organizationId().equals(supplierId)) {
@@ -43,7 +43,7 @@ public class StockController {
     }
 
     @PostMapping("/products")
-    @PreAuthorize("hasAuthority('SUPPLIER_MANAGE_PRODUCTS')")
+    @PreAuthorize("hasAnyAuthority('SUPPLIER_MANAGE_PRODUCTS','SYSTEM_ADMIN')")
     public ResponseEntity<ProductResponse> createProduct(
             @PathVariable Long supplierId,
             @Valid @RequestBody ProductCreateRequest request) {
@@ -55,7 +55,7 @@ public class StockController {
     }
 
     @PatchMapping("/products/{productId}")
-    @PreAuthorize("hasAuthority('SUPPLIER_MANAGE_PRODUCTS')")
+    @PreAuthorize("hasAnyAuthority('SUPPLIER_MANAGE_PRODUCTS','SYSTEM_ADMIN')")
     public ResponseEntity<ProductResponse> updateProduct(
             @PathVariable Long supplierId,
             @PathVariable Long productId,
@@ -68,7 +68,7 @@ public class StockController {
     }
 
     @DeleteMapping("/products/{productId}")
-    @PreAuthorize("hasAuthority('SUPPLIER_MANAGE_PRODUCTS')")
+    @PreAuthorize("hasAnyAuthority('SUPPLIER_MANAGE_PRODUCTS','SYSTEM_ADMIN')")
     public ResponseEntity<Void> deleteProduct(@PathVariable Long supplierId, @PathVariable Long productId) {
         var current = CurrentUser.get();
         if (current.organizationId() != null && !current.organizationId().equals(supplierId)) {
@@ -79,7 +79,7 @@ public class StockController {
     }
 
     @GetMapping("/movements")
-    @PreAuthorize("hasAuthority('SUPPLIER_MANAGE_STOCK')")
+    @PreAuthorize("hasAnyAuthority('SUPPLIER_MANAGE_STOCK','SYSTEM_ADMIN')")
     public ResponseEntity<List<StockMovementResponse>> listMovements(
             @PathVariable Long supplierId,
             @RequestParam(required = false) Long productId) {
@@ -91,7 +91,7 @@ public class StockController {
     }
 
     @PostMapping("/movements")
-    @PreAuthorize("hasAuthority('SUPPLIER_MANAGE_STOCK')")
+    @PreAuthorize("hasAnyAuthority('SUPPLIER_MANAGE_STOCK','SYSTEM_ADMIN')")
     public ResponseEntity<StockMovementResponse> createMovement(
             @PathVariable Long supplierId,
             @Valid @RequestBody StockMovementRequest request) {

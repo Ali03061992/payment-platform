@@ -443,3 +443,164 @@ tr:hover { background: #fafbfc; }
 @media (max-width: 480px) {
   .detail-grid { grid-template-columns: 1fr; }
 }
+
+/* ===========================
+   PWA MOBILE OPTIMIZATIONS
+   =========================== */
+
+/* Prevent zoom on input focus (iOS) */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="tel"],
+input[type="url"],
+input[type="search"],
+select,
+textarea {
+  font-size: 16px !important;
+}
+
+/* Safe area for notched phones */
+@supports (padding: env(safe-area-inset-top)) {
+  body {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+}
+
+/* Touch feedback */
+.btn:active {
+  transform: scale(0.97);
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Prevent text selection on interactive elements */
+.btn,
+.sidebar-item,
+.nav-link {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Improve scroll on mobile */
+.sidebar {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Mobile sidebar overlay */
+@media (max-width: 768px) {
+  .layout-wrapper {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    position: fixed;
+    left: -260px;
+    top: 0;
+    bottom: 0;
+    z-index: 1000;
+    transition: left 0.3s ease;
+    width: 260px;
+  }
+
+  .sidebar.open {
+    left: 0;
+  }
+
+  .sidebar-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 999;
+  }
+
+  .sidebar-overlay.open {
+    display: block;
+  }
+
+  .main-content {
+    margin-left: 0 !important;
+    padding: 16px !important;
+    width: 100% !important;
+  }
+
+  .mobile-header {
+    display: flex !important;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background: #0f3460;
+    color: white;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .mobile-menu-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 4px 8px;
+  }
+
+  .page-header h2 {
+    font-size: 20px;
+  }
+
+  .form-card {
+    padding: 16px;
+  }
+
+  table {
+    font-size: 13px;
+  }
+
+  th, td {
+    padding: 10px 8px;
+  }
+
+  .btn {
+    padding: 12px 16px;
+    font-size: 14px;
+    width: 100%;
+  }
+
+  .form-actions {
+    flex-direction: column;
+  }
+
+  .form-actions .btn {
+    width: 100%;
+  }
+
+  .stat-card {
+    padding: 16px;
+  }
+
+  .stat-value {
+    font-size: 24px;
+  }
+}
+
+/* Desktop hides mobile header */
+.mobile-header {
+  display: none;
+}
+
+/* Hidden utility for mobile */
+.hide-mobile {
+  display: block;
+}
+
+@media (max-width: 768px) {
+  .hide-mobile {
+    display: none !important;
+  }
+}

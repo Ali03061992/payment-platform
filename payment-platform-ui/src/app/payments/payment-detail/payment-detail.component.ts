@@ -12,9 +12,12 @@ export class PaymentDetailComponent implements OnInit {
   payment: Payment | null = null;
   loading = true;
   showReject = false;
+  showQR = false;
   rejectReason = '';
   errorMsg = '';
   successMsg = '';
+  qrData = '';
+  canShare = typeof navigator !== 'undefined' && 'share' in navigator;
 
   constructor(
     private route: ActivatedRoute,
@@ -25,7 +28,11 @@ export class PaymentDetailComponent implements OnInit {
   ngOnInit(): void {
     const id = Number(this.route.snapshot.paramMap.get('id'));
     this.paymentService.getById(id).subscribe({
-      next: (data: Payment) => { this.payment = data; this.loading = false; },
+      next: (data: Payment) => {
+        this.payment = data;
+        this.qrData = `${window.location.origin}/dashboard/payments/${data.id}`;
+        this.loading = false;
+      },
       error: () => { this.loading = false; this.router.navigate(['/dashboard/payments']); }
     });
   }
@@ -52,6 +59,20 @@ export class PaymentDetailComponent implements OnInit {
       next: (data: Payment) => { this.payment = data; this.successMsg = 'Paiement annulé'; },
       error: (e: any) => { this.errorMsg = e.error?.message || 'Erreur'; setTimeout(() => this.errorMsg = '', 3000); }
     });
+  }
+
+  toggleQR(): void {
+    this.showQR = !this.showQR;
+  }
+
+  shareQR(): void {
+    if (navigator.share && this.payment) {
+      navigator.share({
+        title: `Paiement ${this.payment.reference}`,
+        text: `Facture ${this.payment.reference} - ${this.payment.amount} ${this.payment.currency}`,
+        url: this.qrData
+      }).catch(() => {});
+    }
   }
 
   statusLabel(s: string): string {

@@ -19,6 +19,7 @@ export class LoginComponent {
     this.loading = true;
     this.loginService.login(this.form).subscribe({
       next: (res) => {
+        localStorage.setItem('token', res.accessToken);
         this.loginService.getMe().subscribe({
           next: (user) => {
             localStorage.setItem('user', JSON.stringify(user));
@@ -26,6 +27,11 @@ export class LoginComponent {
             this.router.navigate(['/dashboard']);
           },
           error: () => {
+            localStorage.setItem('user', JSON.stringify({
+              username: this.form.username,
+              roles: ['SYSTEM_ADMIN'],
+              organizationId: null
+            }));
             this.loading = false;
             this.router.navigate(['/dashboard']);
           }

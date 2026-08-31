@@ -32,9 +32,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (header != null && header.startsWith("Bearer ")) {
             try {
                 AuthenticatedUser user = jwtService.parse(header.substring(7));
-                List<SimpleGrantedAuthority> authorities = PermissionCatalog.permissionsFor(user.roles()).stream()
+                List<SimpleGrantedAuthority> authorities = new java.util.ArrayList<>(user.roles().stream()
+                        .map(r -> new SimpleGrantedAuthority(r))
+                        .toList());
+                authorities.addAll(PermissionCatalog.permissionsFor(user.roles()).stream()
                         .map(SimpleGrantedAuthority::new)
-                        .toList();
+                        .toList());
                 var authentication = new UsernamePasswordAuthenticationToken(user, null, authorities);
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             } catch (Exception e) {

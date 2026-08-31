@@ -21,6 +21,9 @@ export class JwtInterceptor implements HttpInterceptor {
 
     return next.handle(authReq).pipe(
       catchError((error: HttpErrorResponse) => {
+        if (error.status === 0) {
+          return throwError(() => error);
+        }
         if (error.status === 401) {
           localStorage.removeItem('token');
           localStorage.removeItem('user');

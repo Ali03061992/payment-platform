@@ -48,6 +48,9 @@ public class Payment {
         if (shopId <= 0) throw new DomainException("L'ID de la boutique est obligatoire");
         if (supplierId <= 0) throw new DomainException("L'ID du fournisseur est obligatoire");
         if (shopId == supplierId) throw new DomainException("La boutique et le fournisseur doivent être différents");
+        if (money == null || money.amount() == null) throw new DomainException("Le montant est obligatoire");
+        if (money.amount().compareTo(java.math.BigDecimal.ZERO) <= 0)
+            throw new DomainException("Le montant doit être supérieur à 0");
 
         Instant now = Instant.now();
         PaymentReference ref = PaymentReference.generate();

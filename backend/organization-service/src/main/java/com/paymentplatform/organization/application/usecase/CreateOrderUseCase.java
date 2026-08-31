@@ -42,6 +42,12 @@ public class CreateOrderUseCase {
 
     @Transactional
     public OrderResponse execute(CreateOrderRequest request, long actorUserId, String actorRole) {
+        if (request.items() == null || request.items().isEmpty()) {
+            throw new ConflictException("La commande doit contenir au moins un article");
+        }
+        if (request.supplierId().equals(request.shopId())) {
+            throw new ConflictException("Le fournisseur et la boutique doivent être différents");
+        }
         validateOrganizations(request.supplierId(), request.shopId());
         validateRelation(request.supplierId(), request.shopId());
 

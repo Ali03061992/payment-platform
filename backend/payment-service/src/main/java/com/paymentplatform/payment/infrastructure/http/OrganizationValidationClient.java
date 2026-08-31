@@ -85,12 +85,11 @@ public class OrganizationValidationClient {
     }
 
     public void validateRelation(long shopId, long supplierId) {
-        String url = gatewayBaseUrl + "/api/admin/supplier-shop-relations/supplier/" + supplierId;
+        String url = gatewayBaseUrl + "/api/organizations/internal/relations/supplier/" + supplierId;
         try {
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(url))
                     .header("X-Internal-Token", internalSecret)
-                    .header("Authorization", "Bearer system.internal")
                     .GET()
                     .build();
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());

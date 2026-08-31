@@ -1,6 +1,7 @@
 package com.paymentplatform.organization.domain.model;
 
 import com.paymentplatform.shared.domain.exception.ConflictException;
+import com.paymentplatform.shared.domain.exception.DomainException;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
@@ -96,6 +97,12 @@ public class Order {
 
     public static Order create(Long supplierId, Long shopId, Long createdBy,
                                String createdByRole, String source, boolean asapPayment, String currency) {
+        if (supplierId == null || shopId == null) {
+            throw new ConflictException("Le fournisseur et la boutique sont requis");
+        }
+        if (supplierId.equals(shopId)) {
+            throw new ConflictException("Le fournisseur et la boutique doivent être différents");
+        }
         Order order = new Order();
         order.reference = "ORD-" + System.currentTimeMillis();
         order.supplierId = supplierId;

@@ -12,6 +12,8 @@ public final class Permissions {
     public static final String ADMIN_VIEW_STATS = "ADMIN_VIEW_STATS";
     public static final String SUPPLIER_MANAGE_AGENTS = "SUPPLIER_MANAGE_AGENTS";
     public static final String SUPPLIER_MANAGE_PAYMENTS = "SUPPLIER_MANAGE_PAYMENTS";
+    public static final String SUPPLIER_MANAGE_PRODUCTS = "SUPPLIER_MANAGE_PRODUCTS";
+    public static final String SUPPLIER_MANAGE_STOCK = "SUPPLIER_MANAGE_STOCK";
     public static final String SHOP_MANAGE_AGENTS = "SHOP_MANAGE_AGENTS";
     public static final String SHOP_CREATE_PAYMENTS = "SHOP_CREATE_PAYMENTS";
     public static final String SHOP_CANCEL_PAYMENTS = "SHOP_CANCEL_PAYMENTS";

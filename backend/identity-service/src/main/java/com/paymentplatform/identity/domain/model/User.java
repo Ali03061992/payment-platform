@@ -111,7 +111,7 @@ public class User {
     }
 
     public Set<RoleCode> roles() {
-        return EnumSet.copyOf(roles);
+        return roles.isEmpty() ? Set.of() : EnumSet.copyOf(roles);
     }
 
     public long version() {

@@ -95,7 +95,10 @@ public class StockService {
 
     @Transactional
     public StockMovementResponse createMovement(Long supplierId, StockMovementRequest request) {
-        Product product = products.findById(request.productId())
+        if (request.quantity() == null || request.quantity() <= 0) {
+            throw new ConflictException("La quantité doit être supérieure à 0");
+        }
+        Product product = products.findByIdForUpdate(request.productId())
                 .filter(p -> p.getSupplierId().equals(supplierId))
                 .orElseThrow(() -> new NotFoundException("Produit non trouvé"));
 

@@ -4,10 +4,14 @@ import com.paymentplatform.shared.infrastructure.security.CurrentUser;
 import com.paymentplatform.payment.application.dto.*;
 import com.paymentplatform.payment.application.usecase.*;
 import jakarta.validation.Valid;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Map;
 
@@ -21,19 +25,22 @@ public class PaymentController {
     private final ConfirmPaymentUseCase confirmPayment;
     private final RejectPaymentUseCase rejectPayment;
     private final CancelPaymentUseCase cancelPayment;
+    private final AgentPaymentsBySupplierUseCase agentPayments;
 
     public PaymentController(CreatePaymentUseCase createPayment,
                              GetPaymentUseCase getPayment,
                              ListPaymentsUseCase listPayments,
                              ConfirmPaymentUseCase confirmPayment,
                              RejectPaymentUseCase rejectPayment,
-                             CancelPaymentUseCase cancelPayment) {
+                             CancelPaymentUseCase cancelPayment,
+                             AgentPaymentsBySupplierUseCase agentPayments) {
         this.createPayment = createPayment;
         this.getPayment = getPayment;
         this.listPayments = listPayments;
         this.confirmPayment = confirmPayment;
         this.rejectPayment = rejectPayment;
         this.cancelPayment = cancelPayment;
+        this.agentPayments = agentPayments;
     }
 
     @PostMapping
@@ -49,7 +56,16 @@ public class PaymentController {
     @GetMapping("/{id}")
     @PreAuthorize("hasAuthority('VIEW_PAYMENTS')")
     public ResponseEntity<PaymentResponse> getById(@PathVariable long id) {
-        return ResponseEntity.ok(getPayment.execute(id));
+        var current = CurrentUser.get();
+        var response = getPayment.execute(id);
+        if (!current.roles().contains("SYSTEM_ADMIN")) {
+            Long orgId = current.organizationId();
+            if (orgId == null) return ResponseEntity.status(403).build();
+            boolean isShop = response.shopId() == orgId;
+            boolean isSupplier = response.supplierId() == orgId;
+            if (!isShop && !isSupplier) return ResponseEntity.status(403).build();
+        }
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/reference/{reference}")
@@ -77,6 +93,24 @@ public class PaymentController {
     @PreAuthorize("hasAuthority('VIEW_PAYMENTS')")
     public ResponseEntity<PaymentStatsResponse> stats() {
         return ResponseEntity.ok(listPayments.stats());
+    }
+
+    @GetMapping("/agent-summary")
+    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SYSTEM_ADMIN')")
+    public ResponseEntity<List<AgentPaymentSummary>> agentSummary(
+            @RequestParam long supplierId,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
+        var current = CurrentUser.get();
+        if (!current.roles().contains("SYSTEM_ADMIN")) {
+            Long orgId = current.organizationId();
+            if (orgId == null || orgId != supplierId) {
+                return ResponseEntity.status(403).build();
+            }
+        }
+        Instant fromInstant = from.atStartOfDay().toInstant(ZoneOffset.UTC);
+        Instant toInstant = to.plusDays(1).atStartOfDay().toInstant(ZoneOffset.UTC);
+        return ResponseEntity.ok(agentPayments.execute(supplierId, fromInstant, toInstant));
     }
 
     @PostMapping("/{id}/confirm")

@@ -1,18 +1,59 @@
 <div class="layout" [class.sidebar-collapsed]="!sidebarOpen">
-  <aside class="sidebar">
+  <!-- Mobile header -->
+  <div class="mobile-header">
+    <button class="mobile-menu-btn" (click)="toggleSidebar()">☰</button>
+    <span class="mobile-title">Payment Platform</span>
+    <div class="mobile-header-actions">
+      <button class="notif-bell-mobile" (click)="toggleNotifications()" aria-label="Notifications">
+        🔔
+        <span class="notif-badge" *ngIf="unreadCount > 0">{{ unreadCount > 99 ? '99+' : unreadCount }}</span>
+      </button>
+      <button class="mobile-logout-btn" (click)="logout()">🚪</button>
+    </div>
+  </div>
+
+  <!-- Sidebar overlay for mobile -->
+  <div class="sidebar-overlay" [class.open]="sidebarOpen" (click)="toggleSidebar()"></div>
+
+  <!-- Notifications overlay -->
+  <div class="notif-overlay" *ngIf="showNotifications" (click)="closeNotifications()"></div>
+
+  <!-- Notifications panel -->
+  <div class="notif-panel" *ngIf="showNotifications">
+    <div class="notif-header">
+      <h3>Notifications</h3>
+      <button class="notif-mark-all" (click)="markAllRead()" *ngIf="unreadCount > 0">Tout marquer lu</button>
+    </div>
+    <div class="notif-list">
+      <div *ngIf="notifications.length === 0" class="notif-empty">Aucune notification</div>
+      <div *ngFor="let n of notifications"
+           class="notif-item"
+           [class.unread]="n.readStatus === 'UNREAD'"
+           (click)="navigateNotification(n)">
+        <span class="notif-icon">{{ getNotificationIcon(n.type) }}</span>
+        <div class="notif-content">
+          <div class="notif-message">{{ n.message }}</div>
+          <div class="notif-time">{{ getTimeAgo(n.createdAt) }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <aside class="sidebar" [class.open]="sidebarOpen">
     <div class="sidebar-header">
       <div class="logo">
         <span class="logo-icon">💳</span>
         <span class="logo-text" *ngIf="sidebarOpen">Payment Platform</span>
       </div>
-      <button class="toggle-btn" (click)="toggleSidebar()">☰</button>
+      <button class="toggle-btn hide-mobile" (click)="toggleSidebar()">☰</button>
     </div>
 
     <nav class="sidebar-nav">
       <a *ngFor="let item of filteredNav"
          [routerLink]="item.route"
          routerLinkActive="active"
-         class="nav-item">
+         class="nav-item"
+         (click)="onNavClick()">
         <span class="nav-icon">{{ item.icon }}</span>
         <span class="nav-label" *ngIf="sidebarOpen">{{ item.label }}</span>
       </a>
@@ -34,16 +75,20 @@
   </aside>
 
   <main class="main-content">
-    <header class="top-bar">
+    <header class="top-bar hide-mobile">
       <div class="page-title">
         <h2>Bienvenue, {{ user?.firstName }}</h2>
         <span class="breadcrumb">{{ user?.roles?.[0] }}</span>
       </div>
       <div class="header-actions">
+        <button class="notif-bell" (click)="toggleNotifications()" aria-label="Notifications">
+          🔔
+          <span class="notif-badge" *ngIf="unreadCount > 0">{{ unreadCount > 99 ? '99+' : unreadCount }}</span>
+        </button>
         <span class="status-badge active">En ligne</span>
       </div>
     </header>
-    <div class="content-area">
+    <div class="content-area" (click)="closeNotifications()">
       <router-outlet></router-outlet>
     </div>
   </main>

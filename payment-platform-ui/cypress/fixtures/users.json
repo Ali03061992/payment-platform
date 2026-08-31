@@ -1,0 +1,22 @@
+{
+  "admin": {
+    "username": "system.admin",
+    "password": "Admin@123"
+  },
+  "supplier": {
+    "username": "supplier.admin",
+    "password": "Admin@123"
+  },
+  "shop": {
+    "username": "shop.admin",
+    "password": "Admin@123"
+  },
+  "newUser": {
+    "username": "test.user.e2e",
+    "email": "test.e2e@example.com",
+    "password": "test1234",
+    "firstName": "Test",
+    "lastName": "E2E",
+    "phone": "21699123456"
+  }
+}

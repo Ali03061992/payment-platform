@@ -1,7 +1,7 @@
 FROM node:18-alpine AS build
 WORKDIR /app
 COPY payment-platform-ui/package.json payment-platform-ui/package-lock.json ./
-RUN npm ci
+RUN npm install --legacy-peer-deps
 COPY payment-platform-ui/ ./
 RUN npx ng build --configuration production
 

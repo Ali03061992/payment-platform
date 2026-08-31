@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { ProductCategory, ProductFamily, ProductSubfamily } from '../models/catalog.model';
 
@@ -10,11 +10,15 @@ export class CatalogService {
   constructor(private http: HttpClient) {}
 
   listCategories(supplierId: number): Observable<ProductCategory[]> {
-    return this.http.get<ProductCategory[]>(`${this.apiUrl}/${supplierId}/categories`);
+    return this.http.get<ProductCategory[]>(`${this.apiUrl}/categories`, {
+      params: { supplierId: supplierId.toString() }
+    });
   }
 
   createCategory(data: { supplierId: number; name: string; code: string }): Observable<ProductCategory> {
-    return this.http.post<ProductCategory>(`${this.apiUrl}/${data.supplierId}/categories`, { name: data.name, code: data.code });
+    return this.http.post<ProductCategory>(`${this.apiUrl}/categories`, {
+      supplierId: data.supplierId, name: data.name, code: data.code
+    });
   }
 
   deleteCategory(id: number): Observable<void> {
@@ -22,15 +26,17 @@ export class CatalogService {
   }
 
   listFamilies(supplierId: number, categoryId?: number): Observable<ProductFamily[]> {
-    let url = `${this.apiUrl}/${supplierId}/families`;
+    let params = new HttpParams().set('supplierId', supplierId.toString());
     if (categoryId != null) {
-      url += `?categoryId=${categoryId}`;
+      params = params.set('categoryId', categoryId.toString());
     }
-    return this.http.get<ProductFamily[]>(url);
+    return this.http.get<ProductFamily[]>(`${this.apiUrl}/families`, { params });
   }
 
   createFamily(data: { supplierId: number; categoryId: number; name: string; code: string }): Observable<ProductFamily> {
-    return this.http.post<ProductFamily>(`${this.apiUrl}/${data.supplierId}/families`, { categoryId: data.categoryId, name: data.name, code: data.code });
+    return this.http.post<ProductFamily>(`${this.apiUrl}/families`, {
+      supplierId: data.supplierId, categoryId: data.categoryId, name: data.name, code: data.code
+    });
   }
 
   deleteFamily(id: number): Observable<void> {
@@ -38,15 +44,17 @@ export class CatalogService {
   }
 
   listSubfamilies(supplierId: number, familyId?: number): Observable<ProductSubfamily[]> {
-    let url = `${this.apiUrl}/${supplierId}/subfamilies`;
+    let params = new HttpParams().set('supplierId', supplierId.toString());
     if (familyId != null) {
-      url += `?familyId=${familyId}`;
+      params = params.set('familyId', familyId.toString());
     }
-    return this.http.get<ProductSubfamily[]>(url);
+    return this.http.get<ProductSubfamily[]>(`${this.apiUrl}/subfamilies`, { params });
   }
 
   createSubfamily(data: { supplierId: number; familyId: number; name: string; code: string }): Observable<ProductSubfamily> {
-    return this.http.post<ProductSubfamily>(`${this.apiUrl}/${data.supplierId}/subfamilies`, { familyId: data.familyId, name: data.name, code: data.code });
+    return this.http.post<ProductSubfamily>(`${this.apiUrl}/subfamilies`, {
+      supplierId: data.supplierId, familyId: data.familyId, name: data.name, code: data.code
+    });
   }
 
   deleteSubfamily(id: number): Observable<void> {

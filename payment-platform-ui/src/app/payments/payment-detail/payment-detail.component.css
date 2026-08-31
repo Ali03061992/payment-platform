@@ -1,5 +1,74 @@
-/* Component-specific styles only — global design system in styles.css */
+.header-actions {
+  display: flex;
+  gap: 8px;
+}
 
-.payment-badge.created { background: #e3f2fd; color: #1565c0; }
+.qr-section {
+  margin-bottom: 24px;
+}
 
-.event-action { white-space: nowrap; }
+.qr-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 32px;
+  text-align: center;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+  max-width: 340px;
+  margin: 0 auto;
+}
+
+.qr-card h3 {
+  margin: 0 0 4px;
+  font-size: 18px;
+  color: #1a1a2e;
+}
+
+.qr-subtitle {
+  color: #8896ab;
+  font-size: 13px;
+  margin: 0 0 20px;
+}
+
+.qr-container {
+  display: inline-block;
+  padding: 12px;
+  border: 2px solid #e8ecf1;
+  border-radius: 12px;
+  background: #fff;
+  margin-bottom: 16px;
+}
+
+.qr-reference {
+  font-size: 14px;
+  font-weight: 600;
+  color: #0f3460;
+  margin: 0 0 4px;
+}
+
+.qr-amount {
+  font-size: 22px;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin: 0 0 16px;
+}
+
+.qr-actions {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+
+@media (max-width: 768px) {
+  .qr-card {
+    padding: 24px 16px;
+  }
+
+  .header-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .header-actions .btn {
+    width: 100%;
+  }
+}

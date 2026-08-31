@@ -4,6 +4,7 @@ import com.paymentplatform.organization.application.dto.CreateOrderRequest;
 import com.paymentplatform.organization.application.dto.OrderResponse;
 import com.paymentplatform.organization.application.usecase.*;
 import com.paymentplatform.shared.infrastructure.security.CurrentUser;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -44,8 +45,8 @@ public class OrderController {
     }
 
     @PostMapping
-    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SHOP_MANAGER')")
-    public ResponseEntity<OrderResponse> createOrder(@RequestBody CreateOrderRequest request) {
+    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SHOP_ADMIN', 'SHOP_MANAGER')")
+    public ResponseEntity<OrderResponse> createOrder(@Valid @RequestBody CreateOrderRequest request) {
         var current = CurrentUser.get();
         String role = current.roles().contains("SUPPLIER_ADMIN") ? "SUPPLIER" : "SHOP";
         OrderResponse response = createOrder.execute(request, current.userId(), role);
@@ -53,7 +54,7 @@ public class OrderController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SHOP_MANAGER', 'DELIVERY_AGENT', 'SYSTEM_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SHOP_ADMIN', 'SHOP_MANAGER', 'DELIVERY_AGENT', 'SYSTEM_ADMIN')")
     public ResponseEntity<List<OrderResponse>> listOrders(@RequestParam(required = false) String status) {
         var current = CurrentUser.get();
         List<com.paymentplatform.organization.domain.model.Order> orders;
@@ -82,12 +83,21 @@ public class OrderController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SHOP_MANAGER', 'DELIVERY_AGENT', 'SYSTEM_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SHOP_ADMIN', 'SHOP_MANAGER', 'DELIVERY_AGENT', 'SYSTEM_ADMIN')")
     public ResponseEntity<OrderResponse> getOrder(@PathVariable Long id) {
+        var current = CurrentUser.get();
         var order = orderRepository.findById(id);
         if (order.isEmpty()) return ResponseEntity.notFound().build();
+        var o = order.get();
+        if (!current.roles().contains("SYSTEM_ADMIN")) {
+            if (current.organizationId() == null) return ResponseEntity.status(403).build();
+            boolean isSupplier = o.getSupplierId() != null && o.getSupplierId().equals(current.organizationId());
+            boolean isShop = o.getShopId() != null && o.getShopId().equals(current.organizationId());
+            boolean isDeliveryAgent = o.getDeliveryAgentId() != null && o.getDeliveryAgentId().equals(current.userId());
+            if (!isSupplier && !isShop && !isDeliveryAgent) return ResponseEntity.status(403).build();
+        }
         var items = orderItemRepository.findByOrderId(id);
-        return ResponseEntity.ok(OrderResponse.from(order.get(), items));
+        return ResponseEntity.ok(OrderResponse.from(o, items));
     }
 
     @PostMapping("/{id}/confirm")
@@ -150,7 +160,7 @@ public class OrderController {
     }
 
     @PostMapping("/{id}/cancel")
-    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SHOP_MANAGER')")
+    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SHOP_ADMIN', 'SHOP_MANAGER')")
     public ResponseEntity<OrderResponse> cancelOrder(@PathVariable Long id) {
         var current = CurrentUser.get();
         return ResponseEntity.ok(cancelOrder.execute(id, current.userId()));

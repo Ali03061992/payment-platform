@@ -40,7 +40,7 @@ public class ConfirmOrderUseCase {
 
         List<OrderItem> items = orderItems.findByOrderId(orderId);
         for (OrderItem item : items) {
-            Product product = products.findById(item.getProductId())
+            Product product = products.findByIdForUpdate(item.getProductId())
                     .orElseThrow(() -> new NotFoundException("Produit non trouvé : " + item.getProductId()));
             int availableQty = product.getQuantity() - product.getReservedQty();
             if (availableQty < item.getQuantity()) {

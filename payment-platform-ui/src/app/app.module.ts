@@ -3,6 +3,9 @@ import { BrowserModule } from '@angular/platform-browser';
 import { FormsModule } from '@angular/forms';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { RouterModule, Routes } from '@angular/router';
+import { ServiceWorkerModule } from '@angular/service-worker';
+import { QRCodeModule } from 'angularx-qrcode';
+import { environment } from '../environments/environment';
 
 import { AppComponent } from './app.component';
 import { LoginComponent } from './login/login.component';
@@ -31,6 +34,9 @@ import { OrderListComponent } from './shop/order-list/order-list.component';
 import { CreateOrderComponent } from './shop/create-order/create-order.component';
 import { ShopOrderDetailComponent } from './shop/order-detail/order-detail.component';
 import { BalanceViewComponent } from './shop/balance-view/balance-view.component';
+import { PwaUpdateComponent } from './pwa-update/pwa-update.component';
+import { QrScannerComponent } from './qr-scanner/qr-scanner.component';
+import { AgentPaymentsComponent } from './supplier/agent-payments/agent-payments.component';
 
 import { JwtInterceptor } from './core/jwt.interceptor';
 import { AuthGuard } from './core/auth.guard';
@@ -63,6 +69,8 @@ const routes: Routes = [
       { path: 'payments/create', component: CreatePaymentComponent, canActivate: [RoleGuard], data: { roles: [...adminRoles, ...shopRoles] } },
       { path: 'payments/stats', component: PaymentStatsComponent, canActivate: [RoleGuard], data: { roles: allRoles } },
       { path: 'payments/:id', component: PaymentDetailComponent, canActivate: [RoleGuard], data: { roles: allRoles } },
+      { path: 'scan', component: QrScannerComponent, canActivate: [RoleGuard], data: { roles: allRoles } },
+      { path: 'supplier/agent-payments', component: AgentPaymentsComponent, canActivate: [RoleGuard], data: { roles: ['SUPPLIER_ADMIN'] } },
       { path: 'supplier/stock', component: StockManagementComponent, canActivate: [RoleGuard], data: { roles: supplierRoles } },
       { path: 'supplier/stock/create', component: AddProductComponent, canActivate: [RoleGuard], data: { roles: ['SUPPLIER_ADMIN'] } },
       { path: 'supplier/products', component: ProductManagementComponent, canActivate: [RoleGuard], data: { roles: supplierRoles } },
@@ -106,13 +114,18 @@ const routes: Routes = [
     OrderListComponent,
     CreateOrderComponent,
     ShopOrderDetailComponent,
-    BalanceViewComponent
+    BalanceViewComponent,
+    PwaUpdateComponent,
+    QrScannerComponent,
+    AgentPaymentsComponent
   ],
   imports: [
     BrowserModule,
     FormsModule,
     HttpClientModule,
-    RouterModule.forRoot(routes)
+    QRCodeModule,
+    RouterModule.forRoot(routes, { scrollPositionRestoration: 'top' }),
+    ServiceWorkerModule.register('ngsw-worker.js', { enabled: environment.production })
   ],
   providers: [
     { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true }

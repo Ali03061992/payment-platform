@@ -6,11 +6,34 @@
 <div *ngIf="payment && !loading">
   <div class="page-header">
     <h2>Paiement {{ payment.reference }}</h2>
-    <a class="btn btn-secondary" routerLink="/dashboard/payments">Retour</a>
+    <div class="header-actions">
+      <button class="btn btn-secondary" (click)="toggleQR()">
+        {{ showQR ? 'Masquer QR' : '📱 QR Code' }}
+      </button>
+      <a class="btn btn-secondary" routerLink="/dashboard/payments">Retour</a>
+    </div>
   </div>
 
   <div class="alert alert-success" *ngIf="successMsg">{{ successMsg }}</div>
   <div class="alert alert-error" *ngIf="errorMsg">{{ errorMsg }}</div>
+
+  <!-- QR Code Section -->
+  <div class="qr-section" *ngIf="showQR">
+    <div class="qr-card">
+      <h3>QR Code de facture</h3>
+      <p class="qr-subtitle">Scannez pour accéder à la facture</p>
+      <div class="qr-container">
+        <qrcode [qrdata]="qrData" [width]="220" [margin]="2" [colorDark]="'#0f3460'" [colorLight]="'#ffffff'"></qrcode>
+      </div>
+      <p class="qr-reference">{{ payment.reference }}</p>
+      <p class="qr-amount">{{ payment.amount | number:'1.2-2' }} {{ payment.currency }}</p>
+      <div class="qr-actions">
+        <button class="btn btn-sm btn-primary" (click)="shareQR()" *ngIf="canShare">
+          📤 Partager
+        </button>
+      </div>
+    </div>
+  </div>
 
   <div class="detail-grid">
     <div class="detail-card">

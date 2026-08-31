@@ -43,10 +43,10 @@ public class AcceptOrderUseCase {
 
         List<OrderItem> items = orderItems.findByOrderId(orderId);
         for (OrderItem item : items) {
-            Product product = products.findById(item.getProductId())
+            Product product = products.findByIdForUpdate(item.getProductId())
                     .orElseThrow(() -> new NotFoundException("Produit non trouvé : " + item.getProductId()));
             product.setQuantity(product.getQuantity() - item.getQuantity());
-            product.setReservedQty(product.getReservedQty() - item.getQuantity());
+            product.setReservedQty(Math.max(0, product.getReservedQty() - item.getQuantity()));
             products.save(product);
         }
 

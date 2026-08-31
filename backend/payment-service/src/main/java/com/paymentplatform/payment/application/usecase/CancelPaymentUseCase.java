@@ -32,6 +32,11 @@ public class CancelPaymentUseCase {
         Payment payment = payments.findById(id)
                 .orElseThrow(() -> new NotFoundException("Paiement non trouvé : " + id));
 
+        if (organizationId != null && !payment.belongsToShop(organizationId)) {
+            throw new com.paymentplatform.shared.domain.exception.ForbiddenException(
+                    "Vous ne pouvez pas annuler ce paiement");
+        }
+
         payment.cancel(actorUserId);
         Payment saved = payments.save(payment);
 

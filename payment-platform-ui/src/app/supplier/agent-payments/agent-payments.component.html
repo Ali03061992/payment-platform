@@ -1,0 +1,120 @@
+<div class="page-header">
+  <h2>Paiements par agent</h2>
+</div>
+
+<div class="alert alert-error" *ngIf="errorMsg">{{ errorMsg }}</div>
+
+<!-- Date Filter -->
+<div class="filter-card">
+  <div class="filter-row">
+    <div class="form-group">
+      <label>Date début</label>
+      <input type="date" [(ngModel)]="fromDate" class="form-control" (change)="load()">
+    </div>
+    <div class="form-group">
+      <label>Date fin</label>
+      <input type="date" [(ngModel)]="toDate" class="form-control" (change)="load()">
+    </div>
+    <div class="form-group filter-status">
+      <label>Statut</label>
+      <select [(ngModel)]="statusFilter" class="form-control">
+        <option value="">Tous</option>
+        <option value="PENDING">En attente</option>
+        <option value="CONFIRMED">Confirmé</option>
+        <option value="REJECTED">Rejeté</option>
+        <option value="CANCELLED">Annulé</option>
+      </select>
+    </div>
+  </div>
+</div>
+
+<!-- Grand Totals -->
+<div class="totals-bar" *ngIf="!loading && summaries.length > 0">
+  <div class="total-item total-today">
+    <div class="total-label">Aujourd'hui</div>
+    <div class="total-value green">{{ grandTodayTotal | number:'1.2-2' }} TND</div>
+  </div>
+  <div class="total-item">
+    <div class="total-label">Total période</div>
+    <div class="total-value">{{ grandTotal | number:'1.2-2' }} TND</div>
+  </div>
+  <div class="total-item">
+    <div class="total-label">Paiements</div>
+    <div class="total-value">{{ totalPayments }}</div>
+  </div>
+</div>
+
+<!-- Loading -->
+<div class="loading" *ngIf="loading">
+  <div class="spinner"></div>
+  <span>Chargement...</span>
+</div>
+
+<!-- Empty -->
+<div class="empty" *ngIf="!loading && summaries.length === 0">
+  <p>Aucun paiement trouvé pour cette période</p>
+</div>
+
+<!-- Agent Cards -->
+<div class="agent-list" *ngIf="!loading && summaries.length > 0">
+  <div class="agent-card" *ngFor="let agent of summaries"
+       [class.expanded]="expandedAgent === agent.userId">
+
+    <div class="agent-header" (click)="toggleAgent(agent.userId)">
+      <div class="agent-info">
+        <div class="agent-avatar">{{ agent.username.charAt(0) }}</div>
+        <div class="agent-details">
+          <div class="agent-name">{{ agent.username }}</div>
+          <div class="agent-meta">{{ agent.paymentCount }} paiement(s)</div>
+        </div>
+      </div>
+      <div class="agent-totals">
+        <div class="today-amount" *ngIf="agent.confirmedToday > 0">
+          <span class="today-label">Aujourd'hui</span>
+          <span class="today-value">{{ agent.confirmedToday | number:'1.2-2' }} {{ agent.currency }}</span>
+        </div>
+        <div class="period-amount">
+          <span class="period-label">Total</span>
+          <span class="period-value">{{ agent.totalAmount | number:'1.2-2' }} {{ agent.currency }}</span>
+        </div>
+      </div>
+      <div class="expand-icon">{{ expandedAgent === agent.userId ? '▲' : '▼' }}</div>
+    </div>
+
+    <!-- Agent Detail (expandable) -->
+    <div class="agent-detail" *ngIf="expandedAgent === agent.userId">
+      <div class="detail-table">
+        <table>
+          <thead>
+            <tr>
+              <th>Référence</th>
+              <th>Boutique</th>
+              <th>Montant</th>
+              <th>Statut</th>
+              <th>Date</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let p of getAgentPayments(agent)">
+              <td class="ref-cell">{{ p.reference }}</td>
+              <td>Boutique #{{ p.shopId }}</td>
+              <td class="amount-cell">{{ p.amount | number:'1.2-2' }} {{ p.currency }}</td>
+              <td>
+                <span class="payment-badge" [ngClass]="p.status.toLowerCase()">{{ statusLabel(p.status) }}</span>
+              </td>
+              <td>{{ p.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
+              <td>
+                <a [routerLink]="['/dashboard/payments', p.id]" class="btn btn-sm btn-secondary">Voir</a>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="agent-total-row">
+        <strong>Total agent :</strong>
+        <span class="total-amount">{{ agent.totalAmount | number:'1.2-2' }} {{ agent.currency }}</span>
+      </div>
+    </div>
+  </div>
+</div>

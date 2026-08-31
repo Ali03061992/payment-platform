@@ -16,6 +16,8 @@ import static com.paymentplatform.shared.domain.security.Permissions.SHOP_CREATE
 import static com.paymentplatform.shared.domain.security.Permissions.SHOP_MANAGE_AGENTS;
 import static com.paymentplatform.shared.domain.security.Permissions.SUPPLIER_MANAGE_AGENTS;
 import static com.paymentplatform.shared.domain.security.Permissions.SUPPLIER_MANAGE_PAYMENTS;
+import static com.paymentplatform.shared.domain.security.Permissions.SUPPLIER_MANAGE_PRODUCTS;
+import static com.paymentplatform.shared.domain.security.Permissions.SUPPLIER_MANAGE_STOCK;
 import static com.paymentplatform.shared.domain.security.Permissions.VIEW_NOTIFICATIONS;
 import static com.paymentplatform.shared.domain.security.Permissions.VIEW_PAYMENTS;
 
@@ -25,9 +27,11 @@ public final class PermissionCatalog {
     private static final Map<RoleCode, Set<String>> BY_ROLE = Map.of(
             RoleCode.SYSTEM_ADMIN, Set.of(ADMIN_MANAGE_ORGANIZATIONS, ADMIN_MANAGE_USERS, ADMIN_VIEW_AUDIT,
                     ADMIN_VIEW_STATS, VIEW_PAYMENTS, VIEW_NOTIFICATIONS),
-            RoleCode.SUPPLIER_ADMIN, Set.of(SUPPLIER_MANAGE_AGENTS, SUPPLIER_MANAGE_PAYMENTS, VIEW_PAYMENTS,
+            RoleCode.SUPPLIER_ADMIN, Set.of(SUPPLIER_MANAGE_AGENTS, SUPPLIER_MANAGE_PAYMENTS,
+                    SUPPLIER_MANAGE_PRODUCTS, SUPPLIER_MANAGE_STOCK, VIEW_PAYMENTS,
                     VIEW_NOTIFICATIONS),
-            RoleCode.SUPPLIER_AGENT, Set.of(SUPPLIER_MANAGE_PAYMENTS, VIEW_PAYMENTS, VIEW_NOTIFICATIONS),
+            RoleCode.SUPPLIER_AGENT, Set.of(SUPPLIER_MANAGE_PAYMENTS, SUPPLIER_MANAGE_PRODUCTS,
+                    SUPPLIER_MANAGE_STOCK, VIEW_PAYMENTS, VIEW_NOTIFICATIONS),
             RoleCode.SHOP_ADMIN, Set.of(SHOP_MANAGE_AGENTS, SHOP_CREATE_PAYMENTS, SHOP_CANCEL_PAYMENTS,
                     VIEW_PAYMENTS, VIEW_NOTIFICATIONS),
             RoleCode.SHOP_AGENT, Set.of(SHOP_CREATE_PAYMENTS, SHOP_CANCEL_PAYMENTS, VIEW_PAYMENTS,

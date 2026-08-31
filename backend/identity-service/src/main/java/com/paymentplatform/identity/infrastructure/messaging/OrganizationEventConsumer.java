@@ -36,9 +36,16 @@ public class OrganizationEventConsumer {
     public void onOrganizationEvent(String payload) {
         try {
             JsonNode node = objectMapper.readTree(payload);
-            String eventType = node.get("eventType").asText();
-            String eventId = node.get("eventId").asText();
-            long organizationId = node.get("organizationId").asLong();
+            JsonNode eventTypeNode = node.get("eventType");
+            JsonNode eventIdNode = node.get("eventId");
+            JsonNode orgIdNode = node.get("organizationId");
+            if (eventTypeNode == null || orgIdNode == null) {
+                log.warn("Événement organisation ignoré (champs manquants) : {}", payload);
+                return;
+            }
+            String eventType = eventTypeNode.asText();
+            String eventId = eventIdNode != null ? eventIdNode.asText() : null;
+            long organizationId = orgIdNode.asLong();
 
             switch (eventType) {
                 case SupplierDisabledEvent.EVENT_TYPE -> cascade.onOrganizationDisabled(eventType, organizationId,

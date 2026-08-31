@@ -1,0 +1,62 @@
+<div class="scanner-page">
+  <div class="scanner-header">
+    <button class="back-btn" (click)="goBack()">← Retour</button>
+    <h2>Scanner QR Code</h2>
+    <p>Pointez votre caméra vers le QR code de la facture</p>
+  </div>
+
+  <div class="scanner-container" *ngIf="!useManual">
+    <div class="camera-view" [class.active]="cameraActive">
+      <video #video autoplay playsinline muted></video>
+      <div class="scan-overlay" *ngIf="scanning">
+        <div class="scan-frame">
+          <div class="corner tl"></div>
+          <div class="corner tr"></div>
+          <div class="corner bl"></div>
+          <div class="corner br"></div>
+          <div class="scan-line"></div>
+        </div>
+      </div>
+      <div class="camera-placeholder" *ngIf="!cameraActive">
+        <span class="camera-icon">📷</span>
+        <span>Appuyez pour activer la caméra</span>
+      </div>
+    </div>
+
+    <button class="btn btn-primary btn-scan" (click)="startCamera()" *ngIf="!cameraActive">
+      Activer la caméra
+    </button>
+    <button class="btn btn-secondary btn-scan" (click)="stopCamera()" *ngIf="cameraActive">
+      Arrêter
+    </button>
+  </div>
+
+  <div class="manual-section">
+    <div class="divider" *ngIf="!useManual">
+      <span>ou</span>
+    </div>
+    <button class="btn btn-link" (click)="useManual = true; stopCamera()" *ngIf="!useManual">
+      Saisie manuelle du lien
+    </button>
+
+    <div class="manual-form" *ngIf="useManual">
+      <h3>Saisie manuelle</h3>
+      <p>Collez le lien de la facture ou entrez le numéro</p>
+      <div class="form-group">
+        <input type="text" [(ngModel)]="manualUrl" class="form-control"
+               placeholder="Ex: /dashboard/payments/42 ou juste 42"
+               (keyup.enter)="submitManual()">
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-secondary" (click)="useManual = false">Retour caméra</button>
+        <button class="btn btn-primary" [disabled]="!manualUrl.trim()" (click)="submitManual()">
+          Accéder à la facture
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="alert alert-error" *ngIf="errorMsg" style="margin-top:16px;">
+    {{ errorMsg }}
+  </div>
+</div>

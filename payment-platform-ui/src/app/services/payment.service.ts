@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Payment, PaymentStats, CreatePaymentRequest, RejectPaymentRequest } from '../models/payment.model';
+import { AgentPaymentSummary } from '../models/agent-payment.model';
 
 @Injectable({ providedIn: 'root' })
 export class PaymentService {
@@ -39,5 +40,13 @@ export class PaymentService {
 
   getStats(): Observable<PaymentStats> {
     return this.http.get<PaymentStats>(`${this.apiUrl}/stats`);
+  }
+
+  getAgentSummary(supplierId: number, from: string, to: string): Observable<AgentPaymentSummary[]> {
+    const params = new HttpParams()
+      .set('supplierId', supplierId.toString())
+      .set('from', from)
+      .set('to', to);
+    return this.http.get<AgentPaymentSummary[]>(`${this.apiUrl}/agent-summary`, { params });
   }
 }
