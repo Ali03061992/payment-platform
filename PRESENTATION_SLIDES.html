@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Payment Platform - Présentation</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', sans-serif; background: #0f172a; color: #e2e8f0; line-height: 1.6; }
+  .slides { display: flex; flex-direction: column; gap: 40px; padding: 60px 80px; max-width: 1200px; margin: 0 auto; }
+  .slide { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border: 1px solid #334155; border-radius: 16px; padding: 48px; min-height: 400px; display: flex; flex-direction: column; justify-content: center; }
+  .slide h1 { font-size: 2.5rem; font-weight: 700; margin-bottom: 1rem; background: linear-gradient(90deg, #4fc3f7, #81d4fa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .slide h2 { font-size: 1.5rem; font-weight: 600; color: #94a3b8; margin-bottom: 1.5rem; }
+  .slide p { font-size: 1.1rem; color: #cbd5e1; margin-bottom: 1rem; max-width: 800px; }
+  .slide ul { margin-left: 1.5rem; color: #94a3b8; }
+  .slide li { margin-bottom: 0.5rem; }
+  .slide code { background: #020617; color: #22d3ee; padding: 2px 6px; border-radius: 4px; font-family: 'Fira Code', monospace; font-size: 0.9em; }
+  .slide pre { background: #020617; border: 1px solid #1e293b; border-radius: 8px; padding: 16px; overflow-x: auto; margin: 1rem 0; }
+  .slide pre code { background: none; padding: 0; color: #a5b4fc; }
+  .badge { display: inline-block; background: linear-gradient(135deg, #4fc3f7, #0ea5e9); color: #0f172a; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; margin-right: 8px; margin-bottom: 8px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-top: 1rem; }
+  .card { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 20px; }
+  .card h3 { color: #4fc3f7; margin-bottom: 0.5rem; font-size: 1rem; }
+  .timeline { display: flex; flex-direction: column; gap: 12px; }
+  .timeline-item { display: flex; gap: 16px; align-items: flex-start; }
+  .timeline-time { background: #4fc3f7; color: #0f172a; padding: 4px 12px; border-radius: 6px; font-weight: 600; font-size: 0.85rem; white-space: nowrap; min-width: 100px; }
+  .footer { text-align: center; padding: 40px; color: #64748b; font-size: 0.9rem; }
+  .kbd { background: #1e293b; border: 1px solid #334155; border-radius: 4px; padding: 2px 8px; font-family: monospace; font-size: 0.85rem; }
+</style>
+</head>
+<body>
+<div class="slides">
+
+<!-- SLIDE 1: TITRE -->
+<div class="slide">
+  <h1>Payment Platform</h1>
+  <h2>Plateforme B2B de Gestion Paiements Fournisseurs ↔ Boutiques</h2>
+  <p style="margin-top: 2rem; font-size: 1.2rem;">Catalogue • Stock • Commandes • Livraisons • Soldes • Paiements • Notifications temps réel</p>
+  <div style="margin-top: 2rem; display: flex; gap: 12px; flex-wrap: wrap;">
+    <span class="badge">Java 26 / Spring Boot 4.1</span>
+    <span class="badge">Angular 16 + PWA</span>
+    <span class="badge">Microservices (6 services)</span>
+    <span class="badge">DDD + Clean Architecture</span>
+    <span class="badge">Event-Driven (RabbitMQ)</span>
+    <span class="badge">Docker Compose (10 conteneurs)</span>
+    <span class="badge">100+ Tests Cypress</span>
+    <span class="badge">Lighthouse 100%</span>
+  </div>
+</div>
+
+<!-- SLIDE 2: ARCHITECTURE -->
+<div class="slide">
+  <h1>Architecture Microservices</h1>
+  <div class="grid">
+    <div class="card">
+      <h3>🔐 Identity Service</h3>
+      <p>Users, Auth JWT, Roles, Permissions, Password setup</p>
+    </div>
+    <div class="card">
+      <h3>🏢 Organization Service</h3>
+      <p>Suppliers, Shops, Relations, Catalog, Stock, Orders, Deliveries, Balances</p>
+    </div>
+    <div class="card">
+      <h3>💳 Payment Service</h3>
+      <p>Paiements, Confirm/Reject/Cancel, Soldes, Agent summaries, QR codes</p>
+    </div>
+    <div class="card">
+      <h3>🔔 Notification Service</h3>
+      <p>Consommation events RabbitMQ, SSE, Notifications persistées, Unread count</p>
+    </div>
+    <div class="card">
+      <h3>🌐 API Gateway</h3>
+      <p>Reverse proxy manuel (HttpClient), Routing /api/*, CORS, Rate limiting</p>
+    </div>
+    <div class="card">
+      <h3>🎨 Frontend Angular</h3>
+      <p>NgModule, PWA, Service Worker, QR Scanner, Agent Payments, Responsive</p>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 3: PATTERN OUTBOX -->
+<div class="slide">
+  <h1>Cohérence Événementielle : Pattern Outbox</h1>
+  <div class="timeline">
+    <div class="timeline-item">
+      <span class="timeline-time">1. Mutation</span>
+      <div>UseCase exécute la logique métier + <code>outbox.append(event)</code> dans <b>même transaction</b></div>
+    </div>
+    <div class="timeline-item">
+      <span class="timeline-time">2. Persistance</span>
+      <div>Écriture atomique dans <code>outbox_events</code> (event_id, type, payload JSON, aggregate_id)</div>
+    </div>
+    <div class="timeline-item">
+      <span class="timeline-time">3. Relay</span>
+      <div><code>@Scheduled(1s)</code> lit 100 events non traités → <code>RabbitTemplate.convertAndSend(exchange, routingKey)</code></div>
+    </div>
+    <div class="timeline-item">
+      <span class="timeline-time">4. Consommation</span>
+      <div><code>@RabbitListener</code> + <code>EventDeduplicator.markProcessed(eventId)</code> (idempotence PK)</div>
+    </div>
+    <div class="timeline-item">
+      <span class="timeline-time">5. Notification</span>
+      <div>Création notifications pour les 2 parties (shop + supplier) selon event type</div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 4: RBAC -->
+<div class="slide">
+  <h1>RBAC : Rôles & Permissions Fines</h1>
+  <div class="grid">
+    <div class="card">
+      <h3>SYSTEM_ADMIN</h3>
+      <p>ADMIN_MANAGE_ORGANIZATIONS, ADMIN_MANAGE_USERS, ADMIN_VIEW_AUDIT, ADMIN_VIEW_STATS, VIEW_PAYMENTS, VIEW_NOTIFICATIONS</p>
+    </div>
+    <div class="card">
+      <h3>SUPPLIER_ADMIN</h3>
+      <p>SUPPLIER_MANAGE_AGENTS, SUPPLIER_MANAGE_PAYMENTS, <b>SUPPLIER_MANAGE_PRODUCTS</b>, <b>SUPPLIER_MANAGE_STOCK</b>, VIEW_PAYMENTS, VIEW_NOTIFICATIONS</p>
+    </div>
+    <div class="card">
+      <h3>SUPPLIER_AGENT</h3>
+      <p>SUPPLIER_MANAGE_PAYMENTS, SUPPLIER_MANAGE_PRODUCTS, SUPPLIER_MANAGE_STOCK, VIEW_PAYMENTS, VIEW_NOTIFICATIONS</p>
+    </div>
+    <div class="card">
+      <h3>SHOP_ADMIN</h3>
+      <p>SHOP_MANAGE_AGENTS, SHOP_CREATE_PAYMENTS, SHOP_CANCEL_PAYMENTS, VIEW_PAYMENTS, VIEW_NOTIFICATIONS</p>
+    </div>
+    <div class="card">
+      <h3>SHOP_AGENT</h3>
+      <p>SHOP_CREATE_PAYMENTS, SHOP_CANCEL_PAYMENTS, VIEW_PAYMENTS, VIEW_NOTIFICATIONS</p>
+    </div>
+  </div>
+  <p style="margin-top: 1.5rem;"><code>JwtAuthenticationFilter</code> ajoute <b>rôles</b> + <b>permissions</b> comme <code>SimpleGrantedAuthority</code> → <code>@PreAuthorize("hasAuthority('SUPPLIER_MANAGE_PRODUCTS')")</code></p>
+</div>
+
+<!-- SLIDE 5: DONNEES DEMO -->
+<div class="slide">
+  <h1>Données de Démo : Covale & Pointteck</h1>
+  <div class="grid">
+    <div class="card">
+      <h3>🏭 Covale (id=1)</h3>
+      <p><b>Boutiques :</b> Tunis Sousse (3), Sfax Mahdiya (4)<br>
+      <b>Admin :</b> covale.admin<br>
+      <b>Agents :</b> covale.agent1, covale.agent2</p>
+    </div>
+    <div class="card">
+      <h3>🏭 Pointteck (id=2)</h3>
+      <p><b>Boutiques :</b> Tunis Centre (5), Sfax Ville (6)<br>
+      <b>Admin :</b> pointteck.admin<br>
+      <b>Agents :</b> pointteck.agent1, pointteck.agent2</p>
+    </div>
+    <div class="card">
+      <h3>🏪 Boutiques & Admins</h3>
+      <p>Tunis Sousse (3) → <b>abdelslam</b><br>
+      Sfax Mahdiya (4) → <b>ali</b><br>
+      Tunis Centre (5) → pointteck.tunis.admin<br>
+      Sfax Ville (6) → pointteck.sfax.admin</p>
+    </div>
+    <div class="card">
+      <h3>🔗 Relations Actives (4)</h3>
+      <p>Covale ↔ Tunis Sousse (3)<br>
+      Covale ↔ Sfax Mahdiya (4)<br>
+      Pointteck ↔ Tunis Centre (5)<br>
+      Pointteck ↔ Sfax Ville (6)</p>
+    </div>
+  </div>
+  <p style="margin-top: 1rem;">Tous users : mot de passe <code class="kbd">Admin@123</code> • 11 users total • system.admin (org=null, SYSTEM_ADMIN)</p>
+</div>
+
+<!-- SLIDE 6: FLUX PAIEMENT -->
+<div class="slide">
+  <h1>Flux Paiement + Notifications Temps Réel</h1>
+  <div class="timeline">
+    <div class="timeline-item">
+      <span class="timeline-time">1. Shop crée</span>
+      <div><code>POST /api/payments</code> {shopId:3, supplierId:1, amount:500, currency:"EUR"} → <b>PENDING</b></div>
+    </div>
+    <div class="timeline-item">
+      <span class="timeline-time">2. Event</span>
+      <div><code>payment.created</code> publié sur <code>payment.events</code> → queue <code>notification.payments</code></div>
+    </div>
+    <div class="timeline-item">
+      <span class="timeline-time">3. Notifications</span>
+      <div>2 notifs créées : <b>Supplier org=1</b> "Nouveau paiement PAY-xxx 500 EUR" + <b>User créateur</b> "Paiement soumis"</div>
+    </div>
+    <div class="timeline-item">
+      <span class="timeline-time">4. Supplier confirme</span>
+      <div><code>POST /api/payments/{id}/confirm</code> → <code>payment.confirmed</code> → notif shop "Confirmé par fournisseur"</div>
+    </div>
+    <div class="timeline-item">
+      <span class="timeline-time">5. Rejet / Annulation</span>
+      <div><code>payment.rejected</code> (motif) → notif shop | <code>payment.cancelled</code> → notif supplier</div>
+    </div>
+  </div>
+  <p style="margin-top: 1rem;">🔔 Badge temps réel (polling 30s + SSE prévu) • <code>GET /api/notifications</code>, <code>/unread-count</code>, <code>/read-all</code>, <code>/{id}/read</code></p>
+</div>
+
+<!-- SLIDE 7: PWA & QR -->
+<div class="slide">
+  <h1>PWA, Mobile & QR Code</h1>
+  <div class="grid">
+    <div class="card">
+      <h3>📱 PWA Installable</h3>
+      <p>manifest.json + Service Worker (<code>ngsw-worker.js</code>)<br>
+      Cache statique 1 an (<code>immutable</code>)<br>
+      Stratégie <code>NetworkFirst</code> pour API<br>
+      Fonctionne offline (navigation)</p>
+    </div>
+    <div class="card">
+      <h3>📐 Responsive Mobile</h3>
+      <p>Sidebar coulissante + overlay (< 768px)<br>
+      Hamburger menu, police 16px (no zoom iOS)<br>
+      Touch targets 44px, <code>safe-area-inset</code><br>
+      Breakpoints : 768px / 1024px</p>
+    </div>
+    <div class="card">
+      <h3>📷 QR Code Paiement</h3>
+      <p><code>angularx-qrcode</code> sur détail paiement<br>
+      Contenu : paymentId, ref, amount, currency, shopId, supplierId<br>
+      Scanner : <code>/dashboard/scan</code> (BarcodeDetector API natif + fallback input manuel)</p>
+    </div>
+    <div class="card">
+      <h3>👥 Paiements Agents</h3>
+      <p>Écran <code>/dashboard/supplier/agent-payments</code><br>
+      Filtre par date, total du jour (vert)<br>
+      Détail par agent (créateur) expansible<br>
+      Endpoint : <code>GET /api/payments/agent-summary</code></p>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 8: TESTS & QUALITE -->
+<div class="slide">
+  <h1>Tests & Qualité : 100% Vert</h1>
+  <div class="grid">
+    <div class="card">
+      <h3>🧪 Cypress E2E : 100+ tests</h3>
+      <pre><code>admin.cy.ts           14 ✅
+api-integration.cy.ts  25 ✅
+auth.cy.ts             10 ✅
+navigation.cy.ts       12 ✅
+notifications.cy.ts    11 ✅
+payments.cy.ts          9 ✅
+shop.cy.ts              6 ✅
+supplier.cy.ts         13 ✅
+data-structure.cy.ts   33 ✅  ← NOUVEAU (Covale/Pointteck)
+────────────────────────────
+TOTAL                 133+ ✅</code></pre>
+    </div>
+    <div class="card">
+      <h3>⚡ Lighthouse 100%</h3>
+      <pre><code>Performance       100
+Accessibilité     100
+Best Practices    100
+SEO               100</code></pre>
+      <p style="margin-top: 0.5rem;">Headers Nginx : <code>X-Frame-Options: DENY</code>, <code>X-Content-Type-Options: nosniff</code>, CSP, gzip, cache assets 1 an</p>
+    </div>
+    <div class="card">
+      <h3>📦 Budgets Angular</h3>
+      <pre><code>Initial bundle     545 kB (budget 600 kB) ✅
+Component CSS      ~2-4 kB (budget 6 kB) ✅
+Lazy loading       Routes admin/supplier/shop/payments</code></pre>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 9: DEPLOIEMENT -->
+<div class="slide">
+  <h1>Déploiement One-Command</h1>
+  <pre><code># Clone & Launch
+git clone https://github.com/Ali03061992/payment-platform
+cd payment-platform/deploy
+docker compose up -d
+
+# Services disponibles
+http://localhost:8080    # Frontend Angular (Nginx)
+http://localhost:8081    # API Gateway
+http://localhost:8082    # Identity Service
+http://localhost:8083    # Organization Service
+http://localhost:8084    # Payment Service
+http://localhost:8085    # Notification Service
+http://localhost:8086    # Adminer (DB)
+http://localhost:8025    # Mailpit UI
+http://localhost:15673   # RabbitMQ Management</code></pre>
+  <p style="margin-top: 1.5rem;">Bases isolées : <code>identity_db</code>, <code>organization_db</code>, <code>payment_db</code>, <code>notification_db</code> • Flyway migrations auto • Healthchecks Docker</p>
+</div>
+
+<!-- SLIDE 10: CONCLUSION -->
+<div class="slide">
+  <h1>Prochaines Étapes</h1>
+  <div class="grid">
+    <div class="card">
+      <h3>🔄 Temps Réel</h3>
+      <p>SSE notifications (remplacer polling 30s)<br>
+      WebSocket pour chat support</p>
+    </div>
+    <div class="card">
+      <h3>📊 Analytics</h3>
+      <p>Dashboard fournisseur : CA, top produits, stock critique<br>
+      Dashboard boutique : historique, balance, prévisionnels</p>
+    </div>
+    <div class="card">
+      <h3>📄 Documents</h3>
+      <p>Export PDF/Excel (factures, bons de livraison, relevés)<br>
+      Signature électronique</p>
+    </div>
+    <div class="card">
+      <h3>🌍 Multi-devises & i18n</h3>
+      <p>TND, EUR, USD avec taux de change<br>
+      FR / AR / EN</p>
+    </div>
+  </div>
+  <p style="margin-top: 2rem; text-align: center; font-size: 1.2rem;">
+    <a href="https://github.com/Ali03061992/payment-platform" style="color: #4fc3f7;">github.com/Ali03061992/payment-platform</a>
+  </p>
+</div>
+
+</div>
+<div class="footer">
+  Payment Platform v1.0.0 • Août 2026 • Généré pour démonstration vidéo
+</div>
+</body>
+</html>

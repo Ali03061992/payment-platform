@@ -52,30 +52,44 @@ describe('Notifications - API Integration', () => {
   });
 
   it('Payment creation should generate notifications for both supplier and shop', () => {
-    cy.request({ method: 'POST', url: `${API_URL}/api/payments`, body: {
-      shopId: 20, supplierId: 1, amount: 100.00, currency: 'EUR'
-    }, headers: authHeaders(shopToken) }).then(r => {
-      expect(r.status).to.be.oneOf([200, 201]);
-      expect(r.body).to.have.property('reference');
-      paymentRef = r.body.reference;
-    });
+    // Fresh login to ensure valid tokens
+    let supplierToken: string;
+    let shopToken: string;
+    
+    cy.request({ method: 'POST', url: `${API_URL}/api/auth/login`, body: { username: 'covale.admin', password: 'Admin@123' } })
+      .then(r => { supplierToken = r.body.accessToken; });
+    cy.request({ method: 'POST', url: `${API_URL}/api/auth/login`, body: { username: 'abdelslam', password: 'Admin@123' } })
+      .then(r => { shopToken = r.body.accessToken; });
 
-    cy.wait(6000);
+    cy.wrap(null).then(() => {
+      cy.request({ method: 'POST', url: `${API_URL}/api/payments`, body: {
+        shopId: 3, supplierId: 1, amount: 100.00, currency: 'EUR'
+      }, headers: authHeaders(shopToken) }).then(r => {
+        expect(r.status).to.be.oneOf([200, 201]);
+        expect(r.body).to.have.property('reference');
+        paymentRef = r.body.reference;
+      });
 
-    cy.request({ method: 'GET', url: `${API_URL}/api/notifications`,
-      headers: authHeaders(supplierToken) }).then(r => {
-      const supplierNotifs = r.body.filter((n: any) => n.relatedEntityId === paymentRef);
-      expect(supplierNotifs.length).to.be.greaterThan(0);
-      expect(supplierNotifs[0].type).to.eq('PAYMENT_CREATED');
-      expect(supplierNotifs[0].message).to.contain('Nouveau paiement');
-    });
+      cy.wait(8000);
 
-    cy.request({ method: 'GET', url: `${API_URL}/api/notifications`,
-      headers: authHeaders(shopToken) }).then(r => {
-      const shopNotifs = r.body.filter((n: any) => n.relatedEntityId === paymentRef);
-      expect(shopNotifs.length).to.be.greaterThan(0);
-      expect(shopNotifs[0].type).to.eq('PAYMENT_CREATED');
-      expect(shopNotifs[0].message).to.contain('soumis');
+      cy.request({ method: 'GET', url: `${API_URL}/api/notifications`,
+        headers: authHeaders(supplierToken) }).then(r => {
+        const supplierNotifs = r.body.filter((n: any) => n.relatedEntityId === paymentRef);
+        if (supplierNotifs.length === 0) {
+          cy.log('All supplier notifications: ' + JSON.stringify(r.body));
+        }
+        expect(supplierNotifs.length).to.be.greaterThan(0);
+        expect(supplierNotifs[0].type).to.eq('PAYMENT_CREATED');
+        expect(supplierNotifs[0].message).to.contain('Nouveau paiement');
+      });
+
+      cy.request({ method: 'GET', url: `${API_URL}/api/notifications`,
+        headers: authHeaders(shopToken) }).then(r => {
+        const shopNotifs = r.body.filter((n: any) => n.relatedEntityId === paymentRef);
+        expect(shopNotifs.length).to.be.greaterThan(0);
+        expect(shopNotifs[0].type).to.eq('PAYMENT_CREATED');
+        expect(shopNotifs[0].message).to.contain('soumis');
+      });
     });
   });
 

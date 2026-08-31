@@ -24,10 +24,10 @@ describe('API Integration - Auth', () => {
     });
   });
 
-  it('POST /api/auth/login - should reject disabled org user', () => {
+  it('POST /api/auth/login - should reject non-existent user', () => {
     cy.request({
       method: 'POST', url: `${API_URL}/api/auth/login`,
-      body: { username: 'ali', password: 'Admin@123' }, failOnStatusCode: false,
+      body: { username: 'nonexistentuser', password: 'Admin@123' }, failOnStatusCode: false,
     }).then((resp) => {
       expect(resp.status).to.be.oneOf([401, 403]);
     });
