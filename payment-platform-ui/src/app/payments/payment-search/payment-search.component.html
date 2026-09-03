@@ -1,0 +1,89 @@
+<div class="page-header">
+  <h2>Recherche de paiements</h2>
+</div>
+
+<div class="filter-card">
+  <div class="filter-grid">
+    <div class="filter-group">
+      <label>Boutique</label>
+      <select [(ngModel)]="filters.shopId" class="form-control">
+        <option [ngValue]="undefined">Toutes les boutiques</option>
+        <option *ngFor="let s of shops" [ngValue]="s.id">{{ s.name }}</option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label>Agent créateur</label>
+      <input type="number" [(ngModel)]="filters.createdBy" class="form-control" placeholder="ID agent">
+    </div>
+
+    <div class="filter-group">
+      <label>Statut</label>
+      <select [(ngModel)]="filters.status" class="form-control">
+        <option [ngValue]="undefined">Tous les statuts</option>
+        <option *ngFor="let s of statuses" [ngValue]="s">{{ statusLabel(s) }}</option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label>Date début</label>
+      <input type="datetime-local" [(ngModel)]="filters.from" class="form-control">
+    </div>
+
+    <div class="filter-group">
+      <label>Date fin</label>
+      <input type="datetime-local" [(ngModel)]="filters.to" class="form-control">
+    </div>
+
+    <div class="filter-actions">
+      <button class="btn btn-primary" (click)="search()" [disabled]="loading">
+        {{ loading ? 'Recherche...' : '🔍 Rechercher' }}
+      </button>
+      <button class="btn btn-secondary" (click)="resetFilters()">Réinitialiser</button>
+    </div>
+  </div>
+</div>
+
+<div class="stats-bar" *ngIf="total > 0">
+  <span>{{ total }} résultat(s) trouvé(s)</span>
+</div>
+
+<div class="table-card" style="margin-top: 16px;">
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr>
+          <th>Référence</th>
+          <th>Boutique</th>
+          <th>Fournisseur</th>
+          <th>Agent</th>
+          <th>Montant</th>
+          <th>Statut</th>
+          <th>Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let p of results" class="clickable-row" [routerLink]="['/dashboard/payments', p.id]">
+          <td><strong>{{ p.reference }}</strong></td>
+          <td>{{ p.shopName }}</td>
+          <td>{{ p.supplierName }}</td>
+          <td>{{ p.createdByName }}</td>
+          <td>{{ p.amount | number:'1.2-2' }} {{ p.currency }}</td>
+          <td>
+            <span class="payment-badge" [ngClass]="p.status.toLowerCase()">{{ statusLabel(p.status) }}</span>
+          </td>
+          <td>{{ p.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
+        </tr>
+        <tr *ngIf="results.length === 0 && !loading">
+          <td colspan="7" class="empty">Aucun résultat trouvé</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="pagination" *ngIf="totalPages > 1">
+    <button class="btn btn-sm btn-secondary" (click)="prevPage()" [disabled]="filters.page === 0">← Précédent</button>
+    <span>Page {{ filters.page + 1 }} / {{ totalPages }}</span>
+    <button class="btn btn-sm btn-secondary" (click)="nextPage()" [disabled]="filters.page >= totalPages - 1">Suivant →</button>
+  </div>
+</div>

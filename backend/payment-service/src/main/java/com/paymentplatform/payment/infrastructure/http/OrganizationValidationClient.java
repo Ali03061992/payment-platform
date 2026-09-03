@@ -11,12 +11,17 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.Optional;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Component
 public class OrganizationValidationClient {
 
     private static final Logger log = LoggerFactory.getLogger(OrganizationValidationClient.class);
     private final HttpClient httpClient = HttpClient.newHttpClient();
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Value("${app.gateway.base-url:http://localhost:8081}")
     private String gatewayBaseUrl;
@@ -107,5 +112,47 @@ public class OrganizationValidationClient {
             log.warn("Impossible de valider la relation {} <-> {} : {}", shopId, supplierId, e.getMessage());
             throw new ConflictException("Service de validation des organisations indisponible");
         }
+    }
+
+    public Optional<String> getOrganizationName(long organizationId) {
+        String url = gatewayBaseUrl + "/api/organizations/internal/" + organizationId + "/status";
+        try {
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(url))
+                    .header("X-Internal-Token", internalSecret)
+                    .GET()
+                    .build();
+            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            if (response.statusCode() == 200) {
+                JsonNode node = objectMapper.readTree(response.body());
+                if (node.has("name")) {
+                    return Optional.of(node.get("name").asText());
+                }
+            }
+        } catch (Exception e) {
+            log.debug("Could not fetch organization name for {}: {}", organizationId, e.getMessage());
+        }
+        return Optional.empty();
+    }
+
+    public Optional<String> getUserName(long userId) {
+        String url = gatewayBaseUrl + "/api/users/" + userId;
+        try {
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(url))
+                    .header("X-Internal-Token", internalSecret)
+                    .GET()
+                    .build();
+            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            if (response.statusCode() == 200) {
+                JsonNode node = objectMapper.readTree(response.body());
+                String firstName = node.has("firstName") ? node.get("firstName").asText() : "";
+                String lastName = node.has("lastName") ? node.get("lastName").asText() : "";
+                return Optional.of((firstName + " " + lastName).trim());
+            }
+        } catch (Exception e) {
+            log.debug("Could not fetch user name for {}: {}", userId, e.getMessage());
+        }
+        return Optional.empty();
     }
 }

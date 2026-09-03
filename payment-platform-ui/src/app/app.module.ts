@@ -37,6 +37,7 @@ import { BalanceViewComponent } from './shop/balance-view/balance-view.component
 import { PwaUpdateComponent } from './pwa-update/pwa-update.component';
 import { QrScannerComponent } from './qr-scanner/qr-scanner.component';
 import { AgentPaymentsComponent } from './supplier/agent-payments/agent-payments.component';
+import { PaymentSearchComponent } from './payments/payment-search/payment-search.component';
 import { NotificationBannerComponent } from './components/notification-banner/notification-banner.component';
 import { ToastComponent } from './components/toast/toast.component';
 
@@ -70,6 +71,7 @@ const routes: Routes = [
       { path: 'payments', component: PaymentListComponent, canActivate: [RoleGuard], data: { roles: allRoles } },
       { path: 'payments/create', component: CreatePaymentComponent, canActivate: [RoleGuard], data: { roles: [...adminRoles, ...shopRoles] } },
       { path: 'payments/stats', component: PaymentStatsComponent, canActivate: [RoleGuard], data: { roles: allRoles } },
+      { path: 'payments/search', component: PaymentSearchComponent, canActivate: [RoleGuard], data: { roles: ['SUPPLIER_ADMIN', 'SYSTEM_ADMIN'] } },
       { path: 'payments/:id', component: PaymentDetailComponent, canActivate: [RoleGuard], data: { roles: allRoles } },
       { path: 'scan', component: QrScannerComponent, canActivate: [RoleGuard], data: { roles: allRoles } },
       { path: 'supplier/agent-payments', component: AgentPaymentsComponent, canActivate: [RoleGuard], data: { roles: ['SUPPLIER_ADMIN'] } },
@@ -120,6 +122,7 @@ const routes: Routes = [
     PwaUpdateComponent,
     QrScannerComponent,
     AgentPaymentsComponent,
+    PaymentSearchComponent,
     NotificationBannerComponent,
     ToastComponent
   ],

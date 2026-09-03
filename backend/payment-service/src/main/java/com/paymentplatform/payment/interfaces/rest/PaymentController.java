@@ -26,6 +26,7 @@ public class PaymentController {
     private final RejectPaymentUseCase rejectPayment;
     private final CancelPaymentUseCase cancelPayment;
     private final AgentPaymentsBySupplierUseCase agentPayments;
+    private final SearchPaymentsUseCase searchPayments;
 
     public PaymentController(CreatePaymentUseCase createPayment,
                              GetPaymentUseCase getPayment,
@@ -33,7 +34,8 @@ public class PaymentController {
                              ConfirmPaymentUseCase confirmPayment,
                              RejectPaymentUseCase rejectPayment,
                              CancelPaymentUseCase cancelPayment,
-                             AgentPaymentsBySupplierUseCase agentPayments) {
+                             AgentPaymentsBySupplierUseCase agentPayments,
+                             SearchPaymentsUseCase searchPayments) {
         this.createPayment = createPayment;
         this.getPayment = getPayment;
         this.listPayments = listPayments;
@@ -41,6 +43,7 @@ public class PaymentController {
         this.rejectPayment = rejectPayment;
         this.cancelPayment = cancelPayment;
         this.agentPayments = agentPayments;
+        this.searchPayments = searchPayments;
     }
 
     @PostMapping
@@ -134,5 +137,17 @@ public class PaymentController {
     public ResponseEntity<PaymentResponse> cancel(@PathVariable long id) {
         var current = CurrentUser.get();
         return ResponseEntity.ok(cancelPayment.execute(id, current.userId(), current.organizationId()));
+    }
+
+    @PostMapping("/search")
+    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SYSTEM_ADMIN')")
+    public ResponseEntity<SearchPaymentsResponse> search(
+            @RequestBody SearchPaymentsRequest request) {
+        var current = CurrentUser.get();
+        Long supplierId = null;
+        if (!current.roles().contains("SYSTEM_ADMIN")) {
+            supplierId = current.organizationId();
+        }
+        return ResponseEntity.ok(searchPayments.execute(request, supplierId));
     }
 }

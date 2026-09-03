@@ -10,6 +10,7 @@ import com.paymentplatform.payment.domain.model.Payment;
 import com.paymentplatform.payment.domain.repository.PaymentRepository;
 import com.paymentplatform.payment.domain.valueobject.RejectionReason;
 import com.paymentplatform.shared.domain.exception.NotFoundException;
+import com.paymentplatform.payment.infrastructure.elasticsearch.PaymentIndexerService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,11 +23,14 @@ public class RejectPaymentUseCase {
     private final PaymentRepository payments;
     private final AuditRecorder audit;
     private final OutboxEventStore outbox;
+    private final PaymentIndexerService indexer;
 
-    public RejectPaymentUseCase(PaymentRepository payments, AuditRecorder audit, OutboxEventStore outbox) {
+    public RejectPaymentUseCase(PaymentRepository payments, AuditRecorder audit,
+                                 OutboxEventStore outbox, PaymentIndexerService indexer) {
         this.payments = payments;
         this.audit = audit;
         this.outbox = outbox;
+        this.indexer = indexer;
     }
 
     @Transactional
@@ -50,6 +54,8 @@ public class RejectPaymentUseCase {
         outbox.append(new PaymentRejectedEvent(UUID.randomUUID(), Instant.now(),
                 saved.id(), saved.reference().value(), saved.shopId(), saved.supplierId(),
                 actorUserId, reason.value()), String.valueOf(saved.id()));
+
+        indexer.indexPayment(saved);
 
         return PaymentResponse.from(saved);
     }
