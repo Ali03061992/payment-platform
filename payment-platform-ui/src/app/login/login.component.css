@@ -18,6 +18,15 @@
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
 }
 
+.login-logo {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.login-logo .logo-icon {
+  font-size: 48px;
+}
+
 .login-card h1 {
   margin: 0 0 8px 0;
   font-size: 28px;
@@ -96,3 +105,35 @@
 
 .register-link a { color: #0f3460; font-weight: 600; }
 .register-link a:hover { text-decoration: underline; }
+
+/* Mobile optimizations */
+@media (max-width: 480px) {
+  .login-container {
+    padding: 16px;
+    align-items: flex-start;
+    padding-top: 60px;
+  }
+
+  .login-card {
+    padding: 32px 20px;
+    border-radius: 12px;
+  }
+
+  .login-logo .logo-icon {
+    font-size: 40px;
+  }
+
+  .login-card h1 {
+    font-size: 24px;
+  }
+
+  .login-card input {
+    padding: 12px 14px;
+    font-size: 16px; /* Prevents iOS zoom */
+  }
+
+  .login-card .btn {
+    padding: 14px 20px;
+    font-size: 16px;
+  }
+}

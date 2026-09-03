@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { OrganizationService } from '../../services/organization.service';
 import { Organization, SupplierShopRelation } from '../../models/organization.model';
+import { ToastService } from '../../services/toast.service';
 
 @Component({
   selector: 'app-relation-management',
@@ -16,10 +17,8 @@ export class RelationManagementComponent implements OnInit {
   selectedSupplierId = 0;
   selectedShopId = 0;
   creating = false;
-  successMsg = '';
-  errorMsg = '';
 
-  constructor(private orgService: OrganizationService) {}
+  constructor(private orgService: OrganizationService, private toast: ToastService) {}
 
   ngOnInit(): void { this.load(); }
 
@@ -37,16 +36,14 @@ export class RelationManagementComponent implements OnInit {
     this.creating = true;
     this.orgService.createRelation({ supplierId: this.selectedSupplierId, shopId: this.selectedShopId }).subscribe({
       next: () => {
-        this.successMsg = 'Relation créée avec succès';
+        this.toast.success('Relation créée avec succès');
         this.showCreate = false;
         this.creating = false;
         this.load();
-        setTimeout(() => this.successMsg = '', 3000);
       },
       error: (err: any) => {
-        this.errorMsg = err.error?.message || 'Erreur lors de la création';
+        this.toast.error(err.error?.message || 'Erreur lors de la création');
         this.creating = false;
-        setTimeout(() => this.errorMsg = '', 3000);
       }
     });
   }

@@ -3,8 +3,6 @@
   <button class="btn btn-primary" routerLink="/dashboard/payments/create">+ Nouveau paiement</button>
 </div>
 
-<div class="alert alert-error" *ngIf="errorMsg">{{ errorMsg }}</div>
-
 <div class="filters" *ngIf="!loading">
   <select [(ngModel)]="filterStatus" class="form-control" style="max-width:200px;">
     <option value="">Tous les statuts</option>
@@ -21,7 +19,8 @@
   <span>Chargement...</span>
 </div>
 
-<div class="table-card" *ngIf="!loading">
+<!-- Desktop Table View -->
+<div class="table-card hide-mobile" *ngIf="!loading">
   <div class="table-wrapper">
     <table>
       <thead>
@@ -58,5 +57,42 @@
         </tr>
       </tbody>
     </table>
+  </div>
+</div>
+
+<!-- Mobile Card View -->
+<div class="payment-cards show-mobile" *ngIf="!loading">
+  <div *ngIf="filteredPayments.length === 0" class="empty-card">
+    Aucun paiement trouvé
+  </div>
+  <div *ngFor="let p of filteredPayments" class="payment-card" [routerLink]="['/dashboard/payments', p.id]">
+    <div class="payment-card-header">
+      <span class="payment-reference">{{ p.reference }}</span>
+      <span class="payment-badge" [ngClass]="statusClass(p.status)">
+        {{ statusLabel(p.status) }}
+      </span>
+    </div>
+    <div class="payment-card-body">
+      <div class="payment-row">
+        <span class="payment-label">Montant</span>
+        <span class="payment-amount">{{ p.amount | number:'1.2-2' }} {{ p.currency }}</span>
+      </div>
+      <div class="payment-row">
+        <span class="payment-label">Boutique</span>
+        <span class="payment-value">{{ p.shopId }}</span>
+      </div>
+      <div class="payment-row">
+        <span class="payment-label">Fournisseur</span>
+        <span class="payment-value">{{ p.supplierId }}</span>
+      </div>
+      <div class="payment-row">
+        <span class="payment-label">Créé le</span>
+        <span class="payment-value">{{ p.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
+      </div>
+    </div>
+    <div class="payment-card-actions" *ngIf="p.status === 'PENDING'" (click)="$event.stopPropagation()">
+      <button class="btn btn-sm btn-success" (click)="confirm(p.id)">Confirmer</button>
+      <button class="btn btn-sm btn-danger" (click)="cancel(p.id)">Annuler</button>
+    </div>
   </div>
 </div>

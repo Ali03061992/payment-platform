@@ -1,8 +1,8 @@
-const API_URL = 'http://localhost:8081';
-
 function authHeaders(token: string) {
   return { Authorization: `Bearer ${token}` };
 }
+
+const API = () => Cypress.env('apiUrl') || 'http://localhost:8081';
 
 const TEST_DATA = {
   systemAdmin: { username: 'system.admin', password: 'Admin@123' },
@@ -21,13 +21,13 @@ const TEST_DATA = {
 describe('Data Structure - Authentication', () => {
   it('system.admin should login and have SYSTEM_ADMIN role', () => {
     cy.request({
-      method: 'POST', url: `${API_URL}/api/auth/login`,
+      method: 'POST', url: `${API()}/api/auth/login`,
       body: TEST_DATA.systemAdmin
     }).then(r => {
       expect(r.status).to.eq(200);
       expect(r.body.accessToken).to.exist;
       cy.request({
-        method: 'GET', url: `${API_URL}/api/auth/me`,
+        method: 'GET', url: `${API()}/api/auth/me`,
         headers: authHeaders(r.body.accessToken)
       }).then(me => {
         expect(me.body.username).to.eq('system.admin');
@@ -39,11 +39,11 @@ describe('Data Structure - Authentication', () => {
 
   it('covale.admin should login and have SUPPLIER_ADMIN role with orgId=1', () => {
     cy.request({
-      method: 'POST', url: `${API_URL}/api/auth/login`,
+      method: 'POST', url: `${API()}/api/auth/login`,
       body: TEST_DATA.covaleAdmin
     }).then(r => {
       cy.request({
-        method: 'GET', url: `${API_URL}/api/auth/me`,
+        method: 'GET', url: `${API()}/api/auth/me`,
         headers: authHeaders(r.body.accessToken)
       }).then(me => {
         expect(me.body.username).to.eq('covale.admin');
@@ -55,11 +55,11 @@ describe('Data Structure - Authentication', () => {
 
   it('pointteck.admin should login and have SUPPLIER_ADMIN role with orgId=2', () => {
     cy.request({
-      method: 'POST', url: `${API_URL}/api/auth/login`,
+      method: 'POST', url: `${API()}/api/auth/login`,
       body: TEST_DATA.pointteckAdmin
     }).then(r => {
       cy.request({
-        method: 'GET', url: `${API_URL}/api/auth/me`,
+        method: 'GET', url: `${API()}/api/auth/me`,
         headers: authHeaders(r.body.accessToken)
       }).then(me => {
         expect(me.body.username).to.eq('pointteck.admin');
@@ -71,10 +71,10 @@ describe('Data Structure - Authentication', () => {
 
   it('covale agents should login with SUPPLIER_AGENT role orgId=1', () => {
     [TEST_DATA.covaleAgent1, TEST_DATA.covaleAgent2].forEach(user => {
-      cy.request({ method: 'POST', url: `${API_URL}/api/auth/login`, body: user })
+      cy.request({ method: 'POST', url: `${API()}/api/auth/login`, body: user })
         .then(r => {
           cy.request({
-            method: 'GET', url: `${API_URL}/api/auth/me`,
+            method: 'GET', url: `${API()}/api/auth/me`,
             headers: authHeaders(r.body.accessToken)
           }).then(me => {
             expect(me.body.roles).to.include('SUPPLIER_AGENT');
@@ -86,10 +86,10 @@ describe('Data Structure - Authentication', () => {
 
   it('pointteck agents should login with SUPPLIER_AGENT role orgId=2', () => {
     [TEST_DATA.pointteckAgent1, TEST_DATA.pointteckAgent2].forEach(user => {
-      cy.request({ method: 'POST', url: `${API_URL}/api/auth/login`, body: user })
+      cy.request({ method: 'POST', url: `${API()}/api/auth/login`, body: user })
         .then(r => {
           cy.request({
-            method: 'GET', url: `${API_URL}/api/auth/me`,
+            method: 'GET', url: `${API()}/api/auth/me`,
             headers: authHeaders(r.body.accessToken)
           }).then(me => {
             expect(me.body.roles).to.include('SUPPLIER_AGENT');
@@ -100,10 +100,10 @@ describe('Data Structure - Authentication', () => {
   });
 
   it('abdelslam (Covale Tunis Sousse) should login with SHOP_ADMIN orgId=3', () => {
-    cy.request({ method: 'POST', url: `${API_URL}/api/auth/login`, body: TEST_DATA.abdelslam })
+    cy.request({ method: 'POST', url: `${API()}/api/auth/login`, body: TEST_DATA.abdelslam })
       .then(r => {
         cy.request({
-          method: 'GET', url: `${API_URL}/api/auth/me`,
+          method: 'GET', url: `${API()}/api/auth/me`,
           headers: authHeaders(r.body.accessToken)
         }).then(me => {
           expect(me.body.username).to.eq('abdelslam');
@@ -114,10 +114,10 @@ describe('Data Structure - Authentication', () => {
   });
 
   it('ali (Covale Sfax Mahdiya) should login with SHOP_ADMIN orgId=4', () => {
-    cy.request({ method: 'POST', url: `${API_URL}/api/auth/login`, body: TEST_DATA.ali })
+    cy.request({ method: 'POST', url: `${API()}/api/auth/login`, body: TEST_DATA.ali })
       .then(r => {
         cy.request({
-          method: 'GET', url: `${API_URL}/api/auth/me`,
+          method: 'GET', url: `${API()}/api/auth/me`,
           headers: authHeaders(r.body.accessToken)
         }).then(me => {
           expect(me.body.username).to.eq('ali');
@@ -128,14 +128,14 @@ describe('Data Structure - Authentication', () => {
   });
 
   it('pointteck shop admins should login with correct orgIds', () => {
-    cy.request({ method: 'POST', url: `${API_URL}/api/auth/login`, body: TEST_DATA.pointteckTunisAdmin })
+    cy.request({ method: 'POST', url: `${API()}/api/auth/login`, body: TEST_DATA.pointteckTunisAdmin })
       .then(r => {
-        cy.request({ method: 'GET', url: `${API_URL}/api/auth/me`, headers: authHeaders(r.body.accessToken) })
+        cy.request({ method: 'GET', url: `${API()}/api/auth/me`, headers: authHeaders(r.body.accessToken) })
           .then(me => { expect(me.body.organizationId).to.eq(5); });
       });
-    cy.request({ method: 'POST', url: `${API_URL}/api/auth/login`, body: TEST_DATA.pointteckSfaxAdmin })
+    cy.request({ method: 'POST', url: `${API()}/api/auth/login`, body: TEST_DATA.pointteckSfaxAdmin })
       .then(r => {
-        cy.request({ method: 'GET', url: `${API_URL}/api/auth/me`, headers: authHeaders(r.body.accessToken) })
+        cy.request({ method: 'GET', url: `${API()}/api/auth/me`, headers: authHeaders(r.body.accessToken) })
           .then(me => { expect(me.body.organizationId).to.eq(6); });
       });
   });
@@ -145,12 +145,12 @@ describe('Data Structure - Organizations & Relations', () => {
   let adminToken: string;
 
   before(() => {
-    cy.request({ method: 'POST', url: `${API_URL}/api/auth/login`, body: TEST_DATA.systemAdmin })
+    cy.request({ method: 'POST', url: `${API()}/api/auth/login`, body: TEST_DATA.systemAdmin })
       .then(r => { adminToken = r.body.accessToken; });
   });
 
   it('should have Covale (id=1) and Pointteck (id=2) as suppliers', () => {
-    cy.request({ method: 'GET', url: `${API_URL}/api/admin/suppliers`, headers: authHeaders(adminToken) })
+    cy.request({ method: 'GET', url: `${API()}/api/admin/suppliers`, headers: authHeaders(adminToken) })
       .then(r => {
         expect(r.status).to.eq(200);
         const covale = r.body.find((s: any) => s.name === 'Covale');
@@ -165,7 +165,7 @@ describe('Data Structure - Organizations & Relations', () => {
   });
 
   it('should have the 4 Covale/Pointteck shops with correct names and IDs', () => {
-    cy.request({ method: 'GET', url: `${API_URL}/api/admin/shops`, headers: authHeaders(adminToken) })
+    cy.request({ method: 'GET', url: `${API()}/api/admin/shops`, headers: authHeaders(adminToken) })
       .then(r => {
         expect(r.status).to.eq(200);
         const shops = r.body;
@@ -186,7 +186,7 @@ describe('Data Structure - Organizations & Relations', () => {
   });
 
   it('should have exactly 4 active supplier-shop relations', () => {
-    cy.request({ method: 'GET', url: `${API_URL}/api/admin/supplier-shop-relations`, headers: authHeaders(adminToken) })
+    cy.request({ method: 'GET', url: `${API()}/api/admin/supplier-shop-relations`, headers: authHeaders(adminToken) })
       .then(r => {
         expect(r.status).to.eq(200);
         expect(r.body).to.have.length(4);
@@ -200,7 +200,7 @@ describe('Data Structure - Organizations & Relations', () => {
   });
 
   it('Covale (id=1) should have relations with shops 3 and 4', () => {
-    cy.request({ method: 'GET', url: `${API_URL}/api/admin/supplier-shop-relations/supplier/1`, headers: authHeaders(adminToken) })
+    cy.request({ method: 'GET', url: `${API()}/api/admin/supplier-shop-relations/supplier/1`, headers: authHeaders(adminToken) })
       .then(r => {
         expect(r.status).to.eq(200);
         expect(r.body).to.have.length(2);
@@ -210,7 +210,7 @@ describe('Data Structure - Organizations & Relations', () => {
   });
 
   it('Pointteck (id=2) should have relations with shops 5 and 6', () => {
-    cy.request({ method: 'GET', url: `${API_URL}/api/admin/supplier-shop-relations/supplier/2`, headers: authHeaders(adminToken) })
+    cy.request({ method: 'GET', url: `${API()}/api/admin/supplier-shop-relations/supplier/2`, headers: authHeaders(adminToken) })
       .then(r => {
         expect(r.status).to.eq(200);
         expect(r.body).to.have.length(2);
@@ -220,7 +220,7 @@ describe('Data Structure - Organizations & Relations', () => {
   });
 
   it('Shop 3 (Tunis Sousse) should have relation with supplier 1', () => {
-    cy.request({ method: 'GET', url: `${API_URL}/api/admin/supplier-shop-relations/shop/3`, headers: authHeaders(adminToken) })
+    cy.request({ method: 'GET', url: `${API()}/api/admin/supplier-shop-relations/shop/3`, headers: authHeaders(adminToken) })
       .then(r => {
         expect(r.status).to.eq(200);
         expect(r.body).to.have.length(1);
@@ -231,70 +231,70 @@ describe('Data Structure - Organizations & Relations', () => {
 
 describe('Data Structure - Role-based Access Control', () => {
   it('system.admin should access admin endpoints', () => {
-    cy.request({ method: 'POST', url: `${API_URL}/api/auth/login`, body: TEST_DATA.systemAdmin })
+    cy.request({ method: 'POST', url: `${API()}/api/auth/login`, body: TEST_DATA.systemAdmin })
       .then(r => {
-        cy.request({ method: 'GET', url: `${API_URL}/api/admin/suppliers`, headers: authHeaders(r.body.accessToken) })
+        cy.request({ method: 'GET', url: `${API()}/api/admin/suppliers`, headers: authHeaders(r.body.accessToken) })
           .then(res => expect(res.status).to.eq(200));
-        cy.request({ method: 'GET', url: `${API_URL}/api/admin/shops`, headers: authHeaders(r.body.accessToken) })
+        cy.request({ method: 'GET', url: `${API()}/api/admin/shops`, headers: authHeaders(r.body.accessToken) })
           .then(res => expect(res.status).to.eq(200));
-        cy.request({ method: 'GET', url: `${API_URL}/api/users`, headers: authHeaders(r.body.accessToken) })
+        cy.request({ method: 'GET', url: `${API()}/api/users`, headers: authHeaders(r.body.accessToken) })
           .then(res => expect(res.status).to.eq(200));
       });
   });
 
   it('covale.admin should access supplier endpoints but not admin endpoints', () => {
-    cy.request({ method: 'POST', url: `${API_URL}/api/auth/login`, body: TEST_DATA.covaleAdmin })
+    cy.request({ method: 'POST', url: `${API()}/api/auth/login`, body: TEST_DATA.covaleAdmin })
       .then(r => {
         // Supplier endpoints use /api/suppliers/{supplierId}/products
-        cy.request({ method: 'GET', url: `${API_URL}/api/suppliers/1/products`, headers: authHeaders(r.body.accessToken) })
+        cy.request({ method: 'GET', url: `${API()}/api/suppliers/1/products`, headers: authHeaders(r.body.accessToken) })
           .then(res => expect(res.status).to.eq(200));
-        cy.request({ method: 'GET', url: `${API_URL}/api/suppliers/1/movements`, headers: authHeaders(r.body.accessToken) })
+        cy.request({ method: 'GET', url: `${API()}/api/suppliers/1/movements`, headers: authHeaders(r.body.accessToken) })
           .then(res => expect(res.status).to.eq(200));
-        cy.request({ method: 'GET', url: `${API_URL}/api/admin/suppliers`, headers: authHeaders(r.body.accessToken), failOnStatusCode: false })
+        cy.request({ method: 'GET', url: `${API()}/api/admin/suppliers`, headers: authHeaders(r.body.accessToken), failOnStatusCode: false })
           .then(res => expect(res.status).to.be.oneOf([403, 401]));
       });
   });
 
   it('pointteck.admin should access supplier endpoints for org 2', () => {
-    cy.request({ method: 'POST', url: `${API_URL}/api/auth/login`, body: TEST_DATA.pointteckAdmin })
+    cy.request({ method: 'POST', url: `${API()}/api/auth/login`, body: TEST_DATA.pointteckAdmin })
       .then(r => {
-        cy.request({ method: 'GET', url: `${API_URL}/api/suppliers/2/products`, headers: authHeaders(r.body.accessToken) })
+        cy.request({ method: 'GET', url: `${API()}/api/suppliers/2/products`, headers: authHeaders(r.body.accessToken) })
           .then(res => expect(res.status).to.eq(200));
       });
   });
 
   it('abdelslam (shop admin org 3) should access shop endpoints', () => {
-    cy.request({ method: 'POST', url: `${API_URL}/api/auth/login`, body: TEST_DATA.abdelslam })
+    cy.request({ method: 'POST', url: `${API()}/api/auth/login`, body: TEST_DATA.abdelslam })
       .then(r => {
-        cy.request({ method: 'GET', url: `${API_URL}/api/orders`, headers: authHeaders(r.body.accessToken) })
+        cy.request({ method: 'GET', url: `${API()}/api/orders`, headers: authHeaders(r.body.accessToken) })
           .then(res => expect(res.status).to.eq(200));
-        cy.request({ method: 'GET', url: `${API_URL}/api/balances/shop/3`, headers: authHeaders(r.body.accessToken) })
+        cy.request({ method: 'GET', url: `${API()}/api/balances/shop/3`, headers: authHeaders(r.body.accessToken) })
           .then(res => expect(res.status).to.eq(200));
       });
   });
 
   it('ali (shop admin org 4) should access shop endpoints', () => {
-    cy.request({ method: 'POST', url: `${API_URL}/api/auth/login`, body: TEST_DATA.ali })
+    cy.request({ method: 'POST', url: `${API()}/api/auth/login`, body: TEST_DATA.ali })
       .then(r => {
-        cy.request({ method: 'GET', url: `${API_URL}/api/orders`, headers: authHeaders(r.body.accessToken) })
+        cy.request({ method: 'GET', url: `${API()}/api/orders`, headers: authHeaders(r.body.accessToken) })
           .then(res => expect(res.status).to.eq(200));
       });
   });
 
   it('covale agents should access supplier agent endpoints', () => {
-    cy.request({ method: 'POST', url: `${API_URL}/api/auth/login`, body: TEST_DATA.covaleAgent1 })
+    cy.request({ method: 'POST', url: `${API()}/api/auth/login`, body: TEST_DATA.covaleAgent1 })
       .then(r => {
-        cy.request({ method: 'GET', url: `${API_URL}/api/suppliers/1/products`, headers: authHeaders(r.body.accessToken) })
+        cy.request({ method: 'GET', url: `${API()}/api/suppliers/1/products`, headers: authHeaders(r.body.accessToken) })
           .then(res => expect(res.status).to.eq(200));
-        cy.request({ method: 'GET', url: `${API_URL}/api/suppliers/1/movements`, headers: authHeaders(r.body.accessToken) })
+        cy.request({ method: 'GET', url: `${API()}/api/suppliers/1/movements`, headers: authHeaders(r.body.accessToken) })
           .then(res => expect(res.status).to.eq(200));
       });
   });
 
   it('pointteck agents should access supplier agent endpoints for org 2', () => {
-    cy.request({ method: 'POST', url: `${API_URL}/api/auth/login`, body: TEST_DATA.pointteckAgent1 })
+    cy.request({ method: 'POST', url: `${API()}/api/auth/login`, body: TEST_DATA.pointteckAgent1 })
       .then(r => {
-        cy.request({ method: 'GET', url: `${API_URL}/api/suppliers/2/products`, headers: authHeaders(r.body.accessToken) })
+        cy.request({ method: 'GET', url: `${API()}/api/suppliers/2/products`, headers: authHeaders(r.body.accessToken) })
           .then(res => expect(res.status).to.eq(200));
       });
   });
@@ -306,15 +306,15 @@ describe('Data Structure - Payments Flow', () => {
   let paymentRef: string;
 
   before(() => {
-    cy.request({ method: 'POST', url: `${API_URL}/api/auth/login`, body: TEST_DATA.abdelslam })
+    cy.request({ method: 'POST', url: `${API()}/api/auth/login`, body: TEST_DATA.abdelslam })
       .then(r => { shopToken = r.body.accessToken; });
-    cy.request({ method: 'POST', url: `${API_URL}/api/auth/login`, body: TEST_DATA.covaleAdmin })
+    cy.request({ method: 'POST', url: `${API()}/api/auth/login`, body: TEST_DATA.covaleAdmin })
       .then(r => { supplierToken = r.body.accessToken; });
   });
 
   it('shop (abdelslam, org 3) can create payment to supplier 1', () => {
     cy.request({
-      method: 'POST', url: `${API_URL}/api/payments`, headers: authHeaders(shopToken),
+      method: 'POST', url: `${API()}/api/payments`, headers: authHeaders(shopToken),
       body: { shopId: 3, supplierId: 1, amount: 500.00, currency: 'EUR' }
     }).then(r => {
       expect(r.status).to.be.oneOf([200, 201]);
@@ -328,7 +328,7 @@ describe('Data Structure - Payments Flow', () => {
 
   it('supplier (covale.admin, org 1) can see the payment', () => {
     cy.wait(2000);
-    cy.request({ method: 'GET', url: `${API_URL}/api/payments`, headers: authHeaders(supplierToken) })
+    cy.request({ method: 'GET', url: `${API()}/api/payments`, headers: authHeaders(supplierToken) })
       .then(r => {
         expect(r.status).to.eq(200);
         const payment = r.body.find((p: any) => p.reference === paymentRef);
@@ -337,12 +337,12 @@ describe('Data Structure - Payments Flow', () => {
   });
 
   it('supplier can confirm the payment', () => {
-    cy.request({ method: 'GET', url: `${API_URL}/api/payments`, headers: authHeaders(supplierToken) })
+    cy.request({ method: 'GET', url: `${API()}/api/payments`, headers: authHeaders(supplierToken) })
       .then(r => {
         const payment = r.body.find((p: any) => p.reference === paymentRef);
         if (payment) {
           cy.request({
-            method: 'POST', url: `${API_URL}/api/payments/${payment.id}/confirm`,
+            method: 'POST', url: `${API()}/api/payments/${payment.id}/confirm`,
             headers: authHeaders(supplierToken)
           }).then(res => {
             expect(res.status).to.eq(200);
@@ -354,7 +354,7 @@ describe('Data Structure - Payments Flow', () => {
 
   it('shop receives notification after supplier confirms', () => {
     cy.wait(3000);
-    cy.request({ method: 'GET', url: `${API_URL}/api/notifications`, headers: authHeaders(shopToken) })
+    cy.request({ method: 'GET', url: `${API()}/api/notifications`, headers: authHeaders(shopToken) })
       .then(r => {
         expect(r.status).to.eq(200);
         const notif = r.body.find((n: any) => n.type === 'PAYMENT_CONFIRMED' && n.relatedEntityId === paymentRef);
@@ -365,7 +365,7 @@ describe('Data Structure - Payments Flow', () => {
 
   it('supplier receives notification after shop creates payment', () => {
     cy.wait(1000);
-    cy.request({ method: 'GET', url: `${API_URL}/api/notifications`, headers: authHeaders(supplierToken) })
+    cy.request({ method: 'GET', url: `${API()}/api/notifications`, headers: authHeaders(supplierToken) })
       .then(r => {
         expect(r.status).to.eq(200);
         const notif = r.body.find((n: any) => n.type === 'PAYMENT_CREATED' && n.relatedEntityId === paymentRef);

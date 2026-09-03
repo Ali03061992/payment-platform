@@ -47,8 +47,6 @@
       </div>
     </div>
 
-    <div *ngIf="error" class="alert alert-error">{{ error }}</div>
-
     <button type="submit" class="btn btn-primary btn-block" [disabled]="loading">
       {{ loading ? 'Création...' : 'Créer le produit' }}
     </button>

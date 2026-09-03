@@ -1,4 +1,4 @@
-import { Component, HostListener, OnInit, OnDestroy } from '@angular/core';
+import { Component, HostListener, OnInit, OnDestroy, ElementRef, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { LoginService } from '../services/login.service';
 import { NotificationService } from '../services/notification.service';
@@ -12,12 +12,19 @@ import { Subscription } from 'rxjs';
 })
 export class LayoutComponent implements OnInit, OnDestroy {
   user: any;
-  sidebarOpen = true;
+  sidebarOpen = false;
   isMobile = false;
   showNotifications = false;
   unreadCount = 0;
   notifications: Notification[] = [];
   private subs: Subscription[] = [];
+
+  // Swipe gesture tracking
+  private touchStartX = 0;
+  private touchStartY = 0;
+  private touchCurrentX = 0;
+  private isSwiping = false;
+  private swipeThreshold = 80;
 
   navItems: { label: string; icon: string; route: string; roles: string[] }[] = [
     { label: 'Tableau de bord', icon: '📊', route: '', roles: ['SYSTEM_ADMIN', 'SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_AGENT'] },
@@ -86,6 +93,43 @@ export class LayoutComponent implements OnInit, OnDestroy {
     if (this.isMobile) {
       this.sidebarOpen = false;
     }
+  }
+
+  // Swipe gesture handlers for sidebar
+  onTouchStart(event: TouchEvent): void {
+    if (!this.isMobile) return;
+    this.touchStartX = event.touches[0].clientX;
+    this.touchStartY = event.touches[0].clientY;
+    this.isSwiping = false;
+  }
+
+  onTouchMove(event: TouchEvent): void {
+    if (!this.isMobile) return;
+
+    this.touchCurrentX = event.touches[0].clientX;
+    const deltaY = Math.abs(event.touches[0].clientY - this.touchStartY);
+    const deltaX = this.touchCurrentX - this.touchStartX;
+
+    // Only start swiping if horizontal movement is significant and more than vertical
+    if (Math.abs(deltaX) > 10 && Math.abs(deltaX) > deltaY) {
+      this.isSwiping = true;
+
+      // If swiping right from left edge, open sidebar
+      if (deltaX > 0 && this.touchStartX < 30 && !this.sidebarOpen) {
+        event.preventDefault();
+        this.sidebarOpen = true;
+      }
+      // If swiping left while sidebar is open, close it
+      else if (deltaX < 0 && this.sidebarOpen) {
+        event.preventDefault();
+        this.sidebarOpen = false;
+      }
+    }
+  }
+
+  onTouchEnd(event: TouchEvent): void {
+    if (!this.isMobile) return;
+    this.isSwiping = false;
   }
 
   toggleNotifications(): void {

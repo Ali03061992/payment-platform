@@ -11,15 +11,13 @@
   </select>
 </div>
 
-<div *ngIf="successMessage" class="alert alert-success">{{ successMessage }}</div>
-<div *ngIf="error" class="alert alert-error">{{ error }}</div>
-
 <div *ngIf="loading" class="loading">
   <div class="spinner"></div>
   <span>Chargement du stock...</span>
 </div>
 
-<div class="table-card" *ngIf="!loading">
+<!-- Desktop Table View -->
+<div class="table-card hide-mobile" *ngIf="!loading">
   <div class="table-wrapper">
     <table>
       <thead>
@@ -68,5 +66,49 @@
         </tr>
       </tbody>
     </table>
+  </div>
+</div>
+
+<!-- Mobile Card View -->
+<div class="product-cards show-mobile" *ngIf="!loading">
+  <div *ngIf="products.length === 0" class="empty-card">
+    Aucun produit dans le stock
+    <br><a routerLink="create" class="empty-link">Ajouter un premier produit</a>
+  </div>
+  <div *ngFor="let product of products" class="product-card" [class.low-stock-card]="getStockStatus(product) === 'LOW'" [class.out-of-stock-card]="getStockStatus(product) === 'OUT_OF_STOCK'">
+    <div class="product-card-header">
+      <div class="product-info">
+        <strong class="product-name">{{ product.name }}</strong>
+        <span class="product-sku">{{ product.sku }}</span>
+      </div>
+      <span class="stock-badge" [ngClass]="{
+        'stock-ok': getStockStatus(product) === 'OK',
+        'stock-low': getStockStatus(product) === 'LOW',
+        'stock-out': getStockStatus(product) === 'OUT_OF_STOCK'
+      }">
+        {{ getStockStatus(product) === 'OK' ? 'OK' : getStockStatus(product) === 'LOW' ? 'Bas' : 'Rupture' }}
+      </span>
+    </div>
+    <div class="product-card-body" *ngIf="product.description">
+      <div class="product-desc">{{ product.description }}</div>
+    </div>
+    <div class="product-card-details">
+      <div class="product-row">
+        <span class="product-label">Prix</span>
+        <span class="product-value">{{ product.unitPrice | number:'1.2-2' }} {{ product.currency }}</span>
+      </div>
+      <div class="product-row">
+        <span class="product-label">Seuil min</span>
+        <span class="product-value">{{ product.minQuantity }}</span>
+      </div>
+    </div>
+    <div class="product-card-qty">
+      <button class="qty-btn" (click)="updateQuantity(product, -1)" [disabled]="product.quantity <= 0">-</button>
+      <span class="qty-value" [class.qty-zero]="product.quantity === 0">{{ product.quantity }}</span>
+      <button class="qty-btn" (click)="updateQuantity(product, 1)">+</button>
+    </div>
+    <div class="product-card-actions">
+      <button class="btn btn-sm btn-danger" (click)="deleteProduct(product)">Supprimer</button>
+    </div>
   </div>
 </div>

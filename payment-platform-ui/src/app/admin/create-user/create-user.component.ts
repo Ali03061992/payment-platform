@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { UserService } from '../../services/user.service';
 import { OrganizationService } from '../../services/organization.service';
 import { Organization } from '../../models/organization.model';
+import { ToastService } from '../../services/toast.service';
 
 @Component({
   selector: 'app-create-user',
@@ -31,14 +32,14 @@ export class CreateUserComponent implements OnInit {
   suppliers: Organization[] = [];
   shops: Organization[] = [];
 
-  error = '';
   success = false;
   loading = false;
 
   constructor(
     private userService: UserService,
     private organizationService: OrganizationService,
-    private router: Router
+    private router: Router,
+    private toast: ToastService
   ) {}
 
   ngOnInit(): void {
@@ -67,7 +68,6 @@ export class CreateUserComponent implements OnInit {
   }
 
   onSubmit(): void {
-    this.error = '';
     this.loading = true;
     const payload: any = {
       username: this.form.username,
@@ -81,8 +81,8 @@ export class CreateUserComponent implements OnInit {
       payload.organizationId = this.form.organizationId;
     }
     this.userService.create(payload).subscribe({
-      next: () => { this.success = true; this.loading = false; },
-      error: (err) => { this.error = err.error?.message || "Erreur lors de la création"; this.loading = false; }
+      next: () => { this.success = true; this.loading = false; this.toast.success('Compte créé avec succès'); },
+      error: (err) => { this.toast.error(err.error?.message || "Erreur lors de la création"); this.loading = false; }
     });
   }
 

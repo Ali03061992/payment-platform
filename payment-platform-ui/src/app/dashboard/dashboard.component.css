@@ -74,3 +74,54 @@
   color: #0f3460;
   transform: translateX(4px);
 }
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  .dashboard {
+    padding: 0;
+  }
+
+  .welcome-section {
+    margin-bottom: 16px;
+  }
+
+  .welcome-section h1 {
+    font-size: 20px;
+  }
+
+  .welcome-section p {
+    font-size: 13px;
+  }
+
+  .info-cards {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .info-card {
+    padding: 16px;
+    border-radius: 8px;
+  }
+
+  .info-card h3 {
+    font-size: 14px;
+    margin-bottom: 12px;
+  }
+
+  .info-row {
+    padding: 8px 0;
+    font-size: 13px;
+  }
+
+  .quick-action {
+    padding: 10px 12px;
+    font-size: 13px;
+  }
+
+  .stat-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 18px;
+    border-radius: 10px;
+  }
+}

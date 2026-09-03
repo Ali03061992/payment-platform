@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { StockService } from '../../services/stock.service';
 import { Product, StockMovement } from '../../models/stock.model';
+import { ToastService } from '../../services/toast.service';
 
 @Component({
   selector: 'app-stock-dashboard',
@@ -11,8 +12,6 @@ export class StockDashboardComponent implements OnInit {
   products: Product[] = [];
   movements: StockMovement[] = [];
   loading = true;
-  errorMsg = '';
-  successMsg = '';
 
   totalProducts = 0;
   totalQuantity = 0;
@@ -33,7 +32,7 @@ export class StockDashboardComponent implements OnInit {
   historyMovements: StockMovement[] = [];
   loadingHistory = false;
 
-  constructor(private stockService: StockService) {}
+  constructor(private stockService: StockService, private toast: ToastService) {}
 
   ngOnInit(): void {
     this.loadData();
@@ -47,7 +46,7 @@ export class StockDashboardComponent implements OnInit {
         this.computeStats();
         this.loading = false;
       },
-      error: (err: any) => { this.errorMsg = err.error?.message || 'Erreur de chargement'; this.loading = false; }
+      error: (err: any) => { this.toast.error(err.error?.message || 'Erreur de chargement'); this.loading = false; }
     });
   }
 
@@ -83,13 +82,12 @@ export class StockDashboardComponent implements OnInit {
       notes: this.movementNotes
     }).subscribe({
       next: () => {
-        this.successMsg = 'Mouvement de stock enregistré';
+        this.toast.success('Mouvement de stock enregistré');
         this.closeMovement();
         this.savingMovement = false;
         this.loadData();
-        setTimeout(() => this.successMsg = '', 3000);
       },
-      error: (err: any) => { this.errorMsg = err.error?.message || 'Erreur'; this.savingMovement = false; setTimeout(() => this.errorMsg = '', 3000); }
+      error: (err: any) => { this.toast.error(err.error?.message || 'Erreur'); this.savingMovement = false; }
     });
   }
 

@@ -52,3 +52,133 @@ code {
 
 tr.low-stock { background: #fffde7; }
 tr.out-of-stock { background: #fce4ec; }
+
+/* Mobile card view */
+.show-mobile {
+  display: none;
+}
+
+.product-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.product-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+.product-card.low-stock-card {
+  border-left: 4px solid #e65100;
+}
+
+.product-card.out-of-stock-card {
+  border-left: 4px solid #c62828;
+}
+
+.product-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.product-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.product-name {
+  font-size: 15px;
+  color: #1a1a2e;
+}
+
+.product-sku {
+  font-size: 12px;
+  color: #8896ab;
+  font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
+}
+
+.product-card-body {
+  margin-bottom: 8px;
+}
+
+.product-card-details {
+  margin-bottom: 12px;
+}
+
+.product-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 0;
+  border-bottom: 1px solid #f0f2f5;
+}
+
+.product-row:last-child {
+  border-bottom: none;
+}
+
+.product-label {
+  font-size: 12px;
+  color: #8896ab;
+}
+
+.product-value {
+  font-size: 14px;
+  color: #1a1a2e;
+  font-weight: 600;
+}
+
+.product-card-qty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 12px;
+  background: #f5f7fa;
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
+
+.product-card-qty .qty-btn {
+  width: 40px;
+  height: 40px;
+  font-size: 18px;
+}
+
+.product-card-qty .qty-value {
+  font-size: 20px;
+  min-width: 50px;
+}
+
+.product-card-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.product-card-actions .btn {
+  flex: 1;
+}
+
+.empty-card {
+  text-align: center;
+  padding: 32px;
+  color: #8896ab;
+  background: #fff;
+  border-radius: 12px;
+}
+
+@media (max-width: 768px) {
+  .show-mobile {
+    display: flex;
+  }
+
+  .hide-mobile {
+    display: none !important;
+  }
+}

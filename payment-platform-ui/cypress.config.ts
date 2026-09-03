@@ -17,20 +17,6 @@ export default defineConfig({
     supportFile: "cypress/support/e2e.ts",
   },
 
-  component: {
-    devServer: {
-      framework: "angular",
-      bundler: "webpack",
-    },
-    specPattern: "**/*.cy.ts",
-    supportFile: "cypress/support/component.ts",
-    indexHtmlFile: "cypress/support/component-index.html",
-    viewportWidth: 400,
-    viewportHeight: 300,
-  },
-  
-  // Webpack 4 workaround for Angular 16
-  experimentalStudio: false,
   retries: {
     runMode: 0,
     openMode: 0,

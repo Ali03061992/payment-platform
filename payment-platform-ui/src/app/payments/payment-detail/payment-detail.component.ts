@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { PaymentService } from '../../services/payment.service';
 import { Payment } from '../../models/payment.model';
+import { ToastService } from '../../services/toast.service';
 
 @Component({
   selector: 'app-payment-detail',
@@ -14,15 +15,14 @@ export class PaymentDetailComponent implements OnInit {
   showReject = false;
   showQR = false;
   rejectReason = '';
-  errorMsg = '';
-  successMsg = '';
   qrData = '';
   canShare = typeof navigator !== 'undefined' && 'share' in navigator;
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private paymentService: PaymentService
+    private paymentService: PaymentService,
+    private toast: ToastService
   ) {}
 
   ngOnInit(): void {
@@ -40,24 +40,24 @@ export class PaymentDetailComponent implements OnInit {
   confirm(): void {
     if (!this.payment) return;
     this.paymentService.confirm(this.payment.id).subscribe({
-      next: (data: Payment) => { this.payment = data; this.successMsg = 'Paiement confirmé'; },
-      error: (e: any) => { this.errorMsg = e.error?.message || 'Erreur'; setTimeout(() => this.errorMsg = '', 3000); }
+      next: (data: Payment) => { this.payment = data; this.toast.success('Paiement confirmé'); },
+      error: (e: any) => { this.toast.error(e.error?.message || 'Erreur'); }
     });
   }
 
   reject(): void {
     if (!this.payment || !this.rejectReason.trim()) return;
     this.paymentService.reject(this.payment.id, { rejectionReason: this.rejectReason }).subscribe({
-      next: (data: Payment) => { this.payment = data; this.showReject = false; this.rejectReason = ''; this.successMsg = 'Paiement rejeté'; },
-      error: (e: any) => { this.errorMsg = e.error?.message || 'Erreur'; setTimeout(() => this.errorMsg = '', 3000); }
+      next: (data: Payment) => { this.payment = data; this.showReject = false; this.rejectReason = ''; this.toast.success('Paiement rejeté'); },
+      error: (e: any) => { this.toast.error(e.error?.message || 'Erreur'); }
     });
   }
 
   cancel(): void {
     if (!this.payment) return;
     this.paymentService.cancel(this.payment.id).subscribe({
-      next: (data: Payment) => { this.payment = data; this.successMsg = 'Paiement annulé'; },
-      error: (e: any) => { this.errorMsg = e.error?.message || 'Erreur'; setTimeout(() => this.errorMsg = '', 3000); }
+      next: (data: Payment) => { this.payment = data; this.toast.success('Paiement annulé'); },
+      error: (e: any) => { this.toast.error(e.error?.message || 'Erreur'); }
     });
   }
 

@@ -70,6 +70,42 @@ public class BalanceUseCase {
         return balanceRepository.findByShopIdOrderByCreatedAtDesc(shopId);
     }
 
+    @Transactional(readOnly = true)
+    public List<BalanceResponse> getShopBalanceSummaries(Long shopId) {
+        List<Long> supplierIds = balanceRepository.findDistinctSupplierIdsByShopId(shopId);
+        return supplierIds.stream().map(supplierId -> {
+            BigDecimal currentBalance = getCurrentBalance(supplierId, shopId);
+            BigDecimal totalOrders = balanceRepository.sumOrdersBySupplierAndShop(supplierId, shopId);
+            BigDecimal totalPayments = balanceRepository.sumPaymentsBySupplierAndShop(supplierId, shopId);
+            java.time.Instant lastTransaction = balanceRepository.findLatestBySupplierIdAndShopId(supplierId, shopId)
+                    .map(BalanceEntry::getCreatedAt).orElse(null);
+            return new BalanceResponse(
+                    supplierId, shopId,
+                    "Supplier " + supplierId, "Shop " + shopId,
+                    currentBalance, totalOrders, totalPayments,
+                    currentBalance, lastTransaction
+            );
+        }).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<BalanceResponse> getSupplierBalanceSummaries(Long supplierId) {
+        List<Long> shopIds = balanceRepository.findDistinctShopIdsBySupplierId(supplierId);
+        return shopIds.stream().map(shopId -> {
+            BigDecimal currentBalance = getCurrentBalance(supplierId, shopId);
+            BigDecimal totalOrders = balanceRepository.sumOrdersBySupplierAndShop(supplierId, shopId);
+            BigDecimal totalPayments = balanceRepository.sumPaymentsBySupplierAndShop(supplierId, shopId);
+            java.time.Instant lastTransaction = balanceRepository.findLatestBySupplierIdAndShopId(supplierId, shopId)
+                    .map(BalanceEntry::getCreatedAt).orElse(null);
+            return new BalanceResponse(
+                    supplierId, shopId,
+                    "Supplier " + supplierId, "Shop " + shopId,
+                    currentBalance, totalOrders, totalPayments,
+                    currentBalance, lastTransaction
+            );
+        }).toList();
+    }
+
     private BigDecimal getCurrentBalance(Long supplierId, Long shopId) {
         return balanceRepository.findFirstBySupplierIdAndShopIdOrderByCreatedAtDesc(supplierId, shopId)
                 .map(BalanceEntry::getBalanceAfter)

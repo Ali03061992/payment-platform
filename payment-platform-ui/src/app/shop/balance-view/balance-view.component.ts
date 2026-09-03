@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { BalanceService } from '../../services/balance.service';
 import { BalanceSummary, BalanceEntry } from '../../models/balance.model';
+import { ToastService } from '../../services/toast.service';
 
 @Component({
   selector: 'app-balance-view',
@@ -10,14 +11,13 @@ import { BalanceSummary, BalanceEntry } from '../../models/balance.model';
 export class BalanceViewComponent implements OnInit {
   balances: BalanceSummary[] = [];
   loading = true;
-  errorMsg = '';
 
   selectedSupplierId: number | null = null;
   selectedShopId: number | null = null;
   ledgerEntries: BalanceEntry[] = [];
   loadingLedger = false;
 
-  constructor(private balanceService: BalanceService) {}
+  constructor(private balanceService: BalanceService, private toast: ToastService) {}
 
   ngOnInit(): void { this.load(); }
 
@@ -35,7 +35,7 @@ export class BalanceViewComponent implements OnInit {
     const shopId = this.getShopId();
     this.balanceService.listByShop(shopId).subscribe({
       next: (data: BalanceSummary[]) => { this.balances = data; this.loading = false; },
-      error: (err: any) => { this.errorMsg = err.error?.message || 'Erreur'; this.loading = false; }
+      error: (err: any) => { this.toast.error(err.error?.message || 'Erreur'); this.loading = false; }
     });
   }
 
@@ -45,7 +45,7 @@ export class BalanceViewComponent implements OnInit {
     this.loadingLedger = true;
     this.balanceService.getHistory(supplierId, shopId).subscribe({
       next: (data: BalanceEntry[]) => { this.ledgerEntries = data; this.loadingLedger = false; },
-      error: (err: any) => { this.errorMsg = err.error?.message || 'Erreur'; this.loadingLedger = false; }
+      error: (err: any) => { this.toast.error(err.error?.message || 'Erreur'); this.loadingLedger = false; }
     });
   }
 

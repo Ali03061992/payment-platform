@@ -18,9 +18,7 @@ export class BalanceService {
   }
 
   getHistory(supplierId: number, shopId: number): Observable<BalanceEntry[]> {
-    return this.http.get<BalanceEntry[]>(`${this.apiUrl}/history`, {
-      params: { supplierId: supplierId.toString(), shopId: shopId.toString() }
-    });
+    return this.http.get<BalanceEntry[]>(`${this.apiUrl}/supplier/${supplierId}/shop/${shopId}`);
   }
 
   adjust(data: { supplierId: number; shopId: number; amount: number; reason: string }): Observable<BalanceEntry> {

@@ -1,5 +1,4 @@
 /// <reference types="cypress" />
-/// <reference types="@cypress/angular" />
 
 import { PaymentDetailComponent } from './payment-detail.component';
 import { PaymentService } from '../../services/payment.service';

@@ -6,6 +6,7 @@ import { StockService } from '../../services/stock.service';
 import { Organization } from '../../models/organization.model';
 import { Product } from '../../models/stock.model';
 import { CreateOrderRequest } from '../../models/order.model';
+import { ToastService } from '../../services/toast.service';
 
 interface OrderLine {
   product: Product;
@@ -28,14 +29,14 @@ export class CreateOrderComponent implements OnInit {
   currency = 'TND';
   notes = '';
   creating = false;
-  errorMsg = '';
   shopId = 0;
 
   constructor(
     private orderService: OrderService,
     private orgService: OrganizationService,
     private stockService: StockService,
-    private router: Router
+    private router: Router,
+    private toast: ToastService
   ) {}
 
   ngOnInit(): void {
@@ -131,9 +132,8 @@ export class CreateOrderComponent implements OnInit {
     this.orderService.create(request).subscribe({
       next: () => this.router.navigate(['/dashboard/shop/orders']),
       error: (err: any) => {
-        this.errorMsg = err.error?.message || 'Erreur lors de la création';
+        this.toast.error(err.error?.message || 'Erreur lors de la création');
         this.creating = false;
-        setTimeout(() => this.errorMsg = '', 3000);
       }
     });
   }

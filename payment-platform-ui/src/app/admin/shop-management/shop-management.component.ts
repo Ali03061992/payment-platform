@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { OrganizationService } from '../../services/organization.service';
 import { Organization } from '../../models/organization.model';
+import { ToastService } from '../../services/toast.service';
 
 @Component({
   selector: 'app-shop-management',
@@ -13,10 +14,7 @@ export class ShopManagementComponent implements OnInit {
   showCreate = false;
   newName = '';
   creating = false;
-  successMsg = '';
-  errorMsg = '';
-
-  constructor(private orgService: OrganizationService) {}
+  constructor(private orgService: OrganizationService, private toast: ToastService) {}
 
   ngOnInit(): void { this.load(); }
 
@@ -33,17 +31,15 @@ export class ShopManagementComponent implements OnInit {
     this.creating = true;
     this.orgService.createShop(this.newName.trim()).subscribe({
       next: () => {
-        this.successMsg = 'Boutique créée avec succès';
+        this.toast.success('Boutique créée avec succès');
         this.newName = '';
         this.showCreate = false;
         this.creating = false;
         this.load();
-        setTimeout(() => this.successMsg = '', 3000);
       },
       error: (err: any) => {
-        this.errorMsg = err.error?.message || 'Erreur lors de la création';
+        this.toast.error(err.error?.message || 'Erreur lors de la création');
         this.creating = false;
-        setTimeout(() => this.errorMsg = '', 3000);
       }
     });
   }

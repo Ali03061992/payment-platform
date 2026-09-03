@@ -15,3 +15,101 @@
 .payment-badge.delivery { background: #fff3e0; color: #e65100; }
 .payment-badge.delivered { background: #e8f5e9; color: #2e7d32; }
 .payment-badge.accepted { background: #e0f7fa; color: #00695c; }
+
+/* Mobile card view */
+.show-mobile {
+  display: none;
+}
+
+.order-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.order-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  cursor: pointer;
+  transition: box-shadow 0.2s;
+}
+
+.order-card:hover {
+  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+}
+
+.order-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.order-reference {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1a1a2e;
+}
+
+.order-card-body {
+  margin-bottom: 12px;
+}
+
+.order-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 0;
+  border-bottom: 1px solid #f0f2f5;
+}
+
+.order-row:last-child {
+  border-bottom: none;
+}
+
+.order-label {
+  font-size: 12px;
+  color: #8896ab;
+}
+
+.order-value {
+  font-size: 14px;
+  color: #1a1a2e;
+}
+
+.order-amount {
+  font-size: 16px;
+  font-weight: 700;
+  color: #0f3460;
+}
+
+.order-card-actions {
+  display: flex;
+  gap: 8px;
+  padding-top: 12px;
+  border-top: 1px solid #f0f2f5;
+}
+
+.order-card-actions .btn {
+  flex: 1;
+}
+
+.empty-card {
+  text-align: center;
+  padding: 32px;
+  color: #8896ab;
+  background: #fff;
+  border-radius: 12px;
+}
+
+@media (max-width: 768px) {
+  .show-mobile {
+    display: flex;
+  }
+
+  .hide-mobile {
+    display: none !important;
+  }
+}

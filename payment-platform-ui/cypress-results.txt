@@ -1,0 +1,28 @@
+﻿
+Warning: The allowCypressEnv configuration option is enabled. This allows any browser code to read values from Cypress.env(). This is insecure and will be removed in a future major version.
+
+1. Replace Cypress.env() calls with cy.env() (for sensitive values) or Cypress.expose() (for public configuration)
+2. Set allowCypressEnv: false in your Cypress configuration to disable Cypress.env()
+
+Learn more: https://on.cypress.io/cypress-env-migration
+
+The experimentalStudio option was removed in Cypress version 15.4.0.
+
+Cypress Studio is now available for all users.
+
+You can safely remove this option from your config.
+Cypress could not verify that this server is running:
+
+  > http://localhost:8080
+
+We are verifying this server because it has been configured as your baseUrl.
+
+Cypress automatically waits until your server is accessible before running tests.
+
+We will try connecting to it 3 more times...
+We will try connecting to it 2 more times...
+We will try connecting to it 1 more time...
+
+Cypress failed to verify that your server is running.
+
+Please start this server and then run Cypress again.

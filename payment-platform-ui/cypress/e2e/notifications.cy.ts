@@ -1,8 +1,8 @@
-const API_URL = 'http://localhost:8081';
-
 function authHeaders(token: string) {
   return { Authorization: `Bearer ${token}` };
 }
+
+const API = () => Cypress.env('apiUrl') || 'http://localhost:8081';
 
 describe('Notifications - API Integration', () => {
   let adminToken: string;
@@ -11,16 +11,16 @@ describe('Notifications - API Integration', () => {
   let paymentRef: string;
 
   before(() => {
-    cy.request({ method: 'POST', url: `${API_URL}/api/auth/login`,
+    cy.request({ method: 'POST', url: `${API()}/api/auth/login`,
       body: { username: 'system.admin', password: 'Admin@123' } }).then(r => { adminToken = r.body.accessToken; });
-    cy.request({ method: 'POST', url: `${API_URL}/api/auth/login`,
+    cy.request({ method: 'POST', url: `${API()}/api/auth/login`,
       body: { username: 'supplier.admin', password: 'Admin@123' } }).then(r => { supplierToken = r.body.accessToken; });
-    cy.request({ method: 'POST', url: `${API_URL}/api/auth/login`,
+    cy.request({ method: 'POST', url: `${API()}/api/auth/login`,
       body: { username: 'shop.admin', password: 'Admin@123' } }).then(r => { shopToken = r.body.accessToken; });
   });
 
   it('GET /api/notifications - should return array for authenticated user', () => {
-    cy.request({ method: 'GET', url: `${API_URL}/api/notifications`,
+    cy.request({ method: 'GET', url: `${API()}/api/notifications`,
       headers: authHeaders(adminToken) }).then(r => {
       expect(r.status).to.eq(200);
       expect(r.body).to.be.an('array');
@@ -28,14 +28,14 @@ describe('Notifications - API Integration', () => {
   });
 
   it('GET /api/notifications - should reject without token', () => {
-    cy.request({ method: 'GET', url: `${API_URL}/api/notifications`,
+    cy.request({ method: 'GET', url: `${API()}/api/notifications`,
       failOnStatusCode: false }).then(r => {
       expect(r.status).to.eq(401);
     });
   });
 
   it('GET /api/notifications/unread-count - should return count', () => {
-    cy.request({ method: 'GET', url: `${API_URL}/api/notifications/unread-count`,
+    cy.request({ method: 'GET', url: `${API()}/api/notifications/unread-count`,
       headers: authHeaders(adminToken) }).then(r => {
       expect(r.status).to.eq(200);
       expect(r.body).to.have.property('count');
@@ -44,7 +44,7 @@ describe('Notifications - API Integration', () => {
   });
 
   it('POST /api/notifications/read-all - should mark all as read', () => {
-    cy.request({ method: 'POST', url: `${API_URL}/api/notifications/read-all`,
+    cy.request({ method: 'POST', url: `${API()}/api/notifications/read-all`,
       headers: authHeaders(adminToken) }).then(r => {
       expect(r.status).to.eq(200);
       expect(r.body).to.have.property('updated');
@@ -56,13 +56,13 @@ describe('Notifications - API Integration', () => {
     let supplierToken: string;
     let shopToken: string;
     
-    cy.request({ method: 'POST', url: `${API_URL}/api/auth/login`, body: { username: 'covale.admin', password: 'Admin@123' } })
+    cy.request({ method: 'POST', url: `${API()}/api/auth/login`, body: { username: 'covale.admin', password: 'Admin@123' } })
       .then(r => { supplierToken = r.body.accessToken; });
-    cy.request({ method: 'POST', url: `${API_URL}/api/auth/login`, body: { username: 'abdelslam', password: 'Admin@123' } })
+    cy.request({ method: 'POST', url: `${API()}/api/auth/login`, body: { username: 'abdelslam', password: 'Admin@123' } })
       .then(r => { shopToken = r.body.accessToken; });
 
     cy.wrap(null).then(() => {
-      cy.request({ method: 'POST', url: `${API_URL}/api/payments`, body: {
+      cy.request({ method: 'POST', url: `${API()}/api/payments`, body: {
         shopId: 3, supplierId: 1, amount: 100.00, currency: 'EUR'
       }, headers: authHeaders(shopToken) }).then(r => {
         expect(r.status).to.be.oneOf([200, 201]);
@@ -72,7 +72,7 @@ describe('Notifications - API Integration', () => {
 
       cy.wait(8000);
 
-      cy.request({ method: 'GET', url: `${API_URL}/api/notifications`,
+      cy.request({ method: 'GET', url: `${API()}/api/notifications`,
         headers: authHeaders(supplierToken) }).then(r => {
         const supplierNotifs = r.body.filter((n: any) => n.relatedEntityId === paymentRef);
         if (supplierNotifs.length === 0) {
@@ -83,7 +83,7 @@ describe('Notifications - API Integration', () => {
         expect(supplierNotifs[0].message).to.contain('Nouveau paiement');
       });
 
-      cy.request({ method: 'GET', url: `${API_URL}/api/notifications`,
+      cy.request({ method: 'GET', url: `${API()}/api/notifications`,
         headers: authHeaders(shopToken) }).then(r => {
         const shopNotifs = r.body.filter((n: any) => n.relatedEntityId === paymentRef);
         expect(shopNotifs.length).to.be.greaterThan(0);
@@ -94,21 +94,21 @@ describe('Notifications - API Integration', () => {
   });
 
   it('Payment confirmation should notify shop', () => {
-    cy.request({ method: 'GET', url: `${API_URL}/api/notifications/unread-count`,
+    cy.request({ method: 'GET', url: `${API()}/api/notifications/unread-count`,
       headers: authHeaders(shopToken) }).then(before => {
       const beforeCount = before.body.count;
 
-      cy.request({ method: 'GET', url: `${API_URL}/api/payments`, headers: authHeaders(shopToken) }).then(pays => {
+      cy.request({ method: 'GET', url: `${API()}/api/payments`, headers: authHeaders(shopToken) }).then(pays => {
         const pending = pays.body.find((p: any) => p.status === 'PENDING');
         if (pending) {
-          cy.request({ method: 'POST', url: `${API_URL}/api/payments/${pending.id}/confirm`,
+          cy.request({ method: 'POST', url: `${API()}/api/payments/${pending.id}/confirm`,
             headers: authHeaders(supplierToken) }).then(r => {
             expect(r.status).to.eq(200);
           });
 
           cy.wait(6000);
 
-          cy.request({ method: 'GET', url: `${API_URL}/api/notifications/unread-count`,
+          cy.request({ method: 'GET', url: `${API()}/api/notifications/unread-count`,
             headers: authHeaders(shopToken) }).then(after => {
             expect(after.body.count).to.be.greaterThan(beforeCount);
           });

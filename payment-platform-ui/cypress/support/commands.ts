@@ -1,5 +1,3 @@
-const API_URL = 'http://localhost:8081';
-
 declare namespace Cypress {
   interface Chainable {
     login(username: string, password: string): Chainable<void>;
@@ -10,15 +8,19 @@ declare namespace Cypress {
   }
 }
 
+function apiUrl(): string {
+  return Cypress.env('apiUrl') || 'http://localhost:8081';
+}
+
 Cypress.Commands.add('ensureTestUsers', () => {
   cy.request({
-    method: 'POST', url: `${API_URL}/api/auth/login`,
+    method: 'POST', url: `${apiUrl()}/api/auth/login`,
     body: { username: 'system.admin', password: 'Admin@123' },
   }).then((resp) => {
     const token = resp.body.accessToken;
     const headers = { Authorization: `Bearer ${token}` };
 
-    cy.request({ method: 'GET', url: `${API_URL}/api/users`, headers, failOnStatusCode: false })
+    cy.request({ method: 'GET', url: `${apiUrl()}/api/users`, headers, failOnStatusCode: false })
       .then((usersResp) => {
         const users = usersResp.status === 200 ? usersResp.body : [];
         const hasSupplierAdmin = users.some((u: any) => u.username === 'supplier.admin');
@@ -26,13 +28,13 @@ Cypress.Commands.add('ensureTestUsers', () => {
 
         if (!hasSupplierAdmin) {
           cy.request({
-            method: 'POST', url: `${API_URL}/api/admin/suppliers`, headers,
+            method: 'POST', url: `${apiUrl()}/api/admin/suppliers`, headers,
             body: { name: 'E2E Supplier Test' }, failOnStatusCode: false,
           }).then((supResp) => {
             if (supResp.status === 200 || supResp.status === 201) {
               const supId = supResp.body.id;
               cy.request({
-                method: 'POST', url: `${API_URL}/api/users`, headers,
+                method: 'POST', url: `${apiUrl()}/api/users`, headers,
                 body: {
                   username: 'supplier.admin', email: 'supplier.admin@test.com',
                   password: 'Admin@123', firstName: 'Supplier', lastName: 'Admin',
@@ -45,13 +47,13 @@ Cypress.Commands.add('ensureTestUsers', () => {
 
         if (!hasShopAdmin) {
           cy.request({
-            method: 'POST', url: `${API_URL}/api/admin/shops`, headers,
+            method: 'POST', url: `${apiUrl()}/api/admin/shops`, headers,
             body: { name: 'E2E Shop Test' }, failOnStatusCode: false,
           }).then((shopResp) => {
             if (shopResp.status === 200 || shopResp.status === 201) {
               const shopId = shopResp.body.id;
               cy.request({
-                method: 'POST', url: `${API_URL}/api/users`, headers,
+                method: 'POST', url: `${apiUrl()}/api/users`, headers,
                 body: {
                   username: 'shop.admin', email: 'shop.admin@test.com',
                   password: 'Admin@123', firstName: 'Shop', lastName: 'Admin',
@@ -68,7 +70,7 @@ Cypress.Commands.add('ensureTestUsers', () => {
 Cypress.Commands.add('login', (username: string, password: string) => {
   cy.request({
     method: 'POST',
-    url: `${API_URL}/api/auth/login`,
+    url: `${apiUrl()}/api/auth/login`,
     body: { username, password },
     failOnStatusCode: false,
   }).then((resp) => {
@@ -76,7 +78,7 @@ Cypress.Commands.add('login', (username: string, password: string) => {
       window.localStorage.setItem('token', resp.body.accessToken);
       cy.request({
         method: 'GET',
-        url: `${API_URL}/api/auth/me`,
+        url: `${apiUrl()}/api/auth/me`,
         headers: { Authorization: `Bearer ${resp.body.accessToken}` },
       }).then((meResp) => {
         if (meResp.status === 200) {

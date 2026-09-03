@@ -1,5 +1,4 @@
 /// <reference types="cypress" />
-/// <reference types="@cypress/angular" />
 
 import { LayoutComponent } from './layout.component';
 import { LoginService } from '../services/login.service';

@@ -37,6 +37,8 @@ import { BalanceViewComponent } from './shop/balance-view/balance-view.component
 import { PwaUpdateComponent } from './pwa-update/pwa-update.component';
 import { QrScannerComponent } from './qr-scanner/qr-scanner.component';
 import { AgentPaymentsComponent } from './supplier/agent-payments/agent-payments.component';
+import { NotificationBannerComponent } from './components/notification-banner/notification-banner.component';
+import { ToastComponent } from './components/toast/toast.component';
 
 import { JwtInterceptor } from './core/jwt.interceptor';
 import { AuthGuard } from './core/auth.guard';
@@ -117,7 +119,9 @@ const routes: Routes = [
     BalanceViewComponent,
     PwaUpdateComponent,
     QrScannerComponent,
-    AgentPaymentsComponent
+    AgentPaymentsComponent,
+    NotificationBannerComponent,
+    ToastComponent
   ],
   imports: [
     BrowserModule,

@@ -3,9 +3,6 @@
   <button class="btn btn-primary" (click)="openCreate()">+ Nouveau produit</button>
 </div>
 
-<div class="alert alert-success" *ngIf="successMsg">{{ successMsg }}</div>
-<div class="alert alert-error" *ngIf="errorMsg">{{ errorMsg }}</div>
-
 <div class="form-card" *ngIf="showForm" style="margin-bottom: 24px;">
   <h3>{{ editingProduct ? 'Modifier le produit' : 'Créer un produit' }}</h3>
   <form (ngSubmit)="save()">

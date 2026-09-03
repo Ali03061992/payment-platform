@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy, ViewChild, ElementRef } from '@angular/core';
 import { Router } from '@angular/router';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { ToastService } from '../services/toast.service';
 
 @Component({
   selector: 'app-qr-scanner',
@@ -11,14 +12,13 @@ export class QrScannerComponent implements OnInit, OnDestroy {
   @ViewChild('video') videoRef!: ElementRef<HTMLVideoElement>;
 
   scanning = false;
-  errorMsg = '';
   manualUrl = '';
   useManual = false;
   cameraActive = false;
   private stream: MediaStream | null = null;
   private scanInterval: any;
 
-  constructor(private router: Router, private sanitizer: DomSanitizer) {}
+  constructor(private router: Router, private sanitizer: DomSanitizer, private toast: ToastService) {}
 
   ngOnInit(): void {
     if (!this.isCameraSupported()) {
@@ -35,7 +35,6 @@ export class QrScannerComponent implements OnInit, OnDestroy {
   }
 
   async startCamera(): Promise<void> {
-    this.errorMsg = '';
     this.useManual = false;
     try {
       this.stream = await navigator.mediaDevices.getUserMedia({
@@ -52,7 +51,7 @@ export class QrScannerComponent implements OnInit, OnDestroy {
         }
       }, 100);
     } catch (err: any) {
-      this.errorMsg = 'Caméra non disponible. Utilisez la saisie manuelle.';
+      this.toast.error('Caméra non disponible. Utilisez la saisie manuelle.');
       this.useManual = true;
     }
   }
@@ -72,7 +71,7 @@ export class QrScannerComponent implements OnInit, OnDestroy {
         }
       }, 500);
     } else {
-      this.errorMsg = 'Détection QR auto non supportée. Utilisez la saisie manuelle.';
+      this.toast.error('Détection QR auto non supportée. Utilisez la saisie manuelle.');
       this.stopCamera();
       this.useManual = true;
     }
@@ -85,7 +84,7 @@ export class QrScannerComponent implements OnInit, OnDestroy {
       if (paymentId) {
         this.router.navigate(['/dashboard/payments', paymentId]);
       } else {
-        this.errorMsg = 'QR Code non reconnu comme facture valide.';
+        this.toast.error('QR Code non reconnu comme facture valide.');
       }
     }
   }
@@ -114,7 +113,7 @@ export class QrScannerComponent implements OnInit, OnDestroy {
     if (paymentId) {
       this.router.navigate(['/dashboard/payments', paymentId]);
     } else {
-      this.errorMsg = 'Lien ou ID non reconnu. Essayez un numéro de facture.';
+      this.toast.error('Lien ou ID non reconnu. Essayez un numéro de facture.');
     }
   }
 

@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { OrderService } from '../../services/order.service';
 import { Order } from '../../models/order.model';
+import { ToastService } from '../../services/toast.service';
 
 @Component({
   selector: 'app-order-list',
@@ -11,9 +12,8 @@ export class OrderListComponent implements OnInit {
   orders: Order[] = [];
   loading = true;
   filterStatus = '';
-  errorMsg = '';
 
-  constructor(private orderService: OrderService) {}
+  constructor(private orderService: OrderService, private toast: ToastService) {}
 
   ngOnInit(): void { this.load(); }
 
@@ -21,7 +21,7 @@ export class OrderListComponent implements OnInit {
     this.loading = true;
     this.orderService.list().subscribe({
       next: (data: Order[]) => { this.orders = data; this.loading = false; },
-      error: (err: any) => { this.errorMsg = err.error?.message || 'Erreur'; this.loading = false; }
+      error: (err: any) => { this.toast.error(err.error?.message || 'Erreur'); this.loading = false; }
     });
   }
 
@@ -53,14 +53,14 @@ export class OrderListComponent implements OnInit {
   accept(id: number): void {
     this.orderService.accept(id).subscribe({
       next: () => this.load(),
-      error: (e: any) => { this.errorMsg = e.error?.message || 'Erreur'; setTimeout(() => this.errorMsg = '', 3000); }
+      error: (e: any) => { this.toast.error(e.error?.message || 'Erreur'); }
     });
   }
 
   cancel(id: number): void {
     this.orderService.cancel(id).subscribe({
       next: () => this.load(),
-      error: (e: any) => { this.errorMsg = e.error?.message || 'Erreur'; setTimeout(() => this.errorMsg = '', 3000); }
+      error: (e: any) => { this.toast.error(e.error?.message || 'Erreur'); }
     });
   }
 }

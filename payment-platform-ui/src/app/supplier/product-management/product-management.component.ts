@@ -3,6 +3,7 @@ import { StockService } from '../../services/stock.service';
 import { CatalogService } from '../../services/catalog.service';
 import { Product } from '../../models/stock.model';
 import { ProductFamily, ProductSubfamily, ProductCategory } from '../../models/catalog.model';
+import { ToastService } from '../../services/toast.service';
 
 @Component({
   selector: 'app-product-management',
@@ -15,8 +16,6 @@ export class ProductManagementComponent implements OnInit {
   subfamilies: ProductSubfamily[] = [];
   categories: ProductCategory[] = [];
   loading = true;
-  errorMsg = '';
-  successMsg = '';
 
   filterFamily = '';
   filterSubfamily = '';
@@ -40,7 +39,8 @@ export class ProductManagementComponent implements OnInit {
 
   constructor(
     private stockService: StockService,
-    private catalogService: CatalogService
+    private catalogService: CatalogService,
+    private toast: ToastService
   ) {}
 
   ngOnInit(): void {
@@ -61,7 +61,7 @@ export class ProductManagementComponent implements OnInit {
     this.loading = true;
     this.stockService.getProducts().subscribe({
       next: (data: Product[]) => { this.products = data; this.loading = false; },
-      error: (err: any) => { this.errorMsg = err.error?.message || 'Erreur de chargement'; this.loading = false; }
+      error: (err: any) => { this.toast.error(err.error?.message || 'Erreur de chargement'); this.loading = false; }
     });
   }
 
@@ -123,7 +123,6 @@ export class ProductManagementComponent implements OnInit {
 
   save(): void {
     this.saving = true;
-    this.errorMsg = '';
 
     if (this.editingProduct) {
       this.stockService.updateProduct(this.editingProduct.id, {
@@ -133,13 +132,12 @@ export class ProductManagementComponent implements OnInit {
         minQuantity: this.form.minQuantity
       }).subscribe({
         next: () => {
-          this.successMsg = 'Produit mis à jour avec succès';
+          this.toast.success('Produit mis à jour avec succès');
           this.showForm = false;
           this.saving = false;
           this.loadProducts();
-          setTimeout(() => this.successMsg = '', 3000);
         },
-        error: (err: any) => { this.errorMsg = err.error?.message || 'Erreur lors de la mise à jour'; this.saving = false; }
+        error: (err: any) => { this.toast.error(err.error?.message || 'Erreur lors de la mise à jour'); this.saving = false; }
       });
     } else {
       this.stockService.createProduct({
@@ -152,13 +150,12 @@ export class ProductManagementComponent implements OnInit {
         minQuantity: this.form.minQuantity
       }).subscribe({
         next: () => {
-          this.successMsg = 'Produit créé avec succès';
+          this.toast.success('Produit créé avec succès');
           this.showForm = false;
           this.saving = false;
           this.loadProducts();
-          setTimeout(() => this.successMsg = '', 3000);
         },
-        error: (err: any) => { this.errorMsg = err.error?.message || 'Erreur lors de la création'; this.saving = false; }
+        error: (err: any) => { this.toast.error(err.error?.message || 'Erreur lors de la création'); this.saving = false; }
       });
     }
   }
@@ -166,14 +163,13 @@ export class ProductManagementComponent implements OnInit {
   cancelForm(): void {
     this.showForm = false;
     this.editingProduct = null;
-    this.errorMsg = '';
   }
 
   toggleStatus(product: Product): void {
     const newStatus = product.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
     this.stockService.updateProduct(product.id, { status: newStatus }).subscribe({
       next: () => { this.loadProducts(); },
-      error: (err: any) => { this.errorMsg = err.error?.message || 'Erreur'; setTimeout(() => this.errorMsg = '', 3000); }
+      error: (err: any) => { this.toast.error(err.error?.message || 'Erreur'); }
     });
   }
 
@@ -181,11 +177,10 @@ export class ProductManagementComponent implements OnInit {
     if (!confirm(`Supprimer le produit "${product.name}" ?`)) return;
     this.stockService.deleteProduct(product.id).subscribe({
       next: () => {
-        this.successMsg = 'Produit supprimé';
+        this.toast.success('Produit supprimé');
         this.loadProducts();
-        setTimeout(() => this.successMsg = '', 3000);
       },
-      error: (err: any) => { this.errorMsg = err.error?.message || 'Erreur'; setTimeout(() => this.errorMsg = '', 3000); }
+      error: (err: any) => { this.toast.error(err.error?.message || 'Erreur'); }
     });
   }
 

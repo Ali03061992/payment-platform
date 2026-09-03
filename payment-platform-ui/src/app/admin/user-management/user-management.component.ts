@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { UserService } from '../../services/user.service';
 import { User } from '../../models/user.model';
+import { ToastService } from '../../services/toast.service';
 
 @Component({
   selector: 'app-user-management',
@@ -13,9 +14,8 @@ export class UserManagementComponent implements OnInit {
   error = '';
   filterRole = '';
   filterStatus = '';
-  successMessage = '';
 
-  constructor(private userService: UserService) {}
+  constructor(private userService: UserService, private toast: ToastService) {}
 
   ngOnInit(): void {
     this.loadUsers();
@@ -33,10 +33,9 @@ export class UserManagementComponent implements OnInit {
     this.userService.activate(user.id).subscribe({
       next: () => {
         user.status = 'ACTIVE';
-        this.successMessage = `${user.username} activé avec succès`;
-        setTimeout(() => this.successMessage = '', 3000);
+        this.toast.success(`${user.username} activé avec succès`);
       },
-      error: (err) => { this.error = err.error?.message || 'Erreur'; setTimeout(() => this.error = '', 3000); }
+      error: (err) => { this.toast.error(err.error?.message || 'Erreur'); }
     });
   }
 
@@ -44,10 +43,9 @@ export class UserManagementComponent implements OnInit {
     this.userService.disable(user.id).subscribe({
       next: () => {
         user.status = 'DISABLED';
-        this.successMessage = `${user.username} désactivé avec succès`;
-        setTimeout(() => this.successMessage = '', 3000);
+        this.toast.success(`${user.username} désactivé avec succès`);
       },
-      error: (err) => { this.error = err.error?.message || 'Erreur'; setTimeout(() => this.error = '', 3000); }
+      error: (err) => { this.toast.error(err.error?.message || 'Erreur'); }
     });
   }
 

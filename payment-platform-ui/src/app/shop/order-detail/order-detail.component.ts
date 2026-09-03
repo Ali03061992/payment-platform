@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { OrderService } from '../../services/order.service';
 import { Order } from '../../models/order.model';
+import { ToastService } from '../../services/toast.service';
 
 @Component({
   selector: 'app-order-detail',
@@ -11,15 +12,14 @@ import { Order } from '../../models/order.model';
 export class ShopOrderDetailComponent implements OnInit {
   order: Order | null = null;
   loading = true;
-  errorMsg = '';
-  successMsg = '';
 
   statusSteps = ['DRAFT', 'PENDING', 'CONFIRMED', 'PREPARING', 'READY_FOR_DELIVERY', 'IN_DELIVERY', 'DELIVERED', 'ACCEPTED'];
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private orderService: OrderService
+    private orderService: OrderService,
+    private toast: ToastService
   ) {}
 
   ngOnInit(): void {
@@ -33,24 +33,24 @@ export class ShopOrderDetailComponent implements OnInit {
   accept(): void {
     if (!this.order) return;
     this.orderService.accept(this.order.id).subscribe({
-      next: (data: Order) => { this.order = data; this.successMsg = 'Commande acceptée'; },
-      error: (e: any) => { this.errorMsg = e.error?.message || 'Erreur'; setTimeout(() => this.errorMsg = '', 3000); }
+      next: (data: Order) => { this.order = data; this.toast.success('Commande acceptée'); },
+      error: (e: any) => { this.toast.error(e.error?.message || 'Erreur'); }
     });
   }
 
   acceptAsap(): void {
     if (!this.order) return;
     this.orderService.acceptAsap(this.order.id).subscribe({
-      next: (data: Order) => { this.order = data; this.successMsg = 'Commande acceptée avec paiement ASAP'; },
-      error: (e: any) => { this.errorMsg = e.error?.message || 'Erreur'; setTimeout(() => this.errorMsg = '', 3000); }
+      next: (data: Order) => { this.order = data; this.toast.success('Commande acceptée avec paiement ASAP'); },
+      error: (e: any) => { this.toast.error(e.error?.message || 'Erreur'); }
     });
   }
 
   cancel(): void {
     if (!this.order) return;
     this.orderService.cancel(this.order.id).subscribe({
-      next: (data: Order) => { this.order = data; this.successMsg = 'Commande annulée'; },
-      error: (e: any) => { this.errorMsg = e.error?.message || 'Erreur'; setTimeout(() => this.errorMsg = '', 3000); }
+      next: (data: Order) => { this.order = data; this.toast.success('Commande annulée'); },
+      error: (e: any) => { this.toast.error(e.error?.message || 'Erreur'); }
     });
   }
 

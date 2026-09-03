@@ -25,22 +25,22 @@ public class BalanceController {
 
     @GetMapping("/supplier/{supplierId}")
     @PreAuthorize("hasAuthority('SUPPLIER_ADMIN') or hasAuthority('SYSTEM_ADMIN')")
-    public ResponseEntity<List<BalanceEntry>> listSupplierBalances(@PathVariable Long supplierId) {
+    public ResponseEntity<List<BalanceResponse>> listSupplierBalances(@PathVariable Long supplierId) {
         var current = CurrentUser.get();
         if (!current.roles().contains("SYSTEM_ADMIN") && !current.organizationId().equals(supplierId)) {
             return ResponseEntity.status(403).build();
         }
-        return ResponseEntity.ok(balanceUseCase.getSupplierBalances(supplierId));
+        return ResponseEntity.ok(balanceUseCase.getSupplierBalanceSummaries(supplierId));
     }
 
     @GetMapping("/shop/{shopId}")
     @PreAuthorize("hasAuthority('SHOP_ADMIN') or hasAuthority('SHOP_MANAGER') or hasAuthority('SYSTEM_ADMIN')")
-    public ResponseEntity<List<BalanceEntry>> listShopBalances(@PathVariable Long shopId) {
+    public ResponseEntity<List<BalanceResponse>> listShopBalances(@PathVariable Long shopId) {
         var current = CurrentUser.get();
         if (!current.roles().contains("SYSTEM_ADMIN") && !current.organizationId().equals(shopId)) {
             return ResponseEntity.status(403).build();
         }
-        return ResponseEntity.ok(balanceUseCase.getShopBalances(shopId));
+        return ResponseEntity.ok(balanceUseCase.getShopBalanceSummaries(shopId));
     }
 
     @GetMapping("/supplier/{supplierId}/shop/{shopId}")

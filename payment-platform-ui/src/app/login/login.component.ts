@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { LoginService } from '../services/login.service';
+import { NotificationService } from '../services/notification.service';
 
 @Component({
   selector: 'app-login',
@@ -12,7 +13,11 @@ export class LoginComponent {
   error = '';
   loading = false;
 
-  constructor(private loginService: LoginService, private router: Router) {}
+  constructor(
+    private loginService: LoginService,
+    private router: Router,
+    private notificationService: NotificationService
+  ) {}
 
   onSubmit(): void {
     this.error = '';
@@ -25,15 +30,12 @@ export class LoginComponent {
             localStorage.setItem('user', JSON.stringify(user));
             this.loading = false;
             this.router.navigate(['/dashboard']);
+            this.requestNotificationPermission();
           },
           error: () => {
-            localStorage.setItem('user', JSON.stringify({
-              username: this.form.username,
-              roles: ['SYSTEM_ADMIN'],
-              organizationId: null
-            }));
+            localStorage.removeItem('token');
+            this.error = 'Impossible de récupérer les informations utilisateur';
             this.loading = false;
-            this.router.navigate(['/dashboard']);
           }
         });
       },
@@ -42,5 +44,14 @@ export class LoginComponent {
         this.loading = false;
       }
     });
+  }
+
+  private requestNotificationPermission(): void {
+    if ('Notification' in window && Notification.permission === 'default') {
+      // Wait a moment before requesting permission to avoid blocking the UI
+      setTimeout(() => {
+        this.notificationService.requestPermission();
+      }, 2000);
+    }
   }
 }

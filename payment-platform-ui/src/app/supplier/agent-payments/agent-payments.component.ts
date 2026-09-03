@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { PaymentService } from '../../services/payment.service';
 import { LoginService } from '../../services/login.service';
 import { AgentPaymentSummary, Payment } from '../../models/agent-payment.model';
+import { ToastService } from '../../services/toast.service';
 
 @Component({
   selector: 'app-agent-payments',
@@ -11,7 +12,6 @@ import { AgentPaymentSummary, Payment } from '../../models/agent-payment.model';
 export class AgentPaymentsComponent implements OnInit {
   summaries: AgentPaymentSummary[] = [];
   loading = false;
-  errorMsg = '';
 
   fromDate = '';
   toDate = '';
@@ -26,7 +26,8 @@ export class AgentPaymentsComponent implements OnInit {
 
   constructor(
     private paymentService: PaymentService,
-    private loginService: LoginService
+    private loginService: LoginService,
+    private toast: ToastService
   ) {}
 
   ngOnInit(): void {
@@ -45,7 +46,6 @@ export class AgentPaymentsComponent implements OnInit {
   load(): void {
     if (!this.supplierId || !this.fromDate || !this.toDate) return;
     this.loading = true;
-    this.errorMsg = '';
 
     this.paymentService.getAgentSummary(this.supplierId, this.fromDate, this.toDate).subscribe({
       next: (data: AgentPaymentSummary[]) => {
@@ -54,7 +54,7 @@ export class AgentPaymentsComponent implements OnInit {
         this.loading = false;
       },
       error: () => {
-        this.errorMsg = 'Erreur lors du chargement';
+        this.toast.error('Erreur lors du chargement');
         this.loading = false;
       }
     });

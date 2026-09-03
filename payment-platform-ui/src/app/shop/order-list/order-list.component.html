@@ -3,8 +3,6 @@
   <button class="btn btn-primary" routerLink="/dashboard/shop/orders/create">+ Nouvelle commande</button>
 </div>
 
-<div class="alert alert-error" *ngIf="errorMsg">{{ errorMsg }}</div>
-
 <div class="filters" *ngIf="!loading">
   <select [(ngModel)]="filterStatus" class="form-control" style="max-width:200px;">
     <option value="">Tous les statuts</option>
@@ -26,7 +24,8 @@
   <span>Chargement...</span>
 </div>
 
-<div class="table-card" *ngIf="!loading">
+<!-- Desktop Table View -->
+<div class="table-card hide-mobile" *ngIf="!loading">
   <div class="table-wrapper">
     <table>
       <thead>
@@ -59,5 +58,34 @@
         </tr>
       </tbody>
     </table>
+  </div>
+</div>
+
+<!-- Mobile Card View -->
+<div class="order-cards show-mobile" *ngIf="!loading">
+  <div *ngIf="filteredOrders.length === 0" class="empty-card">
+    Aucune commande trouvée
+  </div>
+  <div *ngFor="let o of filteredOrders" class="order-card" [routerLink]="['/dashboard/shop/orders', o.id]">
+    <div class="order-card-header">
+      <span class="order-reference">{{ o.reference }}</span>
+      <span class="payment-badge" [ngClass]="statusClass(o.status)">
+        {{ statusLabel(o.status) }}
+      </span>
+    </div>
+    <div class="order-card-body">
+      <div class="order-row">
+        <span class="order-label">Total</span>
+        <span class="order-amount">{{ o.total | number:'1.2-2' }} {{ o.currency }}</span>
+      </div>
+      <div class="order-row">
+        <span class="order-label">Date</span>
+        <span class="order-value">{{ o.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
+      </div>
+    </div>
+    <div class="order-card-actions" *ngIf="o.status === 'DELIVERED' || o.status === 'PENDING'" (click)="$event.stopPropagation()">
+      <button class="btn btn-sm btn-success" *ngIf="o.status === 'DELIVERED'" (click)="accept(o.id)">Accepter</button>
+      <button class="btn btn-sm btn-danger" *ngIf="o.status === 'DELIVERED' || o.status === 'PENDING'" (click)="cancel(o.id)">Annuler</button>
+    </div>
   </div>
 </div>

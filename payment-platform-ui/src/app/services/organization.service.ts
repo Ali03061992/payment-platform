@@ -47,6 +47,14 @@ export class OrganizationService {
     return this.http.get<SupplierShopRelation[]>('/api/admin/supplier-shop-relations');
   }
 
+  listRelationsByShop(shopId: number): Observable<SupplierShopRelation[]> {
+    return this.http.get<SupplierShopRelation[]>(`/api/admin/supplier-shop-relations/shop/${shopId}`);
+  }
+
+  listRelationsBySupplier(supplierId: number): Observable<SupplierShopRelation[]> {
+    return this.http.get<SupplierShopRelation[]>(`/api/admin/supplier-shop-relations/supplier/${supplierId}`);
+  }
+
   createRelation(data: CreateRelationRequest): Observable<SupplierShopRelation> {
     return this.http.post<SupplierShopRelation>('/api/admin/supplier-shop-relations', data);
   }

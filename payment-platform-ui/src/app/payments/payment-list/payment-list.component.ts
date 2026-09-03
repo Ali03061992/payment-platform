@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { PaymentService } from '../../services/payment.service';
 import { Payment } from '../../models/payment.model';
+import { ToastService } from '../../services/toast.service';
 
 @Component({
   selector: 'app-payment-list',
@@ -11,9 +12,8 @@ export class PaymentListComponent implements OnInit {
   payments: Payment[] = [];
   loading = true;
   filterStatus = '';
-  errorMsg = '';
 
-  constructor(private paymentService: PaymentService) {}
+  constructor(private paymentService: PaymentService, private toast: ToastService) {}
 
   ngOnInit(): void { this.load(); }
 
@@ -21,7 +21,7 @@ export class PaymentListComponent implements OnInit {
     this.loading = true;
     this.paymentService.list().subscribe({
       next: (data: Payment[]) => { this.payments = data; this.loading = false; },
-      error: (err: any) => { this.errorMsg = err.error?.message || 'Erreur'; this.loading = false; }
+      error: (err: any) => { this.toast.error(err.error?.message || 'Erreur'); this.loading = false; }
     });
   }
 
@@ -45,12 +45,16 @@ export class PaymentListComponent implements OnInit {
   }
 
   confirm(id: number): void {
-    this.paymentService.confirm(id).subscribe({ next: () => this.load(), error: (e: any) => this.errorMsg = e.error?.message });
-    setTimeout(() => this.errorMsg = '', 3000);
+    this.paymentService.confirm(id).subscribe({
+      next: () => this.load(),
+      error: (e: any) => { this.toast.error(e.error?.message || 'Erreur'); }
+    });
   }
 
   cancel(id: number): void {
-    this.paymentService.cancel(id).subscribe({ next: () => this.load(), error: (e: any) => this.errorMsg = e.error?.message });
-    setTimeout(() => this.errorMsg = '', 3000);
+    this.paymentService.cancel(id).subscribe({
+      next: () => this.load(),
+      error: (e: any) => { this.toast.error(e.error?.message || 'Erreur'); }
+    });
   }
 }

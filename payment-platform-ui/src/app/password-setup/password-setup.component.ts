@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
+import { ToastService } from '../services/toast.service';
 
 @Component({
   selector: 'app-password-setup',
@@ -12,7 +13,6 @@ export class PasswordSetupComponent implements OnInit {
   newPassword = '';
   confirmPassword = '';
   loading = false;
-  error = '';
   success = false;
   tokenValid = false;
   checkingToken = true;
@@ -20,14 +20,15 @@ export class PasswordSetupComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private http: HttpClient
+    private http: HttpClient,
+    private toast: ToastService
   ) {}
 
   ngOnInit(): void {
     this.token = this.route.snapshot.queryParamMap.get('token') || '';
     if (!this.token) {
       this.checkingToken = false;
-      this.error = 'Lien invalide. Veuillez demander un nouveau lien de configuration.';
+      this.toast.error('Lien invalide. Veuillez demander un nouveau lien de configuration.');
       return;
     }
     this.http.get<{ valid: boolean }>(`/api/auth/password-setup/validate?token=${this.token}`).subscribe({
@@ -35,24 +36,23 @@ export class PasswordSetupComponent implements OnInit {
         this.tokenValid = res.valid;
         this.checkingToken = false;
         if (!this.tokenValid) {
-          this.error = 'Ce lien est invalide ou a déjà été utilisé. Veuillez demander un nouveau lien.';
+          this.toast.error('Ce lien est invalide ou a déjà été utilisé. Veuillez demander un nouveau lien.');
         }
       },
       error: () => {
         this.checkingToken = false;
-        this.error = 'Erreur lors de la vérification du lien.';
+        this.toast.error('Erreur lors de la vérification du lien.');
       }
     });
   }
 
   onSubmit(): void {
-    this.error = '';
     if (this.newPassword.length < 8) {
-      this.error = 'Le mot de passe doit contenir au moins 8 caractères.';
+      this.toast.error('Le mot de passe doit contenir au moins 8 caractères.');
       return;
     }
     if (this.newPassword !== this.confirmPassword) {
-      this.error = 'Les mots de passe ne correspondent pas.';
+      this.toast.error('Les mots de passe ne correspondent pas.');
       return;
     }
     this.loading = true;
@@ -65,7 +65,7 @@ export class PasswordSetupComponent implements OnInit {
         this.loading = false;
       },
       error: (err) => {
-        this.error = err.error?.message || 'Erreur lors de la configuration du mot de passe.';
+        this.toast.error(err.error?.message || 'Erreur lors de la configuration du mot de passe.');
         this.loading = false;
       }
     });

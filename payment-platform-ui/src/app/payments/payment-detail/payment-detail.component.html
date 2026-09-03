@@ -14,9 +14,6 @@
     </div>
   </div>
 
-  <div class="alert alert-success" *ngIf="successMsg">{{ successMsg }}</div>
-  <div class="alert alert-error" *ngIf="errorMsg">{{ errorMsg }}</div>
-
   <!-- QR Code Section -->
   <div class="qr-section" *ngIf="showQR">
     <div class="qr-card">
@@ -64,7 +61,7 @@
     </div>
   </div>
 
-  <div class="info-box" *ngIf="payment.rejectionReason">
+  <div class="info-box" *ngIf="payment.rejectionReason && payment.rejectionReason !== 'null'">
     <strong>Motif de rejet :</strong> {{ payment.rejectionReason }}
   </div>
 
@@ -99,7 +96,7 @@
         </thead>
         <tbody>
           <tr *ngFor="let e of payment.events">
-            <td><span class="payment-badge" [ngClass]="e.action.toLowerCase().replace('payment.', '')">{{ actionLabel(e.action) }}</span></td>
+            <td><span class="payment-badge" [ngClass]="e.action.toLowerCase().replace('payment_', '')">{{ actionLabel(e.action) }}</span></td>
             <td>{{ e.userId }}</td>
             <td>{{ e.timestamp | date:'dd/MM/yyyy HH:mm:ss' }}</td>
             <td>{{ e.details || '-' }}</td>

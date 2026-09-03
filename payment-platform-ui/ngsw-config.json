@@ -46,7 +46,7 @@
         "/api/**"
       ],
       "cacheConfig": {
-        "strategy": "network-first",
+        "strategy": "freshness",
         "maxSize": 50,
         "maxAge": "24h",
         "timeout": "10s"

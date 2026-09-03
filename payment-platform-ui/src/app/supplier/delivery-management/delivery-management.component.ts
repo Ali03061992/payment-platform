@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { OrderService } from '../../services/order.service';
 import { Order } from '../../models/order.model';
+import { ToastService } from '../../services/toast.service';
 
 @Component({
   selector: 'app-delivery-management',
@@ -10,15 +11,13 @@ import { Order } from '../../models/order.model';
 export class DeliveryManagementComponent implements OnInit {
   deliveries: Order[] = [];
   loading = true;
-  errorMsg = '';
-  successMsg = '';
 
   showDeliverModal = false;
   selectedOrder: Order | null = null;
   receivedBy = 0;
   delivering = false;
 
-  constructor(private orderService: OrderService) {}
+  constructor(private orderService: OrderService, private toast: ToastService) {}
 
   ngOnInit(): void {
     this.loadDeliveries();
@@ -28,7 +27,7 @@ export class DeliveryManagementComponent implements OnInit {
     this.loading = true;
     this.orderService.myDeliveries().subscribe({
       next: (data: Order[]) => { this.deliveries = data; this.loading = false; },
-      error: (err: any) => { this.errorMsg = err.error?.message || 'Erreur de chargement'; this.loading = false; }
+      error: (err: any) => { this.toast.error(err.error?.message || 'Erreur de chargement'); this.loading = false; }
     });
   }
 
@@ -56,16 +55,14 @@ export class DeliveryManagementComponent implements OnInit {
     this.delivering = true;
     this.orderService.deliver(this.selectedOrder.id, this.receivedBy).subscribe({
       next: () => {
-        this.successMsg = 'Livraison confirmée avec succès';
+        this.toast.success('Livraison confirmée avec succès');
         this.closeDeliver();
         this.delivering = false;
         this.loadDeliveries();
-        setTimeout(() => this.successMsg = '', 3000);
       },
       error: (err: any) => {
-        this.errorMsg = err.error?.message || 'Erreur';
+        this.toast.error(err.error?.message || 'Erreur');
         this.delivering = false;
-        setTimeout(() => this.errorMsg = '', 3000);
       }
     });
   }

@@ -30,7 +30,7 @@ export class OrderService {
   }
 
   readyForDelivery(id: number): Observable<Order> {
-    return this.http.post<Order>(`${this.apiUrl}/${id}/ready-for-delivery`, {});
+    return this.http.post<Order>(`${this.apiUrl}/${id}/ready`, {});
   }
 
   assignDelivery(id: number, agentId: number): Observable<Order> {

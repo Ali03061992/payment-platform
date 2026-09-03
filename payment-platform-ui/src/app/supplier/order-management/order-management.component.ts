@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { OrderService } from '../../services/order.service';
 import { Order } from '../../models/order.model';
+import { ToastService } from '../../services/toast.service';
 
 @Component({
   selector: 'app-order-management',
@@ -11,8 +12,6 @@ import { Order } from '../../models/order.model';
 export class OrderManagementComponent implements OnInit {
   orders: Order[] = [];
   loading = true;
-  errorMsg = '';
-  successMsg = '';
   filterStatus = '';
 
   showDetail = false;
@@ -26,7 +25,8 @@ export class OrderManagementComponent implements OnInit {
 
   constructor(
     private orderService: OrderService,
-    private router: Router
+    private router: Router,
+    private toast: ToastService
   ) {}
 
   ngOnInit(): void {
@@ -37,7 +37,7 @@ export class OrderManagementComponent implements OnInit {
     this.loading = true;
     this.orderService.list().subscribe({
       next: (data: Order[]) => { this.orders = data; this.loading = false; },
-      error: (err: any) => { this.errorMsg = err.error?.message || 'Erreur de chargement'; this.loading = false; }
+      error: (err: any) => { this.toast.error(err.error?.message || 'Erreur de chargement'); this.loading = false; }
     });
   }
 
@@ -90,15 +90,15 @@ export class OrderManagementComponent implements OnInit {
 
   prepare(order: Order): void {
     this.orderService.prepare(order.id).subscribe({
-      next: () => { this.successMsg = 'Commande mise en préparation'; this.loadOrders(); setTimeout(() => this.successMsg = '', 3000); },
-      error: (err: any) => { this.errorMsg = err.error?.message || 'Erreur'; setTimeout(() => this.errorMsg = '', 3000); }
+      next: () => { this.toast.success('Commande mise en préparation'); this.loadOrders(); },
+      error: (err: any) => { this.toast.error(err.error?.message || 'Erreur'); }
     });
   }
 
   ready(order: Order): void {
     this.orderService.readyForDelivery(order.id).subscribe({
-      next: () => { this.successMsg = 'Commande prête pour livraison'; this.loadOrders(); setTimeout(() => this.successMsg = '', 3000); },
-      error: (err: any) => { this.errorMsg = err.error?.message || 'Erreur'; setTimeout(() => this.errorMsg = '', 3000); }
+      next: () => { this.toast.success('Commande prête pour livraison'); this.loadOrders(); },
+      error: (err: any) => { this.toast.error(err.error?.message || 'Erreur'); }
     });
   }
 
@@ -117,21 +117,20 @@ export class OrderManagementComponent implements OnInit {
     this.assigning = true;
     this.orderService.assignDelivery(this.assignOrderId, this.assignAgentId).subscribe({
       next: () => {
-        this.successMsg = 'Agent assigné avec succès';
+        this.toast.success('Agent assigné avec succès');
         this.closeAssign();
         this.assigning = false;
         this.loadOrders();
-        setTimeout(() => this.successMsg = '', 3000);
       },
-      error: (err: any) => { this.errorMsg = err.error?.message || 'Erreur'; this.assigning = false; setTimeout(() => this.errorMsg = '', 3000); }
+      error: (err: any) => { this.toast.error(err.error?.message || 'Erreur'); this.assigning = false; }
     });
   }
 
   cancel(order: Order): void {
     if (!confirm('Annuler cette commande ?')) return;
     this.orderService.cancel(order.id).subscribe({
-      next: () => { this.successMsg = 'Commande annulée'; this.loadOrders(); setTimeout(() => this.successMsg = '', 3000); },
-      error: (err: any) => { this.errorMsg = err.error?.message || 'Erreur'; setTimeout(() => this.errorMsg = '', 3000); }
+      next: () => { this.toast.success('Commande annulée'); this.loadOrders(); },
+      error: (err: any) => { this.toast.error(err.error?.message || 'Erreur'); }
     });
   }
 

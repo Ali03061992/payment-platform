@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { StockService } from '../../services/stock.service';
 import { Product } from '../../models/stock.model';
+import { ToastService } from '../../services/toast.service';
 
 @Component({
   selector: 'app-stock-management',
@@ -10,11 +11,9 @@ import { Product } from '../../models/stock.model';
 export class StockManagementComponent implements OnInit {
   products: Product[] = [];
   loading = true;
-  error = '';
-  successMessage = '';
   filterStatus = '';
 
-  constructor(private stockService: StockService) {}
+  constructor(private stockService: StockService, private toast: ToastService) {}
 
   ngOnInit(): void {
     this.loadProducts();
@@ -29,7 +28,7 @@ export class StockManagementComponent implements OnInit {
           this.products = [];
           this.loading = false;
         } else {
-          this.error = err.error?.message || 'Erreur de chargement';
+          this.toast.error(err.error?.message || 'Erreur de chargement');
           this.loading = false;
         }
       }
@@ -49,10 +48,9 @@ export class StockManagementComponent implements OnInit {
       next: (updated) => {
         const idx = this.products.findIndex(p => p.id === product.id);
         if (idx >= 0) this.products[idx] = updated;
-        this.successMessage = `${product.name} mis à jour`;
-        setTimeout(() => this.successMessage = '', 3000);
+        this.toast.success(`${product.name} mis à jour`);
       },
-      error: (err) => { this.error = err.error?.message || 'Erreur'; setTimeout(() => this.error = '', 3000); }
+      error: (err) => { this.toast.error(err.error?.message || 'Erreur'); }
     });
   }
 
@@ -61,10 +59,9 @@ export class StockManagementComponent implements OnInit {
     this.stockService.deleteProduct(product.id).subscribe({
       next: () => {
         this.products = this.products.filter(p => p.id !== product.id);
-        this.successMessage = `${product.name} supprimé`;
-        setTimeout(() => this.successMessage = '', 3000);
+        this.toast.success(`${product.name} supprimé`);
       },
-      error: (err) => { this.error = err.error?.message || 'Erreur'; setTimeout(() => this.error = '', 3000); }
+      error: (err) => { this.toast.error(err.error?.message || 'Erreur'); }
     });
   }
 }

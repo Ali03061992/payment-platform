@@ -5,9 +5,6 @@
   </button>
 </div>
 
-<div class="alert alert-success" *ngIf="successMsg">{{ successMsg }}</div>
-<div class="alert alert-error" *ngIf="errorMsg">{{ errorMsg }}</div>
-
 <div class="form-card" *ngIf="showCreate" style="margin-bottom: 24px;">
   <h3 style="margin-bottom: 16px;">Créer une relation</h3>
   <form (ngSubmit)="create()">

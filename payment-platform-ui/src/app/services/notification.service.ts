@@ -10,6 +10,7 @@ export class NotificationService {
   private notificationsSubject = new BehaviorSubject<Notification[]>([]);
   private unreadCountSubject = new BehaviorSubject<number>(0);
   private pollingSub?: Subscription;
+  private lastUnreadCount = 0;
 
   notifications$ = this.notificationsSubject.asObservable();
   unreadCount$ = this.unreadCountSubject.asObservable();
@@ -40,7 +41,15 @@ export class NotificationService {
 
   fetchUnreadCount(): Observable<{ count: number }> {
     return this.http.get<{ count: number }>(`${this.apiUrl}/unread-count`).pipe(
-      tap(res => this.unreadCountSubject.next(res.count || 0))
+      tap(res => {
+        const newCount = res.count || 0;
+        // Show browser notification if count increased
+        if (newCount > this.lastUnreadCount && this.lastUnreadCount > 0) {
+          this.showBrowserNotification();
+        }
+        this.lastUnreadCount = newCount;
+        this.unreadCountSubject.next(newCount);
+      })
     );
   }
 
@@ -50,5 +59,37 @@ export class NotificationService {
 
   markAllAsRead(): Observable<{ updated: number }> {
     return this.http.post<{ updated: number }>(`${this.apiUrl}/read-all`, {});
+  }
+
+  // Browser Notification API
+  requestPermission(): Promise<NotificationPermission> {
+    if (!('Notification' in window)) {
+      return Promise.resolve('denied');
+    }
+    return Notification.requestPermission();
+  }
+
+  getPermissionStatus(): NotificationPermission | 'unsupported' {
+    if (!('Notification' in window)) {
+      return 'unsupported';
+    }
+    return Notification.permission;
+  }
+
+  showBrowserNotification(): void {
+    if (!('Notification' in window)) return;
+
+    if (Notification.permission === 'granted') {
+      const notifications = this.notificationsSubject.getValue();
+      if (notifications.length > 0) {
+        const latest = notifications[0];
+        new window.Notification('Payment Platform', {
+          body: latest.message,
+          icon: 'assets/icons/icon-192x192.png',
+          tag: 'payment-notification',
+          renotify: true
+        });
+      }
+    }
   }
 }

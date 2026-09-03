@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { StockService } from '../../services/stock.service';
+import { ToastService } from '../../services/toast.service';
 
 @Component({
   selector: 'app-add-product',
@@ -18,18 +19,16 @@ export class AddProductComponent {
     minQuantity: 0
   };
 
-  error = '';
   success = false;
   loading = false;
 
-  constructor(private stockService: StockService, private router: Router) {}
+  constructor(private stockService: StockService, private router: Router, private toast: ToastService) {}
 
   onSubmit(): void {
-    this.error = '';
     this.loading = true;
     this.stockService.createProduct(this.form).subscribe({
-      next: () => { this.success = true; this.loading = false; },
-      error: (err) => { this.error = err.error?.message || "Erreur lors de la création"; this.loading = false; }
+      next: () => { this.success = true; this.loading = false; this.toast.success('Produit créé avec succès'); },
+      error: (err) => { this.toast.error(err.error?.message || "Erreur lors de la création"); this.loading = false; }
     });
   }
 
