@@ -133,7 +133,7 @@ public class PaymentController {
     }
 
     @PostMapping("/{id}/cancel")
-    @PreAuthorize("hasAuthority('SHOP_CANCEL_PAYMENTS')")
+    @PreAuthorize("hasAnyAuthority('SHOP_CANCEL_PAYMENTS', 'SUPPLIER_MANAGE_PAYMENTS')")
     public ResponseEntity<PaymentResponse> cancel(@PathVariable long id) {
         var current = CurrentUser.get();
         return ResponseEntity.ok(cancelPayment.execute(id, current.userId(), current.organizationId()));
