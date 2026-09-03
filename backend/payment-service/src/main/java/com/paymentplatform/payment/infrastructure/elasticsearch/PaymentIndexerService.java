@@ -4,26 +4,38 @@ import com.paymentplatform.payment.domain.model.Payment;
 import com.paymentplatform.payment.infrastructure.http.OrganizationValidationClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import jakarta.annotation.PostConstruct;
+import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
+import org.springframework.data.elasticsearch.core.IndexOperations;
+import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
+import org.springframework.data.elasticsearch.core.query.IndexQuery;
+import org.springframework.data.elasticsearch.core.query.IndexQueryBuilder;
 import org.springframework.stereotype.Service;
-
-import java.util.Optional;
 
 @Service
 public class PaymentIndexerService {
 
     private static final Logger log = LoggerFactory.getLogger(PaymentIndexerService.class);
+    private static final String INDEX_NAME = "payments";
 
-    private final PaymentSearchRepository searchRepository;
+    private final ElasticsearchOperations elasticsearchOperations;
     private final OrganizationValidationClient orgClient;
 
-    public PaymentIndexerService(PaymentSearchRepository searchRepository,
+    public PaymentIndexerService(ElasticsearchOperations elasticsearchOperations,
                                   OrganizationValidationClient orgClient) {
-        this.searchRepository = searchRepository;
+        this.elasticsearchOperations = elasticsearchOperations;
         this.orgClient = orgClient;
+    }
+
+    @PostConstruct
+    public void init() {
+        ensureIndexExists();
     }
 
     public void indexPayment(Payment payment) {
         try {
+            ensureIndexExists();
+
             String shopName = orgClient.getOrganizationName(payment.shopId()).orElse("Shop " + payment.shopId());
             String supplierName = orgClient.getOrganizationName(payment.supplierId()).orElse("Supplier " + payment.supplierId());
             String agentName = orgClient.getUserName(payment.createdBy()).orElse("User " + payment.createdBy());
@@ -44,7 +56,13 @@ public class PaymentIndexerService {
                     payment.createdAt(),
                     payment.updatedAt()
             );
-            searchRepository.save(doc);
+
+            IndexQuery indexQuery = new IndexQueryBuilder()
+                    .withId(String.valueOf(payment.id()))
+                    .withObject(doc)
+                    .build();
+
+            elasticsearchOperations.index(indexQuery, IndexCoordinates.of(INDEX_NAME));
             log.debug("Indexed payment {} to Elasticsearch", payment.id());
         } catch (Exception e) {
             log.warn("Failed to index payment {} to Elasticsearch: {}", payment.id(), e.getMessage());
@@ -53,13 +71,20 @@ public class PaymentIndexerService {
 
     public void removePayment(long paymentId) {
         try {
-            searchRepository.deleteById(paymentId);
+            elasticsearchOperations.delete(String.valueOf(paymentId), IndexCoordinates.of(INDEX_NAME));
         } catch (Exception e) {
             log.warn("Failed to remove payment {} from Elasticsearch: {}", paymentId, e.getMessage());
         }
     }
 
-    public Optional<PaymentSearchDocument> findById(long id) {
-        return searchRepository.findById(id);
+    private void ensureIndexExists() {
+        try {
+            IndexOperations indexOps = elasticsearchOperations.indexOps(IndexCoordinates.of(INDEX_NAME));
+            if (!indexOps.exists()) {
+                indexOps.create();
+            }
+        } catch (Exception e) {
+            log.warn("Failed to check/create Elasticsearch index: {}", e.getMessage());
+        }
     }
 }

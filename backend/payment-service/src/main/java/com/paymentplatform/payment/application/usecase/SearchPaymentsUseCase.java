@@ -3,10 +3,12 @@ package com.paymentplatform.payment.application.usecase;
 import com.paymentplatform.payment.application.dto.SearchPaymentsRequest;
 import com.paymentplatform.payment.application.dto.SearchPaymentsResponse;
 import com.paymentplatform.payment.infrastructure.elasticsearch.PaymentSearchDocument;
-import com.paymentplatform.payment.infrastructure.elasticsearch.PaymentSearchRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.SearchHits;
+import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
 import org.springframework.data.elasticsearch.core.query.Criteria;
 import org.springframework.data.elasticsearch.core.query.CriteriaQuery;
 import org.springframework.stereotype.Service;
@@ -17,13 +19,13 @@ import java.util.stream.Collectors;
 @Service
 public class SearchPaymentsUseCase {
 
-    private final ElasticsearchOperations elasticsearchOperations;
-    private final PaymentSearchRepository searchRepository;
+    private static final Logger log = LoggerFactory.getLogger(SearchPaymentsUseCase.class);
+    private static final String INDEX_NAME = "payments";
 
-    public SearchPaymentsUseCase(ElasticsearchOperations elasticsearchOperations,
-                                  PaymentSearchRepository searchRepository) {
+    private final ElasticsearchOperations elasticsearchOperations;
+
+    public SearchPaymentsUseCase(ElasticsearchOperations elasticsearchOperations) {
         this.elasticsearchOperations = elasticsearchOperations;
-        this.searchRepository = searchRepository;
     }
 
     public SearchPaymentsResponse execute(SearchPaymentsRequest request, Long supplierId) {
@@ -57,30 +59,35 @@ public class SearchPaymentsUseCase {
 
         CriteriaQuery query = new CriteriaQuery(criteria, PageRequest.of(request.page(), request.size()));
 
-        SearchHits<PaymentSearchDocument> hits = elasticsearchOperations.search(query, PaymentSearchDocument.class);
+        try {
+            SearchHits<PaymentSearchDocument> hits = elasticsearchOperations.search(query, PaymentSearchDocument.class, IndexCoordinates.of(INDEX_NAME));
 
-        List<SearchPaymentsResponse.PaymentSearchResult> results = hits.getSearchHits().stream()
-                .map(hit -> {
-                    PaymentSearchDocument doc = hit.getContent();
-                    return new SearchPaymentsResponse.PaymentSearchResult(
-                            doc.getId(),
-                            doc.getReference(),
-                            doc.getShopId(),
-                            doc.getShopName(),
-                            doc.getSupplierId(),
-                            doc.getSupplierName(),
-                            doc.getCreatedBy(),
-                            doc.getCreatedByName(),
-                            doc.getAmount(),
-                            doc.getCurrency(),
-                            doc.getStatus(),
-                            doc.getRejectionReason(),
-                            doc.getCreatedAt(),
-                            doc.getUpdatedAt()
-                    );
-                })
-                .collect(Collectors.toList());
+            List<SearchPaymentsResponse.PaymentSearchResult> results = hits.getSearchHits().stream()
+                    .map(hit -> {
+                        PaymentSearchDocument doc = hit.getContent();
+                        return new SearchPaymentsResponse.PaymentSearchResult(
+                                doc.getId(),
+                                doc.getReference(),
+                                doc.getShopId(),
+                                doc.getShopName(),
+                                doc.getSupplierId(),
+                                doc.getSupplierName(),
+                                doc.getCreatedBy(),
+                                doc.getCreatedByName(),
+                                doc.getAmount(),
+                                doc.getCurrency(),
+                                doc.getStatus(),
+                                doc.getRejectionReason(),
+                                doc.getCreatedAt(),
+                                doc.getUpdatedAt()
+                        );
+                    })
+                    .collect(Collectors.toList());
 
-        return new SearchPaymentsResponse(results, hits.getTotalHits(), request.page(), request.size());
+            return new SearchPaymentsResponse(results, hits.getTotalHits(), request.page(), request.size());
+        } catch (Exception e) {
+            log.warn("Elasticsearch search failed, returning empty result: {}", e.getMessage());
+            return new SearchPaymentsResponse(List.of(), 0L, request.page(), request.size());
+        }
     }
 }
