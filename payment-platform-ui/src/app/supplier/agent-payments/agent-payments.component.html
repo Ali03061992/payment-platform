@@ -81,7 +81,9 @@
 
     <!-- Agent Detail (expandable) -->
     <div class="agent-detail" *ngIf="expandedAgent === agent.userId">
-      <div class="detail-table">
+
+      <!-- Desktop Table -->
+      <div class="detail-table hide-mobile">
         <table>
           <thead>
             <tr>
@@ -118,6 +120,41 @@
           </tbody>
         </table>
       </div>
+
+      <!-- Mobile Cards -->
+      <div class="payment-cards show-mobile">
+        <div *ngFor="let p of getAgentPayments(agent)" class="payment-card" [routerLink]="['/dashboard/payments', p.id]">
+          <div class="payment-card-header">
+            <span class="payment-reference">{{ p.reference }}</span>
+            <span class="payment-badge" [ngClass]="p.status.toLowerCase()">{{ statusLabel(p.status) }}</span>
+          </div>
+          <div class="payment-card-body">
+            <div class="payment-row">
+              <span class="payment-label">Montant</span>
+              <span class="payment-amount">{{ p.amount | number:'1.2-2' }} {{ p.currency }}</span>
+            </div>
+            <div class="payment-row">
+              <span class="payment-label">Boutique</span>
+              <span class="payment-value">{{ p.shopName }}</span>
+            </div>
+            <div class="payment-row">
+              <span class="payment-label">Créé par</span>
+              <span class="payment-value">{{ p.createdByName }}</span>
+            </div>
+            <div class="payment-row" *ngIf="p.status !== 'PENDING'">
+              <span class="payment-label">Traité par</span>
+              <span class="payment-value">
+                {{ p.confirmedByName || p.rejectedByName || p.cancelledByName }}
+              </span>
+            </div>
+            <div class="payment-row">
+              <span class="payment-label">Date</span>
+              <span class="payment-value">{{ p.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div class="agent-total-row">
         <div class="agent-total-item">
           <strong>Total confirmé :</strong>

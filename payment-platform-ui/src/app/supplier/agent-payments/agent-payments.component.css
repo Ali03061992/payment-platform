@@ -168,11 +168,13 @@
 
 .detail-table {
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .detail-table table {
   width: 100%;
   border-collapse: collapse;
+  min-width: 600px;
 }
 
 .detail-table th {
@@ -184,6 +186,7 @@
   border-bottom: 1px solid #f0f2f5;
   text-align: left;
   font-weight: 600;
+  white-space: nowrap;
 }
 
 .detail-table td {
@@ -215,6 +218,7 @@
   padding: 12px 20px;
   background: #f5f7fa;
   font-size: 14px;
+  flex-wrap: wrap;
 }
 
 .agent-total-item {
@@ -233,10 +237,79 @@
   color: #2e7d32;
 }
 
-/* Mobile */
+/* Mobile Cards inside agent detail */
+.payment-cards {
+  display: none;
+}
+
+.payment-card {
+  border: 1px solid #f0f2f5;
+  border-radius: 10px;
+  margin: 12px 16px;
+  background: #fafbfc;
+  cursor: pointer;
+  transition: box-shadow 0.15s;
+}
+
+.payment-card:hover {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.payment-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 14px;
+  border-bottom: 1px solid #f0f2f5;
+}
+
+.payment-reference {
+  font-family: monospace;
+  font-size: 12px;
+  color: #0f3460;
+  font-weight: 600;
+}
+
+.payment-card-body {
+  padding: 10px 14px;
+}
+
+.payment-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px 0;
+}
+
+.payment-label {
+  font-size: 11px;
+  color: #8896ab;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.payment-value {
+  font-size: 13px;
+  color: #333;
+  font-weight: 500;
+}
+
+.payment-amount {
+  font-size: 15px;
+  font-weight: 700;
+  color: #1a1a2e;
+}
+
+/* Mobile < 768px */
 @media (max-width: 768px) {
+  .filter-card {
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+
   .filter-row {
     flex-direction: column;
+    gap: 12px;
   }
 
   .filter-status {
@@ -246,23 +319,113 @@
 
   .totals-bar {
     flex-direction: column;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .total-item {
+    padding: 12px 16px;
+  }
+
+  .total-value {
+    font-size: 20px;
   }
 
   .agent-header {
     flex-wrap: wrap;
+    padding: 14px 16px;
+    gap: 10px;
+  }
+
+  .agent-avatar {
+    width: 38px;
+    height: 38px;
+    font-size: 16px;
+  }
+
+  .agent-name {
+    font-size: 15px;
   }
 
   .agent-totals {
     width: 100%;
     justify-content: space-between;
-    padding-top: 8px;
+    padding-top: 10px;
     border-top: 1px solid #f0f2f5;
+    gap: 12px;
   }
 
-  .detail-table th:nth-child(3),
-  .detail-table td:nth-child(3),
-  .detail-table th:nth-child(6),
-  .detail-table td:nth-child(6) {
-    display: none;
+  .confirmed-value {
+    font-size: 17px;
+  }
+
+  .period-value {
+    font-size: 14px;
+  }
+
+  .expand-icon {
+    position: absolute;
+    right: 16px;
+    top: 16px;
+  }
+
+  .agent-header {
+    position: relative;
+  }
+
+  .hide-mobile {
+    display: none !important;
+  }
+
+  .show-mobile {
+    display: block !important;
+  }
+
+  .agent-total-row {
+    flex-direction: column;
+    gap: 8px;
+    padding: 12px 16px;
+    align-items: flex-start;
+  }
+}
+
+/* Small phone < 400px */
+@media (max-width: 400px) {
+  .filter-card {
+    padding: 12px;
+  }
+
+  .page-header h2 {
+    font-size: 18px;
+  }
+
+  .agent-info {
+    gap: 8px;
+  }
+
+  .agent-avatar {
+    width: 34px;
+    height: 34px;
+    font-size: 14px;
+  }
+
+  .agent-name {
+    font-size: 14px;
+  }
+
+  .agent-totals {
+    gap: 8px;
+  }
+
+  .confirmed-label, .period-label {
+    font-size: 10px;
+  }
+
+  .confirmed-value {
+    font-size: 15px;
+  }
+
+  .period-value {
+    font-size: 13px;
   }
 }
