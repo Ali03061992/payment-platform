@@ -3,6 +3,7 @@ package com.paymentplatform.payment.interfaces.rest;
 import com.paymentplatform.shared.infrastructure.security.CurrentUser;
 import com.paymentplatform.payment.application.dto.*;
 import com.paymentplatform.payment.application.usecase.*;
+import com.paymentplatform.payment.infrastructure.elasticsearch.PaymentIndexerService;
 import jakarta.validation.Valid;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
@@ -27,6 +28,7 @@ public class PaymentController {
     private final CancelPaymentUseCase cancelPayment;
     private final AgentPaymentsBySupplierUseCase agentPayments;
     private final SearchPaymentsUseCase searchPayments;
+    private final PaymentIndexerService indexerService;
 
     public PaymentController(CreatePaymentUseCase createPayment,
                              GetPaymentUseCase getPayment,
@@ -35,7 +37,8 @@ public class PaymentController {
                              RejectPaymentUseCase rejectPayment,
                              CancelPaymentUseCase cancelPayment,
                              AgentPaymentsBySupplierUseCase agentPayments,
-                             SearchPaymentsUseCase searchPayments) {
+                             SearchPaymentsUseCase searchPayments,
+                             PaymentIndexerService indexerService) {
         this.createPayment = createPayment;
         this.getPayment = getPayment;
         this.listPayments = listPayments;
@@ -44,6 +47,7 @@ public class PaymentController {
         this.cancelPayment = cancelPayment;
         this.agentPayments = agentPayments;
         this.searchPayments = searchPayments;
+        this.indexerService = indexerService;
     }
 
     @PostMapping
@@ -149,5 +153,12 @@ public class PaymentController {
             supplierId = current.organizationId();
         }
         return ResponseEntity.ok(searchPayments.execute(request, supplierId));
+    }
+
+    @PostMapping("/reindex")
+    @PreAuthorize("hasAuthority('SYSTEM_ADMIN')")
+    public ResponseEntity<Map<String, Object>> reindex() {
+        int count = indexerService.reindexAll();
+        return ResponseEntity.ok(Map.of("indexed", count));
     }
 }

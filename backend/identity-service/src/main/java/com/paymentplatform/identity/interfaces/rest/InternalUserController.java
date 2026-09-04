@@ -4,14 +4,11 @@ import com.paymentplatform.shared.domain.exception.ForbiddenException;
 import com.paymentplatform.identity.application.dto.CreateInternalUserRequest;
 import com.paymentplatform.identity.application.dto.UserResponse;
 import com.paymentplatform.identity.application.usecase.InternalUserCreationUseCase;
+import com.paymentplatform.identity.application.usecase.UserQueryUseCase;
 import com.paymentplatform.identity.infrastructure.http.InternalAuthGuard;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /** Endpoint interne (secret partagé) utilisé par Organization Service. */
 @RestController
@@ -19,10 +16,14 @@ import org.springframework.web.bind.annotation.RestController;
 public class InternalUserController {
 
     private final InternalUserCreationUseCase useCase;
+    private final UserQueryUseCase query;
     private final InternalAuthGuard guard;
 
-    public InternalUserController(InternalUserCreationUseCase useCase, InternalAuthGuard guard) {
+    public InternalUserController(InternalUserCreationUseCase useCase,
+                                   UserQueryUseCase query,
+                                   InternalAuthGuard guard) {
         this.useCase = useCase;
+        this.query = query;
         this.guard = guard;
     }
 
@@ -33,5 +34,14 @@ public class InternalUserController {
             throw new ForbiddenException("Secret interne invalide");
         }
         return ResponseEntity.status(201).body(useCase.createInternalUser(request));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<UserResponse> getById(@RequestHeader("X-Internal-Token") String token,
+                                                @PathVariable long id) {
+        if (!guard.isValid(token)) {
+            throw new ForbiddenException("Secret interne invalide");
+        }
+        return ResponseEntity.ok(query.findByIdInternal(id));
     }
 }

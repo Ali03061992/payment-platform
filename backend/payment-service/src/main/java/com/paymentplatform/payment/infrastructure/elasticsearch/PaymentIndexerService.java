@@ -1,6 +1,7 @@
 package com.paymentplatform.payment.infrastructure.elasticsearch;
 
 import com.paymentplatform.payment.domain.model.Payment;
+import com.paymentplatform.payment.domain.repository.PaymentRepository;
 import com.paymentplatform.payment.infrastructure.http.OrganizationValidationClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,11 +21,14 @@ public class PaymentIndexerService {
 
     private final ElasticsearchOperations elasticsearchOperations;
     private final OrganizationValidationClient orgClient;
+    private final PaymentRepository payments;
 
     public PaymentIndexerService(ElasticsearchOperations elasticsearchOperations,
-                                  OrganizationValidationClient orgClient) {
+                                  OrganizationValidationClient orgClient,
+                                  PaymentRepository payments) {
         this.elasticsearchOperations = elasticsearchOperations;
         this.orgClient = orgClient;
+        this.payments = payments;
     }
 
     @PostConstruct
@@ -86,5 +90,21 @@ public class PaymentIndexerService {
         } catch (Exception e) {
             log.warn("Failed to check/create Elasticsearch index: {}", e.getMessage());
         }
+    }
+
+    public int reindexAll() {
+        ensureIndexExists();
+        var allPayments = payments.findAll();
+        int indexed = 0;
+        for (Payment payment : allPayments) {
+            try {
+                indexPayment(payment);
+                indexed++;
+            } catch (Exception e) {
+                log.warn("Failed to reindex payment {}: {}", payment.id(), e.getMessage());
+            }
+        }
+        log.info("Reindexed {} payments to Elasticsearch", indexed);
+        return indexed;
     }
 }

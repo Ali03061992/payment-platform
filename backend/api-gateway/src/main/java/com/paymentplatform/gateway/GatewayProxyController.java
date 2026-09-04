@@ -35,7 +35,7 @@ public class GatewayProxyController {
     @Value("${NOTIFICATION_SERVICE_PORT:8085}")
     private String notificationPort;
 
-    @RequestMapping(value = {"/auth/**", "/users/**", "/suppliers/{supplierId}/agents/**"}, method = {
+    @RequestMapping(value = {"/auth/**", "/users/**", "/suppliers/{supplierId}/agents/**", "/internal/**"}, method = {
             org.springframework.web.bind.annotation.RequestMethod.GET,
             org.springframework.web.bind.annotation.RequestMethod.POST,
             org.springframework.web.bind.annotation.RequestMethod.PUT,

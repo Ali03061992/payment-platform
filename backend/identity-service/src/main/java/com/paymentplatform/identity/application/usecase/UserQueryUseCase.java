@@ -34,6 +34,13 @@ public class UserQueryUseCase {
     }
 
     @Transactional(readOnly = true)
+    public UserResponse findByIdInternal(long userId) {
+        User target = users.findById(UserId.of(userId))
+                .orElseThrow(() -> new NotFoundException("Utilisateur introuvable"));
+        return UserResponse.from(target);
+    }
+
+    @Transactional(readOnly = true)
     public List<UserResponse> list(long actorUserId, List<String> actorRoles, Long actorOrganizationId,
                                    Long organizationId, String role, String status) {
         List<User> result;

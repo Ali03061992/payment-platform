@@ -21,6 +21,6 @@ public class OrganizationValidationUseCase {
     public OrganizationStatusResponse validate(long organizationId) {
         Organization org = organizations.findById(OrganizationId.of(organizationId))
                 .orElseThrow(() -> new NotFoundException("Organisation non trouvée : " + organizationId));
-        return new OrganizationStatusResponse(org.id().value(), org.type().name(), org.status().name());
+        return new OrganizationStatusResponse(org.id().value(), org.name().value(), org.type().name(), org.status().name());
     }
 }

@@ -9,7 +9,7 @@ public class InternalAuthGuard {
 
     private final String internalSecret;
 
-    public InternalAuthGuard(@Value("${app.internal-secret:}") String internalSecret) {
+    public InternalAuthGuard(@Value("${app.internal-secret:dev-internal-secret-change-me}") String internalSecret) {
         this.internalSecret = internalSecret;
     }
 

@@ -132,6 +132,10 @@ services:
       INTERNAL_SECRET: dev-internal-secret-change-me
       ELASTICSEARCH_HOST: elasticsearch
       ELASTICSEARCH_PORT: 9200
+      IDENTITY_SERVICE_URL: identity-service
+      IDENTITY_SERVICE_PORT: 8082
+      ORGANIZATION_SERVICE_URL: organization-service
+      ORGANIZATION_SERVICE_PORT: 8083
     depends_on:
       mysql:
         condition: service_healthy

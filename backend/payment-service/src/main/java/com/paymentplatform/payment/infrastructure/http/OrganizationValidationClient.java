@@ -26,6 +26,18 @@ public class OrganizationValidationClient {
     @Value("${app.gateway.base-url:http://localhost:8081}")
     private String gatewayBaseUrl;
 
+    @Value("${app.organization-service.url:organization-service}")
+    private String organizationServiceUrl;
+
+    @Value("${app.organization-service.port:8083}")
+    private int organizationServicePort;
+
+    @Value("${app.identity-service.url:identity-service}")
+    private String identityServiceUrl;
+
+    @Value("${app.identity-service.port:8082}")
+    private int identityServicePort;
+
     @Value("${app.internal-secret:dev-internal-secret-change-me}")
     private String internalSecret;
 
@@ -115,7 +127,7 @@ public class OrganizationValidationClient {
     }
 
     public Optional<String> getOrganizationName(long organizationId) {
-        String url = gatewayBaseUrl + "/api/organizations/internal/" + organizationId + "/status";
+        String url = "http://" + organizationServiceUrl + ":" + organizationServicePort + "/api/organizations/internal/" + organizationId + "/status";
         try {
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(url))
@@ -136,7 +148,7 @@ public class OrganizationValidationClient {
     }
 
     public Optional<String> getUserName(long userId) {
-        String url = gatewayBaseUrl + "/api/users/" + userId;
+        String url = "http://" + identityServiceUrl + ":" + identityServicePort + "/api/internal/users/" + userId;
         try {
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(url))
@@ -148,7 +160,11 @@ public class OrganizationValidationClient {
                 JsonNode node = objectMapper.readTree(response.body());
                 String firstName = node.has("firstName") ? node.get("firstName").asText() : "";
                 String lastName = node.has("lastName") ? node.get("lastName").asText() : "";
-                return Optional.of((firstName + " " + lastName).trim());
+                String username = node.has("username") ? node.get("username").asText() : "";
+                if (!firstName.isEmpty() && !lastName.isEmpty()) {
+                    return Optional.of(firstName + " " + lastName);
+                }
+                return Optional.of(username);
             }
         } catch (Exception e) {
             log.debug("Could not fetch user name for {}: {}", userId, e.getMessage());
