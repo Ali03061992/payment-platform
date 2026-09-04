@@ -45,7 +45,7 @@ export class LayoutComponent implements OnInit, OnDestroy {
     { label: 'Paiements', icon: '💰', route: 'payments', roles: ['SYSTEM_ADMIN', 'SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_AGENT'] },
     { label: 'Stats paiements', icon: '📊', route: 'payments/stats', roles: ['SYSTEM_ADMIN', 'SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_AGENT'] },
     { label: 'Scanner QR', icon: '📱', route: 'scan', roles: ['SYSTEM_ADMIN', 'SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_AGENT'] },
-    { label: 'Paiements agents', icon: '👥', route: 'supplier/agent-payments', roles: ['SUPPLIER_ADMIN'] },
+    { label: 'Paiements agents', icon: '👥', route: 'supplier/agent-payments', roles: ['SUPPLIER_ADMIN', 'SUPPLIER_AGENT'] },
     { label: 'Recherche paiements', icon: '🔍', route: 'payments/search', roles: ['SUPPLIER_ADMIN', 'SYSTEM_ADMIN'] },
   ];
 

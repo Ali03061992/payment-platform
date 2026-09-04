@@ -74,7 +74,7 @@ const routes: Routes = [
       { path: 'payments/search', component: PaymentSearchComponent, canActivate: [RoleGuard], data: { roles: ['SUPPLIER_ADMIN', 'SYSTEM_ADMIN'] } },
       { path: 'payments/:id', component: PaymentDetailComponent, canActivate: [RoleGuard], data: { roles: allRoles } },
       { path: 'scan', component: QrScannerComponent, canActivate: [RoleGuard], data: { roles: allRoles } },
-      { path: 'supplier/agent-payments', component: AgentPaymentsComponent, canActivate: [RoleGuard], data: { roles: ['SUPPLIER_ADMIN'] } },
+      { path: 'supplier/agent-payments', component: AgentPaymentsComponent, canActivate: [RoleGuard], data: { roles: supplierRoles } },
       { path: 'supplier/stock', component: StockManagementComponent, canActivate: [RoleGuard], data: { roles: supplierRoles } },
       { path: 'supplier/stock/create', component: AddProductComponent, canActivate: [RoleGuard], data: { roles: ['SUPPLIER_ADMIN'] } },
       { path: 'supplier/products', component: ProductManagementComponent, canActivate: [RoleGuard], data: { roles: supplierRoles } },
