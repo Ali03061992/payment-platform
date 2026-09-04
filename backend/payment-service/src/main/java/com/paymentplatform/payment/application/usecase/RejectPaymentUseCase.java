@@ -4,6 +4,7 @@ import com.paymentplatform.shared.infrastructure.audit.AuditActions;
 import com.paymentplatform.shared.infrastructure.audit.AuditRecorder;
 import com.paymentplatform.shared.infrastructure.outbox.OutboxEventStore;
 import com.paymentplatform.shared.domain.event.PaymentEvents.PaymentRejectedEvent;
+import com.paymentplatform.payment.application.dto.PaymentNameResolver;
 import com.paymentplatform.payment.application.dto.PaymentResponse;
 import com.paymentplatform.payment.application.dto.RejectPaymentRequest;
 import com.paymentplatform.payment.domain.model.Payment;
@@ -24,13 +25,16 @@ public class RejectPaymentUseCase {
     private final AuditRecorder audit;
     private final OutboxEventStore outbox;
     private final PaymentIndexerService indexer;
+    private final PaymentNameResolver nameResolver;
 
     public RejectPaymentUseCase(PaymentRepository payments, AuditRecorder audit,
-                                 OutboxEventStore outbox, PaymentIndexerService indexer) {
+                                 OutboxEventStore outbox, PaymentIndexerService indexer,
+                                 PaymentNameResolver nameResolver) {
         this.payments = payments;
         this.audit = audit;
         this.outbox = outbox;
         this.indexer = indexer;
+        this.nameResolver = nameResolver;
     }
 
     @Transactional
@@ -57,6 +61,6 @@ public class RejectPaymentUseCase {
 
         indexer.indexPayment(saved);
 
-        return PaymentResponse.from(saved);
+        return PaymentResponse.from(saved, nameResolver.toNameResolver());
     }
 }

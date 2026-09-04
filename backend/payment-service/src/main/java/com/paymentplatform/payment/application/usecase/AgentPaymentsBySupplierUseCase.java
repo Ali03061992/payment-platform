@@ -1,9 +1,11 @@
 package com.paymentplatform.payment.application.usecase;
 
 import com.paymentplatform.payment.application.dto.AgentPaymentSummary;
+import com.paymentplatform.payment.application.dto.PaymentNameResolver;
 import com.paymentplatform.payment.application.dto.PaymentResponse;
 import com.paymentplatform.payment.infrastructure.persistence.PaymentJpaRepository;
 import com.paymentplatform.payment.infrastructure.persistence.PaymentJpaEntity;
+import com.paymentplatform.payment.infrastructure.http.OrganizationValidationClient;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -17,9 +19,11 @@ import java.util.List;
 public class AgentPaymentsBySupplierUseCase {
 
     private final PaymentJpaRepository paymentRepo;
+    private final PaymentNameResolver nameResolver;
 
-    public AgentPaymentsBySupplierUseCase(PaymentJpaRepository paymentRepo) {
+    public AgentPaymentsBySupplierUseCase(PaymentJpaRepository paymentRepo, PaymentNameResolver nameResolver) {
         this.paymentRepo = paymentRepo;
+        this.nameResolver = nameResolver;
     }
 
     public List<AgentPaymentSummary> execute(long supplierId, Instant from, Instant to) {
@@ -50,9 +54,11 @@ public class AgentPaymentsBySupplierUseCase {
                     .map(this::toResponse)
                     .toList();
 
+            String agentName = nameResolver.toNameResolver().resolveUser(userId);
+
             summaries.add(new AgentPaymentSummary(
                     userId,
-                    "Agent #" + userId,
+                    agentName,
                     payments.size(),
                     total,
                     confirmedToday,
@@ -65,10 +71,15 @@ public class AgentPaymentsBySupplierUseCase {
     }
 
     private PaymentResponse toResponse(PaymentJpaEntity e) {
+        var resolver = nameResolver.toNameResolver();
         return new PaymentResponse(
-                e.getId(), e.getReference(), e.getShopId(), e.getSupplierId(),
+                e.getId(), e.getReference(),
+                e.getShopId(), resolver.resolveOrg(e.getShopId()),
+                e.getSupplierId(), resolver.resolveOrg(e.getSupplierId()),
                 e.getAmount(), e.getCurrency(), e.getStatus(), e.getRejectionReason(),
-                e.getCreatedBy(), e.getVersion(), e.getCreatedAt(), e.getUpdatedAt(),
+                e.getCreatedBy(), resolver.resolveUser(e.getCreatedBy()),
+                null, null, null,
+                e.getVersion(), e.getCreatedAt(), e.getUpdatedAt(),
                 List.of()
         );
     }

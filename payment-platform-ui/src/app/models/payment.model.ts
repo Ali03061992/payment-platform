@@ -2,12 +2,18 @@ export interface Payment {
   id: number;
   reference: string;
   shopId: number;
+  shopName: string;
   supplierId: number;
+  supplierName: string;
   amount: number;
   currency: string;
   status: 'PENDING' | 'CONFIRMED' | 'REJECTED' | 'CANCELLED';
   rejectionReason: string;
   createdBy: number;
+  createdByName: string;
+  confirmedByName: string;
+  rejectedByName: string;
+  cancelledByName: string;
   version: number;
   createdAt: string;
   updatedAt: string;
@@ -17,6 +23,7 @@ export interface Payment {
 export interface PaymentEvent {
   action: string;
   userId: number;
+  userName: string;
   timestamp: string;
   details: string;
 }

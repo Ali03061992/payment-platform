@@ -27,9 +27,11 @@
         <tr>
           <th>Référence</th>
           <th>Boutique</th>
+          <th>Créé par</th>
           <th>Fournisseur</th>
           <th>Montant</th>
           <th>Statut</th>
+          <th>Traité par</th>
           <th>Créé le</th>
           <th>Actions</th>
         </tr>
@@ -37,13 +39,20 @@
       <tbody>
         <tr *ngFor="let p of filteredPayments">
           <td><strong>{{ p.reference }}</strong></td>
-          <td>{{ p.shopId }}</td>
-          <td>{{ p.supplierId }}</td>
+          <td>{{ p.shopName }}</td>
+          <td>{{ p.createdByName }}</td>
+          <td>{{ p.supplierName }}</td>
           <td>{{ p.amount | number:'1.2-2' }} {{ p.currency }}</td>
           <td>
             <span class="payment-badge" [ngClass]="statusClass(p.status)">
               {{ statusLabel(p.status) }}
             </span>
+          </td>
+          <td>
+            <span *ngIf="p.status === 'CONFIRMED'">{{ p.confirmedByName }}</span>
+            <span *ngIf="p.status === 'REJECTED'">{{ p.rejectedByName }}</span>
+            <span *ngIf="p.status === 'CANCELLED'">{{ p.cancelledByName }}</span>
+            <span *ngIf="p.status === 'PENDING'" class="text-muted">-</span>
           </td>
           <td>{{ p.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
           <td>
@@ -53,7 +62,7 @@
           </td>
         </tr>
         <tr *ngIf="filteredPayments.length === 0">
-          <td colspan="7" style="text-align:center;color:#8896ab;padding:32px;">Aucun paiement trouvé</td>
+          <td colspan="9" style="text-align:center;color:#8896ab;padding:32px;">Aucun paiement trouvé</td>
         </tr>
       </tbody>
     </table>
@@ -79,11 +88,21 @@
       </div>
       <div class="payment-row">
         <span class="payment-label">Boutique</span>
-        <span class="payment-value">{{ p.shopId }}</span>
+        <span class="payment-value">{{ p.shopName }}</span>
       </div>
       <div class="payment-row">
         <span class="payment-label">Fournisseur</span>
-        <span class="payment-value">{{ p.supplierId }}</span>
+        <span class="payment-value">{{ p.supplierName }}</span>
+      </div>
+      <div class="payment-row">
+        <span class="payment-label">Créé par</span>
+        <span class="payment-value">{{ p.createdByName }}</span>
+      </div>
+      <div class="payment-row" *ngIf="p.status !== 'PENDING'">
+        <span class="payment-label">Traité par</span>
+        <span class="payment-value">
+          {{ p.confirmedByName || p.rejectedByName || p.cancelledByName }}
+        </span>
       </div>
       <div class="payment-row">
         <span class="payment-label">Créé le</span>

@@ -48,12 +48,28 @@
       <div class="detail-value amount">{{ payment.amount | number:'1.2-2' }} {{ payment.currency }}</div>
     </div>
     <div class="detail-card">
-      <div class="detail-label">Boutique ID</div>
-      <div class="detail-value">{{ payment.shopId }}</div>
+      <div class="detail-label">Boutique</div>
+      <div class="detail-value">{{ payment.shopName }}</div>
     </div>
     <div class="detail-card">
-      <div class="detail-label">Fournisseur ID</div>
-      <div class="detail-value">{{ payment.supplierId }}</div>
+      <div class="detail-label">Fournisseur</div>
+      <div class="detail-value">{{ payment.supplierName }}</div>
+    </div>
+    <div class="detail-card">
+      <div class="detail-label">Créé par</div>
+      <div class="detail-value">{{ payment.createdByName }}</div>
+    </div>
+    <div class="detail-card" *ngIf="payment.status === 'CONFIRMED'">
+      <div class="detail-label">Confirmé par</div>
+      <div class="detail-value">{{ payment.confirmedByName }}</div>
+    </div>
+    <div class="detail-card" *ngIf="payment.status === 'REJECTED'">
+      <div class="detail-label">Rejeté par</div>
+      <div class="detail-value">{{ payment.rejectedByName }}</div>
+    </div>
+    <div class="detail-card" *ngIf="payment.status === 'CANCELLED'">
+      <div class="detail-label">Annulé par</div>
+      <div class="detail-value">{{ payment.cancelledByName }}</div>
     </div>
     <div class="detail-card">
       <div class="detail-label">Créé le</div>
@@ -97,7 +113,7 @@
         <tbody>
           <tr *ngFor="let e of payment.events">
             <td><span class="payment-badge" [ngClass]="e.action.toLowerCase().replace('payment_', '')">{{ actionLabel(e.action) }}</span></td>
-            <td>{{ e.userId }}</td>
+            <td>{{ e.userName || 'User ' + e.userId }}</td>
             <td>{{ e.timestamp | date:'dd/MM/yyyy HH:mm:ss' }}</td>
             <td>{{ e.details || '-' }}</td>
           </tr>

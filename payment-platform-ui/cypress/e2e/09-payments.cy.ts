@@ -24,14 +24,16 @@ describe('09 - Payments: List', () => {
   });
 
   it('should show payment table with columns', () => {
-    cy.get('table thead th').should('have.length', 7);
-    cy.get('table thead').should('contain', 'Référence');
-    cy.get('table thead').should('contain', 'Boutique');
-    cy.get('table thead').should('contain', 'Fournisseur');
-    cy.get('table.thead').should('contain', 'Montant');
-    cy.get('table thead').should('contain', 'Statut');
-    cy.get('table thead').should('contain', 'Créé le');
-    cy.get('table thead').should('contain', 'Actions');
+    cy.get('.hide-mobile table thead th').should('have.length', 9);
+    cy.get('.hide-mobile table thead').should('contain', 'Référence');
+    cy.get('.hide-mobile table thead').should('contain', 'Boutique');
+    cy.get('.hide-mobile table thead').should('contain', 'Créé par');
+    cy.get('.hide-mobile table thead').should('contain', 'Fournisseur');
+    cy.get('.hide-mobile table thead').should('contain', 'Montant');
+    cy.get('.hide-mobile table thead').should('contain', 'Statut');
+    cy.get('.hide-mobile table thead').should('contain', 'Traité par');
+    cy.get('.hide-mobile table thead').should('contain', 'Créé le');
+    cy.get('.hide-mobile table thead').should('contain', 'Actions');
   });
 
   it('should filter payments by status', () => {
@@ -93,14 +95,14 @@ describe('09 - Payments: Create', () => {
   });
 
   it('should disable submit when fields empty', () => {
-    cy.get('button.btn-primary[type="submit"]').should('be.disabled');
+    cy.get('button.btn-primary').last().should('be.disabled');
   });
 
   it('should enable submit when all fields filled', () => {
     cy.get('select[name="shop"]').select(1);
     cy.get('select[name="supplier"]').select(1);
     cy.get('input[name="amount"]').clear().type('100');
-    cy.get('button.btn-primary[type="submit"]').should('not.be.disabled');
+    cy.get('button.btn-primary').last().should('not.be.disabled');
   });
 });
 
