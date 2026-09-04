@@ -1,91 +1,26 @@
-declare namespace Cypress {
-  interface Chainable {
-    login(username: string, password: string): Chainable<void>;
-    loginAsAdmin(): Chainable<void>;
-    loginAsSupplierAdmin(): Chainable<void>;
-    loginAsShopAdmin(): Chainable<void>;
-    ensureTestUsers(): Chainable<void>;
-  }
+const API_URL = () => Cypress.env('apiUrl') || 'http://localhost:8081';
+
+function authHeaders(token: string) {
+  return { Authorization: `Bearer ${token}` };
 }
-
-function apiUrl(): string {
-  return Cypress.env('apiUrl') || 'http://localhost:8081';
-}
-
-Cypress.Commands.add('ensureTestUsers', () => {
-  cy.request({
-    method: 'POST', url: `${apiUrl()}/api/auth/login`,
-    body: { username: 'system.admin', password: 'Admin@123' },
-  }).then((resp) => {
-    const token = resp.body.accessToken;
-    const headers = { Authorization: `Bearer ${token}` };
-
-    cy.request({ method: 'GET', url: `${apiUrl()}/api/users`, headers, failOnStatusCode: false })
-      .then((usersResp) => {
-        const users = usersResp.status === 200 ? usersResp.body : [];
-        const hasSupplierAdmin = users.some((u: any) => u.username === 'supplier.admin');
-        const hasShopAdmin = users.some((u: any) => u.username === 'shop.admin');
-
-        if (!hasSupplierAdmin) {
-          cy.request({
-            method: 'POST', url: `${apiUrl()}/api/admin/suppliers`, headers,
-            body: { name: 'E2E Supplier Test' }, failOnStatusCode: false,
-          }).then((supResp) => {
-            if (supResp.status === 200 || supResp.status === 201) {
-              const supId = supResp.body.id;
-              cy.request({
-                method: 'POST', url: `${apiUrl()}/api/users`, headers,
-                body: {
-                  username: 'supplier.admin', email: 'supplier.admin@test.com',
-                  password: 'Admin@123', firstName: 'Supplier', lastName: 'Admin',
-                  phone: '+21699111111', role: 'SUPPLIER_ADMIN', organizationId: supId,
-                }, failOnStatusCode: false,
-              });
-            }
-          });
-        }
-
-        if (!hasShopAdmin) {
-          cy.request({
-            method: 'POST', url: `${apiUrl()}/api/admin/shops`, headers,
-            body: { name: 'E2E Shop Test' }, failOnStatusCode: false,
-          }).then((shopResp) => {
-            if (shopResp.status === 200 || shopResp.status === 201) {
-              const shopId = shopResp.body.id;
-              cy.request({
-                method: 'POST', url: `${apiUrl()}/api/users`, headers,
-                body: {
-                  username: 'shop.admin', email: 'shop.admin@test.com',
-                  password: 'Admin@123', firstName: 'Shop', lastName: 'Admin',
-                  phone: '+21699222222', role: 'SHOP_ADMIN', organizationId: shopId,
-                }, failOnStatusCode: false,
-              });
-            }
-          });
-        }
-      });
-  });
-});
 
 Cypress.Commands.add('login', (username: string, password: string) => {
   cy.request({
     method: 'POST',
-    url: `${apiUrl()}/api/auth/login`,
+    url: `${API_URL()}/api/auth/login`,
     body: { username, password },
-    failOnStatusCode: false,
   }).then((resp) => {
-    if (resp.status === 200 && resp.body && resp.body.accessToken) {
-      window.localStorage.setItem('token', resp.body.accessToken);
-      cy.request({
-        method: 'GET',
-        url: `${apiUrl()}/api/auth/me`,
-        headers: { Authorization: `Bearer ${resp.body.accessToken}` },
-      }).then((meResp) => {
-        if (meResp.status === 200) {
-          window.localStorage.setItem('user', JSON.stringify(meResp.body));
-        }
-      });
-    }
+    expect(resp.status).to.eq(200);
+    expect(resp.body).to.have.property('accessToken');
+    const token = resp.body.accessToken;
+    cy.request({
+      method: 'GET',
+      url: `${API_URL()}/api/auth/me`,
+      headers: authHeaders(token),
+    }).then((me) => {
+      window.localStorage.setItem('token', token);
+      window.localStorage.setItem('user', JSON.stringify(me.body));
+    });
   });
 });
 
@@ -94,9 +29,75 @@ Cypress.Commands.add('loginAsAdmin', () => {
 });
 
 Cypress.Commands.add('loginAsSupplierAdmin', () => {
-  cy.login('supplier.admin', 'Admin@123');
+  cy.login('covale.admin', 'Admin@123');
+});
+
+Cypress.Commands.add('loginAsPointteckAdmin', () => {
+  cy.login('pointteck.admin', 'Admin@123');
 });
 
 Cypress.Commands.add('loginAsShopAdmin', () => {
-  cy.login('shop.admin', 'Admin@123');
+  cy.login('abdelslam', 'Admin@123');
 });
+
+Cypress.Commands.add('loginAsAli', () => {
+  cy.login('ali', 'Admin@123');
+});
+
+Cypress.Commands.add('loginAsCovaleAgent', () => {
+  cy.login('covale.agent1', 'Admin@123');
+});
+
+Cypress.Commands.add('loginAsPointteckAgent', () => {
+  cy.login('pointteck.agent1', 'Admin@123');
+});
+
+Cypress.Commands.add('ensureTestUsers', () => {
+  cy.request({
+    method: 'POST',
+    url: `${API_URL()}/api/auth/login`,
+    body: { username: 'system.admin', password: 'Admin@123' },
+    failOnStatusCode: false,
+  }).then((resp) => {
+    if (resp.status !== 200) return;
+    const token = resp.body.accessToken;
+    const testUsers = [
+      { username: 'covale.admin', password: 'Admin@123', firstName: 'Covale', lastName: 'Admin', email: 'covale.admin@test.com', role: 'SUPPLIER_ADMIN', organizationId: 1 },
+      { username: 'covale.agent1', password: 'Admin@123', firstName: 'Agent', lastName: 'Un', email: 'agent1@test.com', role: 'SUPPLIER_AGENT', organizationId: 1 },
+      { username: 'abdelslam', password: 'Admin@123', firstName: 'Abdelslam', lastName: 'Tunis', email: 'abdelslam@test.com', role: 'SHOP_ADMIN', organizationId: 3 },
+      { username: 'ali', password: 'Admin@123', firstName: 'Ali', lastName: 'Sfax', email: 'ali@test.com', role: 'SHOP_ADMIN', organizationId: 4 },
+    ];
+    testUsers.forEach((user) => {
+      cy.request({
+        method: 'POST',
+        url: `${API_URL()}/api/auth/register`,
+        body: user,
+        failOnStatusCode: false,
+      });
+    });
+  });
+});
+
+Cypress.Commands.add('createPayment', (shopId: number, supplierId: number, amount: number) => {
+  cy.request({
+    method: 'POST',
+    url: `${API_URL()}/api/payments`,
+    body: { shopId, supplierId, amount, currency: 'EUR' },
+    failOnStatusCode: false,
+  });
+});
+
+declare namespace Cypress {
+  interface Chainable {
+    login(username: string, password: string): Chainable<void>;
+    loginAsAdmin(): Chainable<void>;
+    loginAsSupplierAdmin(): Chainable<void>;
+    loginAsPointteckAdmin(): Chainable<void>;
+    loginAsShopAdmin(): Chainable<void>;
+    loginAsAli(): Chainable<void>;
+    loginAsCovaleAgent(): Chainable<void>;
+    loginAsPointteckAgent(): Chainable<void>;
+    ensureTestUsers(): Chainable<void>;
+    createPayment(shopId: number, supplierId: number, amount: number): Chainable<void>;
+  }
+}

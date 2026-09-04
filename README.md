@@ -12,6 +12,7 @@ Architecture **microservices** appliquant **DDD**, **Clean/Hexagonal Architectur
 | Spring Boot | 4.1.0 (Spring Framework 7, Hibernate 7.4) |
 | Spring Cloud | 2025.1.2 (compatible Boot 4.1) |
 | MySQL | 8.4 LTS |
+| Elasticsearch | 9.0.0 |
 | RabbitMQ | 4.x |
 | Angular | 16 |
 | Docker | Multi-stage builds |
@@ -77,6 +78,7 @@ docker compose up --build -d
 | **Connexion** | http://localhost:8080/login | Se connecter |
 | **API Gateway** | http://localhost:8081 | Entry point API |
 | **Swagger UI** | http://localhost:8081/swagger-ui.html | Documentation API |
+| **Elasticsearch** | http://localhost:9200 | Moteur de recherche |
 | **Adminer** | http://localhost:8086 | Interface web MySQL |
 | **RabbitMQ** | http://localhost:15673 | Management UI RabbitMQ |
 
@@ -96,6 +98,58 @@ docker compose up --build -d
 | MySQL | 3307 | `payment_app` / `app-password-change-me` |
 | RabbitMQ AMQP | 5673 | `payment` / `rabbit-password-change-me` |
 | RabbitMQ Management | 15673 | `payment` / `rabbit-password-change-me` |
+| Elasticsearch | 9200 | Pas d'authentification (xpack.security.enabled=false) |
+
+## Elasticsearch
+
+Elasticsearch est utilisé pour la recherche full-text des paiements. Le service tourne sur le port **9200**.
+
+### Accès local
+
+```bash
+# Vérifier que le service est actif
+curl http://localhost:9200/
+
+# Vérifier la santé du cluster
+curl http://localhost:9200/_cluster/health?pretty
+
+# Lister les indices
+curl http://localhost:9200/_cat/indices?v
+
+# Voir le mappings de l'indice payments
+curl http://localhost:9200/payments/_mapping?pretty
+
+# Rechercher des paiements
+curl -X GET "http://localhost:9200/payments/_search?pretty" -H 'Content-Type: application/json' -d'
+{
+  "query": {
+    "match_all": {}
+  }
+}'
+```
+
+### Commandes PowerShell
+
+```powershell
+# Vérifier que le service est actif
+Invoke-RestMethod -Uri "http://localhost:9200/"
+
+# Vérifier la santé du cluster
+Invoke-RestMethod -Uri "http://localhost:9200/_cluster/health?pretty"
+
+# Lister les indices
+Invoke-RestMethod -Uri "http://localhost:9200/_cat/indices?v"
+
+# Rechercher des paiements
+Invoke-RestMethod -Uri "http://localhost:9200/payments/_search?pretty" -Method Post -ContentType "application/json" -Body '{"query":{"match_all":{}}}'
+```
+
+### UI alternatives
+
+| Outil | URL | Description |
+|---|---|---|
+| **Kibana** | http://localhost:5601 | Dashboard Elasticsearch (non inclus dans docker-compose) |
+| **Elasticvue** | Extension Chrome/Firefox | Client Elasticsearch dans le navigateur |
 
 ## Comptes de démonstration
 
@@ -138,6 +192,7 @@ docker compose up --build -d
 - **Backend** : Java 26, Spring Boot 4.1, Spring Cloud Gateway, Hibernate 7.4, Flyway, RabbitMQ
 - **Frontend** : Angular 16, TypeScript
 - **Base de données** : MySQL 8.4 (une base par microservice)
+- **Recherche** : Elasticsearch 9.0.0 (indexation des paiements)
 - **Infra** : Docker multi-stage, Docker Compose, Nginx
 - **Architecture** : DDD, Clean/Hexagonal, Event-Driven, Outbox Pattern
 

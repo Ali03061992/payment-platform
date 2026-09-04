@@ -1,14 +1,12 @@
-describe('Shop - Order List', () => {
-  before(() => {
-    cy.ensureTestUsers();
-  });
+describe('08 - Shop: Order List', () => {
+  before(() => cy.ensureTestUsers());
 
   beforeEach(() => {
     cy.loginAsShopAdmin();
     cy.visit('/dashboard/shop/orders');
   });
 
-  it('should display orders list', () => {
+  it('should display order list page', () => {
     cy.url().should('include', '/shop/orders');
     cy.get('body').should('be.visible');
   });
@@ -27,10 +25,8 @@ describe('Shop - Order List', () => {
   });
 });
 
-describe('Shop - Create Order', () => {
-  before(() => {
-    cy.ensureTestUsers();
-  });
+describe('08 - Shop: Create Order', () => {
+  before(() => cy.ensureTestUsers());
 
   beforeEach(() => {
     cy.loginAsShopAdmin();
@@ -41,12 +37,22 @@ describe('Shop - Create Order', () => {
     cy.url().should('include', '/shop/orders/create');
     cy.get('body').should('be.visible');
   });
+
+  it('should have supplier selection', () => {
+    cy.get('select').should('have.length.gte', 1);
+  });
+
+  it('should have submit button', () => {
+    cy.get('button[type="submit"], button:contains("Créer"), button:contains("Valider")').should('exist');
+  });
+
+  it('should have cancel button', () => {
+    cy.get('a:contains("Annuler"), button:contains("Annuler")').should('exist');
+  });
 });
 
-describe('Shop - Order Detail', () => {
-  before(() => {
-    cy.ensureTestUsers();
-  });
+describe('08 - Shop: Order Detail', () => {
+  before(() => cy.ensureTestUsers());
 
   it('should handle invalid order id gracefully', () => {
     cy.loginAsShopAdmin();
@@ -57,10 +63,8 @@ describe('Shop - Order Detail', () => {
   });
 });
 
-describe('Shop - Balance View', () => {
-  before(() => {
-    cy.ensureTestUsers();
-  });
+describe('08 - Shop: Balance View', () => {
+  before(() => cy.ensureTestUsers());
 
   beforeEach(() => {
     cy.loginAsShopAdmin();
@@ -70,5 +74,9 @@ describe('Shop - Balance View', () => {
   it('should display balance page', () => {
     cy.url().should('include', '/shop/balance');
     cy.get('body').should('be.visible');
+  });
+
+  it('should show balance information', () => {
+    cy.get('body').should('contain.text', 'Balance');
   });
 });

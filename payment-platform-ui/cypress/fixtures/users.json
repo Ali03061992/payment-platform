@@ -1,22 +1,14 @@
 {
-  "admin": {
-    "username": "system.admin",
-    "password": "Admin@123"
-  },
-  "supplier": {
-    "username": "supplier.admin",
-    "password": "Admin@123"
-  },
-  "shop": {
-    "username": "shop.admin",
-    "password": "Admin@123"
-  },
-  "newUser": {
-    "username": "test.user.e2e",
-    "email": "test.e2e@example.com",
-    "password": "test1234",
-    "firstName": "Test",
-    "lastName": "E2E",
-    "phone": "21699123456"
-  }
+  "systemAdmin": { "username": "system.admin", "password": "Admin@123" },
+  "covaleAdmin": { "username": "covale.admin", "password": "Admin@123" },
+  "pointteckAdmin": { "username": "pointteck.admin", "password": "Admin@123" },
+  "covaleAgent1": { "username": "covale.agent1", "password": "Admin@123" },
+  "covaleAgent2": { "username": "covale.agent2", "password": "Admin@123" },
+  "pointteckAgent1": { "username": "pointteck.agent1", "password": "Admin@123" },
+  "pointteckAgent2": { "username": "pointteck.agent2", "password": "Admin@123" },
+  "shopAdminAbdelslam": { "username": "abdelslam", "password": "Admin@123" },
+  "shopAdminAli": { "username": "ali", "password": "Admin@123" },
+  "pointteckTunis": { "username": "pointteck.tunis.admin", "password": "Admin@123" },
+  "pointteckSfax": { "username": "pointteck.sfax.admin", "password": "Admin@123" },
+  "newUser": { "username": "test.user.e2e", "password": "Test@1234", "email": "test.e2e@platform.com", "firstName": "Test", "lastName": "E2E", "role": "SHOP_ADMIN" }
 }
