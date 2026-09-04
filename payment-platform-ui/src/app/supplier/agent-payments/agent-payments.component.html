@@ -28,9 +28,9 @@
 
 <!-- Grand Totals -->
 <div class="totals-bar" *ngIf="!loading && summaries.length > 0">
-  <div class="total-item total-today">
-    <div class="total-label">Aujourd'hui</div>
-    <div class="total-value green">{{ grandTodayTotal | number:'1.2-2' }} TND</div>
+  <div class="total-item total-confirmed">
+    <div class="total-label">Total confirmé</div>
+    <div class="total-value green">{{ grandConfirmedTotal | number:'1.2-2' }} TND</div>
   </div>
   <div class="total-item">
     <div class="total-label">Total période</div>
@@ -67,9 +67,9 @@
         </div>
       </div>
       <div class="agent-totals">
-        <div class="today-amount" *ngIf="agent.confirmedToday > 0">
-          <span class="today-label">Aujourd'hui</span>
-          <span class="today-value">{{ agent.confirmedToday | number:'1.2-2' }} {{ agent.currency }}</span>
+        <div class="confirmed-amount">
+          <span class="confirmed-label">Confirmé</span>
+          <span class="confirmed-value">{{ agent.confirmedTotal | number:'1.2-2' }} {{ agent.currency }}</span>
         </div>
         <div class="period-amount">
           <span class="period-label">Total</span>
@@ -87,8 +87,10 @@
             <tr>
               <th>Référence</th>
               <th>Boutique</th>
+              <th>Créé par</th>
               <th>Montant</th>
               <th>Statut</th>
+              <th>Traité par</th>
               <th>Date</th>
               <th></th>
             </tr>
@@ -96,10 +98,17 @@
           <tbody>
             <tr *ngFor="let p of getAgentPayments(agent)">
               <td class="ref-cell">{{ p.reference }}</td>
-              <td>Boutique #{{ p.shopId }}</td>
+              <td>{{ p.shopName }}</td>
+              <td>{{ p.createdByName }}</td>
               <td class="amount-cell">{{ p.amount | number:'1.2-2' }} {{ p.currency }}</td>
               <td>
                 <span class="payment-badge" [ngClass]="p.status.toLowerCase()">{{ statusLabel(p.status) }}</span>
+              </td>
+              <td>
+                <span *ngIf="p.status === 'CONFIRMED'">{{ p.confirmedByName }}</span>
+                <span *ngIf="p.status === 'REJECTED'">{{ p.rejectedByName }}</span>
+                <span *ngIf="p.status === 'CANCELLED'">{{ p.cancelledByName }}</span>
+                <span *ngIf="p.status === 'PENDING'" class="text-muted">-</span>
               </td>
               <td>{{ p.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
               <td>
@@ -110,8 +119,14 @@
         </table>
       </div>
       <div class="agent-total-row">
-        <strong>Total agent :</strong>
-        <span class="total-amount">{{ agent.totalAmount | number:'1.2-2' }} {{ agent.currency }}</span>
+        <div class="agent-total-item">
+          <strong>Total confirmé :</strong>
+          <span class="total-amount green">{{ agent.confirmedTotal | number:'1.2-2' }} {{ agent.currency }}</span>
+        </div>
+        <div class="agent-total-item">
+          <strong>Total période :</strong>
+          <span class="total-amount">{{ agent.totalAmount | number:'1.2-2' }} {{ agent.currency }}</span>
+        </div>
       </div>
     </div>
   </div>

@@ -5,13 +5,10 @@ import com.paymentplatform.payment.application.dto.PaymentNameResolver;
 import com.paymentplatform.payment.application.dto.PaymentResponse;
 import com.paymentplatform.payment.infrastructure.persistence.PaymentJpaRepository;
 import com.paymentplatform.payment.infrastructure.persistence.PaymentJpaEntity;
-import com.paymentplatform.payment.infrastructure.http.OrganizationValidationClient;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,12 +36,8 @@ public class AgentPaymentsBySupplierUseCase {
                     .map(PaymentJpaEntity::getAmount)
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-            Instant todayStart = LocalDate.now().atStartOfDay().toInstant(ZoneOffset.UTC);
-            Instant todayEnd = LocalDate.now().plusDays(1).atStartOfDay().toInstant(ZoneOffset.UTC);
-
-            BigDecimal confirmedToday = payments.stream()
+            BigDecimal confirmedTotal = payments.stream()
                     .filter(p -> "CONFIRMED".equals(p.getStatus()))
-                    .filter(p -> p.getCreatedAt().isAfter(todayStart) && p.getCreatedAt().isBefore(todayEnd))
                     .map(PaymentJpaEntity::getAmount)
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
 
@@ -61,7 +54,7 @@ public class AgentPaymentsBySupplierUseCase {
                     agentName,
                     payments.size(),
                     total,
-                    confirmedToday,
+                    confirmedTotal,
                     currency,
                     responseList
             ));

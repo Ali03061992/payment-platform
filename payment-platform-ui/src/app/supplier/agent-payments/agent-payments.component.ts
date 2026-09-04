@@ -19,7 +19,7 @@ export class AgentPaymentsComponent implements OnInit {
 
   expandedAgent: number | null = null;
   grandTotal = 0;
-  grandTodayTotal = 0;
+  grandConfirmedTotal = 0;
   totalPayments = 0;
 
   statusFilter = '';
@@ -62,7 +62,7 @@ export class AgentPaymentsComponent implements OnInit {
 
   computeTotals(): void {
     this.grandTotal = this.summaries.reduce((s, a) => s + Number(a.totalAmount), 0);
-    this.grandTodayTotal = this.summaries.reduce((s, a) => s + Number(a.confirmedToday), 0);
+    this.grandConfirmedTotal = this.summaries.reduce((s, a) => s + Number(a.confirmedTotal), 0);
     this.totalPayments = this.summaries.reduce((s, a) => s + a.paymentCount, 0);
   }
 

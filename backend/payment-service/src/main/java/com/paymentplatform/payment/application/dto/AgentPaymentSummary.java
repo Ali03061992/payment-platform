@@ -8,7 +8,7 @@ public record AgentPaymentSummary(
         String username,
         long paymentCount,
         BigDecimal totalAmount,
-        BigDecimal confirmedToday,
+        BigDecimal confirmedTotal,
         String currency,
         List<PaymentResponse> payments
 ) {}
