@@ -69,7 +69,7 @@ public class OrderController {
             @RequestParam(defaultValue = "50") int size) {
         var current = CurrentUser.get();
         var pageable = PageRequest.of(page, size);
-        org.springframework.data.Page<com.paymentplatform.organization.domain.model.Order> orderPage;
+        org.springframework.data.domain.Page<com.paymentplatform.organization.domain.model.Order> orderPage;
 
         if ((current.roles().contains("SUPPLIER_ADMIN") || current.roles().contains("SUPPLIER_AGENT")) && current.organizationId() != null) {
             orderPage = (status != null && !status.isBlank())
