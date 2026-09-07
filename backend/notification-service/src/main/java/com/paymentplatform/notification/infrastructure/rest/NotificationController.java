@@ -63,10 +63,10 @@ public class NotificationController {
         Notification n = notifications.findById(id).orElseThrow(() ->
                 new java.util.NoSuchElementException("Notification not found"));
         boolean belongsToOrg = user.organizationId() != null &&
-                n.getRecipientOrganizationId() != null &&
-                n.getRecipientOrganizationId().equals(user.organizationId());
-        boolean belongsToUser = n.getRecipientUserId() != null &&
-                n.getRecipientUserId().equals(user.userId());
+                n.recipientOrganizationId() != null &&
+                n.recipientOrganizationId().equals(user.organizationId());
+        boolean belongsToUser = n.recipientUserId() != null &&
+                n.recipientUserId().equals(user.userId());
         if (!belongsToOrg && !belongsToUser) {
             return ResponseEntity.status(403).build();
         }
