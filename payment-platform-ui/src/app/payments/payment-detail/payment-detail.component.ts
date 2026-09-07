@@ -3,6 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { PaymentService } from '../../services/payment.service';
 import { Payment } from '../../models/payment.model';
 import { ToastService } from '../../services/toast.service';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-payment-detail',
@@ -30,7 +31,7 @@ export class PaymentDetailComponent implements OnInit {
     this.paymentService.getById(id).subscribe({
       next: (data: Payment) => {
         this.payment = data;
-        this.qrData = `${window.location.origin}/dashboard/payments/${data.id}`;
+        this.qrData = `${environment.appUrl}/dashboard/payments/${data.id}`;
         this.loading = false;
       },
       error: () => { this.loading = false; this.router.navigate(['/dashboard/payments']); }

@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy, ViewChild, ElementRef } from '@angular/core';
 import { Router } from '@angular/router';
-import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { ToastService } from '../services/toast.service';
+import { BrowserMultiFormatReader, NotFoundException } from '@zxing/library';
 
 @Component({
   selector: 'app-qr-scanner',
@@ -15,15 +15,13 @@ export class QrScannerComponent implements OnInit, OnDestroy {
   manualUrl = '';
   useManual = false;
   cameraActive = false;
-  private stream: MediaStream | null = null;
-  private scanInterval: any;
+  cameraError = '';
+  private codeReader: BrowserMultiFormatReader | null = null;
 
-  constructor(private router: Router, private sanitizer: DomSanitizer, private toast: ToastService) {}
+  constructor(private router: Router, private toast: ToastService) {}
 
   ngOnInit(): void {
-    if (!this.isCameraSupported()) {
-      this.useManual = true;
-    }
+    this.useManual = true;
   }
 
   ngOnDestroy(): void {
@@ -35,45 +33,51 @@ export class QrScannerComponent implements OnInit, OnDestroy {
   }
 
   async startCamera(): Promise<void> {
+    this.cameraError = '';
     this.useManual = false;
+
+    if (!this.isCameraSupported()) {
+      this.cameraError = 'Caméra non supportée par ce navigateur.';
+      this.useManual = true;
+      return;
+    }
+
     try {
-      this.stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'environment' }
-      });
+      this.codeReader = new BrowserMultiFormatReader();
       this.cameraActive = true;
       this.scanning = true;
 
-      setTimeout(() => {
-        if (this.videoRef?.nativeElement) {
-          this.videoRef.nativeElement.srcObject = this.stream;
-          this.videoRef.nativeElement.play();
-          this.startBarcodeDetection();
-        }
-      }, 100);
-    } catch (err: any) {
-      this.toast.error('Caméra non disponible. Utilisez la saisie manuelle.');
-      this.useManual = true;
-    }
-  }
+      const devices = await this.codeReader.getVideoInputDevices();
+      if (devices.length === 0) {
+        this.cameraError = 'Aucune caméra détectée.';
+        this.useManual = true;
+        this.cameraActive = false;
+        return;
+      }
 
-  startBarcodeDetection(): void {
-    const BD = (window as any).BarcodeDetector;
-    if (BD) {
-      const barcodeDetector = new BD({ formats: ['qr_code'] });
-      this.scanInterval = setInterval(async () => {
-        if (this.videoRef?.nativeElement && this.videoRef.nativeElement.readyState >= 2) {
-          try {
-            const barcodes = await barcodeDetector.detect(this.videoRef.nativeElement);
-            if (barcodes.length > 0) {
-              this.handleResult(barcodes[0].rawValue);
-            }
-          } catch {}
+      const rearCamera = devices.find(d =>
+        d.label.toLowerCase().includes('back') ||
+        d.label.toLowerCase().includes('rear') ||
+        d.label.toLowerCase().includes('environment')
+      ) || devices[devices.length - 1];
+
+      this.codeReader.decodeFromVideoDevice(
+        rearCamera.deviceId,
+        this.videoRef.nativeElement,
+        (result, err) => {
+          if (result) {
+            this.handleResult(result.getText());
+          }
         }
-      }, 500);
-    } else {
-      this.toast.error('Détection QR auto non supportée. Utilisez la saisie manuelle.');
-      this.stopCamera();
+      ).catch((e: any) => {
+        this.cameraError = 'Impossible d\'accéder à la caméra: ' + (e.message || e);
+        this.useManual = true;
+        this.cameraActive = false;
+      });
+    } catch (e: any) {
+      this.cameraError = 'Erreur lors de l\'activation de la caméra.';
       this.useManual = true;
+      this.cameraActive = false;
     }
   }
 
@@ -118,13 +122,9 @@ export class QrScannerComponent implements OnInit, OnDestroy {
   }
 
   stopCamera(): void {
-    if (this.scanInterval) {
-      clearInterval(this.scanInterval);
-      this.scanInterval = null;
-    }
-    if (this.stream) {
-      this.stream.getTracks().forEach(t => t.stop());
-      this.stream = null;
+    if (this.codeReader) {
+      this.codeReader.reset();
+      this.codeReader = null;
     }
     this.cameraActive = false;
     this.scanning = false;

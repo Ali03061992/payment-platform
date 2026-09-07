@@ -5,6 +5,13 @@
     <p>Pointez votre caméra vers le QR code de la facture</p>
   </div>
 
+  <!-- Camera Error -->
+  <div class="camera-error" *ngIf="cameraError">
+    <span class="error-icon">⚠️</span>
+    <span>{{ cameraError }}</span>
+  </div>
+
+  <!-- Camera View -->
   <div class="scanner-container" *ngIf="!useManual">
     <div class="camera-view" [class.active]="cameraActive">
       <video #video autoplay playsinline muted></video>
@@ -17,7 +24,7 @@
           <div class="scan-line"></div>
         </div>
       </div>
-      <div class="camera-placeholder" *ngIf="!cameraActive">
+      <div class="camera-placeholder" *ngIf="!cameraActive" (click)="startCamera()">
         <span class="camera-icon">📷</span>
         <span>Appuyez pour activer la caméra</span>
       </div>
@@ -31,6 +38,7 @@
     </button>
   </div>
 
+  <!-- Manual Input -->
   <div class="manual-section">
     <div class="divider" *ngIf="!useManual">
       <span>ou</span>
@@ -48,7 +56,9 @@
                (keyup.enter)="submitManual()">
       </div>
       <div class="form-actions">
-        <button class="btn btn-secondary" (click)="useManual = false">Retour caméra</button>
+        <button class="btn btn-secondary" (click)="useManual = false; startCamera()" *ngIf="isCameraSupported()">
+          Retour caméra
+        </button>
         <button class="btn btn-primary" [disabled]="!manualUrl.trim()" (click)="submitManual()">
           Accéder à la facture
         </button>
