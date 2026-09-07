@@ -7,6 +7,7 @@ import com.paymentplatform.identity.application.port.OrganizationStatusPort;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
@@ -21,6 +22,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * Périmètre : ne consulte jamais les tables d'un autre service.
  */
 @Component
+@Profile("!test")
 public class OrganizationGatewayClient implements OrganizationStatusPort {
 
     private static final Logger log = LoggerFactory.getLogger(OrganizationGatewayClient.class);
