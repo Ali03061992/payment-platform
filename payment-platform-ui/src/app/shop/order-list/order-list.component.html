@@ -7,7 +7,6 @@
   <select [(ngModel)]="filterStatus" class="form-control" style="max-width:200px;">
     <option value="">Tous les statuts</option>
     <option value="DRAFT">Brouillon</option>
-    <option value="PENDING">En attente</option>
     <option value="CONFIRMED">Confirmé</option>
     <option value="PREPARING">En préparation</option>
     <option value="READY_FOR_DELIVERY">Prêt pour livraison</option>
@@ -15,6 +14,8 @@
     <option value="DELIVERED">Livré</option>
     <option value="ACCEPTED">Accepté</option>
     <option value="CANCELLED">Annulé</option>
+    <option value="REJECTED">Rejeté</option>
+    <option value="DELIVERY_REJECTED">Livraison rejetée</option>
   </select>
   <span class="result-count">{{ filteredOrders.length }} résultat(s)</span>
 </div>
@@ -50,7 +51,8 @@
           <td class="actions" (click)="$event.stopPropagation()">
             <a class="btn btn-sm btn-secondary" [routerLink]="['/dashboard/shop/orders', o.id]">Détail</a>
             <button class="btn btn-sm btn-success" *ngIf="o.status === 'DELIVERED'" (click)="accept(o.id)">Accepter</button>
-            <button class="btn btn-sm btn-danger" *ngIf="o.status === 'DELIVERED' || o.status === 'PENDING'" (click)="cancel(o.id)">Annuler</button>
+            <button class="btn btn-sm btn-danger" *ngIf="o.status === 'DELIVERED'" (click)="reject(o.id)">Rejeter</button>
+            <button class="btn btn-sm btn-danger" *ngIf="o.status === 'DRAFT' || o.status === 'CONFIRMED' || o.status === 'PREPARING'" (click)="cancel(o.id)">Annuler</button>
           </td>
         </tr>
         <tr *ngIf="filteredOrders.length === 0">
@@ -83,9 +85,10 @@
         <span class="order-value">{{ o.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
       </div>
     </div>
-    <div class="order-card-actions" *ngIf="o.status === 'DELIVERED' || o.status === 'PENDING'" (click)="$event.stopPropagation()">
+    <div class="order-card-actions" (click)="$event.stopPropagation()">
       <button class="btn btn-sm btn-success" *ngIf="o.status === 'DELIVERED'" (click)="accept(o.id)">Accepter</button>
-      <button class="btn btn-sm btn-danger" *ngIf="o.status === 'DELIVERED' || o.status === 'PENDING'" (click)="cancel(o.id)">Annuler</button>
+      <button class="btn btn-sm btn-danger" *ngIf="o.status === 'DELIVERED'" (click)="reject(o.id)">Rejeter</button>
+      <button class="btn btn-sm btn-danger" *ngIf="o.status === 'DRAFT' || o.status === 'CONFIRMED' || o.status === 'PREPARING'" (click)="cancel(o.id)">Annuler</button>
     </div>
   </div>
 </div>

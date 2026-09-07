@@ -14,6 +14,10 @@ public record ProductResponse(
     String currency,
     Integer quantity,
     Integer minQuantity,
+    Integer reservedQty,
+    Long categoryId,
+    Long familyId,
+    String unit,
     String status,
     Instant createdAt,
     Instant updatedAt
@@ -29,6 +33,10 @@ public record ProductResponse(
             product.getCurrency(),
             product.getQuantity(),
             product.getMinQuantity(),
+            product.getReservedQty(),
+            product.getCategoryId(),
+            product.getFamilyId(),
+            product.getUnit(),
             product.getStatus(),
             product.getCreatedAt(),
             product.getUpdatedAt()

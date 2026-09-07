@@ -1,93 +1,102 @@
 <div class="page-header">
-  <h2>Gestion des produits</h2>
+  <h1>Catalogue produits</h1>
   <button class="btn btn-primary" (click)="openCreate()">+ Nouveau produit</button>
 </div>
 
-<div class="form-card" *ngIf="showForm" style="margin-bottom: 24px;">
-  <h3>{{ editingProduct ? 'Modifier le produit' : 'Créer un produit' }}</h3>
+<div class="form-card" *ngIf="showForm">
+  <h3>{{ editingProduct ? 'Modifier le produit' : 'Creer un produit' }}</h3>
   <form (ngSubmit)="save()">
-    <div class="form-row">
-      <div class="form-group">
-        <label>Nom du produit</label>
-        <input type="text" [(ngModel)]="form.name" name="name" class="form-control" placeholder="Ex: T-shirt Premium" required>
-      </div>
-      <div class="form-group" *ngIf="!editingProduct">
-        <label>SKU</label>
-        <input type="text" [(ngModel)]="form.sku" name="sku" class="form-control" placeholder="Ex: TS-001" required>
-      </div>
-    </div>
-
-    <div class="form-group">
-      <label>Description</label>
-      <input type="text" [(ngModel)]="form.description" name="description" class="form-control" placeholder="Description du produit">
-    </div>
-
-    <div class="form-row">
-      <div class="form-group">
-        <label>Famille</label>
-        <select [(ngModel)]="form.family" name="family" class="form-control" (change)="onFamilyChange()">
-          <option value="">-- Sélectionner --</option>
-          <option *ngFor="let f of families" [value]="f.name">{{ f.name }}</option>
-        </select>
+    <div class="form-section">
+      <h4>Informations produit</h4>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Nom <span class="required">*</span></label>
+          <input type="text" [(ngModel)]="form.name" name="name" class="form-control" placeholder="Ex: T-shirt Premium" required>
+        </div>
+        <div class="form-group">
+          <label>SKU <span class="required">*</span></label>
+          <input type="text" [(ngModel)]="form.sku" name="sku" class="form-control" placeholder="Ex: TS-001" [disabled]="!!editingProduct" required>
+        </div>
       </div>
       <div class="form-group">
-        <label>Sous-famille</label>
-        <select [(ngModel)]="form.subfamily" name="subfamily" class="form-control" [disabled]="!form.family">
-          <option value="">-- Sélectionner --</option>
-          <option *ngFor="let sf of subfamilies" [value]="sf.name">{{ sf.name }}</option>
-        </select>
+        <label>Description</label>
+        <input type="text" [(ngModel)]="form.description" name="description" class="form-control" placeholder="Description optionnelle">
       </div>
     </div>
 
-    <div class="form-row">
-      <div class="form-group">
-        <label>Catégorie</label>
-        <select [(ngModel)]="form.category" name="category" class="form-control">
-          <option value="">-- Sélectionner --</option>
-          <option *ngFor="let c of categories" [value]="c.name">{{ c.name }}</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>Devise</label>
-        <select [(ngModel)]="form.currency" name="currency" class="form-control">
-          <option value="EUR">EUR (€)</option>
-          <option value="USD">USD ($)</option>
-          <option value="TND">TND</option>
-        </select>
+    <div class="form-section">
+      <h4>Classification</h4>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Categorie</label>
+          <select [(ngModel)]="form.categoryId" name="categoryId" class="form-control" (change)="onCategoryChange()">
+            <option [ngValue]="0">-- Aucune --</option>
+            <option *ngFor="let c of categories" [ngValue]="c.id">{{ c.name }}</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Famille</label>
+          <select [(ngModel)]="form.familyId" name="familyId" class="form-control">
+            <option [ngValue]="0">-- Aucune --</option>
+            <option *ngFor="let f of getFamiliesForCategory()" [ngValue]="f.id">{{ f.name }}</option>
+          </select>
+        </div>
       </div>
     </div>
 
-    <div class="form-row">
-      <div class="form-group">
-        <label>Prix unitaire</label>
-        <input type="number" [(ngModel)]="form.unitPrice" name="unitPrice" class="form-control" min="0" step="0.01" required>
-      </div>
-      <div class="form-group">
-        <label>Quantité minimum</label>
-        <input type="number" [(ngModel)]="form.minQuantity" name="minQuantity" class="form-control" min="0" required>
+    <div class="form-section">
+      <h4>Prix et unite</h4>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Prix unitaire <span class="required">*</span></label>
+          <input type="number" [(ngModel)]="form.unitPrice" name="unitPrice" class="form-control" min="0" step="0.01" required>
+        </div>
+        <div class="form-group">
+          <label>Devise</label>
+          <select [(ngModel)]="form.currency" name="currency" class="form-control">
+            <option value="TND">TND - Dinar tunisien</option>
+            <option value="EUR">EUR - Euro</option>
+            <option value="USD">USD - Dollar</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Unite</label>
+          <select [(ngModel)]="form.unit" name="unit" class="form-control">
+            <option value="unite">Unite</option>
+            <option value="kg">Kilogramme</option>
+            <option value="m">Metre</option>
+            <option value="l">Litre</option>
+            <option value="carton">Carton</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Seuil min</label>
+          <input type="number" [(ngModel)]="form.minQuantity" name="minQuantity" class="form-control" min="0">
+        </div>
       </div>
     </div>
 
     <div class="form-actions">
-      <button type="button" class="btn btn-secondary" (click)="cancelForm()">Annuler</button>
+      <button type="button" class="btn btn-secondary" (click)="showForm = false">Annuler</button>
       <button type="submit" class="btn btn-primary" [disabled]="saving || !form.name || !form.sku">
-        {{ saving ? 'Enregistrement...' : (editingProduct ? 'Mettre à jour' : 'Créer') }}
+        {{ saving ? 'Enregistrement...' : (editingProduct ? 'Mettre a jour' : 'Creer') }}
       </button>
     </div>
   </form>
 </div>
 
-<div class="loading" *ngIf="loading">
-  <div class="spinner"></div>
-  <span>Chargement des produits...</span>
-</div>
+<div class="loading" *ngIf="loading"><div class="spinner"></div></div>
 
-<div class="filters" *ngIf="!loading">
-  <select [(ngModel)]="filterCategory" class="form-control" style="max-width:200px;">
-    <option value="">Toutes les catégories</option>
-    <option *ngFor="let c of categories" [value]="c.name">{{ c.name }}</option>
+<div class="filter-bar" *ngIf="!loading">
+  <select [(ngModel)]="filterCategory" class="form-control filter-select" (change)="filterFamily = ''">
+    <option value="">Toutes les categories</option>
+    <option *ngFor="let c of categories" [value]="c.id">{{ c.name }}</option>
   </select>
-  <span class="result-count">{{ filteredProducts.length }} résultat(s)</span>
+  <select [(ngModel)]="filterFamily" class="form-control filter-select">
+    <option value="">Toutes les familles</option>
+    <option *ngFor="let f of families" [value]="f.id">{{ f.name }}</option>
+  </select>
+  <span class="result-count">{{ filteredProducts.length }} resultat(s)</span>
 </div>
 
 <div class="table-card" *ngIf="!loading">
@@ -97,11 +106,10 @@
         <tr>
           <th>SKU</th>
           <th>Nom</th>
+          <th>Categorie</th>
           <th>Famille</th>
           <th>Prix</th>
-          <th>Quantité</th>
-          <th>Réservé</th>
-          <th>Disponible</th>
+          <th>Unite</th>
           <th>Statut</th>
           <th>Actions</th>
         </tr>
@@ -109,27 +117,26 @@
       <tbody>
         <tr *ngFor="let p of filteredProducts">
           <td><code>{{ p.sku }}</code></td>
-          <td><strong>{{ p.name }}</strong></td>
-          <td>{{ getFamily(p) }}</td>
+          <td><strong>{{ p.name }}</strong><div class="desc" *ngIf="p.description">{{ p.description }}</div></td>
+          <td>{{ getCategoryName(p.categoryId) }}</td>
+          <td>{{ getFamilyName(p.familyId) }}</td>
           <td>{{ p.unitPrice | number:'1.2-2' }} {{ p.currency }}</td>
-          <td>{{ p.quantity }}</td>
-          <td>{{ getReserved(p) }}</td>
-          <td>{{ getAvailable(p) }}</td>
+          <td>{{ p.unit }}</td>
           <td>
-            <span class="status-badge" [class.active]="p.status === 'ACTIVE'" [class.disabled]="p.status === 'INACTIVE'" [class.inactive]="p.status === 'OUT_OF_STOCK'">
+            <span class="badge" [class.badge-active]="p.status === 'ACTIVE'" [class.badge-inactive]="p.status !== 'ACTIVE'">
               {{ statusLabel(p.status) }}
             </span>
           </td>
           <td class="actions">
             <button class="btn btn-sm btn-secondary" (click)="openEdit(p)">Modifier</button>
             <button class="btn btn-sm" [class.btn-warning]="p.status === 'ACTIVE'" [class.btn-success]="p.status !== 'ACTIVE'" (click)="toggleStatus(p)">
-              {{ p.status === 'ACTIVE' ? 'Désactiver' : 'Activer' }}
+              {{ p.status === 'ACTIVE' ? 'Desactiver' : 'Activer' }}
             </button>
             <button class="btn btn-sm btn-danger" (click)="deleteProduct(p)">Supprimer</button>
           </td>
         </tr>
         <tr *ngIf="filteredProducts.length === 0">
-          <td colspan="9" class="empty">Aucun produit trouvé</td>
+          <td colspan="8" class="empty">Aucun produit</td>
         </tr>
       </tbody>
     </table>

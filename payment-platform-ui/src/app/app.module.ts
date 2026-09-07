@@ -27,9 +27,14 @@ import { CreatePaymentComponent } from './payments/create-payment/create-payment
 import { PaymentDetailComponent } from './payments/payment-detail/payment-detail.component';
 import { PaymentStatsComponent } from './payments/payment-stats/payment-stats.component';
 import { ProductManagementComponent } from './supplier/product-management/product-management.component';
+import { CategoryManagementComponent } from './supplier/category-management/category-management.component';
+import { FamilyManagementComponent } from './supplier/family-management/family-management.component';
 import { StockDashboardComponent } from './supplier/stock-dashboard/stock-dashboard.component';
+import { StockOptimizationComponent } from './supplier/stock-optimization/stock-optimization.component';
+import { FilterByRiskPipe } from './supplier/stock-optimization/filter-by-risk.pipe';
 import { OrderManagementComponent } from './supplier/order-management/order-management.component';
 import { DeliveryManagementComponent } from './supplier/delivery-management/delivery-management.component';
+import { SupplierCreateOrderComponent } from './supplier/create-order/create-order.component';
 import { OrderListComponent } from './shop/order-list/order-list.component';
 import { CreateOrderComponent } from './shop/create-order/create-order.component';
 import { ShopOrderDetailComponent } from './shop/order-detail/order-detail.component';
@@ -76,10 +81,14 @@ const routes: Routes = [
       { path: 'scan', component: QrScannerComponent, canActivate: [RoleGuard], data: { roles: allRoles } },
       { path: 'supplier/agent-payments', component: AgentPaymentsComponent, canActivate: [RoleGuard], data: { roles: supplierRoles } },
       { path: 'supplier/stock', component: StockManagementComponent, canActivate: [RoleGuard], data: { roles: supplierRoles } },
+      { path: 'supplier/optimization', component: StockOptimizationComponent, canActivate: [RoleGuard], data: { roles: ['SUPPLIER_ADMIN'] } },
       { path: 'supplier/stock/create', component: AddProductComponent, canActivate: [RoleGuard], data: { roles: ['SUPPLIER_ADMIN'] } },
-      { path: 'supplier/products', component: ProductManagementComponent, canActivate: [RoleGuard], data: { roles: supplierRoles } },
+      { path: 'supplier/categories', component: CategoryManagementComponent, canActivate: [RoleGuard], data: { roles: ['SUPPLIER_ADMIN'] } },
+      { path: 'supplier/families', component: FamilyManagementComponent, canActivate: [RoleGuard], data: { roles: ['SUPPLIER_ADMIN'] } },
+      { path: 'supplier/products', component: ProductManagementComponent, canActivate: [RoleGuard], data: { roles: ['SUPPLIER_ADMIN'] } },
       { path: 'supplier/dashboard', component: StockDashboardComponent, canActivate: [RoleGuard], data: { roles: supplierRoles } },
       { path: 'supplier/orders', component: OrderManagementComponent, canActivate: [RoleGuard], data: { roles: supplierRoles } },
+      { path: 'supplier/orders/create', component: SupplierCreateOrderComponent, canActivate: [RoleGuard], data: { roles: ['SUPPLIER_ADMIN'] } },
       { path: 'supplier/deliveries', component: DeliveryManagementComponent, canActivate: [RoleGuard], data: { roles: ['SUPPLIER_AGENT'] } },
       { path: 'shop/orders', component: OrderListComponent, canActivate: [RoleGuard], data: { roles: shopRoles } },
       { path: 'shop/orders/create', component: CreateOrderComponent, canActivate: [RoleGuard], data: { roles: shopRoles } },
@@ -112,9 +121,14 @@ const routes: Routes = [
     PaymentDetailComponent,
     PaymentStatsComponent,
     ProductManagementComponent,
+    CategoryManagementComponent,
+    FamilyManagementComponent,
     StockDashboardComponent,
+    StockOptimizationComponent,
+    FilterByRiskPipe,
     OrderManagementComponent,
     DeliveryManagementComponent,
+    SupplierCreateOrderComponent,
     OrderListComponent,
     CreateOrderComponent,
     ShopOrderDetailComponent,

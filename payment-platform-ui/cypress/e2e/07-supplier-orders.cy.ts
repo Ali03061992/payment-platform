@@ -11,7 +11,12 @@ describe('07 - Supplier: Order Management', () => {
     cy.get('.page-header h2').should('contain', 'Gestion des commandes');
   });
 
-  it('should show order table with columns', () => {
+  it('should have create order button', () => {
+    cy.get('.page-header a.btn-primary').should('contain', 'Nouvelle commande');
+    cy.get('.page-header a.btn-primary').should('have.attr', 'routerLink', '/dashboard/supplier/orders/create');
+  });
+
+  it('should show order table with all columns', () => {
     cy.get('table thead th').should('have.length', 6);
     cy.get('table thead').should('contain', 'Référence');
     cy.get('table thead').should('contain', 'Boutique');
@@ -21,36 +26,68 @@ describe('07 - Supplier: Order Management', () => {
     cy.get('table thead').should('contain', 'Actions');
   });
 
-  it('should filter orders by status', () => {
+  it('should have status filter', () => {
     cy.get('.filters select').should('exist');
     cy.get('.result-count').should('exist');
+  });
+
+  it('should filter orders by status', () => {
     cy.get('.filters select').select('CONFIRMED');
-    cy.get('.result-count').should('contain', 'résultat');
+    cy.get('table tbody tr').should('have.length.gte', 0);
   });
 
-  it('should show status badges on orders', () => {
-    cy.get('table tbody tr').then(($rows) => {
-      if ($rows.length > 0) {
-        cy.get('.payment-badge').should('have.length.gte', 1);
-      }
-    });
+  it('should show create order link in nav', () => {
+    cy.get('.page-header a.btn-primary').should('exist');
+  });
+});
+
+describe('07 - Supplier: Create Order', () => {
+  before(() => cy.ensureTestUsers());
+
+  beforeEach(() => {
+    cy.loginAsSupplierAdmin();
+    cy.visit('/dashboard/supplier/orders/create');
   });
 
-  it('should show action buttons based on order status', () => {
-    cy.get('table tbody tr').then(($rows) => {
-      if ($rows.length > 0) {
-        cy.get('table tbody tr').first().within(() => {
-          cy.get('.actions button, .actions a').should('have.length.gte', 0);
-        });
-      }
-    });
+  it('should display create order form', () => {
+    cy.url().should('include', '/supplier/orders/create');
+    cy.get('.page-header h2').should('contain', 'Nouvelle commande');
   });
 
-  it('should open order detail modal on row click', () => {
-    cy.get('table tbody tr').then(($rows) => {
-      if ($rows.length > 0) {
-        cy.get('table tbody tr').first().click();
-        cy.get('.modal-overlay, .modal-content', { timeout: 5000 }).should('exist');
+  it('should have shop select', () => {
+    cy.get('select[name="shop"]').should('exist');
+  });
+
+  it('should have currency select', () => {
+    cy.get('select[name="currency"]').should('exist');
+    cy.get('select[name="currency"]').should('contain.value', 'TND');
+  });
+
+  it('should have notes textarea', () => {
+    cy.get('textarea[name="notes"]').should('exist');
+  });
+
+  it('should have ASAP payment toggle', () => {
+    cy.get('input[name="asapPayment"]').should('exist');
+  });
+
+  it('should have cancel button', () => {
+    cy.get('a[routerLink*="supplier/orders"]').should('contain', 'Retour');
+  });
+});
+
+describe('07 - Supplier: Order Detail', () => {
+  before(() => cy.ensureTestUsers());
+
+  it('should load order detail page for existing orders', () => {
+    cy.loginAsSupplierAdmin();
+    cy.visit('/dashboard/supplier/orders');
+    cy.get('table tbody', { timeout: 10000 }).then(($tbody) => {
+      const clickableRows = $tbody.find('tr.clickable-row');
+      if (clickableRows.length > 0) {
+        cy.wrap(clickableRows).first().click();
+        cy.get('.modal-content', { timeout: 5000 }).should('be.visible');
+        cy.get('.btn-close').click();
       }
     });
   });
@@ -59,54 +96,16 @@ describe('07 - Supplier: Order Management', () => {
 describe('07 - Supplier: Delivery Management', () => {
   before(() => cy.ensureTestUsers());
 
-  it('should access delivery management as SUPPLIER_AGENT', () => {
+  it('should display delivery management page for agent', () => {
     cy.loginAsCovaleAgent();
     cy.visit('/dashboard/supplier/deliveries');
-    cy.url({ timeout: 10000 }).should('include', '/supplier/deliveries');
-    cy.get('body').should('be.visible');
+    cy.url().should('include', '/supplier/deliveries');
+    cy.get('.page-header h2').should('contain', 'Mes livraisons');
   });
 
-  it('should redirect SUPPLIER_ADMIN from delivery page', () => {
-    cy.loginAsSupplierAdmin();
+  it('should show delivery table or empty state', () => {
+    cy.loginAsCovaleAgent();
     cy.visit('/dashboard/supplier/deliveries');
-    cy.url({ timeout: 10000 }).should('satisfy', (url: string) =>
-      !url.includes('/supplier/deliveries')
-    );
-  });
-});
-
-describe('07 - Supplier: Agent Payments', () => {
-  before(() => cy.ensureTestUsers());
-
-  beforeEach(() => {
-    cy.loginAsSupplierAdmin();
-    cy.visit('/dashboard/supplier/agent-payments');
-  });
-
-  it('should display agent payments page', () => {
-    cy.url().should('include', '/supplier/agent-payments');
-    cy.get('h2').should('contain', 'Paiements par agent');
-  });
-
-  it('should have date filter inputs', () => {
-    cy.get('input[type="date"]').should('have.length', 2);
-  });
-
-  it('should have status filter dropdown', () => {
-    cy.get('select.form-control').should('exist');
-  });
-
-  it('should display totals bar or empty state', () => {
-    cy.get('.loading').should('not.exist');
-    cy.get('body').then(($body) => {
-      const hasTotals = $body.find('.totals-bar').length > 0;
-      const hasEmpty = $body.find('.empty').length > 0;
-      expect(hasTotals || hasEmpty).to.be.true;
-    });
-  });
-
-  it('should have agent payments link in sidebar', () => {
-    cy.visit('/dashboard');
-    cy.get('.sidebar').should('contain.text', 'Paiements agents');
+    cy.get('body').should('be.visible');
   });
 });

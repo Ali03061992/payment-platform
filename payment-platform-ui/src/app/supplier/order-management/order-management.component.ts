@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { OrderService } from '../../services/order.service';
+import { OrganizationService } from '../../services/organization.service';
 import { Order } from '../../models/order.model';
 import { ToastService } from '../../services/toast.service';
 
@@ -22,15 +23,18 @@ export class OrderManagementComponent implements OnInit {
   assignOrderId = 0;
   assignAgentId = 0;
   assigning = false;
+  agents: { id: number; firstName: string; lastName: string }[] = [];
 
   constructor(
     private orderService: OrderService,
+    private orgService: OrganizationService,
     private router: Router,
     private toast: ToastService
   ) {}
 
   ngOnInit(): void {
     this.loadOrders();
+    this.loadAgents();
   }
 
   loadOrders(): void {
@@ -38,6 +42,17 @@ export class OrderManagementComponent implements OnInit {
     this.orderService.list().subscribe({
       next: (data: Order[]) => { this.orders = data; this.loading = false; },
       error: (err: any) => { this.toast.error(err.error?.message || 'Erreur de chargement'); this.loading = false; }
+    });
+  }
+
+  loadAgents(): void {
+    this.orgService.listUsers().subscribe({
+      next: (users) => {
+        this.agents = users.filter((u: any) =>
+          u.roles && (u.roles.includes('SUPPLIER_AGENT') || u.roles.includes('DELIVERY_AGENT'))
+        );
+      },
+      error: () => {}
     });
   }
 
@@ -49,13 +64,15 @@ export class OrderManagementComponent implements OnInit {
   statusLabel(s: string): string {
     const map: Record<string, string> = {
       DRAFT: 'Brouillon',
-      CONFIRMÉ: 'Confirmé',
       CONFIRMED: 'Confirmé',
       PREPARING: 'En préparation',
-      READY: 'Prêt',
+      READY_FOR_DELIVERY: 'Prêt pour livraison',
       IN_DELIVERY: 'En livraison',
       DELIVERED: 'Livré',
-      CANCELLED: 'Annulé'
+      ACCEPTED: 'Accepté',
+      CANCELLED: 'Annulé',
+      REJECTED: 'Rejeté',
+      DELIVERY_REJECTED: 'Livraison rejetée'
     };
     return map[s] || s;
   }
@@ -63,13 +80,15 @@ export class OrderManagementComponent implements OnInit {
   statusClass(s: string): string {
     const map: Record<string, string> = {
       DRAFT: 'draft',
-      CONFIRMÉ: 'confirmed',
       CONFIRMED: 'confirmed',
       PREPARING: 'preparing',
-      READY: 'ready',
+      READY_FOR_DELIVERY: 'ready',
       IN_DELIVERY: 'in-delivery',
       DELIVERED: 'delivered',
-      CANCELLED: 'cancelled'
+      ACCEPTED: 'accepted',
+      CANCELLED: 'cancelled',
+      REJECTED: 'rejected',
+      DELIVERY_REJECTED: 'delivery-rejected'
     };
     return map[s] || '';
   }
@@ -86,6 +105,13 @@ export class OrderManagementComponent implements OnInit {
   closeDetail(): void {
     this.showDetail = false;
     this.selectedOrder = null;
+  }
+
+  confirm(order: Order): void {
+    this.orderService.confirm(order.id).subscribe({
+      next: () => { this.toast.success('Commande confirmée'); this.loadOrders(); },
+      error: (err: any) => { this.toast.error(err.error?.message || 'Erreur'); }
+    });
   }
 
   prepare(order: Order): void {
@@ -126,12 +152,24 @@ export class OrderManagementComponent implements OnInit {
     });
   }
 
+  deliveryReject(order: Order): void {
+    if (!confirm('Rejeter la livraison de cette commande ?')) return;
+    this.orderService.deliveryReject(order.id).subscribe({
+      next: () => { this.toast.success('Livraison rejetée'); this.loadOrders(); },
+      error: (err: any) => { this.toast.error(err.error?.message || 'Erreur'); }
+    });
+  }
+
   cancel(order: Order): void {
     if (!confirm('Annuler cette commande ?')) return;
     this.orderService.cancel(order.id).subscribe({
       next: () => { this.toast.success('Commande annulée'); this.loadOrders(); },
       error: (err: any) => { this.toast.error(err.error?.message || 'Erreur'); }
     });
+  }
+
+  canConfirm(order: Order): boolean {
+    return order.status === 'DRAFT';
   }
 
   canPrepare(order: Order): boolean {
@@ -143,10 +181,14 @@ export class OrderManagementComponent implements OnInit {
   }
 
   canAssign(order: Order): boolean {
-    return order.status === 'READY';
+    return order.status === 'READY_FOR_DELIVERY';
+  }
+
+  canDeliveryReject(order: Order): boolean {
+    return order.status === 'IN_DELIVERY';
   }
 
   canCancel(order: Order): boolean {
-    return order.status !== 'DELIVERED' && order.status !== 'CANCELLED';
+    return order.status !== 'DELIVERED' && order.status !== 'CANCELLED' && order.status !== 'ACCEPTED' && order.status !== 'REJECTED';
   }
 }

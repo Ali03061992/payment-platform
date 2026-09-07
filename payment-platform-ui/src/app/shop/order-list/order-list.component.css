@@ -15,6 +15,8 @@
 .payment-badge.delivery { background: #fff3e0; color: #e65100; }
 .payment-badge.delivered { background: #e8f5e9; color: #2e7d32; }
 .payment-badge.accepted { background: #e0f7fa; color: #00695c; }
+.payment-badge.rejected { background: #fce4ec; color: #c62828; }
+.payment-badge.delivery-rejected { background: #fff3e0; color: #e65100; }
 
 /* Mobile card view */
 .show-mobile {

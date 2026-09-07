@@ -53,6 +53,14 @@ export class OrderService {
     return this.http.post<Order>(`${this.apiUrl}/${id}/cancel`, {});
   }
 
+  reject(id: number): Observable<Order> {
+    return this.http.post<Order>(`${this.apiUrl}/${id}/reject`, {});
+  }
+
+  deliveryReject(id: number, reason?: string): Observable<Order> {
+    return this.http.post<Order>(`${this.apiUrl}/${id}/delivery-reject`, { reason });
+  }
+
   myDeliveries(): Observable<Order[]> {
     return this.http.get<Order[]>(`${this.apiUrl}/my-deliveries`);
   }

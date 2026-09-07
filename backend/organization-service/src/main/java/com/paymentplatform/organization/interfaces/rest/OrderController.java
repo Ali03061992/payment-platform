@@ -23,6 +23,8 @@ public class OrderController {
     private final DeliverOrderUseCase deliverOrder;
     private final AcceptOrderUseCase acceptOrder;
     private final CancelOrderUseCase cancelOrder;
+    private final RejectOrderUseCase rejectOrder;
+    private final DeliveryRejectOrderUseCase deliveryRejectOrder;
     private final com.paymentplatform.organization.domain.repository.OrderRepository orderRepository;
     private final com.paymentplatform.organization.domain.repository.OrderItemRepository orderItemRepository;
 
@@ -32,6 +34,8 @@ public class OrderController {
                            DeliverOrderUseCase deliverOrder,
                            AcceptOrderUseCase acceptOrder,
                            CancelOrderUseCase cancelOrder,
+                           RejectOrderUseCase rejectOrder,
+                           DeliveryRejectOrderUseCase deliveryRejectOrder,
                            com.paymentplatform.organization.domain.repository.OrderRepository orderRepository,
                            com.paymentplatform.organization.domain.repository.OrderItemRepository orderItemRepository) {
         this.createOrder = createOrder;
@@ -40,6 +44,8 @@ public class OrderController {
         this.deliverOrder = deliverOrder;
         this.acceptOrder = acceptOrder;
         this.cancelOrder = cancelOrder;
+        this.rejectOrder = rejectOrder;
+        this.deliveryRejectOrder = deliveryRejectOrder;
         this.orderRepository = orderRepository;
         this.orderItemRepository = orderItemRepository;
     }
@@ -59,11 +65,11 @@ public class OrderController {
         var current = CurrentUser.get();
         List<com.paymentplatform.organization.domain.model.Order> orders;
 
-        if (current.roles().contains("SUPPLIER_ADMIN") && current.organizationId() != null) {
+        if ((current.roles().contains("SUPPLIER_ADMIN") || current.roles().contains("SUPPLIER_AGENT")) && current.organizationId() != null) {
             orders = (status != null && !status.isBlank())
                     ? orderRepository.findBySupplierIdAndStatus(current.organizationId(), status)
                     : orderRepository.findBySupplierId(current.organizationId());
-        } else if (current.roles().contains("SHOP_MANAGER") && current.organizationId() != null) {
+        } else if ((current.roles().contains("SHOP_MANAGER") || current.roles().contains("SHOP_ADMIN")) && current.organizationId() != null) {
             orders = (status != null && !status.isBlank())
                     ? orderRepository.findByShopIdAndStatus(current.organizationId(), status)
                     : orderRepository.findByShopId(current.organizationId());
@@ -164,6 +170,23 @@ public class OrderController {
     public ResponseEntity<OrderResponse> cancelOrder(@PathVariable Long id) {
         var current = CurrentUser.get();
         return ResponseEntity.ok(cancelOrder.execute(id, current.userId()));
+    }
+
+    @PostMapping("/{id}/reject")
+    @PreAuthorize("hasAnyAuthority('SHOP_MANAGER', 'SHOP_ADMIN')")
+    public ResponseEntity<OrderResponse> rejectOrder(@PathVariable Long id) {
+        var current = CurrentUser.get();
+        return ResponseEntity.ok(rejectOrder.execute(id, current.userId()));
+    }
+
+    @PostMapping("/{id}/delivery-reject")
+    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'DELIVERY_AGENT')")
+    public ResponseEntity<OrderResponse> deliveryRejectOrder(
+            @PathVariable Long id,
+            @RequestBody(required = false) Map<String, String> body) {
+        var current = CurrentUser.get();
+        String reason = body != null ? body.get("reason") : null;
+        return ResponseEntity.ok(deliveryRejectOrder.execute(id, current.userId(), reason));
     }
 
     @GetMapping("/my-deliveries")

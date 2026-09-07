@@ -13,7 +13,7 @@ export class ShopOrderDetailComponent implements OnInit {
   order: Order | null = null;
   loading = true;
 
-  statusSteps = ['DRAFT', 'PENDING', 'CONFIRMED', 'PREPARING', 'READY_FOR_DELIVERY', 'IN_DELIVERY', 'DELIVERED', 'ACCEPTED'];
+  statusSteps = ['DRAFT', 'CONFIRMED', 'PREPARING', 'READY_FOR_DELIVERY', 'IN_DELIVERY', 'DELIVERED', 'ACCEPTED'];
 
   constructor(
     private route: ActivatedRoute,
@@ -46,6 +46,15 @@ export class ShopOrderDetailComponent implements OnInit {
     });
   }
 
+  reject(): void {
+    if (!this.order) return;
+    if (!confirm('Rejeter cette commande ?')) return;
+    this.orderService.reject(this.order.id).subscribe({
+      next: (data: Order) => { this.order = data; this.toast.success('Commande rejetée'); },
+      error: (e: any) => { this.toast.error(e.error?.message || 'Erreur'); }
+    });
+  }
+
   cancel(): void {
     if (!this.order) return;
     this.orderService.cancel(this.order.id).subscribe({
@@ -56,20 +65,21 @@ export class ShopOrderDetailComponent implements OnInit {
 
   statusLabel(s: string): string {
     const map: Record<string, string> = {
-      DRAFT: 'Brouillon', PENDING: 'En attente', CONFIRMED: 'Confirmé',
+      DRAFT: 'Brouillon', CONFIRMED: 'Confirmé',
       PREPARING: 'En préparation', READY_FOR_DELIVERY: 'Prêt pour livraison',
       IN_DELIVERY: 'En livraison', DELIVERED: 'Livré', ACCEPTED: 'Accepté',
-      CANCELLED: 'Annulé'
+      CANCELLED: 'Annulé', REJECTED: 'Rejeté', DELIVERY_REJECTED: 'Livraison rejetée'
     };
     return map[s] || s;
   }
 
   statusClass(s: string): string {
     const map: Record<string, string> = {
-      DRAFT: 'draft', PENDING: 'pending', CONFIRMED: 'confirmed',
+      DRAFT: 'draft', CONFIRMED: 'confirmed',
       PREPARING: 'preparing', READY_FOR_DELIVERY: 'ready',
       IN_DELIVERY: 'delivery', DELIVERED: 'delivered',
-      ACCEPTED: 'accepted', CANCELLED: 'cancelled'
+      ACCEPTED: 'accepted', CANCELLED: 'cancelled',
+      REJECTED: 'rejected', DELIVERY_REJECTED: 'delivery-rejected'
     };
     return map[s] || '';
   }
@@ -80,7 +90,8 @@ export class ShopOrderDetailComponent implements OnInit {
       ORDER_PREPARING: 'En préparation', ORDER_READY_FOR_DELIVERY: 'Prêt',
       ORDER_IN_DELIVERY: 'En livraison', ORDER_DELIVERED: 'Livré',
       ORDER_ACCEPTED: 'Accepté', ORDER_CANCELLED: 'Annulé',
-      ORDER_ACCEPTED_ASAP: 'Accepté (ASAP)'
+      ORDER_ACCEPTED_ASAP: 'Accepté (ASAP)',
+      ORDER_REJECTED: 'Rejeté', ORDER_DELIVERY_REJECTED: 'Livraison rejetée'
     };
     return map[a] || a;
   }
@@ -88,7 +99,7 @@ export class ShopOrderDetailComponent implements OnInit {
   isStepCompleted(stepIndex: number): boolean {
     if (!this.order) return false;
     const currentIndex = this.statusSteps.indexOf(this.order.status);
-    return stepIndex <= currentIndex;
+    return currentIndex >= 0 && stepIndex <= currentIndex;
   }
 
   isCurrentStep(step: string): boolean {

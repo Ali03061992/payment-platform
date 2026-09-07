@@ -1,0 +1,135 @@
+<div class="page-header">
+  <h2>Nouvelle commande</h2>
+  <a class="btn btn-secondary" routerLink="/dashboard/supplier/orders">Retour</a>
+</div>
+
+<div class="form-card">
+  <form (ngSubmit)="submit()">
+    <div class="form-row">
+      <div class="form-group">
+        <label>Boutique</label>
+        <select [(ngModel)]="selectedShopId" name="shop" class="form-control"
+                (ngModelChange)="onShopChange()" required>
+          <option [value]="0">-- Sélectionner --</option>
+          <option *ngFor="let s of shops" [ngValue]="s.id">{{ s.name }}</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Devise</label>
+        <select [(ngModel)]="currency" name="currency" class="form-control">
+          <option value="TND">TND</option>
+          <option value="EUR">EUR</option>
+          <option value="USD">USD</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-group" *ngIf="selectedShopId">
+      <label>Rechercher un produit</label>
+      <input type="text" [(ngModel)]="searchQuery" name="search" class="form-control"
+             placeholder="Nom ou SKU...">
+    </div>
+
+    <div class="table-card" *ngIf="selectedShopId" style="margin-bottom:24px;">
+      <h3 style="padding:16px 20px 0;">Produits disponibles</h3>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Nom</th>
+              <th>SKU</th>
+              <th>Prix unitaire</th>
+              <th>Stock</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let p of filteredProducts">
+              <td>{{ p.name }}</td>
+              <td>{{ p.sku }}</td>
+              <td>{{ p.unitPrice | number:'1.2-2' }} {{ p.currency }}</td>
+              <td>{{ p.quantity }}</td>
+              <td>
+                <button class="btn btn-sm btn-primary" type="button" (click)="addProduct(p)">Ajouter</button>
+              </td>
+            </tr>
+            <tr *ngIf="filteredProducts.length === 0">
+              <td colspan="5" class="empty">Aucun produit trouvé</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="table-card" *ngIf="orderLines.length > 0" style="margin-bottom:24px;">
+      <h3 style="padding:16px 20px 0;">Lignes de commande</h3>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Produit</th>
+              <th>Quantité</th>
+              <th>Prix unitaire</th>
+              <th>Remise %</th>
+              <th>Total</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let line of orderLines; let i = index">
+              <td>{{ line.product.name }}</td>
+              <td>
+                <input type="number" [(ngModel)]="line.quantity" [name]="'qty_' + i"
+                       class="form-control" min="1" style="width:80px;" required>
+              </td>
+              <td>{{ line.product.unitPrice | number:'1.2-2' }}</td>
+              <td>
+                <input type="number" [(ngModel)]="line.discount" [name]="'discount_' + i"
+                       class="form-control" min="0" max="100" style="width:80px;">
+              </td>
+              <td>{{ (line.product.unitPrice * line.quantity * (1 - line.discount / 100)) | number:'1.2-2' }}</td>
+              <td>
+                <button class="btn btn-sm btn-danger" type="button" (click)="removeLine(i)">Supprimer</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="order-summary" *ngIf="orderLines.length > 0">
+      <div class="summary-row">
+        <span>Sous-total</span>
+        <span>{{ subtotal | number:'1.2-2' }} {{ currency }}</span>
+      </div>
+      <div class="summary-row">
+        <span>TVA (19%)</span>
+        <span>{{ taxAmount | number:'1.2-2' }} {{ currency }}</span>
+      </div>
+      <div class="summary-row total">
+        <span>Total</span>
+        <span>{{ total | number:'1.2-2' }} {{ currency }}</span>
+      </div>
+    </div>
+
+    <div class="form-group" style="margin-top:16px;">
+      <label class="toggle-label">
+        <input type="checkbox" [(ngModel)]="asapPayment" name="asapPayment">
+        <span>Paiement ASAP</span>
+      </label>
+    </div>
+
+    <div class="form-group">
+      <label>Notes</label>
+      <textarea [(ngModel)]="notes" name="notes" class="form-control" rows="3"
+                placeholder="Notes optionnelles..."></textarea>
+    </div>
+
+    <div class="form-actions">
+      <a class="btn btn-secondary" routerLink="/dashboard/supplier/orders">Annuler</a>
+      <button class="btn btn-primary" [disabled]="!canSubmit()">
+        {{ creating ? 'Création...' : 'Créer la commande' }}
+      </button>
+    </div>
+  </form>
+</div>

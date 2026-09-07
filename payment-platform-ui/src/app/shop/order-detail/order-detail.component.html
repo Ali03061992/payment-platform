@@ -49,10 +49,10 @@
   <div class="action-bar" *ngIf="order.status === 'DELIVERED'">
     <button class="btn btn-success" (click)="accept()">Accepter</button>
     <button class="btn btn-primary" (click)="acceptAsap()">Accepter avec paiement ASAP</button>
-    <button class="btn btn-danger" (click)="cancel()">Annuler</button>
+    <button class="btn btn-danger" (click)="reject()">Rejeter</button>
   </div>
 
-  <div class="action-bar" *ngIf="order.status === 'PENDING' || order.status === 'CONFIRMED'">
+  <div class="action-bar" *ngIf="order.status === 'DRAFT' || order.status === 'CONFIRMED' || order.status === 'PREPARING'">
     <button class="btn btn-danger" (click)="cancel()">Annuler</button>
   </div>
 

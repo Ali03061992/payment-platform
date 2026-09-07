@@ -1,114 +1,180 @@
 <div class="page-header">
   <h1>Gestion du stock</h1>
-  <a routerLink="create" class="btn btn-primary">+ Ajouter un produit</a>
 </div>
 
-<div class="filters">
-  <select [(ngModel)]="filterStatus" (change)="loadProducts()">
-    <option value="">Tous les statuts</option>
-    <option value="ACTIVE">Actif</option>
-    <option value="INACTIVE">Inactif</option>
-  </select>
-</div>
+<div class="loading" *ngIf="loading"><div class="spinner"></div></div>
 
-<div *ngIf="loading" class="loading">
-  <div class="spinner"></div>
-  <span>Chargement du stock...</span>
-</div>
+<div *ngIf="!loading">
+  <div class="stats-grid">
+    <div class="stat-card"><div class="stat-val">{{ stats.total }}</div><div class="stat-lbl">Produits</div></div>
+    <div class="stat-card"><div class="stat-val">{{ stats.totalQty }}</div><div class="stat-lbl">Quantite totale</div></div>
+    <div class="stat-card"><div class="stat-val">{{ stats.totalValue | number:'1.2-2' }}</div><div class="stat-lbl">Valeur totale</div></div>
+    <div class="stat-card stat-warn" *ngIf="stats.lowStock > 0"><div class="stat-val">{{ stats.lowStock }}</div><div class="stat-lbl">Stock bas</div></div>
+    <div class="stat-card stat-danger" *ngIf="stats.outOfStock > 0"><div class="stat-val">{{ stats.outOfStock }}</div><div class="stat-lbl">Rupture</div></div>
+  </div>
 
-<!-- Desktop Table View -->
-<div class="table-card hide-mobile" *ngIf="!loading">
-  <div class="table-wrapper">
-    <table>
-      <thead>
-        <tr>
-          <th>SKU</th>
-          <th>Produit</th>
-          <th>Prix unitaire</th>
-          <th>Quantité</th>
-          <th>Seuil min</th>
-          <th>Statut stock</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
+  <div class="filter-bar" *ngIf="products.length > 0">
+    <input type="text" [(ngModel)]="searchTerm" (input)="applyFilters()" placeholder="Rechercher..." class="search-input">
+    <select [(ngModel)]="filterStatus" (change)="applyFilters()" class="filter-select">
+      <option value="">Tous</option>
+      <option value="OK">En stock</option>
+      <option value="LOW">Stock bas</option>
+      <option value="OUT_OF_STOCK">Rupture</option>
+    </select>
+    <select [(ngModel)]="sortBy" (change)="applyFilters()" class="filter-select">
+      <option value="lowStock">Stock bas d'abord</option>
+      <option value="name">Nom</option>
+      <option value="quantity">Quantite</option>
+    </select>
+  </div>
+
+  <div class="empty-state" *ngIf="products.length === 0">
+    <div class="empty-icon">📦</div>
+    <h3>Aucun produit en stock</h3>
+    <p>Ajoutez des produits depuis le catalogue, puis gerez les quantites ici.</p>
+  </div>
+
+  <!-- Desktop Table -->
+  <div class="table-card hide-mobile" *ngIf="filteredProducts.length > 0">
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Produit</th>
+            <th>SKU</th>
+            <th>Stock</th>
+            <th>Seuil min</th>
+            <th>Niveau</th>
+            <th>Statut</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let p of filteredProducts" [class.row-low]="getStockStatus(p)==='LOW'" [class.row-out]="getStockStatus(p)==='OUT_OF_STOCK'">
+            <td><strong>{{ p.name }}</strong></td>
+            <td><code>{{ p.sku }}</code></td>
+            <td class="qty-cell">
+              <button class="qty-btn" (click)="openMovement(p, 'OUT')" [disabled]="p.quantity <= 0">-</button>
+              <span class="qty-value" [class.qty-zero]="p.quantity===0">{{ p.quantity }}</span>
+              <button class="qty-btn" (click)="openMovement(p, 'IN')">+</button>
+            </td>
+            <td>{{ p.minQuantity }}</td>
+            <td>
+              <div class="stock-bar-wrap">
+                <div class="stock-bar" [style.width.%]="getStockPercent(p)" [class.bar-ok]="getStockStatus(p)==='OK'" [class.bar-low]="getStockStatus(p)==='LOW'" [class.bar-out]="getStockStatus(p)==='OUT_OF_STOCK'"></div>
+              </div>
+            </td>
+            <td><span class="badge" [ngClass]="{'badge-ok':getStockStatus(p)==='OK','badge-low':getStockStatus(p)==='LOW','badge-out':getStockStatus(p)==='OUT_OF_STOCK'}">{{ statusLabel(getStockStatus(p)) }}</span></td>
+            <td class="actions">
+              <button class="btn btn-sm btn-success" (click)="openMovement(p, 'IN')">+</button>
+              <button class="btn btn-sm btn-warning" (click)="openMovement(p, 'ADJUSTMENT')">~</button>
+              <button class="btn btn-sm btn-secondary" (click)="openHistory(p)">📋</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Mobile Cards -->
+  <div class="product-cards show-mobile" *ngIf="filteredProducts.length > 0">
+    <div *ngFor="let p of filteredProducts" class="product-card" [class.card-low]="getStockStatus(p)==='LOW'" [class.card-out]="getStockStatus(p)==='OUT_OF_STOCK'">
+      <div class="card-header">
+        <div><span class="card-name">{{ p.name }}</span><span class="card-sku">{{ p.sku }}</span></div>
+        <span class="badge" [ngClass]="{'badge-ok':getStockStatus(p)==='OK','badge-low':getStockStatus(p)==='LOW','badge-out':getStockStatus(p)==='OUT_OF_STOCK'}">{{ statusLabel(getStockStatus(p)) }}</span>
+      </div>
+      <div class="card-stock">
+        <div class="stock-bar-label"><span>Stock</span><span>{{ p.quantity }} / {{ p.minQuantity * 3 }}</span></div>
+        <div class="stock-bar-wrap"><div class="stock-bar" [style.width.%]="getStockPercent(p)" [class.bar-ok]="getStockStatus(p)==='OK'" [class.bar-low]="getStockStatus(p)==='LOW'" [class.bar-out]="getStockStatus(p)==='OUT_OF_STOCK'"></div></div>
+      </div>
+      <div class="card-qty">
+        <button class="qty-btn qty-lg" (click)="openMovement(p, 'OUT')" [disabled]="p.quantity <= 0">-</button>
+        <span class="qty-val qty-val-lg" [class.qty-zero]="p.quantity===0">{{ p.quantity }}</span>
+        <button class="qty-btn qty-lg" (click)="openMovement(p, 'IN')">+</button>
+      </div>
+      <div class="card-actions">
+        <button class="btn btn-sm btn-secondary" (click)="openHistory(p)">Historique</button>
+        <button class="btn btn-sm btn-warning" (click)="openMovement(p, 'ADJUSTMENT')">Ajuster</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent Movements -->
+  <div class="section-card" *ngIf="recentMovements.length > 0">
+    <h3>Derniers mouvements</h3>
+    <table class="mini-table">
+      <thead><tr><th>Date</th><th>Produit</th><th>Type</th><th>Qte</th><th>Ref</th></tr></thead>
       <tbody>
-        <tr *ngFor="let product of products" [class.low-stock]="getStockStatus(product) === 'LOW'" [class.out-of-stock]="getStockStatus(product) === 'OUT_OF_STOCK'">
-          <td><code>{{ product.sku }}</code></td>
-          <td>
-            <strong>{{ product.name }}</strong>
-            <div class="product-desc" *ngIf="product.description">{{ product.description }}</div>
-          </td>
-          <td>{{ product.unitPrice | number:'1.2-2' }} {{ product.currency }}</td>
-          <td class="qty-cell">
-            <button class="qty-btn" (click)="updateQuantity(product, -1)" [disabled]="product.quantity <= 0">-</button>
-            <span class="qty-value" [class.qty-zero]="product.quantity === 0">{{ product.quantity }}</span>
-            <button class="qty-btn" (click)="updateQuantity(product, 1)">+</button>
-          </td>
-          <td>{{ product.minQuantity }}</td>
-          <td>
-            <span class="stock-badge" [ngClass]="{
-              'stock-ok': getStockStatus(product) === 'OK',
-              'stock-low': getStockStatus(product) === 'LOW',
-              'stock-out': getStockStatus(product) === 'OUT_OF_STOCK'
-            }">
-              {{ getStockStatus(product) === 'OK' ? 'OK' : getStockStatus(product) === 'LOW' ? 'Bas' : 'Rupture' }}
-            </span>
-          </td>
-          <td class="actions">
-            <button class="btn btn-sm btn-danger" (click)="deleteProduct(product)">Supprimer</button>
-          </td>
-        </tr>
-        <tr *ngIf="products.length === 0">
-          <td colspan="7" class="empty">
-            Aucun produit dans le stock
-            <br><a routerLink="create" class="empty-link">Ajouter un premier produit</a>
-          </td>
+        <tr *ngFor="let m of recentMovements">
+          <td>{{ m.createdAt | date:'dd/MM HH:mm' }}</td>
+          <td><strong>{{ m.productName }}</strong></td>
+          <td><span class="badge" [ngClass]="movementTypeClass(m.type)">{{ movementTypeLabel(m.type) }}</span></td>
+          <td>{{ m.quantity }}</td>
+          <td>{{ m.reference || '-' }}</td>
         </tr>
       </tbody>
     </table>
   </div>
 </div>
 
-<!-- Mobile Card View -->
-<div class="product-cards show-mobile" *ngIf="!loading">
-  <div *ngIf="products.length === 0" class="empty-card">
-    Aucun produit dans le stock
-    <br><a routerLink="create" class="empty-link">Ajouter un premier produit</a>
+<!-- Mouvement Modal -->
+<div class="modal-overlay" *ngIf="showMovementModal" (click)="closeMovement()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>{{ movementTypeLabel(movementType) }} — {{ selectedProduct?.name }}</h3>
+      <button class="btn-close" (click)="closeMovement()">&times;</button>
+    </div>
+    <form (ngSubmit)="submitMovement()">
+      <div class="form-group">
+        <label>Type</label>
+        <select [(ngModel)]="movementType" name="type" class="form-control">
+          <option value="IN">Entree</option>
+          <option value="OUT">Sortie</option>
+          <option value="ADJUSTMENT">Ajustement</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Quantite</label>
+        <input type="number" [(ngModel)]="movementQty" name="qty" class="form-control" min="1" required>
+      </div>
+      <div class="form-group">
+        <label>Reference</label>
+        <input type="text" [(ngModel)]="movementRef" name="ref" class="form-control" placeholder="Ex: BON-001">
+      </div>
+      <div class="form-group">
+        <label>Notes</label>
+        <input type="text" [(ngModel)]="movementNotes" name="notes" class="form-control" placeholder="Optionnel">
+      </div>
+      <div class="form-actions">
+        <button type="button" class="btn btn-secondary" (click)="closeMovement()">Annuler</button>
+        <button type="submit" class="btn btn-primary" [disabled]="savingMovement || movementQty <= 0">
+          {{ savingMovement ? 'Enregistrement...' : 'Enregistrer' }}
+        </button>
+      </div>
+    </form>
   </div>
-  <div *ngFor="let product of products" class="product-card" [class.low-stock-card]="getStockStatus(product) === 'LOW'" [class.out-of-stock-card]="getStockStatus(product) === 'OUT_OF_STOCK'">
-    <div class="product-card-header">
-      <div class="product-info">
-        <strong class="product-name">{{ product.name }}</strong>
-        <span class="product-sku">{{ product.sku }}</span>
-      </div>
-      <span class="stock-badge" [ngClass]="{
-        'stock-ok': getStockStatus(product) === 'OK',
-        'stock-low': getStockStatus(product) === 'LOW',
-        'stock-out': getStockStatus(product) === 'OUT_OF_STOCK'
-      }">
-        {{ getStockStatus(product) === 'OK' ? 'OK' : getStockStatus(product) === 'LOW' ? 'Bas' : 'Rupture' }}
-      </span>
+</div>
+
+<!-- Historique Modal -->
+<div class="modal-overlay" *ngIf="showHistoryModal" (click)="closeHistory()">
+  <div class="modal-content modal-lg" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Historique — {{ historyProduct?.name }}</h3>
+      <button class="btn-close" (click)="closeHistory()">&times;</button>
     </div>
-    <div class="product-card-body" *ngIf="product.description">
-      <div class="product-desc">{{ product.description }}</div>
-    </div>
-    <div class="product-card-details">
-      <div class="product-row">
-        <span class="product-label">Prix</span>
-        <span class="product-value">{{ product.unitPrice | number:'1.2-2' }} {{ product.currency }}</span>
-      </div>
-      <div class="product-row">
-        <span class="product-label">Seuil min</span>
-        <span class="product-value">{{ product.minQuantity }}</span>
-      </div>
-    </div>
-    <div class="product-card-qty">
-      <button class="qty-btn" (click)="updateQuantity(product, -1)" [disabled]="product.quantity <= 0">-</button>
-      <span class="qty-value" [class.qty-zero]="product.quantity === 0">{{ product.quantity }}</span>
-      <button class="qty-btn" (click)="updateQuantity(product, 1)">+</button>
-    </div>
-    <div class="product-card-actions">
-      <button class="btn btn-sm btn-danger" (click)="deleteProduct(product)">Supprimer</button>
-    </div>
+    <div class="loading" *ngIf="loadingHistory" style="padding:24px"><div class="spinner"></div></div>
+    <table class="mini-table" *ngIf="!loadingHistory">
+      <thead><tr><th>Date</th><th>Type</th><th>Qte</th><th>Ref</th><th>Par</th></tr></thead>
+      <tbody>
+        <tr *ngFor="let m of historyMovements">
+          <td>{{ m.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
+          <td><span class="badge" [ngClass]="movementTypeClass(m.type)">{{ movementTypeLabel(m.type) }}</span></td>
+          <td>{{ m.quantity }}</td>
+          <td>{{ m.reference || '-' }}</td>
+          <td>{{ m.createdBy }}</td>
+        </tr>
+        <tr *ngIf="historyMovements.length === 0"><td colspan="5" class="empty">Aucun mouvement</td></tr>
+      </tbody>
+    </table>
   </div>
 </div>

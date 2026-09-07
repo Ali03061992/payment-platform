@@ -62,4 +62,8 @@ export class OrganizationService {
   deactivateRelation(id: number): Observable<void> {
     return this.http.delete<void>(`/api/admin/supplier-shop-relations/${id}`);
   }
+
+  listUsers(): Observable<any[]> {
+    return this.http.get<any[]>('/api/users');
+  }
 }

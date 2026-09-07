@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { ProductCategory, ProductFamily, ProductSubfamily } from '../models/catalog.model';
+import { ProductCategory, ProductFamily } from '../models/catalog.model';
 
 @Injectable({ providedIn: 'root' })
 export class CatalogService {
@@ -16,9 +16,7 @@ export class CatalogService {
   }
 
   createCategory(data: { supplierId: number; name: string; code: string }): Observable<ProductCategory> {
-    return this.http.post<ProductCategory>(`${this.apiUrl}/categories`, {
-      supplierId: data.supplierId, name: data.name, code: data.code
-    });
+    return this.http.post<ProductCategory>(`${this.apiUrl}/categories`, data);
   }
 
   deleteCategory(id: number): Observable<void> {
@@ -33,31 +31,15 @@ export class CatalogService {
     return this.http.get<ProductFamily[]>(`${this.apiUrl}/families`, { params });
   }
 
-  createFamily(data: { supplierId: number; categoryId: number; name: string; code: string }): Observable<ProductFamily> {
-    return this.http.post<ProductFamily>(`${this.apiUrl}/families`, {
-      supplierId: data.supplierId, categoryId: data.categoryId, name: data.name, code: data.code
-    });
+  createFamily(data: { supplierId: number; name: string; code: string; categoryIds: number[] }): Observable<ProductFamily> {
+    return this.http.post<ProductFamily>(`${this.apiUrl}/families`, data);
+  }
+
+  updateFamily(id: number, data: { supplierId: number; name: string; code: string; categoryIds: number[] }): Observable<ProductFamily> {
+    return this.http.put<ProductFamily>(`${this.apiUrl}/families/${id}`, data);
   }
 
   deleteFamily(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/families/${id}`);
-  }
-
-  listSubfamilies(supplierId: number, familyId?: number): Observable<ProductSubfamily[]> {
-    let params = new HttpParams().set('supplierId', supplierId.toString());
-    if (familyId != null) {
-      params = params.set('familyId', familyId.toString());
-    }
-    return this.http.get<ProductSubfamily[]>(`${this.apiUrl}/subfamilies`, { params });
-  }
-
-  createSubfamily(data: { supplierId: number; familyId: number; name: string; code: string }): Observable<ProductSubfamily> {
-    return this.http.post<ProductSubfamily>(`${this.apiUrl}/subfamilies`, {
-      supplierId: data.supplierId, familyId: data.familyId, name: data.name, code: data.code
-    });
-  }
-
-  deleteSubfamily(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/subfamilies/${id}`);
   }
 }

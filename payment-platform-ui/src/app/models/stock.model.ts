@@ -8,6 +8,10 @@ export interface Product {
   currency: string;
   quantity: number;
   minQuantity: number;
+  reservedQty: number;
+  categoryId: number | null;
+  familyId: number | null;
+  unit: string;
   status: 'ACTIVE' | 'INACTIVE' | 'OUT_OF_STOCK';
   createdAt: string;
   updatedAt: string;
@@ -21,6 +25,9 @@ export interface ProductCreateRequest {
   currency: string;
   quantity: number;
   minQuantity: number;
+  categoryId?: number | null;
+  familyId?: number | null;
+  unit?: string;
 }
 
 export interface ProductUpdateRequest {
@@ -30,6 +37,9 @@ export interface ProductUpdateRequest {
   quantity?: number;
   minQuantity?: number;
   status?: string;
+  categoryId?: number | null;
+  familyId?: number | null;
+  unit?: string;
 }
 
 export interface StockMovement {

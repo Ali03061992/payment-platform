@@ -50,7 +50,8 @@ public class GatewayProxyController {
     @RequestMapping(value = {"/admin/**", "/organizations/**",
             "/supplier/catalog/**", "/orders/**", "/balances/**",
             "/suppliers/{supplierId}/products/**", "/suppliers/{supplierId}/movements/**",
-            "/suppliers/{supplierId}/stocks/**"}, method = {
+            "/suppliers/{supplierId}/stocks/**", "/suppliers/{supplierId}/optimization/**",
+            "/categories/**"}, method = {
             org.springframework.web.bind.annotation.RequestMethod.GET,
             org.springframework.web.bind.annotation.RequestMethod.POST,
             org.springframework.web.bind.annotation.RequestMethod.PUT,

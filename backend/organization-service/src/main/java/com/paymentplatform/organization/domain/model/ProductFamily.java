@@ -2,6 +2,8 @@ package com.paymentplatform.organization.domain.model;
 
 import jakarta.persistence.*;
 import java.time.Instant;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "product_families")
@@ -14,9 +16,6 @@ public class ProductFamily {
     @Column(name = "supplier_id", nullable = false)
     private Long supplierId;
 
-    @Column(name = "category_id", nullable = false)
-    private Long categoryId;
-
     @Column(nullable = false, length = 100)
     private String name;
 
@@ -25,6 +24,14 @@ public class ProductFamily {
 
     @Column(nullable = false, length = 20)
     private String status;
+
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+        name = "family_categories",
+        joinColumns = @JoinColumn(name = "family_id"),
+        inverseJoinColumns = @JoinColumn(name = "category_id")
+    )
+    private Set<ProductCategory> categories = new HashSet<>();
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
@@ -47,14 +54,14 @@ public class ProductFamily {
     public Long getId() { return id; }
     public Long getSupplierId() { return supplierId; }
     public void setSupplierId(Long supplierId) { this.supplierId = supplierId; }
-    public Long getCategoryId() { return categoryId; }
-    public void setCategoryId(Long categoryId) { this.categoryId = categoryId; }
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
     public String getCode() { return code; }
     public void setCode(String code) { this.code = code; }
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
+    public Set<ProductCategory> getCategories() { return categories; }
+    public void setCategories(Set<ProductCategory> categories) { this.categories = categories; }
     public Instant getCreatedAt() { return createdAt; }
     public Instant getUpdatedAt() { return updatedAt; }
 }
