@@ -1,16 +1,17 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { OrderService } from '../../services/order.service';
 import { OrganizationService } from '../../services/organization.service';
 import { Order } from '../../models/order.model';
 import { ToastService } from '../../services/toast.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-order-management',
   templateUrl: './order-management.component.html',
   styleUrls: ['./order-management.component.css']
 })
-export class OrderManagementComponent implements OnInit {
+export class OrderManagementComponent implements OnInit, OnDestroy {
   orders: Order[] = [];
   loading = true;
   filterStatus = '';
@@ -25,6 +26,8 @@ export class OrderManagementComponent implements OnInit {
   assigning = false;
   agents: { id: number; firstName: string; lastName: string }[] = [];
 
+  private subscriptions = new Subscription();
+
   constructor(
     private orderService: OrderService,
     private orgService: OrganizationService,
@@ -37,23 +40,27 @@ export class OrderManagementComponent implements OnInit {
     this.loadAgents();
   }
 
+  ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
+  }
+
   loadOrders(): void {
     this.loading = true;
-    this.orderService.list().subscribe({
+    this.subscriptions.add(this.orderService.list().subscribe({
       next: (data: Order[]) => { this.orders = data; this.loading = false; },
       error: (err: any) => { this.toast.error(err.error?.message || 'Erreur de chargement'); this.loading = false; }
-    });
+    }));
   }
 
   loadAgents(): void {
-    this.orgService.listUsers().subscribe({
+    this.subscriptions.add(this.orgService.listUsers().subscribe({
       next: (users) => {
         this.agents = users.filter((u: any) =>
           u.roles && (u.roles.includes('SUPPLIER_AGENT') || u.roles.includes('DELIVERY_AGENT'))
         );
       },
       error: () => {}
-    });
+    }));
   }
 
   get filteredOrders(): Order[] {
@@ -96,10 +103,10 @@ export class OrderManagementComponent implements OnInit {
   viewDetail(order: Order): void {
     this.loadingDetail = true;
     this.showDetail = true;
-    this.orderService.getById(order.id).subscribe({
+    this.subscriptions.add(this.orderService.getById(order.id).subscribe({
       next: (data) => { this.selectedOrder = data; this.loadingDetail = false; },
       error: () => { this.selectedOrder = order; this.loadingDetail = false; }
-    });
+    }));
   }
 
   closeDetail(): void {
@@ -108,24 +115,24 @@ export class OrderManagementComponent implements OnInit {
   }
 
   confirm(order: Order): void {
-    this.orderService.confirm(order.id).subscribe({
+    this.subscriptions.add(this.orderService.confirm(order.id).subscribe({
       next: () => { this.toast.success('Commande confirmée'); this.loadOrders(); },
       error: (err: any) => { this.toast.error(err.error?.message || 'Erreur'); }
-    });
+    }));
   }
 
   prepare(order: Order): void {
-    this.orderService.prepare(order.id).subscribe({
+    this.subscriptions.add(this.orderService.prepare(order.id).subscribe({
       next: () => { this.toast.success('Commande mise en préparation'); this.loadOrders(); },
       error: (err: any) => { this.toast.error(err.error?.message || 'Erreur'); }
-    });
+    }));
   }
 
   ready(order: Order): void {
-    this.orderService.readyForDelivery(order.id).subscribe({
+    this.subscriptions.add(this.orderService.readyForDelivery(order.id).subscribe({
       next: () => { this.toast.success('Commande prête pour livraison'); this.loadOrders(); },
       error: (err: any) => { this.toast.error(err.error?.message || 'Erreur'); }
-    });
+    }));
   }
 
   openAssign(order: Order): void {
@@ -141,7 +148,7 @@ export class OrderManagementComponent implements OnInit {
   submitAssign(): void {
     if (!this.assignAgentId) return;
     this.assigning = true;
-    this.orderService.assignDelivery(this.assignOrderId, this.assignAgentId).subscribe({
+    this.subscriptions.add(this.orderService.assignDelivery(this.assignOrderId, this.assignAgentId).subscribe({
       next: () => {
         this.toast.success('Agent assigné avec succès');
         this.closeAssign();
@@ -149,23 +156,23 @@ export class OrderManagementComponent implements OnInit {
         this.loadOrders();
       },
       error: (err: any) => { this.toast.error(err.error?.message || 'Erreur'); this.assigning = false; }
-    });
+    }));
   }
 
   deliveryReject(order: Order): void {
     if (!confirm('Rejeter la livraison de cette commande ?')) return;
-    this.orderService.deliveryReject(order.id).subscribe({
+    this.subscriptions.add(this.orderService.deliveryReject(order.id).subscribe({
       next: () => { this.toast.success('Livraison rejetée'); this.loadOrders(); },
       error: (err: any) => { this.toast.error(err.error?.message || 'Erreur'); }
-    });
+    }));
   }
 
   cancel(order: Order): void {
     if (!confirm('Annuler cette commande ?')) return;
-    this.orderService.cancel(order.id).subscribe({
+    this.subscriptions.add(this.orderService.cancel(order.id).subscribe({
       next: () => { this.toast.success('Commande annulée'); this.loadOrders(); },
       error: (err: any) => { this.toast.error(err.error?.message || 'Erreur'); }
-    });
+    }));
   }
 
   canConfirm(order: Order): boolean {

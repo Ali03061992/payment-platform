@@ -12,7 +12,7 @@ export class LoginService {
   login(data: LoginRequest): Observable<LoginResponse> {
     return this.http.post<LoginResponse>(`${this.apiUrl}/login`, data).pipe(
       tap(res => {
-        localStorage.setItem('token', res.accessToken);
+        sessionStorage.setItem('token', res.accessToken);
       })
     );
   }
@@ -22,16 +22,16 @@ export class LoginService {
   }
 
   logout(): void {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+    sessionStorage.removeItem('token');
+    sessionStorage.removeItem('user');
   }
 
   isLoggedIn(): boolean {
-    return !!localStorage.getItem('token');
+    return !!sessionStorage.getItem('token');
   }
 
   getCurrentUser(): User | null {
-    const userJson = localStorage.getItem('user');
+    const userJson = sessionStorage.getItem('user');
     return userJson ? JSON.parse(userJson) : null;
   }
 

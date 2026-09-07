@@ -24,16 +24,16 @@ export class LoginComponent {
     this.loading = true;
     this.loginService.login(this.form).subscribe({
       next: (res) => {
-        localStorage.setItem('token', res.accessToken);
+        sessionStorage.setItem('token', res.accessToken);
         this.loginService.getMe().subscribe({
           next: (user) => {
-            localStorage.setItem('user', JSON.stringify(user));
+            sessionStorage.setItem('user', JSON.stringify(user));
             this.loading = false;
             this.router.navigate(['/dashboard']);
             this.requestNotificationPermission();
           },
           error: () => {
-            localStorage.removeItem('token');
+            sessionStorage.removeItem('token');
             this.error = 'Impossible de récupérer les informations utilisateur';
             this.loading = false;
           }

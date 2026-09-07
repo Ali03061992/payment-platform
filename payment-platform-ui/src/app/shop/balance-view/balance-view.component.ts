@@ -22,7 +22,7 @@ export class BalanceViewComponent implements OnInit {
   ngOnInit(): void { this.load(); }
 
   private getShopId(): number {
-    const userJson = localStorage.getItem('user');
+    const userJson = sessionStorage.getItem('user');
     if (userJson) {
       const user = JSON.parse(userJson);
       return user.organizationId || 0;

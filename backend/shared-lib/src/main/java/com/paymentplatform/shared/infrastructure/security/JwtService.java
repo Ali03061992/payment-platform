@@ -34,8 +34,20 @@ public class JwtService {
     private final JwtDecoder decoder;
     private final long expirationMinutes;
 
+    private static final String INSECURE_DEFAULT_SECRET = "dev-only-secret-change-me";
+
     public JwtService(SecurityProperties properties) {
-        byte[] secretBytes = properties.secret().getBytes(StandardCharsets.UTF_8);
+        String secret = properties.secret();
+        if (secret == null || secret.startsWith(INSECURE_DEFAULT_SECRET)) {
+            throw new IllegalStateException(
+                    "JWT_SECRET must be configured with a secure value in production. " +
+                    "Set the JWT_SECRET environment variable.");
+        }
+        byte[] secretBytes = secret.getBytes(StandardCharsets.UTF_8);
+        if (secretBytes.length < 32) {
+            throw new IllegalStateException(
+                    "JWT_SECRET must be at least 32 bytes (256 bits) for HS256 security.");
+        }
         SecretKeySpec key = new SecretKeySpec(secretBytes, "HmacSHA256");
 
         try {

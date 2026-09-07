@@ -2,9 +2,11 @@ package com.paymentplatform.organization.interfaces.rest;
 
 import com.paymentplatform.organization.application.dto.CreateOrderRequest;
 import com.paymentplatform.organization.application.dto.OrderResponse;
+import com.paymentplatform.organization.application.dto.PageResponse;
 import com.paymentplatform.organization.application.usecase.*;
 import com.paymentplatform.shared.infrastructure.security.CurrentUser;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -61,31 +63,42 @@ public class OrderController {
 
     @GetMapping
     @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SHOP_ADMIN', 'SHOP_MANAGER', 'DELIVERY_AGENT', 'SYSTEM_ADMIN')")
-    public ResponseEntity<List<OrderResponse>> listOrders(@RequestParam(required = false) String status) {
+    public ResponseEntity<PageResponse<OrderResponse>> listOrders(
+            @RequestParam(required = false) String status,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "50") int size) {
         var current = CurrentUser.get();
-        List<com.paymentplatform.organization.domain.model.Order> orders;
+        var pageable = PageRequest.of(page, size);
+        org.springframework.data.Page<com.paymentplatform.organization.domain.model.Order> orderPage;
 
         if ((current.roles().contains("SUPPLIER_ADMIN") || current.roles().contains("SUPPLIER_AGENT")) && current.organizationId() != null) {
-            orders = (status != null && !status.isBlank())
-                    ? orderRepository.findBySupplierIdAndStatus(current.organizationId(), status)
-                    : orderRepository.findBySupplierId(current.organizationId());
+            orderPage = (status != null && !status.isBlank())
+                    ? orderRepository.findBySupplierIdAndStatus(current.organizationId(), status, pageable)
+                    : orderRepository.findBySupplierId(current.organizationId(), pageable);
         } else if ((current.roles().contains("SHOP_MANAGER") || current.roles().contains("SHOP_ADMIN")) && current.organizationId() != null) {
-            orders = (status != null && !status.isBlank())
-                    ? orderRepository.findByShopIdAndStatus(current.organizationId(), status)
-                    : orderRepository.findByShopId(current.organizationId());
+            orderPage = (status != null && !status.isBlank())
+                    ? orderRepository.findByShopIdAndStatus(current.organizationId(), status, pageable)
+                    : orderRepository.findByShopId(current.organizationId(), pageable);
         } else if (current.roles().contains("DELIVERY_AGENT")) {
-            orders = orderRepository.findByDeliveryAgentId(current.userId());
+            List<com.paymentplatform.organization.domain.model.Order> orders = orderRepository.findByDeliveryAgentId(current.userId());
+            List<OrderResponse> responses = orders.stream()
+                    .map(o -> {
+                        var items = orderItemRepository.findByOrderId(o.getId());
+                        return OrderResponse.from(o, items);
+                    })
+                    .toList();
+            return ResponseEntity.ok(new PageResponse<>(responses, responses.size(), 1, 0));
         } else {
-            orders = orderRepository.findAll();
+            return ResponseEntity.ok(PageResponse.of(orderRepository.findAll(pageable).map(o -> {
+                var items = orderItemRepository.findByOrderId(o.getId());
+                return OrderResponse.from(o, items);
+            }));
         }
 
-        List<OrderResponse> responses = orders.stream()
-                .map(o -> {
-                    var items = orderItemRepository.findByOrderId(o.getId());
-                    return OrderResponse.from(o, items);
-                })
-                .toList();
-        return ResponseEntity.ok(responses);
+        return ResponseEntity.ok(PageResponse.of(orderPage.map(o -> {
+            var items = orderItemRepository.findByOrderId(o.getId());
+            return OrderResponse.from(o, items);
+        })));
     }
 
     @GetMapping("/{id}")

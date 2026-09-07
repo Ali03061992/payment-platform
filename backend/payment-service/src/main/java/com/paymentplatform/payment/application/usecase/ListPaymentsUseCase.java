@@ -1,5 +1,6 @@
 package com.paymentplatform.payment.application.usecase;
 
+import com.paymentplatform.payment.application.dto.PageResponse;
 import com.paymentplatform.payment.application.dto.PaymentNameResolver;
 import com.paymentplatform.payment.application.dto.PaymentResponse;
 import com.paymentplatform.payment.application.dto.PaymentStatsResponse;
@@ -7,6 +8,9 @@ import com.paymentplatform.payment.domain.model.Payment;
 import com.paymentplatform.payment.domain.model.PaymentStatus;
 import com.paymentplatform.payment.domain.repository.PaymentRepository;
 import com.paymentplatform.payment.infrastructure.http.OrganizationValidationClient;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,21 +32,31 @@ public class ListPaymentsUseCase {
     }
 
     @Transactional(readOnly = true)
-    public List<PaymentResponse> execute(long shopId) {
-        List<Payment> domainPayments = payments.findByShopId(shopId);
-        return buildResponses(domainPayments);
+    public PageResponse<PaymentResponse> execute(long shopId, int page, int size) {
+        List<Payment> allPayments = payments.findByShopId(shopId);
+        return paginate(allPayments, page, size);
     }
 
     @Transactional(readOnly = true)
-    public List<PaymentResponse> executeBySupplier(long supplierId) {
-        List<Payment> domainPayments = payments.findBySupplierId(supplierId);
-        return buildResponses(domainPayments);
+    public PageResponse<PaymentResponse> executeBySupplier(long supplierId, int page, int size) {
+        List<Payment> allPayments = payments.findBySupplierId(supplierId);
+        return paginate(allPayments, page, size);
     }
 
     @Transactional(readOnly = true)
-    public List<PaymentResponse> executeAll() {
-        List<Payment> domainPayments = payments.findAll();
-        return buildResponses(domainPayments);
+    public PageResponse<PaymentResponse> executeAll(int page, int size) {
+        List<Payment> allPayments = payments.findAll();
+        return paginate(allPayments, page, size);
+    }
+
+    private PageResponse<PaymentResponse> paginate(List<Payment> allPayments, int page, int size) {
+        int start = Math.min(page * size, allPayments.size());
+        int end = Math.min(start + size, allPayments.size());
+        List<Payment> pageItems = allPayments.subList(start, end);
+
+        List<PaymentResponse> responses = buildResponses(pageItems);
+        int totalPages = (int) Math.ceil((double) allPayments.size() / size);
+        return new PageResponse<>(responses, allPayments.size(), totalPages, page);
     }
 
     private List<PaymentResponse> buildResponses(List<Payment> domainPayments) {

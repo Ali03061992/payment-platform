@@ -58,9 +58,18 @@ public class NotificationController {
     }
 
     @PostMapping("/{id}/read")
-    public ResponseEntity<Void> markAsRead(@PathVariable Long id) {
+    public ResponseEntity<Void> markAsRead(@PathVariable Long id,
+                                           @AuthenticationPrincipal AuthenticatedUser user) {
         Notification n = notifications.findById(id).orElseThrow(() ->
                 new java.util.NoSuchElementException("Notification not found"));
+        boolean belongsToOrg = user.organizationId() != null &&
+                n.getRecipientOrganizationId() != null &&
+                n.getRecipientOrganizationId().equals(user.organizationId());
+        boolean belongsToUser = n.getRecipientUserId() != null &&
+                n.getRecipientUserId().equals(user.userId());
+        if (!belongsToOrg && !belongsToUser) {
+            return ResponseEntity.status(403).build();
+        }
         n.markAsRead();
         notifications.save(n);
         return ResponseEntity.noContent().build();

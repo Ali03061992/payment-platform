@@ -10,6 +10,7 @@ export class NotificationService {
   private notificationsSubject = new BehaviorSubject<Notification[]>([]);
   private unreadCountSubject = new BehaviorSubject<number>(0);
   private pollingSub?: Subscription;
+  private unreadCountPollingSub?: Subscription;
   private lastUnreadCount = 0;
 
   notifications$ = this.notificationsSubject.asObservable();
@@ -18,19 +19,21 @@ export class NotificationService {
   constructor(private http: HttpClient) {}
 
   startPolling(intervalMs = 30000): void {
+    this.stopPolling();
     this.fetchNotifications().subscribe();
     this.fetchUnreadCount().subscribe();
 
     this.pollingSub = interval(intervalMs).pipe(
       switchMap(() => this.fetchNotifications())
     ).subscribe();
-    interval(intervalMs).pipe(
+    this.unreadCountPollingSub = interval(intervalMs).pipe(
       switchMap(() => this.fetchUnreadCount())
     ).subscribe();
   }
 
   stopPolling(): void {
     this.pollingSub?.unsubscribe();
+    this.unreadCountPollingSub?.unsubscribe();
   }
 
   fetchNotifications(): Observable<Notification[]> {

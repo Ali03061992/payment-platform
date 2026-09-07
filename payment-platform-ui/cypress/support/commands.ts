@@ -18,8 +18,8 @@ Cypress.Commands.add('login', (username: string, password: string) => {
       url: `${API_URL()}/api/auth/me`,
       headers: authHeaders(token),
     }).then((me) => {
-      window.localStorage.setItem('token', token);
-      window.localStorage.setItem('user', JSON.stringify(me.body));
+      window.sessionStorage.setItem('token', token);
+      window.sessionStorage.setItem('user', JSON.stringify(me.body));
     });
   });
 });

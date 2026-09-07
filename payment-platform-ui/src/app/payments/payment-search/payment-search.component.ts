@@ -28,7 +28,7 @@ export class PaymentSearchComponent implements OnInit {
     private orgService: OrganizationService,
     private toast: ToastService
   ) {
-    const userJson = localStorage.getItem('user');
+    const userJson = sessionStorage.getItem('user');
     if (userJson) {
       this.user = JSON.parse(userJson);
     }

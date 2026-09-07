@@ -4,13 +4,18 @@ import com.paymentplatform.organization.application.dto.OrderResponse;
 import com.paymentplatform.organization.domain.model.Order;
 import com.paymentplatform.organization.domain.model.OrderEvent;
 import com.paymentplatform.organization.domain.model.OrderItem;
+import com.paymentplatform.organization.domain.model.Product;
 import com.paymentplatform.organization.domain.repository.*;
 import com.paymentplatform.shared.domain.exception.ConflictException;
 import com.paymentplatform.shared.domain.exception.NotFoundException;
+import com.paymentplatform.shared.domain.event.OrderEvents;
+import com.paymentplatform.shared.infrastructure.outbox.OutboxEventStore;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class RejectOrderUseCase {
@@ -18,12 +23,17 @@ public class RejectOrderUseCase {
     private final OrderRepository orders;
     private final OrderItemRepository orderItems;
     private final OrderEventRepository events;
+    private final ProductRepository products;
+    private final OutboxEventStore outbox;
 
     public RejectOrderUseCase(OrderRepository orders, OrderItemRepository orderItems,
-                              OrderEventRepository events) {
+                              OrderEventRepository events, ProductRepository products,
+                              OutboxEventStore outbox) {
         this.orders = orders;
         this.orderItems = orderItems;
         this.events = events;
+        this.products = products;
+        this.outbox = outbox;
     }
 
     @Transactional
@@ -35,11 +45,22 @@ public class RejectOrderUseCase {
             throw new ConflictException("La commande doit être en statut DELIVERED pour être rejetée");
         }
 
+        List<OrderItem> items = orderItems.findByOrderId(orderId);
+        for (OrderItem item : items) {
+            Product product = products.findByIdForUpdate(item.getProductId())
+                    .orElseThrow(() -> new NotFoundException("Produit non trouvé : " + item.getProductId()));
+            product.setReservedQty(Math.max(0, product.getReservedQty() - item.getQuantity()));
+            products.save(product);
+        }
+
         order.reject();
         orders.save(order);
 
-        List<OrderItem> items = orderItems.findByOrderId(orderId);
         events.save(OrderEvent.create(orderId, "ORDER_REJECTED", actorUserId, "Commande rejetée par la boutique"));
+        outbox.append(new OrderEvents.OrderRejectedEvent(UUID.randomUUID(), Instant.now(),
+                orderId, order.getReference(),
+                order.getShopId(), order.getSupplierId(), actorUserId),
+                String.valueOf(orderId));
 
         return OrderResponse.from(order, items);
     }

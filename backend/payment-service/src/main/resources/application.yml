@@ -24,8 +24,14 @@ spring:
     port: ${RABBITMQ_PORT:5672}
     username: ${RABBITMQ_USER:payment}
     password: ${RABBITMQ_PASSWORD:rabbit-password-change-me}
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
   elasticsearch:
     uris: http://${ELASTICSEARCH_HOST:localhost}:${ELASTICSEARCH_PORT:9200}
+    username: elastic
+    password: ${ELASTIC_PASSWORD:changeme}
 
 app:
   security:

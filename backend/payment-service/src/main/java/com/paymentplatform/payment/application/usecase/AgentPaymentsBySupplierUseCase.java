@@ -44,7 +44,7 @@ public class AgentPaymentsBySupplierUseCase {
             String currency = payments.isEmpty() ? "TND" : payments.get(0).getCurrency();
 
             List<PaymentResponse> responseList = payments.stream()
-                    .map(this::toResponse)
+                    .map(e -> toResponse(e, userId))
                     .toList();
 
             String agentName = nameResolver.toNameResolver().resolveUser(userId);
@@ -63,14 +63,14 @@ public class AgentPaymentsBySupplierUseCase {
         return summaries;
     }
 
-    private PaymentResponse toResponse(PaymentJpaEntity e) {
-        var resolver = nameResolver.toNameResolver();
+    private PaymentResponse toResponse(PaymentJpaEntity e, long agentUserId) {
+        var batchResolver = nameResolver.toNameResolver();
         return new PaymentResponse(
                 e.getId(), e.getReference(),
-                e.getShopId(), resolver.resolveOrg(e.getShopId()),
-                e.getSupplierId(), resolver.resolveOrg(e.getSupplierId()),
+                e.getShopId(), batchResolver.resolveOrg(e.getShopId()),
+                e.getSupplierId(), batchResolver.resolveOrg(e.getSupplierId()),
                 e.getAmount(), e.getCurrency(), e.getStatus(), e.getRejectionReason(),
-                e.getCreatedBy(), resolver.resolveUser(e.getCreatedBy()),
+                e.getCreatedBy(), batchResolver.resolveUser(e.getCreatedBy()),
                 null, null, null,
                 e.getVersion(), e.getCreatedAt(), e.getUpdatedAt(),
                 List.of()

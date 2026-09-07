@@ -17,4 +17,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT p FROM Product p WHERE p.id = :id")
     Optional<Product> findByIdForUpdate(Long id);
+
+    @Query("SELECT p FROM Product p WHERE p.status = 'ACTIVE' AND (p.quantity - p.reservedQty) <= p.minQuantity")
+    List<Product> findLowStockProducts();
 }

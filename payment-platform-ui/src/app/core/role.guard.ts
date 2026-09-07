@@ -7,13 +7,13 @@ export class RoleGuard implements CanActivate {
   constructor(private router: Router) {}
 
   canActivate(route: ActivatedRouteSnapshot): boolean {
-    const token = localStorage.getItem('token');
+    const token = sessionStorage.getItem('token');
     if (!token) {
       this.router.navigate(['/login']);
       return false;
     }
 
-    const userJson = localStorage.getItem('user');
+    const userJson = sessionStorage.getItem('user');
     if (!userJson) {
       this.router.navigate(['/login']);
       return false;

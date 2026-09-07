@@ -121,7 +121,7 @@ describe('09 - Payments: Detail', () => {
     let paymentId: number;
     cy.loginAsAdmin();
     cy.window().then((win) => {
-      const token = win.localStorage.getItem('token');
+      const token = win.sessionStorage.getItem('token');
       cy.request({
         method: 'GET',
         url: `${API()}/api/payments`,
@@ -143,7 +143,7 @@ describe('09 - Payments: Detail', () => {
   it('should have QR Code toggle button', () => {
     cy.loginAsAdmin();
     cy.window().then((win) => {
-      const token = win.localStorage.getItem('token');
+      const token = win.sessionStorage.getItem('token');
       cy.request({
         method: 'GET', url: `${API()}/api/payments`, headers: authHeaders(token!),
       }).then((r) => {
@@ -189,7 +189,7 @@ describe('09 - Payments: Cancel Flow', () => {
 
     cy.login('ali', 'Admin@123').then(() => {
       cy.window().then((win) => {
-        shopToken = win.localStorage.getItem('token')!;
+        shopToken = win.sessionStorage.getItem('token')!;
         cy.request({
           method: 'POST',
           url: `${API()}/api/payments`,
@@ -218,7 +218,7 @@ describe('09 - Payments: Cancel Flow', () => {
 
     cy.login('ali', 'Admin@123').then(() => {
       cy.window().then((win) => {
-        shopToken = win.localStorage.getItem('token')!;
+        shopToken = win.sessionStorage.getItem('token')!;
         cy.request({
           method: 'POST',
           url: `${API()}/api/payments`,
@@ -230,7 +230,7 @@ describe('09 - Payments: Cancel Flow', () => {
 
           cy.login('covale.admin', 'Admin@123').then(() => {
             cy.window().then((win2) => {
-              supplierToken = win2.localStorage.getItem('token')!;
+              supplierToken = win2.sessionStorage.getItem('token')!;
               cy.request({
                 method: 'POST',
                 url: `${API()}/api/payments/${paymentId}/cancel`,
@@ -253,7 +253,7 @@ describe('09 - Payments: Cancel Flow', () => {
 
     cy.login('abdelslam', 'Admin@123').then(() => {
       cy.window().then((win) => {
-        shopTokenAbdelslam = win.localStorage.getItem('token')!;
+        shopTokenAbdelslam = win.sessionStorage.getItem('token')!;
         cy.request({
           method: 'POST',
           url: `${API()}/api/payments`,
@@ -265,7 +265,7 @@ describe('09 - Payments: Cancel Flow', () => {
 
           cy.login('ali', 'Admin@123').then(() => {
             cy.window().then((win2) => {
-              shopTokenAli = win2.localStorage.getItem('token')!;
+              shopTokenAli = win2.sessionStorage.getItem('token')!;
               cy.request({
                 method: 'POST',
                 url: `${API()}/api/payments/${paymentId}/cancel`,
@@ -288,7 +288,7 @@ describe('09 - Payments: Cancel Flow', () => {
 
     cy.login('ali', 'Admin@123').then(() => {
       cy.window().then((win) => {
-        shopToken = win.localStorage.getItem('token')!;
+        shopToken = win.sessionStorage.getItem('token')!;
         cy.request({
           method: 'POST',
           url: `${API()}/api/payments`,
@@ -300,7 +300,7 @@ describe('09 - Payments: Cancel Flow', () => {
 
           cy.login('pointteck.admin', 'Admin@123').then(() => {
             cy.window().then((win2) => {
-              wrongSupplierToken = win2.localStorage.getItem('token')!;
+              wrongSupplierToken = win2.sessionStorage.getItem('token')!;
               cy.request({
                 method: 'POST',
                 url: `${API()}/api/payments/${paymentId}/cancel`,
@@ -323,7 +323,7 @@ describe('09 - Payments: Cancel Flow', () => {
 
     cy.login('ali', 'Admin@123').then(() => {
       cy.window().then((win) => {
-        shopToken = win.localStorage.getItem('token')!;
+        shopToken = win.sessionStorage.getItem('token')!;
         cy.request({
           method: 'POST',
           url: `${API()}/api/payments`,
@@ -335,7 +335,7 @@ describe('09 - Payments: Cancel Flow', () => {
 
           cy.login('covale.admin', 'Admin@123').then(() => {
             cy.window().then((win2) => {
-              supplierToken = win2.localStorage.getItem('token')!;
+              supplierToken = win2.sessionStorage.getItem('token')!;
               cy.request({
                 method: 'POST',
                 url: `${API()}/api/payments/${paymentId}/confirm`,

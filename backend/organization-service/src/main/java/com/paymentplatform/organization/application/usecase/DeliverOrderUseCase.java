@@ -6,10 +6,14 @@ import com.paymentplatform.organization.domain.model.OrderEvent;
 import com.paymentplatform.organization.domain.model.OrderItem;
 import com.paymentplatform.organization.domain.repository.*;
 import com.paymentplatform.shared.domain.exception.NotFoundException;
+import com.paymentplatform.shared.domain.event.OrderEvents;
+import com.paymentplatform.shared.infrastructure.outbox.OutboxEventStore;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class DeliverOrderUseCase {
@@ -17,12 +21,14 @@ public class DeliverOrderUseCase {
     private final OrderRepository orders;
     private final OrderItemRepository orderItems;
     private final OrderEventRepository events;
+    private final OutboxEventStore outbox;
 
     public DeliverOrderUseCase(OrderRepository orders, OrderItemRepository orderItems,
-                               OrderEventRepository events) {
+                               OrderEventRepository events, OutboxEventStore outbox) {
         this.orders = orders;
         this.orderItems = orderItems;
         this.events = events;
+        this.outbox = outbox;
     }
 
     @Transactional
@@ -35,6 +41,11 @@ public class DeliverOrderUseCase {
 
         events.save(OrderEvent.create(orderId, "ORDER_DELIVERED", actorUserId,
                 "Reçu par: " + receivedBy));
+        outbox.append(new OrderEvents.OrderDeliveredEvent(UUID.randomUUID(), Instant.now(),
+                orderId, order.getReference(),
+                order.getShopId(), order.getSupplierId(),
+                actorUserId, receivedBy != null ? receivedBy : 0L),
+                String.valueOf(orderId));
 
         List<OrderItem> items = orderItems.findByOrderId(orderId);
         return OrderResponse.from(order, items);

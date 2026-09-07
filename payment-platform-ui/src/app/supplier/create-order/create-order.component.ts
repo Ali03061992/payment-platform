@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { OrderService } from '../../services/order.service';
 import { OrganizationService } from '../../services/organization.service';
@@ -7,6 +7,7 @@ import { Organization } from '../../models/organization.model';
 import { Product } from '../../models/stock.model';
 import { CreateOrderRequest } from '../../models/order.model';
 import { ToastService } from '../../services/toast.service';
+import { Subscription } from 'rxjs';
 
 interface OrderLine {
   product: Product;
@@ -19,7 +20,7 @@ interface OrderLine {
   templateUrl: './create-order.component.html',
   styleUrls: ['./create-order.component.css']
 })
-export class SupplierCreateOrderComponent implements OnInit {
+export class SupplierCreateOrderComponent implements OnInit, OnDestroy {
   shops: Organization[] = [];
   selectedShopId = 0;
   products: Product[] = [];
@@ -39,13 +40,19 @@ export class SupplierCreateOrderComponent implements OnInit {
     private toast: ToastService
   ) {}
 
+  private subscriptions = new Subscription();
+
   ngOnInit(): void {
     this.supplierId = this.getSupplierId();
     this.loadShops();
   }
 
+  ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
+  }
+
   private getSupplierId(): number {
-    const userJson = localStorage.getItem('user');
+    const userJson = sessionStorage.getItem('user');
     if (userJson) {
       const user = JSON.parse(userJson);
       return user.organizationId || 0;
@@ -54,16 +61,16 @@ export class SupplierCreateOrderComponent implements OnInit {
   }
 
   loadShops(): void {
-    this.orgService.listRelations().subscribe({
+    this.subscriptions.add(this.orgService.listRelations().subscribe({
       next: (relations) => {
         const shopIds = [...new Set(
           relations.filter(r => r.supplierId === this.supplierId && r.status === 'ACTIVE').map(r => r.shopId)
         )];
-        this.orgService.listShops().subscribe({
+        this.subscriptions.add(this.orgService.listShops().subscribe({
           next: (all) => { this.shops = all.filter(s => shopIds.includes(s.id)); }
-        });
+        }));
       }
-    });
+    }));
   }
 
   onShopChange(): void {
@@ -76,9 +83,9 @@ export class SupplierCreateOrderComponent implements OnInit {
   }
 
   loadProducts(): void {
-    this.stockService.getProducts('ACTIVE').subscribe({
+    this.subscriptions.add(this.stockService.getProducts('ACTIVE').subscribe({
       next: (data) => { this.products = data; }
-    });
+    }));
   }
 
   get filteredProducts(): Product[] {
@@ -133,7 +140,7 @@ export class SupplierCreateOrderComponent implements OnInit {
         discount: l.discount
       }))
     };
-    this.orderService.create(request).subscribe({
+    this.subscriptions.add(this.orderService.create(request).subscribe({
       next: () => {
         this.toast.success('Commande créée avec succès');
         this.router.navigate(['/dashboard/supplier/orders']);
@@ -142,6 +149,6 @@ export class SupplierCreateOrderComponent implements OnInit {
         this.toast.error(err.error?.message || 'Erreur lors de la création');
         this.creating = false;
       }
-    });
+    }));
   }
 }

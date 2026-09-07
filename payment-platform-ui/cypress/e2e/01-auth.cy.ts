@@ -32,9 +32,9 @@ describe('01 - Auth: Login Page', () => {
     cy.get('button[type="submit"]').click();
     cy.url({ timeout: 15000 }).should('include', '/dashboard');
     cy.window().then((win) => {
-      const user = JSON.parse(win.localStorage.getItem('user') || '{}');
+      const user = JSON.parse(win.sessionStorage.getItem('user') || '{}');
       expect(user.roles).to.include('SYSTEM_ADMIN');
-      expect(win.localStorage.getItem('token')).to.not.be.null;
+      expect(win.sessionStorage.getItem('token')).to.not.be.null;
     });
   });
 
@@ -44,7 +44,7 @@ describe('01 - Auth: Login Page', () => {
     cy.get('button[type="submit"]').click();
     cy.url({ timeout: 15000 }).should('include', '/dashboard');
     cy.window().then((win) => {
-      const user = JSON.parse(win.localStorage.getItem('user') || '{}');
+      const user = JSON.parse(win.sessionStorage.getItem('user') || '{}');
       expect(user.roles).to.include('SUPPLIER_ADMIN');
     });
   });
@@ -55,7 +55,7 @@ describe('01 - Auth: Login Page', () => {
     cy.get('button[type="submit"]').click();
     cy.url({ timeout: 15000 }).should('include', '/dashboard');
     cy.window().then((win) => {
-      const user = JSON.parse(win.localStorage.getItem('user') || '{}');
+      const user = JSON.parse(win.sessionStorage.getItem('user') || '{}');
       expect(user.roles).to.include('SHOP_ADMIN');
     });
   });
@@ -112,8 +112,8 @@ describe('01 - Auth: Logout', () => {
     cy.get('.sidebar .logout-btn').click();
     cy.url({ timeout: 5000 }).should('include', '/login');
     cy.window().then((win) => {
-      expect(win.localStorage.getItem('token')).to.be.null;
-      expect(win.localStorage.getItem('user')).to.be.null;
+      expect(win.sessionStorage.getItem('token')).to.be.null;
+      expect(win.sessionStorage.getItem('user')).to.be.null;
     });
   });
 });

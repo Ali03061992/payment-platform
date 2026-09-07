@@ -45,6 +45,7 @@ import { AgentPaymentsComponent } from './supplier/agent-payments/agent-payments
 import { PaymentSearchComponent } from './payments/payment-search/payment-search.component';
 import { NotificationBannerComponent } from './components/notification-banner/notification-banner.component';
 import { ToastComponent } from './components/toast/toast.component';
+import { StatusLabelPipe } from './pipes/status-label.pipe';
 
 import { JwtInterceptor } from './core/jwt.interceptor';
 import { AuthGuard } from './core/auth.guard';
@@ -138,7 +139,8 @@ const routes: Routes = [
     AgentPaymentsComponent,
     PaymentSearchComponent,
     NotificationBannerComponent,
-    ToastComponent
+    ToastComponent,
+    StatusLabelPipe
   ],
   imports: [
     BrowserModule,

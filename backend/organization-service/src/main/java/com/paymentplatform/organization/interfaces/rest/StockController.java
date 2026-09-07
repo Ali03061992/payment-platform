@@ -67,15 +67,14 @@ public class StockController {
         return ResponseEntity.ok(stockService.updateProduct(supplierId, productId, request));
     }
 
-    @DeleteMapping("/products/{productId}")
+    @PatchMapping("/products/{productId}/deactivate")
     @PreAuthorize("hasAnyAuthority('SUPPLIER_MANAGE_PRODUCTS','SYSTEM_ADMIN')")
-    public ResponseEntity<Void> deleteProduct(@PathVariable Long supplierId, @PathVariable Long productId) {
+    public ResponseEntity<ProductResponse> deleteProduct(@PathVariable Long supplierId, @PathVariable Long productId) {
         var current = CurrentUser.get();
         if (current.organizationId() != null && !current.organizationId().equals(supplierId)) {
             return ResponseEntity.status(403).build();
         }
-        stockService.deleteProduct(supplierId, productId);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(stockService.deleteProduct(supplierId, productId));
     }
 
     @GetMapping("/movements")

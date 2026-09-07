@@ -10,7 +10,7 @@ export class StockService {
   constructor(private http: HttpClient) {}
 
   private getSupplierId(): number {
-    const userJson = localStorage.getItem('user');
+    const userJson = sessionStorage.getItem('user');
     if (userJson) {
       const user = JSON.parse(userJson);
       return user.organizationId || 0;
@@ -40,9 +40,9 @@ export class StockService {
     return this.http.patch<Product>(`${this.apiUrl}/${supplierId}/products/${id}`, data);
   }
 
-  deleteProduct(id: number): Observable<void> {
+  deleteProduct(id: number): Observable<Product> {
     const supplierId = this.getSupplierId();
-    return this.http.delete<void>(`${this.apiUrl}/${supplierId}/products/${id}`);
+    return this.http.patch<Product>(`${this.apiUrl}/${supplierId}/products/${id}/deactivate`, { status: 'INACTIVE' });
   }
 
   getStockMovements(productId?: number): Observable<StockMovement[]> {

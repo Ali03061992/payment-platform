@@ -42,8 +42,8 @@ describe('PaymentDetailComponent', () => {
       }
     };
     
-    localStorage.clear();
-    localStorage.setItem('token', 'mock-token');
+    sessionStorage.clear();
+    sessionStorage.setItem('token', 'mock-token');
   });
 
   const mountComponent = (overrides: Partial<{ payment: Payment; error: any }> = {}) => {

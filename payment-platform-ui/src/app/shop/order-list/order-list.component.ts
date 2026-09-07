@@ -1,28 +1,35 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { OrderService } from '../../services/order.service';
 import { Order } from '../../models/order.model';
 import { ToastService } from '../../services/toast.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-order-list',
   templateUrl: './order-list.component.html',
   styleUrls: ['./order-list.component.css']
 })
-export class OrderListComponent implements OnInit {
+export class OrderListComponent implements OnInit, OnDestroy {
   orders: Order[] = [];
   loading = true;
   filterStatus = '';
+
+  private subscriptions = new Subscription();
 
   constructor(private orderService: OrderService, private toast: ToastService) {}
 
   ngOnInit(): void { this.load(); }
 
+  ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
+  }
+
   load(): void {
     this.loading = true;
-    this.orderService.list().subscribe({
+    this.subscriptions.add(this.orderService.list().subscribe({
       next: (data: Order[]) => { this.orders = data; this.loading = false; },
       error: (err: any) => { this.toast.error(err.error?.message || 'Erreur'); this.loading = false; }
-    });
+    }));
   }
 
   get filteredOrders(): Order[] {
@@ -52,24 +59,24 @@ export class OrderListComponent implements OnInit {
   }
 
   accept(id: number): void {
-    this.orderService.accept(id).subscribe({
+    this.subscriptions.add(this.orderService.accept(id).subscribe({
       next: () => this.load(),
       error: (e: any) => { this.toast.error(e.error?.message || 'Erreur'); }
-    });
+    }));
   }
 
   reject(id: number): void {
     if (!confirm('Rejeter cette commande ?')) return;
-    this.orderService.reject(id).subscribe({
+    this.subscriptions.add(this.orderService.reject(id).subscribe({
       next: () => this.load(),
       error: (e: any) => { this.toast.error(e.error?.message || 'Erreur'); }
-    });
+    }));
   }
 
   cancel(id: number): void {
-    this.orderService.cancel(id).subscribe({
+    this.subscriptions.add(this.orderService.cancel(id).subscribe({
       next: () => this.load(),
       error: (e: any) => { this.toast.error(e.error?.message || 'Erreur'); }
-    });
+    }));
   }
 }

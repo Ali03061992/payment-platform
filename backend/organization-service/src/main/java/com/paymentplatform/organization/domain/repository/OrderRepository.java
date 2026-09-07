@@ -1,6 +1,8 @@
 package com.paymentplatform.organization.domain.repository;
 
 import com.paymentplatform.organization.domain.model.Order;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -19,6 +21,14 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     List<Order> findByShopIdAndStatus(Long shopId, String status);
 
     List<Order> findByDeliveryAgentId(Long deliveryAgentId);
+
+    Page<Order> findBySupplierId(Long supplierId, Pageable pageable);
+
+    Page<Order> findByShopId(Long shopId, Pageable pageable);
+
+    Page<Order> findBySupplierIdAndStatus(Long supplierId, String status, Pageable pageable);
+
+    Page<Order> findByShopIdAndStatus(Long shopId, String status, Pageable pageable);
 
     long countBySupplierId(Long supplierId);
 

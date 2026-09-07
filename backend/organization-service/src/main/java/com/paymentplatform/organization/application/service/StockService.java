@@ -72,11 +72,16 @@ public class StockService {
     }
 
     @Transactional
-    public void deleteProduct(Long supplierId, Long productId) {
+    public ProductResponse deleteProduct(Long supplierId, Long productId) {
         Product product = products.findById(productId)
                 .filter(p -> p.getSupplierId().equals(supplierId))
                 .orElseThrow(() -> new NotFoundException("Produit non trouvé"));
-        products.delete(product);
+        if (product.getReservedQty() != null && product.getReservedQty() > 0) {
+            throw new ConflictException("Impossible de désactiver un produit avec des réservations en cours");
+        }
+        product.setStatus("INACTIVE");
+        products.save(product);
+        return ProductResponse.from(product);
     }
 
     public List<StockMovementResponse> listMovements(Long supplierId, Long productId) {

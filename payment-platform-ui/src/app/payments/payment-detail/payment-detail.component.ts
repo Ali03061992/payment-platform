@@ -1,16 +1,17 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { PaymentService } from '../../services/payment.service';
 import { Payment } from '../../models/payment.model';
 import { ToastService } from '../../services/toast.service';
 import { environment } from '../../../environments/environment';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-payment-detail',
   templateUrl: './payment-detail.component.html',
   styleUrls: ['./payment-detail.component.css']
 })
-export class PaymentDetailComponent implements OnInit {
+export class PaymentDetailComponent implements OnInit, OnDestroy {
   payment: Payment | null = null;
   loading = true;
   showReject = false;
@@ -26,40 +27,46 @@ export class PaymentDetailComponent implements OnInit {
     private toast: ToastService
   ) {}
 
+  private subscriptions = new Subscription();
+
   ngOnInit(): void {
     const id = Number(this.route.snapshot.paramMap.get('id'));
-    this.paymentService.getById(id).subscribe({
+    this.subscriptions.add(this.paymentService.getById(id).subscribe({
       next: (data: Payment) => {
         this.payment = data;
         this.qrData = `${environment.appUrl}/dashboard/payments/${data.id}`;
         this.loading = false;
       },
       error: () => { this.loading = false; this.router.navigate(['/dashboard/payments']); }
-    });
+    }));
+  }
+
+  ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
   }
 
   confirm(): void {
     if (!this.payment) return;
-    this.paymentService.confirm(this.payment.id).subscribe({
+    this.subscriptions.add(this.paymentService.confirm(this.payment.id).subscribe({
       next: (data: Payment) => { this.payment = data; this.toast.success('Paiement confirmé'); },
       error: (e: any) => { this.toast.error(e.error?.message || 'Erreur'); }
-    });
+    }));
   }
 
   reject(): void {
     if (!this.payment || !this.rejectReason.trim()) return;
-    this.paymentService.reject(this.payment.id, { rejectionReason: this.rejectReason }).subscribe({
+    this.subscriptions.add(this.paymentService.reject(this.payment.id, { rejectionReason: this.rejectReason }).subscribe({
       next: (data: Payment) => { this.payment = data; this.showReject = false; this.rejectReason = ''; this.toast.success('Paiement rejeté'); },
       error: (e: any) => { this.toast.error(e.error?.message || 'Erreur'); }
-    });
+    }));
   }
 
   cancel(): void {
     if (!this.payment) return;
-    this.paymentService.cancel(this.payment.id).subscribe({
+    this.subscriptions.add(this.paymentService.cancel(this.payment.id).subscribe({
       next: (data: Payment) => { this.payment = data; this.toast.success('Paiement annulé'); },
       error: (e: any) => { this.toast.error(e.error?.message || 'Erreur'); }
-    });
+    }));
   }
 
   toggleQR(): void {

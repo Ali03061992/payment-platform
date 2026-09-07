@@ -24,6 +24,10 @@ spring:
     port: ${RABBITMQ_PORT:5672}
     username: ${RABBITMQ_USER:payment}
     password: ${RABBITMQ_PASSWORD:rabbit-password-change-me}
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
   mail:
     host: ${SMTP_HOST:localhost}
     port: ${SMTP_PORT:1025}

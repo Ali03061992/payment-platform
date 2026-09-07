@@ -3,9 +3,13 @@ package com.paymentplatform.payment.interfaces.rest;
 import com.paymentplatform.shared.infrastructure.security.CurrentUser;
 import com.paymentplatform.payment.application.dto.*;
 import com.paymentplatform.payment.application.usecase.*;
+import com.paymentplatform.payment.infrastructure.csv.CsvExportService;
 import com.paymentplatform.payment.infrastructure.elasticsearch.PaymentIndexerService;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -29,6 +33,7 @@ public class PaymentController {
     private final AgentPaymentsBySupplierUseCase agentPayments;
     private final SearchPaymentsUseCase searchPayments;
     private final PaymentIndexerService indexerService;
+    private final CsvExportService csvExportService;
 
     public PaymentController(CreatePaymentUseCase createPayment,
                              GetPaymentUseCase getPayment,
@@ -38,7 +43,8 @@ public class PaymentController {
                              CancelPaymentUseCase cancelPayment,
                              AgentPaymentsBySupplierUseCase agentPayments,
                              SearchPaymentsUseCase searchPayments,
-                             PaymentIndexerService indexerService) {
+                             PaymentIndexerService indexerService,
+                             CsvExportService csvExportService) {
         this.createPayment = createPayment;
         this.getPayment = getPayment;
         this.listPayments = listPayments;
@@ -48,6 +54,7 @@ public class PaymentController {
         this.agentPayments = agentPayments;
         this.searchPayments = searchPayments;
         this.indexerService = indexerService;
+        this.csvExportService = csvExportService;
     }
 
     @PostMapping
@@ -78,22 +85,33 @@ public class PaymentController {
     @GetMapping("/reference/{reference}")
     @PreAuthorize("hasAuthority('VIEW_PAYMENTS')")
     public ResponseEntity<PaymentResponse> getByReference(@PathVariable String reference) {
-        return ResponseEntity.ok(getPayment.execute(reference));
+        var current = CurrentUser.get();
+        var response = getPayment.execute(reference);
+        if (!current.roles().contains("SYSTEM_ADMIN")) {
+            Long orgId = current.organizationId();
+            if (orgId == null) return ResponseEntity.status(403).build();
+            boolean isShop = response.shopId() == orgId;
+            boolean isSupplier = response.supplierId() == orgId;
+            if (!isShop && !isSupplier) return ResponseEntity.status(403).build();
+        }
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping
     @PreAuthorize("hasAuthority('VIEW_PAYMENTS')")
-    public ResponseEntity<List<PaymentResponse>> list() {
+    public ResponseEntity<PageResponse<PaymentResponse>> list(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "50") int size) {
         var current = CurrentUser.get();
         if (current.organizationId() != null) {
             String role = current.roles().getFirst();
             if (role.contains("SHOP")) {
-                return ResponseEntity.ok(listPayments.execute(current.organizationId()));
+                return ResponseEntity.ok(listPayments.execute(current.organizationId(), page, size));
             } else if (role.contains("SUPPLIER")) {
-                return ResponseEntity.ok(listPayments.executeBySupplier(current.organizationId()));
+                return ResponseEntity.ok(listPayments.executeBySupplier(current.organizationId(), page, size));
             }
         }
-        return ResponseEntity.ok(listPayments.executeAll());
+        return ResponseEntity.ok(listPayments.executeAll(page, size));
     }
 
     @GetMapping("/stats")
@@ -143,16 +161,30 @@ public class PaymentController {
         return ResponseEntity.ok(cancelPayment.execute(id, current.userId(), current.organizationId()));
     }
 
-    @PostMapping("/search")
-    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SYSTEM_ADMIN')")
-    public ResponseEntity<SearchPaymentsResponse> search(
-            @RequestBody SearchPaymentsRequest request) {
+    @GetMapping("/export")
+    @PreAuthorize("hasAuthority('VIEW_PAYMENTS')")
+    public void exportCsv(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
+            HttpServletResponse response) throws Exception {
         var current = CurrentUser.get();
         Long supplierId = null;
+        Long shopId = null;
         if (!current.roles().contains("SYSTEM_ADMIN")) {
-            supplierId = current.organizationId();
+            String role = current.roles().getFirst();
+            if (role.contains("SHOP")) {
+                shopId = current.organizationId();
+            } else if (role.contains("SUPPLIER")) {
+                supplierId = current.organizationId();
+            }
         }
-        return ResponseEntity.ok(searchPayments.execute(request, supplierId));
+        Instant fromInstant = from.atStartOfDay().toInstant(ZoneOffset.UTC);
+        Instant toInstant = to.plusDays(1).atStartOfDay().toInstant(ZoneOffset.UTC);
+        String csv = csvExportService.generatePaymentsCsv(fromInstant, toInstant, supplierId, shopId);
+        response.setContentType("text/csv");
+        response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"payments.csv\"");
+        response.getWriter().write(csv);
+        response.getWriter().flush();
     }
 
     @PostMapping("/reindex")

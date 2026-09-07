@@ -9,14 +9,18 @@ import com.paymentplatform.organization.domain.model.OrderItem;
 import com.paymentplatform.organization.domain.model.Product;
 import com.paymentplatform.organization.domain.model.SupplierShopRelation;
 import com.paymentplatform.organization.domain.repository.*;
+import com.paymentplatform.shared.domain.event.OrderEvents;
 import com.paymentplatform.shared.domain.exception.ConflictException;
 import com.paymentplatform.shared.domain.exception.NotFoundException;
+import com.paymentplatform.shared.infrastructure.outbox.OutboxEventStore;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class CreateOrderUseCase {
@@ -27,17 +31,20 @@ public class CreateOrderUseCase {
     private final ProductRepository products;
     private final OrganizationRepository organizations;
     private final SupplierShopRelationRepository relations;
+    private final OutboxEventStore outbox;
 
     public CreateOrderUseCase(OrderRepository orders, OrderItemRepository orderItems,
                               OrderEventRepository events, ProductRepository products,
                               OrganizationRepository organizations,
-                              SupplierShopRelationRepository relations) {
+                              SupplierShopRelationRepository relations,
+                              OutboxEventStore outbox) {
         this.orders = orders;
         this.orderItems = orderItems;
         this.events = events;
         this.products = products;
         this.organizations = organizations;
         this.relations = relations;
+        this.outbox = outbox;
     }
 
     @Transactional
@@ -105,6 +112,11 @@ public class CreateOrderUseCase {
         orders.save(savedOrder);
 
         events.save(OrderEvent.create(savedOrder.getId(), "ORDER_CREATED", actorUserId, null));
+        outbox.append(new OrderEvents.OrderCreatedEvent(UUID.randomUUID(), Instant.now(),
+                savedOrder.getId(), savedOrder.getReference(),
+                savedOrder.getShopId(), savedOrder.getSupplierId(),
+                actorUserId, source),
+                String.valueOf(savedOrder.getId()));
 
         if ("SUPPLIER".equals(source)) {
             savedOrder.confirm();
@@ -112,6 +124,14 @@ public class CreateOrderUseCase {
             orders.save(savedOrder);
             events.save(OrderEvent.create(savedOrder.getId(), "ORDER_CONFIRMED", actorUserId, "Auto-confirmé (source SUPPLIER)"));
             events.save(OrderEvent.create(savedOrder.getId(), "ORDER_PREPARING", actorUserId, "Auto-mis en préparation (source SUPPLIER)"));
+            outbox.append(new OrderEvents.OrderConfirmedEvent(UUID.randomUUID(), Instant.now(),
+                    savedOrder.getId(), savedOrder.getReference(),
+                    savedOrder.getShopId(), savedOrder.getSupplierId(), actorUserId),
+                    String.valueOf(savedOrder.getId()));
+            outbox.append(new OrderEvents.OrderPreparingEvent(UUID.randomUUID(), Instant.now(),
+                    savedOrder.getId(), savedOrder.getReference(),
+                    savedOrder.getShopId(), savedOrder.getSupplierId(), actorUserId),
+                    String.valueOf(savedOrder.getId()));
         }
 
         return OrderResponse.from(savedOrder, items);

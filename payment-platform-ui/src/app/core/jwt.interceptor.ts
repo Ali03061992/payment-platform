@@ -10,7 +10,7 @@ export class JwtInterceptor implements HttpInterceptor {
   constructor(private router: Router) {}
 
   intercept(req: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
-    const token = localStorage.getItem('token');
+    const token = sessionStorage.getItem('token');
     let authReq = req;
 
     if (token) {
@@ -25,8 +25,8 @@ export class JwtInterceptor implements HttpInterceptor {
           return throwError(() => error);
         }
         if (error.status === 401) {
-          localStorage.removeItem('token');
-          localStorage.removeItem('user');
+          sessionStorage.removeItem('token');
+          sessionStorage.removeItem('user');
           this.router.navigate(['/login']);
         }
         return throwError(() => error);

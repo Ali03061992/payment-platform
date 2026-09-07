@@ -5,6 +5,7 @@ import com.paymentplatform.shared.domain.exception.NotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
 import java.net.URI;
@@ -126,6 +127,7 @@ public class OrganizationValidationClient {
         }
     }
 
+    @Cacheable(value = "organizations", key = "#organizationId")
     public Optional<String> getOrganizationName(long organizationId) {
         String url = "http://" + organizationServiceUrl + ":" + organizationServicePort + "/api/organizations/internal/" + organizationId + "/status";
         try {
@@ -147,6 +149,7 @@ public class OrganizationValidationClient {
         return Optional.empty();
     }
 
+    @Cacheable(value = "users", key = "#userId")
     public Optional<String> getUserName(long userId) {
         String url = "http://" + identityServiceUrl + ":" + identityServicePort + "/api/internal/users/" + userId;
         try {

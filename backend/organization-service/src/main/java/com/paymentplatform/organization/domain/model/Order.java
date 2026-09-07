@@ -104,7 +104,8 @@ public class Order {
             throw new ConflictException("Le fournisseur et la boutique doivent être différents");
         }
         Order order = new Order();
-        order.reference = "ORD-" + System.currentTimeMillis();
+        order.reference = "ORD-" + java.util.UUID.randomUUID().toString().substring(0, 8).toUpperCase()
+                + "-" + System.currentTimeMillis();
         order.supplierId = supplierId;
         order.shopId = shopId;
         order.createdBy = createdBy;
@@ -150,6 +151,7 @@ public class Order {
     public void deliver(Long receivedBy) {
         transitionTo(OrderStatus.DELIVERED);
         this.receivedBy = receivedBy;
+        this.receivedAt = Instant.now();
         this.deliveredAt = Instant.now();
     }
 

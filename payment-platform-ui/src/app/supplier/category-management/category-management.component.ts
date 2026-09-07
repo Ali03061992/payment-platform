@@ -20,7 +20,7 @@ export class CategoryManagementComponent implements OnInit {
   ngOnInit(): void { this.loadCategories(); }
 
   get supplierId(): number {
-    const u = localStorage.getItem('user');
+    const u = sessionStorage.getItem('user');
     return u ? JSON.parse(u).organizationId || 0 : 0;
   }
 

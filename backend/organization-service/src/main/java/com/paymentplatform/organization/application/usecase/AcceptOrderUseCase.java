@@ -8,10 +8,14 @@ import com.paymentplatform.organization.domain.model.Product;
 import com.paymentplatform.organization.domain.repository.*;
 import com.paymentplatform.shared.domain.exception.ConflictException;
 import com.paymentplatform.shared.domain.exception.NotFoundException;
+import com.paymentplatform.shared.domain.event.OrderEvents;
+import com.paymentplatform.shared.infrastructure.outbox.OutboxEventStore;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class AcceptOrderUseCase {
@@ -20,13 +24,16 @@ public class AcceptOrderUseCase {
     private final OrderItemRepository orderItems;
     private final OrderEventRepository events;
     private final ProductRepository products;
+    private final OutboxEventStore outbox;
 
     public AcceptOrderUseCase(OrderRepository orders, OrderItemRepository orderItems,
-                              OrderEventRepository events, ProductRepository products) {
+                              OrderEventRepository events, ProductRepository products,
+                              OutboxEventStore outbox) {
         this.orders = orders;
         this.orderItems = orderItems;
         this.events = events;
         this.products = products;
+        this.outbox = outbox;
     }
 
     @Transactional
@@ -51,6 +58,10 @@ public class AcceptOrderUseCase {
         }
 
         events.save(OrderEvent.create(orderId, "ORDER_ACCEPTED", actorUserId, null));
+        outbox.append(new OrderEvents.OrderAcceptedEvent(UUID.randomUUID(), Instant.now(),
+                orderId, order.getReference(),
+                order.getShopId(), order.getSupplierId(), actorUserId),
+                String.valueOf(orderId));
 
         return OrderResponse.from(order, items);
     }

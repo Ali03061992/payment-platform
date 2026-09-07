@@ -13,8 +13,8 @@ describe('LoginComponent', () => {
     loginServiceSpy = jasmine.createSpyObj('LoginService', ['login', 'getMe']);
     routerSpy = jasmine.createSpyObj('Router', ['navigate']);
 
-    // Clear localStorage before each test
-    localStorage.clear();
+    // Clear sessionStorage before each test
+    sessionStorage.clear();
   });
 
   const mountComponent = (overrides: Partial<{ login: any; getMe: any }> = {}) => {
@@ -66,7 +66,7 @@ describe('LoginComponent', () => {
     cy.wrap(null).should(() => {
       expect(loginServiceSpy.login).toHaveBeenCalledWith({ username: 'system.admin', password: 'Admin@123' });
       expect(loginServiceSpy.getMe).toHaveBeenCalled();
-      expect(localStorage.getItem('token')).to.equal('mock-jwt-token');
+      expect(sessionStorage.getItem('token')).to.equal('mock-jwt-token');
       expect(routerSpy.navigate).toHaveBeenCalledWith(['/dashboard']);
     });
   });
@@ -82,9 +82,9 @@ describe('LoginComponent', () => {
 
     cy.wrap(null).should(() => {
       // Token should be removed on getMe failure
-      expect(localStorage.getItem('token')).to.be.null;
-      // User should NOT be stored in localStorage
-      expect(localStorage.getItem('user')).to.be.null;
+      expect(sessionStorage.getItem('token')).to.be.null;
+      // User should NOT be stored in sessionStorage
+      expect(sessionStorage.getItem('user')).to.be.null;
       // Should NOT navigate to dashboard
       expect(routerSpy.navigate).to.not.have.been.called;
       // Error message should be shown

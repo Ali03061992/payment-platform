@@ -11,6 +11,7 @@ public class AmqpTopology {
     public static final String EXCHANGE_IDENTITY = "identity.events";
 
     public static final String QUEUE_NOTIFICATION_PAYMENTS = "notification.payments";
+    public static final String QUEUE_NOTIFICATION_ORDERS = "notification.orders";
     public static final String QUEUE_NOTIFICATION_ORGANIZATIONS = "notification.organizations";
     public static final String QUEUE_NOTIFICATION_USERS = "notification.users";
     public static final String QUEUE_IDENTITY_ORG_STATUS = "identity.organization-status";
@@ -18,6 +19,9 @@ public class AmqpTopology {
     public String exchangeFor(String eventType) {
         if (eventType.startsWith("payment.")) {
             return EXCHANGE_PAYMENT;
+        }
+        if (eventType.startsWith("order.")) {
+            return EXCHANGE_ORGANIZATION;
         }
         if (eventType.startsWith("organization.")) {
             return EXCHANGE_ORGANIZATION;
