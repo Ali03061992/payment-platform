@@ -92,7 +92,7 @@ public class OrderController {
             return ResponseEntity.ok(PageResponse.of(orderRepository.findAll(pageable).map(o -> {
                 var items = orderItemRepository.findByOrderId(o.getId());
                 return OrderResponse.from(o, items);
-            }));
+            })));
         }
 
         return ResponseEntity.ok(PageResponse.of(orderPage.map(o -> {
