@@ -5,14 +5,26 @@
     <p>Pointez votre caméra vers le QR code de la facture</p>
   </div>
 
+  <!-- HTTPS Warning -->
+  <div class="https-warning" *ngIf="!isSecureContext">
+    <div class="warning-icon">🔒</div>
+    <div class="warning-text">
+      <strong>HTTPS requis pour la caméra</strong>
+      <p>La caméra fonctionne uniquement sur HTTPS ou localhost.</p>
+      <p class="warning-hint">
+        Accédez via <code>https://votre-domaine</code> ou utilisez la <strong>saisie manuelle</strong> ci-dessous.
+      </p>
+    </div>
+  </div>
+
   <!-- Camera Error -->
-  <div class="camera-error" *ngIf="cameraError">
+  <div class="camera-error" *ngIf="cameraError && isSecureContext">
     <span class="error-icon">⚠️</span>
     <span>{{ cameraError }}</span>
   </div>
 
   <!-- Camera View -->
-  <div class="scanner-container" *ngIf="!useManual">
+  <div class="scanner-container" *ngIf="!useManual && isSecureContext">
     <div class="camera-view" [class.active]="cameraActive">
       <video #video autoplay playsinline muted></video>
       <div class="scan-overlay" *ngIf="scanning">
@@ -40,10 +52,10 @@
 
   <!-- Manual Input -->
   <div class="manual-section">
-    <div class="divider" *ngIf="!useManual">
+    <div class="divider" *ngIf="!useManual && isSecureContext">
       <span>ou</span>
     </div>
-    <button class="btn btn-link" (click)="useManual = true; stopCamera()" *ngIf="!useManual">
+    <button class="btn btn-link" (click)="useManual = true; stopCamera()" *ngIf="!useManual && isSecureContext">
       Saisie manuelle du lien
     </button>
 
@@ -56,7 +68,7 @@
                (keyup.enter)="submitManual()">
       </div>
       <div class="form-actions">
-        <button class="btn btn-secondary" (click)="useManual = false; startCamera()" *ngIf="isCameraSupported()">
+        <button class="btn btn-secondary" (click)="useManual = false; startCamera()" *ngIf="isSecureContext">
           Retour caméra
         </button>
         <button class="btn btn-primary" [disabled]="!manualUrl.trim()" (click)="submitManual()">

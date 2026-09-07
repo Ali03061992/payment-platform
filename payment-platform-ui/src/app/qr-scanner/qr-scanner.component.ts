@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy, ViewChild, ElementRef } from '@angular/core';
 import { Router } from '@angular/router';
 import { ToastService } from '../services/toast.service';
-import { BrowserMultiFormatReader, NotFoundException } from '@zxing/library';
+import { BrowserMultiFormatReader } from '@zxing/library';
 
 @Component({
   selector: 'app-qr-scanner',
@@ -13,15 +13,16 @@ export class QrScannerComponent implements OnInit, OnDestroy {
 
   scanning = false;
   manualUrl = '';
-  useManual = false;
+  useManual = true;
   cameraActive = false;
   cameraError = '';
+  isSecureContext = false;
   private codeReader: BrowserMultiFormatReader | null = null;
 
   constructor(private router: Router, private toast: ToastService) {}
 
   ngOnInit(): void {
-    this.useManual = true;
+    this.isSecureContext = window.isSecureContext;
   }
 
   ngOnDestroy(): void {
@@ -36,6 +37,12 @@ export class QrScannerComponent implements OnInit, OnDestroy {
     this.cameraError = '';
     this.useManual = false;
 
+    if (!this.isSecureContext) {
+      this.cameraError = 'La caméra nécessite HTTPS. Accédez via https:// ou utilisez la saisie manuelle.';
+      this.useManual = true;
+      return;
+    }
+
     if (!this.isCameraSupported()) {
       this.cameraError = 'Caméra non supportée par ce navigateur.';
       this.useManual = true;
@@ -44,16 +51,16 @@ export class QrScannerComponent implements OnInit, OnDestroy {
 
     try {
       this.codeReader = new BrowserMultiFormatReader();
-      this.cameraActive = true;
-      this.scanning = true;
 
       const devices = await this.codeReader.getVideoInputDevices();
       if (devices.length === 0) {
         this.cameraError = 'Aucune caméra détectée.';
         this.useManual = true;
-        this.cameraActive = false;
         return;
       }
+
+      this.cameraActive = true;
+      this.scanning = true;
 
       const rearCamera = devices.find(d =>
         d.label.toLowerCase().includes('back') ||
@@ -61,7 +68,7 @@ export class QrScannerComponent implements OnInit, OnDestroy {
         d.label.toLowerCase().includes('environment')
       ) || devices[devices.length - 1];
 
-      this.codeReader.decodeFromVideoDevice(
+      await this.codeReader.decodeFromVideoDevice(
         rearCamera.deviceId,
         this.videoRef.nativeElement,
         (result, err) => {
@@ -69,13 +76,14 @@ export class QrScannerComponent implements OnInit, OnDestroy {
             this.handleResult(result.getText());
           }
         }
-      ).catch((e: any) => {
-        this.cameraError = 'Impossible d\'accéder à la caméra: ' + (e.message || e);
-        this.useManual = true;
-        this.cameraActive = false;
-      });
+      );
     } catch (e: any) {
-      this.cameraError = 'Erreur lors de l\'activation de la caméra.';
+      const msg = e?.message || String(e);
+      if (msg.includes('Permission') || msg.includes('denied') || msg.includes('NotAllowedError')) {
+        this.cameraError = 'Permission caméra refusée. Autorisez l\'accès dans les paramètres du navigateur.';
+      } else {
+        this.cameraError = 'Erreur caméra: ' + msg;
+      }
       this.useManual = true;
       this.cameraActive = false;
     }
