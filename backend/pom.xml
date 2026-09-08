@@ -75,7 +75,53 @@
             </execution>
           </executions>
         </plugin>
+        <plugin>
+          <groupId>org.jacoco</groupId>
+          <artifactId>jacoco-maven-plugin</artifactId>
+          <version>0.8.15</version>
+          <executions>
+            <execution>
+              <id>prepare-agent</id>
+              <goals>
+                <goal>prepare-agent</goal>
+              </goals>
+            </execution>
+            <execution>
+              <id>report</id>
+              <goals>
+                <goal>report</goal>
+              </goals>
+              <configuration>
+                <classDirectories>
+                  <classDirectory>
+                    <fileSets>
+                      <fileSet>
+                        <directory>${project.build.outputDirectory}</directory>
+                        <excludes>
+                          <exclude>com/paymentplatform/**/domain/model/*</exclude>
+                          <exclude>com/paymentplatform/**/domain/valueobject/*</exclude>
+                          <exclude>com/paymentplatform/**/domain/event/*</exclude>
+                          <exclude>com/paymentplatform/**/domain/exception/*</exclude>
+                          <exclude>com/paymentplatform/**/domain/engine/**</exclude>
+                          <exclude>com/paymentplatform/**/domain/security/*</exclude>
+                          <exclude>com/paymentplatform/**/domain/repository/*</exclude>
+                        </excludes>
+                      </fileSet>
+                    </fileSets>
+                  </classDirectory>
+                </classDirectories>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
       </plugins>
     </pluginManagement>
+
+    <plugins>
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+      </plugin>
+    </plugins>
   </build>
 </project>

@@ -24,13 +24,13 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
 
     @Modifying
     @Transactional
-    @Query("UPDATE Notification n SET n.readStatus = 'READ', n.readAt = CURRENT_TIMESTAMP " +
+    @Query("UPDATE Notification n SET n.readStatus = 'READ' " +
            "WHERE n.recipientUserId = :userId AND n.readStatus = 'UNREAD'")
     int markAllAsReadByUserId(@Param("userId") Long userId);
 
     @Modifying
     @Transactional
-    @Query("UPDATE Notification n SET n.readStatus = 'READ', n.readAt = CURRENT_TIMESTAMP " +
+    @Query("UPDATE Notification n SET n.readStatus = 'READ' " +
            "WHERE n.recipientOrganizationId = :orgId AND n.readStatus = 'UNREAD'")
     int markAllAsReadByOrgId(@Param("orgId") Long orgId);
 }
