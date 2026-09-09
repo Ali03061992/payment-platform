@@ -3,6 +3,7 @@ package com.paymentplatform.identity.infrastructure.email;
 import java.util.UUID;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.UuidGenerator;
 import java.time.Instant;
 
 @Entity

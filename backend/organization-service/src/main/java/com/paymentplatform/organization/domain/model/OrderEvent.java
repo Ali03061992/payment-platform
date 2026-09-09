@@ -3,6 +3,7 @@ package com.paymentplatform.organization.domain.model;
 import java.util.UUID;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.UuidGenerator;
 
 import java.time.Instant;
 
