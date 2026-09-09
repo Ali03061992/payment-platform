@@ -53,11 +53,18 @@ describe('09 - Payments: List', () => {
 
   it('should show confirm/cancel buttons for PENDING payments', () => {
     cy.get('.filters select').select('PENDING');
-    cy.get('table tbody tr').then(($rows) => {
-      if ($rows.length > 0) {
-        cy.get('button.btn-success').should('contain', 'Confirmer');
-        cy.get('button.btn-danger').should('contain', 'Annuler');
+    cy.get('table tbody').then(($tbody) => {
+      const text = $tbody.text();
+      if (text.includes('Aucun paiement trouvé')) {
+        cy.log('No PENDING payments - skip button check');
+        return;
       }
+      cy.get('table tbody tr').then(($rows) => {
+        if ($rows.length > 0) {
+          cy.get('button.btn-success').should('contain', 'Confirmer');
+          cy.get('button.btn-danger').should('contain', 'Annuler');
+        }
+      });
     });
   });
 });
