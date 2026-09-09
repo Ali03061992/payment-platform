@@ -1,15 +1,15 @@
 -- Payment Service - schéma initial
 
 CREATE TABLE payments (
-  id               BIGINT AUTO_INCREMENT PRIMARY KEY,
+  id VARCHAR(36) PRIMARY KEY,
   reference        VARCHAR(64)   NOT NULL UNIQUE,
-  shop_id          BIGINT        NOT NULL,
-  supplier_id      BIGINT        NOT NULL,
+  shop_id VARCHAR(36)        NOT NULL,
+  supplier_id VARCHAR(36)        NOT NULL,
   currency         CHAR(3)       NOT NULL,
   amount           DECIMAL(19,4) NOT NULL,
   status           VARCHAR(20)   NOT NULL,
   rejection_reason VARCHAR(500)  NULL,
-  created_by       BIGINT        NOT NULL,
+  created_by VARCHAR(36)        NOT NULL,
   version          BIGINT        NOT NULL DEFAULT 0,
   created_at       DATETIME(6)   NOT NULL,
   updated_at       DATETIME(6)   NOT NULL,
@@ -20,10 +20,10 @@ CREATE TABLE payments (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE payment_events (
-  id         BIGINT AUTO_INCREMENT PRIMARY KEY,
-  payment_id BIGINT      NOT NULL,
+  id VARCHAR(36) PRIMARY KEY,
+  payment_id VARCHAR(36)      NOT NULL,
   action     VARCHAR(40) NOT NULL,
-  user_id    BIGINT      NULL,
+  user_id VARCHAR(36)      NULL,
   timestamp  DATETIME(6) NOT NULL,
   details    TEXT        NULL,
   INDEX idx_payment_events_payment (payment_id),
@@ -31,11 +31,11 @@ CREATE TABLE payment_events (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE audit_logs (
-  id              BIGINT AUTO_INCREMENT PRIMARY KEY,
-  user_id         BIGINT       NULL,
-  organization_id BIGINT       NULL,
+  id VARCHAR(36) PRIMARY KEY,
+  user_id VARCHAR(36)       NULL,
+  organization_id VARCHAR(36)       NULL,
   action          VARCHAR(60)  NOT NULL,
-  entity_id       BIGINT       NULL,
+  entity_id VARCHAR(36)       NULL,
   timestamp       DATETIME(6)  NOT NULL,
   details         TEXT         NULL,
   INDEX idx_audit_action (action),
@@ -44,7 +44,7 @@ CREATE TABLE audit_logs (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE outbox_events (
-  id           BIGINT AUTO_INCREMENT PRIMARY KEY,
+  id VARCHAR(36) PRIMARY KEY,
   event_id     CHAR(36)     NOT NULL UNIQUE,
   event_type   VARCHAR(120) NOT NULL,
   aggregate_id VARCHAR(64)  NOT NULL,

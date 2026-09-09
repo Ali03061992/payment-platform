@@ -1,5 +1,7 @@
 package com.paymentplatform.organization.interfaces.rest;
 
+import java.util.UUID;
+
 import com.paymentplatform.shared.infrastructure.security.AuthenticatedUser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,26 +41,26 @@ class OrderControllerTest {
                 .build();
     }
 
-    private static UsernamePasswordAuthenticationToken auth(long userId, String username, List<String> perms, Long orgId) {
+    private static UsernamePasswordAuthenticationToken auth(UUID userId, String username, List<String> perms, UUID orgId) {
         AuthenticatedUser principal = new AuthenticatedUser(userId, username, perms, orgId);
         var authorities = perms.stream().map(SimpleGrantedAuthority::new).toList();
         return new UsernamePasswordAuthenticationToken(principal, null, authorities);
     }
 
     private UsernamePasswordAuthenticationToken shopAdmin() {
-        return auth(1L, "shop.admin", List.of("SHOP_ADMIN"), 10L);
+        return auth(UUID.fromString("00000000-0000-0000-0000-000000000001"), "shop.admin", List.of("SHOP_ADMIN"), UUID.fromString("00000000-0000-0000-0000-000000000010"));
     }
 
     private UsernamePasswordAuthenticationToken supplierAdmin() {
-        return auth(2L, "supplier.admin", List.of("SUPPLIER_ADMIN"), 20L);
+        return auth(UUID.fromString("00000000-0000-0000-0000-000000000002"), "supplier.admin", List.of("SUPPLIER_ADMIN"), UUID.fromString("00000000-0000-0000-0000-000000000020"));
     }
 
     private UsernamePasswordAuthenticationToken systemAdmin() {
-        return auth(3L, "sysadmin", List.of("SYSTEM_ADMIN"), null);
+        return auth(UUID.fromString("00000000-0000-0000-0000-000000000003"), "sysadmin", List.of("SYSTEM_ADMIN"), null);
     }
 
     private UsernamePasswordAuthenticationToken deliveryAgent() {
-        return auth(4L, "delivery.agent", List.of("DELIVERY_AGENT"), null);
+        return auth(UUID.fromString("00000000-0000-0000-0000-000000000004"), "delivery.agent", List.of("DELIVERY_AGENT"), null);
     }
 
     @Test
@@ -103,14 +105,14 @@ class OrderControllerTest {
 
     @Test
     void getOrder_nonExistent_returns404() throws Exception {
-        mockMvc.perform(get("/api/orders/99999")
+        mockMvc.perform(get("/api/orders/00000000-0000-0000-0000-000000099999")
                         .with(SecurityMockMvcRequestPostProcessors.authentication(systemAdmin())))
                 .andExpect(status().isNotFound());
     }
 
     @Test
     void getOrder_asDeliveryAgent_returnsOk() throws Exception {
-        mockMvc.perform(get("/api/orders/1")
+        mockMvc.perform(get("/api/orders/00000000-0000-0000-0000-000000000001")
                         .with(SecurityMockMvcRequestPostProcessors.authentication(deliveryAgent())))
                 .andExpect(status().isNotFound());
     }
@@ -127,8 +129,8 @@ class OrderControllerTest {
     void createOrder_withoutAuth_returns401() throws Exception {
         String body = objectMapper.writeValueAsString(
                 new com.paymentplatform.organization.application.dto.CreateOrderRequest(
-                        20L, 10L, false, "TND", null,
-                        List.of(new com.paymentplatform.organization.application.dto.OrderItemRequest(1L, 5, null))));
+                        UUID.fromString("00000000-0000-0000-0000-000000000020"), UUID.fromString("00000000-0000-0000-0000-000000000010"), false, "TND", null,
+                        List.of(new com.paymentplatform.organization.application.dto.OrderItemRequest(UUID.fromString("00000000-0000-0000-0000-000000000001"), 5, null))));
 
         mockMvc.perform(post("/api/orders")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -138,14 +140,14 @@ class OrderControllerTest {
 
     @Test
     void confirmOrder_nonExistent_returnsNotFound() throws Exception {
-        mockMvc.perform(post("/api/orders/99999/confirm")
+        mockMvc.perform(post("/api/orders/00000000-0000-0000-0000-000000099999/confirm")
                         .with(SecurityMockMvcRequestPostProcessors.authentication(supplierAdmin())))
                 .andExpect(status().isNotFound());
     }
 
     @Test
     void cancelOrder_nonExistent_returnsNotFound() throws Exception {
-        mockMvc.perform(post("/api/orders/99999/cancel")
+        mockMvc.perform(post("/api/orders/00000000-0000-0000-0000-000000099999/cancel")
                         .with(SecurityMockMvcRequestPostProcessors.authentication(shopAdmin())))
                 .andExpect(status().isNotFound());
     }

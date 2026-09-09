@@ -1,5 +1,7 @@
 package com.paymentplatform.shared.infrastructure.outbox;
 
+import java.util.UUID;
+
 import com.paymentplatform.shared.domain.event.DomainEvent;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -16,8 +18,9 @@ import java.time.Instant;
 public class OutboxEventEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(columnDefinition = "VARCHAR(36)")
+    private UUID id;
 
     @Column(name = "event_id", nullable = false, unique = true, length = 36)
     private String eventId;
@@ -48,7 +51,7 @@ public class OutboxEventEntity {
         this.createdAt = Instant.now();
     }
 
-    public Long getId() {
+    public UUID getId() {
         return id;
     }
 

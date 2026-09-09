@@ -9,9 +9,9 @@ export class StockOptimizationService {
 
   constructor(private http: HttpClient) {}
 
-  private getSupplierId(): number {
+  private getSupplierId(): string {
     const u = sessionStorage.getItem('user');
-    return u ? JSON.parse(u).organizationId || 0 : 0;
+    return u ? JSON.parse(u).organizationId || '' : 0;
   }
 
   optimize(): Observable<StockOptimizationResponse> {

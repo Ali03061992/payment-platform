@@ -10,7 +10,7 @@ public final class IdentityEvents {
     private IdentityEvents() {
     }
 
-    public record UserCreatedEvent(UUID eventId, Instant occurredAt, long userId, Long organizationId,
+    public record UserCreatedEvent(UUID eventId, Instant occurredAt, UUID userId, UUID organizationId,
                                    List<String> roles) implements DomainEvent {
         public static final String EVENT_TYPE = "identity.user.created";
 
@@ -30,7 +30,7 @@ public final class IdentityEvents {
         }
     }
 
-    public record UserActivatedEvent(UUID eventId, Instant occurredAt, long userId, Long organizationId)
+    public record UserActivatedEvent(UUID eventId, Instant occurredAt, UUID userId, UUID organizationId)
             implements DomainEvent {
         public static final String EVENT_TYPE = "identity.user.activated";
 
@@ -50,7 +50,7 @@ public final class IdentityEvents {
         }
     }
 
-    public record UserDisabledEvent(UUID eventId, Instant occurredAt, long userId, Long organizationId,
+    public record UserDisabledEvent(UUID eventId, Instant occurredAt, UUID userId, UUID organizationId,
                                     String reason) implements DomainEvent {
         public static final String EVENT_TYPE = "identity.user.disabled";
 

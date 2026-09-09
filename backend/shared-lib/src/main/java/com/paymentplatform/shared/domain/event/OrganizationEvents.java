@@ -9,7 +9,7 @@ public final class OrganizationEvents {
     private OrganizationEvents() {
     }
 
-    public record SupplierCreatedEvent(UUID eventId, Instant occurredAt, long organizationId, String name)
+    public record SupplierCreatedEvent(UUID eventId, Instant occurredAt, UUID organizationId, String name)
             implements DomainEvent {
         public static final String EVENT_TYPE = "organization.supplier.created";
 
@@ -29,7 +29,7 @@ public final class OrganizationEvents {
         }
     }
 
-    public record SupplierActivatedEvent(UUID eventId, Instant occurredAt, long organizationId) implements DomainEvent {
+    public record SupplierActivatedEvent(UUID eventId, Instant occurredAt, UUID organizationId) implements DomainEvent {
         public static final String EVENT_TYPE = "organization.supplier.activated";
 
         @Override
@@ -48,7 +48,7 @@ public final class OrganizationEvents {
         }
     }
 
-    public record SupplierDisabledEvent(UUID eventId, Instant occurredAt, long organizationId) implements DomainEvent {
+    public record SupplierDisabledEvent(UUID eventId, Instant occurredAt, UUID organizationId) implements DomainEvent {
         public static final String EVENT_TYPE = "organization.supplier.disabled";
 
         @Override
@@ -67,7 +67,7 @@ public final class OrganizationEvents {
         }
     }
 
-    public record ShopCreatedEvent(UUID eventId, Instant occurredAt, long organizationId, String name)
+    public record ShopCreatedEvent(UUID eventId, Instant occurredAt, UUID organizationId, String name)
             implements DomainEvent {
         public static final String EVENT_TYPE = "organization.shop.created";
 
@@ -87,7 +87,7 @@ public final class OrganizationEvents {
         }
     }
 
-    public record ShopActivatedEvent(UUID eventId, Instant occurredAt, long organizationId) implements DomainEvent {
+    public record ShopActivatedEvent(UUID eventId, Instant occurredAt, UUID organizationId) implements DomainEvent {
         public static final String EVENT_TYPE = "organization.shop.activated";
 
         @Override
@@ -106,7 +106,7 @@ public final class OrganizationEvents {
         }
     }
 
-    public record ShopDisabledEvent(UUID eventId, Instant occurredAt, long organizationId) implements DomainEvent {
+    public record ShopDisabledEvent(UUID eventId, Instant occurredAt, UUID organizationId) implements DomainEvent {
         public static final String EVENT_TYPE = "organization.shop.disabled";
 
         @Override

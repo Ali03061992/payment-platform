@@ -1,5 +1,7 @@
 package com.paymentplatform.identity.application.usecase;
 
+import java.util.UUID;
+
 import com.paymentplatform.identity.domain.model.User;
 import com.paymentplatform.identity.domain.repository.UserRepository;
 import com.paymentplatform.identity.domain.valueobject.Email;
@@ -35,10 +37,10 @@ class PasswordSetupUseCaseH2Test {
 
     @BeforeEach
     void setUp() {
-        User user = User.create(new UserId(0), Username.of("pwd.testuser"),
+        User user = User.create(new UserId(null), Username.of("pwd.testuser"),
                 Email.of("pwd.test@example.com"), PasswordHash.of(passwordEncoder.encode("OldPass@1")),
                 "Test", "User", new PhoneNumber(null),
-                OrganizationId.of(5), RoleCode.SHOP_AGENT);
+                OrganizationId.of(UUID.fromString("00000000-0000-0000-0000-000000000005")), RoleCode.SHOP_AGENT);
         users.save(user);
     }
 

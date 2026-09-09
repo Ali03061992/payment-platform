@@ -11,8 +11,8 @@ import { ToastService } from '../../services/toast.service';
   styleUrls: ['./create-payment.component.css']
 })
 export class CreatePaymentComponent implements OnInit {
-  shopId = 0;
-  supplierId = 0;
+  shopId = '';
+  supplierId = '';
   amount = 0;
   currency = 'TND';
   shops: Organization[] = [];
@@ -45,7 +45,7 @@ export class CreatePaymentComponent implements OnInit {
     }
   }
 
-  private loadSuppliersForShop(shopId: number): void {
+  private loadSuppliersForShop(shopId: string): void {
     this.orgService.listRelationsByShop(shopId).subscribe({
       next: (relations) => {
         const supplierIds = [...new Set(relations.filter(r => r.status === 'ACTIVE').map(r => r.supplierId))];

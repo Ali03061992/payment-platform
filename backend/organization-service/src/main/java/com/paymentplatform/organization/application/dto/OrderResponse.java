@@ -1,5 +1,7 @@
 package com.paymentplatform.organization.application.dto;
 
+import java.util.UUID;
+
 import com.paymentplatform.organization.domain.model.Order;
 import com.paymentplatform.organization.domain.model.OrderItem;
 
@@ -8,11 +10,11 @@ import java.time.Instant;
 import java.util.List;
 
 public record OrderResponse(
-        Long id,
+        UUID id,
         String reference,
-        Long supplierId,
-        Long shopId,
-        Long createdBy,
+        UUID supplierId,
+        UUID shopId,
+        UUID createdBy,
         String createdByRole,
         String source,
         String status,
@@ -21,8 +23,8 @@ public record OrderResponse(
         BigDecimal taxAmount,
         BigDecimal total,
         String currency,
-        Long deliveryAgentId,
-        Long receivedBy,
+        UUID deliveryAgentId,
+        UUID receivedBy,
         Instant receivedAt,
         Instant deliveredAt,
         boolean asapPayment,
@@ -64,8 +66,8 @@ public record OrderResponse(
     }
 
     public record OrderItemResponse(
-            Long id,
-            Long productId,
+            UUID id,
+            UUID productId,
             String productRef,
             String productName,
             Integer quantity,

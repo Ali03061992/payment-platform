@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 
 export interface Toast {
-  id: number;
+  id: string;
   type: 'success' | 'error' | 'warning' | 'info';
   message: string;
   duration?: number;
@@ -17,7 +17,7 @@ export class ToastService {
 
   show(message: string, type: Toast['type'] = 'info', duration = 4000): void {
     const toast: Toast = {
-      id: ++this.counter,
+      id: String(++this.counter),
       type,
       message,
       duration
@@ -47,7 +47,7 @@ export class ToastService {
     this.show(message, 'info', duration);
   }
 
-  dismiss(id: number): void {
+  dismiss(id: string): void {
     const current = this.toastsSubject.getValue();
     this.toastsSubject.next(current.filter(t => t.id !== id));
   }

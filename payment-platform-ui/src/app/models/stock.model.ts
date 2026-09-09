@@ -1,6 +1,6 @@
 export interface Product {
-  id: number;
-  supplierId: number;
+  id: string;
+  supplierId: string;
   name: string;
   sku: string;
   description: string;
@@ -9,8 +9,8 @@ export interface Product {
   quantity: number;
   minQuantity: number;
   reservedQty: number;
-  categoryId: number | null;
-  familyId: number | null;
+  categoryId: string | null;
+  familyId: string | null;
   unit: string;
   status: 'ACTIVE' | 'INACTIVE' | 'OUT_OF_STOCK';
   createdAt: string;
@@ -25,8 +25,8 @@ export interface ProductCreateRequest {
   currency: string;
   quantity: number;
   minQuantity: number;
-  categoryId?: number | null;
-  familyId?: number | null;
+  categoryId?: string | null;
+  familyId?: string | null;
   unit?: string;
 }
 
@@ -37,14 +37,14 @@ export interface ProductUpdateRequest {
   quantity?: number;
   minQuantity?: number;
   status?: string;
-  categoryId?: number | null;
-  familyId?: number | null;
+  categoryId?: string | null;
+  familyId?: string | null;
   unit?: string;
 }
 
 export interface StockMovement {
-  id: number;
-  productId: number;
+  id: string;
+  productId: string;
   productName: string;
   type: 'IN' | 'OUT' | 'ADJUSTMENT';
   quantity: number;

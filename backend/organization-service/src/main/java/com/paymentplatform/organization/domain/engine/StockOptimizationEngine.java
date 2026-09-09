@@ -1,5 +1,7 @@
 package com.paymentplatform.organization.domain.engine;
 
+import java.util.UUID;
+
 import com.paymentplatform.organization.domain.model.Product;
 import com.paymentplatform.organization.domain.model.StockMovement;
 
@@ -24,7 +26,7 @@ public class StockOptimizationEngine {
     private final RecommendationEngine recEngine = new RecommendationEngine();
 
     public record ProductOptimization(
-        Long productId,
+        UUID productId,
         String productName,
         String sku,
         // Classification
@@ -97,8 +99,8 @@ public class StockOptimizationEngine {
      */
     public OptimizationResult optimize(
             List<Product> products,
-            Map<Long, List<StockMovement>> movementsByProduct,
-            Map<Long, double[]> demandHistoryByProduct,
+            Map<UUID, List<StockMovement>> movementsByProduct,
+            Map<UUID, double[]> demandHistoryByProduct,
             double defaultLeadTimeDays,
             double orderingCost,
             double holdingCostPercent) {
@@ -158,7 +160,7 @@ public class StockOptimizationEngine {
             double orderingCost,
             double holdingCostPercent) {
 
-        long pid = product.getId();
+        UUID pid = product.getId();
         String name = product.getName();
         String sku = product.getSku();
         double currentStock = product.getQuantity();
@@ -172,7 +174,7 @@ public class StockOptimizationEngine {
 
         // ABC classification (use annual demand * unit cost)
         double annualDemand = Arrays.stream(demand).sum() * (demand.length > 0 ? 365.0 / demand.length : 0);
-        Map<Long, ABCClassifier.ABCResult> abcResults = abcClassifier.classify(
+        Map<UUID, ABCClassifier.ABCResult> abcResults = abcClassifier.classify(
             List.of(pid), new double[]{annualDemand}, new double[]{unitCost}
         );
         ABCClassifier.ABCResult abcResult = abcResults.get(pid);
@@ -312,7 +314,7 @@ public class StockOptimizationEngine {
         return new double[0];
     }
 
-    private double getUnitCost(List<Product> products, Long productId) {
+    private double getUnitCost(List<Product> products, UUID productId) {
         return products.stream()
             .filter(p -> p.getId().equals(productId))
             .findFirst()

@@ -1,5 +1,7 @@
 package com.paymentplatform.payment.interfaces.rest;
 
+import java.util.UUID;
+
 import com.paymentplatform.payment.application.dto.CreatePaymentRequest;
 import com.paymentplatform.payment.application.dto.RejectPaymentRequest;
 import com.paymentplatform.payment.domain.model.Payment;
@@ -46,34 +48,34 @@ class PaymentControllerTest {
                 .build();
     }
 
-    private Payment createPayment(long shopId, long supplierId, long createdBy) {
+    private Payment createPayment(UUID shopId, UUID supplierId, UUID createdBy) {
         return payments.save(Payment.create(
                 shopId, supplierId,
                 Money.of(new BigDecimal("100.00"), "TND"),
                 createdBy));
     }
 
-    private static UsernamePasswordAuthenticationToken auth(long userId, String username, List<String> perms, Long orgId) {
+    private static UsernamePasswordAuthenticationToken auth(UUID userId, String username, List<String> perms, UUID orgId) {
         AuthenticatedUser principal = new AuthenticatedUser(userId, username, perms, orgId);
         var authorities = perms.stream().map(SimpleGrantedAuthority::new).toList();
         return new UsernamePasswordAuthenticationToken(principal, null, authorities);
     }
 
     private UsernamePasswordAuthenticationToken shopUser() {
-        return auth(1L, "shop.user", List.of("SHOP_CREATE_PAYMENTS", "SHOP_CANCEL_PAYMENTS", "VIEW_PAYMENTS"), 10L);
+        return auth(UUID.fromString("00000000-0000-0000-0000-000000000001"), "shop.user", List.of("SHOP_CREATE_PAYMENTS", "SHOP_CANCEL_PAYMENTS", "VIEW_PAYMENTS"), UUID.fromString("00000000-0000-0000-0000-000000000010"));
     }
 
     private UsernamePasswordAuthenticationToken supplierUser() {
-        return auth(2L, "supplier.user", List.of("SUPPLIER_MANAGE_PAYMENTS"), 20L);
+        return auth(UUID.fromString("00000000-0000-0000-0000-000000000002"), "supplier.user", List.of("SUPPLIER_MANAGE_PAYMENTS"), UUID.fromString("00000000-0000-0000-0000-000000000020"));
     }
 
     private UsernamePasswordAuthenticationToken adminUser() {
-        return auth(3L, "admin", List.of("SYSTEM_ADMIN", "VIEW_PAYMENTS"), null);
+        return auth(UUID.fromString("00000000-0000-0000-0000-000000000003"), "admin", List.of("SYSTEM_ADMIN", "VIEW_PAYMENTS"), null);
     }
 
     @Test
     void create_validRequest_returns201() throws Exception {
-        CreatePaymentRequest request = new CreatePaymentRequest(10L, 20L, new BigDecimal("150.00"), "TND");
+        CreatePaymentRequest request = new CreatePaymentRequest(UUID.fromString("00000000-0000-0000-0000-000000000010"), UUID.fromString("00000000-0000-0000-0000-000000000020"), new BigDecimal("150.00"), "TND");
 
         mockMvc.perform(post("/api/payments")
                         .with(SecurityMockMvcRequestPostProcessors.authentication(shopUser()))
@@ -86,7 +88,7 @@ class PaymentControllerTest {
 
     @Test
     void getById_asShopOwner_returnsPayment() throws Exception {
-        Payment p = createPayment(10L, 20L, 1L);
+        Payment p = createPayment(UUID.fromString("00000000-0000-0000-0000-000000000010"), UUID.fromString("00000000-0000-0000-0000-000000000020"), UUID.fromString("00000000-0000-0000-0000-000000000001"));
 
         mockMvc.perform(get("/api/payments/" + p.id())
                         .with(SecurityMockMvcRequestPostProcessors.authentication(shopUser())))
@@ -96,7 +98,7 @@ class PaymentControllerTest {
 
     @Test
     void getById_asAdmin_returnsPayment() throws Exception {
-        Payment p = createPayment(10L, 20L, 1L);
+        Payment p = createPayment(UUID.fromString("00000000-0000-0000-0000-000000000010"), UUID.fromString("00000000-0000-0000-0000-000000000020"), UUID.fromString("00000000-0000-0000-0000-000000000001"));
 
         mockMvc.perform(get("/api/payments/" + p.id())
                         .with(SecurityMockMvcRequestPostProcessors.authentication(adminUser())))
@@ -105,7 +107,7 @@ class PaymentControllerTest {
 
     @Test
     void list_shopRole_returnsShopPayments() throws Exception {
-        createPayment(10L, 20L, 1L);
+        createPayment(UUID.fromString("00000000-0000-0000-0000-000000000010"), UUID.fromString("00000000-0000-0000-0000-000000000020"), UUID.fromString("00000000-0000-0000-0000-000000000001"));
 
         mockMvc.perform(get("/api/payments")
                         .with(SecurityMockMvcRequestPostProcessors.authentication(shopUser())))
@@ -122,7 +124,7 @@ class PaymentControllerTest {
 
     @Test
     void confirm_asSupplier() throws Exception {
-        Payment p = createPayment(10L, 20L, 1L);
+        Payment p = createPayment(UUID.fromString("00000000-0000-0000-0000-000000000010"), UUID.fromString("00000000-0000-0000-0000-000000000020"), UUID.fromString("00000000-0000-0000-0000-000000000001"));
 
         mockMvc.perform(post("/api/payments/" + p.id() + "/confirm")
                         .with(SecurityMockMvcRequestPostProcessors.authentication(supplierUser())))
@@ -132,7 +134,7 @@ class PaymentControllerTest {
 
     @Test
     void reject_asSupplier() throws Exception {
-        Payment p = createPayment(10L, 20L, 1L);
+        Payment p = createPayment(UUID.fromString("00000000-0000-0000-0000-000000000010"), UUID.fromString("00000000-0000-0000-0000-000000000020"), UUID.fromString("00000000-0000-0000-0000-000000000001"));
 
         RejectPaymentRequest request = new RejectPaymentRequest("Quality issue");
         mockMvc.perform(post("/api/payments/" + p.id() + "/reject")
@@ -145,7 +147,7 @@ class PaymentControllerTest {
 
     @Test
     void cancel_asShop() throws Exception {
-        Payment p = createPayment(10L, 20L, 1L);
+        Payment p = createPayment(UUID.fromString("00000000-0000-0000-0000-000000000010"), UUID.fromString("00000000-0000-0000-0000-000000000020"), UUID.fromString("00000000-0000-0000-0000-000000000001"));
 
         mockMvc.perform(post("/api/payments/" + p.id() + "/cancel")
                         .with(SecurityMockMvcRequestPostProcessors.authentication(shopUser())))
@@ -155,7 +157,7 @@ class PaymentControllerTest {
 
     @Test
     void create_invalidAmount_returns400() throws Exception {
-        CreatePaymentRequest request = new CreatePaymentRequest(10L, 20L, BigDecimal.ZERO, "TND");
+        CreatePaymentRequest request = new CreatePaymentRequest(UUID.fromString("00000000-0000-0000-0000-000000000010"), UUID.fromString("00000000-0000-0000-0000-000000000020"), BigDecimal.ZERO, "TND");
 
         mockMvc.perform(post("/api/payments")
                         .with(SecurityMockMvcRequestPostProcessors.authentication(shopUser()))
@@ -167,7 +169,7 @@ class PaymentControllerTest {
     @Test
     void create_missingCurrency_returns400() throws Exception {
         String request = """
-                {"shopId":10,"supplierId":20,"amount":100.00}
+                {"shopId":"00000000-0000-0000-0000-000000000010","supplierId":"00000000-0000-0000-0000-000000000020","amount":100.00}
                 """;
 
         mockMvc.perform(post("/api/payments")
@@ -181,7 +183,7 @@ class PaymentControllerTest {
     void agentSummary_asAdmin_returnsOk() throws Exception {
         mockMvc.perform(get("/api/payments/agent-summary")
                         .with(SecurityMockMvcRequestPostProcessors.authentication(adminUser()))
-                        .param("supplierId", "20")
+                        .param("supplierId", "00000000-0000-0000-0000-000000000020")
                         .param("from", "2026-01-01")
                         .param("to", "2026-12-31"))
                 .andExpect(status().isOk())
@@ -190,11 +192,11 @@ class PaymentControllerTest {
 
     @Test
     void agentSummary_asWrongSupplier_returns403() throws Exception {
-        UsernamePasswordAuthenticationToken otherSupplier = auth(4L, "other", List.of("SUPPLIER_ADMIN"), 99L);
+        UsernamePasswordAuthenticationToken otherSupplier = auth(UUID.fromString("00000000-0000-0000-0000-000000000004"), "other", List.of("SUPPLIER_ADMIN"), UUID.fromString("00000000-0000-0000-0000-000000000099"));
 
         mockMvc.perform(get("/api/payments/agent-summary")
                         .with(SecurityMockMvcRequestPostProcessors.authentication(otherSupplier))
-                        .param("supplierId", "20")
+                        .param("supplierId", "00000000-0000-0000-0000-000000000020")
                         .param("from", "2026-01-01")
                         .param("to", "2026-12-31"))
                 .andExpect(status().isForbidden());
@@ -244,7 +246,7 @@ class PaymentControllerTest {
 
     @Test
     void list_withStatusFilter_returnsOk() throws Exception {
-        createPayment(10L, 20L, 1L);
+        createPayment(UUID.fromString("00000000-0000-0000-0000-000000000010"), UUID.fromString("00000000-0000-0000-0000-000000000020"), UUID.fromString("00000000-0000-0000-0000-000000000001"));
 
         mockMvc.perform(get("/api/payments")
                         .with(SecurityMockMvcRequestPostProcessors.authentication(shopUser()))
@@ -255,14 +257,14 @@ class PaymentControllerTest {
 
     @Test
     void confirm_nonExistentPayment_returns404() throws Exception {
-        mockMvc.perform(post("/api/payments/99999/confirm")
+        mockMvc.perform(post("/api/payments/00000000-0000-0000-0000-000000099999/confirm")
                         .with(SecurityMockMvcRequestPostProcessors.authentication(supplierUser())))
                 .andExpect(status().isNotFound());
     }
 
     @Test
     void cancel_nonExistentPayment_returns404() throws Exception {
-        mockMvc.perform(post("/api/payments/99999/cancel")
+        mockMvc.perform(post("/api/payments/00000000-0000-0000-0000-000000099999/cancel")
                         .with(SecurityMockMvcRequestPostProcessors.authentication(shopUser())))
                 .andExpect(status().isNotFound());
     }
@@ -270,7 +272,7 @@ class PaymentControllerTest {
     @Test
     void reject_nonExistentPayment_returns404() throws Exception {
         RejectPaymentRequest request = new RejectPaymentRequest("Reason");
-        mockMvc.perform(post("/api/payments/99999/reject")
+        mockMvc.perform(post("/api/payments/00000000-0000-0000-0000-000000099999/reject")
                         .with(SecurityMockMvcRequestPostProcessors.authentication(supplierUser()))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -279,7 +281,7 @@ class PaymentControllerTest {
 
     @Test
     void getById_nonExistentPayment_returns404() throws Exception {
-        mockMvc.perform(get("/api/payments/99999")
+        mockMvc.perform(get("/api/payments/00000000-0000-0000-0000-000000099999")
                         .with(SecurityMockMvcRequestPostProcessors.authentication(shopUser())))
                 .andExpect(status().isNotFound());
     }

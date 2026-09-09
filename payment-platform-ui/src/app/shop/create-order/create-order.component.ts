@@ -21,7 +21,7 @@ interface OrderLine {
 })
 export class CreateOrderComponent implements OnInit {
   suppliers: Organization[] = [];
-  selectedSupplierId = 0;
+  selectedSupplierId = '';
   products: Product[] = [];
   searchQuery = '';
   orderLines: OrderLine[] = [];
@@ -29,7 +29,7 @@ export class CreateOrderComponent implements OnInit {
   currency = 'TND';
   notes = '';
   creating = false;
-  shopId = 0;
+  shopId = '';
   loadingSuppliers = false;
   loadingProducts = false;
   errorSuppliers: string | null = null;
@@ -88,13 +88,13 @@ export class CreateOrderComponent implements OnInit {
     });
   }
 
-  private getShopId(): number {
+  private getShopId(): string {
     const userJson = sessionStorage.getItem('user');
     if (userJson) {
       const user = JSON.parse(userJson);
-      return user.organizationId || 0;
+      return user.organizationId || '';
     }
-    return 0;
+    return '';
   }
 
   onSupplierChange(): void {
@@ -156,7 +156,7 @@ export class CreateOrderComponent implements OnInit {
   }
 
   canSubmit(): boolean {
-    return this.selectedSupplierId > 0 && this.orderLines.length > 0 && !this.creating;
+    return !!this.selectedSupplierId && this.orderLines.length > 0 && !this.creating;
   }
 
   submit(): void {

@@ -1,5 +1,7 @@
 package com.paymentplatform.identity.application.dto;
 
+import java.util.UUID;
+
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -12,6 +14,6 @@ public record CreateInternalUserRequest(
         @NotBlank(message = "Nom requis") String firstName,
         @NotBlank(message = "Prénom requis") String lastName,
         @Size(max = 30) String phone,
-        Long organizationId,
+        UUID organizationId,
         @NotBlank(message = "Rôle requis") String role) {
 }

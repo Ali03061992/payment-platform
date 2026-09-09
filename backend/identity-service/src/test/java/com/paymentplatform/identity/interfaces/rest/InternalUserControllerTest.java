@@ -1,5 +1,7 @@
 package com.paymentplatform.identity.interfaces.rest;
 
+import java.util.UUID;
+
 import com.paymentplatform.identity.application.dto.CreateInternalUserRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,7 +37,7 @@ class InternalUserControllerTest {
     void create_validToken_returns201() throws Exception {
         CreateInternalUserRequest request = new CreateInternalUserRequest(
                 "internaluser." + System.nanoTime(), "internal." + System.nanoTime() + "@example.com", "Password@1",
-                "Internal", "User", null, 5L, "SHOP_ADMIN");
+                "Internal", "User", null, UUID.fromString("00000000-0000-0000-0000-000000000005"), "SHOP_ADMIN");
 
         mockMvc.perform(post("/api/internal/users")
                         .header("X-Internal-Token", INTERNAL_TOKEN)
@@ -49,7 +51,7 @@ class InternalUserControllerTest {
     void create_invalidToken_returns403() throws Exception {
         CreateInternalUserRequest request = new CreateInternalUserRequest(
                 "internaluser." + System.nanoTime(), "internal." + System.nanoTime() + "@example.com", "Password@1",
-                "Internal", "User", null, 5L, "SHOP_ADMIN");
+                "Internal", "User", null, UUID.fromString("00000000-0000-0000-0000-000000000005"), "SHOP_ADMIN");
 
         mockMvc.perform(post("/api/internal/users")
                         .header("X-Internal-Token", "wrong-token")
@@ -64,7 +66,7 @@ class InternalUserControllerTest {
         String uname = "getuser." + System.nanoTime();
         CreateInternalUserRequest createRequest = new CreateInternalUserRequest(
                 uname, uname + "@example.com", "Password@1",
-                "Get", "User", null, 5L, "SHOP_ADMIN");
+                "Get", "User", null, UUID.fromString("00000000-0000-0000-0000-000000000005"), "SHOP_ADMIN");
 
         String responseBody = mockMvc.perform(post("/api/internal/users")
                         .header("X-Internal-Token", INTERNAL_TOKEN)
@@ -72,7 +74,7 @@ class InternalUserControllerTest {
                         .content(objectMapper.writeValueAsString(createRequest)))
                 .andExpect(status().isCreated())
                 .andReturn().getResponse().getContentAsString();
-        Long id = objectMapper.readTree(responseBody).get("id").asLong();
+        UUID id = UUID.fromString(objectMapper.readTree(responseBody).get("id").asText());
 
         mockMvc.perform(get("/api/internal/users/" + id)
                         .header("X-Internal-Token", INTERNAL_TOKEN))
@@ -82,7 +84,7 @@ class InternalUserControllerTest {
 
     @Test
     void getById_invalidToken_returns403() throws Exception {
-        mockMvc.perform(get("/api/internal/users/1")
+        mockMvc.perform(get("/api/internal/users/00000000-0000-0000-0000-000000000001")
                         .header("X-Internal-Token", "wrong-token"))
                 .andExpect(status().isForbidden());
     }

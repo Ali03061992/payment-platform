@@ -47,7 +47,7 @@ public class InternalUserCreationUseCase {
     @Transactional
     public UserResponse createInternalUser(CreateInternalUserRequest request) {
         RoleCode role = RoleCode.from(request.role());
-        Long orgId = request.organizationId();
+        UUID orgId = request.organizationId();
 
         if (role == RoleCode.SYSTEM_ADMIN && orgId != null) {
             throw new ConflictException("Un SYSTEM_ADMIN ne peut pas être rattaché à une organisation");
@@ -70,7 +70,7 @@ public class InternalUserCreationUseCase {
                 : request.password();
         PasswordHash hash = PasswordHash.of(passwordEncoder.encode(rawPassword));
 
-        User user = User.create(new UserId(0), username, email, hash, request.firstName(), request.lastName(),
+        User user = User.create(new UserId(null), username, email, hash, request.firstName(), request.lastName(),
                 PhoneNumber.of(request.phone()), orgId == null ? null : OrganizationId.of(orgId), role);
         users.save(user);
 

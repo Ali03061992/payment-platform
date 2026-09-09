@@ -71,11 +71,11 @@ public class JwtService {
                     .issueTime(Date.from(now))
                     .expirationTime(Date.from(expiry))
                     .jwtID(UUID.randomUUID().toString())
-                    .subject(String.valueOf(user.userId()))
+                    .subject(user.userId().toString())
                     .claim("username", user.username())
                     .claim("roles", user.roles());
             if (user.organizationId() != null) {
-                claimsBuilder.claim("organizationId", user.organizationId());
+                claimsBuilder.claim("organizationId", user.organizationId().toString());
             }
 
             JWSHeader header = new JWSHeader(JWSAlgorithm.HS256);
@@ -94,11 +94,11 @@ public class JwtService {
     public AuthenticatedUser parse(String token) {
         try {
             Jwt jwt = decoder.decode(token);
-            long userId = Long.parseLong(jwt.getSubject());
+            UUID userId = UUID.fromString(jwt.getSubject());
             String username = jwt.getClaimAsString("username");
             List<String> roles = jwt.getClaimAsStringList("roles");
-            Long organizationId = jwt.hasClaim("organizationId")
-                    ? jwt.getClaim("organizationId") instanceof Number number ? number.longValue() : null
+            UUID organizationId = jwt.hasClaim("organizationId")
+                    ? jwt.hasClaim("organizationId") ? UUID.fromString(jwt.getClaimAsString("organizationId")) : null
                     : null;
             return new AuthenticatedUser(userId, username, roles == null ? List.of() : roles, organizationId);
         } catch (Exception e) {

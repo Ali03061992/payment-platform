@@ -1,5 +1,7 @@
 package com.paymentplatform.organization.application.usecase;
 
+import java.util.UUID;
+
 import com.paymentplatform.organization.application.dto.CreateOrganizationRequest;
 import com.paymentplatform.organization.application.dto.CreateRelationRequest;
 import com.paymentplatform.organization.domain.repository.OrganizationRepository;
@@ -23,14 +25,14 @@ class SupplierShopRelationUseCaseH2Test {
     @Autowired private SupplierShopRelationUseCase relationUseCase;
     @Autowired private CreateOrganizationUseCase createOrg;
 
-    private long supplierId;
-    private long shopId;
+    private UUID supplierId;
+    private UUID shopId;
 
     @BeforeEach
     void setUp() {
-        var supplier = createOrg.execute(new CreateOrganizationRequest("Rel Supplier", "SUPPLIER"), 1L);
+        var supplier = createOrg.execute(new CreateOrganizationRequest("Rel Supplier", "SUPPLIER"), UUID.fromString("00000000-0000-0000-0000-000000000001"));
         supplierId = supplier.id();
-        var shop = createOrg.execute(new CreateOrganizationRequest("Rel Shop", "SHOP"), 1L);
+        var shop = createOrg.execute(new CreateOrganizationRequest("Rel Shop", "SHOP"), UUID.fromString("00000000-0000-0000-0000-000000000001"));
         shopId = shop.id();
     }
 
@@ -51,19 +53,19 @@ class SupplierShopRelationUseCaseH2Test {
 
     @Test
     void createRelation_supplierNotFound_throws() {
-        assertThatThrownBy(() -> relationUseCase.createRelation(new CreateRelationRequest(999L, shopId)))
+        assertThatThrownBy(() -> relationUseCase.createRelation(new CreateRelationRequest(UUID.fromString("00000000-0000-0000-0000-000000000999"), shopId)))
                 .isInstanceOf(NotFoundException.class);
     }
 
     @Test
     void createRelation_shopNotFound_throws() {
-        assertThatThrownBy(() -> relationUseCase.createRelation(new CreateRelationRequest(supplierId, 999L)))
+        assertThatThrownBy(() -> relationUseCase.createRelation(new CreateRelationRequest(supplierId, UUID.fromString("00000000-0000-0000-0000-000000000999"))))
                 .isInstanceOf(NotFoundException.class);
     }
 
     @Test
     void createRelation_disabledSupplier_throws() {
-        var disabled = createOrg.execute(new CreateOrganizationRequest("Disabled Sup", "SUPPLIER"), 1L);
+        var disabled = createOrg.execute(new CreateOrganizationRequest("Disabled Sup", "SUPPLIER"), UUID.fromString("00000000-0000-0000-0000-000000000001"));
         // Disable supplier through status use case
         // ... we test the validation logic
     }
@@ -98,7 +100,7 @@ class SupplierShopRelationUseCaseH2Test {
 
     @Test
     void deactivateRelation_notFound_throws() {
-        assertThatThrownBy(() -> relationUseCase.deactivateRelation(999L))
+        assertThatThrownBy(() -> relationUseCase.deactivateRelation(UUID.fromString("00000000-0000-0000-0000-000000000999")))
                 .isInstanceOf(NotFoundException.class);
     }
 

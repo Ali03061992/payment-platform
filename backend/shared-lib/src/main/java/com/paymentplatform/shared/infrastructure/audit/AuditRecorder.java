@@ -1,7 +1,9 @@
 package com.paymentplatform.shared.infrastructure.audit;
 
+import java.util.UUID;
+
 /** Enregistre une entrée d'audit dans la transaction courante. */
 public interface AuditRecorder {
 
-    void record(Long userId, Long organizationId, String action, Long entityId, String details);
+    void record(UUID userId, UUID organizationId, String action, UUID entityId, String details);
 }

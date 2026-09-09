@@ -1,11 +1,11 @@
 -- Add audit_logs and outbox_events tables missing from V1
 
 CREATE TABLE audit_logs (
-  id              BIGINT AUTO_INCREMENT PRIMARY KEY,
-  user_id         BIGINT       NULL,
-  organization_id BIGINT       NULL,
+  id VARCHAR(36) PRIMARY KEY,
+  user_id VARCHAR(36)       NULL,
+  organization_id VARCHAR(36)       NULL,
   action          VARCHAR(60)  NOT NULL,
-  entity_id       BIGINT       NULL,
+  entity_id VARCHAR(36)       NULL,
   timestamp       DATETIME(6)  NOT NULL,
   details         TEXT         NULL,
   INDEX idx_audit_action (action),
@@ -14,7 +14,7 @@ CREATE TABLE audit_logs (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE outbox_events (
-  id           BIGINT AUTO_INCREMENT PRIMARY KEY,
+  id VARCHAR(36) PRIMARY KEY,
   event_id     CHAR(36)     NOT NULL UNIQUE,
   event_type   VARCHAR(120) NOT NULL,
   aggregate_id VARCHAR(64)  NOT NULL,

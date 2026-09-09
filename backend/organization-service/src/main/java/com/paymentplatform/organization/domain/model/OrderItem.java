@@ -1,5 +1,7 @@
 package com.paymentplatform.organization.domain.model;
 
+import java.util.UUID;
+
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
@@ -10,14 +12,15 @@ import java.time.Instant;
 public class OrderItem {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(columnDefinition = "VARCHAR(36)")
+    private UUID id;
 
-    @Column(name = "order_id", nullable = false)
-    private Long orderId;
+    @Column(name = "order_id", nullable = false, columnDefinition = "VARCHAR(36)")
+    private UUID orderId;
 
-    @Column(name = "product_id", nullable = false)
-    private Long productId;
+    @Column(name = "product_id", nullable = false, columnDefinition = "VARCHAR(36)")
+    private UUID productId;
 
     @Column(name = "product_ref", length = 50)
     private String productRef;
@@ -57,11 +60,11 @@ public class OrderItem {
         this.lineTotal = subtotal.subtract(discount);
     }
 
-    public Long getId() { return id; }
-    public Long getOrderId() { return orderId; }
-    public void setOrderId(Long orderId) { this.orderId = orderId; }
-    public Long getProductId() { return productId; }
-    public void setProductId(Long productId) { this.productId = productId; }
+    public UUID getId() { return id; }
+    public UUID getOrderId() { return orderId; }
+    public void setOrderId(UUID orderId) { this.orderId = orderId; }
+    public UUID getProductId() { return productId; }
+    public void setProductId(UUID productId) { this.productId = productId; }
     public String getProductRef() { return productRef; }
     public void setProductRef(String productRef) { this.productRef = productRef; }
     public String getProductName() { return productName; }

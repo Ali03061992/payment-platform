@@ -1,5 +1,7 @@
 package com.paymentplatform.payment.infrastructure.test;
 
+import java.util.UUID;
+
 import com.paymentplatform.payment.infrastructure.elasticsearch.PaymentIndexerService;
 import com.paymentplatform.payment.infrastructure.http.OrganizationValidationClient;
 import com.paymentplatform.payment.domain.model.Payment;
@@ -24,7 +26,7 @@ public class TestPaymentIndexerService extends PaymentIndexerService {
     }
 
     @Override
-    public void removePayment(long paymentId) {
+    public void removePayment(UUID paymentId) {
     }
 
     @Override

@@ -1,5 +1,7 @@
 package com.paymentplatform.organization.interfaces.rest;
 
+import java.util.UUID;
+
 import com.paymentplatform.shared.infrastructure.security.AuthenticatedUser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,14 +41,14 @@ class AdminOrganizationControllerTest {
                 .build();
     }
 
-    private static UsernamePasswordAuthenticationToken auth(long userId, String username, List<String> perms, Long orgId) {
+    private static UsernamePasswordAuthenticationToken auth(UUID userId, String username, List<String> perms, UUID orgId) {
         AuthenticatedUser principal = new AuthenticatedUser(userId, username, perms, orgId);
         var authorities = perms.stream().map(SimpleGrantedAuthority::new).toList();
         return new UsernamePasswordAuthenticationToken(principal, null, authorities);
     }
 
     private UsernamePasswordAuthenticationToken adminUser() {
-        return auth(1L, "admin", List.of("ADMIN_MANAGE_ORGANIZATIONS", "ADMIN_VIEW_STATS"), null);
+        return auth(UUID.fromString("00000000-0000-0000-0000-000000000001"), "admin", List.of("ADMIN_MANAGE_ORGANIZATIONS", "ADMIN_VIEW_STATS"), null);
     }
 
     @Test
@@ -114,7 +116,7 @@ class AdminOrganizationControllerTest {
 
     @Test
     void listSuppliers_withWrongRole_returns403() throws Exception {
-        UsernamePasswordAuthenticationToken shopUser = auth(2L, "shop.user", List.of("SHOP_ADMIN"), 10L);
+        UsernamePasswordAuthenticationToken shopUser = auth(UUID.fromString("00000000-0000-0000-0000-000000000002"), "shop.user", List.of("SHOP_ADMIN"), UUID.fromString("00000000-0000-0000-0000-000000000010"));
 
         mockMvc.perform(get("/api/admin/suppliers")
                         .with(SecurityMockMvcRequestPostProcessors.authentication(shopUser)))

@@ -1,5 +1,5 @@
 export interface AgentPaymentSummary {
-  userId: number;
+  userId: string;
   username: string;
   paymentCount: number;
   totalAmount: number;
@@ -9,17 +9,17 @@ export interface AgentPaymentSummary {
 }
 
 export interface Payment {
-  id: number;
+  id: string;
   reference: string;
-  shopId: number;
+  shopId: string;
   shopName: string;
-  supplierId: number;
+  supplierId: string;
   supplierName: string;
   amount: number;
   currency: string;
   status: string;
   rejectionReason: string;
-  createdBy: number;
+  createdBy: string;
   createdByName: string;
   confirmedByName: string;
   rejectedByName: string;

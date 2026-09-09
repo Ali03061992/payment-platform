@@ -1,5 +1,7 @@
 package com.paymentplatform.identity.infrastructure.messaging;
 
+import java.util.UUID;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.paymentplatform.shared.domain.model.RoleCode;
@@ -45,7 +47,7 @@ public class OrganizationEventConsumer {
             }
             String eventType = eventTypeNode.asText();
             String eventId = eventIdNode != null ? eventIdNode.asText() : null;
-            long organizationId = orgIdNode.asLong();
+            UUID organizationId = UUID.fromString(orgIdNode.asText());
 
             switch (eventType) {
                 case SupplierDisabledEvent.EVENT_TYPE -> cascade.onOrganizationDisabled(eventType, organizationId,

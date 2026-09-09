@@ -1,5 +1,7 @@
 package com.paymentplatform.organization.application.service;
 
+import java.util.UUID;
+
 import com.paymentplatform.organization.application.dto.StockOptimizationResponse;
 import com.paymentplatform.organization.domain.engine.*;
 import com.paymentplatform.organization.domain.model.Product;
@@ -28,12 +30,12 @@ public class StockOptimizationService {
         this.movementRepository = movementRepository;
     }
 
-    public StockOptimizationResponse optimize(Long supplierId) {
+    public StockOptimizationResponse optimize(UUID supplierId) {
         List<Product> products = productRepository.findBySupplierId(supplierId);
 
         // Load movements for each product
-        Map<Long, List<StockMovement>> movementsByProduct = new HashMap<>();
-        Map<Long, double[]> demandByProduct = new HashMap<>();
+        Map<UUID, List<StockMovement>> movementsByProduct = new HashMap<>();
+        Map<UUID, double[]> demandByProduct = new HashMap<>();
 
         for (Product p : products) {
             List<StockMovement> movements = movementRepository.findByProductIdOrderByCreatedAtDesc(p.getId());

@@ -1,5 +1,7 @@
 package com.paymentplatform.organization.application.usecase;
 
+import java.util.UUID;
+
 import com.paymentplatform.organization.application.dto.CreateOrganizationRequest;
 import com.paymentplatform.organization.application.dto.OrganizationResponse;
 import com.paymentplatform.organization.domain.repository.OrganizationRepository;
@@ -24,9 +26,9 @@ class OrganizationQueryUseCaseH2Test {
 
     @BeforeEach
     void setUp() {
-        createOrg.execute(new CreateOrganizationRequest("Supplier A", "SUPPLIER"), 1L);
-        createOrg.execute(new CreateOrganizationRequest("Supplier B", "SUPPLIER"), 1L);
-        createOrg.execute(new CreateOrganizationRequest("Shop A", "SHOP"), 1L);
+        createOrg.execute(new CreateOrganizationRequest("Supplier A", "SUPPLIER"), UUID.fromString("00000000-0000-0000-0000-000000000001"));
+        createOrg.execute(new CreateOrganizationRequest("Supplier B", "SUPPLIER"), UUID.fromString("00000000-0000-0000-0000-000000000001"));
+        createOrg.execute(new CreateOrganizationRequest("Shop A", "SHOP"), UUID.fromString("00000000-0000-0000-0000-000000000001"));
     }
 
     @Test
@@ -57,7 +59,7 @@ class OrganizationQueryUseCaseH2Test {
 
     @Test
     void findById_invalidId_throwsNotFound() {
-        assertThatThrownBy(() -> query.findById(999L))
+        assertThatThrownBy(() -> query.findById(UUID.fromString("00000000-0000-0000-0000-000000000999")))
                 .isInstanceOf(NotFoundException.class);
     }
 

@@ -1,13 +1,15 @@
 package com.paymentplatform.identity.application.dto;
 
+import java.util.UUID;
+
 import com.paymentplatform.identity.domain.model.User;
 import com.paymentplatform.identity.domain.model.UserStatus;
 
 import java.time.Instant;
 import java.util.List;
 
-public record UserResponse(long id, String username, String email, String firstName, String lastName,
-                           String phone, Long organizationId, List<String> roles, String status,
+public record UserResponse(UUID id, String username, String email, String firstName, String lastName,
+                           String phone, UUID organizationId, List<String> roles, String status,
                            Instant createdAt, Instant updatedAt) {
 
     public static UserResponse from(User user) {

@@ -1,5 +1,7 @@
 package com.paymentplatform.identity.application.usecase;
 
+import java.util.UUID;
+
 import com.paymentplatform.identity.domain.model.User;
 import com.paymentplatform.identity.domain.repository.UserRepository;
 import com.paymentplatform.identity.domain.valueobject.Email;
@@ -30,14 +32,14 @@ class UserStatusUseCaseH2Test {
     @Autowired private UserRepository users;
     @Autowired private PasswordEncoder passwordEncoder;
 
-    private long userId;
+    private UUID userId;
 
     @BeforeEach
     void setUp() {
-        User user = User.create(new UserId(0), Username.of("ustatus.user"),
+        User user = User.create(new UserId(null), Username.of("ustatus.user"),
                 Email.of("ustatus@test.com"), PasswordHash.of(passwordEncoder.encode("pass")),
                 "Status", "Test", new PhoneNumber(null),
-                OrganizationId.of(5), RoleCode.SHOP_AGENT);
+                OrganizationId.of(UUID.fromString("00000000-0000-0000-0000-000000000005")), RoleCode.SHOP_AGENT);
         users.save(user);
         User fetched = users.findByUsername(Username.of("ustatus.user")).orElseThrow();
         userId = fetched.id().value();
@@ -45,39 +47,39 @@ class UserStatusUseCaseH2Test {
 
     @Test
     void disableUser_activeUser_becomesDisabled() {
-        var response = status.disableUser(1L, userId);
+        var response = status.disableUser(UUID.fromString("00000000-0000-0000-0000-000000000001"), userId);
         assertThat(response.status()).isEqualTo("DISABLED");
     }
 
     @Test
     void disableUser_alreadyDisabled_idempotent() {
-        status.disableUser(1L, userId);
-        var response = status.disableUser(1L, userId);
+        status.disableUser(UUID.fromString("00000000-0000-0000-0000-000000000001"), userId);
+        var response = status.disableUser(UUID.fromString("00000000-0000-0000-0000-000000000001"), userId);
         assertThat(response.status()).isEqualTo("DISABLED");
     }
 
     @Test
     void activateUser_disabledUser_becomesActive() {
-        status.disableUser(1L, userId);
-        var response = status.activateUser(1L, userId);
+        status.disableUser(UUID.fromString("00000000-0000-0000-0000-000000000001"), userId);
+        var response = status.activateUser(UUID.fromString("00000000-0000-0000-0000-000000000001"), userId);
         assertThat(response.status()).isEqualTo("ACTIVE");
     }
 
     @Test
     void activateUser_alreadyActive_idempotent() {
-        var response = status.activateUser(1L, userId);
+        var response = status.activateUser(UUID.fromString("00000000-0000-0000-0000-000000000001"), userId);
         assertThat(response.status()).isEqualTo("ACTIVE");
     }
 
     @Test
     void disableUser_notFound_throws() {
-        assertThatThrownBy(() -> status.disableUser(1L, 99999L))
+        assertThatThrownBy(() -> status.disableUser(UUID.fromString("00000000-0000-0000-0000-000000000001"), UUID.fromString("00000000-0000-0000-0000-000000099999")))
                 .isInstanceOf(NotFoundException.class);
     }
 
     @Test
     void activateUser_notFound_throws() {
-        assertThatThrownBy(() -> status.activateUser(1L, 99999L))
+        assertThatThrownBy(() -> status.activateUser(UUID.fromString("00000000-0000-0000-0000-000000000001"), UUID.fromString("00000000-0000-0000-0000-000000099999")))
                 .isInstanceOf(NotFoundException.class);
     }
 }

@@ -1,5 +1,7 @@
 package com.paymentplatform.identity.infrastructure.security;
 
+import java.util.UUID;
+
 import com.paymentplatform.shared.infrastructure.security.AuthenticatedUser;
 import com.paymentplatform.shared.infrastructure.security.JwtService;
 import org.junit.jupiter.api.Test;
@@ -23,20 +25,20 @@ class IdentityTokenIssuerTest {
 
     @Test
     void issue_returnsToken() {
-        AuthenticatedUser user = new AuthenticatedUser(1L, "testuser", List.of("SHOP_AGENT"), 5L);
+        AuthenticatedUser user = new AuthenticatedUser(UUID.fromString("00000000-0000-0000-0000-000000000001"), "testuser", List.of("SHOP_AGENT"), UUID.fromString("00000000-0000-0000-0000-000000000005"));
         String token = issuer.issue(user);
         assertThat(token).isNotBlank();
     }
 
     @Test
     void issue_tokenCanBeParsed() {
-        AuthenticatedUser user = new AuthenticatedUser(1L, "testuser", List.of("SHOP_AGENT"), 5L);
+        AuthenticatedUser user = new AuthenticatedUser(UUID.fromString("00000000-0000-0000-0000-000000000001"), "testuser", List.of("SHOP_AGENT"), UUID.fromString("00000000-0000-0000-0000-000000000005"));
         String token = issuer.issue(user);
         AuthenticatedUser parsed = jwtService.parse(token);
-        assertThat(parsed.userId()).isEqualTo(1L);
+        assertThat(parsed.userId()).isEqualTo(UUID.fromString("00000000-0000-0000-0000-000000000001"));
         assertThat(parsed.username()).isEqualTo("testuser");
         assertThat(parsed.roles()).contains("SHOP_AGENT");
-        assertThat(parsed.organizationId()).isEqualTo(5L);
+        assertThat(parsed.organizationId()).isEqualTo(UUID.fromString("00000000-0000-0000-0000-000000000005"));
     }
 
     @Test
@@ -46,7 +48,7 @@ class IdentityTokenIssuerTest {
 
     @Test
     void issue_withNullOrganizationId() {
-        AuthenticatedUser user = new AuthenticatedUser(2L, "admin", List.of("SYSTEM_ADMIN"), null);
+        AuthenticatedUser user = new AuthenticatedUser(UUID.fromString("00000000-0000-0000-0000-000000000002"), "admin", List.of("SYSTEM_ADMIN"), null);
         String token = issuer.issue(user);
         AuthenticatedUser parsed = jwtService.parse(token);
         assertThat(parsed.organizationId()).isNull();

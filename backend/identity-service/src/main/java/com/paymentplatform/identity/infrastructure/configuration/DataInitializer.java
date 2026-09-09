@@ -1,5 +1,7 @@
 package com.paymentplatform.identity.infrastructure.configuration;
 
+import java.util.UUID;
+
 import com.paymentplatform.shared.domain.model.OrganizationId;
 import com.paymentplatform.shared.domain.model.RoleCode;
 import com.paymentplatform.shared.domain.model.UserId;
@@ -37,7 +39,7 @@ public class DataInitializer implements ApplicationRunner {
         String username = System.getenv().getOrDefault("SEED_ADMIN_USERNAME", "system.admin");
         String password = System.getenv().getOrDefault("SEED_ADMIN_PASSWORD", "Admin@123");
         if (!users.existsByUsername(Username.of(username))) {
-            User admin = User.create(new UserId(0), Username.of(username),
+            User admin = User.create(new UserId(null), Username.of(username),
                     Email.of(System.getenv().getOrDefault("SEED_ADMIN_EMAIL", "system.admin@payment-platform.local")),
                     PasswordHash.of(passwordEncoder.encode(password)), "System", "Admin", new PhoneNumber(null),
                     (OrganizationId) null, RoleCode.SYSTEM_ADMIN);

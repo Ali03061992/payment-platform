@@ -1,5 +1,7 @@
 package com.paymentplatform.organization.domain.engine;
 
+import java.util.UUID;
+
 import java.util.*;
 
 /**
@@ -13,7 +15,7 @@ public class RecommendationEngine {
     }
 
     public record Recommendation(
-        Long productId,
+        UUID productId,
         String productName,
         Action action,
         String priority,       // URGENT, HIGH, MEDIUM, LOW
@@ -35,7 +37,7 @@ public class RecommendationEngine {
      * Generate recommendation for a single product.
      */
     public Recommendation generate(
-            Long productId,
+            UUID productId,
             String productName,
             // Stock data
             double currentStock,

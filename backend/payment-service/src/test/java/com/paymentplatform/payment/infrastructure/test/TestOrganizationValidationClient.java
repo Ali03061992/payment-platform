@@ -1,5 +1,7 @@
 package com.paymentplatform.payment.infrastructure.test;
 
+import java.util.UUID;
+
 import com.paymentplatform.payment.infrastructure.http.OrganizationValidationClient;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
@@ -13,24 +15,24 @@ import java.util.Optional;
 public class TestOrganizationValidationClient extends OrganizationValidationClient {
 
     @Override
-    public void validateShop(long shopId) {
+    public void validateShop(UUID shopId) {
     }
 
     @Override
-    public void validateSupplier(long supplierId) {
+    public void validateSupplier(UUID supplierId) {
     }
 
     @Override
-    public void validateRelation(long shopId, long supplierId) {
+    public void validateRelation(UUID shopId, UUID supplierId) {
     }
 
     @Override
-    public Optional<String> getOrganizationName(long organizationId) {
+    public Optional<String> getOrganizationName(UUID organizationId) {
         return Optional.of("Org " + organizationId);
     }
 
     @Override
-    public Optional<String> getUserName(long userId) {
+    public Optional<String> getUserName(UUID userId) {
         return Optional.of("User " + userId);
     }
 }

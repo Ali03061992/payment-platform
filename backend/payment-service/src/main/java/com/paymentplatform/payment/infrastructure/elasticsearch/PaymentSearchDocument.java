@@ -1,5 +1,7 @@
 package com.paymentplatform.payment.infrastructure.elasticsearch;
 
+import java.util.UUID;
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
@@ -12,25 +14,25 @@ import java.time.Instant;
 public class PaymentSearchDocument {
 
     @Id
-    private Long id;
+    private UUID id;
 
     @Field(type = FieldType.Keyword)
     private String reference;
 
     @Field(type = FieldType.Long)
-    private long shopId;
+    private UUID shopId;
 
     @Field(type = FieldType.Keyword)
     private String shopName;
 
     @Field(type = FieldType.Long)
-    private long supplierId;
+    private UUID supplierId;
 
     @Field(type = FieldType.Keyword)
     private String supplierName;
 
     @Field(type = FieldType.Long)
-    private long createdBy;
+    private UUID createdBy;
 
     @Field(type = FieldType.Keyword)
     private String createdByName;
@@ -55,8 +57,8 @@ public class PaymentSearchDocument {
 
     public PaymentSearchDocument() {}
 
-    public PaymentSearchDocument(Long id, String reference, long shopId, String shopName,
-                                  long supplierId, String supplierName, long createdBy, String createdByName,
+    public PaymentSearchDocument(UUID id, String reference, UUID shopId, String shopName,
+                                  UUID supplierId, String supplierName, UUID createdBy, String createdByName,
                                   BigDecimal amount, String currency, String status, String rejectionReason,
                                   Instant createdAt, Instant updatedAt) {
         this.id = id;
@@ -75,20 +77,20 @@ public class PaymentSearchDocument {
         this.updatedAt = updatedAt;
     }
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public UUID getId() { return id; }
+    public void setId(UUID id) { this.id = id; }
     public String getReference() { return reference; }
     public void setReference(String reference) { this.reference = reference; }
-    public long getShopId() { return shopId; }
-    public void setShopId(long shopId) { this.shopId = shopId; }
+    public UUID getShopId() { return shopId; }
+    public void setShopId(UUID shopId) { this.shopId = shopId; }
     public String getShopName() { return shopName; }
     public void setShopName(String shopName) { this.shopName = shopName; }
-    public long getSupplierId() { return supplierId; }
-    public void setSupplierId(long supplierId) { this.supplierId = supplierId; }
+    public UUID getSupplierId() { return supplierId; }
+    public void setSupplierId(UUID supplierId) { this.supplierId = supplierId; }
     public String getSupplierName() { return supplierName; }
     public void setSupplierName(String supplierName) { this.supplierName = supplierName; }
-    public long getCreatedBy() { return createdBy; }
-    public void setCreatedBy(long createdBy) { this.createdBy = createdBy; }
+    public UUID getCreatedBy() { return createdBy; }
+    public void setCreatedBy(UUID createdBy) { this.createdBy = createdBy; }
     public String getCreatedByName() { return createdByName; }
     public void setCreatedByName(String createdByName) { this.createdByName = createdByName; }
     public BigDecimal getAmount() { return amount; }

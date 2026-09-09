@@ -1,5 +1,7 @@
 package com.paymentplatform.organization.domain.model;
 
+import java.util.UUID;
+
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -9,11 +11,12 @@ import java.time.Instant;
 public class Product {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(columnDefinition = "VARCHAR(36)")
+    private UUID id;
 
-    @Column(name = "supplier_id", nullable = false)
-    private Long supplierId;
+    @Column(name = "supplier_id", nullable = false, columnDefinition = "VARCHAR(36)")
+    private UUID supplierId;
 
     @Column(nullable = false, length = 200)
     private String name;
@@ -39,11 +42,11 @@ public class Product {
     @Column(name = "reserved_qty", nullable = false)
     private Integer reservedQty;
 
-    @Column(name = "category_id")
-    private Long categoryId;
+    @Column(name = "category_id", columnDefinition = "VARCHAR(36)")
+    private UUID categoryId;
 
-    @Column(name = "family_id")
-    private Long familyId;
+    @Column(name = "family_id", columnDefinition = "VARCHAR(36)")
+    private UUID familyId;
 
     @Column(nullable = false, length = 20)
     private String unit;
@@ -76,9 +79,9 @@ public class Product {
         updatedAt = Instant.now();
     }
 
-    public Long getId() { return id; }
-    public Long getSupplierId() { return supplierId; }
-    public void setSupplierId(Long supplierId) { this.supplierId = supplierId; }
+    public UUID getId() { return id; }
+    public UUID getSupplierId() { return supplierId; }
+    public void setSupplierId(UUID supplierId) { this.supplierId = supplierId; }
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
     public String getSku() { return sku; }
@@ -100,10 +103,10 @@ public class Product {
     public Instant getUpdatedAt() { return updatedAt; }
     public Integer getReservedQty() { return reservedQty; }
     public void setReservedQty(Integer reservedQty) { this.reservedQty = reservedQty; }
-    public Long getCategoryId() { return categoryId; }
-    public void setCategoryId(Long categoryId) { this.categoryId = categoryId; }
-    public Long getFamilyId() { return familyId; }
-    public void setFamilyId(Long familyId) { this.familyId = familyId; }
+    public UUID getCategoryId() { return categoryId; }
+    public void setCategoryId(UUID categoryId) { this.categoryId = categoryId; }
+    public UUID getFamilyId() { return familyId; }
+    public void setFamilyId(UUID familyId) { this.familyId = familyId; }
     public String getUnit() { return unit; }
     public void setUnit(String unit) { this.unit = unit; }
 }

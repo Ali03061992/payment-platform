@@ -1,5 +1,7 @@
 package com.paymentplatform.payment.infrastructure.persistence;
 
+import java.util.UUID;
+
 import com.paymentplatform.payment.domain.model.Payment;
 import com.paymentplatform.payment.domain.model.PaymentStatus;
 import com.paymentplatform.payment.domain.valueobject.Money;
@@ -27,7 +29,7 @@ class JpaPaymentRepositoryH2Test {
         paymentRepository.findAll().forEach(p -> paymentRepository.save(p));
     }
 
-    private Payment createAndSave(long shopId, long supplierId, long createdBy) {
+    private Payment createAndSave(UUID shopId, UUID supplierId, UUID createdBy) {
         Payment p = Payment.create(shopId, supplierId,
                 Money.of(new BigDecimal("100"), "TND"), createdBy);
         return paymentRepository.save(p);
@@ -35,7 +37,7 @@ class JpaPaymentRepositoryH2Test {
 
     @Test
     void save_andFindById() {
-        Payment saved = createAndSave(1L, 2L, 10L);
+        Payment saved = createAndSave(UUID.fromString("00000000-0000-0000-0000-000000000001"), UUID.fromString("00000000-0000-0000-0000-000000000002"), UUID.fromString("00000000-0000-0000-0000-000000000010"));
         var found = paymentRepository.findById(saved.id());
         assertThat(found).isPresent();
         assertThat(found.get().reference()).isEqualTo(saved.reference());
@@ -43,7 +45,7 @@ class JpaPaymentRepositoryH2Test {
 
     @Test
     void findByReference() {
-        Payment saved = createAndSave(1L, 2L, 10L);
+        Payment saved = createAndSave(UUID.fromString("00000000-0000-0000-0000-000000000001"), UUID.fromString("00000000-0000-0000-0000-000000000002"), UUID.fromString("00000000-0000-0000-0000-000000000010"));
         var found = paymentRepository.findByReference(saved.reference().value());
         assertThat(found).isPresent();
         assertThat(found.get().id()).isEqualTo(saved.id());
@@ -56,34 +58,34 @@ class JpaPaymentRepositoryH2Test {
 
     @Test
     void findAll() {
-        createAndSave(1L, 2L, 10L);
-        createAndSave(3L, 4L, 10L);
+        createAndSave(UUID.fromString("00000000-0000-0000-0000-000000000001"), UUID.fromString("00000000-0000-0000-0000-000000000002"), UUID.fromString("00000000-0000-0000-0000-000000000010"));
+        createAndSave(UUID.fromString("00000000-0000-0000-0000-000000000003"), UUID.fromString("00000000-0000-0000-0000-000000000004"), UUID.fromString("00000000-0000-0000-0000-000000000010"));
         var all = paymentRepository.findAll();
         assertThat(all).hasSizeGreaterThanOrEqualTo(2);
     }
 
     @Test
     void findByShopId() {
-        createAndSave(1L, 2L, 10L);
-        createAndSave(1L, 3L, 10L);
-        createAndSave(5L, 2L, 10L);
-        var result = paymentRepository.findByShopId(1L);
+        createAndSave(UUID.fromString("00000000-0000-0000-0000-000000000001"), UUID.fromString("00000000-0000-0000-0000-000000000002"), UUID.fromString("00000000-0000-0000-0000-000000000010"));
+        createAndSave(UUID.fromString("00000000-0000-0000-0000-000000000001"), UUID.fromString("00000000-0000-0000-0000-000000000003"), UUID.fromString("00000000-0000-0000-0000-000000000010"));
+        createAndSave(UUID.fromString("00000000-0000-0000-0000-000000000005"), UUID.fromString("00000000-0000-0000-0000-000000000002"), UUID.fromString("00000000-0000-0000-0000-000000000010"));
+        var result = paymentRepository.findByShopId(UUID.fromString("00000000-0000-0000-0000-000000000001"));
         assertThat(result).hasSize(2);
     }
 
     @Test
     void findBySupplierId() {
-        createAndSave(1L, 2L, 10L);
-        createAndSave(3L, 2L, 10L);
-        createAndSave(5L, 4L, 10L);
-        var result = paymentRepository.findBySupplierId(2L);
+        createAndSave(UUID.fromString("00000000-0000-0000-0000-000000000001"), UUID.fromString("00000000-0000-0000-0000-000000000002"), UUID.fromString("00000000-0000-0000-0000-000000000010"));
+        createAndSave(UUID.fromString("00000000-0000-0000-0000-000000000003"), UUID.fromString("00000000-0000-0000-0000-000000000002"), UUID.fromString("00000000-0000-0000-0000-000000000010"));
+        createAndSave(UUID.fromString("00000000-0000-0000-0000-000000000005"), UUID.fromString("00000000-0000-0000-0000-000000000004"), UUID.fromString("00000000-0000-0000-0000-000000000010"));
+        var result = paymentRepository.findBySupplierId(UUID.fromString("00000000-0000-0000-0000-000000000002"));
         assertThat(result).hasSize(2);
     }
 
     @Test
     void findByStatus() {
-        Payment p = createAndSave(1L, 2L, 10L);
-        paymentRepository.save(p.confirm(20L));
+        Payment p = createAndSave(UUID.fromString("00000000-0000-0000-0000-000000000001"), UUID.fromString("00000000-0000-0000-0000-000000000002"), UUID.fromString("00000000-0000-0000-0000-000000000010"));
+        paymentRepository.save(p.confirm(UUID.fromString("00000000-0000-0000-0000-000000000020")));
         var pending = paymentRepository.findByStatus(PaymentStatus.PENDING);
         var confirmed = paymentRepository.findByStatus(PaymentStatus.CONFIRMED);
         assertThat(confirmed).hasSizeGreaterThanOrEqualTo(1);
@@ -91,23 +93,23 @@ class JpaPaymentRepositoryH2Test {
 
     @Test
     void countByStatus() {
-        createAndSave(1L, 2L, 10L);
-        createAndSave(1L, 3L, 10L);
+        createAndSave(UUID.fromString("00000000-0000-0000-0000-000000000001"), UUID.fromString("00000000-0000-0000-0000-000000000002"), UUID.fromString("00000000-0000-0000-0000-000000000010"));
+        createAndSave(UUID.fromString("00000000-0000-0000-0000-000000000001"), UUID.fromString("00000000-0000-0000-0000-000000000003"), UUID.fromString("00000000-0000-0000-0000-000000000010"));
         long count = paymentRepository.countByStatus(PaymentStatus.PENDING);
         assertThat(count).isGreaterThanOrEqualTo(2);
     }
 
     @Test
     void existsByReference() {
-        Payment saved = createAndSave(1L, 2L, 10L);
+        Payment saved = createAndSave(UUID.fromString("00000000-0000-0000-0000-000000000001"), UUID.fromString("00000000-0000-0000-0000-000000000002"), UUID.fromString("00000000-0000-0000-0000-000000000010"));
         assertThat(paymentRepository.existsByReference(saved.reference().value())).isTrue();
         assertThat(paymentRepository.existsByReference("FAKE")).isFalse();
     }
 
     @Test
     void save_updatesPayment() {
-        Payment saved = createAndSave(1L, 2L, 10L);
-        Payment confirmed = saved.confirm(20L);
+        Payment saved = createAndSave(UUID.fromString("00000000-0000-0000-0000-000000000001"), UUID.fromString("00000000-0000-0000-0000-000000000002"), UUID.fromString("00000000-0000-0000-0000-000000000010"));
+        Payment confirmed = saved.confirm(UUID.fromString("00000000-0000-0000-0000-000000000020"));
         Payment updated = paymentRepository.save(confirmed);
         assertThat(updated.status()).isEqualTo(PaymentStatus.CONFIRMED);
     }

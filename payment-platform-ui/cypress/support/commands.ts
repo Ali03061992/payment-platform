@@ -78,7 +78,7 @@ Cypress.Commands.add('ensureTestUsers', () => {
   });
 });
 
-Cypress.Commands.add('createPayment', (shopId: number, supplierId: number, amount: number) => {
+Cypress.Commands.add('createPayment', (shopId: string, supplierId: string, amount: number) => {
   cy.request({
     method: 'POST',
     url: `${API_URL()}/api/payments`,
@@ -98,6 +98,6 @@ declare namespace Cypress {
     loginAsCovaleAgent(): Chainable<void>;
     loginAsPointteckAgent(): Chainable<void>;
     ensureTestUsers(): Chainable<void>;
-    createPayment(shopId: number, supplierId: number, amount: number): Chainable<void>;
+    createPayment(shopId: string, supplierId: string, amount: number): Chainable<void>;
   }
 }

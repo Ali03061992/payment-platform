@@ -1,5 +1,7 @@
 package com.paymentplatform.organization.interfaces.rest;
 
+import java.util.UUID;
+
 import com.paymentplatform.organization.application.dto.*;
 import com.paymentplatform.organization.application.service.StockService;
 import com.paymentplatform.shared.infrastructure.security.CurrentUser;
@@ -26,7 +28,7 @@ public class StockController {
     @GetMapping("/products")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<ProductResponse>> listProducts(
-            @PathVariable Long supplierId,
+            @PathVariable UUID supplierId,
             @RequestParam(required = false) String status) {
         var current = CurrentUser.get();
         boolean isSupplierOwner = current.organizationId() != null && current.organizationId().equals(supplierId);
@@ -53,7 +55,7 @@ public class StockController {
 
     @GetMapping("/products/{productId}")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<ProductResponse> getProduct(@PathVariable Long supplierId, @PathVariable Long productId) {
+    public ResponseEntity<ProductResponse> getProduct(@PathVariable UUID supplierId, @PathVariable UUID productId) {
         var current = CurrentUser.get();
         boolean isSupplierOwner = current.organizationId() != null && current.organizationId().equals(supplierId);
         boolean isSystemAdmin = current.roles().contains("SYSTEM_ADMIN");
@@ -80,7 +82,7 @@ public class StockController {
     @PostMapping("/products")
     @PreAuthorize("hasAnyAuthority('SUPPLIER_MANAGE_PRODUCTS','SYSTEM_ADMIN')")
     public ResponseEntity<ProductResponse> createProduct(
-            @PathVariable Long supplierId,
+            @PathVariable UUID supplierId,
             @Valid @RequestBody ProductCreateRequest request) {
         var current = CurrentUser.get();
         if (current.organizationId() != null && !current.organizationId().equals(supplierId)) {
@@ -92,8 +94,8 @@ public class StockController {
     @PatchMapping("/products/{productId}")
     @PreAuthorize("hasAnyAuthority('SUPPLIER_MANAGE_PRODUCTS','SYSTEM_ADMIN')")
     public ResponseEntity<ProductResponse> updateProduct(
-            @PathVariable Long supplierId,
-            @PathVariable Long productId,
+            @PathVariable UUID supplierId,
+            @PathVariable UUID productId,
             @RequestBody ProductUpdateRequest request) {
         var current = CurrentUser.get();
         if (current.organizationId() != null && !current.organizationId().equals(supplierId)) {
@@ -104,7 +106,7 @@ public class StockController {
 
     @PatchMapping("/products/{productId}/deactivate")
     @PreAuthorize("hasAnyAuthority('SUPPLIER_MANAGE_PRODUCTS','SYSTEM_ADMIN')")
-    public ResponseEntity<ProductResponse> deleteProduct(@PathVariable Long supplierId, @PathVariable Long productId) {
+    public ResponseEntity<ProductResponse> deleteProduct(@PathVariable UUID supplierId, @PathVariable UUID productId) {
         var current = CurrentUser.get();
         if (current.organizationId() != null && !current.organizationId().equals(supplierId)) {
             return ResponseEntity.status(403).build();
@@ -115,8 +117,8 @@ public class StockController {
     @GetMapping("/movements")
     @PreAuthorize("hasAnyAuthority('SUPPLIER_MANAGE_STOCK','SYSTEM_ADMIN')")
     public ResponseEntity<List<StockMovementResponse>> listMovements(
-            @PathVariable Long supplierId,
-            @RequestParam(required = false) Long productId) {
+            @PathVariable UUID supplierId,
+            @RequestParam(required = false) UUID productId) {
         var current = CurrentUser.get();
         if (current.organizationId() != null && !current.organizationId().equals(supplierId)) {
             return ResponseEntity.status(403).build();
@@ -127,7 +129,7 @@ public class StockController {
     @PostMapping("/movements")
     @PreAuthorize("hasAnyAuthority('SUPPLIER_MANAGE_STOCK','SYSTEM_ADMIN')")
     public ResponseEntity<StockMovementResponse> createMovement(
-            @PathVariable Long supplierId,
+            @PathVariable UUID supplierId,
             @Valid @RequestBody StockMovementRequest request) {
         var current = CurrentUser.get();
         if (current.organizationId() != null && !current.organizationId().equals(supplierId)) {

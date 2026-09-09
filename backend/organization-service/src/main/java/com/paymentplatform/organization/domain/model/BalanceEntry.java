@@ -1,5 +1,7 @@
 package com.paymentplatform.organization.domain.model;
 
+import java.util.UUID;
+
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -14,14 +16,15 @@ public class BalanceEntry {
     public static final String REFUND = "REFUND";
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(columnDefinition = "VARCHAR(36)")
+    private UUID id;
 
-    @Column(name = "supplier_id", nullable = false)
-    private Long supplierId;
+    @Column(name = "supplier_id", nullable = false, columnDefinition = "VARCHAR(36)")
+    private UUID supplierId;
 
-    @Column(name = "shop_id", nullable = false)
-    private Long shopId;
+    @Column(name = "shop_id", nullable = false, columnDefinition = "VARCHAR(36)")
+    private UUID shopId;
 
     @Column(nullable = false, length = 30)
     private String type;
@@ -32,11 +35,11 @@ public class BalanceEntry {
     @Column(name = "balance_after", nullable = false, precision = 19, scale = 4)
     private BigDecimal balanceAfter;
 
-    @Column(name = "order_id")
-    private Long orderId;
+    @Column(name = "order_id", columnDefinition = "VARCHAR(36)")
+    private UUID orderId;
 
-    @Column(name = "payment_id")
-    private Long paymentId;
+    @Column(name = "payment_id", columnDefinition = "VARCHAR(36)")
+    private UUID paymentId;
 
     @Column(length = 100)
     private String reference;
@@ -44,8 +47,8 @@ public class BalanceEntry {
     @Column(columnDefinition = "TEXT")
     private String reason;
 
-    @Column(name = "created_by")
-    private Long createdBy;
+    @Column(name = "created_by", columnDefinition = "VARCHAR(36)")
+    private UUID createdBy;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
@@ -53,9 +56,9 @@ public class BalanceEntry {
     protected BalanceEntry() {
     }
 
-    private BalanceEntry(Long supplierId, Long shopId, String type, BigDecimal amount,
-                         BigDecimal balanceAfter, Long orderId, Long paymentId,
-                         String reference, String reason, Long createdBy) {
+    private BalanceEntry(UUID supplierId, UUID shopId, String type, BigDecimal amount,
+                         BigDecimal balanceAfter, UUID orderId, UUID paymentId,
+                         String reference, String reason, UUID createdBy) {
         this.supplierId = supplierId;
         this.shopId = shopId;
         this.type = type;
@@ -73,23 +76,23 @@ public class BalanceEntry {
         createdAt = Instant.now();
     }
 
-    public static BalanceEntry create(Long supplierId, Long shopId, String type, BigDecimal amount,
-                                      BigDecimal balanceAfter, Long orderId, Long paymentId,
-                                      String reference, String reason, Long createdBy) {
+    public static BalanceEntry create(UUID supplierId, UUID shopId, String type, BigDecimal amount,
+                                      BigDecimal balanceAfter, UUID orderId, UUID paymentId,
+                                      String reference, String reason, UUID createdBy) {
         return new BalanceEntry(supplierId, shopId, type, amount, balanceAfter,
                 orderId, paymentId, reference, reason, createdBy);
     }
 
-    public Long getId() { return id; }
-    public Long getSupplierId() { return supplierId; }
-    public Long getShopId() { return shopId; }
+    public UUID getId() { return id; }
+    public UUID getSupplierId() { return supplierId; }
+    public UUID getShopId() { return shopId; }
     public String getType() { return type; }
     public BigDecimal getAmount() { return amount; }
     public BigDecimal getBalanceAfter() { return balanceAfter; }
-    public Long getOrderId() { return orderId; }
-    public Long getPaymentId() { return paymentId; }
+    public UUID getOrderId() { return orderId; }
+    public UUID getPaymentId() { return paymentId; }
     public String getReference() { return reference; }
     public String getReason() { return reason; }
-    public Long getCreatedBy() { return createdBy; }
+    public UUID getCreatedBy() { return createdBy; }
     public Instant getCreatedAt() { return createdAt; }
 }

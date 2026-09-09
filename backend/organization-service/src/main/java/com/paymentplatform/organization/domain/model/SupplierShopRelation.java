@@ -1,5 +1,7 @@
 package com.paymentplatform.organization.domain.model;
 
+import java.util.UUID;
+
 import com.paymentplatform.shared.domain.exception.DomainException;
 import com.paymentplatform.organization.domain.valueobject.OrganizationId;
 import com.paymentplatform.organization.domain.valueobject.RelationStatus;
@@ -11,13 +13,13 @@ import java.time.Instant;
  */
 public class SupplierShopRelation {
 
-    private Long id;
+    private UUID id;
     private final OrganizationId supplierId;
     private final OrganizationId shopId;
     private RelationStatus status;
     private final Instant createdAt;
 
-    private SupplierShopRelation(Long id, OrganizationId supplierId, OrganizationId shopId,
+    private SupplierShopRelation(UUID id, OrganizationId supplierId, OrganizationId shopId,
                                  RelationStatus status, Instant createdAt) {
         this.id = id;
         this.supplierId = supplierId;
@@ -30,13 +32,13 @@ public class SupplierShopRelation {
         if (supplierId == null || shopId == null) {
             throw new DomainException("Les IDs fournisseur et boutique sont requis");
         }
-        if (supplierId.value() == shopId.value()) {
+        if (supplierId.value().equals(shopId.value())) {
             throw new DomainException("Un fournisseur ne peut pas être associé à lui-même");
         }
         return new SupplierShopRelation(null, supplierId, shopId, RelationStatus.ACTIVE, Instant.now());
     }
 
-    public static SupplierShopRelation reconstruct(Long id, OrganizationId supplierId, OrganizationId shopId,
+    public static SupplierShopRelation reconstruct(UUID id, OrganizationId supplierId, OrganizationId shopId,
                                                     RelationStatus status, Instant createdAt) {
         return new SupplierShopRelation(id, supplierId, shopId, status, createdAt);
     }
@@ -53,8 +55,8 @@ public class SupplierShopRelation {
         return status == RelationStatus.ACTIVE;
     }
 
-    public Long id() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public UUID id() { return id; }
+    public void setId(UUID id) { this.id = id; }
     public OrganizationId supplierId() { return supplierId; }
     public OrganizationId shopId() { return shopId; }
     public RelationStatus status() { return status; }

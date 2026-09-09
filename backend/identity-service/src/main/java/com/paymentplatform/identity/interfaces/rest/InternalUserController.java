@@ -1,5 +1,7 @@
 package com.paymentplatform.identity.interfaces.rest;
 
+import java.util.UUID;
+
 import com.paymentplatform.shared.domain.exception.ForbiddenException;
 import com.paymentplatform.identity.application.dto.CreateInternalUserRequest;
 import com.paymentplatform.identity.application.dto.UserResponse;
@@ -38,7 +40,7 @@ public class InternalUserController {
 
     @GetMapping("/{id}")
     public ResponseEntity<UserResponse> getById(@RequestHeader("X-Internal-Token") String token,
-                                                @PathVariable long id) {
+                                                @PathVariable UUID id) {
         if (!guard.isValid(token)) {
             throw new ForbiddenException("Secret interne invalide");
         }

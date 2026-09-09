@@ -1,5 +1,7 @@
 package com.paymentplatform.payment.application.usecase;
 
+import java.util.UUID;
+
 import com.paymentplatform.payment.application.dto.PageResponse;
 import com.paymentplatform.payment.application.dto.PaymentNameResolver;
 import com.paymentplatform.payment.application.dto.PaymentResponse;
@@ -32,13 +34,13 @@ public class ListPaymentsUseCase {
     }
 
     @Transactional(readOnly = true)
-    public PageResponse<PaymentResponse> execute(long shopId, int page, int size) {
+    public PageResponse<PaymentResponse> execute(UUID shopId, int page, int size) {
         List<Payment> allPayments = payments.findByShopId(shopId);
         return paginate(allPayments, page, size);
     }
 
     @Transactional(readOnly = true)
-    public PageResponse<PaymentResponse> executeBySupplier(long supplierId, int page, int size) {
+    public PageResponse<PaymentResponse> executeBySupplier(UUID supplierId, int page, int size) {
         List<Payment> allPayments = payments.findBySupplierId(supplierId);
         return paginate(allPayments, page, size);
     }
@@ -60,8 +62,8 @@ public class ListPaymentsUseCase {
     }
 
     private List<PaymentResponse> buildResponses(List<Payment> domainPayments) {
-        Set<Long> orgIds = new LinkedHashSet<>();
-        Set<Long> userIds = new LinkedHashSet<>();
+        Set<UUID> orgIds = new LinkedHashSet<>();
+        Set<UUID> userIds = new LinkedHashSet<>();
 
         for (Payment p : domainPayments) {
             orgIds.add(p.shopId());
@@ -72,22 +74,22 @@ public class ListPaymentsUseCase {
             }
         }
 
-        Map<Long, String> orgNames = new HashMap<>();
-        Map<Long, String> userNames = new HashMap<>();
-        for (Long id : orgIds) {
+        Map<UUID, String> orgNames = new HashMap<>();
+        Map<UUID, String> userNames = new HashMap<>();
+        for (UUID id : orgIds) {
             orgNames.put(id, orgClient.getOrganizationName(id).orElse("Org " + id));
         }
-        for (Long id : userIds) {
+        for (UUID id : userIds) {
             userNames.put(id, orgClient.getUserName(id).orElse("User " + id));
         }
 
         PaymentResponse.NameResolver resolver = new PaymentResponse.NameResolver() {
             @Override
-            public String resolveOrg(long organizationId) {
+            public String resolveOrg(UUID organizationId) {
                 return orgNames.getOrDefault(organizationId, "Org " + organizationId);
             }
             @Override
-            public String resolveUser(long userId) {
+            public String resolveUser(UUID userId) {
                 return userNames.getOrDefault(userId, "User " + userId);
             }
         };

@@ -1,5 +1,7 @@
 package com.paymentplatform.payment.application.usecase;
 
+import java.util.UUID;
+
 import com.paymentplatform.shared.domain.exception.NotFoundException;
 import com.paymentplatform.payment.application.dto.PaymentNameResolver;
 import com.paymentplatform.payment.application.dto.PaymentResponse;
@@ -20,7 +22,7 @@ public class GetPaymentUseCase {
     }
 
     @Transactional(readOnly = true)
-    public PaymentResponse execute(long id) {
+    public PaymentResponse execute(UUID id) {
         Payment payment = payments.findById(id)
                 .orElseThrow(() -> new NotFoundException("Paiement non trouvé : " + id));
         return PaymentResponse.from(payment, nameResolver.toNameResolver());

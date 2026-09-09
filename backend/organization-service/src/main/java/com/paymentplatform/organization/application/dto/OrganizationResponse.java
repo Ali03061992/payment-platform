@@ -1,5 +1,7 @@
 package com.paymentplatform.organization.application.dto;
 
+import java.util.UUID;
+
 import com.paymentplatform.organization.domain.model.Organization;
 import com.paymentplatform.organization.domain.model.SupplierShopRelation;
 
@@ -7,7 +9,7 @@ import java.time.Instant;
 import java.util.List;
 
 public record OrganizationResponse(
-        long id,
+        UUID id,
         String name,
         String type,
         String status,

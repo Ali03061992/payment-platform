@@ -1,5 +1,7 @@
 package com.paymentplatform.payment.interfaces.rest;
 
+import java.util.UUID;
+
 import com.paymentplatform.shared.infrastructure.security.CurrentUser;
 import com.paymentplatform.payment.application.dto.*;
 import com.paymentplatform.payment.application.usecase.*;
@@ -69,11 +71,11 @@ public class PaymentController {
 
     @GetMapping("/{id}")
     @PreAuthorize("hasAuthority('VIEW_PAYMENTS')")
-    public ResponseEntity<PaymentResponse> getById(@PathVariable long id) {
+    public ResponseEntity<PaymentResponse> getById(@PathVariable UUID id) {
         var current = CurrentUser.get();
         var response = getPayment.execute(id);
         if (!current.roles().contains("SYSTEM_ADMIN")) {
-            Long orgId = current.organizationId();
+            UUID orgId = current.organizationId();
             if (orgId == null) return ResponseEntity.status(403).build();
             boolean isShop = response.shopId() == orgId;
             boolean isSupplier = response.supplierId() == orgId;
@@ -88,7 +90,7 @@ public class PaymentController {
         var current = CurrentUser.get();
         var response = getPayment.execute(reference);
         if (!current.roles().contains("SYSTEM_ADMIN")) {
-            Long orgId = current.organizationId();
+            UUID orgId = current.organizationId();
             if (orgId == null) return ResponseEntity.status(403).build();
             boolean isShop = response.shopId() == orgId;
             boolean isSupplier = response.supplierId() == orgId;
@@ -123,12 +125,12 @@ public class PaymentController {
     @GetMapping("/agent-summary")
     @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SYSTEM_ADMIN')")
     public ResponseEntity<List<AgentPaymentSummary>> agentSummary(
-            @RequestParam long supplierId,
+            @RequestParam UUID supplierId,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
         var current = CurrentUser.get();
         if (!current.roles().contains("SYSTEM_ADMIN")) {
-            Long orgId = current.organizationId();
+            UUID orgId = current.organizationId();
             if (orgId == null || orgId != supplierId) {
                 return ResponseEntity.status(403).build();
             }
@@ -140,7 +142,7 @@ public class PaymentController {
 
     @PostMapping("/{id}/confirm")
     @PreAuthorize("hasAuthority('SUPPLIER_MANAGE_PAYMENTS')")
-    public ResponseEntity<PaymentResponse> confirm(@PathVariable long id) {
+    public ResponseEntity<PaymentResponse> confirm(@PathVariable UUID id) {
         var current = CurrentUser.get();
         return ResponseEntity.ok(confirmPayment.execute(id, current.userId(), current.organizationId()));
     }
@@ -148,7 +150,7 @@ public class PaymentController {
     @PostMapping("/{id}/reject")
     @PreAuthorize("hasAuthority('SUPPLIER_MANAGE_PAYMENTS')")
     public ResponseEntity<PaymentResponse> reject(
-            @PathVariable long id,
+            @PathVariable UUID id,
             @Valid @RequestBody RejectPaymentRequest request) {
         var current = CurrentUser.get();
         return ResponseEntity.ok(rejectPayment.execute(id, request, current.userId(), current.organizationId()));
@@ -156,7 +158,7 @@ public class PaymentController {
 
     @PostMapping("/{id}/cancel")
     @PreAuthorize("hasAnyAuthority('SHOP_CANCEL_PAYMENTS', 'SUPPLIER_MANAGE_PAYMENTS')")
-    public ResponseEntity<PaymentResponse> cancel(@PathVariable long id) {
+    public ResponseEntity<PaymentResponse> cancel(@PathVariable UUID id) {
         var current = CurrentUser.get();
         return ResponseEntity.ok(cancelPayment.execute(id, current.userId(), current.organizationId()));
     }
@@ -168,8 +170,8 @@ public class PaymentController {
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
             HttpServletResponse response) throws Exception {
         var current = CurrentUser.get();
-        Long supplierId = null;
-        Long shopId = null;
+        UUID supplierId = null;
+        UUID shopId = null;
         if (!current.roles().contains("SYSTEM_ADMIN")) {
             String role = current.roles().getFirst();
             if (role.contains("SHOP")) {

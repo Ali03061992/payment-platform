@@ -38,7 +38,7 @@ public class RejectPaymentUseCase {
     }
 
     @Transactional
-    public PaymentResponse execute(long id, RejectPaymentRequest request, long actorUserId, Long organizationId) {
+    public PaymentResponse execute(UUID id, RejectPaymentRequest request, UUID actorUserId, UUID organizationId) {
         Payment payment = payments.findById(id)
                 .orElseThrow(() -> new NotFoundException("Paiement non trouvé : " + id));
 

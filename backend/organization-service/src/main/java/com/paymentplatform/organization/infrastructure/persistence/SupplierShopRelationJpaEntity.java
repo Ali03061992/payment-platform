@@ -1,5 +1,7 @@
 package com.paymentplatform.organization.infrastructure.persistence;
 
+import java.util.UUID;
+
 import jakarta.persistence.*;
 import java.time.Instant;
 
@@ -8,14 +10,15 @@ import java.time.Instant;
 public class SupplierShopRelationJpaEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(columnDefinition = "VARCHAR(36)")
+    private UUID id;
 
-    @Column(name = "supplier_id", nullable = false)
-    private Long supplierId;
+    @Column(name = "supplier_id", nullable = false, columnDefinition = "VARCHAR(36)")
+    private UUID supplierId;
 
-    @Column(name = "shop_id", nullable = false)
-    private Long shopId;
+    @Column(name = "shop_id", nullable = false, columnDefinition = "VARCHAR(36)")
+    private UUID shopId;
 
     @Column(nullable = false, length = 20)
     private String status;
@@ -25,12 +28,12 @@ public class SupplierShopRelationJpaEntity {
 
     protected SupplierShopRelationJpaEntity() {}
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-    public Long getSupplierId() { return supplierId; }
-    public void setSupplierId(Long supplierId) { this.supplierId = supplierId; }
-    public Long getShopId() { return shopId; }
-    public void setShopId(Long shopId) { this.shopId = shopId; }
+    public UUID getId() { return id; }
+    public void setId(UUID id) { this.id = id; }
+    public UUID getSupplierId() { return supplierId; }
+    public void setSupplierId(UUID supplierId) { this.supplierId = supplierId; }
+    public UUID getShopId() { return shopId; }
+    public void setShopId(UUID shopId) { this.shopId = shopId; }
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
     public Instant getCreatedAt() { return createdAt; }

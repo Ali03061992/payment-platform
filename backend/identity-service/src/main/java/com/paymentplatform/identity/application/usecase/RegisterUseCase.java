@@ -67,7 +67,7 @@ public class RegisterUseCase {
         }
 
         PasswordHash hash = PasswordHash.of(passwordEncoder.encode(request.password()));
-        User user = User.create(new UserId(0), username, email, hash,
+        User user = User.create(new UserId(null), username, email, hash,
                 request.firstName(), request.lastName(),
                 PhoneNumber.of(request.phone()), null, role);
         users.save(user);

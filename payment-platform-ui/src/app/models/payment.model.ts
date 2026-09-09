@@ -1,15 +1,15 @@
 export interface Payment {
-  id: number;
+  id: string;
   reference: string;
-  shopId: number;
+  shopId: string;
   shopName: string;
-  supplierId: number;
+  supplierId: string;
   supplierName: string;
   amount: number;
   currency: string;
   status: 'PENDING' | 'CONFIRMED' | 'REJECTED' | 'CANCELLED';
   rejectionReason: string;
-  createdBy: number;
+  createdBy: string;
   createdByName: string;
   confirmedByName: string;
   rejectedByName: string;
@@ -22,7 +22,7 @@ export interface Payment {
 
 export interface PaymentEvent {
   action: string;
-  userId: number;
+  userId: string;
   userName: string;
   timestamp: string;
   details: string;
@@ -37,8 +37,8 @@ export interface PaymentStats {
 }
 
 export interface CreatePaymentRequest {
-  shopId: number;
-  supplierId: number;
+  shopId: string;
+  supplierId: string;
   amount: number;
   currency: string;
 }

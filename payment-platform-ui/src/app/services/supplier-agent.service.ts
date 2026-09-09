@@ -3,14 +3,14 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 export interface SupplierAgent {
-  id: number;
+  id: string;
   username: string;
   firstName: string;
   lastName: string;
   email: string;
   phone: string;
   status: string;
-  organizationId: number;
+  organizationId: string;
 }
 
 export interface CreateAgentRequest {
@@ -27,23 +27,23 @@ export class SupplierAgentService {
 
   constructor(private http: HttpClient) {}
 
-  listAgents(supplierId: number): Observable<SupplierAgent[]> {
+  listAgents(supplierId: string): Observable<SupplierAgent[]> {
     return this.http.get<SupplierAgent[]>(`${this.apiUrl}/${supplierId}/agents`);
   }
 
-  createAgent(supplierId: number, data: CreateAgentRequest): Observable<SupplierAgent> {
+  createAgent(supplierId: string, data: CreateAgentRequest): Observable<SupplierAgent> {
     return this.http.post<SupplierAgent>(`${this.apiUrl}/${supplierId}/agents`, data);
   }
 
-  updateAgent(supplierId: number, agentId: number, data: Partial<CreateAgentRequest>): Observable<SupplierAgent> {
+  updateAgent(supplierId: string, agentId: string, data: Partial<CreateAgentRequest>): Observable<SupplierAgent> {
     return this.http.patch<SupplierAgent>(`${this.apiUrl}/${supplierId}/agents/${agentId}`, data);
   }
 
-  activateAgent(supplierId: number, agentId: number): Observable<SupplierAgent> {
+  activateAgent(supplierId: string, agentId: string): Observable<SupplierAgent> {
     return this.http.patch<SupplierAgent>(`${this.apiUrl}/${supplierId}/agents/${agentId}/activate`, {});
   }
 
-  disableAgent(supplierId: number, agentId: number): Observable<SupplierAgent> {
+  disableAgent(supplierId: string, agentId: string): Observable<SupplierAgent> {
     return this.http.patch<SupplierAgent>(`${this.apiUrl}/${supplierId}/agents/${agentId}/disable`, {});
   }
 }

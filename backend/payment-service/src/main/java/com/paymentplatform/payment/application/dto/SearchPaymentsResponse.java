@@ -1,5 +1,7 @@
 package com.paymentplatform.payment.application.dto;
 
+import java.util.UUID;
+
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
@@ -11,13 +13,13 @@ public record SearchPaymentsResponse(
         int size
 ) {
     public record PaymentSearchResult(
-            long id,
+            UUID id,
             String reference,
-            long shopId,
+            UUID shopId,
             String shopName,
-            long supplierId,
+            UUID supplierId,
             String supplierName,
-            long createdBy,
+            UUID createdBy,
             String createdByName,
             BigDecimal amount,
             String currency,

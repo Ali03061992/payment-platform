@@ -1,5 +1,7 @@
 package com.paymentplatform.payment;
 
+import java.util.UUID;
+
 import com.paymentplatform.shared.domain.exception.DomainException;
 import com.paymentplatform.payment.domain.model.Payment;
 import com.paymentplatform.payment.domain.model.PaymentStatus;
@@ -16,25 +18,25 @@ class PaymentTest {
 
     @Test
     void createPendingPayment() {
-        Payment p = Payment.create(1L, 2L, Money.of(new BigDecimal("150.50"), "TND"), 10L);
+        Payment p = Payment.create(UUID.fromString("00000000-0000-0000-0000-000000000001"), UUID.fromString("00000000-0000-0000-0000-000000000002"), Money.of(new BigDecimal("150.50"), "TND"), UUID.fromString("00000000-0000-0000-0000-000000000010"));
 
         assertThat(p.id()).isNull();
         assertThat(p.reference().value()).startsWith("PAY-");
-        assertThat(p.shopId()).isEqualTo(1L);
-        assertThat(p.supplierId()).isEqualTo(2L);
+        assertThat(p.shopId()).isEqualTo(UUID.fromString("00000000-0000-0000-0000-000000000001"));
+        assertThat(p.supplierId()).isEqualTo(UUID.fromString("00000000-0000-0000-0000-000000000002"));
         assertThat(p.money().amount()).isEqualByComparingTo(new BigDecimal("150.50"));
         assertThat(p.money().currency()).isEqualTo("TND");
         assertThat(p.status()).isEqualTo(PaymentStatus.PENDING);
         assertThat(p.rejectionReason()).isNull();
-        assertThat(p.createdBy()).isEqualTo(10L);
+        assertThat(p.createdBy()).isEqualTo(UUID.fromString("00000000-0000-0000-0000-000000000010"));
         assertThat(p.version()).isEqualTo(0);
         assertThat(p.events()).hasSize(1);
     }
 
     @Test
     void confirmPayment() {
-        Payment p = Payment.create(1L, 2L, Money.of(new BigDecimal("100"), "TND"), 10L);
-        p = p.confirm(5L);
+        Payment p = Payment.create(UUID.fromString("00000000-0000-0000-0000-000000000001"), UUID.fromString("00000000-0000-0000-0000-000000000002"), Money.of(new BigDecimal("100"), "TND"), UUID.fromString("00000000-0000-0000-0000-000000000010"));
+        p = p.confirm(UUID.fromString("00000000-0000-0000-0000-000000000005"));
 
         assertThat(p.status()).isEqualTo(PaymentStatus.CONFIRMED);
         assertThat(p.events()).hasSize(2);
@@ -42,8 +44,8 @@ class PaymentTest {
 
     @Test
     void rejectPaymentWithReason() {
-        Payment p = Payment.create(1L, 2L, Money.of(new BigDecimal("200"), "EUR"), 10L);
-        p = p.reject(5L, new RejectionReason("Montant incorrect"));
+        Payment p = Payment.create(UUID.fromString("00000000-0000-0000-0000-000000000001"), UUID.fromString("00000000-0000-0000-0000-000000000002"), Money.of(new BigDecimal("200"), "EUR"), UUID.fromString("00000000-0000-0000-0000-000000000010"));
+        p = p.reject(UUID.fromString("00000000-0000-0000-0000-000000000005"), new RejectionReason("Montant incorrect"));
 
         assertThat(p.status()).isEqualTo(PaymentStatus.REJECTED);
         assertThat(p.rejectionReason().value()).isEqualTo("Montant incorrect");
@@ -52,8 +54,8 @@ class PaymentTest {
 
     @Test
     void cancelPayment() {
-        Payment p = Payment.create(1L, 2L, Money.of(new BigDecimal("50"), "USD"), 10L);
-        p = p.cancel(10L);
+        Payment p = Payment.create(UUID.fromString("00000000-0000-0000-0000-000000000001"), UUID.fromString("00000000-0000-0000-0000-000000000002"), Money.of(new BigDecimal("50"), "USD"), UUID.fromString("00000000-0000-0000-0000-000000000010"));
+        p = p.cancel(UUID.fromString("00000000-0000-0000-0000-000000000010"));
 
         assertThat(p.status()).isEqualTo(PaymentStatus.CANCELLED);
         assertThat(p.events()).hasSize(2);
@@ -61,48 +63,48 @@ class PaymentTest {
 
     @Test
     void cannotConfirmAlreadyConfirmed() {
-        Payment confirmed = Payment.create(1L, 2L, Money.of(new BigDecimal("100"), "TND"), 10L).confirm(5L);
+        Payment confirmed = Payment.create(UUID.fromString("00000000-0000-0000-0000-000000000001"), UUID.fromString("00000000-0000-0000-0000-000000000002"), Money.of(new BigDecimal("100"), "TND"), UUID.fromString("00000000-0000-0000-0000-000000000010")).confirm(UUID.fromString("00000000-0000-0000-0000-000000000005"));
 
-        assertThatThrownBy(() -> confirmed.confirm(5L))
+        assertThatThrownBy(() -> confirmed.confirm(UUID.fromString("00000000-0000-0000-0000-000000000005")))
                 .isInstanceOf(DomainException.class)
                 .hasMessageContaining("état terminal");
     }
 
     @Test
     void cannotRejectAlreadyCancelled() {
-        Payment cancelled = Payment.create(1L, 2L, Money.of(new BigDecimal("100"), "TND"), 10L).cancel(10L);
+        Payment cancelled = Payment.create(UUID.fromString("00000000-0000-0000-0000-000000000001"), UUID.fromString("00000000-0000-0000-0000-000000000002"), Money.of(new BigDecimal("100"), "TND"), UUID.fromString("00000000-0000-0000-0000-000000000010")).cancel(UUID.fromString("00000000-0000-0000-0000-000000000010"));
 
-        assertThatThrownBy(() -> cancelled.reject(5L, new RejectionReason("test")))
+        assertThatThrownBy(() -> cancelled.reject(UUID.fromString("00000000-0000-0000-0000-000000000005"), new RejectionReason("test")))
                 .isInstanceOf(DomainException.class)
                 .hasMessageContaining("état terminal");
     }
 
     @Test
     void cannotConfirmAlreadyRejected() {
-        Payment rejected = Payment.create(1L, 2L, Money.of(new BigDecimal("100"), "TND"), 10L).reject(5L, new RejectionReason("reason"));
+        Payment rejected = Payment.create(UUID.fromString("00000000-0000-0000-0000-000000000001"), UUID.fromString("00000000-0000-0000-0000-000000000002"), Money.of(new BigDecimal("100"), "TND"), UUID.fromString("00000000-0000-0000-0000-000000000010")).reject(UUID.fromString("00000000-0000-0000-0000-000000000005"), new RejectionReason("reason"));
 
-        assertThatThrownBy(() -> rejected.confirm(5L))
+        assertThatThrownBy(() -> rejected.confirm(UUID.fromString("00000000-0000-0000-0000-000000000005")))
                 .isInstanceOf(DomainException.class)
                 .hasMessageContaining("état terminal");
     }
 
     @Test
     void cannotCreateWithZeroAmount() {
-        assertThatThrownBy(() -> Payment.create(1L, 2L, Money.of(BigDecimal.ZERO, "TND"), 10L))
+        assertThatThrownBy(() -> Payment.create(UUID.fromString("00000000-0000-0000-0000-000000000001"), UUID.fromString("00000000-0000-0000-0000-000000000002"), Money.of(BigDecimal.ZERO, "TND"), UUID.fromString("00000000-0000-0000-0000-000000000010")))
                 .isInstanceOf(DomainException.class)
                 .hasMessageContaining("supérieur à 0");
     }
 
     @Test
     void cannotCreateWithNegativeAmount() {
-        assertThatThrownBy(() -> Payment.create(1L, 2L, Money.of(new BigDecimal("-10"), "TND"), 10L))
+        assertThatThrownBy(() -> Payment.create(UUID.fromString("00000000-0000-0000-0000-000000000001"), UUID.fromString("00000000-0000-0000-0000-000000000002"), Money.of(new BigDecimal("-10"), "TND"), UUID.fromString("00000000-0000-0000-0000-000000000010")))
                 .isInstanceOf(DomainException.class)
                 .hasMessageContaining("supérieur à 0");
     }
 
     @Test
     void cannotCreateWithSameShopAndSupplier() {
-        assertThatThrownBy(() -> Payment.create(1L, 1L, Money.of(new BigDecimal("100"), "TND"), 10L))
+        assertThatThrownBy(() -> Payment.create(UUID.fromString("00000000-0000-0000-0000-000000000001"), UUID.fromString("00000000-0000-0000-0000-000000000001"), Money.of(new BigDecimal("100"), "TND"), UUID.fromString("00000000-0000-0000-0000-000000000010")))
                 .isInstanceOf(DomainException.class)
                 .hasMessageContaining("différents");
     }
@@ -129,24 +131,24 @@ class PaymentTest {
 
     @Test
     void belongsToShop() {
-        Payment p = Payment.create(1L, 2L, Money.of(new BigDecimal("100"), "TND"), 10L);
-        assertThat(p.belongsToShop(1L)).isTrue();
-        assertThat(p.belongsToShop(2L)).isFalse();
+        Payment p = Payment.create(UUID.fromString("00000000-0000-0000-0000-000000000001"), UUID.fromString("00000000-0000-0000-0000-000000000002"), Money.of(new BigDecimal("100"), "TND"), UUID.fromString("00000000-0000-0000-0000-000000000010"));
+        assertThat(p.belongsToShop(UUID.fromString("00000000-0000-0000-0000-000000000001"))).isTrue();
+        assertThat(p.belongsToShop(UUID.fromString("00000000-0000-0000-0000-000000000002"))).isFalse();
     }
 
     @Test
     void belongsToSupplier() {
-        Payment p = Payment.create(1L, 2L, Money.of(new BigDecimal("100"), "TND"), 10L);
-        assertThat(p.belongsToSupplier(2L)).isTrue();
-        assertThat(p.belongsToSupplier(1L)).isFalse();
+        Payment p = Payment.create(UUID.fromString("00000000-0000-0000-0000-000000000001"), UUID.fromString("00000000-0000-0000-0000-000000000002"), Money.of(new BigDecimal("100"), "TND"), UUID.fromString("00000000-0000-0000-0000-000000000010"));
+        assertThat(p.belongsToSupplier(UUID.fromString("00000000-0000-0000-0000-000000000002"))).isTrue();
+        assertThat(p.belongsToSupplier(UUID.fromString("00000000-0000-0000-0000-000000000001"))).isFalse();
     }
 
     @Test
     void canBeViewedBy() {
-        Payment p = Payment.create(1L, 2L, Money.of(new BigDecimal("100"), "TND"), 10L);
-        assertThat(p.canBeViewedBy(10L, null)).isTrue();
-        assertThat(p.canBeViewedBy(99L, 1L)).isTrue();
-        assertThat(p.canBeViewedBy(99L, 2L)).isTrue();
-        assertThat(p.canBeViewedBy(99L, 3L)).isFalse();
+        Payment p = Payment.create(UUID.fromString("00000000-0000-0000-0000-000000000001"), UUID.fromString("00000000-0000-0000-0000-000000000002"), Money.of(new BigDecimal("100"), "TND"), UUID.fromString("00000000-0000-0000-0000-000000000010"));
+        assertThat(p.canBeViewedBy(UUID.fromString("00000000-0000-0000-0000-000000000010"), null)).isTrue();
+        assertThat(p.canBeViewedBy(UUID.fromString("00000000-0000-0000-0000-000000000099"), UUID.fromString("00000000-0000-0000-0000-000000000001"))).isTrue();
+        assertThat(p.canBeViewedBy(UUID.fromString("00000000-0000-0000-0000-000000000099"), UUID.fromString("00000000-0000-0000-0000-000000000002"))).isTrue();
+        assertThat(p.canBeViewedBy(UUID.fromString("00000000-0000-0000-0000-000000000099"), UUID.fromString("00000000-0000-0000-0000-000000000003"))).isFalse();
     }
 }

@@ -1,5 +1,7 @@
 package com.paymentplatform.identity.interfaces.rest;
 
+import java.util.UUID;
+
 import com.paymentplatform.identity.application.dto.LoginRequest;
 import com.paymentplatform.identity.application.dto.CreateInternalUserRequest;
 import com.paymentplatform.identity.domain.model.User;
@@ -52,7 +54,7 @@ class UserControllerTest {
                 .apply(SecurityMockMvcConfigurers.springSecurity())
                 .build();
         adminUsername = "admin." + System.nanoTime();
-        User admin = users.save(User.create(new UserId(0), Username.of(adminUsername),
+        User admin = users.save(User.create(new UserId(null), Username.of(adminUsername),
                 Email.of(adminUsername + "@example.com"), PasswordHash.of(passwordEncoder.encode("Admin@1")),
                 "Admin", "User", new PhoneNumber(null),
                 null, RoleCode.SYSTEM_ADMIN));

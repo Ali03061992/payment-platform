@@ -1,5 +1,7 @@
 package com.paymentplatform.organization.application.dto;
 
+import java.util.UUID;
+
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
@@ -9,8 +11,8 @@ import java.math.BigDecimal;
 import java.util.List;
 
 public record CreateOrderRequest(
-        @NotNull(message = "L'ID du fournisseur est requis") Long supplierId,
-        @NotNull(message = "L'ID de la boutique est requis") Long shopId,
+        @NotNull(message = "L'ID du fournisseur est requis") UUID supplierId,
+        @NotNull(message = "L'ID de la boutique est requis") UUID shopId,
         Boolean asapPayment,
         @NotBlank(message = "La devise est requise") String currency,
         String notes,

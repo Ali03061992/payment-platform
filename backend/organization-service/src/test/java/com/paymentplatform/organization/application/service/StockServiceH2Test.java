@@ -1,5 +1,7 @@
 package com.paymentplatform.organization.application.service;
 
+import java.util.UUID;
+
 import com.paymentplatform.organization.application.dto.ProductCreateRequest;
 import com.paymentplatform.organization.application.dto.ProductUpdateRequest;
 import com.paymentplatform.organization.application.dto.StockMovementRequest;
@@ -27,11 +29,11 @@ class StockServiceH2Test {
     @Autowired private StockService stockService;
     @Autowired private ProductRepository products;
 
-    private Long supplierId;
+    private UUID supplierId;
 
     @BeforeEach
     void setUp() {
-        supplierId = 1L;
+        supplierId = UUID.fromString("00000000-0000-0000-0000-000000000001");
     }
 
     @Test
@@ -92,7 +94,7 @@ class StockServiceH2Test {
     void getProduct_wrongSupplier_throwsNotFound() {
         var created = stockService.createProduct(supplierId, new ProductCreateRequest("Get", "GET-002", null,
                 new BigDecimal("10.00"), "TND", 10, 1));
-        assertThatThrownBy(() -> stockService.getProduct(99L, created.id()))
+        assertThatThrownBy(() -> stockService.getProduct(UUID.fromString("00000000-0000-0000-0000-000000000099"), created.id()))
                 .isInstanceOf(NotFoundException.class);
     }
 

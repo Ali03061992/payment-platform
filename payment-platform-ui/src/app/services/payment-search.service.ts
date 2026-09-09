@@ -3,9 +3,9 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 export interface SearchPaymentsRequest {
-  shopId?: number;
-  supplierId?: number;
-  createdBy?: number;
+  shopId?: string;
+  supplierId?: string;
+  createdBy?: string;
   status?: string;
   from?: string;
   to?: string;
@@ -14,13 +14,13 @@ export interface SearchPaymentsRequest {
 }
 
 export interface PaymentSearchResult {
-  id: number;
+  id: string;
   reference: string;
-  shopId: number;
+  shopId: string;
   shopName: string;
-  supplierId: number;
+  supplierId: string;
   supplierName: string;
-  createdBy: number;
+  createdBy: string;
   createdByName: string;
   amount: number;
   currency: string;

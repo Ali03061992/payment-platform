@@ -51,14 +51,14 @@ export class PaymentListComponent implements OnInit, OnDestroy {
     return map[s] || '';
   }
 
-  confirm(id: number): void {
+  confirm(id: string): void {
     this.subscriptions.add(this.paymentService.confirm(id).subscribe({
       next: () => this.load(),
       error: (e: any) => { this.toast.error(e.error?.message || 'Erreur'); }
     }));
   }
 
-  cancel(id: number): void {
+  cancel(id: string): void {
     this.subscriptions.add(this.paymentService.cancel(id).subscribe({
       next: () => this.load(),
       error: (e: any) => { this.toast.error(e.error?.message || 'Erreur'); }

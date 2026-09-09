@@ -1,5 +1,7 @@
 package com.paymentplatform.organization.application.service;
 
+import java.util.UUID;
+
 import com.paymentplatform.organization.domain.model.Product;
 import com.paymentplatform.organization.domain.model.StockMovement;
 import com.paymentplatform.organization.domain.repository.ProductRepository;
@@ -30,7 +32,7 @@ class StockOptimizationServiceTest {
         productRepository.deleteAll();
     }
 
-    private Product createProduct(long supplierId, String sku, int qty, int minQty) {
+    private Product createProduct(UUID supplierId, String sku, int qty, int minQty) {
         Product p = new Product();
         p.setSupplierId(supplierId);
         p.setName("Product-" + sku);
@@ -55,11 +57,11 @@ class StockOptimizationServiceTest {
 
     @Test
     void optimize_withProducts_returnsResponse() {
-        Product p = createProduct(10L, "SKU-001", 50, 10);
+        Product p = createProduct(UUID.fromString("00000000-0000-0000-0000-000000000010"), "SKU-001", 50, 10);
         createMovement(p, "OUT", 10);
         createMovement(p, "OUT", 15);
 
-        var response = service.optimize(10L);
+        var response = service.optimize(UUID.fromString("00000000-0000-0000-0000-000000000010"));
 
         assertThat(response).isNotNull();
         assertThat(response.products()).isNotNull();
@@ -67,7 +69,7 @@ class StockOptimizationServiceTest {
 
     @Test
     void optimize_noProducts_returnsEmptyResponse() {
-        var response = service.optimize(99L);
+        var response = service.optimize(UUID.fromString("00000000-0000-0000-0000-000000000099"));
 
         assertThat(response).isNotNull();
         assertThat(response.products()).isEmpty();
@@ -75,9 +77,9 @@ class StockOptimizationServiceTest {
 
     @Test
     void optimize_withNoMovements_returnsResponse() {
-        createProduct(10L, "SKU-002", 100, 5);
+        createProduct(UUID.fromString("00000000-0000-0000-0000-000000000010"), "SKU-002", 100, 5);
 
-        var response = service.optimize(10L);
+        var response = service.optimize(UUID.fromString("00000000-0000-0000-0000-000000000010"));
 
         assertThat(response).isNotNull();
         assertThat(response.products()).hasSize(1);
@@ -87,31 +89,31 @@ class StockOptimizationServiceTest {
     void setParameters_updatesConfig() {
         service.setParameters(14, 75.0, 0.30);
 
-        createProduct(10L, "SKU-003", 20, 5);
-        var response = service.optimize(10L);
+        createProduct(UUID.fromString("00000000-0000-0000-0000-000000000010"), "SKU-003", 20, 5);
+        var response = service.optimize(UUID.fromString("00000000-0000-0000-0000-000000000010"));
 
         assertThat(response).isNotNull();
     }
 
     @Test
     void optimize_multipleProducts_returnsMultipleResults() {
-        createProduct(10L, "SKU-A", 30, 5);
-        createProduct(10L, "SKU-B", 80, 10);
-        createProduct(10L, "SKU-C", 150, 20);
+        createProduct(UUID.fromString("00000000-0000-0000-0000-000000000010"), "SKU-A", 30, 5);
+        createProduct(UUID.fromString("00000000-0000-0000-0000-000000000010"), "SKU-B", 80, 10);
+        createProduct(UUID.fromString("00000000-0000-0000-0000-000000000010"), "SKU-C", 150, 20);
 
-        var response = service.optimize(10L);
+        var response = service.optimize(UUID.fromString("00000000-0000-0000-0000-000000000010"));
 
         assertThat(response.products()).hasSize(3);
     }
 
     @Test
     void optimize_productWithInMovements_derivesDemand() {
-        Product p = createProduct(10L, "SKU-OUT", 100, 10);
+        Product p = createProduct(UUID.fromString("00000000-0000-0000-0000-000000000010"), "SKU-OUT", 100, 10);
         createMovement(p, "IN", 50);
         createMovement(p, "OUT", 20);
         createMovement(p, "OUT", 30);
 
-        var response = service.optimize(10L);
+        var response = service.optimize(UUID.fromString("00000000-0000-0000-0000-000000000010"));
 
         assertThat(response).isNotNull();
         assertThat(response.products()).hasSize(1);

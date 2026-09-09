@@ -1,7 +1,7 @@
 export interface Notification {
-  id: number;
-  recipientUserId: number;
-  recipientOrganizationId: number | null;
+  id: string;
+  recipientUserId: string;
+  recipientOrganizationId: string | null;
   type: string;
   message: string;
   readStatus: string;

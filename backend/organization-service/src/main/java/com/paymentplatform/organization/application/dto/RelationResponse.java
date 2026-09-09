@@ -1,13 +1,15 @@
 package com.paymentplatform.organization.application.dto;
 
+import java.util.UUID;
+
 import com.paymentplatform.organization.domain.model.SupplierShopRelation;
 
 import java.time.Instant;
 
 public record RelationResponse(
-        long id,
-        long supplierId,
-        long shopId,
+        UUID id,
+        UUID supplierId,
+        UUID shopId,
         String status,
         Instant createdAt
 ) {

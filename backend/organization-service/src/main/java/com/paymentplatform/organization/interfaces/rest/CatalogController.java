@@ -1,5 +1,7 @@
 package com.paymentplatform.organization.interfaces.rest;
 
+import java.util.UUID;
+
 import com.paymentplatform.organization.domain.model.ProductCategory;
 import com.paymentplatform.organization.domain.model.ProductFamily;
 import com.paymentplatform.organization.domain.repository.ProductCategoryRepository;
@@ -34,7 +36,7 @@ public class CatalogController {
 
     @GetMapping("/categories")
     @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN','SYSTEM_ADMIN')")
-    public ResponseEntity<List<ProductCategory>> listCategories(@RequestParam Long supplierId) {
+    public ResponseEntity<List<ProductCategory>> listCategories(@RequestParam UUID supplierId) {
         var current = CurrentUser.get();
         if (current.organizationId() != null && !current.organizationId().equals(supplierId)) {
             return ResponseEntity.status(403).build();
@@ -47,7 +49,7 @@ public class CatalogController {
     public ResponseEntity<ProductCategory> createCategory(
             @Valid @RequestBody CategoryRequest request) {
         var current = CurrentUser.get();
-        Long supplierId = request.supplierId();
+        UUID supplierId = request.supplierId();
         if (current.organizationId() != null && !current.organizationId().equals(supplierId)) {
             return ResponseEntity.status(403).build();
         }
@@ -64,7 +66,7 @@ public class CatalogController {
 
     @DeleteMapping("/categories/{id}")
     @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN','SYSTEM_ADMIN')")
-    public ResponseEntity<Void> deleteCategory(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteCategory(@PathVariable UUID id) {
         if (!categoryRepository.existsById(id)) {
             return ResponseEntity.notFound().build();
         }
@@ -77,8 +79,8 @@ public class CatalogController {
     @GetMapping("/families")
     @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN','SYSTEM_ADMIN')")
     public ResponseEntity<List<ProductFamily>> listFamilies(
-            @RequestParam(required = false) Long supplierId,
-            @RequestParam(required = false) Long categoryId) {
+            @RequestParam(required = false) UUID supplierId,
+            @RequestParam(required = false) UUID categoryId) {
         var current = CurrentUser.get();
         if (supplierId != null && current.organizationId() != null && !current.organizationId().equals(supplierId)) {
             return ResponseEntity.status(403).build();
@@ -97,7 +99,7 @@ public class CatalogController {
     public ResponseEntity<ProductFamily> createFamily(
             @Valid @RequestBody FamilyRequest request) {
         var current = CurrentUser.get();
-        Long supplierId = request.supplierId();
+        UUID supplierId = request.supplierId();
         if (current.organizationId() != null && !current.organizationId().equals(supplierId)) {
             return ResponseEntity.status(403).build();
         }
@@ -118,10 +120,10 @@ public class CatalogController {
     @PutMapping("/families/{id}")
     @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN','SYSTEM_ADMIN')")
     public ResponseEntity<ProductFamily> updateFamily(
-            @PathVariable Long id,
+            @PathVariable UUID id,
             @Valid @RequestBody FamilyRequest request) {
         var current = CurrentUser.get();
-        Long supplierId = request.supplierId();
+        UUID supplierId = request.supplierId();
         if (current.organizationId() != null && !current.organizationId().equals(supplierId)) {
             return ResponseEntity.status(403).build();
         }
@@ -138,7 +140,7 @@ public class CatalogController {
 
     @DeleteMapping("/families/{id}")
     @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN','SYSTEM_ADMIN')")
-    public ResponseEntity<Void> deleteFamily(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteFamily(@PathVariable UUID id) {
         if (!familyRepository.existsById(id)) {
             return ResponseEntity.notFound().build();
         }
@@ -149,15 +151,15 @@ public class CatalogController {
     // --- Request DTOs ---
 
     public record CategoryRequest(
-            @NotNull Long supplierId,
+            @NotNull UUID supplierId,
             @NotBlank String name,
             @NotBlank String code
     ) {}
 
     public record FamilyRequest(
-            @NotNull Long supplierId,
+            @NotNull UUID supplierId,
             @NotBlank String name,
             @NotBlank String code,
-            Set<Long> categoryIds
+            Set<UUID> categoryIds
     ) {}
 }

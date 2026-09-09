@@ -1,5 +1,7 @@
 package com.paymentplatform.notification.infrastructure.messaging;
 
+import java.util.UUID;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.paymentplatform.notification.domain.model.Notification;
@@ -53,15 +55,14 @@ public class PaymentEventConsumer {
     }
 
     private void handlePaymentCreated(JsonNode event) {
-        long shopId = event.get("shopId").asLong();
-        long supplierId = event.get("supplierId").asLong();
+        UUID shopId = UUID.fromString(event.get("shopId").asText());
+        UUID supplierId = UUID.fromString(event.get("supplierId").asText());
         String reference = event.get("reference").asText();
-        long createdBy = event.get("createdBy").asLong();
+        UUID createdBy = UUID.fromString(event.get("createdBy").asText());
         String amount = event.get("amount").asText();
         String currency = event.get("currency").asText();
 
-        notifications.save(new Notification(
-                0L, supplierId,
+        notifications.save(new Notification(null, supplierId,
                 "PAYMENT_CREATED",
                 "Nouveau paiement " + reference + " de " + amount + " " + currency,
                 "PAYMENT", reference
@@ -76,13 +77,12 @@ public class PaymentEventConsumer {
     }
 
     private void handlePaymentConfirmed(JsonNode event) {
-        long shopId = event.get("shopId").asLong();
-        long supplierId = event.get("supplierId").asLong();
+        UUID shopId = UUID.fromString(event.get("shopId").asText());
+        UUID supplierId = UUID.fromString(event.get("supplierId").asText());
         String reference = event.get("reference").asText();
-        long confirmedBy = event.get("confirmedBy").asLong();
+        UUID confirmedBy = UUID.fromString(event.get("confirmedBy").asText());
 
-        notifications.save(new Notification(
-                0L, shopId,
+        notifications.save(new Notification(null, shopId,
                 "PAYMENT_CONFIRMED",
                 "Paiement " + reference + " confirm\u00e9 par le fournisseur",
                 "PAYMENT", reference
@@ -97,12 +97,11 @@ public class PaymentEventConsumer {
     }
 
     private void handlePaymentRejected(JsonNode event) {
-        long shopId = event.get("shopId").asLong();
+        UUID shopId = UUID.fromString(event.get("shopId").asText());
         String reference = event.get("reference").asText();
         String reason = event.has("rejectionReason") ? event.get("rejectionReason").asText() : "";
 
-        notifications.save(new Notification(
-                0L, shopId,
+        notifications.save(new Notification(null, shopId,
                 "PAYMENT_REJECTED",
                 "Paiement " + reference + " rejet\u00e9" + (reason.isEmpty() ? "" : " : " + reason),
                 "PAYMENT", reference
@@ -110,13 +109,12 @@ public class PaymentEventConsumer {
     }
 
     private void handlePaymentCancelled(JsonNode event) {
-        long shopId = event.get("shopId").asLong();
-        long supplierId = event.get("supplierId").asLong();
+        UUID shopId = UUID.fromString(event.get("shopId").asText());
+        UUID supplierId = UUID.fromString(event.get("supplierId").asText());
         String reference = event.get("reference").asText();
-        long cancelledBy = event.get("cancelledBy").asLong();
+        UUID cancelledBy = UUID.fromString(event.get("cancelledBy").asText());
 
-        notifications.save(new Notification(
-                0L, supplierId,
+        notifications.save(new Notification(null, supplierId,
                 "PAYMENT_CANCELLED",
                 "Paiement " + reference + " annul\u00e9 par la boutique",
                 "PAYMENT", reference

@@ -1,5 +1,5 @@
 export interface Organization {
-  id: number;
+  id: string;
   name: string;
   type: 'SUPPLIER' | 'SHOP';
   status: 'ACTIVE' | 'DISABLED';
@@ -10,9 +10,9 @@ export interface Organization {
 }
 
 export interface SupplierShopRelation {
-  id: number;
-  supplierId: number;
-  shopId: number;
+  id: string;
+  supplierId: string;
+  shopId: string;
   status: 'ACTIVE' | 'INACTIVE';
   createdAt: string;
 }
@@ -27,6 +27,6 @@ export interface CreateOrganizationRequest {
 }
 
 export interface CreateRelationRequest {
-  supplierId: number;
-  shopId: number;
+  supplierId: string;
+  shopId: string;
 }

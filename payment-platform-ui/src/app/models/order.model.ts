@@ -1,9 +1,9 @@
 export interface Order {
-  id: number;
+  id: string;
   reference: string;
-  supplierId: number;
-  shopId: number;
-  createdBy: number;
+  supplierId: string;
+  shopId: string;
+  createdBy: string;
   createdByRole: string;
   source: string;
   status: string;
@@ -12,8 +12,8 @@ export interface Order {
   taxAmount: number;
   total: number;
   currency: string;
-  deliveryAgentId: number | null;
-  receivedBy: number | null;
+  deliveryAgentId: string | null;
+  receivedBy: string | null;
   receivedAt: string | null;
   deliveredAt: string | null;
   asapPayment: boolean;
@@ -26,9 +26,9 @@ export interface Order {
 }
 
 export interface OrderItem {
-  id: number;
-  orderId: number;
-  productId: number;
+  id: string;
+  orderId: string;
+  productId: string;
   productRef: string;
   productName: string;
   quantity: number;
@@ -39,19 +39,19 @@ export interface OrderItem {
 }
 
 export interface OrderEvent {
-  id: number;
-  orderId: number;
+  id: string;
+  orderId: string;
   action: string;
-  userId: number | null;
+  userId: string | null;
   timestamp: string;
   details: string | null;
 }
 
 export interface CreateOrderRequest {
-  supplierId: number;
-  shopId: number;
+  supplierId: string;
+  shopId: string;
   asapPayment: boolean;
   currency: string;
   notes: string;
-  items: { productId: number; quantity: number; discount: number }[];
+  items: { productId: string; quantity: number; discount: number }[];
 }

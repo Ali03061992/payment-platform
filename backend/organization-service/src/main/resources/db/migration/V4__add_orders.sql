@@ -1,11 +1,11 @@
 -- V4 : Commandes et lignes de commande
 
 CREATE TABLE orders (
-  id                   BIGINT AUTO_INCREMENT PRIMARY KEY,
+  id VARCHAR(36) PRIMARY KEY,
   reference            VARCHAR(64)    NOT NULL UNIQUE,
-  supplier_id          BIGINT         NOT NULL,
-  shop_id              BIGINT         NOT NULL,
-  created_by           BIGINT         NOT NULL,
+  supplier_id VARCHAR(36)         NOT NULL,
+  shop_id VARCHAR(36)         NOT NULL,
+  created_by VARCHAR(36)         NOT NULL,
   created_by_role      VARCHAR(30)    NOT NULL,
   source               VARCHAR(10)    NOT NULL DEFAULT 'SHOP',
   status               VARCHAR(30)    NOT NULL DEFAULT 'DRAFT',
@@ -14,8 +14,8 @@ CREATE TABLE orders (
   tax_amount           DECIMAL(19,4)  NOT NULL DEFAULT 0,
   total                DECIMAL(19,4)  NOT NULL DEFAULT 0,
   currency             CHAR(3)        NOT NULL DEFAULT 'TND',
-  delivery_agent_id    BIGINT         NULL,
-  received_by          BIGINT         NULL,
+  delivery_agent_id VARCHAR(36)         NULL,
+  received_by VARCHAR(36)         NULL,
   received_at          DATETIME(6)    NULL,
   delivered_at         DATETIME(6)    NULL,
   asap_payment         BOOLEAN        NOT NULL DEFAULT FALSE,
@@ -32,9 +32,9 @@ CREATE TABLE orders (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE order_items (
-  id              BIGINT AUTO_INCREMENT PRIMARY KEY,
-  order_id        BIGINT         NOT NULL,
-  product_id      BIGINT         NOT NULL,
+  id VARCHAR(36) PRIMARY KEY,
+  order_id VARCHAR(36)         NOT NULL,
+  product_id VARCHAR(36)         NOT NULL,
   product_ref     VARCHAR(50)    NOT NULL,
   product_name    VARCHAR(200)   NOT NULL,
   quantity        INT            NOT NULL,
@@ -48,10 +48,10 @@ CREATE TABLE order_items (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE order_events (
-  id         BIGINT AUTO_INCREMENT PRIMARY KEY,
-  order_id   BIGINT      NOT NULL,
+  id VARCHAR(36) PRIMARY KEY,
+  order_id VARCHAR(36)      NOT NULL,
   action     VARCHAR(40) NOT NULL,
-  user_id    BIGINT      NULL,
+  user_id VARCHAR(36)      NULL,
   timestamp  DATETIME(6) NOT NULL,
   details    TEXT        NULL,
   INDEX idx_order_events_order (order_id),

@@ -1,5 +1,7 @@
 package com.paymentplatform.payment.infrastructure.elasticsearch;
 
+import java.util.UUID;
+
 import com.paymentplatform.payment.domain.model.Payment;
 import com.paymentplatform.payment.domain.repository.PaymentRepository;
 import com.paymentplatform.payment.infrastructure.http.OrganizationValidationClient;
@@ -73,7 +75,7 @@ public class PaymentIndexerService {
         }
     }
 
-    public void removePayment(long paymentId) {
+    public void removePayment(UUID paymentId) {
         try {
             elasticsearchOperations.delete(String.valueOf(paymentId), IndexCoordinates.of(INDEX_NAME));
         } catch (Exception e) {

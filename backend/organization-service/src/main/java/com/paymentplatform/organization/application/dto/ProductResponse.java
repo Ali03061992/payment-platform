@@ -1,12 +1,14 @@
 package com.paymentplatform.organization.application.dto;
 
+import java.util.UUID;
+
 import com.paymentplatform.organization.domain.model.Product;
 import java.math.BigDecimal;
 import java.time.Instant;
 
 public record ProductResponse(
-    Long id,
-    Long supplierId,
+    UUID id,
+    UUID supplierId,
     String name,
     String sku,
     String description,
@@ -15,8 +17,8 @@ public record ProductResponse(
     Integer quantity,
     Integer minQuantity,
     Integer reservedQty,
-    Long categoryId,
-    Long familyId,
+    UUID categoryId,
+    UUID familyId,
     String unit,
     String status,
     Instant createdAt,

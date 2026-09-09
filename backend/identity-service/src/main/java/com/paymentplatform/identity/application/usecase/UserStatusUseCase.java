@@ -31,12 +31,12 @@ public class UserStatusUseCase {
     }
 
     @Transactional
-    public UserResponse disableUser(long actorUserId, long userId) {
+    public UserResponse disableUser(UUID actorUserId, UUID userId) {
         User user = users.findById(UserId.of(userId))
                 .orElseThrow(() -> new NotFoundException("Utilisateur introuvable"));
         user.disable();
         users.save(user);
-        Long orgId = user.organizationId() == null ? null : user.organizationId().value();
+        UUID orgId = user.organizationId() == null ? null : user.organizationId().value();
         audit.record(actorUserId, orgId, AuditActions.USER_DISABLED, userId, "{\"by\":\"system-admin\"}");
         outbox.append(new UserDisabledEvent(UUID.randomUUID(), Instant.now(), userId, orgId, "system-admin"),
                 String.valueOf(userId));
@@ -44,12 +44,12 @@ public class UserStatusUseCase {
     }
 
     @Transactional
-    public UserResponse activateUser(long actorUserId, long userId) {
+    public UserResponse activateUser(UUID actorUserId, UUID userId) {
         User user = users.findById(UserId.of(userId))
                 .orElseThrow(() -> new NotFoundException("Utilisateur introuvable"));
         user.activate();
         users.save(user);
-        Long orgId = user.organizationId() == null ? null : user.organizationId().value();
+        UUID orgId = user.organizationId() == null ? null : user.organizationId().value();
         audit.record(actorUserId, orgId, AuditActions.USER_ENABLED, userId, "{\"by\":\"system-admin\"}");
         outbox.append(new UserActivatedEvent(UUID.randomUUID(), Instant.now(), userId, orgId),
                 String.valueOf(userId));

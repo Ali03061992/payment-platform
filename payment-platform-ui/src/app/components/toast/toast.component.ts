@@ -23,7 +23,7 @@ export class ToastComponent implements OnInit, OnDestroy {
     this.sub?.unsubscribe();
   }
 
-  dismiss(id: number): void {
+  dismiss(id: string): void {
     this.toastService.dismiss(id);
   }
 

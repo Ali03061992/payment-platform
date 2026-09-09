@@ -15,7 +15,7 @@ export interface StockOptimizationResponse {
 }
 
 export interface ProductOptimization {
-  productId: number;
+  productId: string;
   productName: string;
   sku: string;
   abcClass: string;

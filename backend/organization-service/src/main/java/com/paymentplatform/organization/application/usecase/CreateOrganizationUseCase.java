@@ -35,7 +35,7 @@ public class CreateOrganizationUseCase {
     }
 
     @Transactional
-    public OrganizationResponse execute(CreateOrganizationRequest request, long actorUserId) {
+    public OrganizationResponse execute(CreateOrganizationRequest request, UUID actorUserId) {
         OrganizationType type = OrganizationType.from(request.type());
         OrganizationName name = OrganizationName.of(request.name());
 
@@ -43,7 +43,7 @@ public class CreateOrganizationUseCase {
             throw new ConflictException("Une organisation avec ce nom existe déjà : " + name.value());
         }
 
-        Organization org = Organization.create(new OrganizationId(0), name, type);
+        Organization org = Organization.create(new OrganizationId(null), name, type);
         Organization saved = organizations.save(org);
 
         audit.record(null, saved.id().value(), type == OrganizationType.SUPPLIER

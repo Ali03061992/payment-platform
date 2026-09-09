@@ -1,5 +1,7 @@
 package com.paymentplatform.organization.infrastructure.persistence;
 
+import java.util.UUID;
+
 import jakarta.persistence.*;
 import java.time.Instant;
 
@@ -8,8 +10,9 @@ import java.time.Instant;
 public class OrganizationJpaEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(columnDefinition = "VARCHAR(36)")
+    private UUID id;
 
     @Column(nullable = false, length = 100)
     private String name;
@@ -31,8 +34,8 @@ public class OrganizationJpaEntity {
 
     protected OrganizationJpaEntity() {}
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public UUID getId() { return id; }
+    public void setId(UUID id) { this.id = id; }
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
     public String getType() { return type; }

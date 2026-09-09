@@ -1,5 +1,7 @@
 package com.paymentplatform.organization.interfaces.rest;
 
+import java.util.UUID;
+
 import com.paymentplatform.organization.domain.model.Organization;
 import com.paymentplatform.organization.domain.repository.OrganizationRepository;
 import com.paymentplatform.organization.domain.valueobject.OrganizationId;
@@ -34,37 +36,37 @@ class InternalOrganizationControllerTest {
         mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
     }
 
-    private long createOrg(String name) {
-        Organization org = Organization.create(OrganizationId.of(0), OrganizationName.of(name), OrganizationType.SHOP);
+    private UUID createOrg(String name) {
+        Organization org = Organization.create(OrganizationId.of(null), OrganizationName.of(name), OrganizationType.SHOP);
         return organizations.save(org).id().value();
     }
 
     @Test
     void getStatus_validToken_returnsOk() throws Exception {
-        long orgId = createOrg("InternalTest-" + System.nanoTime());
+        UUID orgId = createOrg("InternalTest-" + System.nanoTime());
 
         mockMvc.perform(get("/api/organizations/internal/" + orgId + "/status")
                         .header("X-Internal-Token", INTERNAL_TOKEN))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").isNumber());
+                .andExpect(jsonPath("$.id").isString());
     }
 
     @Test
     void getStatus_invalidToken_returns401() throws Exception {
-        mockMvc.perform(get("/api/organizations/internal/1/status")
+        mockMvc.perform(get("/api/organizations/internal/00000000-0000-0000-0000-000000000001/status")
                         .header("X-Internal-Token", "wrong-token"))
                 .andExpect(status().isUnauthorized());
     }
 
     @Test
     void getStatus_missingToken_returns401() throws Exception {
-        mockMvc.perform(get("/api/organizations/internal/1/status"))
+        mockMvc.perform(get("/api/organizations/internal/00000000-0000-0000-0000-000000000001/status"))
                 .andExpect(status().isUnauthorized());
     }
 
     @Test
     void getRelationsBySupplier_validToken_returnsOk() throws Exception {
-        mockMvc.perform(get("/api/organizations/internal/relations/supplier/1")
+        mockMvc.perform(get("/api/organizations/internal/relations/supplier/00000000-0000-0000-0000-000000000001")
                         .header("X-Internal-Token", INTERNAL_TOKEN))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray());
@@ -72,14 +74,14 @@ class InternalOrganizationControllerTest {
 
     @Test
     void getRelationsBySupplier_invalidToken_returns401() throws Exception {
-        mockMvc.perform(get("/api/organizations/internal/relations/supplier/1")
+        mockMvc.perform(get("/api/organizations/internal/relations/supplier/00000000-0000-0000-0000-000000000001")
                         .header("X-Internal-Token", "wrong-token"))
                 .andExpect(status().isUnauthorized());
     }
 
     @Test
     void getRelationsBySupplier_missingToken_returns401() throws Exception {
-        mockMvc.perform(get("/api/organizations/internal/relations/supplier/1"))
+        mockMvc.perform(get("/api/organizations/internal/relations/supplier/00000000-0000-0000-0000-000000000001"))
                 .andExpect(status().isUnauthorized());
     }
 }

@@ -1,10 +1,12 @@
 package com.paymentplatform.payment.domain.model;
 
+import java.util.UUID;
+
 import java.time.Instant;
 
-public record PaymentEvent(long id, long paymentId, String action, Long userId, Instant timestamp, String details) {
+public record PaymentEvent(UUID id, UUID paymentId, String action, UUID userId, Instant timestamp, String details) {
 
-    public static PaymentEvent create(long paymentId, String action, Long userId, String details) {
-        return new PaymentEvent(0, paymentId, action, userId, Instant.now(), details);
+    public static PaymentEvent create(UUID paymentId, String action, UUID userId, String details) {
+        return new PaymentEvent(null, paymentId, action, userId, Instant.now(), details);
     }
 }

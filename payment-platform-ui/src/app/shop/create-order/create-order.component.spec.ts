@@ -108,7 +108,7 @@ describe('CreateOrderComponent (shop)', () => {
     });
 
     it('should return false when no supplier', () => {
-      component.selectedSupplierId = 0;
+      component.selectedSupplierId = '';
       component.orderLines = [{ product: { id: 1 } as any, quantity: 1, discount: 0 }];
       expect(component.canSubmit()).toBeFalse();
     });
@@ -143,7 +143,7 @@ describe('CreateOrderComponent (shop)', () => {
     });
 
     it('should not load products when supplierId is 0', () => {
-      component.selectedSupplierId = 0;
+      component.selectedSupplierId = '';
       component.onSupplierChange();
       expect(stockService.getProducts).not.toHaveBeenCalled();
     });
@@ -222,7 +222,7 @@ describe('CreateOrderComponent (shop)', () => {
 
   describe('submit', () => {
     it('should not submit when canSubmit is false', () => {
-      component.selectedSupplierId = 0;
+      component.selectedSupplierId = '';
       component.submit();
       expect(orderService.create).not.toHaveBeenCalled();
     });

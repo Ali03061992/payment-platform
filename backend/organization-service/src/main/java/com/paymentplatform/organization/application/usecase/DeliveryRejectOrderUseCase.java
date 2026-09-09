@@ -37,7 +37,7 @@ public class DeliveryRejectOrderUseCase {
     }
 
     @Transactional
-    public OrderResponse execute(Long orderId, long actorUserId, String reason) {
+    public OrderResponse execute(UUID orderId, UUID actorUserId, String reason) {
         Order order = orders.findById(orderId)
                 .orElseThrow(() -> new NotFoundException("Commande non trouvée : " + orderId));
 

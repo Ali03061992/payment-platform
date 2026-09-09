@@ -1,5 +1,7 @@
 package com.paymentplatform.shared.infrastructure.security;
 
+import java.util.UUID;
+
 import com.paymentplatform.shared.domain.exception.UnauthorizedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -18,7 +20,7 @@ public final class CurrentUser {
         throw new UnauthorizedException("Non authentifié");
     }
 
-    public static long id() {
+    public static UUID id() {
         return get().userId();
     }
 }

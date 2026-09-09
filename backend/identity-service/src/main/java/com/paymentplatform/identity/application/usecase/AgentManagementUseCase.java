@@ -58,7 +58,7 @@ public class AgentManagementUseCase {
     }
 
     @Transactional
-    public AgentCreatedResponse createAgent(long actorUserId, long organizationId, String expectedType,
+    public AgentCreatedResponse createAgent(UUID actorUserId, UUID organizationId, String expectedType,
                                             List<RoleCode> allowedRoles, AgentRequest request) {
         User actor = requireActor(actorUserId, organizationId);
         RoleCode role = RoleCode.from(request.role());
@@ -88,7 +88,7 @@ public class AgentManagementUseCase {
                 : "test1234";
         PasswordHash hash = PasswordHash.of(passwordEncoder.encode(rawPassword));
 
-        User user = User.create(new UserId(0), username, email, hash, request.firstName(), request.lastName(),
+        User user = User.create(new UserId(null), username, email, hash, request.firstName(), request.lastName(),
                 PhoneNumber.of(request.phone()), OrganizationId.of(organizationId), role);
         User saved = users.save(user);
 
@@ -102,7 +102,7 @@ public class AgentManagementUseCase {
     }
 
     @Transactional
-    public UserResponse updateAgent(long actorUserId, long organizationId, long agentId,
+    public UserResponse updateAgent(UUID actorUserId, UUID organizationId, UUID agentId,
                                     UpdateAgentRequest request) {
         requireActor(actorUserId, organizationId);
         User agent = requireAgentOf(organizationId, agentId);
@@ -121,7 +121,7 @@ public class AgentManagementUseCase {
     }
 
     @Transactional
-    public UserResponse disableAgent(long actorUserId, long organizationId, long agentId) {
+    public UserResponse disableAgent(UUID actorUserId, UUID organizationId, UUID agentId) {
         requireActor(actorUserId, organizationId);
         User agent = requireAgentOf(organizationId, agentId);
         agent.disable();
@@ -133,7 +133,7 @@ public class AgentManagementUseCase {
     }
 
     @Transactional
-    public UserResponse activateAgent(long actorUserId, long organizationId, long agentId) {
+    public UserResponse activateAgent(UUID actorUserId, UUID organizationId, UUID agentId) {
         requireActor(actorUserId, organizationId);
         User agent = requireAgentOf(organizationId, agentId);
         agent.activate();
@@ -145,24 +145,24 @@ public class AgentManagementUseCase {
     }
 
     @Transactional(readOnly = true)
-    public List<UserResponse> listAgents(long actorUserId, long organizationId) {
+    public List<UserResponse> listAgents(UUID actorUserId, UUID organizationId) {
         requireActor(actorUserId, organizationId);
         return users.findByOrganizationId(OrganizationId.of(organizationId)).stream()
                 .map(UserResponse::from)
                 .toList();
     }
 
-    private User requireActor(long actorUserId, long organizationId) {
+    private User requireActor(UUID actorUserId, UUID organizationId) {
         User actor = users.findById(UserId.of(actorUserId))
                 .orElseThrow(() -> new NotFoundException("Utilisateur courant introuvable"));
         actor.assertCanManageOrganization(OrganizationId.of(organizationId));
         return actor;
     }
 
-    private User requireAgentOf(long organizationId, long agentId) {
+    private User requireAgentOf(UUID organizationId, UUID agentId) {
         User agent = users.findById(UserId.of(agentId))
                 .orElseThrow(() -> new NotFoundException("Agent introuvable"));
-        if (agent.organizationId() == null || agent.organizationId().value() != organizationId) {
+        if (agent.organizationId() == null || !agent.organizationId().value().equals(organizationId)) {
             throw new ForbiddenException("L'agent n'appartient pas à l'organisation " + organizationId);
         }
         return agent;

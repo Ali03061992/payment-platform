@@ -58,14 +58,14 @@ export class OrderListComponent implements OnInit, OnDestroy {
     return map[s] || '';
   }
 
-  accept(id: number): void {
+  accept(id: string): void {
     this.subscriptions.add(this.orderService.accept(id).subscribe({
       next: () => this.load(),
       error: (e: any) => { this.toast.error(e.error?.message || 'Erreur'); }
     }));
   }
 
-  reject(id: number): void {
+  reject(id: string): void {
     if (!confirm('Rejeter cette commande ?')) return;
     this.subscriptions.add(this.orderService.reject(id).subscribe({
       next: () => this.load(),
@@ -73,7 +73,7 @@ export class OrderListComponent implements OnInit, OnDestroy {
     }));
   }
 
-  cancel(id: number): void {
+  cancel(id: string): void {
     this.subscriptions.add(this.orderService.cancel(id).subscribe({
       next: () => this.load(),
       error: (e: any) => { this.toast.error(e.error?.message || 'Erreur'); }

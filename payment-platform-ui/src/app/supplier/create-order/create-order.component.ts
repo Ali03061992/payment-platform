@@ -22,7 +22,7 @@ interface OrderLine {
 })
 export class SupplierCreateOrderComponent implements OnInit, OnDestroy {
   shops: Organization[] = [];
-  selectedShopId = 0;
+  selectedShopId = '';
   products: Product[] = [];
   searchQuery = '';
   orderLines: OrderLine[] = [];
@@ -30,7 +30,7 @@ export class SupplierCreateOrderComponent implements OnInit, OnDestroy {
   currency = 'TND';
   notes = '';
   creating = false;
-  supplierId = 0;
+  supplierId = '';
 
   constructor(
     private orderService: OrderService,
@@ -51,13 +51,13 @@ export class SupplierCreateOrderComponent implements OnInit, OnDestroy {
     this.subscriptions.unsubscribe();
   }
 
-  private getSupplierId(): number {
+  private getSupplierId(): string {
     const userJson = sessionStorage.getItem('user');
     if (userJson) {
       const user = JSON.parse(userJson);
-      return user.organizationId || 0;
+      return user.organizationId || '';
     }
-    return 0;
+    return '';
   }
 
   loadingShops = false;
@@ -164,7 +164,7 @@ export class SupplierCreateOrderComponent implements OnInit, OnDestroy {
   }
 
   canSubmit(): boolean {
-    return this.selectedShopId > 0 && this.orderLines.length > 0 && !this.creating;
+    return !!this.selectedShopId && this.orderLines.length > 0 && !this.creating;
   }
 
   submit(): void {

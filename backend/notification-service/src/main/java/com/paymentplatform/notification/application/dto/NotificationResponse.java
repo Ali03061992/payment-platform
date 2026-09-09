@@ -1,13 +1,15 @@
 package com.paymentplatform.notification.application.dto;
 
+import java.util.UUID;
+
 import com.paymentplatform.notification.domain.model.Notification;
 
 import java.time.Instant;
 
 public record NotificationResponse(
-        Long id,
-        Long recipientUserId,
-        Long recipientOrganizationId,
+        UUID id,
+        UUID recipientUserId,
+        UUID recipientOrganizationId,
         String type,
         String message,
         String readStatus,

@@ -100,7 +100,7 @@ describe('SupplierCreateOrderComponent', () => {
     it('should clear products and lines', () => {
       component.products = [{ id: 1 } as any];
       component.orderLines = [{ product: { id: 1 } as any, quantity: 1, discount: 0 }];
-      component.selectedShopId = 0;
+      component.selectedShopId = '';
       component.onShopChange();
       expect(component.products.length).toBe(0);
       expect(component.orderLines.length).toBe(0);
@@ -195,7 +195,7 @@ describe('SupplierCreateOrderComponent', () => {
     });
 
     it('should return false when no shop', () => {
-      component.selectedShopId = 0;
+      component.selectedShopId = '';
       component.orderLines = [{ product: { id: 1 } as any, quantity: 1, discount: 0 }];
       expect(component.canSubmit()).toBeFalse();
     });
@@ -216,7 +216,7 @@ describe('SupplierCreateOrderComponent', () => {
 
   describe('submit', () => {
     it('should not submit when cannot submit', () => {
-      component.selectedShopId = 0;
+      component.selectedShopId = '';
       component.submit();
       expect(orderService.create).not.toHaveBeenCalled();
     });

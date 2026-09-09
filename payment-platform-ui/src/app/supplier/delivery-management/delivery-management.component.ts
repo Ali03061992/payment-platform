@@ -14,7 +14,7 @@ export class DeliveryManagementComponent implements OnInit {
 
   showDeliverModal = false;
   selectedOrder: Order | null = null;
-  receivedBy = 0;
+  receivedBy = '';
   delivering = false;
 
   constructor(private orderService: OrderService, private toast: ToastService) {}
@@ -41,7 +41,7 @@ export class DeliveryManagementComponent implements OnInit {
 
   openDeliver(order: Order): void {
     this.selectedOrder = order;
-    this.receivedBy = 0;
+    this.receivedBy = '';
     this.showDeliverModal = true;
   }
 

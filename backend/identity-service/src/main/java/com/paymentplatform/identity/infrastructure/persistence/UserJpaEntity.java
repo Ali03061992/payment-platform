@@ -1,5 +1,7 @@
 package com.paymentplatform.identity.infrastructure.persistence;
 
+import java.util.UUID;
+
 import com.paymentplatform.shared.domain.model.RoleCode;
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
@@ -24,8 +26,9 @@ import java.util.Set;
 public class UserJpaEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(columnDefinition = "VARCHAR(36)")
+    private UUID id;
 
     @Column(nullable = false, unique = true, length = 50)
     private String username;
@@ -45,8 +48,8 @@ public class UserJpaEntity {
     @Column(length = 30)
     private String phone;
 
-    @Column(name = "organization_id")
-    private Long organizationId;
+    @Column(name = "organization_id", columnDefinition = "VARCHAR(36)")
+    private UUID organizationId;
 
     @Column(nullable = false, length = 20)
     private String status;
@@ -69,11 +72,11 @@ public class UserJpaEntity {
     protected UserJpaEntity() {
     }
 
-    public Long getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 
@@ -125,11 +128,11 @@ public class UserJpaEntity {
         this.phone = phone;
     }
 
-    public Long getOrganizationId() {
+    public UUID getOrganizationId() {
         return organizationId;
     }
 
-    public void setOrganizationId(Long organizationId) {
+    public void setOrganizationId(UUID organizationId) {
         this.organizationId = organizationId;
     }
 

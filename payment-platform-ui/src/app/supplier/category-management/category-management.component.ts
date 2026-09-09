@@ -19,9 +19,9 @@ export class CategoryManagementComponent implements OnInit {
 
   ngOnInit(): void { this.loadCategories(); }
 
-  get supplierId(): number {
+  get supplierId(): string {
     const u = sessionStorage.getItem('user');
-    return u ? JSON.parse(u).organizationId || 0 : 0;
+    return u ? JSON.parse(u).organizationId || '' : '';
   }
 
   loadCategories(): void {

@@ -1,5 +1,7 @@
 package com.paymentplatform.shared.infrastructure.audit;
 
+import java.util.UUID;
+
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,7 +16,7 @@ public class JpaAuditRecorder implements AuditRecorder {
 
     @Override
     @Transactional
-    public void record(Long userId, Long organizationId, String action, Long entityId, String details) {
+    public void record(UUID userId, UUID organizationId, String action, UUID entityId, String details) {
         repository.save(new AuditLogEntity(userId, organizationId, action, entityId, details));
     }
 }

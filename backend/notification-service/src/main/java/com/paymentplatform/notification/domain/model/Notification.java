@@ -1,5 +1,7 @@
 package com.paymentplatform.notification.domain.model;
 
+import java.util.UUID;
+
 import jakarta.persistence.*;
 import java.time.Instant;
 
@@ -8,14 +10,15 @@ import java.time.Instant;
 public class Notification {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(columnDefinition = "VARCHAR(36)")
+    private UUID id;
 
-    @Column(name = "recipient_user_id", nullable = false)
-    private Long recipientUserId;
+    @Column(name = "recipient_user_id", nullable = false, columnDefinition = "VARCHAR(36)")
+    private UUID recipientUserId;
 
-    @Column(name = "recipient_organization_id")
-    private Long recipientOrganizationId;
+    @Column(name = "recipient_organization_id", columnDefinition = "VARCHAR(36)")
+    private UUID recipientOrganizationId;
 
     @Column(nullable = false, length = 40)
     private String type;
@@ -40,7 +43,7 @@ public class Notification {
 
     protected Notification() {}
 
-    public Notification(Long recipientUserId, Long recipientOrganizationId,
+    public Notification(UUID recipientUserId, UUID recipientOrganizationId,
                         String type, String message, String relatedEntityType, String relatedEntityId) {
         this.recipientUserId = recipientUserId;
         this.recipientOrganizationId = recipientOrganizationId;
@@ -57,9 +60,9 @@ public class Notification {
         this.readAt = Instant.now();
     }
 
-    public Long id() { return id; }
-    public Long recipientUserId() { return recipientUserId; }
-    public Long recipientOrganizationId() { return recipientOrganizationId; }
+    public UUID id() { return id; }
+    public UUID recipientUserId() { return recipientUserId; }
+    public UUID recipientOrganizationId() { return recipientOrganizationId; }
     public String type() { return type; }
     public String message() { return message; }
     public String readStatus() { return readStatus; }

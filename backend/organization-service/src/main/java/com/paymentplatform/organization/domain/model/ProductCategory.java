@@ -1,5 +1,7 @@
 package com.paymentplatform.organization.domain.model;
 
+import java.util.UUID;
+
 import jakarta.persistence.*;
 import java.time.Instant;
 
@@ -8,11 +10,12 @@ import java.time.Instant;
 public class ProductCategory {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(columnDefinition = "VARCHAR(36)")
+    private UUID id;
 
-    @Column(name = "supplier_id", nullable = false)
-    private Long supplierId;
+    @Column(name = "supplier_id", nullable = false, columnDefinition = "VARCHAR(36)")
+    private UUID supplierId;
 
     @Column(nullable = false, length = 100)
     private String name;
@@ -41,9 +44,9 @@ public class ProductCategory {
         updatedAt = Instant.now();
     }
 
-    public Long getId() { return id; }
-    public Long getSupplierId() { return supplierId; }
-    public void setSupplierId(Long supplierId) { this.supplierId = supplierId; }
+    public UUID getId() { return id; }
+    public UUID getSupplierId() { return supplierId; }
+    public void setSupplierId(UUID supplierId) { this.supplierId = supplierId; }
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
     public String getCode() { return code; }

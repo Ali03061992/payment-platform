@@ -1,5 +1,7 @@
 package com.paymentplatform.payment.infrastructure.persistence;
 
+import java.util.UUID;
+
 import com.paymentplatform.payment.domain.model.Payment;
 import com.paymentplatform.payment.domain.model.PaymentStatus;
 import com.paymentplatform.payment.domain.valueobject.Money;
@@ -18,29 +20,29 @@ class PaymentMapperTest {
     @Test
     void toJpa_mapsAllFields() {
         Payment payment = Payment.create(
-                10L, 20L,
+                UUID.fromString("00000000-0000-0000-0000-000000000010"), UUID.fromString("00000000-0000-0000-0000-000000000020"),
                 Money.of(new BigDecimal("100.50"), "TND"),
-                5L);
+                UUID.fromString("00000000-0000-0000-0000-000000000005"));
 
         var jpa = mapper.toJpa(payment);
 
         assertThat(jpa.getReference()).isEqualTo(payment.reference().value());
-        assertThat(jpa.getShopId()).isEqualTo(10L);
-        assertThat(jpa.getSupplierId()).isEqualTo(20L);
+        assertThat(jpa.getShopId()).isEqualTo(UUID.fromString("00000000-0000-0000-0000-000000000010"));
+        assertThat(jpa.getSupplierId()).isEqualTo(UUID.fromString("00000000-0000-0000-0000-000000000020"));
         assertThat(jpa.getAmount()).isEqualByComparingTo(new BigDecimal("100.50"));
         assertThat(jpa.getCurrency()).isEqualTo("TND");
         assertThat(jpa.getStatus()).isEqualTo(PaymentStatus.PENDING.name());
-        assertThat(jpa.getCreatedBy()).isEqualTo(5L);
+        assertThat(jpa.getCreatedBy()).isEqualTo(UUID.fromString("00000000-0000-0000-0000-000000000005"));
         assertThat(jpa.getCreatedAt()).isNotNull();
     }
 
     @Test
     void toJpa_withRejectionReason() {
         Payment payment = Payment.create(
-                10L, 20L,
+                UUID.fromString("00000000-0000-0000-0000-000000000010"), UUID.fromString("00000000-0000-0000-0000-000000000020"),
                 Money.of(new BigDecimal("200.00"), "TND"),
-                5L);
-        Payment rejected = payment.reject(10L, new RejectionReason("Quality issue"));
+                UUID.fromString("00000000-0000-0000-0000-000000000005"));
+        Payment rejected = payment.reject(UUID.fromString("00000000-0000-0000-0000-000000000010"), new RejectionReason("Quality issue"));
 
         var jpa = mapper.toJpa(rejected);
 
@@ -51,56 +53,56 @@ class PaymentMapperTest {
     @Test
     void toEventJpa_mapsAllFields() {
         var event = new com.paymentplatform.payment.domain.model.PaymentEvent(
-                0L, 1L, "PAYMENT_CONFIRMED", 10L, Instant.now(), "Confirmed");
+                UUID.fromString("00000000-0000-0000-0000-000000000000"), UUID.fromString("00000000-0000-0000-0000-000000000001"), "PAYMENT_CONFIRMED", UUID.fromString("00000000-0000-0000-0000-000000000010"), Instant.now(), "Confirmed");
 
-        var eventJpa = mapper.toEventJpa(event, 1L);
+        var eventJpa = mapper.toEventJpa(event, UUID.fromString("00000000-0000-0000-0000-000000000001"));
 
-        assertThat(eventJpa.getPaymentId()).isEqualTo(1L);
+        assertThat(eventJpa.getPaymentId()).isEqualTo(UUID.fromString("00000000-0000-0000-0000-000000000001"));
         assertThat(eventJpa.getAction()).isEqualTo("PAYMENT_CONFIRMED");
-        assertThat(eventJpa.getUserId()).isEqualTo(10L);
+        assertThat(eventJpa.getUserId()).isEqualTo(UUID.fromString("00000000-0000-0000-0000-000000000010"));
         assertThat(eventJpa.getDetails()).isEqualTo("Confirmed");
     }
 
     @Test
     void toEventDomain_mapsAllFields() {
         var eventJpa = new PaymentEventJpaEntity();
-        eventJpa.setId(1L);
-        eventJpa.setPaymentId(1L);
+        eventJpa.setId(UUID.fromString("00000000-0000-0000-0000-000000000001"));
+        eventJpa.setPaymentId(UUID.fromString("00000000-0000-0000-0000-000000000001"));
         eventJpa.setAction("PAYMENT_CREATED");
-        eventJpa.setUserId(5L);
+        eventJpa.setUserId(UUID.fromString("00000000-0000-0000-0000-000000000005"));
         eventJpa.setTimestamp(Instant.now());
         eventJpa.setDetails("Created");
 
         var domain = mapper.toEventDomain(eventJpa);
 
-        assertThat(domain.id()).isEqualTo(1L);
-        assertThat(domain.paymentId()).isEqualTo(1L);
+        assertThat(domain.id()).isEqualTo(UUID.fromString("00000000-0000-0000-0000-000000000001"));
+        assertThat(domain.paymentId()).isEqualTo(UUID.fromString("00000000-0000-0000-0000-000000000001"));
         assertThat(domain.action()).isEqualTo("PAYMENT_CREATED");
-        assertThat(domain.userId()).isEqualTo(5L);
+        assertThat(domain.userId()).isEqualTo(UUID.fromString("00000000-0000-0000-0000-000000000005"));
         assertThat(domain.details()).isEqualTo("Created");
     }
 
     @Test
     void fromFields_reconstructsPayment() {
         PaymentJpaEntity entity = new PaymentJpaEntity();
-        entity.setId(1L);
+        entity.setId(UUID.fromString("00000000-0000-0000-0000-000000000001"));
         entity.setReference("PAY-003");
-        entity.setShopId(10L);
-        entity.setSupplierId(20L);
+        entity.setShopId(UUID.fromString("00000000-0000-0000-0000-000000000010"));
+        entity.setSupplierId(UUID.fromString("00000000-0000-0000-0000-000000000020"));
         entity.setAmount(new BigDecimal("300.00"));
         entity.setCurrency("TND");
         entity.setStatus("PENDING");
-        entity.setCreatedBy(5L);
+        entity.setCreatedBy(UUID.fromString("00000000-0000-0000-0000-000000000005"));
         entity.setVersion(0L);
         entity.setCreatedAt(Instant.now());
         entity.setUpdatedAt(Instant.now());
 
         var payment = mapper.fromFields(entity, java.util.List.of());
 
-        assertThat(payment.id()).isEqualTo(1L);
+        assertThat(payment.id()).isEqualTo(UUID.fromString("00000000-0000-0000-0000-000000000001"));
         assertThat(payment.reference().value()).isEqualTo("PAY-003");
-        assertThat(payment.shopId()).isEqualTo(10L);
-        assertThat(payment.supplierId()).isEqualTo(20L);
+        assertThat(payment.shopId()).isEqualTo(UUID.fromString("00000000-0000-0000-0000-000000000010"));
+        assertThat(payment.supplierId()).isEqualTo(UUID.fromString("00000000-0000-0000-0000-000000000020"));
         assertThat(payment.money().amount()).isEqualByComparingTo(new BigDecimal("300.00"));
         assertThat(payment.status()).isEqualTo(PaymentStatus.PENDING);
     }
@@ -108,15 +110,15 @@ class PaymentMapperTest {
     @Test
     void fromFields_withRejectionReason() {
         PaymentJpaEntity entity = new PaymentJpaEntity();
-        entity.setId(2L);
+        entity.setId(UUID.fromString("00000000-0000-0000-0000-000000000002"));
         entity.setReference("PAY-004");
-        entity.setShopId(10L);
-        entity.setSupplierId(20L);
+        entity.setShopId(UUID.fromString("00000000-0000-0000-0000-000000000010"));
+        entity.setSupplierId(UUID.fromString("00000000-0000-0000-0000-000000000020"));
         entity.setAmount(new BigDecimal("400.00"));
         entity.setCurrency("TND");
         entity.setStatus("REJECTED");
         entity.setRejectionReason("Quality issue");
-        entity.setCreatedBy(5L);
+        entity.setCreatedBy(UUID.fromString("00000000-0000-0000-0000-000000000005"));
         entity.setVersion(0L);
         entity.setCreatedAt(Instant.now());
         entity.setUpdatedAt(Instant.now());

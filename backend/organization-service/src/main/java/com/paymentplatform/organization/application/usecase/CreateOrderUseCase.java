@@ -48,7 +48,7 @@ public class CreateOrderUseCase {
     }
 
     @Transactional
-    public OrderResponse execute(CreateOrderRequest request, long actorUserId, String actorRole) {
+    public OrderResponse execute(CreateOrderRequest request, UUID actorUserId, String actorRole) {
         if (request.items() == null || request.items().isEmpty()) {
             throw new ConflictException("La commande doit contenir au moins un article");
         }
@@ -137,14 +137,14 @@ public class CreateOrderUseCase {
         return OrderResponse.from(savedOrder, items);
     }
 
-    private void validateOrganizations(Long supplierId, Long shopId) {
+    private void validateOrganizations(UUID supplierId, UUID shopId) {
         organizations.findById(new com.paymentplatform.organization.domain.valueobject.OrganizationId(supplierId))
                 .orElseThrow(() -> new NotFoundException("Fournisseur non trouvé : " + supplierId));
         organizations.findById(new com.paymentplatform.organization.domain.valueobject.OrganizationId(shopId))
                 .orElseThrow(() -> new NotFoundException("Boutique non trouvée : " + shopId));
     }
 
-    private void validateRelation(Long supplierId, Long shopId) {
+    private void validateRelation(UUID supplierId, UUID shopId) {
         if (!relations.existsBySupplierIdAndShopIdAndStatus(
                 new com.paymentplatform.organization.domain.valueobject.OrganizationId(supplierId),
                 new com.paymentplatform.organization.domain.valueobject.OrganizationId(shopId),

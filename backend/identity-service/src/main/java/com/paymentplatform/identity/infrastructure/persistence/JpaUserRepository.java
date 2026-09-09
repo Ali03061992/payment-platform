@@ -88,7 +88,7 @@ public class JpaUserRepository implements UserRepository {
 
     private UserJpaEntity toEntity(User user) {
         UserJpaEntity e = new UserJpaEntity();
-        if (user.id().value() > 0) {
+        if (user.id() != null && user.id().value() != null) {
             e.setId(user.id().value());
             e.setVersion(user.version());
         }

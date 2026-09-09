@@ -9,21 +9,21 @@ export class CatalogService {
 
   constructor(private http: HttpClient) {}
 
-  listCategories(supplierId: number): Observable<ProductCategory[]> {
+  listCategories(supplierId: string): Observable<ProductCategory[]> {
     return this.http.get<ProductCategory[]>(`${this.apiUrl}/categories`, {
       params: { supplierId: supplierId.toString() }
     });
   }
 
-  createCategory(data: { supplierId: number; name: string; code: string }): Observable<ProductCategory> {
+  createCategory(data: { supplierId: string; name: string; code: string }): Observable<ProductCategory> {
     return this.http.post<ProductCategory>(`${this.apiUrl}/categories`, data);
   }
 
-  deleteCategory(id: number): Observable<void> {
+  deleteCategory(id: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/categories/${id}`);
   }
 
-  listFamilies(supplierId: number, categoryId?: number): Observable<ProductFamily[]> {
+  listFamilies(supplierId: string, categoryId?: string): Observable<ProductFamily[]> {
     let params = new HttpParams().set('supplierId', supplierId.toString());
     if (categoryId != null) {
       params = params.set('categoryId', categoryId.toString());
@@ -31,15 +31,15 @@ export class CatalogService {
     return this.http.get<ProductFamily[]>(`${this.apiUrl}/families`, { params });
   }
 
-  createFamily(data: { supplierId: number; name: string; code: string; categoryIds: number[] }): Observable<ProductFamily> {
+  createFamily(data: { supplierId: string; name: string; code: string; categoryIds: string[] }): Observable<ProductFamily> {
     return this.http.post<ProductFamily>(`${this.apiUrl}/families`, data);
   }
 
-  updateFamily(id: number, data: { supplierId: number; name: string; code: string; categoryIds: number[] }): Observable<ProductFamily> {
+  updateFamily(id: string, data: { supplierId: string; name: string; code: string; categoryIds: string[] }): Observable<ProductFamily> {
     return this.http.put<ProductFamily>(`${this.apiUrl}/families/${id}`, data);
   }
 
-  deleteFamily(id: number): Observable<void> {
+  deleteFamily(id: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/families/${id}`);
   }
 }

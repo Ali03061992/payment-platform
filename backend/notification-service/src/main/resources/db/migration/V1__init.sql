@@ -1,9 +1,9 @@
 -- Notification Service - schéma initial
 
 CREATE TABLE notifications (
-  id                        BIGINT AUTO_INCREMENT PRIMARY KEY,
-  recipient_user_id         BIGINT       NOT NULL,
-  recipient_organization_id BIGINT       NULL,
+  id VARCHAR(36) PRIMARY KEY,
+  recipient_user_id VARCHAR(36)       NOT NULL,
+  recipient_organization_id VARCHAR(36)       NULL,
   type                      VARCHAR(40)  NOT NULL,
   message                   VARCHAR(500) NOT NULL,
   read_status               VARCHAR(20)  NOT NULL,

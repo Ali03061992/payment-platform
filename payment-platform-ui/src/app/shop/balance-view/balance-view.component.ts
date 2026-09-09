@@ -12,8 +12,8 @@ export class BalanceViewComponent implements OnInit {
   balances: BalanceSummary[] = [];
   loading = true;
 
-  selectedSupplierId: number | null = null;
-  selectedShopId: number | null = null;
+  selectedSupplierId: string | null = null;
+  selectedShopId: string | null = null;
   ledgerEntries: BalanceEntry[] = [];
   loadingLedger = false;
 
@@ -21,13 +21,13 @@ export class BalanceViewComponent implements OnInit {
 
   ngOnInit(): void { this.load(); }
 
-  private getShopId(): number {
+  private getShopId(): string {
     const userJson = sessionStorage.getItem('user');
     if (userJson) {
       const user = JSON.parse(userJson);
-      return user.organizationId || 0;
+      return user.organizationId || '';
     }
-    return 0;
+    return '';
   }
 
   load(): void {
@@ -39,7 +39,7 @@ export class BalanceViewComponent implements OnInit {
     });
   }
 
-  viewLedger(supplierId: number, shopId: number): void {
+  viewLedger(supplierId: string, shopId: string): void {
     this.selectedSupplierId = supplierId;
     this.selectedShopId = shopId;
     this.loadingLedger = true;

@@ -1,5 +1,7 @@
 package com.paymentplatform.organization.application.usecase;
 
+import java.util.UUID;
+
 import com.paymentplatform.organization.application.dto.CreateOrganizationRequest;
 import com.paymentplatform.shared.domain.exception.NotFoundException;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,11 +22,11 @@ class OrganizationValidationUseCaseH2Test {
     @Autowired private OrganizationValidationUseCase validation;
     @Autowired private CreateOrganizationUseCase createOrg;
 
-    private long orgId;
+    private UUID orgId;
 
     @BeforeEach
     void setUp() {
-        var org = createOrg.execute(new CreateOrganizationRequest("Valid Supplier", "SUPPLIER"), 1L);
+        var org = createOrg.execute(new CreateOrganizationRequest("Valid Supplier", "SUPPLIER"), UUID.fromString("00000000-0000-0000-0000-000000000001"));
         orgId = org.id();
     }
 
@@ -39,7 +41,7 @@ class OrganizationValidationUseCaseH2Test {
 
     @Test
     void validate_unknownOrg_throwsNotFound() {
-        assertThatThrownBy(() -> validation.validate(999L))
+        assertThatThrownBy(() -> validation.validate(UUID.fromString("00000000-0000-0000-0000-000000000999")))
                 .isInstanceOf(NotFoundException.class);
     }
 }

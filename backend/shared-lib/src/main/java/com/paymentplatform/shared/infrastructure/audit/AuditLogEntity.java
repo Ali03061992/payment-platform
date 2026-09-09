@@ -1,5 +1,7 @@
 package com.paymentplatform.shared.infrastructure.audit;
 
+import java.util.UUID;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -15,20 +17,21 @@ import java.time.Instant;
 public class AuditLogEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(columnDefinition = "VARCHAR(36)")
+    private UUID id;
 
-    @Column(name = "user_id")
-    private Long userId;
+    @Column(name = "user_id", columnDefinition = "VARCHAR(36)")
+    private UUID userId;
 
-    @Column(name = "organization_id")
-    private Long organizationId;
+    @Column(name = "organization_id", columnDefinition = "VARCHAR(36)")
+    private UUID organizationId;
 
     @Column(nullable = false, length = 60)
     private String action;
 
     @Column(name = "entity_id")
-    private Long entityId;
+    private UUID entityId;
 
     @Column(nullable = false)
     private Instant timestamp;
@@ -39,7 +42,7 @@ public class AuditLogEntity {
     protected AuditLogEntity() {
     }
 
-    public AuditLogEntity(Long userId, Long organizationId, String action, Long entityId, String details) {
+    public AuditLogEntity(UUID userId, UUID organizationId, String action, UUID entityId, String details) {
         this.userId = userId;
         this.organizationId = organizationId;
         this.action = action;
@@ -48,15 +51,15 @@ public class AuditLogEntity {
         this.details = details;
     }
 
-    public Long getId() {
+    public UUID getId() {
         return id;
     }
 
-    public Long getUserId() {
+    public UUID getUserId() {
         return userId;
     }
 
-    public Long getOrganizationId() {
+    public UUID getOrganizationId() {
         return organizationId;
     }
 
@@ -64,7 +67,7 @@ public class AuditLogEntity {
         return action;
     }
 
-    public Long getEntityId() {
+    public UUID getEntityId() {
         return entityId;
     }
 

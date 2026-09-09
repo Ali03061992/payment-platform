@@ -1,5 +1,7 @@
 package com.paymentplatform.identity.application.usecase;
 
+import java.util.UUID;
+
 import com.paymentplatform.identity.application.dto.RegisterRequest;
 import com.paymentplatform.identity.domain.model.User;
 import com.paymentplatform.identity.domain.repository.UserRepository;
@@ -46,7 +48,7 @@ class RegisterUseCaseH2Test {
 
     @Test
     void register_duplicateUsername_throwsConflict() {
-        User existing = User.create(new UserId(0), Username.of("reg.taken"),
+        User existing = User.create(new UserId(null), Username.of("reg.taken"),
                 Email.of("reg.first@example.com"), PasswordHash.of(passwordEncoder.encode("pass")),
                 "A", "B", new PhoneNumber(null), null, RoleCode.SHOP_AGENT);
         users.save(existing);
@@ -60,7 +62,7 @@ class RegisterUseCaseH2Test {
 
     @Test
     void register_duplicateEmail_throwsConflict() {
-        User existing = User.create(new UserId(0), Username.of("reg.user1"),
+        User existing = User.create(new UserId(null), Username.of("reg.user1"),
                 Email.of("reg.dup@example.com"), PasswordHash.of(passwordEncoder.encode("pass")),
                 "A", "B", new PhoneNumber(null), null, RoleCode.SHOP_AGENT);
         users.save(existing);

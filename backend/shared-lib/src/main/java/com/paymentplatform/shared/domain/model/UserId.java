@@ -1,9 +1,11 @@
 package com.paymentplatform.shared.domain.model;
 
-/** Identifiant typé d'un utilisateur. */
-public record UserId(long value) {
+import java.util.UUID;
 
-    public static UserId of(long value) {
+/** Identifiant typé d'un utilisateur. */
+public record UserId(UUID value) {
+
+    public static UserId of(UUID value) {
         return new UserId(value);
     }
 

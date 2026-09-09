@@ -1,5 +1,7 @@
 package com.paymentplatform.payment.infrastructure.csv;
 
+import java.util.UUID;
+
 import com.paymentplatform.payment.application.dto.CreatePaymentRequest;
 import com.paymentplatform.payment.application.usecase.CreatePaymentUseCase;
 import org.junit.jupiter.api.Test;
@@ -24,8 +26,8 @@ class CsvExportServiceH2Test {
 
     @Test
     void generatePaymentsCsv_withData_returnsCsv() {
-        createPayment.execute(new CreatePaymentRequest(1L, 2L, new BigDecimal("100"), "TND"), 10L, 1L);
-        createPayment.execute(new CreatePaymentRequest(1L, 3L, new BigDecimal("200"), "EUR"), 10L, 1L);
+        createPayment.execute(new CreatePaymentRequest(UUID.fromString("00000000-0000-0000-0000-000000000001"), UUID.fromString("00000000-0000-0000-0000-000000000002"), new BigDecimal("100"), "TND"), UUID.fromString("00000000-0000-0000-0000-000000000010"), UUID.fromString("00000000-0000-0000-0000-000000000001"));
+        createPayment.execute(new CreatePaymentRequest(UUID.fromString("00000000-0000-0000-0000-000000000001"), UUID.fromString("00000000-0000-0000-0000-000000000003"), new BigDecimal("200"), "EUR"), UUID.fromString("00000000-0000-0000-0000-000000000010"), UUID.fromString("00000000-0000-0000-0000-000000000001"));
 
         Instant from = Instant.now().minus(1, ChronoUnit.DAYS);
         Instant to = Instant.now().plus(1, ChronoUnit.DAYS);
@@ -46,13 +48,13 @@ class CsvExportServiceH2Test {
 
     @Test
     void generatePaymentsCsv_filterBySupplier() {
-        createPayment.execute(new CreatePaymentRequest(1L, 2L, new BigDecimal("100"), "TND"), 10L, 1L);
-        createPayment.execute(new CreatePaymentRequest(3L, 4L, new BigDecimal("200"), "TND"), 10L, 2L);
+        createPayment.execute(new CreatePaymentRequest(UUID.fromString("00000000-0000-0000-0000-000000000001"), UUID.fromString("00000000-0000-0000-0000-000000000002"), new BigDecimal("100"), "TND"), UUID.fromString("00000000-0000-0000-0000-000000000010"), UUID.fromString("00000000-0000-0000-0000-000000000001"));
+        createPayment.execute(new CreatePaymentRequest(UUID.fromString("00000000-0000-0000-0000-000000000003"), UUID.fromString("00000000-0000-0000-0000-000000000004"), new BigDecimal("200"), "TND"), UUID.fromString("00000000-0000-0000-0000-000000000010"), UUID.fromString("00000000-0000-0000-0000-000000000002"));
 
         Instant from = Instant.now().minus(1, ChronoUnit.DAYS);
         Instant to = Instant.now().plus(1, ChronoUnit.DAYS);
 
-        String csv = csvExportService.generatePaymentsCsv(from, to, 2L, null);
+        String csv = csvExportService.generatePaymentsCsv(from, to, UUID.fromString("00000000-0000-0000-0000-000000000002"), null);
         String[] lines = csv.split("\n");
         assertThat(lines.length).isEqualTo(2); // header + 1 data line
     }

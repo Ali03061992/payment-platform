@@ -1,5 +1,7 @@
 package com.paymentplatform.organization.interfaces.rest;
 
+import java.util.UUID;
+
 import com.paymentplatform.organization.application.dto.CreateOrderRequest;
 import com.paymentplatform.organization.application.dto.OrderResponse;
 import com.paymentplatform.organization.application.dto.PageResponse;
@@ -103,7 +105,7 @@ public class OrderController {
 
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SHOP_ADMIN', 'SHOP_MANAGER', 'DELIVERY_AGENT', 'SYSTEM_ADMIN')")
-    public ResponseEntity<OrderResponse> getOrder(@PathVariable Long id) {
+    public ResponseEntity<OrderResponse> getOrder(@PathVariable UUID id) {
         var current = CurrentUser.get();
         var order = orderRepository.findById(id);
         if (order.isEmpty()) return ResponseEntity.notFound().build();
@@ -121,21 +123,21 @@ public class OrderController {
 
     @PostMapping("/{id}/confirm")
     @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN')")
-    public ResponseEntity<OrderResponse> confirmOrder(@PathVariable Long id) {
+    public ResponseEntity<OrderResponse> confirmOrder(@PathVariable UUID id) {
         var current = CurrentUser.get();
         return ResponseEntity.ok(confirmOrder.execute(id, current.userId()));
     }
 
     @PostMapping("/{id}/prepare")
     @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN')")
-    public ResponseEntity<OrderResponse> prepareOrder(@PathVariable Long id) {
+    public ResponseEntity<OrderResponse> prepareOrder(@PathVariable UUID id) {
         var current = CurrentUser.get();
         return ResponseEntity.ok(prepareOrder.execute(id, current.userId()));
     }
 
     @PostMapping("/{id}/ready")
     @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN')")
-    public ResponseEntity<OrderResponse> readyForDelivery(@PathVariable Long id) {
+    public ResponseEntity<OrderResponse> readyForDelivery(@PathVariable UUID id) {
         var current = CurrentUser.get();
         return ResponseEntity.ok(prepareOrder.readyForDelivery(id, current.userId()));
     }
@@ -143,8 +145,8 @@ public class OrderController {
     @PostMapping("/{id}/assign-delivery")
     @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN')")
     public ResponseEntity<OrderResponse> assignDeliveryAgent(
-            @PathVariable Long id,
-            @RequestBody Map<String, Long> body) {
+            @PathVariable UUID id,
+            @RequestBody Map<String, UUID> body) {
         var order = orderRepository.findById(id);
         if (order.isEmpty()) return ResponseEntity.notFound().build();
         order.get().assignDeliveryAgent(body.get("agentId"));
@@ -156,22 +158,22 @@ public class OrderController {
     @PostMapping("/{id}/deliver")
     @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'DELIVERY_AGENT')")
     public ResponseEntity<OrderResponse> deliverOrder(
-            @PathVariable Long id,
-            @RequestBody Map<String, Long> body) {
+            @PathVariable UUID id,
+            @RequestBody Map<String, UUID> body) {
         var current = CurrentUser.get();
         return ResponseEntity.ok(deliverOrder.execute(id, body.get("receivedBy"), current.userId()));
     }
 
     @PostMapping("/{id}/accept")
     @PreAuthorize("hasAnyAuthority('SHOP_MANAGER')")
-    public ResponseEntity<OrderResponse> acceptOrder(@PathVariable Long id) {
+    public ResponseEntity<OrderResponse> acceptOrder(@PathVariable UUID id) {
         var current = CurrentUser.get();
         return ResponseEntity.ok(acceptOrder.execute(id, current.userId()));
     }
 
     @PostMapping("/{id}/accept-asap")
     @PreAuthorize("hasAnyAuthority('SHOP_MANAGER')")
-    public ResponseEntity<OrderResponse> acceptAsapOrder(@PathVariable Long id) {
+    public ResponseEntity<OrderResponse> acceptAsapOrder(@PathVariable UUID id) {
         var current = CurrentUser.get();
         OrderResponse response = acceptOrder.execute(id, current.userId());
         // TODO: auto-create payment for ASAP orders
@@ -180,14 +182,14 @@ public class OrderController {
 
     @PostMapping("/{id}/cancel")
     @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SHOP_ADMIN', 'SHOP_MANAGER')")
-    public ResponseEntity<OrderResponse> cancelOrder(@PathVariable Long id) {
+    public ResponseEntity<OrderResponse> cancelOrder(@PathVariable UUID id) {
         var current = CurrentUser.get();
         return ResponseEntity.ok(cancelOrder.execute(id, current.userId()));
     }
 
     @PostMapping("/{id}/reject")
     @PreAuthorize("hasAnyAuthority('SHOP_MANAGER', 'SHOP_ADMIN')")
-    public ResponseEntity<OrderResponse> rejectOrder(@PathVariable Long id) {
+    public ResponseEntity<OrderResponse> rejectOrder(@PathVariable UUID id) {
         var current = CurrentUser.get();
         return ResponseEntity.ok(rejectOrder.execute(id, current.userId()));
     }
@@ -195,7 +197,7 @@ public class OrderController {
     @PostMapping("/{id}/delivery-reject")
     @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'DELIVERY_AGENT')")
     public ResponseEntity<OrderResponse> deliveryRejectOrder(
-            @PathVariable Long id,
+            @PathVariable UUID id,
             @RequestBody(required = false) Map<String, String> body) {
         var current = CurrentUser.get();
         String reason = body != null ? body.get("reason") : null;

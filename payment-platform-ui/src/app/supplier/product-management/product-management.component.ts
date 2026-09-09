@@ -23,7 +23,7 @@ export class ProductManagementComponent implements OnInit {
 
   form = {
     name: '', sku: '', description: '', unitPrice: 0, currency: 'TND',
-    categoryId: 0, familyId: 0, unit: 'unite', minQuantity: 0
+    categoryId: '', familyId: '', unit: 'unite', minQuantity: 0
   };
 
   constructor(
@@ -34,9 +34,9 @@ export class ProductManagementComponent implements OnInit {
 
   ngOnInit(): void { this.loadData(); }
 
-  get supplierId(): number {
+  get supplierId(): string {
     const u = sessionStorage.getItem('user');
-    return u ? JSON.parse(u).organizationId || 0 : 0;
+    return u ? JSON.parse(u).organizationId || '' : '';
   }
 
   loadData(): void {
@@ -52,17 +52,17 @@ export class ProductManagementComponent implements OnInit {
 
   get filteredProducts(): Product[] {
     return this.products.filter(p => {
-      if (this.filterCategory && p.categoryId !== +this.filterCategory) return false;
-      if (this.filterFamily && p.familyId !== +this.filterFamily) return false;
+      if (this.filterCategory && p.categoryId !== this.filterCategory) return false;
+      if (this.filterFamily && p.familyId !== this.filterFamily) return false;
       return true;
     });
   }
 
-  getCategoryName(id: number | null): string { return this.categories.find(c => c.id === id)?.name || '-'; }
-  getFamilyName(id: number | null): string { return this.families.find(f => f.id === id)?.name || '-'; }
+  getCategoryName(id: string | null): string { return this.categories.find(c => c.id === id)?.name || '-'; }
+  getFamilyName(id: string | null): string { return this.families.find(f => f.id === id)?.name || '-'; }
 
   onCategoryChange(): void {
-    this.form.familyId = 0;
+    this.form.familyId = '';
   }
 
   getFamiliesForCategory(): ProductFamily[] {
@@ -72,7 +72,7 @@ export class ProductManagementComponent implements OnInit {
 
   openCreate(): void {
     this.editingProduct = null;
-    this.form = { name: '', sku: '', description: '', unitPrice: 0, currency: 'TND', categoryId: 0, familyId: 0, unit: 'unite', minQuantity: 0 };
+    this.form = { name: '', sku: '', description: '', unitPrice: 0, currency: 'TND', categoryId: '', familyId: '', unit: 'unite', minQuantity: 0 };
     this.showForm = true;
   }
 
@@ -80,7 +80,7 @@ export class ProductManagementComponent implements OnInit {
     this.editingProduct = p;
     this.form = {
       name: p.name, sku: p.sku, description: p.description || '', unitPrice: p.unitPrice,
-      currency: p.currency, categoryId: p.categoryId || 0, familyId: p.familyId || 0,
+      currency: p.currency, categoryId: p.categoryId || '', familyId: p.familyId || '',
       unit: p.unit || 'unite', minQuantity: p.minQuantity
     };
     this.showForm = true;

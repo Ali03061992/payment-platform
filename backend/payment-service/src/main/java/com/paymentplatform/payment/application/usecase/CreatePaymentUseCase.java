@@ -43,7 +43,7 @@ public class CreatePaymentUseCase {
     }
 
     @Transactional
-    public PaymentResponse execute(CreatePaymentRequest request, long actorUserId, Long organizationId) {
+    public PaymentResponse execute(CreatePaymentRequest request, UUID actorUserId, UUID organizationId) {
         orgClient.validateShop(request.shopId());
         orgClient.validateSupplier(request.supplierId());
         orgClient.validateRelation(request.shopId(), request.supplierId());

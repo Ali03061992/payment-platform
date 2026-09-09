@@ -1,5 +1,7 @@
 package com.paymentplatform.identity.interfaces.rest;
 
+import java.util.UUID;
+
 import com.paymentplatform.identity.application.dto.LoginRequest;
 import com.paymentplatform.identity.application.dto.AgentRequest;
 import com.paymentplatform.identity.application.dto.UpdateAgentRequest;
@@ -44,7 +46,7 @@ class SupplierAgentControllerTest {
 
     private MockMvc mockMvc;
     private String supplierAdminToken;
-    private static final long SUPPLIER_ID = 42L;
+    private static final UUID SUPPLIER_ID = UUID.fromString("00000000-0000-0000-0000-000000000042");
 
     @BeforeEach
     void setUp() throws Exception {
@@ -52,7 +54,7 @@ class SupplierAgentControllerTest {
                 .apply(SecurityMockMvcConfigurers.springSecurity())
                 .build();
         String supplierAdminUsername = "supplier.admin." + System.nanoTime();
-        User supplierAdmin = users.save(User.create(new UserId(0), Username.of(supplierAdminUsername),
+        User supplierAdmin = users.save(User.create(new UserId(null), Username.of(supplierAdminUsername),
                 Email.of(supplierAdminUsername + "@example.com"), PasswordHash.of(passwordEncoder.encode("Admin@1")),
                 "Supplier", "Admin", new PhoneNumber(null),
                 OrganizationId.of(SUPPLIER_ID), RoleCode.SUPPLIER_ADMIN));
@@ -88,7 +90,7 @@ class SupplierAgentControllerTest {
                 .andExpect(jsonPath("$").isArray());
     }
 
-    private long createAgent(String suffix) throws Exception {
+    private UUID createAgent(String suffix) throws Exception {
         AgentRequest createReq = new AgentRequest("Agent", "Test" + suffix, "agent." + suffix + "@example.com",
                 null, "agent." + suffix, "SUPPLIER_AGENT", "Agent@123");
         MvcResult result = mockMvc.perform(post("/api/suppliers/" + SUPPLIER_ID + "/agents")
@@ -97,13 +99,12 @@ class SupplierAgentControllerTest {
                         .content(objectMapper.writeValueAsString(createReq)))
                 .andExpect(status().isCreated())
                 .andReturn();
-        return objectMapper.readTree(result.getResponse().getContentAsString())
-                .get("user").get("id").asLong();
+        return UUID.fromString(objectMapper.readTree(result.getResponse().getContentAsString()).get("user").get("id").asText());
     }
 
     @Test
     void update_agent() throws Exception {
-        long agentId = createAgent("update" + System.nanoTime());
+        UUID agentId = createAgent("update" + System.nanoTime());
 
         UpdateAgentRequest updateReq = new UpdateAgentRequest("Updated", "Agent", "updated." + System.nanoTime() + "@example.com", "99887766");
         mockMvc.perform(patch("/api/suppliers/" + SUPPLIER_ID + "/agents/" + agentId)
@@ -116,7 +117,7 @@ class SupplierAgentControllerTest {
 
     @Test
     void activate_agent() throws Exception {
-        long agentId = createAgent("activate" + System.nanoTime());
+        UUID agentId = createAgent("activate" + System.nanoTime());
 
         mockMvc.perform(patch("/api/suppliers/" + SUPPLIER_ID + "/agents/" + agentId + "/activate")
                         .header("Authorization", "Bearer " + supplierAdminToken))
@@ -125,7 +126,7 @@ class SupplierAgentControllerTest {
 
     @Test
     void disable_agent() throws Exception {
-        long agentId = createAgent("disable" + System.nanoTime());
+        UUID agentId = createAgent("disable" + System.nanoTime());
 
         mockMvc.perform(patch("/api/suppliers/" + SUPPLIER_ID + "/agents/" + agentId + "/disable")
                         .header("Authorization", "Bearer " + supplierAdminToken))

@@ -1,5 +1,7 @@
 package com.paymentplatform.organization.domain.repository;
 
+import java.util.UUID;
+
 import com.paymentplatform.organization.domain.model.Product;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
@@ -8,15 +10,15 @@ import jakarta.persistence.LockModeType;
 import java.util.List;
 import java.util.Optional;
 
-public interface ProductRepository extends JpaRepository<Product, Long> {
-    List<Product> findBySupplierIdAndStatus(Long supplierId, String status);
-    List<Product> findBySupplierId(Long supplierId);
-    Optional<Product> findBySupplierIdAndSku(Long supplierId, String sku);
-    boolean existsBySupplierIdAndSku(Long supplierId, String sku);
+public interface ProductRepository extends JpaRepository<Product, UUID> {
+    List<Product> findBySupplierIdAndStatus(UUID supplierId, String status);
+    List<Product> findBySupplierId(UUID supplierId);
+    Optional<Product> findBySupplierIdAndSku(UUID supplierId, String sku);
+    boolean existsBySupplierIdAndSku(UUID supplierId, String sku);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT p FROM Product p WHERE p.id = :id")
-    Optional<Product> findByIdForUpdate(Long id);
+    Optional<Product> findByIdForUpdate(UUID id);
 
     @Query("SELECT p FROM Product p WHERE p.status = 'ACTIVE' AND (p.quantity - p.reservedQty) <= p.minQuantity")
     List<Product> findLowStockProducts();

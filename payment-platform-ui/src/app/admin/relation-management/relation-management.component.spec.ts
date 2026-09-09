@@ -58,7 +58,7 @@ describe('RelationManagementComponent', () => {
   });
 
   it('should not create relation without supplier', () => {
-    component.selectedSupplierId = 0;
+    component.selectedSupplierId = '';
     component.selectedShopId = 2;
     component.create();
     expect(orgService.createRelation).not.toHaveBeenCalled();
@@ -66,7 +66,7 @@ describe('RelationManagementComponent', () => {
 
   it('should not create relation without shop', () => {
     component.selectedSupplierId = 1;
-    component.selectedShopId = 0;
+    component.selectedShopId = '';
     component.create();
     expect(orgService.createRelation).not.toHaveBeenCalled();
   });

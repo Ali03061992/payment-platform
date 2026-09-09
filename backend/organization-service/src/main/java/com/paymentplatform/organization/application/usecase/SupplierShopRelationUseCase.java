@@ -1,5 +1,7 @@
 package com.paymentplatform.organization.application.usecase;
 
+import java.util.UUID;
+
 import com.paymentplatform.shared.domain.exception.ConflictException;
 import com.paymentplatform.shared.domain.exception.NotFoundException;
 import com.paymentplatform.shared.infrastructure.audit.AuditRecorder;
@@ -70,13 +72,13 @@ public class SupplierShopRelationUseCase {
     }
 
     @Transactional(readOnly = true)
-    public List<RelationResponse> listBySupplier(long supplierId) {
+    public List<RelationResponse> listBySupplier(UUID supplierId) {
         return relations.findBySupplierId(OrganizationId.of(supplierId)).stream()
                 .map(RelationResponse::from).toList();
     }
 
     @Transactional(readOnly = true)
-    public List<RelationResponse> listByShop(long shopId) {
+    public List<RelationResponse> listByShop(UUID shopId) {
         return relations.findByShopId(OrganizationId.of(shopId)).stream()
                 .map(RelationResponse::from).toList();
     }
@@ -88,7 +90,7 @@ public class SupplierShopRelationUseCase {
     }
 
     @Transactional
-    public void deactivateRelation(long relationId) {
+    public void deactivateRelation(UUID relationId) {
         SupplierShopRelation relation = relations.findById(relationId)
                 .orElseThrow(() -> new NotFoundException("Relation non trouvée : " + relationId));
         relation.deactivate();
@@ -99,7 +101,7 @@ public class SupplierShopRelationUseCase {
     }
 
     @Transactional(readOnly = true)
-    public boolean existsActiveRelation(long supplierId, long shopId) {
+    public boolean existsActiveRelation(UUID supplierId, UUID shopId) {
         return relations.existsBySupplierIdAndShopIdAndStatus(
                 OrganizationId.of(supplierId), OrganizationId.of(shopId), RelationStatus.ACTIVE);
     }

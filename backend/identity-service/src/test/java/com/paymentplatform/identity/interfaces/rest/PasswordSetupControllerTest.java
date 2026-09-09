@@ -1,5 +1,7 @@
 package com.paymentplatform.identity.interfaces.rest;
 
+import java.util.UUID;
+
 import com.paymentplatform.identity.domain.model.User;
 import com.paymentplatform.identity.domain.repository.UserRepository;
 import com.paymentplatform.identity.domain.valueobject.Email;
@@ -46,10 +48,10 @@ class PasswordSetupControllerTest {
     @BeforeEach
     void setUp() {
         mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
-        testUser = users.save(User.create(new UserId(0), Username.of("pwd.setup." + System.nanoTime()),
+        testUser = users.save(User.create(new UserId(null), Username.of("pwd.setup." + System.nanoTime()),
                 Email.of("pwd.setup." + System.nanoTime() + "@example.com"), PasswordHash.of(passwordEncoder.encode("Test@1")),
                 "Test", "User", new PhoneNumber(null),
-                OrganizationId.of(5), RoleCode.SHOP_AGENT));
+                OrganizationId.of(UUID.fromString("00000000-0000-0000-0000-000000000005")), RoleCode.SHOP_AGENT));
     }
 
     @Test

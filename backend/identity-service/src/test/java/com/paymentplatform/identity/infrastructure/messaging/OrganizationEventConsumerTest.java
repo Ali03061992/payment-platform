@@ -1,5 +1,7 @@
 package com.paymentplatform.identity.infrastructure.messaging;
 
+import java.util.UUID;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.paymentplatform.identity.application.usecase.OrganizationCascadeUseCase;
 import com.paymentplatform.shared.domain.event.OrganizationEvents;
@@ -26,13 +28,13 @@ class OrganizationEventConsumerTest {
         OrganizationEventConsumer consumer = new OrganizationEventConsumer(cascade, objectMapper);
 
         String payload = """
-                {"eventType":"%s","eventId":"evt-1","organizationId":42}
+                {"eventType":"%s","eventId":"evt-1","organizationId":"00000000-0000-0000-0000-000000000042"}
                 """.formatted(OrganizationEvents.SupplierDisabledEvent.EVENT_TYPE);
 
         consumer.onOrganizationEvent(payload);
 
         verify(cascade).onOrganizationDisabled(eq(OrganizationEvents.SupplierDisabledEvent.EVENT_TYPE),
-                eq(42L), anyList(), eq("evt-1"));
+                eq(UUID.fromString("00000000-0000-0000-0000-000000000042")), anyList(), eq("evt-1"));
     }
 
     @Test
@@ -41,13 +43,13 @@ class OrganizationEventConsumerTest {
         OrganizationEventConsumer consumer = new OrganizationEventConsumer(cascade, objectMapper);
 
         String payload = """
-                {"eventType":"%s","eventId":"evt-2","organizationId":7}
+                {"eventType":"%s","eventId":"evt-2","organizationId":"00000000-0000-0000-0000-000000000007"}
                 """.formatted(OrganizationEvents.ShopDisabledEvent.EVENT_TYPE);
 
         consumer.onOrganizationEvent(payload);
 
         verify(cascade).onOrganizationDisabled(eq(OrganizationEvents.ShopDisabledEvent.EVENT_TYPE),
-                eq(7L), anyList(), eq("evt-2"));
+                eq(UUID.fromString("00000000-0000-0000-0000-000000000007")), anyList(), eq("evt-2"));
     }
 
     @Test
@@ -56,7 +58,7 @@ class OrganizationEventConsumerTest {
         OrganizationEventConsumer consumer = new OrganizationEventConsumer(cascade, objectMapper);
 
         String payload = """
-                {"eventType":"organization.unknown","eventId":"evt-3","organizationId":1}
+                {"eventType":"organization.unknown","eventId":"evt-3","organizationId":"00000000-0000-0000-0000-000000000001"}
                 """;
 
         consumer.onOrganizationEvent(payload);

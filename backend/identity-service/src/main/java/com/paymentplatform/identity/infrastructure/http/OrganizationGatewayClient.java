@@ -1,5 +1,7 @@
 package com.paymentplatform.identity.infrastructure.http;
 
+import java.util.UUID;
+
 import com.paymentplatform.shared.domain.exception.NotFoundException;
 import com.paymentplatform.shared.domain.exception.UnprocessableEntityException;
 import com.paymentplatform.identity.application.port.OrganizationStatus;
@@ -36,7 +38,7 @@ public class OrganizationGatewayClient implements OrganizationStatusPort {
     private static final long CACHE_TTL_MS = 10_000;
 
     private final RestClient restClient;
-    private final Map<Long, CacheEntry> cache = new ConcurrentHashMap<>();
+    private final Map<UUID, CacheEntry> cache = new ConcurrentHashMap<>();
 
     public OrganizationGatewayClient(RestClient.Builder builder,
                                      @Value("${app.gateway.base-url}") String gatewayBaseUrl) {
@@ -44,7 +46,7 @@ public class OrganizationGatewayClient implements OrganizationStatusPort {
     }
 
     @Override
-    public OrganizationStatus getOrganizationStatus(long organizationId) {
+    public OrganizationStatus getOrganizationStatus(UUID organizationId) {
         CacheEntry cached = cache.get(organizationId);
         if (cached != null && cached.valid()) {
             return cached.status();
@@ -54,7 +56,7 @@ public class OrganizationGatewayClient implements OrganizationStatusPort {
         return status;
     }
 
-    private OrganizationStatus fetch(long organizationId) {
+    private OrganizationStatus fetch(UUID organizationId) {
         try {
             OrganizationStatus status = restClient.get()
                     .uri("/api/organizations/internal/{id}/status", organizationId)

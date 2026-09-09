@@ -1,5 +1,7 @@
 package com.paymentplatform.payment.infrastructure.csv;
 
+import java.util.UUID;
+
 import com.paymentplatform.payment.domain.model.Payment;
 import com.paymentplatform.payment.domain.repository.PaymentRepository;
 import com.paymentplatform.payment.infrastructure.http.OrganizationValidationClient;
@@ -22,7 +24,7 @@ public class CsvExportService {
         this.orgClient = orgClient;
     }
 
-    public String generatePaymentsCsv(Instant from, Instant to, Long supplierId, Long shopId) {
+    public String generatePaymentsCsv(Instant from, Instant to, UUID supplierId, UUID shopId) {
         List<Payment> allPayments = payments.findAll();
 
         List<Payment> filtered = allPayments.stream()

@@ -1,5 +1,7 @@
 package com.paymentplatform.organization.domain.model;
 
+import java.util.UUID;
+
 import jakarta.persistence.*;
 import java.time.Instant;
 
@@ -8,14 +10,15 @@ import java.time.Instant;
 public class StockMovement {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(columnDefinition = "VARCHAR(36)")
+    private UUID id;
 
-    @Column(name = "product_id", nullable = false)
-    private Long productId;
+    @Column(name = "product_id", nullable = false, columnDefinition = "VARCHAR(36)")
+    private UUID productId;
 
-    @Column(name = "supplier_id", nullable = false)
-    private Long supplierId;
+    @Column(name = "supplier_id", nullable = false, columnDefinition = "VARCHAR(36)")
+    private UUID supplierId;
 
     @Column(nullable = false, length = 20)
     private String type;
@@ -40,11 +43,11 @@ public class StockMovement {
         createdAt = Instant.now();
     }
 
-    public Long getId() { return id; }
-    public Long getProductId() { return productId; }
-    public void setProductId(Long productId) { this.productId = productId; }
-    public Long getSupplierId() { return supplierId; }
-    public void setSupplierId(Long supplierId) { this.supplierId = supplierId; }
+    public UUID getId() { return id; }
+    public UUID getProductId() { return productId; }
+    public void setProductId(UUID productId) { this.productId = productId; }
+    public UUID getSupplierId() { return supplierId; }
+    public void setSupplierId(UUID supplierId) { this.supplierId = supplierId; }
     public String getType() { return type; }
     public void setType(String type) { this.type = type; }
     public Integer getQuantity() { return quantity; }

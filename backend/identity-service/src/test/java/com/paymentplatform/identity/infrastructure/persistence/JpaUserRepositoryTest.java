@@ -1,5 +1,7 @@
 package com.paymentplatform.identity.infrastructure.persistence;
 
+import java.util.UUID;
+
 import com.paymentplatform.shared.domain.model.OrganizationId;
 import com.paymentplatform.shared.domain.model.RoleCode;
 import com.paymentplatform.shared.domain.model.UserId;
@@ -33,11 +35,11 @@ class JpaUserRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        savedUser = repository.save(User.create(new UserId(0),
+        savedUser = repository.save(User.create(new UserId(null),
                 Username.of("testuser"), Email.of("test@example.com"),
                 PasswordHash.of(passwordEncoder.encode("Test@1")),
                 "Test", "User", new PhoneNumber("55123456"),
-                OrganizationId.of(10), RoleCode.SHOP_AGENT));
+                OrganizationId.of(UUID.fromString("00000000-0000-0000-0000-000000000010")), RoleCode.SHOP_AGENT));
     }
 
     @Test
@@ -49,7 +51,7 @@ class JpaUserRepositoryTest {
 
     @Test
     void findById_nonExisting_returnsEmpty() {
-        assertThat(repository.findById(new UserId(99999))).isEmpty();
+        assertThat(repository.findById(new UserId(UUID.fromString("00000000-0000-0000-0000-000000099999")))).isEmpty();
     }
 
     @Test
@@ -92,31 +94,31 @@ class JpaUserRepositoryTest {
 
     @Test
     void findByOrganizationId() {
-        repository.save(User.create(new UserId(0),
+        repository.save(User.create(new UserId(null),
                 Username.of("user2"), Email.of("user2@example.com"),
                 PasswordHash.of(passwordEncoder.encode("Test@1")),
                 "User", "Two", new PhoneNumber(null),
-                OrganizationId.of(10), RoleCode.SHOP_ADMIN));
+                OrganizationId.of(UUID.fromString("00000000-0000-0000-0000-000000000010")), RoleCode.SHOP_ADMIN));
 
-        List<User> users = repository.findByOrganizationId(OrganizationId.of(10));
+        List<User> users = repository.findByOrganizationId(OrganizationId.of(UUID.fromString("00000000-0000-0000-0000-000000000010")));
         assertThat(users).hasSize(2);
     }
 
     @Test
     void findByOrganizationId_emptyWhenNone() {
-        List<User> users = repository.findByOrganizationId(OrganizationId.of(999));
+        List<User> users = repository.findByOrganizationId(OrganizationId.of(UUID.fromString("00000000-0000-0000-0000-000000000999")));
         assertThat(users).isEmpty();
     }
 
     @Test
     void findByOrganizationIdAndRole_filtersCorrectly() {
-        repository.save(User.create(new UserId(0),
+        repository.save(User.create(new UserId(null),
                 Username.of("admin"), Email.of("admin@example.com"),
                 PasswordHash.of(passwordEncoder.encode("Test@1")),
                 "Admin", "User", new PhoneNumber(null),
-                OrganizationId.of(10), RoleCode.SHOP_ADMIN));
+                OrganizationId.of(UUID.fromString("00000000-0000-0000-0000-000000000010")), RoleCode.SHOP_ADMIN));
 
-        List<User> agents = repository.findByOrganizationIdAndRole(OrganizationId.of(10), RoleCode.SHOP_AGENT);
+        List<User> agents = repository.findByOrganizationIdAndRole(OrganizationId.of(UUID.fromString("00000000-0000-0000-0000-000000000010")), RoleCode.SHOP_AGENT);
         assertThat(agents).hasSize(1);
         assertThat(agents.get(0).username().value()).isEqualTo("testuser");
     }
@@ -124,11 +126,11 @@ class JpaUserRepositoryTest {
     @Test
     void findAll_returnsAll() {
         long before = repository.findAll().size();
-        repository.save(User.create(new UserId(0),
+        repository.save(User.create(new UserId(null),
                 Username.of("other"), Email.of("other@example.com"),
                 PasswordHash.of(passwordEncoder.encode("Test@1")),
                 "Other", "User", new PhoneNumber(null),
-                OrganizationId.of(20), RoleCode.SUPPLIER_ADMIN));
+                OrganizationId.of(UUID.fromString("00000000-0000-0000-0000-000000000020")), RoleCode.SUPPLIER_ADMIN));
 
         List<User> all = repository.findAll();
         assertThat(all).hasSize((int) (before + 1));

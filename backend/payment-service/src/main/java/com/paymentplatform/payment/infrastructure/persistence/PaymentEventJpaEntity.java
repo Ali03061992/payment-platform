@@ -1,5 +1,7 @@
 package com.paymentplatform.payment.infrastructure.persistence;
 
+import java.util.UUID;
+
 import jakarta.persistence.*;
 import java.time.Instant;
 
@@ -8,17 +10,18 @@ import java.time.Instant;
 public class PaymentEventJpaEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(columnDefinition = "VARCHAR(36)")
+    private UUID id;
 
-    @Column(name = "payment_id", nullable = false)
-    private Long paymentId;
+    @Column(name = "payment_id", nullable = false, columnDefinition = "VARCHAR(36)")
+    private UUID paymentId;
 
     @Column(nullable = false, length = 40)
     private String action;
 
-    @Column(name = "user_id")
-    private Long userId;
+    @Column(name = "user_id", columnDefinition = "VARCHAR(36)")
+    private UUID userId;
 
     @Column(nullable = false)
     private Instant timestamp;
@@ -26,14 +29,14 @@ public class PaymentEventJpaEntity {
     @Column(columnDefinition = "TEXT")
     private String details;
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-    public Long getPaymentId() { return paymentId; }
-    public void setPaymentId(Long paymentId) { this.paymentId = paymentId; }
+    public UUID getId() { return id; }
+    public void setId(UUID id) { this.id = id; }
+    public UUID getPaymentId() { return paymentId; }
+    public void setPaymentId(UUID paymentId) { this.paymentId = paymentId; }
     public String getAction() { return action; }
     public void setAction(String action) { this.action = action; }
-    public Long getUserId() { return userId; }
-    public void setUserId(Long userId) { this.userId = userId; }
+    public UUID getUserId() { return userId; }
+    public void setUserId(UUID userId) { this.userId = userId; }
     public Instant getTimestamp() { return timestamp; }
     public void setTimestamp(Instant timestamp) { this.timestamp = timestamp; }
     public String getDetails() { return details; }

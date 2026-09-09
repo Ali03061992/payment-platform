@@ -1,5 +1,7 @@
 package com.paymentplatform.identity.interfaces.rest;
 
+import java.util.UUID;
+
 import com.paymentplatform.shared.domain.model.RoleCode;
 import com.paymentplatform.shared.infrastructure.security.CurrentUser;
 import com.paymentplatform.identity.application.dto.AgentCreatedResponse;
@@ -38,12 +40,12 @@ public class SupplierAgentController {
     }
 
     @GetMapping
-    public ResponseEntity<List<UserResponse>> list(@PathVariable long supplierId) {
+    public ResponseEntity<List<UserResponse>> list(@PathVariable UUID supplierId) {
         return ResponseEntity.ok(agents.listAgents(CurrentUser.id(), supplierId));
     }
 
     @PostMapping
-    public ResponseEntity<AgentCreatedResponse> create(@PathVariable long supplierId,
+    public ResponseEntity<AgentCreatedResponse> create(@PathVariable UUID supplierId,
                                                        @Valid @RequestBody AgentRequest request) {
         AgentCreatedResponse created = agents.createAgent(CurrentUser.id(), supplierId, "SUPPLIER",
                 SUPPLIER_ROLES, request);
@@ -51,18 +53,18 @@ public class SupplierAgentController {
     }
 
     @PatchMapping("/{agentId}")
-    public ResponseEntity<UserResponse> update(@PathVariable long supplierId, @PathVariable long agentId,
+    public ResponseEntity<UserResponse> update(@PathVariable UUID supplierId, @PathVariable UUID agentId,
                                                @Valid @RequestBody UpdateAgentRequest request) {
         return ResponseEntity.ok(agents.updateAgent(CurrentUser.id(), supplierId, agentId, request));
     }
 
     @PatchMapping("/{agentId}/activate")
-    public ResponseEntity<UserResponse> activate(@PathVariable long supplierId, @PathVariable long agentId) {
+    public ResponseEntity<UserResponse> activate(@PathVariable UUID supplierId, @PathVariable UUID agentId) {
         return ResponseEntity.ok(agents.activateAgent(CurrentUser.id(), supplierId, agentId));
     }
 
     @PatchMapping("/{agentId}/disable")
-    public ResponseEntity<UserResponse> disable(@PathVariable long supplierId, @PathVariable long agentId) {
+    public ResponseEntity<UserResponse> disable(@PathVariable UUID supplierId, @PathVariable UUID agentId) {
         return ResponseEntity.ok(agents.disableAgent(CurrentUser.id(), supplierId, agentId));
     }
 }

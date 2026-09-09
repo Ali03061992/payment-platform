@@ -1,6 +1,6 @@
 export interface ProductCategory {
-  id: number;
-  supplierId: number;
+  id: string;
+  supplierId: string;
   name: string;
   code: string;
   status: string;
@@ -9,8 +9,8 @@ export interface ProductCategory {
 }
 
 export interface ProductFamily {
-  id: number;
-  supplierId: number;
+  id: string;
+  supplierId: string;
   name: string;
   code: string;
   status: string;

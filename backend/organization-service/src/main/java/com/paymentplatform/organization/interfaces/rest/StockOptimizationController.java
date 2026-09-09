@@ -1,5 +1,7 @@
 package com.paymentplatform.organization.interfaces.rest;
 
+import java.util.UUID;
+
 import com.paymentplatform.organization.application.dto.StockOptimizationResponse;
 import com.paymentplatform.organization.application.service.StockOptimizationService;
 import org.springframework.http.ResponseEntity;
@@ -23,7 +25,7 @@ public class StockOptimizationController {
      */
     @GetMapping
     @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SYSTEM_ADMIN')")
-    public ResponseEntity<StockOptimizationResponse> optimize(@PathVariable Long supplierId) {
+    public ResponseEntity<StockOptimizationResponse> optimize(@PathVariable UUID supplierId) {
         StockOptimizationResponse result = optimizationService.optimize(supplierId);
         return ResponseEntity.ok(result);
     }
@@ -34,7 +36,7 @@ public class StockOptimizationController {
     @PostMapping("/configure")
     @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SYSTEM_ADMIN')")
     public ResponseEntity<StockOptimizationResponse> configure(
-            @PathVariable Long supplierId,
+            @PathVariable UUID supplierId,
             @RequestParam(defaultValue = "7") double leadTimeDays,
             @RequestParam(defaultValue = "50") double orderingCost,
             @RequestParam(defaultValue = "0.25") double holdingCostPercent) {

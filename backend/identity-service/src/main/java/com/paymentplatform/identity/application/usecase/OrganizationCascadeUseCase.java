@@ -43,7 +43,7 @@ public class OrganizationCascadeUseCase {
     }
 
     @Transactional
-    public void onOrganizationDisabled(String eventType, long organizationId, List<RoleCode> targetRoles,
+    public void onOrganizationDisabled(String eventType, UUID organizationId, List<RoleCode> targetRoles,
                                        String eventId) {
         if (deduplicator.isProcessed(eventId)) {
             log.debug("Événement {} déjà traité", eventId);

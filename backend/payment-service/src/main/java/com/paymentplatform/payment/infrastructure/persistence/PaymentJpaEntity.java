@@ -1,5 +1,7 @@
 package com.paymentplatform.payment.infrastructure.persistence;
 
+import java.util.UUID;
+
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -9,17 +11,18 @@ import java.time.Instant;
 public class PaymentJpaEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(columnDefinition = "VARCHAR(36)")
+    private UUID id;
 
     @Column(nullable = false, unique = true, length = 64)
     private String reference;
 
-    @Column(name = "shop_id", nullable = false)
-    private Long shopId;
+    @Column(name = "shop_id", nullable = false, columnDefinition = "VARCHAR(36)")
+    private UUID shopId;
 
-    @Column(name = "supplier_id", nullable = false)
-    private Long supplierId;
+    @Column(name = "supplier_id", nullable = false, columnDefinition = "VARCHAR(36)")
+    private UUID supplierId;
 
     @Column(nullable = false, length = 3)
     private String currency;
@@ -33,8 +36,8 @@ public class PaymentJpaEntity {
     @Column(name = "rejection_reason", length = 500)
     private String rejectionReason;
 
-    @Column(name = "created_by", nullable = false)
-    private Long createdBy;
+    @Column(name = "created_by", nullable = false, columnDefinition = "VARCHAR(36)")
+    private UUID createdBy;
 
     @Version
     private Long version;
@@ -45,14 +48,14 @@ public class PaymentJpaEntity {
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public UUID getId() { return id; }
+    public void setId(UUID id) { this.id = id; }
     public String getReference() { return reference; }
     public void setReference(String reference) { this.reference = reference; }
-    public Long getShopId() { return shopId; }
-    public void setShopId(Long shopId) { this.shopId = shopId; }
-    public Long getSupplierId() { return supplierId; }
-    public void setSupplierId(Long supplierId) { this.supplierId = supplierId; }
+    public UUID getShopId() { return shopId; }
+    public void setShopId(UUID shopId) { this.shopId = shopId; }
+    public UUID getSupplierId() { return supplierId; }
+    public void setSupplierId(UUID supplierId) { this.supplierId = supplierId; }
     public String getCurrency() { return currency; }
     public void setCurrency(String currency) { this.currency = currency; }
     public BigDecimal getAmount() { return amount; }
@@ -61,8 +64,8 @@ public class PaymentJpaEntity {
     public void setStatus(String status) { this.status = status; }
     public String getRejectionReason() { return rejectionReason; }
     public void setRejectionReason(String rejectionReason) { this.rejectionReason = rejectionReason; }
-    public Long getCreatedBy() { return createdBy; }
-    public void setCreatedBy(Long createdBy) { this.createdBy = createdBy; }
+    public UUID getCreatedBy() { return createdBy; }
+    public void setCreatedBy(UUID createdBy) { this.createdBy = createdBy; }
     public Long getVersion() { return version; }
     public void setVersion(Long version) { this.version = version; }
     public Instant getCreatedAt() { return createdAt; }

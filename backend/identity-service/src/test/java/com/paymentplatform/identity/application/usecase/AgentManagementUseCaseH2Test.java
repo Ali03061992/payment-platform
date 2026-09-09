@@ -1,5 +1,7 @@
 package com.paymentplatform.identity.application.usecase;
 
+import java.util.UUID;
+
 import com.paymentplatform.identity.application.dto.AgentRequest;
 import com.paymentplatform.identity.application.port.OrganizationStatusPort;
 import com.paymentplatform.identity.domain.model.User;
@@ -42,10 +44,10 @@ class AgentManagementUseCaseH2Test {
 
     @BeforeEach
     void setUp() {
-        User supplierAdmin = User.create(new UserId(0), Username.of("supplier.admin"),
+        User supplierAdmin = User.create(new UserId(null), Username.of("supplier.admin"),
                 Email.of("sa@x.com"), PasswordHash.of(passwordEncoder.encode("pass")),
                 "Sam", "Fournier", new PhoneNumber(null),
-                OrganizationId.of(42), RoleCode.SUPPLIER_ADMIN);
+                OrganizationId.of(UUID.fromString("00000000-0000-0000-0000-000000000042")), RoleCode.SUPPLIER_ADMIN);
         users.save(supplierAdmin);
     }
 
@@ -56,7 +58,7 @@ class AgentManagementUseCaseH2Test {
         AgentRequest request = new AgentRequest("Ali", "Ben", "agent@x.com", "+21620000000",
                 "agent.alibaba", "SUPPLIER_AGENT", null);
 
-        var created = useCase.createAgent(actor.id().value(), 42, "SUPPLIER",
+        var created = useCase.createAgent(actor.id().value(), UUID.fromString("00000000-0000-0000-0000-000000000042"), "SUPPLIER",
                 List.of(RoleCode.SUPPLIER_ADMIN, RoleCode.SUPPLIER_AGENT), request);
 
         assertThat(created.user().id()).isNotNull();
@@ -71,7 +73,7 @@ class AgentManagementUseCaseH2Test {
         AgentRequest request = new AgentRequest("Ali", "Ben", "a@x.com", null, "agent.x",
                 "SUPPLIER_AGENT", null);
 
-        assertThatThrownBy(() -> useCase.createAgent(actor.id().value(), 7, "SUPPLIER",
+        assertThatThrownBy(() -> useCase.createAgent(actor.id().value(), UUID.fromString("00000000-0000-0000-0000-000000000007"), "SUPPLIER",
                 List.of(RoleCode.SUPPLIER_ADMIN, RoleCode.SUPPLIER_AGENT), request))
                 .isInstanceOf(ConflictException.class);
     }
@@ -83,7 +85,7 @@ class AgentManagementUseCaseH2Test {
         AgentRequest request = new AgentRequest("Ali", "Ben", "a@x.com", null, "agent.x",
                 "SHOP_AGENT", null);
 
-        assertThatThrownBy(() -> useCase.createAgent(actor.id().value(), 42, "SUPPLIER",
+        assertThatThrownBy(() -> useCase.createAgent(actor.id().value(), UUID.fromString("00000000-0000-0000-0000-000000000042"), "SUPPLIER",
                 List.of(RoleCode.SUPPLIER_ADMIN, RoleCode.SUPPLIER_AGENT), request))
                 .isInstanceOf(ForbiddenException.class);
     }
@@ -94,13 +96,13 @@ class AgentManagementUseCaseH2Test {
 
         AgentRequest request1 = new AgentRequest("Ali", "Ben", "a@x.com", null, "agent.x",
                 "SUPPLIER_AGENT", null);
-        useCase.createAgent(actor.id().value(), 42, "SUPPLIER",
+        useCase.createAgent(actor.id().value(), UUID.fromString("00000000-0000-0000-0000-000000000042"), "SUPPLIER",
                 List.of(RoleCode.SUPPLIER_ADMIN, RoleCode.SUPPLIER_AGENT), request1);
 
         AgentRequest request2 = new AgentRequest("Ali", "Ben", "b@x.com", null, "agent.x",
                 "SUPPLIER_AGENT", null);
 
-        assertThatThrownBy(() -> useCase.createAgent(actor.id().value(), 42, "SUPPLIER",
+        assertThatThrownBy(() -> useCase.createAgent(actor.id().value(), UUID.fromString("00000000-0000-0000-0000-000000000042"), "SUPPLIER",
                 List.of(RoleCode.SUPPLIER_ADMIN, RoleCode.SUPPLIER_AGENT), request2))
                 .isInstanceOf(ConflictException.class)
                 .hasMessageContaining("Nom d'utilisateur déjà utilisé");
@@ -110,13 +112,13 @@ class AgentManagementUseCaseH2Test {
     void disableAgent_agentOfAnotherOrg_throwsForbidden() {
         User actor = users.findByUsername(Username.of("supplier.admin")).orElseThrow();
 
-        User otherAgent = User.create(new UserId(0), Username.of("other.agent"),
+        User otherAgent = User.create(new UserId(null), Username.of("other.agent"),
                 Email.of("other@x.com"), PasswordHash.of(passwordEncoder.encode("pass")),
                 "Autre", "Agent", new PhoneNumber(null),
-                OrganizationId.of(7), RoleCode.SUPPLIER_AGENT);
+                OrganizationId.of(UUID.fromString("00000000-0000-0000-0000-000000000007")), RoleCode.SUPPLIER_AGENT);
         User savedOther = users.save(otherAgent);
 
-        assertThatThrownBy(() -> useCase.disableAgent(actor.id().value(), 42, savedOther.id().value()))
+        assertThatThrownBy(() -> useCase.disableAgent(actor.id().value(), UUID.fromString("00000000-0000-0000-0000-000000000042"), savedOther.id().value()))
                 .isInstanceOf(ForbiddenException.class);
     }
 }

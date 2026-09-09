@@ -10,9 +10,9 @@ public final class PaymentEvents {
     private PaymentEvents() {
     }
 
-    public record PaymentCreatedEvent(UUID eventId, Instant occurredAt, long paymentId, String reference,
-                                      long shopId, long supplierId, String currency, BigDecimal amount,
-                                      long createdBy) implements DomainEvent {
+    public record PaymentCreatedEvent(UUID eventId, Instant occurredAt, UUID paymentId, String reference,
+                                      UUID shopId, UUID supplierId, String currency, BigDecimal amount,
+                                      UUID createdBy) implements DomainEvent {
         public static final String EVENT_TYPE = "payment.created";
 
         @Override
@@ -31,8 +31,8 @@ public final class PaymentEvents {
         }
     }
 
-    public record PaymentConfirmedEvent(UUID eventId, Instant occurredAt, long paymentId, String reference,
-                                        long shopId, long supplierId, long confirmedBy) implements DomainEvent {
+    public record PaymentConfirmedEvent(UUID eventId, Instant occurredAt, UUID paymentId, String reference,
+                                        UUID shopId, UUID supplierId, UUID confirmedBy) implements DomainEvent {
         public static final String EVENT_TYPE = "payment.confirmed";
 
         @Override
@@ -51,8 +51,8 @@ public final class PaymentEvents {
         }
     }
 
-    public record PaymentRejectedEvent(UUID eventId, Instant occurredAt, long paymentId, String reference,
-                                       long shopId, long supplierId, long rejectedBy, String rejectionReason)
+    public record PaymentRejectedEvent(UUID eventId, Instant occurredAt, UUID paymentId, String reference,
+                                       UUID shopId, UUID supplierId, UUID rejectedBy, String rejectionReason)
             implements DomainEvent {
         public static final String EVENT_TYPE = "payment.rejected";
 
@@ -72,8 +72,8 @@ public final class PaymentEvents {
         }
     }
 
-    public record PaymentCancelledEvent(UUID eventId, Instant occurredAt, long paymentId, String reference,
-                                        long shopId, long supplierId, long cancelledBy) implements DomainEvent {
+    public record PaymentCancelledEvent(UUID eventId, Instant occurredAt, UUID paymentId, String reference,
+                                        UUID shopId, UUID supplierId, UUID cancelledBy) implements DomainEvent {
         public static final String EVENT_TYPE = "payment.cancelled";
 
         @Override

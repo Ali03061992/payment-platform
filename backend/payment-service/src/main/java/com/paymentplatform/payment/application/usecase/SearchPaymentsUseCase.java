@@ -1,5 +1,7 @@
 package com.paymentplatform.payment.application.usecase;
 
+import java.util.UUID;
+
 import com.paymentplatform.payment.application.dto.SearchPaymentsRequest;
 import com.paymentplatform.payment.application.dto.SearchPaymentsResponse;
 import com.paymentplatform.payment.infrastructure.elasticsearch.PaymentSearchDocument;
@@ -28,7 +30,7 @@ public class SearchPaymentsUseCase {
         this.elasticsearchOperations = elasticsearchOperations;
     }
 
-    public SearchPaymentsResponse execute(SearchPaymentsRequest request, Long supplierId) {
+    public SearchPaymentsResponse execute(SearchPaymentsRequest request, UUID supplierId) {
         Criteria criteria = new Criteria();
 
         if (supplierId != null) {

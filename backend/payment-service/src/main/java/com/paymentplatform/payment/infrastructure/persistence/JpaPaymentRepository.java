@@ -1,5 +1,7 @@
 package com.paymentplatform.payment.infrastructure.persistence;
 
+import java.util.UUID;
+
 import com.paymentplatform.payment.domain.model.Payment;
 import com.paymentplatform.payment.domain.model.PaymentEvent;
 import com.paymentplatform.payment.domain.model.PaymentStatus;
@@ -32,7 +34,7 @@ public class JpaPaymentRepository implements PaymentRepository {
         PaymentJpaEntity saved = jpaRepo.save(entity);
 
         List<PaymentEvent> pendingEvents = payment.events().stream()
-                .filter(e -> e.id() == 0)
+                .filter(e -> e.id() == null)
                 .toList();
         for (PaymentEvent event : pendingEvents) {
             eventJpaRepo.save(mapper.toEventJpa(event, saved.getId()));
@@ -45,7 +47,7 @@ public class JpaPaymentRepository implements PaymentRepository {
     }
 
     @Override
-    public Optional<Payment> findById(long id) {
+    public Optional<Payment> findById(UUID id) {
         return jpaRepo.findById(id).map(entity -> {
             List<PaymentEvent> events = eventJpaRepo.findByPaymentIdOrderByTimestampAsc(id)
                     .stream().map(mapper::toEventDomain).toList();
@@ -72,7 +74,7 @@ public class JpaPaymentRepository implements PaymentRepository {
     }
 
     @Override
-    public List<Payment> findByShopId(long shopId) {
+    public List<Payment> findByShopId(UUID shopId) {
         return jpaRepo.findByShopIdOrderByCreatedAtDesc(shopId).stream().map(entity -> {
             List<PaymentEvent> events = eventJpaRepo.findByPaymentIdOrderByTimestampAsc(entity.getId())
                     .stream().map(mapper::toEventDomain).toList();
@@ -81,7 +83,7 @@ public class JpaPaymentRepository implements PaymentRepository {
     }
 
     @Override
-    public List<Payment> findBySupplierId(long supplierId) {
+    public List<Payment> findBySupplierId(UUID supplierId) {
         return jpaRepo.findBySupplierIdOrderByCreatedAtDesc(supplierId).stream().map(entity -> {
             List<PaymentEvent> events = eventJpaRepo.findByPaymentIdOrderByTimestampAsc(entity.getId())
                     .stream().map(mapper::toEventDomain).toList();

@@ -9,8 +9,8 @@ public final class OrderEvents {
     private OrderEvents() {
     }
 
-    public record OrderCreatedEvent(UUID eventId, Instant occurredAt, long orderId, String reference,
-                                    long shopId, long supplierId, long createdBy, String source)
+    public record OrderCreatedEvent(UUID eventId, Instant occurredAt, UUID orderId, String reference,
+                                    UUID shopId, UUID supplierId, UUID createdBy, String source)
             implements DomainEvent {
         public static final String EVENT_TYPE = "order.created";
 
@@ -19,8 +19,8 @@ public final class OrderEvents {
         @Override public String aggregateId() { return String.valueOf(orderId); }
     }
 
-    public record OrderConfirmedEvent(UUID eventId, Instant occurredAt, long orderId, String reference,
-                                      long shopId, long supplierId, long confirmedBy) implements DomainEvent {
+    public record OrderConfirmedEvent(UUID eventId, Instant occurredAt, UUID orderId, String reference,
+                                      UUID shopId, UUID supplierId, UUID confirmedBy) implements DomainEvent {
         public static final String EVENT_TYPE = "order.confirmed";
 
         @Override public String eventType() { return EVENT_TYPE; }
@@ -28,8 +28,8 @@ public final class OrderEvents {
         @Override public String aggregateId() { return String.valueOf(orderId); }
     }
 
-    public record OrderPreparingEvent(UUID eventId, Instant occurredAt, long orderId, String reference,
-                                      long shopId, long supplierId, long startedBy) implements DomainEvent {
+    public record OrderPreparingEvent(UUID eventId, Instant occurredAt, UUID orderId, String reference,
+                                      UUID shopId, UUID supplierId, UUID startedBy) implements DomainEvent {
         public static final String EVENT_TYPE = "order.preparing";
 
         @Override public String eventType() { return EVENT_TYPE; }
@@ -37,8 +37,8 @@ public final class OrderEvents {
         @Override public String aggregateId() { return String.valueOf(orderId); }
     }
 
-    public record OrderReadyForDeliveryEvent(UUID eventId, Instant occurredAt, long orderId, String reference,
-                                             long shopId, long supplierId, long readyBy) implements DomainEvent {
+    public record OrderReadyForDeliveryEvent(UUID eventId, Instant occurredAt, UUID orderId, String reference,
+                                             UUID shopId, UUID supplierId, UUID readyBy) implements DomainEvent {
         public static final String EVENT_TYPE = "order.ready_for_delivery";
 
         @Override public String eventType() { return EVENT_TYPE; }
@@ -46,8 +46,8 @@ public final class OrderEvents {
         @Override public String aggregateId() { return String.valueOf(orderId); }
     }
 
-    public record OrderDeliveredEvent(UUID eventId, Instant occurredAt, long orderId, String reference,
-                                      long shopId, long supplierId, long deliveredBy, long receivedBy)
+    public record OrderDeliveredEvent(UUID eventId, Instant occurredAt, UUID orderId, String reference,
+                                      UUID shopId, UUID supplierId, UUID deliveredBy, UUID receivedBy)
             implements DomainEvent {
         public static final String EVENT_TYPE = "order.delivered";
 
@@ -56,8 +56,8 @@ public final class OrderEvents {
         @Override public String aggregateId() { return String.valueOf(orderId); }
     }
 
-    public record OrderAcceptedEvent(UUID eventId, Instant occurredAt, long orderId, String reference,
-                                     long shopId, long supplierId, long acceptedBy) implements DomainEvent {
+    public record OrderAcceptedEvent(UUID eventId, Instant occurredAt, UUID orderId, String reference,
+                                     UUID shopId, UUID supplierId, UUID acceptedBy) implements DomainEvent {
         public static final String EVENT_TYPE = "order.accepted";
 
         @Override public String eventType() { return EVENT_TYPE; }
@@ -65,8 +65,8 @@ public final class OrderEvents {
         @Override public String aggregateId() { return String.valueOf(orderId); }
     }
 
-    public record OrderCancelledEvent(UUID eventId, Instant occurredAt, long orderId, String reference,
-                                      long shopId, long supplierId, long cancelledBy) implements DomainEvent {
+    public record OrderCancelledEvent(UUID eventId, Instant occurredAt, UUID orderId, String reference,
+                                      UUID shopId, UUID supplierId, UUID cancelledBy) implements DomainEvent {
         public static final String EVENT_TYPE = "order.cancelled";
 
         @Override public String eventType() { return EVENT_TYPE; }
@@ -74,8 +74,8 @@ public final class OrderEvents {
         @Override public String aggregateId() { return String.valueOf(orderId); }
     }
 
-    public record OrderRejectedEvent(UUID eventId, Instant occurredAt, long orderId, String reference,
-                                     long shopId, long supplierId, long rejectedBy) implements DomainEvent {
+    public record OrderRejectedEvent(UUID eventId, Instant occurredAt, UUID orderId, String reference,
+                                     UUID shopId, UUID supplierId, UUID rejectedBy) implements DomainEvent {
         public static final String EVENT_TYPE = "order.rejected";
 
         @Override public String eventType() { return EVENT_TYPE; }
@@ -83,8 +83,8 @@ public final class OrderEvents {
         @Override public String aggregateId() { return String.valueOf(orderId); }
     }
 
-    public record OrderDeliveryRejectedEvent(UUID eventId, Instant occurredAt, long orderId, String reference,
-                                              long shopId, long supplierId, long rejectedBy, String reason)
+    public record OrderDeliveryRejectedEvent(UUID eventId, Instant occurredAt, UUID orderId, String reference,
+                                              UUID shopId, UUID supplierId, UUID rejectedBy, String reason)
             implements DomainEvent {
         public static final String EVENT_TYPE = "order.delivery_rejected";
 
@@ -93,8 +93,8 @@ public final class OrderEvents {
         @Override public String aggregateId() { return String.valueOf(orderId); }
     }
 
-    public record LowStockAlertEvent(UUID eventId, Instant occurredAt, long productId, String productName,
-                                      String sku, int availableQty, int minQuantity, long supplierId)
+    public record LowStockAlertEvent(UUID eventId, Instant occurredAt, UUID productId, String productName,
+                                      String sku, int availableQty, int minQuantity, UUID supplierId)
             implements DomainEvent {
         public static final String EVENT_TYPE = "order.low_stock_alert";
 

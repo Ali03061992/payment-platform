@@ -9,19 +9,19 @@ export class BalanceService {
 
   constructor(private http: HttpClient) {}
 
-  listBySupplier(supplierId: number): Observable<BalanceSummary[]> {
+  listBySupplier(supplierId: string): Observable<BalanceSummary[]> {
     return this.http.get<BalanceSummary[]>(`${this.apiUrl}/supplier/${supplierId}`);
   }
 
-  listByShop(shopId: number): Observable<BalanceSummary[]> {
+  listByShop(shopId: string): Observable<BalanceSummary[]> {
     return this.http.get<BalanceSummary[]>(`${this.apiUrl}/shop/${shopId}`);
   }
 
-  getHistory(supplierId: number, shopId: number): Observable<BalanceEntry[]> {
+  getHistory(supplierId: string, shopId: string): Observable<BalanceEntry[]> {
     return this.http.get<BalanceEntry[]>(`${this.apiUrl}/supplier/${supplierId}/shop/${shopId}`);
   }
 
-  adjust(data: { supplierId: number; shopId: number; amount: number; reason: string }): Observable<BalanceEntry> {
+  adjust(data: { supplierId: string; shopId: string; amount: number; reason: string }): Observable<BalanceEntry> {
     return this.http.post<BalanceEntry>(`${this.apiUrl}/adjust`, data);
   }
 }

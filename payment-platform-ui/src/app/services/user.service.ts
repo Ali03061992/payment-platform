@@ -9,7 +9,7 @@ export class UserService {
 
   constructor(private http: HttpClient) {}
 
-  list(organizationId?: number, role?: string, status?: string): Observable<User[]> {
+  list(organizationId?: string, role?: string, status?: string): Observable<User[]> {
     let params = new HttpParams();
     if (organizationId) params = params.set('organizationId', organizationId.toString());
     if (role) params = params.set('role', role);
@@ -17,7 +17,7 @@ export class UserService {
     return this.http.get<User[]>(this.apiUrl, { params });
   }
 
-  getById(id: number): Observable<User> {
+  getById(id: string): Observable<User> {
     return this.http.get<User>(`${this.apiUrl}/${id}`);
   }
 
@@ -25,11 +25,11 @@ export class UserService {
     return this.http.post<User>(this.apiUrl, data);
   }
 
-  activate(id: number): Observable<User> {
+  activate(id: string): Observable<User> {
     return this.http.patch<User>(`${this.apiUrl}/${id}/activate`, {});
   }
 
-  disable(id: number): Observable<User> {
+  disable(id: string): Observable<User> {
     return this.http.patch<User>(`${this.apiUrl}/${id}/disable`, {});
   }
 }

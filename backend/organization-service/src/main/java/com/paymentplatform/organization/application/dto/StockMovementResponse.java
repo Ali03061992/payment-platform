@@ -1,11 +1,13 @@
 package com.paymentplatform.organization.application.dto;
 
+import java.util.UUID;
+
 import com.paymentplatform.organization.domain.model.StockMovement;
 import java.time.Instant;
 
 public record StockMovementResponse(
-    Long id,
-    Long productId,
+    UUID id,
+    UUID productId,
     String productName,
     String type,
     Integer quantity,

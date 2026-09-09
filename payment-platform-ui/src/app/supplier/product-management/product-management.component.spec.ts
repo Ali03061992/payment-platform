@@ -174,7 +174,7 @@ describe('ProductManagementComponent', () => {
   describe('getFamiliesForCategory', () => {
     it('should return all families when no category selected', () => {
       component.families = [{ id: 1 } as any, { id: 2 } as any];
-      component.form.categoryId = 0;
+      component.form.categoryId = '';
       expect(component.getFamiliesForCategory().length).toBe(2);
     });
 

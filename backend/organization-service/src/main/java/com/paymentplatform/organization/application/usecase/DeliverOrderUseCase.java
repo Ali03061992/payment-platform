@@ -32,7 +32,7 @@ public class DeliverOrderUseCase {
     }
 
     @Transactional
-    public OrderResponse execute(Long orderId, Long receivedBy, long actorUserId) {
+    public OrderResponse execute(UUID orderId, UUID receivedBy, UUID actorUserId) {
         Order order = orders.findById(orderId)
                 .orElseThrow(() -> new NotFoundException("Commande non trouvée : " + orderId));
 
@@ -44,7 +44,7 @@ public class DeliverOrderUseCase {
         outbox.append(new OrderEvents.OrderDeliveredEvent(UUID.randomUUID(), Instant.now(),
                 orderId, order.getReference(),
                 order.getShopId(), order.getSupplierId(),
-                actorUserId, receivedBy != null ? receivedBy : 0L),
+                actorUserId, receivedBy),
                 String.valueOf(orderId));
 
         List<OrderItem> items = orderItems.findByOrderId(orderId);

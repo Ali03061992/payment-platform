@@ -26,7 +26,7 @@ export class PaymentService {
     });
   }
 
-  getById(id: number): Observable<Payment> {
+  getById(id: string): Observable<Payment> {
     return this.http.get<Payment>(`${this.apiUrl}/${id}`);
   }
 
@@ -38,15 +38,15 @@ export class PaymentService {
     return this.http.post<Payment>(this.apiUrl, data);
   }
 
-  confirm(id: number): Observable<Payment> {
+  confirm(id: string): Observable<Payment> {
     return this.http.post<Payment>(`${this.apiUrl}/${id}/confirm`, {});
   }
 
-  reject(id: number, data: RejectPaymentRequest): Observable<Payment> {
+  reject(id: string, data: RejectPaymentRequest): Observable<Payment> {
     return this.http.post<Payment>(`${this.apiUrl}/${id}/reject`, data);
   }
 
-  cancel(id: number): Observable<Payment> {
+  cancel(id: string): Observable<Payment> {
     return this.http.post<Payment>(`${this.apiUrl}/${id}/cancel`, {});
   }
 
@@ -54,7 +54,7 @@ export class PaymentService {
     return this.http.get<PaymentStats>(`${this.apiUrl}/stats`);
   }
 
-  getAgentSummary(supplierId: number, from: string, to: string): Observable<AgentPaymentSummary[]> {
+  getAgentSummary(supplierId: string, from: string, to: string): Observable<AgentPaymentSummary[]> {
     const params = new HttpParams()
       .set('supplierId', supplierId.toString())
       .set('from', from)

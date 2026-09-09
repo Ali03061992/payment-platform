@@ -35,7 +35,7 @@ public class OrganizationStatusUseCase {
     }
 
     @Transactional
-    public OrganizationResponse activate(long id, long actorUserId) {
+    public OrganizationResponse activate(UUID id, UUID actorUserId) {
         Organization org = organizations.findById(OrganizationId.of(id))
                 .orElseThrow(() -> new NotFoundException("Organisation non trouvée : " + id));
 
@@ -57,7 +57,7 @@ public class OrganizationStatusUseCase {
     }
 
     @Transactional
-    public OrganizationResponse disable(long id, long actorUserId) {
+    public OrganizationResponse disable(UUID id, UUID actorUserId) {
         Organization org = organizations.findById(OrganizationId.of(id))
                 .orElseThrow(() -> new NotFoundException("Organisation non trouvée : " + id));
 

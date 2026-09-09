@@ -1,5 +1,7 @@
 package com.paymentplatform.organization.domain.repository;
 
+import java.util.UUID;
+
 import com.paymentplatform.organization.domain.model.Order;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -8,33 +10,33 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 import java.util.Optional;
 
-public interface OrderRepository extends JpaRepository<Order, Long> {
+public interface OrderRepository extends JpaRepository<Order, UUID> {
 
     Optional<Order> findByReference(String reference);
 
-    List<Order> findBySupplierId(Long supplierId);
+    List<Order> findBySupplierId(UUID supplierId);
 
-    List<Order> findByShopId(Long shopId);
+    List<Order> findByShopId(UUID shopId);
 
-    List<Order> findBySupplierIdAndStatus(Long supplierId, String status);
+    List<Order> findBySupplierIdAndStatus(UUID supplierId, String status);
 
-    List<Order> findByShopIdAndStatus(Long shopId, String status);
+    List<Order> findByShopIdAndStatus(UUID shopId, String status);
 
-    List<Order> findByDeliveryAgentId(Long deliveryAgentId);
+    List<Order> findByDeliveryAgentId(UUID deliveryAgentId);
 
-    Page<Order> findBySupplierId(Long supplierId, Pageable pageable);
+    Page<Order> findBySupplierId(UUID supplierId, Pageable pageable);
 
-    Page<Order> findByShopId(Long shopId, Pageable pageable);
+    Page<Order> findByShopId(UUID shopId, Pageable pageable);
 
-    Page<Order> findBySupplierIdAndStatus(Long supplierId, String status, Pageable pageable);
+    Page<Order> findBySupplierIdAndStatus(UUID supplierId, String status, Pageable pageable);
 
-    Page<Order> findByShopIdAndStatus(Long shopId, String status, Pageable pageable);
+    Page<Order> findByShopIdAndStatus(UUID shopId, String status, Pageable pageable);
 
-    long countBySupplierId(Long supplierId);
+    UUID countBySupplierId(UUID supplierId);
 
-    long countBySupplierIdAndStatus(Long supplierId, String status);
+    long countBySupplierIdAndStatus(UUID supplierId, String status);
 
-    long countByShopId(Long shopId);
+    UUID countByShopId(UUID shopId);
 
-    long countByShopIdAndStatus(Long shopId, String status);
+    long countByShopIdAndStatus(UUID shopId, String status);
 }

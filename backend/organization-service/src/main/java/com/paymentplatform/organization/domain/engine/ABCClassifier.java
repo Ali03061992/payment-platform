@@ -1,5 +1,7 @@
 package com.paymentplatform.organization.domain.engine;
 
+import java.util.UUID;
+
 import java.util.*;
 
 /**
@@ -43,7 +45,7 @@ public class ABCClassifier {
      * @param unitCosts unit costs
      * @return map productId -> ABCResult
      */
-    public Map<Long, ABCResult> classify(List<Long> productIds, double[] annualDemand, double[] unitCosts) {
+    public Map<UUID, ABCResult> classify(List<UUID> productIds, double[] annualDemand, double[] unitCosts) {
         int n = productIds.size();
         double[] annualValues = new double[n];
         for (int i = 0; i < n; i++) {
@@ -58,7 +60,7 @@ public class ABCClassifier {
         double totalValue = Arrays.stream(annualValues).sum();
         if (totalValue == 0) totalValue = 1;
 
-        Map<Long, ABCResult> results = new LinkedHashMap<>();
+        Map<UUID, ABCResult> results = new LinkedHashMap<>();
         double cumulative = 0;
 
         for (int rank = 0; rank < n; rank++) {

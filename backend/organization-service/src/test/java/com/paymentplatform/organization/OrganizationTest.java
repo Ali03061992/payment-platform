@@ -1,5 +1,7 @@
 package com.paymentplatform.organization;
 
+import java.util.UUID;
+
 import com.paymentplatform.shared.domain.exception.DomainException;
 import com.paymentplatform.organization.domain.model.Organization;
 import com.paymentplatform.organization.domain.model.SupplierShopRelation;
@@ -13,9 +15,9 @@ class OrganizationTest {
     @Test
     void createSupplier() {
         Organization org = Organization.create(
-                OrganizationId.of(1), OrganizationName.of("Fournisseur ABC"), OrganizationType.SUPPLIER);
+                OrganizationId.of(UUID.fromString("00000000-0000-0000-0000-000000000001")), OrganizationName.of("Fournisseur ABC"), OrganizationType.SUPPLIER);
 
-        assertThat(org.id().value()).isEqualTo(1);
+        assertThat(org.id().value()).isEqualTo(UUID.fromString("00000000-0000-0000-0000-000000000001"));
         assertThat(org.name().value()).isEqualTo("Fournisseur ABC");
         assertThat(org.type()).isEqualTo(OrganizationType.SUPPLIER);
         assertThat(org.status()).isEqualTo(OrganizationStatus.ACTIVE);
@@ -27,7 +29,7 @@ class OrganizationTest {
     @Test
     void createShop() {
         Organization org = Organization.create(
-                OrganizationId.of(2), OrganizationName.of("Boutique Tunis"), OrganizationType.SHOP);
+                OrganizationId.of(UUID.fromString("00000000-0000-0000-0000-000000000002")), OrganizationName.of("Boutique Tunis"), OrganizationType.SHOP);
 
         assertThat(org.type()).isEqualTo(OrganizationType.SHOP);
         assertThat(org.isShop()).isTrue();
@@ -37,7 +39,7 @@ class OrganizationTest {
     @Test
     void disableIsIdempotent() {
         Organization org = Organization.create(
-                OrganizationId.of(1), OrganizationName.of("Test"), OrganizationType.SUPPLIER);
+                OrganizationId.of(UUID.fromString("00000000-0000-0000-0000-000000000001")), OrganizationName.of("Test"), OrganizationType.SUPPLIER);
 
         org.disable();
         assertThat(org.status()).isEqualTo(OrganizationStatus.DISABLED);
@@ -50,7 +52,7 @@ class OrganizationTest {
     @Test
     void activateIsIdempotent() {
         Organization org = Organization.create(
-                OrganizationId.of(1), OrganizationName.of("Test"), OrganizationType.SUPPLIER);
+                OrganizationId.of(UUID.fromString("00000000-0000-0000-0000-000000000001")), OrganizationName.of("Test"), OrganizationType.SUPPLIER);
 
         org.disable();
         org.activate();
@@ -64,7 +66,7 @@ class OrganizationTest {
     @Test
     void disableThenActivateDoesNotReEnableIndividuallyDisabledUsers() {
         Organization org = Organization.create(
-                OrganizationId.of(1), OrganizationName.of("Test"), OrganizationType.SUPPLIER);
+                OrganizationId.of(UUID.fromString("00000000-0000-0000-0000-000000000001")), OrganizationName.of("Test"), OrganizationType.SUPPLIER);
 
         org.disable();
         assertThat(org.status()).isEqualTo(OrganizationStatus.DISABLED);
@@ -78,7 +80,7 @@ class OrganizationTest {
     @Test
     void updateName() {
         Organization org = Organization.create(
-                OrganizationId.of(1), OrganizationName.of("Old Name"), OrganizationType.SUPPLIER);
+                OrganizationId.of(UUID.fromString("00000000-0000-0000-0000-000000000001")), OrganizationName.of("Old Name"), OrganizationType.SUPPLIER);
 
         org.updateName(OrganizationName.of("New Name"));
         assertThat(org.name().value()).isEqualTo("New Name");
@@ -93,31 +95,31 @@ class OrganizationTest {
     @Test
     void rejectNullType() {
         assertThatThrownBy(() -> Organization.create(
-                OrganizationId.of(1), OrganizationName.of("Test"), null))
+                OrganizationId.of(UUID.fromString("00000000-0000-0000-0000-000000000001")), OrganizationName.of("Test"), null))
                 .isInstanceOf(DomainException.class);
     }
 
     @Test
     void supplierShopRelationCreate() {
         SupplierShopRelation relation = SupplierShopRelation.create(
-                OrganizationId.of(1), OrganizationId.of(2));
+                OrganizationId.of(UUID.fromString("00000000-0000-0000-0000-000000000001")), OrganizationId.of(UUID.fromString("00000000-0000-0000-0000-000000000002")));
 
-        assertThat(relation.supplierId().value()).isEqualTo(1);
-        assertThat(relation.shopId().value()).isEqualTo(2);
+        assertThat(relation.supplierId().value()).isEqualTo(UUID.fromString("00000000-0000-0000-0000-000000000001"));
+        assertThat(relation.shopId().value()).isEqualTo(UUID.fromString("00000000-0000-0000-0000-000000000002"));
         assertThat(relation.isActive()).isTrue();
     }
 
     @Test
     void supplierShopRelationCannotSelfReference() {
         assertThatThrownBy(() -> SupplierShopRelation.create(
-                OrganizationId.of(1), OrganizationId.of(1)))
+                OrganizationId.of(UUID.fromString("00000000-0000-0000-0000-000000000001")), OrganizationId.of(UUID.fromString("00000000-0000-0000-0000-000000000001"))))
                 .isInstanceOf(DomainException.class);
     }
 
     @Test
     void supplierShopRelationDeactivate() {
         SupplierShopRelation relation = SupplierShopRelation.create(
-                OrganizationId.of(1), OrganizationId.of(2));
+                OrganizationId.of(UUID.fromString("00000000-0000-0000-0000-000000000001")), OrganizationId.of(UUID.fromString("00000000-0000-0000-0000-000000000002")));
 
         relation.deactivate();
         assertThat(relation.isActive()).isFalse();

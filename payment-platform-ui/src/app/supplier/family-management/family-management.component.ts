@@ -15,15 +15,15 @@ export class FamilyManagementComponent implements OnInit {
   showForm = false;
   saving = false;
   editingFamily: ProductFamily | null = null;
-  form = { name: '', code: '', categoryIds: [] as number[] };
+  form = { name: '', code: '', categoryIds: [] as string[] };
 
   constructor(private catalogService: CatalogService, private toast: ToastService) {}
 
   ngOnInit(): void { this.loadData(); }
 
-  get supplierId(): number {
+  get supplierId(): string {
     const u = sessionStorage.getItem('user');
-    return u ? JSON.parse(u).organizationId || 0 : 0;
+    return u ? JSON.parse(u).organizationId || '' : '';
   }
 
   loadData(): void {
@@ -62,7 +62,7 @@ export class FamilyManagementComponent implements OnInit {
     this.showForm = true;
   }
 
-  toggleCategory(catId: number): void {
+  toggleCategory(catId: string): void {
     const idx = this.form.categoryIds.indexOf(catId);
     if (idx >= 0) {
       this.form.categoryIds.splice(idx, 1);
@@ -71,7 +71,7 @@ export class FamilyManagementComponent implements OnInit {
     }
   }
 
-  isCategorySelected(catId: number): boolean {
+  isCategorySelected(catId: string): boolean {
     return this.form.categoryIds.includes(catId);
   }
 

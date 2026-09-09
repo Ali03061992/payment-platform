@@ -1,5 +1,7 @@
 package com.paymentplatform.organization.application.usecase;
 
+import java.util.UUID;
+
 import com.paymentplatform.shared.domain.exception.NotFoundException;
 import com.paymentplatform.organization.application.dto.BalanceResponse;
 import com.paymentplatform.organization.domain.model.BalanceEntry;
@@ -20,7 +22,7 @@ public class BalanceUseCase {
         this.balanceRepository = balanceRepository;
     }
 
-    public BalanceEntry creditBalance(Long supplierId, Long shopId, BigDecimal amount, Long orderId, Long createdBy) {
+    public BalanceEntry creditBalance(UUID supplierId, UUID shopId, BigDecimal amount, UUID orderId, UUID createdBy) {
         BigDecimal currentBalance = getCurrentBalance(supplierId, shopId);
         BigDecimal newBalance = currentBalance.add(amount);
 
@@ -30,7 +32,7 @@ public class BalanceUseCase {
         return balanceRepository.save(entry);
     }
 
-    public BalanceEntry debitBalance(Long supplierId, Long shopId, BigDecimal amount, Long paymentId, Long createdBy) {
+    public BalanceEntry debitBalance(UUID supplierId, UUID shopId, BigDecimal amount, UUID paymentId, UUID createdBy) {
         BigDecimal currentBalance = getCurrentBalance(supplierId, shopId);
         BigDecimal newBalance = currentBalance.subtract(amount);
 
@@ -40,7 +42,7 @@ public class BalanceUseCase {
         return balanceRepository.save(entry);
     }
 
-    public BalanceEntry adjustBalance(Long supplierId, Long shopId, BigDecimal amount, String reason, Long createdBy) {
+    public BalanceEntry adjustBalance(UUID supplierId, UUID shopId, BigDecimal amount, String reason, UUID createdBy) {
         BigDecimal currentBalance = getCurrentBalance(supplierId, shopId);
         BigDecimal newBalance = currentBalance.add(amount);
 
@@ -51,28 +53,28 @@ public class BalanceUseCase {
     }
 
     @Transactional(readOnly = true)
-    public BigDecimal getBalance(Long supplierId, Long shopId) {
+    public BigDecimal getBalance(UUID supplierId, UUID shopId) {
         return getCurrentBalance(supplierId, shopId);
     }
 
     @Transactional(readOnly = true)
-    public List<BalanceEntry> getBalanceHistory(Long supplierId, Long shopId) {
+    public List<BalanceEntry> getBalanceHistory(UUID supplierId, UUID shopId) {
         return balanceRepository.findBySupplierIdAndShopIdOrderByCreatedAtDesc(supplierId, shopId);
     }
 
     @Transactional(readOnly = true)
-    public List<BalanceEntry> getSupplierBalances(Long supplierId) {
+    public List<BalanceEntry> getSupplierBalances(UUID supplierId) {
         return balanceRepository.findBySupplierIdOrderByCreatedAtDesc(supplierId);
     }
 
     @Transactional(readOnly = true)
-    public List<BalanceEntry> getShopBalances(Long shopId) {
+    public List<BalanceEntry> getShopBalances(UUID shopId) {
         return balanceRepository.findByShopIdOrderByCreatedAtDesc(shopId);
     }
 
     @Transactional(readOnly = true)
-    public List<BalanceResponse> getShopBalanceSummaries(Long shopId) {
-        List<Long> supplierIds = balanceRepository.findDistinctSupplierIdsByShopId(shopId);
+    public List<BalanceResponse> getShopBalanceSummaries(UUID shopId) {
+        List<UUID> supplierIds = balanceRepository.findDistinctSupplierIdsByShopId(shopId);
         return supplierIds.stream().map(supplierId -> {
             BigDecimal currentBalance = getCurrentBalance(supplierId, shopId);
             BigDecimal totalOrders = balanceRepository.sumOrdersBySupplierAndShop(supplierId, shopId);
@@ -89,8 +91,8 @@ public class BalanceUseCase {
     }
 
     @Transactional(readOnly = true)
-    public List<BalanceResponse> getSupplierBalanceSummaries(Long supplierId) {
-        List<Long> shopIds = balanceRepository.findDistinctShopIdsBySupplierId(supplierId);
+    public List<BalanceResponse> getSupplierBalanceSummaries(UUID supplierId) {
+        List<UUID> shopIds = balanceRepository.findDistinctShopIdsBySupplierId(supplierId);
         return shopIds.stream().map(shopId -> {
             BigDecimal currentBalance = getCurrentBalance(supplierId, shopId);
             BigDecimal totalOrders = balanceRepository.sumOrdersBySupplierAndShop(supplierId, shopId);
@@ -106,7 +108,7 @@ public class BalanceUseCase {
         }).toList();
     }
 
-    private BigDecimal getCurrentBalance(Long supplierId, Long shopId) {
+    private BigDecimal getCurrentBalance(UUID supplierId, UUID shopId) {
         return balanceRepository.findFirstBySupplierIdAndShopIdOrderByCreatedAtDesc(supplierId, shopId)
                 .map(BalanceEntry::getBalanceAfter)
                 .orElse(BigDecimal.ZERO);

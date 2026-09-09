@@ -1,5 +1,7 @@
 package com.paymentplatform.identity.application.usecase;
 
+import java.util.UUID;
+
 import com.paymentplatform.identity.application.dto.LoginRequest;
 import com.paymentplatform.identity.domain.model.User;
 import com.paymentplatform.identity.domain.model.UserStatus;
@@ -43,10 +45,10 @@ class AuthUseCaseH2Test {
 
     @BeforeEach
     void setUp() {
-        User agent = User.create(new UserId(0), Username.of("shop.agent"),
+        User agent = User.create(new UserId(null), Username.of("shop.agent"),
                 Email.of("shop.agent@example.com"), PasswordHash.of(passwordEncoder.encode("Secret@1")),
                 "Amine", "Trabelsi", new PhoneNumber(null),
-                OrganizationId.of(5), RoleCode.SHOP_AGENT);
+                OrganizationId.of(UUID.fromString("00000000-0000-0000-0000-000000000005")), RoleCode.SHOP_AGENT);
         users.save(agent);
     }
 
@@ -78,7 +80,7 @@ class AuthUseCaseH2Test {
 
     @Test
     void login_disabledOrganization_throws() {
-        organizationStatus.setStatus(5, "SHOP", "DISABLED");
+        organizationStatus.setStatus(UUID.fromString("00000000-0000-0000-0000-000000000005"), "SHOP", "DISABLED");
 
         assertThatThrownBy(() -> auth.login(new LoginRequest("shop.agent", "Secret@1")))
                 .isInstanceOf(UnauthorizedException.class);

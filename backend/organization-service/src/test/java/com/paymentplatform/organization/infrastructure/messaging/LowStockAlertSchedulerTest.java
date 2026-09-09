@@ -1,5 +1,7 @@
 package com.paymentplatform.organization.infrastructure.messaging;
 
+import java.util.UUID;
+
 import com.paymentplatform.organization.domain.model.Product;
 import com.paymentplatform.organization.domain.repository.ProductRepository;
 import com.paymentplatform.shared.infrastructure.outbox.OutboxEventStore;
@@ -31,7 +33,7 @@ class LowStockAlertSchedulerTest {
     @Test
     void checkLowStock_withLowStockProducts_publishesEvents() {
         Product product = new Product();
-        product.setSupplierId(1L);
+        product.setSupplierId(UUID.fromString("00000000-0000-0000-0000-000000000001"));
         product.setName("Widget");
         product.setSku("WDG-001");
         product.setUnitPrice(new BigDecimal("10.00"));

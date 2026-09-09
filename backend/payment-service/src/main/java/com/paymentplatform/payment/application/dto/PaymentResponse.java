@@ -1,5 +1,7 @@
 package com.paymentplatform.payment.application.dto;
 
+import java.util.UUID;
+
 import com.paymentplatform.payment.domain.model.Payment;
 import com.paymentplatform.payment.domain.model.PaymentEvent;
 
@@ -8,17 +10,17 @@ import java.time.Instant;
 import java.util.List;
 
 public record PaymentResponse(
-        Long id,
+        UUID id,
         String reference,
-        long shopId,
+        UUID shopId,
         String shopName,
-        long supplierId,
+        UUID supplierId,
         String supplierName,
         BigDecimal amount,
         String currency,
         String status,
         String rejectionReason,
-        long createdBy,
+        UUID createdBy,
         String createdByName,
         String confirmedByName,
         String rejectedByName,
@@ -68,7 +70,7 @@ public record PaymentResponse(
         );
     }
 
-    public record PaymentEventResponse(String action, Long userId, String userName, Instant timestamp, String details) {
+    public record PaymentEventResponse(String action, UUID userId, String userName, Instant timestamp, String details) {
         public static PaymentEventResponse from(PaymentEvent event, NameResolver names) {
             String userName = event.userId() != null ? names.resolveUser(event.userId()) : null;
             return new PaymentEventResponse(event.action(), event.userId(), userName, event.timestamp(), event.details());
@@ -76,7 +78,7 @@ public record PaymentResponse(
     }
 
     public interface NameResolver {
-        String resolveOrg(long organizationId);
-        String resolveUser(long userId);
+        String resolveOrg(UUID organizationId);
+        String resolveUser(UUID userId);
     }
 }

@@ -1,5 +1,7 @@
 package com.paymentplatform.payment.infrastructure.elasticsearch;
 
+import java.util.UUID;
+
 import com.paymentplatform.shared.domain.event.PaymentEvents;
 import com.paymentplatform.payment.domain.model.Payment;
 import com.paymentplatform.payment.domain.repository.PaymentRepository;
@@ -46,7 +48,7 @@ public class PaymentIndexEventListener {
         indexPayment(event.paymentId());
     }
 
-    private void indexPayment(long paymentId) {
+    private void indexPayment(UUID paymentId) {
         payments.findById(paymentId).ifPresent(indexer::indexPayment);
     }
 }

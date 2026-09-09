@@ -1,5 +1,7 @@
 package com.paymentplatform.organization.interfaces.rest;
 
+import java.util.UUID;
+
 import com.paymentplatform.shared.infrastructure.security.CurrentUser;
 import com.paymentplatform.organization.application.dto.CreateOrganizationRequest;
 import com.paymentplatform.organization.application.dto.OrganizationResponse;
@@ -48,20 +50,20 @@ public class AdminOrganizationController {
 
     @GetMapping("/suppliers/{id}")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<OrganizationResponse> getSupplier(@PathVariable long id) {
+    public ResponseEntity<OrganizationResponse> getSupplier(@PathVariable UUID id) {
         return ResponseEntity.ok(queryOrg.findById(id));
     }
 
     @PatchMapping("/suppliers/{id}/activate")
     @PreAuthorize("hasAuthority('ADMIN_MANAGE_ORGANIZATIONS')")
-    public ResponseEntity<OrganizationResponse> activateSupplier(@PathVariable long id) {
+    public ResponseEntity<OrganizationResponse> activateSupplier(@PathVariable UUID id) {
         var current = CurrentUser.get();
         return ResponseEntity.ok(statusOrg.activate(id, current.userId()));
     }
 
     @PatchMapping("/suppliers/{id}/disable")
     @PreAuthorize("hasAuthority('ADMIN_MANAGE_ORGANIZATIONS')")
-    public ResponseEntity<OrganizationResponse> disableSupplier(@PathVariable long id) {
+    public ResponseEntity<OrganizationResponse> disableSupplier(@PathVariable UUID id) {
         var current = CurrentUser.get();
         return ResponseEntity.ok(statusOrg.disable(id, current.userId()));
     }
@@ -83,20 +85,20 @@ public class AdminOrganizationController {
 
     @GetMapping("/shops/{id}")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<OrganizationResponse> getShop(@PathVariable long id) {
+    public ResponseEntity<OrganizationResponse> getShop(@PathVariable UUID id) {
         return ResponseEntity.ok(queryOrg.findById(id));
     }
 
     @PatchMapping("/shops/{id}/activate")
     @PreAuthorize("hasAuthority('ADMIN_MANAGE_ORGANIZATIONS')")
-    public ResponseEntity<OrganizationResponse> activateShop(@PathVariable long id) {
+    public ResponseEntity<OrganizationResponse> activateShop(@PathVariable UUID id) {
         var current = CurrentUser.get();
         return ResponseEntity.ok(statusOrg.activate(id, current.userId()));
     }
 
     @PatchMapping("/shops/{id}/disable")
     @PreAuthorize("hasAuthority('ADMIN_MANAGE_ORGANIZATIONS')")
-    public ResponseEntity<OrganizationResponse> disableShop(@PathVariable long id) {
+    public ResponseEntity<OrganizationResponse> disableShop(@PathVariable UUID id) {
         var current = CurrentUser.get();
         return ResponseEntity.ok(statusOrg.disable(id, current.userId()));
     }

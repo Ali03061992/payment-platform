@@ -8,8 +8,8 @@ import org.mapstruct.*;
 public interface SupplierShopRelationMapper {
 
     @Mapping(target = "id", expression = "java(relation.id())")
-    @Mapping(target = "supplierId", expression = "java(relation.supplierId() != null ? relation.supplierId().value() : 0L)")
-    @Mapping(target = "shopId", expression = "java(relation.shopId() != null ? relation.shopId().value() : 0L)")
+    @Mapping(target = "supplierId", expression = "java(relation.supplierId() != null ? relation.supplierId().value() : null)")
+    @Mapping(target = "shopId", expression = "java(relation.shopId() != null ? relation.shopId().value() : null)")
     @Mapping(target = "status", expression = "java(relation.status() != null ? relation.status().name() : \"\")")
     RelationResponse toResponse(SupplierShopRelation relation);
 }

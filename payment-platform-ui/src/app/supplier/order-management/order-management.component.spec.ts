@@ -228,7 +228,7 @@ describe('OrderManagementComponent', () => {
     });
 
     it('should not assign when no agent selected', () => {
-      component.assignAgentId = 0;
+      component.assignAgentId = '';
       component.submitAssign();
       expect(orderService.assignDelivery).not.toHaveBeenCalled();
     });

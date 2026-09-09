@@ -1,17 +1,17 @@
 -- V5 : Balance ledger (mouvements financiers immuables)
 
 CREATE TABLE balance_ledger (
-  id              BIGINT AUTO_INCREMENT PRIMARY KEY,
-  supplier_id     BIGINT        NOT NULL,
-  shop_id         BIGINT        NOT NULL,
+  id VARCHAR(36) PRIMARY KEY,
+  supplier_id VARCHAR(36)        NOT NULL,
+  shop_id VARCHAR(36)        NOT NULL,
   type            VARCHAR(30)   NOT NULL,
   amount          DECIMAL(19,4) NOT NULL,
   balance_after   DECIMAL(19,4) NOT NULL,
-  order_id        BIGINT        NULL,
-  payment_id      BIGINT        NULL,
+  order_id VARCHAR(36)        NULL,
+  payment_id VARCHAR(36)        NULL,
   reference       VARCHAR(100)  NULL,
   reason          TEXT          NULL,
-  created_by      BIGINT        NULL,
+  created_by VARCHAR(36)        NULL,
   created_at      DATETIME(6)   NOT NULL,
   INDEX idx_balance_supplier (supplier_id),
   INDEX idx_balance_shop (shop_id),

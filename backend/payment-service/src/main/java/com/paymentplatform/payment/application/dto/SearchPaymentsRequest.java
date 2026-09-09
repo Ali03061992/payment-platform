@@ -1,11 +1,13 @@
 package com.paymentplatform.payment.application.dto;
 
+import java.util.UUID;
+
 import java.time.Instant;
 
 public record SearchPaymentsRequest(
-        Long shopId,
-        Long supplierId,
-        Long createdBy,
+        UUID shopId,
+        UUID supplierId,
+        UUID createdBy,
         String status,
         Instant from,
         Instant to,

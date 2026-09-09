@@ -9,13 +9,13 @@ export class StockService {
 
   constructor(private http: HttpClient) {}
 
-  private getSupplierId(): number {
+  private getSupplierId(): string {
     const userJson = sessionStorage.getItem('user');
     if (userJson) {
       const user = JSON.parse(userJson);
-      return user.organizationId || 0;
+      return user.organizationId || '';
     }
-    return 0;
+    return '';
   }
 
   getProducts(status?: string): Observable<Product[]> {
@@ -25,13 +25,13 @@ export class StockService {
     return this.http.get<Product[]>(`${this.apiUrl}/${supplierId}/products`, { params });
   }
 
-  getProductsBySupplier(supplierId: number, status?: string): Observable<Product[]> {
+  getProductsBySupplier(supplierId: string, status?: string): Observable<Product[]> {
     let params = new HttpParams();
     if (status) params = params.set('status', status);
     return this.http.get<Product[]>(`${this.apiUrl}/${supplierId}/products`, { params });
   }
 
-  getProduct(id: number): Observable<Product> {
+  getProduct(id: string): Observable<Product> {
     const supplierId = this.getSupplierId();
     return this.http.get<Product>(`${this.apiUrl}/${supplierId}/products/${id}`);
   }
@@ -41,24 +41,24 @@ export class StockService {
     return this.http.post<Product>(`${this.apiUrl}/${supplierId}/products`, data);
   }
 
-  updateProduct(id: number, data: ProductUpdateRequest): Observable<Product> {
+  updateProduct(id: string, data: ProductUpdateRequest): Observable<Product> {
     const supplierId = this.getSupplierId();
     return this.http.patch<Product>(`${this.apiUrl}/${supplierId}/products/${id}`, data);
   }
 
-  deleteProduct(id: number): Observable<Product> {
+  deleteProduct(id: string): Observable<Product> {
     const supplierId = this.getSupplierId();
     return this.http.patch<Product>(`${this.apiUrl}/${supplierId}/products/${id}/deactivate`, { status: 'INACTIVE' });
   }
 
-  getStockMovements(productId?: number): Observable<StockMovement[]> {
+  getStockMovements(productId?: string): Observable<StockMovement[]> {
     const supplierId = this.getSupplierId();
     let params = new HttpParams();
     if (productId) params = params.set('productId', productId.toString());
     return this.http.get<StockMovement[]>(`${this.apiUrl}/${supplierId}/movements`, { params });
   }
 
-  createStockMovement(productId: number, data: StockMovementRequest): Observable<StockMovement> {
+  createStockMovement(productId: string, data: StockMovementRequest): Observable<StockMovement> {
     const supplierId = this.getSupplierId();
     return this.http.post<StockMovement>(`${this.apiUrl}/${supplierId}/movements`, { ...data, productId });
   }

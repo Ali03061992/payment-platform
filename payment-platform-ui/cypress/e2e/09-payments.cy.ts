@@ -125,7 +125,7 @@ describe('09 - Payments: Detail', () => {
   });
 
   it('should display payment detail for valid payment', () => {
-    let paymentId: number;
+    let paymentId: string;
     cy.loginAsAdmin();
     cy.window().then((win) => {
       const token = win.sessionStorage.getItem('token');
@@ -192,7 +192,7 @@ describe('09 - Payments: Cancel Flow', () => {
 
   it('should allow shop admin to cancel their own payment', () => {
     let shopToken: string;
-    let paymentId: number;
+    let paymentId: string;
 
     cy.login('ali', 'Admin@123').then(() => {
       cy.window().then((win) => {
@@ -221,7 +221,7 @@ describe('09 - Payments: Cancel Flow', () => {
   it('should allow supplier admin to cancel a payment', () => {
     let shopToken: string;
     let supplierToken: string;
-    let paymentId: number;
+    let paymentId: string;
 
     cy.login('ali', 'Admin@123').then(() => {
       cy.window().then((win) => {
@@ -256,7 +256,7 @@ describe('09 - Payments: Cancel Flow', () => {
   it('should reject shop cancel on another shop payment', () => {
     let shopTokenAli: string;
     let shopTokenAbdelslam: string;
-    let paymentId: number;
+    let paymentId: string;
 
     cy.login('abdelslam', 'Admin@123').then(() => {
       cy.window().then((win) => {
@@ -291,7 +291,7 @@ describe('09 - Payments: Cancel Flow', () => {
   it('should reject supplier cancel on another supplier payment', () => {
     let shopToken: string;
     let wrongSupplierToken: string;
-    let paymentId: number;
+    let paymentId: string;
 
     cy.login('ali', 'Admin@123').then(() => {
       cy.window().then((win) => {
@@ -326,7 +326,7 @@ describe('09 - Payments: Cancel Flow', () => {
   it('should reject cancel on already confirmed payment', () => {
     let shopToken: string;
     let supplierToken: string;
-    let paymentId: number;
+    let paymentId: string;
 
     cy.login('ali', 'Admin@123').then(() => {
       cy.window().then((win) => {

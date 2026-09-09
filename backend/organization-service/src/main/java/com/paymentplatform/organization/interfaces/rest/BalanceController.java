@@ -1,5 +1,7 @@
 package com.paymentplatform.organization.interfaces.rest;
 
+import java.util.UUID;
+
 import com.paymentplatform.organization.application.dto.BalanceResponse;
 import com.paymentplatform.organization.application.usecase.BalanceUseCase;
 import com.paymentplatform.organization.domain.model.BalanceEntry;
@@ -25,7 +27,7 @@ public class BalanceController {
 
     @GetMapping("/supplier/{supplierId}")
     @PreAuthorize("hasAuthority('SUPPLIER_ADMIN') or hasAuthority('SYSTEM_ADMIN')")
-    public ResponseEntity<List<BalanceResponse>> listSupplierBalances(@PathVariable Long supplierId) {
+    public ResponseEntity<List<BalanceResponse>> listSupplierBalances(@PathVariable UUID supplierId) {
         var current = CurrentUser.get();
         if (!current.roles().contains("SYSTEM_ADMIN") && !current.organizationId().equals(supplierId)) {
             return ResponseEntity.status(403).build();
@@ -35,7 +37,7 @@ public class BalanceController {
 
     @GetMapping("/shop/{shopId}")
     @PreAuthorize("hasAuthority('SHOP_ADMIN') or hasAuthority('SHOP_MANAGER') or hasAuthority('SYSTEM_ADMIN')")
-    public ResponseEntity<List<BalanceResponse>> listShopBalances(@PathVariable Long shopId) {
+    public ResponseEntity<List<BalanceResponse>> listShopBalances(@PathVariable UUID shopId) {
         var current = CurrentUser.get();
         if (!current.roles().contains("SYSTEM_ADMIN") && !current.organizationId().equals(shopId)) {
             return ResponseEntity.status(403).build();
@@ -46,11 +48,11 @@ public class BalanceController {
     @GetMapping("/supplier/{supplierId}/shop/{shopId}")
     @PreAuthorize("hasAuthority('SUPPLIER_ADMIN') or hasAuthority('SHOP_ADMIN') or hasAuthority('SHOP_MANAGER') or hasAuthority('SYSTEM_ADMIN')")
     public ResponseEntity<List<BalanceEntry>> getBalanceHistory(
-            @PathVariable Long supplierId,
-            @PathVariable Long shopId) {
+            @PathVariable UUID supplierId,
+            @PathVariable UUID shopId) {
         var current = CurrentUser.get();
         if (!current.roles().contains("SYSTEM_ADMIN")) {
-            Long orgId = current.organizationId();
+            UUID orgId = current.organizationId();
             if (orgId == null) return ResponseEntity.status(403).build();
             boolean isSupplier = orgId.equals(supplierId);
             boolean isShop = orgId.equals(shopId);
@@ -70,8 +72,8 @@ public class BalanceController {
     }
 
     public record AdjustBalanceRequest(
-            @NotNull Long supplierId,
-            @NotNull Long shopId,
+            @NotNull UUID supplierId,
+            @NotNull UUID shopId,
             @NotNull BigDecimal amount,
             String reason
     ) {}

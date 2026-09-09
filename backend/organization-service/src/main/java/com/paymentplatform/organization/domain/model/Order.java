@@ -1,5 +1,7 @@
 package com.paymentplatform.organization.domain.model;
 
+import java.util.UUID;
+
 import com.paymentplatform.shared.domain.exception.ConflictException;
 import com.paymentplatform.shared.domain.exception.DomainException;
 import jakarta.persistence.*;
@@ -12,20 +14,21 @@ import java.time.Instant;
 public class Order {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(columnDefinition = "VARCHAR(36)")
+    private UUID id;
 
     @Column(nullable = false, unique = true, length = 64)
     private String reference;
 
-    @Column(name = "supplier_id", nullable = false)
-    private Long supplierId;
+    @Column(name = "supplier_id", nullable = false, columnDefinition = "VARCHAR(36)")
+    private UUID supplierId;
 
-    @Column(name = "shop_id", nullable = false)
-    private Long shopId;
+    @Column(name = "shop_id", nullable = false, columnDefinition = "VARCHAR(36)")
+    private UUID shopId;
 
-    @Column(name = "created_by", nullable = false)
-    private Long createdBy;
+    @Column(name = "created_by", nullable = false, columnDefinition = "VARCHAR(36)")
+    private UUID createdBy;
 
     @Column(name = "created_by_role", nullable = false, length = 30)
     private String createdByRole;
@@ -51,11 +54,11 @@ public class Order {
     @Column(nullable = false, length = 3)
     private String currency;
 
-    @Column(name = "delivery_agent_id")
-    private Long deliveryAgentId;
+    @Column(name = "delivery_agent_id", columnDefinition = "VARCHAR(36)")
+    private UUID deliveryAgentId;
 
-    @Column(name = "received_by")
-    private Long receivedBy;
+    @Column(name = "received_by", columnDefinition = "VARCHAR(36)")
+    private UUID receivedBy;
 
     @Column(name = "received_at")
     private Instant receivedAt;
@@ -95,7 +98,7 @@ public class Order {
         updatedAt = Instant.now();
     }
 
-    public static Order create(Long supplierId, Long shopId, Long createdBy,
+    public static Order create(UUID supplierId, UUID shopId, UUID createdBy,
                                String createdByRole, String source, boolean asapPayment, String currency) {
         if (supplierId == null || shopId == null) {
             throw new ConflictException("Le fournisseur et la boutique sont requis");
@@ -140,7 +143,7 @@ public class Order {
         transitionTo(OrderStatus.READY_FOR_DELIVERY);
     }
 
-    public void assignDeliveryAgent(Long agentId) {
+    public void assignDeliveryAgent(UUID agentId) {
         if (agentId == null) {
             throw new ConflictException("L'ID de l'agent de livraison est requis");
         }
@@ -148,7 +151,7 @@ public class Order {
         this.updatedAt = Instant.now();
     }
 
-    public void deliver(Long receivedBy) {
+    public void deliver(UUID receivedBy) {
         transitionTo(OrderStatus.DELIVERED);
         this.receivedBy = receivedBy;
         this.receivedAt = Instant.now();
@@ -178,11 +181,11 @@ public class Order {
         this.updatedAt = Instant.now();
     }
 
-    public Long getId() { return id; }
+    public UUID getId() { return id; }
     public String getReference() { return reference; }
-    public Long getSupplierId() { return supplierId; }
-    public Long getShopId() { return shopId; }
-    public Long getCreatedBy() { return createdBy; }
+    public UUID getSupplierId() { return supplierId; }
+    public UUID getShopId() { return shopId; }
+    public UUID getCreatedBy() { return createdBy; }
     public String getCreatedByRole() { return createdByRole; }
     public String getSource() { return source; }
     public String getStatus() { return status; }
@@ -191,8 +194,8 @@ public class Order {
     public BigDecimal getTaxAmount() { return taxAmount; }
     public BigDecimal getTotal() { return total; }
     public String getCurrency() { return currency; }
-    public Long getDeliveryAgentId() { return deliveryAgentId; }
-    public Long getReceivedBy() { return receivedBy; }
+    public UUID getDeliveryAgentId() { return deliveryAgentId; }
+    public UUID getReceivedBy() { return receivedBy; }
     public Instant getReceivedAt() { return receivedAt; }
     public Instant getDeliveredAt() { return deliveredAt; }
     public boolean isAsapPayment() { return asapPayment; }

@@ -1,9 +1,11 @@
 package com.paymentplatform.shared.domain.model;
 
-/** Identifiant typé d'une organisation (fournisseur ou boutique). */
-public record OrganizationId(long value) {
+import java.util.UUID;
 
-    public static OrganizationId of(long value) {
+/** Identifiant typé d'une organisation (fournisseur ou boutique). */
+public record OrganizationId(UUID value) {
+
+    public static OrganizationId of(UUID value) {
         return new OrganizationId(value);
     }
 

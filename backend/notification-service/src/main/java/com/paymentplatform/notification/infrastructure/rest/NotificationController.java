@@ -1,5 +1,7 @@
 package com.paymentplatform.notification.infrastructure.rest;
 
+import java.util.UUID;
+
 import com.paymentplatform.notification.application.dto.NotificationResponse;
 import com.paymentplatform.notification.domain.model.Notification;
 import com.paymentplatform.notification.domain.model.NotificationRepository;
@@ -58,7 +60,7 @@ public class NotificationController {
     }
 
     @PostMapping("/{id}/read")
-    public ResponseEntity<Void> markAsRead(@PathVariable Long id,
+    public ResponseEntity<Void> markAsRead(@PathVariable UUID id,
                                            @AuthenticationPrincipal AuthenticatedUser user) {
         Notification n = notifications.findById(id).orElseThrow(() ->
                 new java.util.NoSuchElementException("Notification not found"));

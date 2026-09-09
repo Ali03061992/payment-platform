@@ -1,5 +1,7 @@
 package com.paymentplatform.organization.interfaces.rest;
 
+import java.util.UUID;
+
 import com.paymentplatform.shared.infrastructure.security.CurrentUser;
 import com.paymentplatform.organization.application.dto.CreateRelationRequest;
 import com.paymentplatform.organization.application.dto.RelationResponse;
@@ -35,7 +37,7 @@ public class SupplierShopRelationController {
 
     @GetMapping("/supplier/{supplierId}")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<List<RelationResponse>> listBySupplier(@PathVariable long supplierId) {
+    public ResponseEntity<List<RelationResponse>> listBySupplier(@PathVariable UUID supplierId) {
         var current = com.paymentplatform.shared.infrastructure.security.CurrentUser.get();
         boolean isAdmin = current.roles().contains("SYSTEM_ADMIN");
         if (!isAdmin && current.organizationId() != null && !current.organizationId().equals(supplierId)) {
@@ -46,7 +48,7 @@ public class SupplierShopRelationController {
 
     @GetMapping("/shop/{shopId}")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<List<RelationResponse>> listByShop(@PathVariable long shopId) {
+    public ResponseEntity<List<RelationResponse>> listByShop(@PathVariable UUID shopId) {
         var current = com.paymentplatform.shared.infrastructure.security.CurrentUser.get();
         boolean isAdmin = current.roles().contains("SYSTEM_ADMIN");
         if (!isAdmin && current.organizationId() != null && !current.organizationId().equals(shopId)) {
@@ -57,7 +59,7 @@ public class SupplierShopRelationController {
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAuthority('ADMIN_MANAGE_ORGANIZATIONS')")
-    public ResponseEntity<Void> deactivate(@PathVariable long id) {
+    public ResponseEntity<Void> deactivate(@PathVariable UUID id) {
         relationUseCase.deactivateRelation(id);
         return ResponseEntity.noContent().build();
     }

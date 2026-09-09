@@ -1,5 +1,7 @@
 package com.paymentplatform.identity.application.usecase;
 
+import java.util.UUID;
+
 import com.paymentplatform.identity.domain.model.User;
 import com.paymentplatform.identity.domain.model.UserStatus;
 import com.paymentplatform.identity.domain.repository.UserRepository;
@@ -57,22 +59,22 @@ class OrganizationCascadeUseCaseH2Test {
             em.createNativeQuery("DELETE FROM audit_logs").executeUpdate();
         });
 
-        User supplierAdmin = User.create(new UserId(0), Username.of("supplier.admin"),
+        User supplierAdmin = User.create(new UserId(null), Username.of("supplier.admin"),
                 Email.of("sa@x.com"), PasswordHash.of(passwordEncoder.encode("pass")),
                 "Admin", "Supplier", new PhoneNumber(null),
-                OrganizationId.of(42), RoleCode.SUPPLIER_ADMIN);
+                OrganizationId.of(UUID.fromString("00000000-0000-0000-0000-000000000042")), RoleCode.SUPPLIER_ADMIN);
         users.save(supplierAdmin);
 
-        User supplierAgent = User.create(new UserId(0), Username.of("supplier.agent"),
+        User supplierAgent = User.create(new UserId(null), Username.of("supplier.agent"),
                 Email.of("agent@x.com"), PasswordHash.of(passwordEncoder.encode("pass")),
                 "Agent", "Supplier", new PhoneNumber(null),
-                OrganizationId.of(42), RoleCode.SUPPLIER_AGENT);
+                OrganizationId.of(UUID.fromString("00000000-0000-0000-0000-000000000042")), RoleCode.SUPPLIER_AGENT);
         users.save(supplierAgent);
 
-        User shopAgent = User.create(new UserId(0), Username.of("shop.agent"),
+        User shopAgent = User.create(new UserId(null), Username.of("shop.agent"),
                 Email.of("shop@x.com"), PasswordHash.of(passwordEncoder.encode("pass")),
                 "Agent", "Shop", new PhoneNumber(null),
-                OrganizationId.of(42), RoleCode.SHOP_AGENT);
+                OrganizationId.of(UUID.fromString("00000000-0000-0000-0000-000000000042")), RoleCode.SHOP_AGENT);
         users.save(shopAgent);
     }
 
@@ -80,10 +82,10 @@ class OrganizationCascadeUseCaseH2Test {
     void supplierDisabled_disablesAllSupplierAdminsAndAgents() {
         deduplicator.markProcessed("e1");
 
-        useCase.onOrganizationDisabled("organization.supplier.disabled", 42,
+        useCase.onOrganizationDisabled("organization.supplier.disabled", UUID.fromString("00000000-0000-0000-0000-000000000042"),
                 List.of(RoleCode.SUPPLIER_ADMIN, RoleCode.SUPPLIER_AGENT), "e2");
 
-        List<User> allUsers = users.findByOrganizationId(OrganizationId.of(42));
+        List<User> allUsers = users.findByOrganizationId(OrganizationId.of(UUID.fromString("00000000-0000-0000-0000-000000000042")));
         List<User> supplierUsers = allUsers.stream()
                 .filter(u -> u.roles().contains(RoleCode.SUPPLIER_ADMIN) || u.roles().contains(RoleCode.SUPPLIER_AGENT))
                 .toList();
@@ -100,7 +102,7 @@ class OrganizationCascadeUseCaseH2Test {
 
         deduplicator.markProcessed("e1");
 
-        useCase.onOrganizationDisabled("organization.supplier.disabled", 42,
+        useCase.onOrganizationDisabled("organization.supplier.disabled", UUID.fromString("00000000-0000-0000-0000-000000000042"),
                 List.of(RoleCode.SUPPLIER_ADMIN, RoleCode.SUPPLIER_AGENT), "e2");
 
         User remaining = users.findByUsername(Username.of("supplier.agent")).orElseThrow();
@@ -111,10 +113,10 @@ class OrganizationCascadeUseCaseH2Test {
     void duplicateEvent_isIgnored() {
         deduplicator.markProcessed("e1");
 
-        useCase.onOrganizationDisabled("organization.supplier.disabled", 42,
+        useCase.onOrganizationDisabled("organization.supplier.disabled", UUID.fromString("00000000-0000-0000-0000-000000000042"),
                 List.of(RoleCode.SUPPLIER_ADMIN, RoleCode.SUPPLIER_AGENT), "e1");
 
-        List<User> allUsers = users.findByOrganizationId(OrganizationId.of(42));
+        List<User> allUsers = users.findByOrganizationId(OrganizationId.of(UUID.fromString("00000000-0000-0000-0000-000000000042")));
         assertThat(allUsers).allMatch(u -> u.status() == UserStatus.ACTIVE);
     }
 
@@ -122,10 +124,10 @@ class OrganizationCascadeUseCaseH2Test {
     void shopDisabled_disablesShopAdminsAndAgents() {
         deduplicator.markProcessed("e1");
 
-        useCase.onOrganizationDisabled("organization.shop.disabled", 42,
+        useCase.onOrganizationDisabled("organization.shop.disabled", UUID.fromString("00000000-0000-0000-0000-000000000042"),
                 List.of(RoleCode.SHOP_ADMIN, RoleCode.SHOP_AGENT), "e2");
 
-        List<User> allUsers = users.findByOrganizationId(OrganizationId.of(42));
+        List<User> allUsers = users.findByOrganizationId(OrganizationId.of(UUID.fromString("00000000-0000-0000-0000-000000000042")));
         List<User> shopUsers = allUsers.stream()
                 .filter(u -> u.roles().contains(RoleCode.SHOP_AGENT))
                 .toList();

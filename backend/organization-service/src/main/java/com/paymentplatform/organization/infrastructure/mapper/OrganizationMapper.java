@@ -7,7 +7,7 @@ import org.mapstruct.*;
 @Mapper(componentModel = "spring")
 public interface OrganizationMapper {
 
-    @Mapping(target = "id", expression = "java(org.id() != null ? org.id().value() : 0L)")
+    @Mapping(target = "id", expression = "java(org.id() != null ? org.id().value() : null)")
     @Mapping(target = "name", expression = "java(org.name() != null ? org.name().value() : \"\")")
     @Mapping(target = "type", expression = "java(org.type() != null ? org.type().name() : \"\")")
     @Mapping(target = "status", expression = "java(org.status() != null ? org.status().name() : \"\")")

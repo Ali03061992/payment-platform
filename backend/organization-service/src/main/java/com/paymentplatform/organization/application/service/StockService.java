@@ -1,5 +1,7 @@
 package com.paymentplatform.organization.application.service;
 
+import java.util.UUID;
+
 import com.paymentplatform.organization.application.dto.*;
 import com.paymentplatform.organization.domain.model.Product;
 import com.paymentplatform.organization.domain.model.StockMovement;
@@ -24,14 +26,14 @@ public class StockService {
         this.movements = movements;
     }
 
-    public List<ProductResponse> listProducts(Long supplierId, String status) {
+    public List<ProductResponse> listProducts(UUID supplierId, String status) {
         List<Product> list = (status != null && !status.isBlank())
                 ? products.findBySupplierIdAndStatus(supplierId, status)
                 : products.findBySupplierId(supplierId);
         return list.stream().map(ProductResponse::from).collect(Collectors.toList());
     }
 
-    public ProductResponse getProduct(Long supplierId, Long productId) {
+    public ProductResponse getProduct(UUID supplierId, UUID productId) {
         Product product = products.findById(productId)
                 .filter(p -> p.getSupplierId().equals(supplierId))
                 .orElseThrow(() -> new NotFoundException("Produit non trouvé"));
@@ -39,7 +41,7 @@ public class StockService {
     }
 
     @Transactional
-    public ProductResponse createProduct(Long supplierId, ProductCreateRequest request) {
+    public ProductResponse createProduct(UUID supplierId, ProductCreateRequest request) {
         if (products.existsBySupplierIdAndSku(supplierId, request.sku())) {
             throw new ConflictException("Un produit avec ce SKU existe déjà pour ce fournisseur");
         }
@@ -57,7 +59,7 @@ public class StockService {
     }
 
     @Transactional
-    public ProductResponse updateProduct(Long supplierId, Long productId, ProductUpdateRequest request) {
+    public ProductResponse updateProduct(UUID supplierId, UUID productId, ProductUpdateRequest request) {
         Product product = products.findById(productId)
                 .filter(p -> p.getSupplierId().equals(supplierId))
                 .orElseThrow(() -> new NotFoundException("Produit non trouvé"));
@@ -72,7 +74,7 @@ public class StockService {
     }
 
     @Transactional
-    public ProductResponse deleteProduct(Long supplierId, Long productId) {
+    public ProductResponse deleteProduct(UUID supplierId, UUID productId) {
         Product product = products.findById(productId)
                 .filter(p -> p.getSupplierId().equals(supplierId))
                 .orElseThrow(() -> new NotFoundException("Produit non trouvé"));
@@ -84,7 +86,7 @@ public class StockService {
         return ProductResponse.from(product);
     }
 
-    public List<StockMovementResponse> listMovements(Long supplierId, Long productId) {
+    public List<StockMovementResponse> listMovements(UUID supplierId, UUID productId) {
         List<StockMovement> list = (productId != null)
                 ? movements.findByProductIdOrderByCreatedAtDesc(productId)
                 : movements.findBySupplierIdOrderByCreatedAtDesc(supplierId);
@@ -99,7 +101,7 @@ public class StockService {
     }
 
     @Transactional
-    public StockMovementResponse createMovement(Long supplierId, StockMovementRequest request) {
+    public StockMovementResponse createMovement(UUID supplierId, StockMovementRequest request) {
         if (request.quantity() == null || request.quantity() <= 0) {
             throw new ConflictException("La quantité doit être supérieure à 0");
         }

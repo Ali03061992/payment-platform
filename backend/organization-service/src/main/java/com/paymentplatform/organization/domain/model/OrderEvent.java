@@ -1,5 +1,7 @@
 package com.paymentplatform.organization.domain.model;
 
+import java.util.UUID;
+
 import jakarta.persistence.*;
 
 import java.time.Instant;
@@ -9,17 +11,18 @@ import java.time.Instant;
 public class OrderEvent {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(columnDefinition = "VARCHAR(36)")
+    private UUID id;
 
-    @Column(name = "order_id", nullable = false)
-    private Long orderId;
+    @Column(name = "order_id", nullable = false, columnDefinition = "VARCHAR(36)")
+    private UUID orderId;
 
     @Column(nullable = false, length = 40)
     private String action;
 
-    @Column(name = "user_id")
-    private Long userId;
+    @Column(name = "user_id", columnDefinition = "VARCHAR(36)")
+    private UUID userId;
 
     @Column(nullable = false)
     private Instant timestamp;
@@ -32,7 +35,7 @@ public class OrderEvent {
         if (timestamp == null) timestamp = Instant.now();
     }
 
-    public static OrderEvent create(Long orderId, String action, Long userId, String details) {
+    public static OrderEvent create(UUID orderId, String action, UUID userId, String details) {
         OrderEvent event = new OrderEvent();
         event.orderId = orderId;
         event.action = action;
@@ -42,10 +45,10 @@ public class OrderEvent {
         return event;
     }
 
-    public Long getId() { return id; }
-    public Long getOrderId() { return orderId; }
+    public UUID getId() { return id; }
+    public UUID getOrderId() { return orderId; }
     public String getAction() { return action; }
-    public Long getUserId() { return userId; }
+    public UUID getUserId() { return userId; }
     public Instant getTimestamp() { return timestamp; }
     public String getDetails() { return details; }
 }

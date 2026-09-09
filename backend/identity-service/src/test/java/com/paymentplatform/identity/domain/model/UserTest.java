@@ -1,5 +1,7 @@
 package com.paymentplatform.identity.domain.model;
 
+import java.util.UUID;
+
 import com.paymentplatform.shared.domain.exception.ConflictException;
 import com.paymentplatform.shared.domain.exception.DomainException;
 import com.paymentplatform.shared.domain.model.OrganizationId;
@@ -17,10 +19,10 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class UserTest {
 
     private User sample() {
-        return User.create(new UserId(0), Username.of("agent.one"),
+        return User.create(new UserId(null), Username.of("agent.one"),
                 Email.of("agent.one@example.com"), PasswordHash.of("hash"),
                 "Ali", "Ben Ammar", new PhoneNumber("+21620123456"),
-                OrganizationId.of(7), RoleCode.SUPPLIER_AGENT);
+                OrganizationId.of(UUID.fromString("00000000-0000-0000-0000-000000000007")), RoleCode.SUPPLIER_AGENT);
     }
 
     @Test
@@ -57,17 +59,17 @@ class UserTest {
     @Test
     void assertCanManageOrganization_allowsOwnOrgOnly() {
         User user = sample();
-        user.assertCanManageOrganization(OrganizationId.of(7));
-        assertThatThrownBy(() -> user.assertCanManageOrganization(OrganizationId.of(8)))
+        user.assertCanManageOrganization(OrganizationId.of(UUID.fromString("00000000-0000-0000-0000-000000000007")));
+        assertThatThrownBy(() -> user.assertCanManageOrganization(OrganizationId.of(UUID.fromString("00000000-0000-0000-0000-000000000008"))))
                 .isInstanceOf(ConflictException.class);
     }
 
     @Test
     void systemAdmin_cannotManageAnyOrganization() {
-        User admin = User.create(new UserId(1), Username.of("system.admin"),
+        User admin = User.create(new UserId(UUID.fromString("00000000-0000-0000-0000-000000000001")), Username.of("system.admin"),
                 Email.of("admin@platform.local"), PasswordHash.of("hash"), "System", "Admin",
                 new PhoneNumber(null), null, RoleCode.SYSTEM_ADMIN);
-        assertThatThrownBy(() -> admin.assertCanManageOrganization(OrganizationId.of(1)))
+        assertThatThrownBy(() -> admin.assertCanManageOrganization(OrganizationId.of(UUID.fromString("00000000-0000-0000-0000-000000000001"))))
                 .isInstanceOf(ConflictException.class);
     }
 }

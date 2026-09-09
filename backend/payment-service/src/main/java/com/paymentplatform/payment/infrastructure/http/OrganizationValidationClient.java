@@ -1,5 +1,7 @@
 package com.paymentplatform.payment.infrastructure.http;
 
+import java.util.UUID;
+
 import com.paymentplatform.shared.domain.exception.ConflictException;
 import com.paymentplatform.shared.domain.exception.NotFoundException;
 import org.slf4j.Logger;
@@ -42,7 +44,7 @@ public class OrganizationValidationClient {
     @Value("${app.internal-secret:dev-internal-secret-change-me}")
     private String internalSecret;
 
-    public void validateShop(long shopId) {
+    public void validateShop(UUID shopId) {
         String url = gatewayBaseUrl + "/api/organizations/internal/" + shopId + "/status";
         try {
             HttpRequest request = HttpRequest.newBuilder()
@@ -72,7 +74,7 @@ public class OrganizationValidationClient {
         }
     }
 
-    public void validateSupplier(long supplierId) {
+    public void validateSupplier(UUID supplierId) {
         String url = gatewayBaseUrl + "/api/organizations/internal/" + supplierId + "/status";
         try {
             HttpRequest request = HttpRequest.newBuilder()
@@ -102,7 +104,7 @@ public class OrganizationValidationClient {
         }
     }
 
-    public void validateRelation(long shopId, long supplierId) {
+    public void validateRelation(UUID shopId, UUID supplierId) {
         String url = gatewayBaseUrl + "/api/organizations/internal/relations/supplier/" + supplierId;
         try {
             HttpRequest request = HttpRequest.newBuilder()
@@ -128,7 +130,7 @@ public class OrganizationValidationClient {
     }
 
     @Cacheable(value = "organizations", key = "#organizationId")
-    public Optional<String> getOrganizationName(long organizationId) {
+    public Optional<String> getOrganizationName(UUID organizationId) {
         String url = "http://" + organizationServiceUrl + ":" + organizationServicePort + "/api/organizations/internal/" + organizationId + "/status";
         try {
             HttpRequest request = HttpRequest.newBuilder()
@@ -150,7 +152,7 @@ public class OrganizationValidationClient {
     }
 
     @Cacheable(value = "users", key = "#userId")
-    public Optional<String> getUserName(long userId) {
+    public Optional<String> getUserName(UUID userId) {
         String url = "http://" + identityServiceUrl + ":" + identityServicePort + "/api/internal/users/" + userId;
         try {
             HttpRequest request = HttpRequest.newBuilder()

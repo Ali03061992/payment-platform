@@ -30,7 +30,7 @@ export class PaymentDetailComponent implements OnInit, OnDestroy {
   private subscriptions = new Subscription();
 
   ngOnInit(): void {
-    const id = Number(this.route.snapshot.paramMap.get('id'));
+    const id = this.route.snapshot.paramMap.get('id')!;
     this.subscriptions.add(this.paymentService.getById(id).subscribe({
       next: (data: Payment) => {
         this.payment = data;

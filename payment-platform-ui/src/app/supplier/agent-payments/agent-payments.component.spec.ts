@@ -96,7 +96,7 @@ describe('AgentPaymentsComponent', () => {
   describe('load', () => {
     it('should not load without supplierId', () => {
       loginService.getCurrentUser.and.returnValue(null as any);
-      component.supplierId = 0;
+      component.supplierId = '';
       component.load();
       expect(paymentService.getAgentSummary).not.toHaveBeenCalled();
     });

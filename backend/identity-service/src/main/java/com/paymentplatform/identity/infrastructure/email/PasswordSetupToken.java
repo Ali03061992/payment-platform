@@ -1,5 +1,7 @@
 package com.paymentplatform.identity.infrastructure.email;
 
+import java.util.UUID;
+
 import jakarta.persistence.*;
 import java.time.Instant;
 
@@ -8,11 +10,12 @@ import java.time.Instant;
 public class PasswordSetupToken {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(columnDefinition = "VARCHAR(36)")
+    private UUID id;
 
-    @Column(name = "user_id", nullable = false)
-    private Long userId;
+    @Column(name = "user_id", nullable = false, columnDefinition = "VARCHAR(36)")
+    private UUID userId;
 
     @Column(nullable = false, unique = true, length = 64)
     private String token;
@@ -28,14 +31,14 @@ public class PasswordSetupToken {
 
     protected PasswordSetupToken() {}
 
-    public PasswordSetupToken(Long userId, String token, Instant expiresAt) {
+    public PasswordSetupToken(UUID userId, String token, Instant expiresAt) {
         this.userId = userId;
         this.token = token;
         this.expiresAt = expiresAt;
     }
 
-    public Long getId() { return id; }
-    public Long getUserId() { return userId; }
+    public UUID getId() { return id; }
+    public UUID getUserId() { return userId; }
     public String getToken() { return token; }
     public Instant getExpiresAt() { return expiresAt; }
     public boolean isUsed() { return used; }

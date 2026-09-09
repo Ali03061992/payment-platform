@@ -1,5 +1,7 @@
 package com.paymentplatform.shared.infrastructure;
 
+import java.util.UUID;
+
 import com.paymentplatform.shared.infrastructure.security.AuthenticatedUser;
 import com.paymentplatform.shared.infrastructure.security.JwtService;
 import com.paymentplatform.shared.infrastructure.security.SecurityProperties;
@@ -24,13 +26,13 @@ class JwtServiceTest {
 
     @Test
     void issue_andParse_roundTrip() {
-        var user = new AuthenticatedUser(1L, "admin", List.of("SYSTEM_ADMIN"), null);
+        var user = new AuthenticatedUser(UUID.fromString("00000000-0000-0000-0000-000000000001"), "admin", List.of("SYSTEM_ADMIN"), null);
         String token = jwtService.issue(user);
 
         assertThat(token).isNotBlank();
 
         var parsed = jwtService.parse(token);
-        assertThat(parsed.userId()).isEqualTo(1L);
+        assertThat(parsed.userId()).isEqualTo(UUID.fromString("00000000-0000-0000-0000-000000000001"));
         assertThat(parsed.username()).isEqualTo("admin");
         assertThat(parsed.roles()).containsExactly("SYSTEM_ADMIN");
         assertThat(parsed.organizationId()).isNull();
@@ -38,11 +40,11 @@ class JwtServiceTest {
 
     @Test
     void issue_withOrganizationId() {
-        var user = new AuthenticatedUser(10L, "agent", List.of("SUPPLIER_AGENT"), 42L);
+        var user = new AuthenticatedUser(UUID.fromString("00000000-0000-0000-0000-000000000010"), "agent", List.of("SUPPLIER_AGENT"), UUID.fromString("00000000-0000-0000-0000-000000000042"));
         String token = jwtService.issue(user);
 
         var parsed = jwtService.parse(token);
-        assertThat(parsed.organizationId()).isEqualTo(42L);
+        assertThat(parsed.organizationId()).isEqualTo(UUID.fromString("00000000-0000-0000-0000-000000000042"));
     }
 
     @Test

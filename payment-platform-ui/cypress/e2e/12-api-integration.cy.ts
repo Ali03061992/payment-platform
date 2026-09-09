@@ -204,7 +204,7 @@ describe('12 - API: Users', () => {
 
 describe('12 - API: Catalog (supplier)', () => {
   let token: string;
-  let supplierId: number;
+  let supplierId: string;
 
   before(() => {
     cy.request({ method: 'POST', url: `${API()}/api/auth/login`, body: { username: 'covale.admin', password: 'Admin@123' } })
@@ -228,7 +228,7 @@ describe('12 - API: Catalog (supplier)', () => {
 
 describe('12 - API: Stocks (supplier)', () => {
   let token: string;
-  let supplierId: number;
+  let supplierId: string;
 
   before(() => {
     cy.request({ method: 'POST', url: `${API()}/api/auth/login`, body: { username: 'covale.admin', password: 'Admin@123' } })

@@ -79,7 +79,7 @@ public class JpaOrganizationRepository implements OrganizationRepository {
 
     private OrganizationJpaEntity toEntity(Organization org) {
         OrganizationJpaEntity e = new OrganizationJpaEntity();
-        if (org.id() != null && org.id().value() > 0) {
+        if (org.id() != null && org.id() != null && org.id().value() != null) {
             e.setId(org.id().value());
         }
         e.setName(org.name().value());

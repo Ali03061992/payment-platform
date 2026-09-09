@@ -1,8 +1,8 @@
 -- V2 : Gestion du stock fournisseur
 
 CREATE TABLE products (
-  id              BIGINT AUTO_INCREMENT PRIMARY KEY,
-  supplier_id     BIGINT        NOT NULL,
+  id VARCHAR(36) PRIMARY KEY,
+  supplier_id VARCHAR(36)        NOT NULL,
   name            VARCHAR(200)  NOT NULL,
   sku             VARCHAR(50)   NOT NULL,
   description     TEXT          NULL,
@@ -20,9 +20,9 @@ CREATE TABLE products (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE stock_movements (
-  id              BIGINT AUTO_INCREMENT PRIMARY KEY,
-  product_id      BIGINT        NOT NULL,
-  supplier_id     BIGINT        NOT NULL,
+  id VARCHAR(36) PRIMARY KEY,
+  product_id VARCHAR(36)        NOT NULL,
+  supplier_id VARCHAR(36)        NOT NULL,
   type            VARCHAR(20)   NOT NULL,
   quantity        INT           NOT NULL,
   reference       VARCHAR(100)  NULL,

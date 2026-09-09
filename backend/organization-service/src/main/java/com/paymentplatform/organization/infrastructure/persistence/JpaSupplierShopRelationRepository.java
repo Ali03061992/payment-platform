@@ -1,5 +1,7 @@
 package com.paymentplatform.organization.infrastructure.persistence;
 
+import java.util.UUID;
+
 import com.paymentplatform.organization.domain.model.SupplierShopRelation;
 import com.paymentplatform.organization.domain.repository.SupplierShopRelationRepository;
 import com.paymentplatform.organization.domain.valueobject.OrganizationId;
@@ -21,7 +23,7 @@ public class JpaSupplierShopRelationRepository implements SupplierShopRelationRe
 
     @Override
     @Transactional(readOnly = true)
-    public Optional<SupplierShopRelation> findById(Long id) {
+    public Optional<SupplierShopRelation> findById(UUID id) {
         return jpa.findById(id).map(this::toDomain);
     }
 

@@ -1,5 +1,7 @@
 package com.paymentplatform.organization.interfaces.rest;
 
+import java.util.UUID;
+
 import com.paymentplatform.shared.infrastructure.security.AuthenticatedUser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -41,23 +43,23 @@ class BalanceControllerTest {
                 .build();
     }
 
-    private static UsernamePasswordAuthenticationToken auth(long userId, String username, List<String> perms, Long orgId) {
+    private static UsernamePasswordAuthenticationToken auth(UUID userId, String username, List<String> perms, UUID orgId) {
         AuthenticatedUser principal = new AuthenticatedUser(userId, username, perms, orgId);
         var authorities = perms.stream().map(SimpleGrantedAuthority::new).toList();
         return new UsernamePasswordAuthenticationToken(principal, null, authorities);
     }
 
     private UsernamePasswordAuthenticationToken systemAdmin() {
-        return auth(1L, "admin", List.of("SYSTEM_ADMIN"), null);
+        return auth(UUID.fromString("00000000-0000-0000-0000-000000000001"), "admin", List.of("SYSTEM_ADMIN"), null);
     }
 
     private UsernamePasswordAuthenticationToken supplierAdmin() {
-        return auth(2L, "supplier.admin", List.of("SUPPLIER_ADMIN"), 10L);
+        return auth(UUID.fromString("00000000-0000-0000-0000-000000000002"), "supplier.admin", List.of("SUPPLIER_ADMIN"), UUID.fromString("00000000-0000-0000-0000-000000000010"));
     }
 
     @Test
     void listSupplierBalances_asSystemAdmin_returnsOk() throws Exception {
-        mockMvc.perform(get("/api/balances/supplier/10")
+        mockMvc.perform(get("/api/balances/supplier/00000000-0000-0000-0000-000000000010")
                         .with(SecurityMockMvcRequestPostProcessors.authentication(systemAdmin())))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray());
@@ -65,7 +67,7 @@ class BalanceControllerTest {
 
     @Test
     void listSupplierBalances_asOwner_returnsOk() throws Exception {
-        mockMvc.perform(get("/api/balances/supplier/10")
+        mockMvc.perform(get("/api/balances/supplier/00000000-0000-0000-0000-000000000010")
                         .with(SecurityMockMvcRequestPostProcessors.authentication(supplierAdmin())))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray());
@@ -73,9 +75,9 @@ class BalanceControllerTest {
 
     @Test
     void listSupplierBalances_asOtherSupplier_returns403() throws Exception {
-        UsernamePasswordAuthenticationToken otherSupplier = auth(3L, "other", List.of("SUPPLIER_ADMIN"), 99L);
+        UsernamePasswordAuthenticationToken otherSupplier = auth(UUID.fromString("00000000-0000-0000-0000-000000000003"), "other", List.of("SUPPLIER_ADMIN"), UUID.fromString("00000000-0000-0000-0000-000000000099"));
 
-        mockMvc.perform(get("/api/balances/supplier/10")
+        mockMvc.perform(get("/api/balances/supplier/00000000-0000-0000-0000-000000000010")
                         .with(SecurityMockMvcRequestPostProcessors.authentication(otherSupplier)))
                 .andExpect(status().isForbidden());
     }
@@ -83,7 +85,7 @@ class BalanceControllerTest {
     @Test
     void adjustBalance_asSystemAdmin_returnsOk() throws Exception {
         String body = objectMapper.writeValueAsString(
-                new com.paymentplatform.organization.interfaces.rest.BalanceController.AdjustBalanceRequest(10L, 20L, new BigDecimal("50.00"), "Test adjustment"));
+                new com.paymentplatform.organization.interfaces.rest.BalanceController.AdjustBalanceRequest(UUID.fromString("00000000-0000-0000-0000-000000000010"), UUID.fromString("00000000-0000-0000-0000-000000000020"), new BigDecimal("50.00"), "Test adjustment"));
 
         mockMvc.perform(post("/api/balances/adjust")
                         .with(SecurityMockMvcRequestPostProcessors.authentication(systemAdmin()))
@@ -95,7 +97,7 @@ class BalanceControllerTest {
     @Test
     void adjustBalance_asNonAdmin_returns403() throws Exception {
         String body = objectMapper.writeValueAsString(
-                new com.paymentplatform.organization.interfaces.rest.BalanceController.AdjustBalanceRequest(10L, 20L, new BigDecimal("50.00"), "Test"));
+                new com.paymentplatform.organization.interfaces.rest.BalanceController.AdjustBalanceRequest(UUID.fromString("00000000-0000-0000-0000-000000000010"), UUID.fromString("00000000-0000-0000-0000-000000000020"), new BigDecimal("50.00"), "Test"));
 
         mockMvc.perform(post("/api/balances/adjust")
                         .with(SecurityMockMvcRequestPostProcessors.authentication(supplierAdmin()))
@@ -106,7 +108,7 @@ class BalanceControllerTest {
 
     @Test
     void listShopBalances_asSystemAdmin_returnsOk() throws Exception {
-        mockMvc.perform(get("/api/balances/shop/20")
+        mockMvc.perform(get("/api/balances/shop/00000000-0000-0000-0000-000000000020")
                         .with(SecurityMockMvcRequestPostProcessors.authentication(systemAdmin())))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray());
@@ -114,7 +116,7 @@ class BalanceControllerTest {
 
     @Test
     void getBalanceHistory_asSystemAdmin_returnsOk() throws Exception {
-        mockMvc.perform(get("/api/balances/supplier/10/shop/20")
+        mockMvc.perform(get("/api/balances/supplier/00000000-0000-0000-0000-000000000010/shop/00000000-0000-0000-0000-000000000020")
                         .with(SecurityMockMvcRequestPostProcessors.authentication(systemAdmin())))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray());

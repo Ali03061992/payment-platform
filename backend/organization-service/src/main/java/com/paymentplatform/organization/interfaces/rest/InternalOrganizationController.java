@@ -1,5 +1,7 @@
 package com.paymentplatform.organization.interfaces.rest;
 
+import java.util.UUID;
+
 import com.paymentplatform.organization.application.dto.OrganizationStatusResponse;
 import com.paymentplatform.organization.application.usecase.OrganizationValidationUseCase;
 import com.paymentplatform.organization.domain.model.SupplierShopRelation;
@@ -32,7 +34,7 @@ public class InternalOrganizationController {
 
     @GetMapping("/{id}/status")
     public ResponseEntity<OrganizationStatusResponse> getStatus(
-            @PathVariable long id,
+            @PathVariable UUID id,
             @RequestHeader(value = "X-Internal-Token", required = false) String token) {
         if (token == null || !token.equals(expectedSecret)) {
             return ResponseEntity.status(401).build();
@@ -42,7 +44,7 @@ public class InternalOrganizationController {
 
     @GetMapping("/relations/supplier/{supplierId}")
     public ResponseEntity<List<Map<String, Object>>> getRelationsBySupplier(
-            @PathVariable long supplierId,
+            @PathVariable UUID supplierId,
             @RequestHeader(value = "X-Internal-Token", required = false) String token) {
         if (token == null || !token.equals(expectedSecret)) {
             return ResponseEntity.status(401).build();

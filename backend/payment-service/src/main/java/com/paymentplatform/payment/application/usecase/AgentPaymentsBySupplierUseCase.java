@@ -1,5 +1,7 @@
 package com.paymentplatform.payment.application.usecase;
 
+import java.util.UUID;
+
 import com.paymentplatform.payment.application.dto.AgentPaymentSummary;
 import com.paymentplatform.payment.application.dto.PaymentNameResolver;
 import com.paymentplatform.payment.application.dto.PaymentResponse;
@@ -23,11 +25,11 @@ public class AgentPaymentsBySupplierUseCase {
         this.nameResolver = nameResolver;
     }
 
-    public List<AgentPaymentSummary> execute(long supplierId, Instant from, Instant to) {
-        List<Long> userIds = paymentRepo.findDistinctCreatedByBetween(supplierId, from, to);
+    public List<AgentPaymentSummary> execute(UUID supplierId, Instant from, Instant to) {
+        List<UUID> userIds = paymentRepo.findDistinctCreatedByBetween(supplierId, from, to);
         List<AgentPaymentSummary> summaries = new ArrayList<>();
 
-        for (Long userId : userIds) {
+        for (UUID userId : userIds) {
             List<PaymentJpaEntity> payments =
                     paymentRepo.findBySupplierIdAndCreatedByAndCreatedAtBetweenOrderByCreatedAtDesc(
                             supplierId, userId, from, to);
@@ -63,7 +65,7 @@ public class AgentPaymentsBySupplierUseCase {
         return summaries;
     }
 
-    private PaymentResponse toResponse(PaymentJpaEntity e, long agentUserId) {
+    private PaymentResponse toResponse(PaymentJpaEntity e, UUID agentUserId) {
         var batchResolver = nameResolver.toNameResolver();
         return new PaymentResponse(
                 e.getId(), e.getReference(),

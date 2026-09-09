@@ -1,11 +1,11 @@
 export interface User {
-  id: number;
+  id: string;
   username: string;
   email: string;
   firstName: string;
   lastName: string;
   phone: string;
-  organizationId: number;
+  organizationId: string;
   roles: string[];
   status: 'ACTIVE' | 'DISABLED';
   createdAt: string;

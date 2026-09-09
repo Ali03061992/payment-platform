@@ -29,47 +29,47 @@ export class OrderService {
     });
   }
 
-  getById(id: number): Observable<Order> {
+  getById(id: string): Observable<Order> {
     return this.http.get<Order>(`${this.apiUrl}/${id}`);
   }
 
-  confirm(id: number): Observable<Order> {
+  confirm(id: string): Observable<Order> {
     return this.http.post<Order>(`${this.apiUrl}/${id}/confirm`, {});
   }
 
-  prepare(id: number): Observable<Order> {
+  prepare(id: string): Observable<Order> {
     return this.http.post<Order>(`${this.apiUrl}/${id}/prepare`, {});
   }
 
-  readyForDelivery(id: number): Observable<Order> {
+  readyForDelivery(id: string): Observable<Order> {
     return this.http.post<Order>(`${this.apiUrl}/${id}/ready`, {});
   }
 
-  assignDelivery(id: number, agentId: number): Observable<Order> {
+  assignDelivery(id: string, agentId: string): Observable<Order> {
     return this.http.post<Order>(`${this.apiUrl}/${id}/assign-delivery`, { agentId });
   }
 
-  deliver(id: number, receivedBy: number): Observable<Order> {
+  deliver(id: string, receivedBy: string): Observable<Order> {
     return this.http.post<Order>(`${this.apiUrl}/${id}/deliver`, { receivedBy });
   }
 
-  accept(id: number): Observable<Order> {
+  accept(id: string): Observable<Order> {
     return this.http.post<Order>(`${this.apiUrl}/${id}/accept`, {});
   }
 
-  acceptAsap(id: number): Observable<Order> {
+  acceptAsap(id: string): Observable<Order> {
     return this.http.post<Order>(`${this.apiUrl}/${id}/accept-asap`, {});
   }
 
-  cancel(id: number): Observable<Order> {
+  cancel(id: string): Observable<Order> {
     return this.http.post<Order>(`${this.apiUrl}/${id}/cancel`, {});
   }
 
-  reject(id: number): Observable<Order> {
+  reject(id: string): Observable<Order> {
     return this.http.post<Order>(`${this.apiUrl}/${id}/reject`, {});
   }
 
-  deliveryReject(id: number, reason?: string): Observable<Order> {
+  deliveryReject(id: string, reason?: string): Observable<Order> {
     return this.http.post<Order>(`${this.apiUrl}/${id}/delivery-reject`, { reason });
   }
 

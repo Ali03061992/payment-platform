@@ -21,10 +21,10 @@ export class OrderManagementComponent implements OnInit, OnDestroy {
   loadingDetail = false;
 
   showAssignModal = false;
-  assignOrderId = 0;
-  assignAgentId = 0;
+  assignOrderId = '';
+  assignAgentId = '';
   assigning = false;
-  agents: { id: number; firstName: string; lastName: string }[] = [];
+  agents: { id: string; firstName: string; lastName: string }[] = [];
 
   private subscriptions = new Subscription();
 
@@ -54,9 +54,9 @@ export class OrderManagementComponent implements OnInit, OnDestroy {
 
   loadAgents(): void {
     const userJson = sessionStorage.getItem('user');
-    let supplierId = 0;
+    let supplierId = '';
     if (userJson) {
-      try { supplierId = JSON.parse(userJson).organizationId || 0; } catch {}
+      try { supplierId = JSON.parse(userJson).organizationId || ''; } catch {}
     }
     if (!supplierId) return;
     this.subscriptions.add(this.agentService.listAgents(supplierId).subscribe({
@@ -148,7 +148,7 @@ export class OrderManagementComponent implements OnInit, OnDestroy {
 
   openAssign(order: Order): void {
     this.assignOrderId = order.id;
-    this.assignAgentId = 0;
+    this.assignAgentId = '';
     this.showAssignModal = true;
   }
 

@@ -1,5 +1,7 @@
 package com.paymentplatform.identity.infrastructure.test;
 
+import java.util.UUID;
+
 import com.paymentplatform.identity.application.port.OrganizationStatus;
 import com.paymentplatform.identity.application.port.OrganizationStatusPort;
 import org.springframework.context.annotation.Profile;
@@ -16,21 +18,21 @@ import java.util.Map;
 @Profile("test")
 public class TestOrganizationStatusPort implements OrganizationStatusPort {
 
-    private final Map<Long, OrganizationStatus> statuses = new HashMap<>(Map.of(
-            42L, new OrganizationStatus(42, "SUPPLIER", "ACTIVE"),
-            5L, new OrganizationStatus(5, "SHOP", "ACTIVE"),
-            7L, new OrganizationStatus(7, "SHOP", "ACTIVE"),
-            100L, new OrganizationStatus(100, "SUPPLIER", "ACTIVE")
+    private final Map<UUID, OrganizationStatus> statuses = new HashMap<>(Map.of(
+            UUID.fromString("00000000-0000-0000-0000-000000000042"), new OrganizationStatus(UUID.fromString("00000000-0000-0000-0000-000000000042"), "SUPPLIER", "ACTIVE"),
+            UUID.fromString("00000000-0000-0000-0000-000000000005"), new OrganizationStatus(UUID.fromString("00000000-0000-0000-0000-000000000005"), "SHOP", "ACTIVE"),
+            UUID.fromString("00000000-0000-0000-0000-000000000007"), new OrganizationStatus(UUID.fromString("00000000-0000-0000-0000-000000000007"), "SHOP", "ACTIVE"),
+            UUID.fromString("00000000-0000-0000-0000-000000000100"), new OrganizationStatus(UUID.fromString("00000000-0000-0000-0000-000000000100"), "SUPPLIER", "ACTIVE")
     ));
 
-    private OrganizationStatus defaultStatus = new OrganizationStatus(0, "SUPPLIER", "ACTIVE");
+    private OrganizationStatus defaultStatus = new OrganizationStatus(UUID.fromString("00000000-0000-0000-0000-000000000000"), "SUPPLIER", "ACTIVE");
 
     @Override
-    public OrganizationStatus getOrganizationStatus(long organizationId) {
+    public OrganizationStatus getOrganizationStatus(UUID organizationId) {
         return statuses.getOrDefault(organizationId, defaultStatus);
     }
 
-    public void setStatus(long id, String type, String status) {
+    public void setStatus(UUID id, String type, String status) {
         statuses.put(id, new OrganizationStatus(id, type, status));
     }
 }

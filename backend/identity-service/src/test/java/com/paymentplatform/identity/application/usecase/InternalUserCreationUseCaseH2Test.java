@@ -1,5 +1,7 @@
 package com.paymentplatform.identity.application.usecase;
 
+import java.util.UUID;
+
 import com.paymentplatform.identity.application.dto.CreateInternalUserRequest;
 import com.paymentplatform.identity.domain.repository.UserRepository;
 import com.paymentplatform.shared.domain.exception.ConflictException;
@@ -23,11 +25,11 @@ class InternalUserCreationUseCaseH2Test {
     @Test
     void createInternalUser_shopAdmin_succeeds() {
         var request = new CreateInternalUserRequest("int.org.admin", "int.admin@org.com",
-                "Password123", "Org", "Admin", null, 42L, "SHOP_ADMIN");
+                "Password123", "Org", "Admin", null, UUID.fromString("00000000-0000-0000-0000-000000000042"), "SHOP_ADMIN");
         var response = useCase.createInternalUser(request);
 
         assertThat(response.username()).isEqualTo("int.org.admin");
-        assertThat(response.organizationId()).isEqualTo(42L);
+        assertThat(response.organizationId()).isEqualTo(UUID.fromString("00000000-0000-0000-0000-000000000042"));
         assertThat(response.roles()).containsExactly("SHOP_ADMIN");
     }
 
@@ -44,7 +46,7 @@ class InternalUserCreationUseCaseH2Test {
     @Test
     void createInternalUser_systemAdmin_withOrg_throwsConflict() {
         var request = new CreateInternalUserRequest("int.sys.admin2", "int.sys2@platform.com",
-                "Password123", "System", "Admin", null, 42L, "SYSTEM_ADMIN");
+                "Password123", "System", "Admin", null, UUID.fromString("00000000-0000-0000-0000-000000000042"), "SYSTEM_ADMIN");
         assertThatThrownBy(() -> useCase.createInternalUser(request))
                 .isInstanceOf(ConflictException.class)
                 .hasMessageContaining("SYSTEM_ADMIN");
@@ -62,11 +64,11 @@ class InternalUserCreationUseCaseH2Test {
     @Test
     void createInternalUser_duplicateUsername_throwsConflict() {
         var request1 = new CreateInternalUserRequest("int.dup.user", "int.dup1@x.com",
-                "Password123", "Dup", "User", null, 42L, "SHOP_AGENT");
+                "Password123", "Dup", "User", null, UUID.fromString("00000000-0000-0000-0000-000000000042"), "SHOP_AGENT");
         useCase.createInternalUser(request1);
 
         var request2 = new CreateInternalUserRequest("int.dup.user", "int.dup2@x.com",
-                "Password123", "Dup", "User2", null, 42L, "SHOP_AGENT");
+                "Password123", "Dup", "User2", null, UUID.fromString("00000000-0000-0000-0000-000000000042"), "SHOP_AGENT");
         assertThatThrownBy(() -> useCase.createInternalUser(request2))
                 .isInstanceOf(ConflictException.class)
                 .hasMessageContaining("Nom d'utilisateur déjà utilisé");
@@ -75,11 +77,11 @@ class InternalUserCreationUseCaseH2Test {
     @Test
     void createInternalUser_duplicateEmail_throwsConflict() {
         var request1 = new CreateInternalUserRequest("int.user1", "int.same@x.com",
-                "Password123", "U", "One", null, 42L, "SHOP_AGENT");
+                "Password123", "U", "One", null, UUID.fromString("00000000-0000-0000-0000-000000000042"), "SHOP_AGENT");
         useCase.createInternalUser(request1);
 
         var request2 = new CreateInternalUserRequest("int.user2", "int.same@x.com",
-                "Password123", "U", "Two", null, 42L, "SHOP_AGENT");
+                "Password123", "U", "Two", null, UUID.fromString("00000000-0000-0000-0000-000000000042"), "SHOP_AGENT");
         assertThatThrownBy(() -> useCase.createInternalUser(request2))
                 .isInstanceOf(ConflictException.class)
                 .hasMessageContaining("Adresse email déjà utilisée");
@@ -88,7 +90,7 @@ class InternalUserCreationUseCaseH2Test {
     @Test
     void createInternalUser_nullPassword_usesDefault() {
         var request = new CreateInternalUserRequest("int.default.pass", "int.dp@x.com",
-                null, "Default", "Pass", null, 42L, "SHOP_AGENT");
+                null, "Default", "Pass", null, UUID.fromString("00000000-0000-0000-0000-000000000042"), "SHOP_AGENT");
         var response = useCase.createInternalUser(request);
         assertThat(response.username()).isEqualTo("int.default.pass");
     }
@@ -96,7 +98,7 @@ class InternalUserCreationUseCaseH2Test {
     @Test
     void createInternalUser_blankPassword_usesDefault() {
         var request = new CreateInternalUserRequest("int.blank.pass", "int.bp@x.com",
-                "   ", "Blank", "Pass", null, 42L, "SHOP_AGENT");
+                "   ", "Blank", "Pass", null, UUID.fromString("00000000-0000-0000-0000-000000000042"), "SHOP_AGENT");
         var response = useCase.createInternalUser(request);
         assertThat(response.username()).isEqualTo("int.blank.pass");
     }

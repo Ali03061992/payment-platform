@@ -1,5 +1,7 @@
 package com.paymentplatform.organization.application.usecase;
 
+import java.util.UUID;
+
 import com.paymentplatform.shared.domain.exception.NotFoundException;
 import com.paymentplatform.organization.application.dto.OrganizationResponse;
 import com.paymentplatform.organization.domain.model.Organization;
@@ -41,7 +43,7 @@ public class OrganizationQueryUseCase {
     }
 
     @Transactional(readOnly = true)
-    public OrganizationResponse findById(long id) {
+    public OrganizationResponse findById(UUID id) {
         Organization org = organizations.findById(OrganizationId.of(id))
                 .orElseThrow(() -> new NotFoundException("Organisation non trouvée : " + id));
         return OrganizationResponse.from(org, getRelations(org));

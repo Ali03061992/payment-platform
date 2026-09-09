@@ -14,8 +14,8 @@ export class RelationManagementComponent implements OnInit {
   shops: Organization[] = [];
   loading = true;
   showCreate = false;
-  selectedSupplierId = 0;
-  selectedShopId = 0;
+  selectedSupplierId = '';
+  selectedShopId = '';
   creating = false;
 
   constructor(private orgService: OrganizationService, private toast: ToastService) {}
@@ -48,15 +48,15 @@ export class RelationManagementComponent implements OnInit {
     });
   }
 
-  deactivate(id: number): void {
+  deactivate(id: string): void {
     this.orgService.deactivateRelation(id).subscribe({ next: () => this.load() });
   }
 
-  getSupplierName(id: number): string {
+  getSupplierName(id: string): string {
     return this.suppliers.find(s => s.id === id)?.name || `#${id}`;
   }
 
-  getShopName(id: number): string {
+  getShopName(id: string): string {
     return this.shops.find(s => s.id === id)?.name || `#${id}`;
   }
 }

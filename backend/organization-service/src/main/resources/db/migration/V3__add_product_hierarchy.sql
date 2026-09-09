@@ -1,8 +1,8 @@
 -- V3 : Hiérarchie produit (catégories, familles, sous-familles) + reserved_qty
 
 CREATE TABLE product_categories (
-  id          BIGINT AUTO_INCREMENT PRIMARY KEY,
-  supplier_id BIGINT       NOT NULL,
+  id VARCHAR(36) PRIMARY KEY,
+  supplier_id VARCHAR(36)       NOT NULL,
   name        VARCHAR(100) NOT NULL,
   code        VARCHAR(30)  NOT NULL,
   status      VARCHAR(20)  NOT NULL DEFAULT 'ACTIVE',
@@ -13,9 +13,9 @@ CREATE TABLE product_categories (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE product_families (
-  id          BIGINT AUTO_INCREMENT PRIMARY KEY,
-  supplier_id BIGINT       NOT NULL,
-  category_id BIGINT       NOT NULL,
+  id VARCHAR(36) PRIMARY KEY,
+  supplier_id VARCHAR(36)       NOT NULL,
+  category_id VARCHAR(36)       NOT NULL,
   name        VARCHAR(100) NOT NULL,
   code        VARCHAR(30)  NOT NULL,
   status      VARCHAR(20)  NOT NULL DEFAULT 'ACTIVE',
@@ -28,9 +28,9 @@ CREATE TABLE product_families (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE product_subfamilies (
-  id          BIGINT AUTO_INCREMENT PRIMARY KEY,
-  supplier_id BIGINT       NOT NULL,
-  family_id   BIGINT       NOT NULL,
+  id VARCHAR(36) PRIMARY KEY,
+  supplier_id VARCHAR(36)       NOT NULL,
+  family_id VARCHAR(36)       NOT NULL,
   name        VARCHAR(100) NOT NULL,
   code        VARCHAR(30)  NOT NULL,
   status      VARCHAR(20)  NOT NULL DEFAULT 'ACTIVE',
@@ -45,9 +45,9 @@ CREATE TABLE product_subfamilies (
 -- Ajouter reserved_qty et les colonnes de hiérarchie aux produits existants
 ALTER TABLE products
   ADD COLUMN reserved_qty   INT NOT NULL DEFAULT 0 AFTER quantity,
-  ADD COLUMN category_id    BIGINT NULL AFTER description,
-  ADD COLUMN family_id      BIGINT NULL AFTER category_id,
-  ADD COLUMN subfamily_id   BIGINT NULL AFTER family_id,
+  ADD COLUMN category_id VARCHAR(36) NULL AFTER description,
+  ADD COLUMN family_id VARCHAR(36) NULL AFTER category_id,
+  ADD COLUMN subfamily_id VARCHAR(36) NULL AFTER family_id,
   ADD COLUMN unit           VARCHAR(20) NULL DEFAULT 'unité' AFTER currency,
   ADD INDEX idx_products_category (category_id),
   ADD INDEX idx_products_family (family_id),

@@ -1,5 +1,7 @@
 package com.paymentplatform.identity.application.usecase;
 
+import java.util.UUID;
+
 import com.paymentplatform.shared.domain.exception.ForbiddenException;
 import com.paymentplatform.shared.domain.exception.NotFoundException;
 import com.paymentplatform.shared.domain.model.OrganizationId;
@@ -25,8 +27,8 @@ public class UserQueryUseCase {
     }
 
     @Transactional(readOnly = true)
-    public UserResponse findById(long actorUserId, long userId, List<String> actorRoles,
-                                 Long actorOrganizationId) {
+    public UserResponse findById(UUID actorUserId, UUID userId, List<String> actorRoles,
+                                 UUID actorOrganizationId) {
         User target = users.findById(UserId.of(userId))
                 .orElseThrow(() -> new NotFoundException("Utilisateur introuvable"));
         assertCanView(actorRoles, actorOrganizationId, target);
@@ -34,15 +36,15 @@ public class UserQueryUseCase {
     }
 
     @Transactional(readOnly = true)
-    public UserResponse findByIdInternal(long userId) {
+    public UserResponse findByIdInternal(UUID userId) {
         User target = users.findById(UserId.of(userId))
                 .orElseThrow(() -> new NotFoundException("Utilisateur introuvable"));
         return UserResponse.from(target);
     }
 
     @Transactional(readOnly = true)
-    public List<UserResponse> list(long actorUserId, List<String> actorRoles, Long actorOrganizationId,
-                                   Long organizationId, String role, String status) {
+    public List<UserResponse> list(UUID actorUserId, List<String> actorRoles, UUID actorOrganizationId,
+                                   UUID organizationId, String role, String status) {
         List<User> result;
         boolean isSystemAdmin = actorRoles.contains(RoleCode.SYSTEM_ADMIN.name());
         if (isSystemAdmin) {
@@ -61,12 +63,12 @@ public class UserQueryUseCase {
                 .toList();
     }
 
-    private void assertCanView(List<String> actorRoles, Long actorOrganizationId, User target) {
+    private void assertCanView(List<String> actorRoles, UUID actorOrganizationId, User target) {
         if (actorRoles.contains(RoleCode.SYSTEM_ADMIN.name())) {
             return;
         }
         if (actorOrganizationId == null || target.organizationId() == null
-                || actorOrganizationId != target.organizationId().value()) {
+                || !actorOrganizationId.equals(target.organizationId().value())) {
             throw new ForbiddenException("Accès hors périmètre");
         }
     }

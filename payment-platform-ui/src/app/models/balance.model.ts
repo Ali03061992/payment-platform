@@ -1,21 +1,21 @@
 export interface BalanceEntry {
-  id: number;
-  supplierId: number;
-  shopId: number;
+  id: string;
+  supplierId: string;
+  shopId: string;
   type: string;
   amount: number;
   balanceAfter: number;
-  orderId: number | null;
-  paymentId: number | null;
+  orderId: string | null;
+  paymentId: string | null;
   reference: string | null;
   reason: string | null;
-  createdBy: number | null;
+  createdBy: string | null;
   createdAt: string;
 }
 
 export interface BalanceSummary {
-  supplierId: number;
-  shopId: number;
+  supplierId: string;
+  shopId: string;
   supplierName: string;
   shopName: string;
   currentBalance: number;

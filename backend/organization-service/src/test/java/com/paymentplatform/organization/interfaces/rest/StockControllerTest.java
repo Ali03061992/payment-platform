@@ -1,5 +1,7 @@
 package com.paymentplatform.organization.interfaces.rest;
 
+import java.util.UUID;
+
 import com.paymentplatform.shared.infrastructure.security.AuthenticatedUser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.paymentplatform.organization.application.dto.ProductCreateRequest;
@@ -38,7 +40,7 @@ class StockControllerTest {
     @Autowired private ProductRepository products;
 
     private MockMvc mockMvc;
-    private static final long SUPPLIER_ID = 10L;
+    private static final UUID SUPPLIER_ID = UUID.fromString("00000000-0000-0000-0000-000000000010");
 
     @BeforeEach
     void setUp() {
@@ -48,14 +50,14 @@ class StockControllerTest {
         products.deleteAll();
     }
 
-    private static UsernamePasswordAuthenticationToken auth(long userId, String username, List<String> perms, Long orgId) {
+    private static UsernamePasswordAuthenticationToken auth(UUID userId, String username, List<String> perms, UUID orgId) {
         AuthenticatedUser principal = new AuthenticatedUser(userId, username, perms, orgId);
         var authorities = perms.stream().map(SimpleGrantedAuthority::new).toList();
         return new UsernamePasswordAuthenticationToken(principal, null, authorities);
     }
 
     private UsernamePasswordAuthenticationToken supplierAdmin() {
-        return auth(1L, "supplier.admin", List.of("SUPPLIER_ADMIN", "SUPPLIER_MANAGE_PRODUCTS", "SUPPLIER_MANAGE_STOCK"), SUPPLIER_ID);
+        return auth(UUID.fromString("00000000-0000-0000-0000-000000000001"), "supplier.admin", List.of("SUPPLIER_ADMIN", "SUPPLIER_MANAGE_PRODUCTS", "SUPPLIER_MANAGE_STOCK"), SUPPLIER_ID);
     }
 
     private Product createProduct(String sku) {
@@ -163,7 +165,7 @@ class StockControllerTest {
 
     @Test
     void listProducts_wrongSupplier_returns403() throws Exception {
-        UsernamePasswordAuthenticationToken other = auth(2L, "other", List.of("SUPPLIER_MANAGE_PRODUCTS"), 99L);
+        UsernamePasswordAuthenticationToken other = auth(UUID.fromString("00000000-0000-0000-0000-000000000002"), "other", List.of("SUPPLIER_MANAGE_PRODUCTS"), UUID.fromString("00000000-0000-0000-0000-000000000099"));
 
         mockMvc.perform(get("/api/suppliers/" + SUPPLIER_ID + "/products")
                         .with(SecurityMockMvcRequestPostProcessors.authentication(other)))
@@ -172,7 +174,7 @@ class StockControllerTest {
 
     @Test
     void listProducts_systemAdmin_returnsOk() throws Exception {
-        UsernamePasswordAuthenticationToken sysAdmin = auth(3L, "sysadmin", List.of("SYSTEM_ADMIN"), null);
+        UsernamePasswordAuthenticationToken sysAdmin = auth(UUID.fromString("00000000-0000-0000-0000-000000000003"), "sysadmin", List.of("SYSTEM_ADMIN"), null);
 
         mockMvc.perform(get("/api/suppliers/" + SUPPLIER_ID + "/products")
                         .with(SecurityMockMvcRequestPostProcessors.authentication(sysAdmin)))

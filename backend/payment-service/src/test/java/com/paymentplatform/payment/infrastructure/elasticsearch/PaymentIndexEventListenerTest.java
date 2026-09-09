@@ -26,12 +26,12 @@ class PaymentIndexEventListenerTest {
 
     @Test
     void onPaymentCreated_indexesPayment() {
-        Payment p = payments.save(Payment.create(10L, 20L,
-                Money.of(new BigDecimal("100.00"), "TND"), 5L));
+        Payment p = payments.save(Payment.create(UUID.fromString("00000000-0000-0000-0000-000000000010"), UUID.fromString("00000000-0000-0000-0000-000000000020"),
+                Money.of(new BigDecimal("100.00"), "TND"), UUID.fromString("00000000-0000-0000-0000-000000000005")));
 
         PaymentEvents.PaymentCreatedEvent event = new PaymentEvents.PaymentCreatedEvent(
                 UUID.randomUUID(), java.time.Instant.now(), p.id(),
-                p.reference().value(), 10L, 20L, "TND", new BigDecimal("100.00"), 5L);
+                p.reference().value(), UUID.fromString("00000000-0000-0000-0000-000000000010"), UUID.fromString("00000000-0000-0000-0000-000000000020"), "TND", new BigDecimal("100.00"), UUID.fromString("00000000-0000-0000-0000-000000000005"));
 
         listener.onPaymentCreated(event);
 
@@ -40,12 +40,12 @@ class PaymentIndexEventListenerTest {
 
     @Test
     void onPaymentConfirmed_indexesPayment() {
-        Payment p = payments.save(Payment.create(10L, 20L,
-                Money.of(new BigDecimal("200.00"), "TND"), 5L));
+        Payment p = payments.save(Payment.create(UUID.fromString("00000000-0000-0000-0000-000000000010"), UUID.fromString("00000000-0000-0000-0000-000000000020"),
+                Money.of(new BigDecimal("200.00"), "TND"), UUID.fromString("00000000-0000-0000-0000-000000000005")));
 
         PaymentEvents.PaymentConfirmedEvent event = new PaymentEvents.PaymentConfirmedEvent(
                 UUID.randomUUID(), java.time.Instant.now(), p.id(),
-                p.reference().value(), 10L, 20L, 10L);
+                p.reference().value(), UUID.fromString("00000000-0000-0000-0000-000000000010"), UUID.fromString("00000000-0000-0000-0000-000000000020"), UUID.fromString("00000000-0000-0000-0000-000000000010"));
 
         listener.onPaymentConfirmed(event);
 
@@ -54,12 +54,12 @@ class PaymentIndexEventListenerTest {
 
     @Test
     void onPaymentRejected_indexesPayment() {
-        Payment p = payments.save(Payment.create(10L, 20L,
-                Money.of(new BigDecimal("300.00"), "TND"), 5L));
+        Payment p = payments.save(Payment.create(UUID.fromString("00000000-0000-0000-0000-000000000010"), UUID.fromString("00000000-0000-0000-0000-000000000020"),
+                Money.of(new BigDecimal("300.00"), "TND"), UUID.fromString("00000000-0000-0000-0000-000000000005")));
 
         PaymentEvents.PaymentRejectedEvent event = new PaymentEvents.PaymentRejectedEvent(
                 UUID.randomUUID(), java.time.Instant.now(), p.id(),
-                p.reference().value(), 10L, 20L, 10L, "Quality issue");
+                p.reference().value(), UUID.fromString("00000000-0000-0000-0000-000000000010"), UUID.fromString("00000000-0000-0000-0000-000000000020"), UUID.fromString("00000000-0000-0000-0000-000000000010"), "Quality issue");
 
         listener.onPaymentRejected(event);
 
@@ -68,12 +68,12 @@ class PaymentIndexEventListenerTest {
 
     @Test
     void onPaymentCancelled_indexesPayment() {
-        Payment p = payments.save(Payment.create(10L, 20L,
-                Money.of(new BigDecimal("400.00"), "TND"), 5L));
+        Payment p = payments.save(Payment.create(UUID.fromString("00000000-0000-0000-0000-000000000010"), UUID.fromString("00000000-0000-0000-0000-000000000020"),
+                Money.of(new BigDecimal("400.00"), "TND"), UUID.fromString("00000000-0000-0000-0000-000000000005")));
 
         PaymentEvents.PaymentCancelledEvent event = new PaymentEvents.PaymentCancelledEvent(
                 UUID.randomUUID(), java.time.Instant.now(), p.id(),
-                p.reference().value(), 10L, 20L, 5L);
+                p.reference().value(), UUID.fromString("00000000-0000-0000-0000-000000000010"), UUID.fromString("00000000-0000-0000-0000-000000000020"), UUID.fromString("00000000-0000-0000-0000-000000000005"));
 
         listener.onPaymentCancelled(event);
 

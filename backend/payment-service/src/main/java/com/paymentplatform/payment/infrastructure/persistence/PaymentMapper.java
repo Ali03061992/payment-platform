@@ -1,5 +1,7 @@
 package com.paymentplatform.payment.infrastructure.persistence;
 
+import java.util.UUID;
+
 import com.paymentplatform.payment.domain.model.Payment;
 import com.paymentplatform.payment.domain.model.PaymentEvent;
 import com.paymentplatform.payment.domain.model.PaymentStatus;
@@ -34,9 +36,9 @@ public class PaymentMapper {
     public Payment fromFields(PaymentJpaEntity entity, List<PaymentEvent> events) {
         try {
             var ctor = Payment.class.getDeclaredConstructor(
-                    Long.class, PaymentReference.class, long.class, long.class,
+                    UUID.class, PaymentReference.class, UUID.class, UUID.class,
                     Money.class, PaymentStatus.class, RejectionReason.class,
-                    long.class, java.time.Instant.class, java.time.Instant.class,
+                    UUID.class, java.time.Instant.class, java.time.Instant.class,
                     long.class, List.class);
             ctor.setAccessible(true);
             return ctor.newInstance(
@@ -58,7 +60,7 @@ public class PaymentMapper {
         }
     }
 
-    public PaymentEventJpaEntity toEventJpa(PaymentEvent event, long paymentId) {
+    public PaymentEventJpaEntity toEventJpa(PaymentEvent event, UUID paymentId) {
         PaymentEventJpaEntity entity = new PaymentEventJpaEntity();
         entity.setPaymentId(paymentId);
         entity.setAction(event.action());

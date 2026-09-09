@@ -1,5 +1,7 @@
 package com.paymentplatform.organization.domain.repository;
 
+import java.util.UUID;
+
 import com.paymentplatform.organization.domain.model.SupplierShopRelation;
 import com.paymentplatform.organization.domain.valueobject.OrganizationId;
 import com.paymentplatform.organization.domain.valueobject.RelationStatus;
@@ -8,7 +10,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface SupplierShopRelationRepository {
-    Optional<SupplierShopRelation> findById(Long id);
+    Optional<SupplierShopRelation> findById(UUID id);
     List<SupplierShopRelation> findBySupplierId(OrganizationId supplierId);
     List<SupplierShopRelation> findByShopId(OrganizationId shopId);
     List<SupplierShopRelation> findByStatus(RelationStatus status);

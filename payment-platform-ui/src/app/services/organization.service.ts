@@ -17,7 +17,7 @@ export class OrganizationService {
     return this.http.get<Organization[]>(`${this.apiUrl}/shops`);
   }
 
-  getById(id: number): Observable<Organization> {
+  getById(id: string): Observable<Organization> {
     return this.http.get<Organization>(`${this.apiUrl}/suppliers/${id}`);
   }
 
@@ -29,12 +29,12 @@ export class OrganizationService {
     return this.http.post<Organization>(`${this.apiUrl}/shops`, { name });
   }
 
-  activate(id: number, type: string): Observable<Organization> {
+  activate(id: string, type: string): Observable<Organization> {
     const path = type === 'SUPPLIER' ? 'suppliers' : 'shops';
     return this.http.patch<Organization>(`${this.apiUrl}/${path}/${id}/activate`, {});
   }
 
-  disable(id: number, type: string): Observable<Organization> {
+  disable(id: string, type: string): Observable<Organization> {
     const path = type === 'SUPPLIER' ? 'suppliers' : 'shops';
     return this.http.patch<Organization>(`${this.apiUrl}/${path}/${id}/disable`, {});
   }
@@ -47,11 +47,11 @@ export class OrganizationService {
     return this.http.get<SupplierShopRelation[]>('/api/admin/supplier-shop-relations');
   }
 
-  listRelationsByShop(shopId: number): Observable<SupplierShopRelation[]> {
+  listRelationsByShop(shopId: string): Observable<SupplierShopRelation[]> {
     return this.http.get<SupplierShopRelation[]>(`/api/admin/supplier-shop-relations/shop/${shopId}`);
   }
 
-  listRelationsBySupplier(supplierId: number): Observable<SupplierShopRelation[]> {
+  listRelationsBySupplier(supplierId: string): Observable<SupplierShopRelation[]> {
     return this.http.get<SupplierShopRelation[]>(`/api/admin/supplier-shop-relations/supplier/${supplierId}`);
   }
 
@@ -59,7 +59,7 @@ export class OrganizationService {
     return this.http.post<SupplierShopRelation>('/api/admin/supplier-shop-relations', data);
   }
 
-  deactivateRelation(id: number): Observable<void> {
+  deactivateRelation(id: string): Observable<void> {
     return this.http.delete<void>(`/api/admin/supplier-shop-relations/${id}`);
   }
 

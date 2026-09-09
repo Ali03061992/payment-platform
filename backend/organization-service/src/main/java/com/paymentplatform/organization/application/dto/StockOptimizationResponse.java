@@ -1,5 +1,7 @@
 package com.paymentplatform.organization.application.dto;
 
+import java.util.UUID;
+
 import com.paymentplatform.organization.domain.engine.AnomalyDetector;
 import com.paymentplatform.organization.domain.engine.RecommendationEngine;
 
@@ -23,7 +25,7 @@ public record StockOptimizationResponse(
     Instant calculatedAt
 ) {
     public record ProductOptimizationResult(
-        Long productId,
+        UUID productId,
         String productName,
         String sku,
         String abcClass,

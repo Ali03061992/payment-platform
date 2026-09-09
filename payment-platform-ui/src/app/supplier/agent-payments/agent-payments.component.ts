@@ -15,9 +15,9 @@ export class AgentPaymentsComponent implements OnInit {
 
   fromDate = '';
   toDate = '';
-  supplierId = 0;
+  supplierId = '';
 
-  expandedAgent: number | null = null;
+  expandedAgent: string | null = null;
   grandTotal = 0;
   grandConfirmedTotal = 0;
   totalPayments = 0;
@@ -32,7 +32,7 @@ export class AgentPaymentsComponent implements OnInit {
 
   ngOnInit(): void {
     const user = this.loginService.getCurrentUser();
-    this.supplierId = user?.organizationId || 0;
+    this.supplierId = user?.organizationId || '';
 
     const today = new Date();
     const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
@@ -66,7 +66,7 @@ export class AgentPaymentsComponent implements OnInit {
     this.totalPayments = this.summaries.reduce((s, a) => s + a.paymentCount, 0);
   }
 
-  toggleAgent(userId: number): void {
+  toggleAgent(userId: string): void {
     this.expandedAgent = this.expandedAgent === userId ? null : userId;
   }
 
