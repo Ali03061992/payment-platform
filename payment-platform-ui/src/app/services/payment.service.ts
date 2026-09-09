@@ -11,7 +11,19 @@ export class PaymentService {
   constructor(private http: HttpClient) {}
 
   list(): Observable<Payment[]> {
-    return this.http.get<Payment[]>(this.apiUrl);
+    return new Observable<Payment[]>(observer => {
+      this.http.get<any>(this.apiUrl).subscribe({
+        next: (res: any) => {
+          if (Array.isArray(res)) observer.next(res as Payment[]);
+          else if (res && Array.isArray(res.items)) observer.next(res.items as Payment[]);
+          else if (res && Array.isArray(res.content)) observer.next(res.content as Payment[]);
+          else if (res && Array.isArray(res.data)) observer.next(res.data as Payment[]);
+          else observer.next([]);
+          observer.complete();
+        },
+        error: (err) => observer.error(err)
+      });
+    });
   }
 
   getById(id: number): Observable<Payment> {

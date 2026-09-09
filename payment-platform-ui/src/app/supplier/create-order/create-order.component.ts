@@ -94,21 +94,13 @@ export class SupplierCreateOrderComponent implements OnInit, OnDestroy {
           }
         }));
       },
-      error: () => {
+      error: (err) => {
         this.loadingShops = false;
-        this.errorShops = 'Impossible de charger les relations';
-        // fallback admin
-        this.subscriptions.add(this.orgService.listRelations().subscribe({
-          next: (relations) => {
-            const shopIds = [...new Set(
-              relations.filter(r => r.supplierId === supplierId && r.status === 'ACTIVE').map(r => r.shopId)
-            )];
-            if (shopIds.length === 0) { this.shops = []; return; }
-            this.subscriptions.add(this.orgService.listShops().subscribe({
-              next: (all) => { this.shops = all.filter(s => shopIds.includes(s.id)); }
-            }));
-          }
-        }));
+        if (err?.status === 403) {
+          this.errorShops = 'Permission insuffisante pour voir les relations (contactez admin)';
+        } else {
+          this.errorShops = 'Impossible de charger les relations';
+        }
       }
     }));
   }

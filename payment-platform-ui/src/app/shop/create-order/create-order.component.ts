@@ -77,21 +77,13 @@ export class CreateOrderComponent implements OnInit {
           }
         });
       },
-      error: () => {
+      error: (err) => {
         this.loadingSuppliers = false;
-        this.errorSuppliers = 'Impossible de charger les relations';
-        // fallback : try admin listRelations then filter
-        this.orgService.listRelations().subscribe({
-          next: (relations) => {
-            const supplierIds = [...new Set(
-              relations.filter(r => r.shopId === shopId && r.status === 'ACTIVE').map(r => r.supplierId)
-            )];
-            if (supplierIds.length === 0) { this.suppliers = []; return; }
-            this.orgService.listSuppliers().subscribe({
-              next: (all) => { this.suppliers = all.filter(s => supplierIds.includes(s.id)); }
-            });
-          }
-        });
+        if (err?.status === 403) {
+          this.errorSuppliers = 'Permission insuffisante pour voir les relations (contactez admin)';
+        } else {
+          this.errorSuppliers = 'Impossible de charger les relations';
+        }
       }
     });
   }
