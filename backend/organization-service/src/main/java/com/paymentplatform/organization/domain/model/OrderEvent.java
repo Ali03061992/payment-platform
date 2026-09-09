@@ -3,7 +3,6 @@ package com.paymentplatform.organization.domain.model;
 import java.util.UUID;
 
 import jakarta.persistence.*;
-import org.hibernate.annotations.UuidGenerator;
 
 import java.time.Instant;
 
@@ -12,8 +11,6 @@ import java.time.Instant;
 public class OrderEvent {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    @UuidGenerator(style = UuidGenerator.Style.RANDOM)
     @Column(columnDefinition = "VARCHAR(36)")
     private UUID id;
 
@@ -34,6 +31,8 @@ public class OrderEvent {
 
     @PrePersist
     void prePersist() {
+        if (this.id == null) { this.id = java.util.UUID.randomUUID(); }
+
         if (timestamp == null) timestamp = Instant.now();
     }
 

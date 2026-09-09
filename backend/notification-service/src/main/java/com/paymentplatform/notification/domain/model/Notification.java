@@ -1,9 +1,9 @@
 package com.paymentplatform.notification.domain.model;
 
 import java.util.UUID;
+import jakarta.persistence.PrePersist;
 
 import jakarta.persistence.*;
-import org.hibernate.annotations.UuidGenerator;
 import java.time.Instant;
 
 @Entity
@@ -11,8 +11,6 @@ import java.time.Instant;
 public class Notification {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    @UuidGenerator(style = UuidGenerator.Style.RANDOM)
     @Column(columnDefinition = "VARCHAR(36)")
     private UUID id;
 
@@ -72,4 +70,9 @@ public class Notification {
     public Instant readAt() { return readAt; }
     public String relatedEntityType() { return relatedEntityType; }
     public String relatedEntityId() { return relatedEntityId; }
+
+    @PrePersist
+    protected void onCreate() {
+        if (this.id == null) { this.id = java.util.UUID.randomUUID(); }
+    }
 }

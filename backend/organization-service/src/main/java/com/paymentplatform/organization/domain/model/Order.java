@@ -5,7 +5,6 @@ import java.util.UUID;
 import com.paymentplatform.shared.domain.exception.ConflictException;
 import com.paymentplatform.shared.domain.exception.DomainException;
 import jakarta.persistence.*;
-import org.hibernate.annotations.UuidGenerator;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -15,8 +14,6 @@ import java.time.Instant;
 public class Order {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    @UuidGenerator(style = UuidGenerator.Style.RANDOM)
     @Column(columnDefinition = "VARCHAR(36)")
     private UUID id;
 
@@ -85,6 +82,8 @@ public class Order {
 
     @PrePersist
     void prePersist() {
+        if (this.id == null) { this.id = java.util.UUID.randomUUID(); }
+
         createdAt = Instant.now();
         updatedAt = Instant.now();
         if (status == null) status = OrderStatus.DRAFT.name();

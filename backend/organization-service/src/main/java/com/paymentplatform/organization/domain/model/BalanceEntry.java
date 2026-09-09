@@ -3,7 +3,6 @@ package com.paymentplatform.organization.domain.model;
 import java.util.UUID;
 
 import jakarta.persistence.*;
-import org.hibernate.annotations.UuidGenerator;
 import java.math.BigDecimal;
 import java.time.Instant;
 
@@ -17,8 +16,6 @@ public class BalanceEntry {
     public static final String REFUND = "REFUND";
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    @UuidGenerator(style = UuidGenerator.Style.RANDOM)
     @Column(columnDefinition = "VARCHAR(36)")
     private UUID id;
 
@@ -75,6 +72,8 @@ public class BalanceEntry {
 
     @PrePersist
     void prePersist() {
+        if (this.id == null) { this.id = java.util.UUID.randomUUID(); }
+
         createdAt = Instant.now();
     }
 

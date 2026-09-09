@@ -1,9 +1,9 @@
 package com.paymentplatform.identity.infrastructure.email;
 
 import java.util.UUID;
+import jakarta.persistence.PrePersist;
 
 import jakarta.persistence.*;
-import org.hibernate.annotations.UuidGenerator;
 import java.time.Instant;
 
 @Entity
@@ -11,8 +11,6 @@ import java.time.Instant;
 public class PasswordSetupToken {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    @UuidGenerator(style = UuidGenerator.Style.RANDOM)
     @Column(columnDefinition = "VARCHAR(36)")
     private UUID id;
 
@@ -52,5 +50,10 @@ public class PasswordSetupToken {
 
     public void markUsed() {
         this.used = true;
+    }
+
+    @PrePersist
+    protected void onCreate() {
+        if (this.id == null) { this.id = java.util.UUID.randomUUID(); }
     }
 }

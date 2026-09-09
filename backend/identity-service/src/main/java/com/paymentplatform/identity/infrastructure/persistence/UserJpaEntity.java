@@ -1,6 +1,7 @@
 package com.paymentplatform.identity.infrastructure.persistence;
 
 import java.util.UUID;
+import jakarta.persistence.PrePersist;
 
 import com.paymentplatform.shared.domain.model.RoleCode;
 import jakarta.persistence.CollectionTable;
@@ -11,8 +12,6 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
-import org.hibernate.annotations.UuidGenerator;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Table;
@@ -27,8 +26,6 @@ import java.util.Set;
 public class UserJpaEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    @UuidGenerator(style = UuidGenerator.Style.RANDOM)
     @Column(columnDefinition = "VARCHAR(36)")
     private UUID id;
 
@@ -176,5 +173,10 @@ public class UserJpaEntity {
 
     public void setRoles(Set<RoleCode> roles) {
         this.roles = roles;
+    }
+
+    @PrePersist
+    protected void onCreate() {
+        if (this.id == null) { this.id = java.util.UUID.randomUUID(); }
     }
 }

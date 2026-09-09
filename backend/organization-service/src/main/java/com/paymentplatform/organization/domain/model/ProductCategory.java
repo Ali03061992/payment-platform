@@ -3,7 +3,6 @@ package com.paymentplatform.organization.domain.model;
 import java.util.UUID;
 
 import jakarta.persistence.*;
-import org.hibernate.annotations.UuidGenerator;
 import java.time.Instant;
 
 @Entity
@@ -11,8 +10,6 @@ import java.time.Instant;
 public class ProductCategory {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    @UuidGenerator(style = UuidGenerator.Style.RANDOM)
     @Column(columnDefinition = "VARCHAR(36)")
     private UUID id;
 
@@ -36,6 +33,8 @@ public class ProductCategory {
 
     @PrePersist
     void prePersist() {
+        if (this.id == null) { this.id = java.util.UUID.randomUUID(); }
+
         createdAt = Instant.now();
         updatedAt = Instant.now();
         if (status == null) status = "ACTIVE";

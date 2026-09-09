@@ -1,13 +1,12 @@
 package com.paymentplatform.shared.infrastructure.outbox;
 
 import java.util.UUID;
+import jakarta.persistence.PrePersist;
 
 import com.paymentplatform.shared.domain.event.DomainEvent;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
-import org.hibernate.annotations.UuidGenerator;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
@@ -19,8 +18,6 @@ import java.time.Instant;
 public class OutboxEventEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    @UuidGenerator(style = UuidGenerator.Style.RANDOM)
     @Column(columnDefinition = "VARCHAR(36)")
     private UUID id;
 
@@ -83,5 +80,10 @@ public class OutboxEventEntity {
 
     public void markProcessed() {
         this.processedAt = Instant.now();
+    }
+
+    @PrePersist
+    protected void onCreate() {
+        if (this.id == null) { this.id = java.util.UUID.randomUUID(); }
     }
 }

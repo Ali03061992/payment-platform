@@ -1,9 +1,9 @@
 package com.paymentplatform.organization.infrastructure.persistence;
 
 import java.util.UUID;
+import jakarta.persistence.PrePersist;
 
 import jakarta.persistence.*;
-import org.hibernate.annotations.UuidGenerator;
 import java.time.Instant;
 
 @Entity
@@ -11,8 +11,6 @@ import java.time.Instant;
 public class SupplierShopRelationJpaEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    @UuidGenerator(style = UuidGenerator.Style.RANDOM)
     @Column(columnDefinition = "VARCHAR(36)")
     private UUID id;
 
@@ -40,4 +38,9 @@ public class SupplierShopRelationJpaEntity {
     public void setStatus(String status) { this.status = status; }
     public Instant getCreatedAt() { return createdAt; }
     public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
+
+    @PrePersist
+    protected void onCreate() {
+        if (this.id == null) { this.id = java.util.UUID.randomUUID(); }
+    }
 }

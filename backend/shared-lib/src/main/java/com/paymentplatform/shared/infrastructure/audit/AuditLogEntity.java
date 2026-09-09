@@ -1,12 +1,11 @@
 package com.paymentplatform.shared.infrastructure.audit;
 
 import java.util.UUID;
+import jakarta.persistence.PrePersist;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
-import org.hibernate.annotations.UuidGenerator;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
@@ -18,8 +17,6 @@ import java.time.Instant;
 public class AuditLogEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    @UuidGenerator(style = UuidGenerator.Style.RANDOM)
     @Column(columnDefinition = "VARCHAR(36)")
     private UUID id;
 
@@ -79,5 +76,10 @@ public class AuditLogEntity {
 
     public String getDetails() {
         return details;
+    }
+
+    @PrePersist
+    protected void onCreate() {
+        if (this.id == null) { this.id = java.util.UUID.randomUUID(); }
     }
 }

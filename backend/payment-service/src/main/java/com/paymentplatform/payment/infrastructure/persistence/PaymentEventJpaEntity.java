@@ -1,9 +1,9 @@
 package com.paymentplatform.payment.infrastructure.persistence;
 
 import java.util.UUID;
+import jakarta.persistence.PrePersist;
 
 import jakarta.persistence.*;
-import org.hibernate.annotations.UuidGenerator;
 import java.time.Instant;
 
 @Entity
@@ -11,8 +11,6 @@ import java.time.Instant;
 public class PaymentEventJpaEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    @UuidGenerator(style = UuidGenerator.Style.RANDOM)
     @Column(columnDefinition = "VARCHAR(36)")
     private UUID id;
 
@@ -43,4 +41,9 @@ public class PaymentEventJpaEntity {
     public void setTimestamp(Instant timestamp) { this.timestamp = timestamp; }
     public String getDetails() { return details; }
     public void setDetails(String details) { this.details = details; }
+
+    @PrePersist
+    protected void onCreate() {
+        if (this.id == null) { this.id = java.util.UUID.randomUUID(); }
+    }
 }
