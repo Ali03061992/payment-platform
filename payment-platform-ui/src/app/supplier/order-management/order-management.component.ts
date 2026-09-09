@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { OrderService } from '../../services/order.service';
-import { OrganizationService } from '../../services/organization.service';
+import { SupplierAgentService } from '../../services/supplier-agent.service';
 import { Order } from '../../models/order.model';
 import { ToastService } from '../../services/toast.service';
 import { Subscription } from 'rxjs';
@@ -30,7 +30,7 @@ export class OrderManagementComponent implements OnInit, OnDestroy {
 
   constructor(
     private orderService: OrderService,
-    private orgService: OrganizationService,
+    private agentService: SupplierAgentService,
     private router: Router,
     private toast: ToastService
   ) {}
@@ -53,13 +53,24 @@ export class OrderManagementComponent implements OnInit, OnDestroy {
   }
 
   loadAgents(): void {
-    this.subscriptions.add(this.orgService.listUsers().subscribe({
-      next: (users) => {
-        this.agents = users.filter((u: any) =>
-          u.roles && (u.roles.includes('SUPPLIER_AGENT') || u.roles.includes('DELIVERY_AGENT'))
-        );
+    const userJson = sessionStorage.getItem('user');
+    let supplierId = 0;
+    if (userJson) {
+      try { supplierId = JSON.parse(userJson).organizationId || 0; } catch {}
+    }
+    if (!supplierId) return;
+    this.subscriptions.add(this.agentService.listAgents(supplierId).subscribe({
+      next: (agents) => {
+        this.agents = agents.map((a: any) => ({
+          id: a.id,
+          firstName: a.firstName,
+          lastName: a.lastName
+        }));
       },
-      error: () => {}
+      error: () => {
+        // pas de toast, 403 silencieux si pas SUPPLIER_MANAGE_AGENTS
+        this.agents = [];
+      }
     }));
   }
 

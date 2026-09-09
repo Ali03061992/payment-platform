@@ -14,7 +14,19 @@ export class OrderService {
   }
 
   list(): Observable<Order[]> {
-    return this.http.get<Order[]>(this.apiUrl);
+    return new Observable<Order[]>(observer => {
+      this.http.get<any>(this.apiUrl).subscribe({
+        next: (res: any) => {
+          if (Array.isArray(res)) observer.next(res as Order[]);
+          else if (res && Array.isArray(res.items)) observer.next(res.items as Order[]);
+          else if (res && Array.isArray(res.content)) observer.next(res.content as Order[]);
+          else if (res && Array.isArray(res.data)) observer.next(res.data as Order[]);
+          else observer.next([]);
+          observer.complete();
+        },
+        error: (err) => observer.error(err)
+      });
+    });
   }
 
   getById(id: number): Observable<Order> {
