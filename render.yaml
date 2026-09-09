@@ -1,26 +1,64 @@
 services:
-  # --- API Gateway ---
-  - type: web
-    name: payment-platform-gateway
+  # --- Infra: MySQL 8.4 (privé) ---
+  - type: pserv
+    name: payment-platform-mysql
     env: docker
-    dockerfilePath: ./backend/Dockerfile
-    dockerContext: ./backend
-    dockerCommand: java -jar app.jar
+    image:
+      url: mysql:8.4
     plan: starter
-    healthCheckPath: /actuator/health
+    healthCheckPath: /
     envVars:
-      - key: SERVICE_NAME
-        value: api-gateway
-      - key: JWT_SECRET
-        sync: false
-      - key: JWT_EXPIRATION
-        value: 30m
-      - key: CORS_ALLOWED_ORIGINS
-        value: https://payment-platform.onrender.com
-      - key: RATE_LIMIT_PER_MINUTE
-        value: 100
+      - key: MYSQL_ROOT_PASSWORD
+        generateValue: true
+      - key: MYSQL_USER
+        value: payment_app
+      - key: MYSQL_PASSWORD
+        generateValue: true
+      - key: MYSQL_DATABASE
+        value: payment_platform
+    disk:
+      name: mysql-data
+      mountPath: /var/lib/mysql
+      sizeGB: 1
 
-  # --- Identity Service ---
+  # --- Infra: Redis ---
+  - type: pserv
+    name: payment-platform-redis
+    env: docker
+    image:
+      url: redis:7-alpine
+    plan: starter
+    healthCheckPath: /
+
+  # --- Infra: RabbitMQ ---
+  - type: pserv
+    name: payment-platform-rabbitmq
+    env: docker
+    image:
+      url: rabbitmq:4-management
+    plan: starter
+    envVars:
+      - key: RABBITMQ_DEFAULT_USER
+        value: payment
+      - key: RABBITMQ_DEFAULT_PASS
+        generateValue: true
+
+  # --- Infra: Elasticsearch 9 (sans sécurité pour simplifier, comme deploy/docker-compose.yml:52) ---
+  - type: pserv
+    name: payment-platform-elasticsearch
+    env: docker
+    image:
+      url: docker.elastic.co/elasticsearch/elasticsearch:9.0.0
+    plan: starter
+    envVars:
+      - key: discovery.type
+        value: single-node
+      - key: xpack.security.enabled
+        value: false
+      - key: ES_JAVA_OPTS
+        value: -Xms512m -Xmx512m
+
+  # --- Backend: Identity ---
   - type: web
     name: payment-platform-identity
     env: docker
@@ -32,11 +70,42 @@ services:
       - key: SERVICE_NAME
         value: identity-service
       - key: JWT_SECRET
-        sync: false
-      - key: SPRING_DATASOURCE_URL
-        sync: false
+        generateValue: true
+      - key: JWT_EXPIRATION
+        value: 30m
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod
+      - key: MYSQL_HOST
+        fromService:
+          name: payment-platform-mysql
+          type: pserv
+          property: host
+      - key: MYSQL_PORT
+        value: 3306
+      - key: MYSQL_USER
+        fromService:
+          name: payment-platform-mysql
+          type: pserv
+          envVarKey: MYSQL_USER
+      - key: MYSQL_PASSWORD
+        fromService:
+          name: payment-platform-mysql
+          type: pserv
+          envVarKey: MYSQL_PASSWORD
+      - key: RABBITMQ_HOST
+        fromService:
+          name: payment-platform-rabbitmq
+          type: pserv
+          property: host
+      - key: REDIS_HOST
+        fromService:
+          name: payment-platform-redis
+          type: pserv
+          property: host
+      - key: INTERNAL_SECRET
+        generateValue: true
 
-  # --- Organization Service ---
+  # --- Backend: Organization ---
   - type: web
     name: payment-platform-organization
     env: docker
@@ -48,9 +117,32 @@ services:
       - key: SERVICE_NAME
         value: organization-service
       - key: JWT_SECRET
-        sync: false
+        fromService:
+          name: payment-platform-identity
+          type: web
+          envVarKey: JWT_SECRET
+      - key: MYSQL_HOST
+        fromService:
+          name: payment-platform-mysql
+          type: pserv
+          property: host
+      - key: RABBITMQ_HOST
+        fromService:
+          name: payment-platform-rabbitmq
+          type: pserv
+          property: host
+      - key: REDIS_HOST
+        fromService:
+          name: payment-platform-redis
+          type: pserv
+          property: host
+      - key: INTERNAL_SECRET
+        fromService:
+          name: payment-platform-identity
+          type: web
+          envVarKey: INTERNAL_SECRET
 
-  # --- Payment Service ---
+  # --- Backend: Payment ---
   - type: web
     name: payment-platform-payment
     env: docker
@@ -62,9 +154,39 @@ services:
       - key: SERVICE_NAME
         value: payment-service
       - key: JWT_SECRET
-        sync: false
+        fromService:
+          name: payment-platform-identity
+          type: web
+          envVarKey: JWT_SECRET
+      - key: MYSQL_HOST
+        fromService:
+          name: payment-platform-mysql
+          type: pserv
+          property: host
+      - key: RABBITMQ_HOST
+        fromService:
+          name: payment-platform-rabbitmq
+          type: pserv
+          property: host
+      - key: REDIS_HOST
+        fromService:
+          name: payment-platform-redis
+          type: pserv
+          property: host
+      - key: ELASTICSEARCH_HOST
+        fromService:
+          name: payment-platform-elasticsearch
+          type: pserv
+          property: host
+      - key: ELASTICSEARCH_PORT
+        value: 9200
+      - key: INTERNAL_SECRET
+        fromService:
+          name: payment-platform-identity
+          type: web
+          envVarKey: INTERNAL_SECRET
 
-  # --- Notification Service ---
+  # --- Backend: Notification ---
   - type: web
     name: payment-platform-notification
     env: docker
@@ -76,16 +198,72 @@ services:
       - key: SERVICE_NAME
         value: notification-service
       - key: JWT_SECRET
-        sync: false
+        fromService:
+          name: payment-platform-identity
+          type: web
+          envVarKey: JWT_SECRET
+      - key: MYSQL_HOST
+        fromService:
+          name: payment-platform-mysql
+          type: pserv
+          property: host
+      - key: RABBITMQ_HOST
+        fromService:
+          name: payment-platform-rabbitmq
+          type: pserv
+          property: host
 
-  # --- Frontend (Angular) ---
+  # --- Backend: API Gateway (exposé) ---
+  - type: web
+    name: payment-platform-gateway
+    env: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    plan: starter
+    healthCheckPath: /actuator/health
+    envVars:
+      - key: SERVICE_NAME
+        value: api-gateway
+      - key: JWT_SECRET
+        fromService:
+          name: payment-platform-identity
+          type: web
+          envVarKey: JWT_SECRET
+      - key: JWT_EXPIRATION
+        value: 30m
+      - key: CORS_ALLOWED_ORIGINS
+        value: https://payment-platform-frontend.onrender.com
+      - key: RATE_LIMIT_PER_MINUTE
+        value: 100
+      - key: IDENTITY_SERVICE_URL
+        fromService:
+          name: payment-platform-identity
+          type: web
+          property: host
+      - key: ORGANIZATION_SERVICE_URL
+        fromService:
+          name: payment-platform-organization
+          type: web
+          property: host
+      - key: PAYMENT_SERVICE_URL
+        fromService:
+          name: payment-platform-payment
+          type: web
+          property: host
+      - key: NOTIFICATION_SERVICE_URL
+        fromService:
+          name: payment-platform-notification
+          type: web
+          property: host
+
+  # --- Frontend Angular (exposé) ---
   - type: web
     name: payment-platform-frontend
     env: docker
     dockerfilePath: ./frontend/Dockerfile
     dockerContext: .
     plan: starter
-    routes:
-      - type: rewrite
-        source: /api/*
-        destination: https://payment-platform-gateway.onrender.com/api/*
+    healthCheckPath: /
+    envVars:
+      - key: API_URL
+        value: https://payment-platform-gateway.onrender.com
