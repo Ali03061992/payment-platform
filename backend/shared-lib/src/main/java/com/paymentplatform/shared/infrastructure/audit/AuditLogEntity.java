@@ -30,7 +30,7 @@ public class AuditLogEntity {
     @Column(nullable = false, length = 60)
     private String action;
 
-    @Column(name = "entity_id")
+    @Column(name = "entity_id", columnDefinition = "VARCHAR(36)")
     private UUID entityId;
 
     @Column(nullable = false)
