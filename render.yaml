@@ -1,11 +1,15 @@
+# Render Blueprint - Free plan compatible (tout en `type: web`, pas de `pserv` privé)
+# `pserv` nécessite un plan payant -> en Free, on met MySQL/Redis/RabbitMQ/ES en `web` (public mais gratuit)
+# Alternative : remplacer par services managés externes (Neon, Upstash, CloudAMQP) et retirer ces 4 blocs
+
 services:
-  # --- Infra: MySQL 8.4 (privé) ---
-  - type: pserv
+  # --- Infra: MySQL 8.4 ---
+  - type: web
     name: payment-platform-mysql
     env: docker
     image:
       url: mysql:8.4
-    plan: starter
+    plan: free
     envVars:
       - key: MYSQL_ROOT_PASSWORD
         generateValue: true
@@ -15,39 +19,35 @@ services:
         generateValue: true
       - key: MYSQL_DATABASE
         value: payment_platform
-    disk:
-      name: mysql-data
-      mountPath: /var/lib/mysql
-      sizeGB: 1
 
   # --- Infra: Redis ---
-  - type: pserv
+  - type: web
     name: payment-platform-redis
     env: docker
     image:
       url: redis:7-alpine
-    plan: starter
+    plan: free
 
   # --- Infra: RabbitMQ ---
-  - type: pserv
+  - type: web
     name: payment-platform-rabbitmq
     env: docker
     image:
       url: rabbitmq:4-management
-    plan: starter
+    plan: free
     envVars:
       - key: RABBITMQ_DEFAULT_USER
         value: payment
       - key: RABBITMQ_DEFAULT_PASS
         generateValue: true
 
-  # --- Infra: Elasticsearch 9 (sans sécurité pour simplifier, comme deploy/docker-compose.yml:52) ---
-  - type: pserv
+  # --- Infra: Elasticsearch 9 (sans sécurité, comme deploy/docker-compose.yml:52) ---
+  - type: web
     name: payment-platform-elasticsearch
     env: docker
     image:
       url: docker.elastic.co/elasticsearch/elasticsearch:9.0.0
-    plan: starter
+    plan: free
     envVars:
       - key: discovery.type
         value: single-node
@@ -62,7 +62,7 @@ services:
     env: docker
     dockerfilePath: ./backend/Dockerfile
     dockerContext: ./backend
-    plan: starter
+    plan: free
     healthCheckPath: /actuator/health
     envVars:
       - key: SERVICE_NAME
@@ -76,29 +76,29 @@ services:
       - key: MYSQL_HOST
         fromService:
           name: payment-platform-mysql
-          type: pserv
+          type: web
           property: host
       - key: MYSQL_PORT
         value: 3306
       - key: MYSQL_USER
         fromService:
           name: payment-platform-mysql
-          type: pserv
+          type: web
           envVarKey: MYSQL_USER
       - key: MYSQL_PASSWORD
         fromService:
           name: payment-platform-mysql
-          type: pserv
+          type: web
           envVarKey: MYSQL_PASSWORD
       - key: RABBITMQ_HOST
         fromService:
           name: payment-platform-rabbitmq
-          type: pserv
+          type: web
           property: host
       - key: REDIS_HOST
         fromService:
           name: payment-platform-redis
-          type: pserv
+          type: web
           property: host
       - key: INTERNAL_SECRET
         generateValue: true
@@ -109,7 +109,7 @@ services:
     env: docker
     dockerfilePath: ./backend/Dockerfile
     dockerContext: ./backend
-    plan: starter
+    plan: free
     healthCheckPath: /actuator/health
     envVars:
       - key: SERVICE_NAME
@@ -122,17 +122,17 @@ services:
       - key: MYSQL_HOST
         fromService:
           name: payment-platform-mysql
-          type: pserv
+          type: web
           property: host
       - key: RABBITMQ_HOST
         fromService:
           name: payment-platform-rabbitmq
-          type: pserv
+          type: web
           property: host
       - key: REDIS_HOST
         fromService:
           name: payment-platform-redis
-          type: pserv
+          type: web
           property: host
       - key: INTERNAL_SECRET
         fromService:
@@ -146,7 +146,7 @@ services:
     env: docker
     dockerfilePath: ./backend/Dockerfile
     dockerContext: ./backend
-    plan: starter
+    plan: free
     healthCheckPath: /actuator/health
     envVars:
       - key: SERVICE_NAME
@@ -159,22 +159,22 @@ services:
       - key: MYSQL_HOST
         fromService:
           name: payment-platform-mysql
-          type: pserv
+          type: web
           property: host
       - key: RABBITMQ_HOST
         fromService:
           name: payment-platform-rabbitmq
-          type: pserv
+          type: web
           property: host
       - key: REDIS_HOST
         fromService:
           name: payment-platform-redis
-          type: pserv
+          type: web
           property: host
       - key: ELASTICSEARCH_HOST
         fromService:
           name: payment-platform-elasticsearch
-          type: pserv
+          type: web
           property: host
       - key: ELASTICSEARCH_PORT
         value: 9200
@@ -190,7 +190,7 @@ services:
     env: docker
     dockerfilePath: ./backend/Dockerfile
     dockerContext: ./backend
-    plan: starter
+    plan: free
     healthCheckPath: /actuator/health
     envVars:
       - key: SERVICE_NAME
@@ -203,12 +203,12 @@ services:
       - key: MYSQL_HOST
         fromService:
           name: payment-platform-mysql
-          type: pserv
+          type: web
           property: host
       - key: RABBITMQ_HOST
         fromService:
           name: payment-platform-rabbitmq
-          type: pserv
+          type: web
           property: host
 
   # --- Backend: API Gateway (exposé) ---
@@ -217,7 +217,7 @@ services:
     env: docker
     dockerfilePath: ./backend/Dockerfile
     dockerContext: ./backend
-    plan: starter
+    plan: free
     healthCheckPath: /actuator/health
     envVars:
       - key: SERVICE_NAME
@@ -260,7 +260,7 @@ services:
     env: docker
     dockerfilePath: ./frontend/Dockerfile
     dockerContext: .
-    plan: starter
+    plan: free
     healthCheckPath: /
     envVars:
       - key: API_URL
