@@ -6,7 +6,6 @@ services:
     image:
       url: mysql:8.4
     plan: starter
-    healthCheckPath: /
     envVars:
       - key: MYSQL_ROOT_PASSWORD
         generateValue: true
@@ -28,7 +27,6 @@ services:
     image:
       url: redis:7-alpine
     plan: starter
-    healthCheckPath: /
 
   # --- Infra: RabbitMQ ---
   - type: pserv
