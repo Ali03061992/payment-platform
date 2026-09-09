@@ -162,4 +162,67 @@ describe('OrganizationService', () => {
       req.flush(null);
     });
   });
+
+  describe('listRelationsByShop', () => {
+    it('should GET relations by shop', () => {
+      const mock: SupplierShopRelation[] = [
+        { id: 1, supplierId: 1, shopId: 2, status: 'ACTIVE', createdAt: '' }
+      ];
+      service.listRelationsByShop(2).subscribe(data => {
+        expect(data.length).toBe(1);
+      });
+      const req = httpMock.expectOne('/api/admin/supplier-shop-relations/shop/2');
+      expect(req.request.method).toBe('GET');
+      req.flush(mock);
+    });
+  });
+
+  describe('listRelationsBySupplier', () => {
+    it('should GET relations by supplier', () => {
+      const mock: SupplierShopRelation[] = [
+        { id: 1, supplierId: 1, shopId: 2, status: 'ACTIVE', createdAt: '' }
+      ];
+      service.listRelationsBySupplier(1).subscribe(data => {
+        expect(data.length).toBe(1);
+      });
+      const req = httpMock.expectOne('/api/admin/supplier-shop-relations/supplier/1');
+      expect(req.request.method).toBe('GET');
+      req.flush(mock);
+    });
+  });
+
+  describe('listUsers', () => {
+    it('should GET users', () => {
+      service.listUsers().subscribe(data => {
+        expect(data.length).toBe(0);
+      });
+      const req = httpMock.expectOne('/api/users');
+      expect(req.request.method).toBe('GET');
+      req.flush([]);
+    });
+  });
+
+  describe('getById', () => {
+    it('should GET organization by id', () => {
+      const mock: Organization = { id: 1, name: 'Supplier A', type: 'SUPPLIER', status: 'ACTIVE', version: 1, createdAt: '', updatedAt: '', relations: [] };
+      service.getById(1).subscribe(data => {
+        expect(data.id).toBe(1);
+      });
+      const req = httpMock.expectOne('/api/admin/suppliers/1');
+      expect(req.request.method).toBe('GET');
+      req.flush(mock);
+    });
+  });
+
+  describe('disable', () => {
+    it('should PATCH disable shop', () => {
+      const mock: Organization = { id: 2, name: 'S', type: 'SHOP', status: 'DISABLED', version: 2, createdAt: '', updatedAt: '', relations: [] };
+      service.disable(2, 'SHOP').subscribe(data => {
+        expect(data.status).toBe('DISABLED');
+      });
+      const req = httpMock.expectOne('/api/admin/shops/2/disable');
+      expect(req.request.method).toBe('PATCH');
+      req.flush(mock);
+    });
+  });
 });

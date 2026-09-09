@@ -33,6 +33,8 @@
     <spring-cloud.version>2025.1.2</spring-cloud.version>
     <springdoc.version>3.0.0</springdoc.version>
     <testcontainers.version>2.0.5</testcontainers.version>
+    <lombok.version>1.18.38</lombok.version>
+    <mapstruct.version>1.6.3</mapstruct.version>
     <maven.compiler.release>26</maven.compiler.release>
   </properties>
 
@@ -56,6 +58,17 @@
         <version>${testcontainers.version}</version>
         <type>pom</type>
         <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.projectlombok</groupId>
+        <artifactId>lombok</artifactId>
+        <version>${lombok.version}</version>
+        <scope>provided</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.mapstruct</groupId>
+        <artifactId>mapstruct</artifactId>
+        <version>${mapstruct.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
@@ -92,24 +105,15 @@
                 <goal>report</goal>
               </goals>
               <configuration>
-                <classDirectories>
-                  <classDirectory>
-                    <fileSets>
-                      <fileSet>
-                        <directory>${project.build.outputDirectory}</directory>
-                        <excludes>
-                          <exclude>com/paymentplatform/**/domain/model/*</exclude>
-                          <exclude>com/paymentplatform/**/domain/valueobject/*</exclude>
-                          <exclude>com/paymentplatform/**/domain/event/*</exclude>
-                          <exclude>com/paymentplatform/**/domain/exception/*</exclude>
-                          <exclude>com/paymentplatform/**/domain/engine/**</exclude>
-                          <exclude>com/paymentplatform/**/domain/security/*</exclude>
-                          <exclude>com/paymentplatform/**/domain/repository/*</exclude>
-                        </excludes>
-                      </fileSet>
-                    </fileSets>
-                  </classDirectory>
-                </classDirectories>
+                <excludes>
+                  <exclude>com/paymentplatform/**/domain/model/**</exclude>
+                  <exclude>com/paymentplatform/**/domain/valueobject/**</exclude>
+                  <exclude>com/paymentplatform/**/domain/event/**</exclude>
+                  <exclude>com/paymentplatform/**/domain/exception/**</exclude>
+                  <exclude>com/paymentplatform/**/domain/engine/**</exclude>
+                  <exclude>com/paymentplatform/**/domain/security/**</exclude>
+                  <exclude>com/paymentplatform/**/domain/repository/**</exclude>
+                </excludes>
               </configuration>
             </execution>
           </executions>
@@ -119,8 +123,45 @@
 
     <plugins>
       <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <annotationProcessorPaths>
+            <path>
+              <groupId>org.projectlombok</groupId>
+              <artifactId>lombok</artifactId>
+              <version>${lombok.version}</version>
+            </path>
+            <path>
+              <groupId>org.mapstruct</groupId>
+              <artifactId>mapstruct-processor</artifactId>
+              <version>${mapstruct.version}</version>
+            </path>
+            <path>
+              <groupId>org.projectlombok</groupId>
+              <artifactId>lombok-mapstruct-binding</artifactId>
+              <version>0.2.0</version>
+            </path>
+          </annotationProcessorPaths>
+          <compilerArgs>
+            <arg>-Amapstruct.defaultComponentModel=spring</arg>
+          </compilerArgs>
+        </configuration>
+      </plugin>
+      <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
+        <configuration>
+          <excludes>
+            <exclude>com/paymentplatform/**/domain/model/**</exclude>
+            <exclude>com/paymentplatform/**/domain/valueobject/**</exclude>
+            <exclude>com/paymentplatform/**/domain/event/**</exclude>
+            <exclude>com/paymentplatform/**/domain/exception/**</exclude>
+            <exclude>com/paymentplatform/**/domain/engine/**</exclude>
+            <exclude>com/paymentplatform/**/domain/security/**</exclude>
+            <exclude>com/paymentplatform/**/domain/repository/**</exclude>
+          </excludes>
+        </configuration>
       </plugin>
     </plugins>
   </build>

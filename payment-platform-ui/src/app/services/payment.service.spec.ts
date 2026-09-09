@@ -27,7 +27,7 @@ describe('PaymentService', () => {
   describe('list', () => {
     it('should GET payments', () => {
       const mock: Payment[] = [
-        { id: 1, reference: 'PAY-001', shopId: 1, supplierId: 2, amount: 100, currency: 'TND', status: 'PENDING', rejectionReason: '', createdBy: 1, version: 1, createdAt: '', updatedAt: '', events: [] }
+        { id: 1, reference: 'PAY-001', shopId: 1, shopName: 'Shop', supplierId: 2, supplierName: 'Sup', amount: 100, currency: 'TND', status: 'PENDING', rejectionReason: '', createdBy: 1, createdByName: '', confirmedByName: '', rejectedByName: '', cancelledByName: '', version: 1, createdAt: '', updatedAt: '', events: [] }
       ];
       service.list().subscribe(data => {
         expect(data.length).toBe(1);
@@ -41,7 +41,7 @@ describe('PaymentService', () => {
 
   describe('getById', () => {
     it('should GET payment by id', () => {
-      const mock: Payment = { id: 1, reference: 'PAY-001', shopId: 1, supplierId: 2, amount: 100, currency: 'TND', status: 'PENDING', rejectionReason: '', createdBy: 1, version: 1, createdAt: '', updatedAt: '', events: [] };
+      const mock: Payment = { id: 1, reference: 'PAY-001', shopId: 1, shopName: 'Shop', supplierId: 2, supplierName: 'Sup', amount: 100, currency: 'TND', status: 'PENDING', rejectionReason: '', createdBy: 1, createdByName: '', confirmedByName: '', rejectedByName: '', cancelledByName: '', version: 1, createdAt: '', updatedAt: '', events: [] };
       service.getById(1).subscribe(data => {
         expect(data.id).toBe(1);
       });
@@ -53,7 +53,7 @@ describe('PaymentService', () => {
 
   describe('getByReference', () => {
     it('should GET payment by reference', () => {
-      const mock: Payment = { id: 1, reference: 'PAY-001', shopId: 1, supplierId: 2, amount: 100, currency: 'TND', status: 'PENDING', rejectionReason: '', createdBy: 1, version: 1, createdAt: '', updatedAt: '', events: [] };
+      const mock: Payment = { id: 1, reference: 'PAY-001', shopId: 1, shopName: 'Shop', supplierId: 2, supplierName: 'Sup', amount: 100, currency: 'TND', status: 'PENDING', rejectionReason: '', createdBy: 1, createdByName: '', confirmedByName: '', rejectedByName: '', cancelledByName: '', version: 1, createdAt: '', updatedAt: '', events: [] };
       service.getByReference('PAY-001').subscribe(data => {
         expect(data.reference).toBe('PAY-001');
       });
@@ -65,7 +65,7 @@ describe('PaymentService', () => {
 
   describe('create', () => {
     it('should POST to create payment', () => {
-      const mock: Payment = { id: 1, reference: 'PAY-001', shopId: 1, supplierId: 2, amount: 100, currency: 'TND', status: 'PENDING', rejectionReason: '', createdBy: 1, version: 1, createdAt: '', updatedAt: '', events: [] };
+      const mock: Payment = { id: 1, reference: 'PAY-001', shopId: 1, shopName: 'Shop', supplierId: 2, supplierName: 'Sup', amount: 100, currency: 'TND', status: 'PENDING', rejectionReason: '', createdBy: 1, createdByName: '', confirmedByName: '', rejectedByName: '', cancelledByName: '', version: 1, createdAt: '', updatedAt: '', events: [] };
       service.create({ shopId: 1, supplierId: 2, amount: 100, currency: 'TND' }).subscribe(data => {
         expect(data.amount).toBe(100);
       });
@@ -78,7 +78,7 @@ describe('PaymentService', () => {
 
   describe('confirm', () => {
     it('should POST to confirm payment', () => {
-      const mock: Payment = { id: 1, reference: 'PAY-001', shopId: 1, supplierId: 2, amount: 100, currency: 'TND', status: 'CONFIRMED', rejectionReason: '', createdBy: 1, version: 2, createdAt: '', updatedAt: '', events: [] };
+      const mock: Payment = { id: 1, reference: 'PAY-001', shopId: 1, shopName: 'Shop', supplierId: 2, supplierName: 'Sup', amount: 100, currency: 'TND', status: 'CONFIRMED', rejectionReason: '', createdBy: 1, createdByName: '', confirmedByName: '', rejectedByName: '', cancelledByName: '', version: 2, createdAt: '', updatedAt: '', events: [] };
       service.confirm(1).subscribe(data => {
         expect(data.status).toBe('CONFIRMED');
       });
@@ -90,7 +90,7 @@ describe('PaymentService', () => {
 
   describe('reject', () => {
     it('should POST to reject payment with reason', () => {
-      const mock: Payment = { id: 1, reference: 'PAY-001', shopId: 1, supplierId: 2, amount: 100, currency: 'TND', status: 'REJECTED', rejectionReason: 'Invalid', createdBy: 1, version: 2, createdAt: '', updatedAt: '', events: [] };
+      const mock: Payment = { id: 1, reference: 'PAY-001', shopId: 1, shopName: 'Shop', supplierId: 2, supplierName: 'Sup', amount: 100, currency: 'TND', status: 'REJECTED', rejectionReason: 'Invalid', createdBy: 1, createdByName: '', confirmedByName: '', rejectedByName: '', cancelledByName: '', version: 2, createdAt: '', updatedAt: '', events: [] };
       service.reject(1, { rejectionReason: 'Invalid' }).subscribe(data => {
         expect(data.status).toBe('REJECTED');
         expect(data.rejectionReason).toBe('Invalid');
@@ -104,7 +104,7 @@ describe('PaymentService', () => {
 
   describe('cancel', () => {
     it('should POST to cancel payment', () => {
-      const mock: Payment = { id: 1, reference: 'PAY-001', shopId: 1, supplierId: 2, amount: 100, currency: 'TND', status: 'CANCELLED', rejectionReason: '', createdBy: 1, version: 2, createdAt: '', updatedAt: '', events: [] };
+      const mock: Payment = { id: 1, reference: 'PAY-001', shopId: 1, shopName: 'Shop', supplierId: 2, supplierName: 'Sup', amount: 100, currency: 'TND', status: 'CANCELLED', rejectionReason: '', createdBy: 1, createdByName: '', confirmedByName: '', rejectedByName: '', cancelledByName: '', version: 2, createdAt: '', updatedAt: '', events: [] };
       service.cancel(1).subscribe(data => {
         expect(data.status).toBe('CANCELLED');
       });
@@ -123,6 +123,24 @@ describe('PaymentService', () => {
       });
       const req = httpMock.expectOne('/api/payments/stats');
       expect(req.request.method).toBe('GET');
+      req.flush(mock);
+    });
+  });
+
+  describe('getAgentSummary', () => {
+    it('should GET agent summary with params', () => {
+      const mock = [
+        { userId: 1, username: 'agent1', paymentCount: 5, totalAmount: 500, confirmedTotal: 300, currency: 'TND', payments: [] }
+      ];
+      service.getAgentSummary(1, '2024-01-01', '2024-01-31').subscribe(data => {
+        expect(data.length).toBe(1);
+        expect(data[0].userId).toBe(1);
+      });
+      const req = httpMock.expectOne(r => r.url === '/api/payments/agent-summary');
+      expect(req.request.method).toBe('GET');
+      expect(req.request.params.get('supplierId')).toBe('1');
+      expect(req.request.params.get('from')).toBe('2024-01-01');
+      expect(req.request.params.get('to')).toBe('2024-01-31');
       req.flush(mock);
     });
   });

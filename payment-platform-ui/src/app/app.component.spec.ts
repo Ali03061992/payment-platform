@@ -1,11 +1,15 @@
 import { TestBed } from '@angular/core/testing';
-import { RouterTestingModule } from '@angular/router/testing';
+import { Router } from '@angular/router';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { AppComponent } from './app.component';
 
 describe('AppComponent', () => {
   beforeEach(() => TestBed.configureTestingModule({
-    imports: [RouterTestingModule],
-    declarations: [AppComponent]
+    declarations: [AppComponent],
+    schemas: [NO_ERRORS_SCHEMA],
+    providers: [
+      { provide: Router, useValue: jasmine.createSpyObj('Router', ['navigate']) }
+    ]
   }));
 
   it('should create the app', () => {

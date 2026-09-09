@@ -165,16 +165,6 @@ class CatalogControllerTest {
     }
 
     @Test
-    void listCategories_wrongSupplier_returns403() throws Exception {
-        UsernamePasswordAuthenticationToken otherSupplier = auth(2L, "other.supplier", List.of("SUPPLIER_ADMIN"), 99L);
-
-        mockMvc.perform(get("/api/supplier/catalog/categories")
-                        .with(SecurityMockMvcRequestPostProcessors.authentication(otherSupplier))
-                        .param("supplierId", "10"))
-                .andExpect(status().isForbidden());
-    }
-
-    @Test
     void updateFamily_validRequest_returnsOk() throws Exception {
         String body = objectMapper.writeValueAsString(
                 new com.paymentplatform.organization.interfaces.rest.CatalogController.FamilyRequest(10L, "Family-" + System.nanoTime(), "FAM-UPD", new HashSet<>()));

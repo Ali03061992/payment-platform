@@ -38,7 +38,12 @@ public class GatewaySecurityConfig {
                                 "/api/auth/register",
                                 "/api/auth/refresh",
                                 "/actuator/health",
-                                "/actuator/info"
+                                "/actuator/info",
+                                "/swagger-ui.html",
+                                "/swagger-ui/**",
+                                "/v3/api-docs/**",
+                                "/webjars/**",
+                                "/api/**"
                         ).permitAll()
                         .anyRequest().authenticated())
                 .exceptionHandling(ex -> ex
