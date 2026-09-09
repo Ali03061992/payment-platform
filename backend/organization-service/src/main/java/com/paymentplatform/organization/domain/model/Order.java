@@ -15,6 +15,7 @@ public class Order {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
+    @UuidGenerator(style = UuidGenerator.Style.RANDOM)
     @Column(columnDefinition = "VARCHAR(36)")
     private UUID id;
 
