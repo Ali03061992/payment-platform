@@ -34,14 +34,24 @@ public class SupplierShopRelationController {
     }
 
     @GetMapping("/supplier/{supplierId}")
-    @PreAuthorize("hasAuthority('ADMIN_MANAGE_ORGANIZATIONS') or hasAuthority('SUPPLIER_MANAGE_AGENTS')")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<RelationResponse>> listBySupplier(@PathVariable long supplierId) {
+        var current = com.paymentplatform.shared.infrastructure.security.CurrentUser.get();
+        boolean isAdmin = current.roles().contains("SYSTEM_ADMIN");
+        if (!isAdmin && current.organizationId() != null && !current.organizationId().equals(supplierId)) {
+            return ResponseEntity.status(403).build();
+        }
         return ResponseEntity.ok(relationUseCase.listBySupplier(supplierId));
     }
 
     @GetMapping("/shop/{shopId}")
-    @PreAuthorize("hasAuthority('ADMIN_MANAGE_ORGANIZATIONS') or hasAuthority('SHOP_MANAGE_AGENTS')")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<RelationResponse>> listByShop(@PathVariable long shopId) {
+        var current = com.paymentplatform.shared.infrastructure.security.CurrentUser.get();
+        boolean isAdmin = current.roles().contains("SYSTEM_ADMIN");
+        if (!isAdmin && current.organizationId() != null && !current.organizationId().equals(shopId)) {
+            return ResponseEntity.status(403).build();
+        }
         return ResponseEntity.ok(relationUseCase.listByShop(shopId));
     }
 

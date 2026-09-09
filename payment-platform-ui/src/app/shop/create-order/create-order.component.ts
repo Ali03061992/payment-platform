@@ -30,6 +30,10 @@ export class CreateOrderComponent implements OnInit {
   notes = '';
   creating = false;
   shopId = 0;
+  loadingSuppliers = false;
+  loadingProducts = false;
+  errorSuppliers: string | null = null;
+  errorProducts: string | null = null;
 
   constructor(
     private orderService: OrderService,
@@ -41,13 +45,52 @@ export class CreateOrderComponent implements OnInit {
 
   ngOnInit(): void {
     this.shopId = this.getShopId();
-    this.orgService.listRelations().subscribe({
+    this.loadSuppliers();
+  }
+
+  loadSuppliers(): void {
+    this.loadingSuppliers = true;
+    this.errorSuppliers = null;
+    const shopId = this.shopId;
+    if (!shopId) {
+      this.loadingSuppliers = false;
+      this.errorSuppliers = 'Boutique non identifiée';
+      return;
+    }
+    this.orgService.listRelationsByShop(shopId).subscribe({
       next: (relations) => {
-        const supplierIds = [...new Set(
-          relations.filter(r => r.shopId === this.shopId && r.status === 'ACTIVE').map(r => r.supplierId)
-        )];
+        const activeRelations = relations.filter(r => r.status === 'ACTIVE');
+        if (activeRelations.length === 0) {
+          this.suppliers = [];
+          this.loadingSuppliers = false;
+          return;
+        }
+        const supplierIds = [...new Set(activeRelations.map(r => r.supplierId))];
         this.orgService.listSuppliers().subscribe({
-          next: (all) => { this.suppliers = all.filter(s => supplierIds.includes(s.id)); }
+          next: (all) => {
+            this.suppliers = all.filter(s => supplierIds.includes(s.id) && s.status === 'ACTIVE');
+            this.loadingSuppliers = false;
+          },
+          error: () => {
+            this.loadingSuppliers = false;
+            this.errorSuppliers = 'Impossible de charger les fournisseurs';
+          }
+        });
+      },
+      error: () => {
+        this.loadingSuppliers = false;
+        this.errorSuppliers = 'Impossible de charger les relations';
+        // fallback : try admin listRelations then filter
+        this.orgService.listRelations().subscribe({
+          next: (relations) => {
+            const supplierIds = [...new Set(
+              relations.filter(r => r.shopId === shopId && r.status === 'ACTIVE').map(r => r.supplierId)
+            )];
+            if (supplierIds.length === 0) { this.suppliers = []; return; }
+            this.orgService.listSuppliers().subscribe({
+              next: (all) => { this.suppliers = all.filter(s => supplierIds.includes(s.id)); }
+            });
+          }
         });
       }
     });
@@ -72,8 +115,18 @@ export class CreateOrderComponent implements OnInit {
   }
 
   loadProducts(): void {
-    this.stockService.getProducts('ACTIVE').subscribe({
-      next: (data) => { this.products = data.filter(p => p.supplierId === this.selectedSupplierId); }
+    this.loadingProducts = true;
+    this.errorProducts = null;
+    this.stockService.getProductsBySupplier(this.selectedSupplierId, 'ACTIVE').subscribe({
+      next: (data) => {
+        this.products = data.filter(p => p.supplierId === this.selectedSupplierId && p.status === 'ACTIVE');
+        this.loadingProducts = false;
+      },
+      error: () => {
+        this.errorProducts = 'Impossible de charger les produits';
+        this.loadingProducts = false;
+        this.products = [];
+      }
     });
   }
 

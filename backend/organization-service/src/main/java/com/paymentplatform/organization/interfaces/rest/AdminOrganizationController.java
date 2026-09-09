@@ -41,13 +41,13 @@ public class AdminOrganizationController {
     }
 
     @GetMapping("/suppliers")
-    @PreAuthorize("hasAuthority('ADMIN_MANAGE_ORGANIZATIONS')")
+    @PreAuthorize("hasAuthority('ADMIN_MANAGE_ORGANIZATIONS') or hasAuthority('SHOP_CREATE_PAYMENTS') or hasAuthority('SHOP_MANAGE_AGENTS') or hasAuthority('SUPPLIER_MANAGE_AGENTS') or hasAuthority('SUPPLIER_MANAGE_PRODUCTS')")
     public ResponseEntity<List<OrganizationResponse>> listSuppliers() {
         return ResponseEntity.ok(queryOrg.listByType("SUPPLIER"));
     }
 
     @GetMapping("/suppliers/{id}")
-    @PreAuthorize("hasAuthority('ADMIN_MANAGE_ORGANIZATIONS')")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<OrganizationResponse> getSupplier(@PathVariable long id) {
         return ResponseEntity.ok(queryOrg.findById(id));
     }
@@ -76,13 +76,13 @@ public class AdminOrganizationController {
     }
 
     @GetMapping("/shops")
-    @PreAuthorize("hasAuthority('ADMIN_MANAGE_ORGANIZATIONS')")
+    @PreAuthorize("hasAuthority('ADMIN_MANAGE_ORGANIZATIONS') or hasAuthority('SHOP_CREATE_PAYMENTS') or hasAuthority('SHOP_MANAGE_AGENTS') or hasAuthority('SUPPLIER_MANAGE_AGENTS') or hasAuthority('SUPPLIER_MANAGE_PRODUCTS')")
     public ResponseEntity<List<OrganizationResponse>> listShops() {
         return ResponseEntity.ok(queryOrg.listByType("SHOP"));
     }
 
     @GetMapping("/shops/{id}")
-    @PreAuthorize("hasAuthority('ADMIN_MANAGE_ORGANIZATIONS')")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<OrganizationResponse> getShop(@PathVariable long id) {
         return ResponseEntity.ok(queryOrg.findById(id));
     }

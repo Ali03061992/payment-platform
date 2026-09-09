@@ -7,12 +7,15 @@
   <form (ngSubmit)="submit()">
     <div class="form-row">
       <div class="form-group">
-        <label>Fournisseur</label>
+        <label>Fournisseur <span *ngIf="loadingSuppliers" class="text-muted">(chargement...)</span></label>
         <select [(ngModel)]="selectedSupplierId" name="supplier" class="form-control"
-                (ngModelChange)="onSupplierChange()" required>
-          <option [value]="0">-- Sélectionner --</option>
-          <option *ngFor="let s of suppliers" [value]="s.id">{{ s.name }}</option>
+                (ngModelChange)="onSupplierChange()" required [disabled]="loadingSuppliers">
+          <option [ngValue]="0">-- Sélectionner --</option>
+          <option *ngFor="let s of suppliers" [ngValue]="s.id">{{ s.name }} ({{ s.status }})</option>
         </select>
+        <small *ngIf="errorSuppliers" class="text-danger">{{ errorSuppliers }}</small>
+        <small *ngIf="!loadingSuppliers && !errorSuppliers && suppliers.length === 0" class="text-muted">Aucun fournisseur lié à votre boutique. Contactez un administrateur pour créer une relation fournisseur-boutique.</small>
+        <small *ngIf="suppliers.length > 0" class="text-muted">{{ suppliers.length }} fournisseur(s) disponible(s)</small>
       </div>
       <div class="form-group">
         <label>Devise</label>
@@ -30,8 +33,10 @@
              placeholder="Nom ou SKU...">
     </div>
 
-    <div class="table-card" *ngIf="selectedSupplierId" style="margin-bottom:24px;">
-      <h3 style="padding:16px 20px 0;">Produits disponibles</h3>
+    <div *ngIf="loadingProducts" class="text-muted" style="padding:12px;">Chargement des produits...</div>
+    <div *ngIf="errorProducts" class="text-danger" style="padding:12px;">{{ errorProducts }}</div>
+    <div class="table-card" *ngIf="selectedSupplierId && !loadingProducts" style="margin-bottom:24px;">
+      <h3 style="padding:16px 20px 0;">Produits disponibles ({{ filteredProducts.length }})</h3>
       <div class="table-wrapper">
         <table>
           <thead>

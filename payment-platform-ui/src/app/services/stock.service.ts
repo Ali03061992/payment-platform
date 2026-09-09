@@ -25,6 +25,12 @@ export class StockService {
     return this.http.get<Product[]>(`${this.apiUrl}/${supplierId}/products`, { params });
   }
 
+  getProductsBySupplier(supplierId: number, status?: string): Observable<Product[]> {
+    let params = new HttpParams();
+    if (status) params = params.set('status', status);
+    return this.http.get<Product[]>(`${this.apiUrl}/${supplierId}/products`, { params });
+  }
+
   getProduct(id: number): Observable<Product> {
     const supplierId = this.getSupplierId();
     return this.http.get<Product>(`${this.apiUrl}/${supplierId}/products/${id}`);

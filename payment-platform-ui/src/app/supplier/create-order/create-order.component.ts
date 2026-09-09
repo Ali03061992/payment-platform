@@ -60,14 +60,54 @@ export class SupplierCreateOrderComponent implements OnInit, OnDestroy {
     return 0;
   }
 
+  loadingShops = false;
+  loadingProducts = false;
+  errorShops: string | null = null;
+  errorProducts: string | null = null;
+
   loadShops(): void {
-    this.subscriptions.add(this.orgService.listRelations().subscribe({
+    this.loadingShops = true;
+    this.errorShops = null;
+    const supplierId = this.supplierId;
+    if (!supplierId) {
+      this.loadingShops = false;
+      this.errorShops = 'Fournisseur non identifié';
+      return;
+    }
+    this.subscriptions.add(this.orgService.listRelationsBySupplier(supplierId).subscribe({
       next: (relations) => {
-        const shopIds = [...new Set(
-          relations.filter(r => r.supplierId === this.supplierId && r.status === 'ACTIVE').map(r => r.shopId)
-        )];
+        const activeRelations = relations.filter(r => r.status === 'ACTIVE');
+        if (activeRelations.length === 0) {
+          this.shops = [];
+          this.loadingShops = false;
+          return;
+        }
+        const shopIds = [...new Set(activeRelations.map(r => r.shopId))];
         this.subscriptions.add(this.orgService.listShops().subscribe({
-          next: (all) => { this.shops = all.filter(s => shopIds.includes(s.id)); }
+          next: (all) => {
+            this.shops = all.filter(s => shopIds.includes(s.id) && s.status === 'ACTIVE');
+            this.loadingShops = false;
+          },
+          error: () => {
+            this.loadingShops = false;
+            this.errorShops = 'Impossible de charger les boutiques';
+          }
+        }));
+      },
+      error: () => {
+        this.loadingShops = false;
+        this.errorShops = 'Impossible de charger les relations';
+        // fallback admin
+        this.subscriptions.add(this.orgService.listRelations().subscribe({
+          next: (relations) => {
+            const shopIds = [...new Set(
+              relations.filter(r => r.supplierId === supplierId && r.status === 'ACTIVE').map(r => r.shopId)
+            )];
+            if (shopIds.length === 0) { this.shops = []; return; }
+            this.subscriptions.add(this.orgService.listShops().subscribe({
+              next: (all) => { this.shops = all.filter(s => shopIds.includes(s.id)); }
+            }));
+          }
         }));
       }
     }));
@@ -83,8 +123,18 @@ export class SupplierCreateOrderComponent implements OnInit, OnDestroy {
   }
 
   loadProducts(): void {
+    this.loadingProducts = true;
+    this.errorProducts = null;
     this.subscriptions.add(this.stockService.getProducts('ACTIVE').subscribe({
-      next: (data) => { this.products = data; }
+      next: (data) => {
+        this.products = data.filter(p => p.status === 'ACTIVE');
+        this.loadingProducts = false;
+      },
+      error: () => {
+        this.loadingProducts = false;
+        this.errorProducts = 'Impossible de charger les produits';
+        this.products = [];
+      }
     }));
   }
 
