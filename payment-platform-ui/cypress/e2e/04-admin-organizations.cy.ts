@@ -14,8 +14,7 @@ describe('04 - Admin: Supplier Management', () => {
   });
 
   it('should show supplier table with columns', () => {
-    cy.get('table thead th').should('have.length', 5);
-    cy.get('table thead').should('contain', 'ID');
+    cy.get('table thead th').should('have.length', 4);
     cy.get('table thead').should('contain', 'Nom');
     cy.get('table thead').should('contain', 'Statut');
     cy.get('table thead').should('contain', 'Créé le');
@@ -72,7 +71,7 @@ describe('04 - Admin: Shop Management', () => {
   });
 
   it('should show shop table', () => {
-    cy.get('table thead th').should('have.length', 5);
+    cy.get('table thead th').should('have.length', 4);
     cy.get('table tbody tr').should('have.length.gte', 4);
   });
 

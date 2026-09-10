@@ -48,8 +48,8 @@ export class LayoutComponent implements OnInit, OnDestroy {
     { label: 'Paiements', icon: '💰', route: 'payments', roles: ['SYSTEM_ADMIN', 'SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_AGENT'] },
     { label: 'Stats paiements', icon: '📊', route: 'payments/stats', roles: ['SYSTEM_ADMIN', 'SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_AGENT'] },
     { label: 'Scanner QR', icon: '📱', route: 'scan', roles: ['SYSTEM_ADMIN', 'SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_AGENT'] },
+    { label: 'Export', icon: '📤', route: 'export', roles: ['SYSTEM_ADMIN', 'SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_AGENT'] },
     { label: 'Paiements agents', icon: '👥', route: 'supplier/agent-payments', roles: ['SUPPLIER_ADMIN', 'SUPPLIER_AGENT'] },
-    { label: 'Recherche paiements', icon: '🔍', route: 'payments/search', roles: ['SUPPLIER_ADMIN', 'SYSTEM_ADMIN'] },
   ];
 
   constructor(
@@ -62,7 +62,9 @@ export class LayoutComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.notificationService.startPolling(5000);
+    this.notificationService.fetchNotifications().subscribe();
+    this.notificationService.fetchUnreadCount().subscribe();
+    this.notificationService.startRealtime();
     this.subs.push(
       this.notificationService.notifications$.subscribe(n => this.notifications = n),
       this.notificationService.unreadCount$.subscribe(c => this.unreadCount = c)
@@ -70,6 +72,7 @@ export class LayoutComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.notificationService.stopRealtime();
     this.subs.forEach(s => s.unsubscribe());
   }
 

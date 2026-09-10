@@ -1,9 +1,14 @@
 package com.paymentplatform.gateway;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -11,11 +16,13 @@ import java.net.http.HttpResponse;
 import java.util.Enumeration;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 @RestController
 @RequestMapping("/api")
 public class GatewayProxyController {
 
+    private static final Logger log = LoggerFactory.getLogger(GatewayProxyController.class);
     private final HttpClient httpClient = HttpClient.newHttpClient();
 
     @Value("${IDENTITY_SERVICE_URL:localhost}")
@@ -42,8 +49,8 @@ public class GatewayProxyController {
             org.springframework.web.bind.annotation.RequestMethod.PATCH,
             org.springframework.web.bind.annotation.RequestMethod.DELETE
     })
-    public ResponseEntity<byte[]> proxyIdentity(HttpServletRequest request,
-                                                @RequestBody(required = false) byte[] body) throws Exception {
+    public ResponseEntity<?> proxyIdentity(HttpServletRequest request,
+                                            @RequestBody(required = false) byte[] body) throws Exception {
         return proxy(request, "http", identityUrl, identityPort, body);
     }
 
@@ -58,8 +65,8 @@ public class GatewayProxyController {
             org.springframework.web.bind.annotation.RequestMethod.PATCH,
             org.springframework.web.bind.annotation.RequestMethod.DELETE
     })
-    public ResponseEntity<byte[]> proxyOrganization(HttpServletRequest request,
-                                                     @RequestBody(required = false) byte[] body) throws Exception {
+    public ResponseEntity<?> proxyOrganization(HttpServletRequest request,
+                                                 @RequestBody(required = false) byte[] body) throws Exception {
         return proxy(request, "http", organizationUrl, organizationPort, body);
     }
 
@@ -70,8 +77,8 @@ public class GatewayProxyController {
             org.springframework.web.bind.annotation.RequestMethod.PATCH,
             org.springframework.web.bind.annotation.RequestMethod.DELETE
     })
-    public ResponseEntity<byte[]> proxyPayment(HttpServletRequest request,
-                                                @RequestBody(required = false) byte[] body) throws Exception {
+    public ResponseEntity<?> proxyPayment(HttpServletRequest request,
+                                            @RequestBody(required = false) byte[] body) throws Exception {
         return proxy(request, "http", paymentUrl, paymentPort, body);
     }
 
@@ -82,9 +89,57 @@ public class GatewayProxyController {
             org.springframework.web.bind.annotation.RequestMethod.PATCH,
             org.springframework.web.bind.annotation.RequestMethod.DELETE
     })
-    public ResponseEntity<byte[]> proxyNotification(HttpServletRequest request,
-                                                     @RequestBody(required = false) byte[] body) throws Exception {
+    public ResponseEntity<?> proxyNotification(HttpServletRequest request,
+                                                 @RequestBody(required = false) byte[] body,
+                                                 HttpServletResponse servletResponse) throws Exception {
+        String accept = request.getHeader("Accept");
+        boolean isSse = accept != null && accept.contains("text/event-stream");
+
+        if (isSse) {
+            return proxySse(request, "http", notificationUrl, notificationPort, servletResponse);
+        }
         return proxy(request, "http", notificationUrl, notificationPort, body);
+    }
+
+    private ResponseEntity<?> proxySse(HttpServletRequest request, String scheme,
+                                        String host, String port,
+                                        HttpServletResponse servletResponse) throws Exception {
+        String query = request.getQueryString();
+        String targetUri = scheme + "://" + host + ":" + port + request.getRequestURI()
+                + (query != null ? "?" + query : "");
+
+        HttpRequest.Builder builder = HttpRequest.newBuilder()
+                .uri(URI.create(targetUri))
+                .GET();
+
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader != null) {
+            builder.header("Authorization", authHeader);
+        }
+        builder.header("Accept", "text/event-stream");
+
+        HttpResponse<InputStream> response = httpClient.send(builder.build(),
+                HttpResponse.BodyHandlers.ofInputStream());
+
+        servletResponse.setStatus(response.statusCode());
+        servletResponse.setContentType("text/event-stream");
+        servletResponse.setCharacterEncoding("UTF-8");
+        servletResponse.setHeader("Cache-Control", "no-cache");
+        servletResponse.setHeader("Connection", "keep-alive");
+
+        try (OutputStream os = servletResponse.getOutputStream();
+             InputStream is = response.body()) {
+            byte[] buffer = new byte[1024];
+            int bytesRead;
+            while ((bytesRead = is.read(buffer)) != -1) {
+                os.write(buffer, 0, bytesRead);
+                os.flush();
+            }
+        } catch (Exception e) {
+            log.debug("SSE stream closed: {}", e.getMessage());
+        }
+
+        return ResponseEntity.ok().build();
     }
 
     private ResponseEntity<byte[]> proxy(HttpServletRequest request, String scheme,

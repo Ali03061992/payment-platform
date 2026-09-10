@@ -6,12 +6,10 @@ import com.paymentplatform.shared.infrastructure.security.CurrentUser;
 import com.paymentplatform.payment.application.dto.*;
 import com.paymentplatform.payment.application.usecase.*;
 import com.paymentplatform.payment.infrastructure.csv.CsvExportService;
-import com.paymentplatform.payment.infrastructure.elasticsearch.PaymentIndexerService;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -20,7 +18,6 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/payments")
@@ -33,8 +30,6 @@ public class PaymentController {
     private final RejectPaymentUseCase rejectPayment;
     private final CancelPaymentUseCase cancelPayment;
     private final AgentPaymentsBySupplierUseCase agentPayments;
-    private final SearchPaymentsUseCase searchPayments;
-    private final PaymentIndexerService indexerService;
     private final CsvExportService csvExportService;
 
     public PaymentController(CreatePaymentUseCase createPayment,
@@ -44,8 +39,6 @@ public class PaymentController {
                              RejectPaymentUseCase rejectPayment,
                              CancelPaymentUseCase cancelPayment,
                              AgentPaymentsBySupplierUseCase agentPayments,
-                             SearchPaymentsUseCase searchPayments,
-                             PaymentIndexerService indexerService,
                              CsvExportService csvExportService) {
         this.createPayment = createPayment;
         this.getPayment = getPayment;
@@ -54,8 +47,6 @@ public class PaymentController {
         this.rejectPayment = rejectPayment;
         this.cancelPayment = cancelPayment;
         this.agentPayments = agentPayments;
-        this.searchPayments = searchPayments;
-        this.indexerService = indexerService;
         this.csvExportService = csvExportService;
     }
 
@@ -187,12 +178,5 @@ public class PaymentController {
         response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"payments.csv\"");
         response.getWriter().write(csv);
         response.getWriter().flush();
-    }
-
-    @PostMapping("/reindex")
-    @PreAuthorize("hasAuthority('SYSTEM_ADMIN')")
-    public ResponseEntity<Map<String, Object>> reindex() {
-        int count = indexerService.reindexAll();
-        return ResponseEntity.ok(Map.of("indexed", count));
     }
 }

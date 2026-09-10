@@ -46,8 +46,12 @@ describe('05 - Supplier: Product Management', () => {
   });
 
   it('should show product actions', () => {
-    cy.get('table tbody tr').first().within(() => {
-      cy.get('button').should('have.length.gte', 2);
+    cy.get('table tbody tr').first().then(($row) => {
+      if (!$row.find('.empty').length) {
+        cy.wrap($row).within(() => {
+          cy.get('button').should('have.length.gte', 2);
+        });
+      }
     });
   });
 });

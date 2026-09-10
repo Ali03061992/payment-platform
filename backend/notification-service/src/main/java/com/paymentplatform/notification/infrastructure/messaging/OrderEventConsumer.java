@@ -21,13 +21,16 @@ public class OrderEventConsumer {
     private final NotificationRepository notifications;
     private final EventDeduplicator deduplicator;
     private final ObjectMapper objectMapper;
+    private final NotificationBroadcaster broadcaster;
 
     public OrderEventConsumer(NotificationRepository notifications,
                                EventDeduplicator deduplicator,
-                               ObjectMapper objectMapper) {
+                               ObjectMapper objectMapper,
+                               NotificationBroadcaster broadcaster) {
         this.notifications = notifications;
         this.deduplicator = deduplicator;
         this.objectMapper = objectMapper;
+        this.broadcaster = broadcaster;
     }
 
     @RabbitListener(queues = "notification.orders")
@@ -66,72 +69,72 @@ public class OrderEventConsumer {
         String reference = event.get("reference").asText();
         String source = event.get("source").asText();
 
-        notifications.save(new Notification(null, supplierId,
+        broadcaster.broadcastNotification(notifications.save(new Notification(null, supplierId,
                 "ORDER_CREATED",
                 "Nouvelle commande " + reference + (source.equals("SHOP") ? " de la boutique" : ""),
                 "ORDER", reference
-        ));
+        )));
 
-        notifications.save(new Notification(null, shopId,
+        broadcaster.broadcastNotification(notifications.save(new Notification(null, shopId,
                 "ORDER_CREATED",
                 "Commande " + reference + " créée",
                 "ORDER", reference
-        ));
+        )));
     }
 
     private void handleOrderConfirmed(JsonNode event) {
         UUID shopId = UUID.fromString(event.get("shopId").asText());
         String reference = event.get("reference").asText();
 
-        notifications.save(new Notification(null, shopId,
+        broadcaster.broadcastNotification(notifications.save(new Notification(null, shopId,
                 "ORDER_CONFIRMED",
                 "Commande " + reference + " confirmée par le fournisseur",
                 "ORDER", reference
-        ));
+        )));
     }
 
     private void handleOrderPreparing(JsonNode event) {
         UUID shopId = UUID.fromString(event.get("shopId").asText());
         String reference = event.get("reference").asText();
 
-        notifications.save(new Notification(null, shopId,
+        broadcaster.broadcastNotification(notifications.save(new Notification(null, shopId,
                 "ORDER_PREPARING",
                 "Commande " + reference + " en préparation",
                 "ORDER", reference
-        ));
+        )));
     }
 
     private void handleOrderReadyForDelivery(JsonNode event) {
         UUID shopId = UUID.fromString(event.get("shopId").asText());
         String reference = event.get("reference").asText();
 
-        notifications.save(new Notification(null, shopId,
+        broadcaster.broadcastNotification(notifications.save(new Notification(null, shopId,
                 "ORDER_READY",
                 "Commande " + reference + " prête pour livraison",
                 "ORDER", reference
-        ));
+        )));
     }
 
     private void handleOrderDelivered(JsonNode event) {
         UUID shopId = UUID.fromString(event.get("shopId").asText());
         String reference = event.get("reference").asText();
 
-        notifications.save(new Notification(null, shopId,
+        broadcaster.broadcastNotification(notifications.save(new Notification(null, shopId,
                 "ORDER_DELIVERED",
                 "Commande " + reference + " livrée — en attente d'acceptation",
                 "ORDER", reference
-        ));
+        )));
     }
 
     private void handleOrderAccepted(JsonNode event) {
         UUID supplierId = UUID.fromString(event.get("supplierId").asText());
         String reference = event.get("reference").asText();
 
-        notifications.save(new Notification(null, supplierId,
+        broadcaster.broadcastNotification(notifications.save(new Notification(null, supplierId,
                 "ORDER_ACCEPTED",
                 "Commande " + reference + " acceptée par la boutique",
                 "ORDER", reference
-        ));
+        )));
     }
 
     private void handleOrderCancelled(JsonNode event) {
@@ -139,28 +142,28 @@ public class OrderEventConsumer {
         UUID supplierId = UUID.fromString(event.get("supplierId").asText());
         String reference = event.get("reference").asText();
 
-        notifications.save(new Notification(null, supplierId,
+        broadcaster.broadcastNotification(notifications.save(new Notification(null, supplierId,
                 "ORDER_CANCELLED",
                 "Commande " + reference + " annulée",
                 "ORDER", reference
-        ));
+        )));
 
-        notifications.save(new Notification(null, shopId,
+        broadcaster.broadcastNotification(notifications.save(new Notification(null, shopId,
                 "ORDER_CANCELLED",
                 "Commande " + reference + " annulée",
                 "ORDER", reference
-        ));
+        )));
     }
 
     private void handleOrderRejected(JsonNode event) {
         UUID supplierId = UUID.fromString(event.get("supplierId").asText());
         String reference = event.get("reference").asText();
 
-        notifications.save(new Notification(null, supplierId,
+        broadcaster.broadcastNotification(notifications.save(new Notification(null, supplierId,
                 "ORDER_REJECTED",
                 "Commande " + reference + " rejetée par la boutique",
                 "ORDER", reference
-        ));
+        )));
     }
 
     private void handleOrderDeliveryRejected(JsonNode event) {
@@ -168,12 +171,12 @@ public class OrderEventConsumer {
         String reference = event.get("reference").asText();
         String reason = event.has("reason") ? event.get("reason").asText() : "";
 
-        notifications.save(new Notification(null, shopId,
+        broadcaster.broadcastNotification(notifications.save(new Notification(null, shopId,
                 "ORDER_DELIVERY_REJECTED",
                 "Livraison de la commande " + reference + " rejetée"
                         + (reason.isEmpty() ? "" : " : " + reason),
                 "ORDER", reference
-        ));
+        )));
     }
 
     private void handleLowStockAlert(JsonNode event) {
@@ -183,11 +186,11 @@ public class OrderEventConsumer {
         int availableQty = event.get("availableQty").asInt();
         int minQuantity = event.get("minQuantity").asInt();
 
-        notifications.save(new Notification(null, supplierId,
+        broadcaster.broadcastNotification(notifications.save(new Notification(null, supplierId,
                 "LOW_STOCK_ALERT",
                 "Stock bas pour " + productName + " (" + sku + ") — "
                         + availableQty + " disponible(s), minimum requis: " + minQuantity,
                 "PRODUCT", sku
-        ));
+        )));
     }
 }

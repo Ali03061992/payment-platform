@@ -41,21 +41,6 @@ services:
       - key: RABBITMQ_DEFAULT_PASS
         generateValue: true
 
-  # --- Infra: Elasticsearch 9 (sans sécurité, comme deploy/docker-compose.yml:52) ---
-  - type: web
-    name: payment-platform-elasticsearch
-    env: docker
-    image:
-      url: docker.elastic.co/elasticsearch/elasticsearch:9.0.0
-    plan: free
-    envVars:
-      - key: discovery.type
-        value: single-node
-      - key: xpack.security.enabled
-        value: false
-      - key: ES_JAVA_OPTS
-        value: -Xms512m -Xmx512m
-
   # --- Backend: Identity ---
   - type: web
     name: payment-platform-identity
@@ -171,13 +156,6 @@ services:
           name: payment-platform-redis
           type: web
           property: host
-      - key: ELASTICSEARCH_HOST
-        fromService:
-          name: payment-platform-elasticsearch
-          type: web
-          property: host
-      - key: ELASTICSEARCH_PORT
-        value: 9200
       - key: INTERNAL_SECRET
         fromService:
           name: payment-platform-identity

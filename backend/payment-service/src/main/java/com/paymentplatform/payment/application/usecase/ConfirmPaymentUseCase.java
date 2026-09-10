@@ -9,7 +9,6 @@ import com.paymentplatform.payment.application.dto.PaymentResponse;
 import com.paymentplatform.payment.domain.model.Payment;
 import com.paymentplatform.payment.domain.repository.PaymentRepository;
 import com.paymentplatform.shared.domain.exception.NotFoundException;
-import com.paymentplatform.payment.infrastructure.elasticsearch.PaymentIndexerService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,16 +21,13 @@ public class ConfirmPaymentUseCase {
     private final PaymentRepository payments;
     private final AuditRecorder audit;
     private final OutboxEventStore outbox;
-    private final PaymentIndexerService indexer;
     private final PaymentNameResolver nameResolver;
 
     public ConfirmPaymentUseCase(PaymentRepository payments, AuditRecorder audit,
-                                  OutboxEventStore outbox, PaymentIndexerService indexer,
-                                  PaymentNameResolver nameResolver) {
+                                  OutboxEventStore outbox, PaymentNameResolver nameResolver) {
         this.payments = payments;
         this.audit = audit;
         this.outbox = outbox;
-        this.indexer = indexer;
         this.nameResolver = nameResolver;
     }
 
@@ -54,8 +50,6 @@ public class ConfirmPaymentUseCase {
         outbox.append(new PaymentConfirmedEvent(UUID.randomUUID(), Instant.now(),
                 saved.id(), saved.reference().value(), saved.shopId(), saved.supplierId(),
                 actorUserId), String.valueOf(saved.id()));
-
-        indexer.indexPayment(saved);
 
         return PaymentResponse.from(saved, nameResolver.toNameResolver());
     }

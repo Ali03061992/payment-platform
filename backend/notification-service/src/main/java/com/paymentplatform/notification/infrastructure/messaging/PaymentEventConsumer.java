@@ -21,13 +21,16 @@ public class PaymentEventConsumer {
     private final NotificationRepository notifications;
     private final EventDeduplicator deduplicator;
     private final ObjectMapper objectMapper;
+    private final NotificationBroadcaster broadcaster;
 
     public PaymentEventConsumer(NotificationRepository notifications,
                                  EventDeduplicator deduplicator,
-                                 ObjectMapper objectMapper) {
+                                 ObjectMapper objectMapper,
+                                 NotificationBroadcaster broadcaster) {
         this.notifications = notifications;
         this.deduplicator = deduplicator;
         this.objectMapper = objectMapper;
+        this.broadcaster = broadcaster;
     }
 
     @RabbitListener(queues = "notification.payments")
@@ -62,18 +65,18 @@ public class PaymentEventConsumer {
         String amount = event.get("amount").asText();
         String currency = event.get("currency").asText();
 
-        notifications.save(new Notification(null, supplierId,
+        broadcaster.broadcastNotification(notifications.save(new Notification(null, supplierId,
                 "PAYMENT_CREATED",
                 "Nouveau paiement " + reference + " de " + amount + " " + currency,
                 "PAYMENT", reference
-        ));
+        )));
 
-        notifications.save(new Notification(
+        broadcaster.broadcastNotification(notifications.save(new Notification(
                 createdBy, shopId,
                 "PAYMENT_CREATED",
                 "Paiement " + reference + " de " + amount + " " + currency + " soumis",
                 "PAYMENT", reference
-        ));
+        )));
     }
 
     private void handlePaymentConfirmed(JsonNode event) {
@@ -82,18 +85,18 @@ public class PaymentEventConsumer {
         String reference = event.get("reference").asText();
         UUID confirmedBy = UUID.fromString(event.get("confirmedBy").asText());
 
-        notifications.save(new Notification(null, shopId,
+        broadcaster.broadcastNotification(notifications.save(new Notification(null, shopId,
                 "PAYMENT_CONFIRMED",
                 "Paiement " + reference + " confirm\u00e9 par le fournisseur",
                 "PAYMENT", reference
-        ));
+        )));
 
-        notifications.save(new Notification(
+        broadcaster.broadcastNotification(notifications.save(new Notification(
                 confirmedBy, supplierId,
                 "PAYMENT_CONFIRMED",
                 "Paiement " + reference + " confirm\u00e9",
                 "PAYMENT", reference
-        ));
+        )));
     }
 
     private void handlePaymentRejected(JsonNode event) {
@@ -101,11 +104,11 @@ public class PaymentEventConsumer {
         String reference = event.get("reference").asText();
         String reason = event.has("rejectionReason") ? event.get("rejectionReason").asText() : "";
 
-        notifications.save(new Notification(null, shopId,
+        broadcaster.broadcastNotification(notifications.save(new Notification(null, shopId,
                 "PAYMENT_REJECTED",
                 "Paiement " + reference + " rejet\u00e9" + (reason.isEmpty() ? "" : " : " + reason),
                 "PAYMENT", reference
-        ));
+        )));
     }
 
     private void handlePaymentCancelled(JsonNode event) {
@@ -114,17 +117,17 @@ public class PaymentEventConsumer {
         String reference = event.get("reference").asText();
         UUID cancelledBy = UUID.fromString(event.get("cancelledBy").asText());
 
-        notifications.save(new Notification(null, supplierId,
+        broadcaster.broadcastNotification(notifications.save(new Notification(null, supplierId,
                 "PAYMENT_CANCELLED",
                 "Paiement " + reference + " annul\u00e9 par la boutique",
                 "PAYMENT", reference
-        ));
+        )));
 
-        notifications.save(new Notification(
+        broadcaster.broadcastNotification(notifications.save(new Notification(
                 cancelledBy, shopId,
                 "PAYMENT_CANCELLED",
                 "Paiement " + reference + " annul\u00e9",
                 "PAYMENT", reference
-        ));
+        )));
     }
 }

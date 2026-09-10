@@ -1,0 +1,99 @@
+.export-page {
+  padding: 0;
+}
+
+.page-header {
+  margin-bottom: 24px;
+}
+
+.page-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: #0f2b4c;
+}
+
+.export-card {
+  background: #1a2a3f;
+  border-radius: 12px;
+  padding: 32px;
+  max-width: 500px;
+}
+
+.export-card h3 {
+  margin: 0 0 8px;
+  color: #e8ecf1;
+  font-size: 1.1rem;
+}
+
+.export-card p {
+  color: #8896ab;
+  margin: 0 0 24px;
+}
+
+.date-row {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.field {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field label {
+  font-size: 0.85rem;
+  color: #8896ab;
+  font-weight: 500;
+}
+
+.field input {
+  padding: 10px 12px;
+  border: 1px solid #2a3a50;
+  border-radius: 8px;
+  background: #0f1923;
+  color: #e8ecf1;
+  font-size: 0.95rem;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.field input:focus {
+  border-color: #3b82f6;
+}
+
+.error {
+  color: #ef4444;
+  margin-bottom: 16px;
+  font-size: 0.9rem;
+}
+
+.actions {
+  margin-top: 8px;
+}
+
+.btn {
+  padding: 10px 24px;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-primary {
+  background: #3b82f6;
+  color: #fff;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: #2563eb;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

@@ -12,6 +12,8 @@ export class NotificationService {
   private pollingSub?: Subscription;
   private unreadCountPollingSub?: Subscription;
   private lastUnreadCount = 0;
+  private eventSource: EventSource | null = null;
+  private reconnectTimer: any;
 
   notifications$ = this.notificationsSubject.asObservable();
   unreadCount$ = this.unreadCountSubject.asObservable();
@@ -36,6 +38,63 @@ export class NotificationService {
     this.unreadCountPollingSub?.unsubscribe();
   }
 
+  startRealtime(): void {
+    this.stopRealtime();
+
+    const token = sessionStorage.getItem('token');
+    if (!token) return;
+
+    const userJson = sessionStorage.getItem('user');
+    const user = userJson ? JSON.parse(userJson) : null;
+    const params = new URLSearchParams();
+    params.set('token', token);
+
+    if (user?.organizationId) {
+      params.set('orgId', user.organizationId);
+    } else if (user?.id) {
+      params.set('userId', user.id);
+    }
+
+    const url = `${this.apiUrl}/stream?${params.toString()}`;
+    this.eventSource = new EventSource(url);
+
+    this.eventSource.addEventListener('notification', (event: MessageEvent) => {
+      try {
+        const notification: Notification = JSON.parse(event.data);
+        this.addNotification(notification);
+      } catch (e) {
+        console.error('Failed to parse SSE notification', e);
+      }
+    });
+
+    this.eventSource.onerror = () => {
+      console.log('SSE connection error, will reconnect in 5s...');
+      this.stopRealtime();
+      this.reconnectTimer = setTimeout(() => this.startRealtime(), 5000);
+    };
+  }
+
+  stopRealtime(): void {
+    if (this.eventSource) {
+      this.eventSource.close();
+      this.eventSource = null;
+    }
+    if (this.reconnectTimer) {
+      clearTimeout(this.reconnectTimer);
+      this.reconnectTimer = null;
+    }
+  }
+
+  private addNotification(notification: Notification): void {
+    const current = this.notificationsSubject.getValue();
+    const exists = current.some(n => n.id === notification.id);
+    if (!exists) {
+      this.notificationsSubject.next([notification, ...current]);
+      this.unreadCountSubject.next(this.unreadCountSubject.getValue() + 1);
+      this.showBrowserNotification(notification);
+    }
+  }
+
   fetchNotifications(): Observable<Notification[]> {
     return this.http.get<Notification[]>(this.apiUrl).pipe(
       tap(list => this.notificationsSubject.next(list || []))
@@ -46,7 +105,6 @@ export class NotificationService {
     return this.http.get<{ count: number }>(`${this.apiUrl}/unread-count`).pipe(
       tap(res => {
         const newCount = res.count || 0;
-        // Show browser notification if count increased
         if (newCount > this.lastUnreadCount && this.lastUnreadCount > 0) {
           this.showBrowserNotification();
         }
@@ -64,7 +122,6 @@ export class NotificationService {
     return this.http.post<{ updated: number }>(`${this.apiUrl}/read-all`, {});
   }
 
-  // Browser Notification API
   requestPermission(): Promise<NotificationPermission> {
     if (!('Notification' in window)) {
       return Promise.resolve('denied');
@@ -79,15 +136,14 @@ export class NotificationService {
     return Notification.permission;
   }
 
-  showBrowserNotification(): void {
+  showBrowserNotification(notif?: Notification): void {
     if (!('Notification' in window)) return;
 
     if (Notification.permission === 'granted') {
-      const notifications = this.notificationsSubject.getValue();
-      if (notifications.length > 0) {
-        const latest = notifications[0];
+      const n = notif || this.notificationsSubject.getValue()[0];
+      if (n) {
         new window.Notification('Payment Platform', {
-          body: latest.message,
+          body: n.message,
           icon: 'assets/icons/icon-192x192.png',
           tag: 'payment-notification',
           renotify: true

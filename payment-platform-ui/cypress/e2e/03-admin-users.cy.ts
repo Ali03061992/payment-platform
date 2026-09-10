@@ -12,11 +12,11 @@ describe('03 - Admin: User Management', () => {
   });
 
   it('should show user table with columns', () => {
-    cy.get('table thead th').should('have.length', 8);
-    cy.get('table thead').should('contain', 'ID');
+    cy.get('table thead th').should('have.length', 7);
     cy.get('table thead').should('contain', "Nom d'utilisateur");
     cy.get('table thead').should('contain', 'Nom complet');
     cy.get('table thead').should('contain', 'Email');
+    cy.get('table thead').should('contain', 'Téléphone');
     cy.get('table thead').should('contain', 'Rôle');
     cy.get('table thead').should('contain', 'Statut');
     cy.get('table thead').should('contain', 'Actions');
@@ -25,7 +25,7 @@ describe('03 - Admin: User Management', () => {
   it('should display users in table', () => {
     cy.get('table tbody tr').should('have.length.gte', 1);
     cy.get('table tbody tr').first().within(() => {
-      cy.get('td').should('have.length', 8);
+      cy.get('td').should('have.length', 7);
     });
   });
 

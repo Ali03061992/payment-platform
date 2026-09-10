@@ -17,8 +17,9 @@ describe('08 - Shop: Order List', () => {
   });
 
   it('should show order table with all columns', () => {
-    cy.get('table thead th').should('have.length', 5);
+    cy.get('table thead th').should('have.length', 6);
     cy.get('table thead').should('contain', 'Référence');
+    cy.get('table thead').should('contain', 'Fournisseur');
     cy.get('table thead').should('contain', 'Date');
     cy.get('table thead').should('contain', 'Total');
     cy.get('table thead').should('contain', 'Statut');
