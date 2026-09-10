@@ -8,6 +8,8 @@ import com.paymentplatform.payment.infrastructure.http.OrganizationValidationCli
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import jakarta.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.IndexOperations;
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
@@ -21,14 +23,15 @@ public class PaymentIndexerService {
     private static final Logger log = LoggerFactory.getLogger(PaymentIndexerService.class);
     private static final String INDEX_NAME = "payments";
 
-    private final ElasticsearchOperations elasticsearchOperations;
+    @Autowired(required = false)
+    @Lazy
+    private ElasticsearchOperations elasticsearchOperations;
+
     private final OrganizationValidationClient orgClient;
     private final PaymentRepository payments;
 
-    public PaymentIndexerService(ElasticsearchOperations elasticsearchOperations,
-                                  OrganizationValidationClient orgClient,
+    public PaymentIndexerService(OrganizationValidationClient orgClient,
                                   PaymentRepository payments) {
-        this.elasticsearchOperations = elasticsearchOperations;
         this.orgClient = orgClient;
         this.payments = payments;
     }
@@ -39,6 +42,7 @@ public class PaymentIndexerService {
     }
 
     public void indexPayment(Payment payment) {
+        if (elasticsearchOperations == null) return;
         try {
             ensureIndexExists();
 
@@ -76,6 +80,7 @@ public class PaymentIndexerService {
     }
 
     public void removePayment(UUID paymentId) {
+        if (elasticsearchOperations == null) return;
         try {
             elasticsearchOperations.delete(String.valueOf(paymentId), IndexCoordinates.of(INDEX_NAME));
         } catch (Exception e) {
@@ -84,6 +89,7 @@ public class PaymentIndexerService {
     }
 
     private void ensureIndexExists() {
+        if (elasticsearchOperations == null) return;
         try {
             IndexOperations indexOps = elasticsearchOperations.indexOps(IndexCoordinates.of(INDEX_NAME));
             if (!indexOps.exists()) {

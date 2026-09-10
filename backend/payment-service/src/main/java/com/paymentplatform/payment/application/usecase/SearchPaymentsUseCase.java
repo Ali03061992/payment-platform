@@ -31,6 +31,10 @@ public class SearchPaymentsUseCase {
     }
 
     public SearchPaymentsResponse execute(SearchPaymentsRequest request, UUID supplierId) {
+        if (elasticsearchOperations == null) {
+            return new SearchPaymentsResponse(List.of(), 0L, request.page(), request.size());
+        }
+
         Criteria criteria = new Criteria();
 
         if (supplierId != null) {

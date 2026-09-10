@@ -18,7 +18,7 @@ import java.util.Optional;
 public class TestPaymentIndexerService extends PaymentIndexerService {
 
     public TestPaymentIndexerService() {
-        super(null, null, null);
+        super(null, null);
     }
 
     @Override
