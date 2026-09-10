@@ -5,7 +5,7 @@ spring:
   application:
     name: payment-service
   datasource:
-    url: jdbc:mysql://${MYSQL_HOST:localhost}:${MYSQL_PORT:3306}/payment_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+    url: jdbc:mysql://${MYSQL_HOST:localhost}:${MYSQL_PORT:3306}/payment_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&sendStringParametersAsUnicode=false
     username: ${MYSQL_USER:payment_app}
     password: ${MYSQL_PASSWORD:app-password-change-me}
   jpa:
