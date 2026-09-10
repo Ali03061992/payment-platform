@@ -62,7 +62,7 @@ export class LayoutComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.notificationService.startPolling(30000);
+    this.notificationService.startPolling(5000);
     this.subs.push(
       this.notificationService.notifications$.subscribe(n => this.notifications = n),
       this.notificationService.unreadCount$.subscribe(c => this.unreadCount = c)
