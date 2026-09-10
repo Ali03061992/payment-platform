@@ -131,7 +131,7 @@ public class PaymentController {
         var current = CurrentUser.get();
         if (!current.roles().contains("SYSTEM_ADMIN")) {
             UUID orgId = current.organizationId();
-            if (orgId == null || orgId != supplierId) {
+            if (orgId == null || !orgId.equals(supplierId)) {
                 return ResponseEntity.status(403).build();
             }
         }

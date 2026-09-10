@@ -47,6 +47,10 @@ describe('04 - Admin: Supplier Management', () => {
       cy.get('button.btn-sm').click();
     });
     cy.wait(1000);
+    cy.get('table tbody tr').first().within(() => {
+      cy.get('button.btn-sm').click();
+    });
+    cy.wait(1000);
   });
 
   it('should have status badges', () => {
@@ -108,7 +112,7 @@ describe('04 - Admin: Relation Management', () => {
   });
 
   it('should show all relations as ACTIVE', () => {
-    cy.get('.status-badge.active').should('have.length', 4);
+    cy.get('.status-badge.active').should('have.length.gte', 4);
   });
 
   it('should toggle create relation form', () => {

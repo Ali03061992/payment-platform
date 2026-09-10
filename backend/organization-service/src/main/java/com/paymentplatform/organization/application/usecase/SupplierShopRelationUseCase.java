@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class SupplierShopRelationUseCase {
@@ -62,8 +63,18 @@ public class SupplierShopRelationUseCase {
                     + " et la boutique " + request.shopId() + " existe déjà");
         }
 
-        SupplierShopRelation relation = SupplierShopRelation.create(supplierId, shopId);
-        SupplierShopRelation saved = relations.save(relation);
+        Optional<SupplierShopRelation> existing = relations.findBySupplierIdAndStatus(supplierId, RelationStatus.INACTIVE).stream()
+                .filter(r -> r.shopId().equals(shopId))
+                .findFirst();
+
+        SupplierShopRelation saved;
+        if (existing.isPresent()) {
+            existing.get().activate();
+            saved = relations.save(existing.get());
+        } else {
+            SupplierShopRelation relation = SupplierShopRelation.create(supplierId, shopId);
+            saved = relations.save(relation);
+        }
 
         audit.record(null, supplierId.value(), "RELATION_CREATED", saved.id(),
                 "{\"supplierId\":" + request.supplierId() + ",\"shopId\":" + request.shopId() + "}");

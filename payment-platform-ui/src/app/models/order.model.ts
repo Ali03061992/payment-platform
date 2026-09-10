@@ -3,6 +3,8 @@ export interface Order {
   reference: string;
   supplierId: string;
   shopId: string;
+  supplierName: string | null;
+  shopName: string | null;
   createdBy: string;
   createdByRole: string;
   source: string;

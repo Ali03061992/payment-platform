@@ -29,7 +29,6 @@
     <table>
       <thead>
         <tr>
-          <th>ID</th>
           <th>Nom d'utilisateur</th>
           <th>Nom complet</th>
           <th>Email</th>
@@ -41,7 +40,6 @@
       </thead>
       <tbody>
         <tr *ngFor="let user of users">
-          <td>{{ user.id }}</td>
           <td><strong>{{ user.username }}</strong></td>
           <td>{{ user.firstName }} {{ user.lastName }}</td>
           <td>{{ user.email }}</td>
@@ -58,7 +56,7 @@
           </td>
         </tr>
         <tr *ngIf="users.length === 0">
-          <td colspan="8" class="empty">Aucun utilisateur trouvé</td>
+          <td colspan="7" class="empty">Aucun utilisateur trouvé</td>
         </tr>
       </tbody>
     </table>

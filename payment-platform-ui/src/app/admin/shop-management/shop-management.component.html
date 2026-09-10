@@ -29,7 +29,6 @@
     <table>
       <thead>
         <tr>
-          <th>ID</th>
           <th>Nom</th>
           <th>Statut</th>
           <th>Créé le</th>
@@ -38,7 +37,6 @@
       </thead>
       <tbody>
         <tr *ngFor="let s of shops">
-          <td>{{ s.id }}</td>
           <td><strong>{{ s.name }}</strong></td>
           <td>
             <span class="status-badge" [class.active]="s.status === 'ACTIVE'" [class.disabled]="s.status === 'DISABLED'">
@@ -54,7 +52,7 @@
           </td>
         </tr>
         <tr *ngIf="shops.length === 0">
-          <td colspan="5" style="text-align:center;color:#8896ab;padding:32px;">Aucune boutique trouvée</td>
+          <td colspan="4" style="text-align:center;color:#8896ab;padding:32px;">Aucune boutique trouvée</td>
         </tr>
       </tbody>
     </table>

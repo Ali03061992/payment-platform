@@ -30,7 +30,7 @@
         <tbody>
           <tr *ngFor="let d of pendingDeliveries">
             <td><strong>{{ d.reference }}</strong></td>
-            <td>{{ d.shopId }}</td>
+            <td>{{ d.shopName || d.shopId }}</td>
             <td>{{ d.notes || '-' }}</td>
             <td>{{ d.total | number:'1.2-2' }} {{ d.currency }}</td>
             <td>{{ d.items?.length || 0 }} article(s)</td>
@@ -70,7 +70,7 @@
         <tbody>
           <tr *ngFor="let d of completedDeliveries">
             <td><strong>{{ d.reference }}</strong></td>
-            <td>{{ d.shopId }}</td>
+            <td>{{ d.shopName || d.shopId }}</td>
             <td>{{ d.notes || '-' }}</td>
             <td>{{ d.total | number:'1.2-2' }} {{ d.currency }}</td>
             <td>{{ d.items?.length || 0 }} article(s)</td>

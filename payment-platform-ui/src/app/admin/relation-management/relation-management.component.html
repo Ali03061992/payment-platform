@@ -40,7 +40,6 @@
     <table>
       <thead>
         <tr>
-          <th>ID</th>
           <th>Fournisseur</th>
           <th>Boutique</th>
           <th>Statut</th>
@@ -50,7 +49,6 @@
       </thead>
       <tbody>
         <tr *ngFor="let r of relations">
-          <td>{{ r.id }}</td>
           <td>{{ getSupplierName(r.supplierId) }}</td>
           <td>{{ getShopName(r.shopId) }}</td>
           <td>
@@ -66,7 +64,7 @@
           </td>
         </tr>
         <tr *ngIf="relations.length === 0">
-          <td colspan="6" style="text-align:center;color:#8896ab;padding:32px;">Aucune relation trouvée</td>
+          <td colspan="5" style="text-align:center;color:#8896ab;padding:32px;">Aucune relation trouvée</td>
         </tr>
       </tbody>
     </table>

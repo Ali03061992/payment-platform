@@ -1,6 +1,7 @@
 const API = () => Cypress.env('apiUrl') || 'http://localhost:8081';
 
 describe('01 - Auth: Login Page', () => {
+  before(() => cy.ensureTestUsers());
   beforeEach(() => cy.visit('/'));
 
   it('should display login form with all fields', () => {

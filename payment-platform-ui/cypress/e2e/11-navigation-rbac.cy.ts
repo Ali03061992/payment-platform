@@ -4,6 +4,7 @@ describe('11 - Navigation: Sidebar', () => {
   beforeEach(() => {
     cy.loginAsAdmin();
     cy.visit('/dashboard');
+    cy.get('.toggle-btn').click();
   });
 
   it('should display sidebar', () => {
@@ -181,9 +182,11 @@ describe('11 - Navigation: Supplier Sidebar Items', () => {
   it('should show supplier-specific nav items', () => {
     cy.loginAsSupplierAdmin();
     cy.visit('/dashboard');
-    cy.get('.sidebar-nav').should('contain.text', 'Catalogue');
-    cy.get('.sidebar-nav').should('contain.text', 'Stock');
-    cy.get('.sidebar-nav').should('contain.text', 'Commandes');
+    cy.get('.toggle-btn', { timeout: 10000 }).click({ force: true });
+    cy.wait(500);
+    cy.get('.sidebar-nav .nav-label').should('contain.text', 'Produits');
+    cy.get('.sidebar-nav .nav-label').should('contain.text', 'Stock');
+    cy.get('.sidebar-nav .nav-label').should('contain.text', 'Commandes');
   });
 });
 
@@ -193,7 +196,9 @@ describe('11 - Navigation: Shop Sidebar Items', () => {
   it('should show shop-specific nav items', () => {
     cy.loginAsShopAdmin();
     cy.visit('/dashboard');
-    cy.get('.sidebar-nav').should('contain.text', 'Mes commandes');
-    cy.get('.sidebar-nav').should('contain.text', 'Balance');
+    cy.get('.toggle-btn', { timeout: 10000 }).click({ force: true });
+    cy.wait(500);
+    cy.get('.sidebar-nav .nav-label').should('contain.text', 'Mes commandes');
+    cy.get('.sidebar-nav .nav-label').should('contain.text', 'Balance');
   });
 });

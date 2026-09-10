@@ -115,7 +115,7 @@ public class OrganizationValidationClient {
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
             if (response.statusCode() == 200 && response.body().contains("\"ACTIVE\"")) {
-                if (response.body().contains("\"shopId\":" + shopId)) {
+                if (response.body().contains("\"shopId\":\"" + shopId + "\"")) {
                     return;
                 }
             }

@@ -41,7 +41,7 @@
       <tbody>
         <tr *ngFor="let o of filteredOrders" class="clickable-row" (click)="viewDetail(o)">
           <td><strong>{{ o.reference }}</strong></td>
-          <td>{{ o.shopId }}</td>
+          <td>{{ o.shopName || o.shopId }}</td>
           <td>{{ o.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
           <td>{{ o.total | number:'1.2-2' }} {{ o.currency }}</td>
           <td>
@@ -91,7 +91,7 @@
         </div>
         <div class="detail-card">
           <div class="detail-label">Boutique</div>
-          <div class="detail-value">{{ selectedOrder.shopId }}</div>
+          <div class="detail-value">{{ selectedOrder.shopName || selectedOrder.shopId }}</div>
         </div>
         <div class="detail-card">
           <div class="detail-label">Source</div>

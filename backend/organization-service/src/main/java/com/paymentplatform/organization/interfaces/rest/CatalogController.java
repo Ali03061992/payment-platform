@@ -6,6 +6,7 @@ import com.paymentplatform.organization.domain.model.ProductCategory;
 import com.paymentplatform.organization.domain.model.ProductFamily;
 import com.paymentplatform.organization.domain.repository.ProductCategoryRepository;
 import com.paymentplatform.organization.domain.repository.ProductFamilyRepository;
+import com.paymentplatform.shared.domain.exception.ConflictException;
 import com.paymentplatform.shared.infrastructure.security.CurrentUser;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import java.net.URI;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 @RestController
@@ -46,7 +48,7 @@ public class CatalogController {
 
     @PostMapping("/categories")
     @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN','SYSTEM_ADMIN')")
-    public ResponseEntity<ProductCategory> createCategory(
+    public ResponseEntity<?> createCategory(
             @Valid @RequestBody CategoryRequest request) {
         var current = CurrentUser.get();
         UUID supplierId = request.supplierId();
@@ -54,7 +56,10 @@ public class CatalogController {
             return ResponseEntity.status(403).build();
         }
         if (categoryRepository.existsBySupplierIdAndCode(supplierId, request.code())) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().body(Map.of(
+                "error", "UNIQUE_CONSTRAINT_VIOLATION",
+                "message", "Une catégorie avec le code '" + request.code() + "' existe déjà pour ce fournisseur"
+            ));
         }
         ProductCategory category = new ProductCategory();
         category.setSupplierId(supplierId);

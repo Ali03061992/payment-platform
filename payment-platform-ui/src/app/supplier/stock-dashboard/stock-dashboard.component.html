@@ -137,7 +137,6 @@
             <th>Quantité</th>
             <th>Référence</th>
             <th>Notes</th>
-            <th>Par</th>
           </tr>
         </thead>
         <tbody>
@@ -151,10 +150,9 @@
             <td>{{ m.quantity }}</td>
             <td>{{ m.reference || '-' }}</td>
             <td>{{ m.notes || '-' }}</td>
-            <td>{{ m.createdBy }}</td>
           </tr>
           <tr *ngIf="historyMovements.length === 0">
-            <td colspan="6" class="empty">Aucun mouvement enregistré</td>
+            <td colspan="5" class="empty">Aucun mouvement enregistré</td>
           </tr>
         </tbody>
       </table>

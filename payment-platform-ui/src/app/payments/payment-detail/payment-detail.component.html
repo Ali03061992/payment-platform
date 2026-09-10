@@ -105,7 +105,6 @@
         <thead>
           <tr>
             <th>Action</th>
-            <th>Utilisateur</th>
             <th>Date</th>
             <th>Détails</th>
           </tr>
@@ -113,7 +112,6 @@
         <tbody>
           <tr *ngFor="let e of payment.events">
             <td><span class="payment-badge" [ngClass]="e.action.toLowerCase().replace('payment_', '')">{{ actionLabel(e.action) }}</span></td>
-            <td>{{ e.userName || 'User ' + e.userId }}</td>
             <td>{{ e.timestamp | date:'dd/MM/yyyy HH:mm:ss' }}</td>
             <td>{{ e.details || '-' }}</td>
           </tr>

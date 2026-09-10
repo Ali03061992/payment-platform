@@ -15,8 +15,8 @@
       <div class="detail-value">{{ order.reference }}</div>
     </div>
     <div class="detail-card">
-      <div class="detail-label">Fournisseur ID</div>
-      <div class="detail-value">{{ order.supplierId }}</div>
+      <div class="detail-label">Fournisseur</div>
+      <div class="detail-value">{{ order.supplierName || order.supplierId }}</div>
     </div>
     <div class="detail-card">
       <div class="detail-label">Statut</div>
@@ -119,7 +119,6 @@
         <thead>
           <tr>
             <th>Action</th>
-            <th>Utilisateur</th>
             <th>Date</th>
             <th>Détails</th>
           </tr>
@@ -131,7 +130,6 @@
                 {{ actionLabel(e.action) }}
               </span>
             </td>
-            <td>{{ e.userId }}</td>
             <td>{{ e.timestamp | date:'dd/MM/yyyy HH:mm:ss' }}</td>
             <td>{{ e.details || '-' }}</td>
           </tr>

@@ -14,6 +14,8 @@ public record OrderResponse(
         String reference,
         UUID supplierId,
         UUID shopId,
+        String supplierName,
+        String shopName,
         UUID createdBy,
         String createdByRole,
         String source,
@@ -35,6 +37,10 @@ public record OrderResponse(
         List<OrderItemResponse> items
 ) {
     public static OrderResponse from(Order order, List<OrderItem> orderItems) {
+        return from(order, orderItems, null, null);
+    }
+
+    public static OrderResponse from(Order order, List<OrderItem> orderItems, String supplierName, String shopName) {
         List<OrderItemResponse> items = orderItems.stream()
                 .map(OrderItemResponse::from)
                 .toList();
@@ -43,6 +49,8 @@ public record OrderResponse(
                 order.getReference(),
                 order.getSupplierId(),
                 order.getShopId(),
+                supplierName,
+                shopName,
                 order.getCreatedBy(),
                 order.getCreatedByRole(),
                 order.getSource(),

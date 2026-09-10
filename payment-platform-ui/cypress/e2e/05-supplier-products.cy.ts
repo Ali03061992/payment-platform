@@ -8,16 +8,16 @@ describe('05 - Supplier: Product Management', () => {
 
   it('should display product management page', () => {
     cy.url().should('include', '/supplier/products');
-    cy.get('.page-header h2').should('contain', 'Gestion des produits');
+    cy.get('.page-header h1').should('contain', 'Catalogue produits');
   });
 
   it('should show product table with all columns', () => {
-    cy.get('table thead th').should('have.length', 9);
+    cy.get('table thead th').should('have.length', 8);
     cy.get('table thead').should('contain', 'SKU');
     cy.get('table thead').should('contain', 'Nom');
     cy.get('table thead').should('contain', 'Famille');
-    cy.get('table.thead').should('contain', 'Prix');
-    cy.get('table thead').should('contain', 'Quantité');
+    cy.get('table thead').should('contain', 'Prix');
+    cy.get('table thead').should('contain', 'Unite');
     cy.get('table thead').should('contain', 'Statut');
     cy.get('table thead').should('contain', 'Actions');
   });
@@ -29,19 +29,19 @@ describe('05 - Supplier: Product Management', () => {
   it('should toggle create product form', () => {
     cy.get('.page-header button.btn-primary').click();
     cy.get('.form-card').should('be.visible');
-    cy.get('.form-card h3').should('contain', 'Créer un produit');
+    cy.get('.form-card h3').should('contain', 'Creer un produit');
     cy.get('input[name="name"]').should('exist');
     cy.get('input[name="sku"]').should('exist');
     cy.get('input[name="description"]').should('exist');
-    cy.get('select[name="family"]').should('exist');
-    cy.get('select[name="category"]').should('exist');
+    cy.get('select[name="familyId"]').should('exist');
+    cy.get('select[name="categoryId"]').should('exist');
     cy.get('select[name="currency"]').should('exist');
     cy.get('input[name="unitPrice"]').should('exist');
     cy.get('input[name="minQuantity"]').should('exist');
   });
 
   it('should filter products by category', () => {
-    cy.get('.filters select').should('exist');
+    cy.get('.filter-bar .filter-select').should('exist');
     cy.get('.result-count').should('exist');
   });
 

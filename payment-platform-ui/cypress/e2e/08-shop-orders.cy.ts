@@ -113,7 +113,7 @@ describe('08 - Shop: Order Detail', () => {
       const clickableRows = $tbody.find('tr.clickable-row');
       if (clickableRows.length > 0) {
         cy.wrap(clickableRows).first().click({ force: true });
-        cy.url({ timeout: 5000 }).should('match', /\/shop\/orders\/\d+/);
+        cy.url({ timeout: 5000 }).should('match', /\/shop\/orders\/[\w-]+/);
       }
     });
   });

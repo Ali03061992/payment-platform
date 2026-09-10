@@ -1,11 +1,14 @@
 package com.paymentplatform.organization.interfaces.rest;
 
 import java.util.UUID;
+import java.util.Optional;
 
 import com.paymentplatform.organization.application.dto.CreateOrderRequest;
 import com.paymentplatform.organization.application.dto.OrderResponse;
 import com.paymentplatform.organization.application.dto.PageResponse;
 import com.paymentplatform.organization.application.usecase.*;
+import com.paymentplatform.organization.domain.repository.OrganizationRepository;
+import com.paymentplatform.organization.domain.valueobject.OrganizationId;
 import com.paymentplatform.shared.infrastructure.security.CurrentUser;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.PageRequest;
@@ -31,6 +34,7 @@ public class OrderController {
     private final DeliveryRejectOrderUseCase deliveryRejectOrder;
     private final com.paymentplatform.organization.domain.repository.OrderRepository orderRepository;
     private final com.paymentplatform.organization.domain.repository.OrderItemRepository orderItemRepository;
+    private final OrganizationRepository organizationRepository;
 
     public OrderController(CreateOrderUseCase createOrder,
                            ConfirmOrderUseCase confirmOrder,
@@ -41,7 +45,8 @@ public class OrderController {
                            RejectOrderUseCase rejectOrder,
                            DeliveryRejectOrderUseCase deliveryRejectOrder,
                            com.paymentplatform.organization.domain.repository.OrderRepository orderRepository,
-                           com.paymentplatform.organization.domain.repository.OrderItemRepository orderItemRepository) {
+                           com.paymentplatform.organization.domain.repository.OrderItemRepository orderItemRepository,
+                           OrganizationRepository organizationRepository) {
         this.createOrder = createOrder;
         this.confirmOrder = confirmOrder;
         this.prepareOrder = prepareOrder;
@@ -52,6 +57,14 @@ public class OrderController {
         this.deliveryRejectOrder = deliveryRejectOrder;
         this.orderRepository = orderRepository;
         this.orderItemRepository = orderItemRepository;
+        this.organizationRepository = organizationRepository;
+    }
+
+    private String resolveOrgName(UUID orgId) {
+        if (orgId == null) return null;
+        return organizationRepository.findById(OrganizationId.of(orgId))
+                .map(org -> org.name().value())
+                .orElse(null);
     }
 
     @PostMapping
@@ -86,20 +99,20 @@ public class OrderController {
             List<OrderResponse> responses = orders.stream()
                     .map(o -> {
                         var items = orderItemRepository.findByOrderId(o.getId());
-                        return OrderResponse.from(o, items);
+                        return OrderResponse.from(o, items, resolveOrgName(o.getSupplierId()), resolveOrgName(o.getShopId()));
                     })
                     .toList();
             return ResponseEntity.ok(new PageResponse<>(responses, responses.size(), 1, 0));
         } else {
             return ResponseEntity.ok(PageResponse.of(orderRepository.findAll(pageable).map(o -> {
                 var items = orderItemRepository.findByOrderId(o.getId());
-                return OrderResponse.from(o, items);
+                return OrderResponse.from(o, items, resolveOrgName(o.getSupplierId()), resolveOrgName(o.getShopId()));
             })));
         }
 
         return ResponseEntity.ok(PageResponse.of(orderPage.map(o -> {
             var items = orderItemRepository.findByOrderId(o.getId());
-            return OrderResponse.from(o, items);
+            return OrderResponse.from(o, items, resolveOrgName(o.getSupplierId()), resolveOrgName(o.getShopId()));
         })));
     }
 
@@ -118,7 +131,7 @@ public class OrderController {
             if (!isSupplier && !isShop && !isDeliveryAgent) return ResponseEntity.status(403).build();
         }
         var items = orderItemRepository.findByOrderId(id);
-        return ResponseEntity.ok(OrderResponse.from(o, items));
+        return ResponseEntity.ok(OrderResponse.from(o, items, resolveOrgName(o.getSupplierId()), resolveOrgName(o.getShopId())));
     }
 
     @PostMapping("/{id}/confirm")
@@ -152,7 +165,7 @@ public class OrderController {
         order.get().assignDeliveryAgent(body.get("agentId"));
         orderRepository.save(order.get());
         var items = orderItemRepository.findByOrderId(id);
-        return ResponseEntity.ok(OrderResponse.from(order.get(), items));
+        return ResponseEntity.ok(OrderResponse.from(order.get(), items, resolveOrgName(order.get().getSupplierId()), resolveOrgName(order.get().getShopId())));
     }
 
     @PostMapping("/{id}/deliver")
@@ -212,7 +225,7 @@ public class OrderController {
         List<OrderResponse> responses = orders.stream()
                 .map(o -> {
                     var items = orderItemRepository.findByOrderId(o.getId());
-                    return OrderResponse.from(o, items);
+                    return OrderResponse.from(o, items, resolveOrgName(o.getSupplierId()), resolveOrgName(o.getShopId()));
                 })
                 .toList();
         return ResponseEntity.ok(responses);
