@@ -7,6 +7,7 @@ import com.paymentplatform.organization.domain.model.OrderItem;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
 
 public record OrderResponse(
@@ -29,6 +30,8 @@ public record OrderResponse(
         UUID receivedBy,
         Instant receivedAt,
         Instant deliveredAt,
+        LocalDate plannedDeliveryDate,
+        LocalDate confirmedDeliveryDate,
         boolean asapPayment,
         String notes,
         Long version,
@@ -64,6 +67,8 @@ public record OrderResponse(
                 order.getReceivedBy(),
                 order.getReceivedAt(),
                 order.getDeliveredAt(),
+                order.getPlannedDeliveryDate(),
+                order.getConfirmedDeliveryDate(),
                 order.isAsapPayment(),
                 order.getNotes(),
                 order.getVersion(),

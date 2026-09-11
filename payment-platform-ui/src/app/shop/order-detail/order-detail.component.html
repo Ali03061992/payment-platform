@@ -36,6 +36,14 @@
       <div class="detail-label">Créé le</div>
       <div class="detail-value">{{ order.createdAt | date:'dd/MM/yyyy HH:mm:ss' }}</div>
     </div>
+    <div class="detail-card" *ngIf="order.plannedDeliveryDate">
+      <div class="detail-label">Date prévue</div>
+      <div class="detail-value">{{ order.plannedDeliveryDate }}</div>
+    </div>
+    <div class="detail-card" *ngIf="order.confirmedDeliveryDate">
+      <div class="detail-label">Date confirmée</div>
+      <div class="detail-value">{{ order.confirmedDeliveryDate }}</div>
+    </div>
     <div class="detail-card" *ngIf="order.deliveredAt">
       <div class="detail-label">Livré le</div>
       <div class="detail-value">{{ order.deliveredAt | date:'dd/MM/yyyy HH:mm:ss' }}</div>

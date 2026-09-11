@@ -54,6 +54,7 @@ public class OrderEventConsumer {
                 case "order.accepted" -> handleOrderAccepted(event);
                 case "order.cancelled" -> handleOrderCancelled(event);
                 case "order.rejected" -> handleOrderRejected(event);
+                case "order.delivery_confirmed" -> handleOrderDeliveryConfirmed(event);
                 case "order.delivery_rejected" -> handleOrderDeliveryRejected(event);
                 case "order.low_stock_alert" -> handleLowStockAlert(event);
                 default -> log.warn("Unknown order routing key: {}", routingKey);
@@ -162,6 +163,25 @@ public class OrderEventConsumer {
         broadcaster.broadcastNotification(notifications.save(new Notification(null, supplierId,
                 "ORDER_REJECTED",
                 "Commande " + reference + " rejetée par la boutique",
+                "ORDER", reference
+        )));
+    }
+
+    private void handleOrderDeliveryConfirmed(JsonNode event) {
+        UUID shopId = UUID.fromString(event.get("shopId").asText());
+        UUID supplierId = UUID.fromString(event.get("supplierId").asText());
+        String reference = event.get("reference").asText();
+        String confirmedDate = event.has("confirmedDate") ? event.get("confirmedDate").asText() : "";
+
+        broadcaster.broadcastNotification(notifications.save(new Notification(null, shopId,
+                "ORDER_DELIVERY_CONFIRMED",
+                "Livraison de la commande " + reference + " confirmée pour le " + confirmedDate,
+                "ORDER", reference
+        )));
+
+        broadcaster.broadcastNotification(notifications.save(new Notification(null, supplierId,
+                "ORDER_DELIVERY_CONFIRMED",
+                "Livraison de la commande " + reference + " confirmée pour le " + confirmedDate,
                 "ORDER", reference
         )));
     }

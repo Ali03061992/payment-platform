@@ -23,6 +23,7 @@ export class OrderManagementComponent implements OnInit, OnDestroy {
   showAssignModal = false;
   assignOrderId = '';
   assignAgentId = '';
+  assignPlannedDate = '';
   assigning = false;
   agents: { id: string; firstName: string; lastName: string }[] = [];
 
@@ -149,6 +150,9 @@ export class OrderManagementComponent implements OnInit, OnDestroy {
   openAssign(order: Order): void {
     this.assignOrderId = order.id;
     this.assignAgentId = '';
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    this.assignPlannedDate = tomorrow.toISOString().split('T')[0];
     this.showAssignModal = true;
   }
 
@@ -159,7 +163,7 @@ export class OrderManagementComponent implements OnInit, OnDestroy {
   submitAssign(): void {
     if (!this.assignAgentId) return;
     this.assigning = true;
-    this.subscriptions.add(this.orderService.assignDelivery(this.assignOrderId, this.assignAgentId).subscribe({
+    this.subscriptions.add(this.orderService.assignDelivery(this.assignOrderId, this.assignAgentId, this.assignPlannedDate).subscribe({
       next: () => {
         this.toast.success('Agent assigné avec succès');
         this.closeAssign();

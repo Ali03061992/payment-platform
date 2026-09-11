@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequestWrapper;
 import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,11 +21,6 @@ import java.time.Instant;
 import java.util.Base64;
 import java.util.Map;
 
-/**
- * Filtre de validation JWT côté Gateway.
- * Vérifie la signature et l'expiration du token avant de proxyer la requête.
- * La ré-authentification détaillée est déléguée aux microservices backend.
- */
 @Component
 public class JwtValidationFilter extends OncePerRequestFilter {
 
@@ -46,19 +42,45 @@ public class JwtValidationFilter extends OncePerRequestFilter {
             return;
         }
 
+        String token = null;
         String authHeader = request.getHeader("Authorization");
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            token = authHeader.substring(7);
+        } else if (path.equals("/api/notifications/stream")) {
+            String query = request.getQueryString();
+            if (query != null) {
+                for (String param : query.split("&")) {
+                    String[] kv = param.split("=", 2);
+                    if (kv.length == 2 && "token".equals(kv[0])) {
+                        token = java.net.URLDecoder.decode(kv[1], java.nio.charset.StandardCharsets.UTF_8);
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (token == null) {
             sendError(response, 401, "Token d'authentification manquant", path);
             return;
         }
 
-        String token = authHeader.substring(7);
         if (!validateJwt(token)) {
             sendError(response, 401, "Token invalide ou expiré", path);
             return;
         }
 
-        filterChain.doFilter(request, response);
+        String finalToken = token;
+        HttpServletRequest wrappedRequest = new HttpServletRequestWrapper(request) {
+            @Override
+            public String getHeader(String name) {
+                if ("Authorization".equalsIgnoreCase(name)) {
+                    return "Bearer " + finalToken;
+                }
+                return super.getHeader(name);
+            }
+        };
+
+        filterChain.doFilter(wrappedRequest, response);
     }
 
     private boolean isPublicPath(String path) {

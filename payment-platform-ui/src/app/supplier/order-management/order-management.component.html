@@ -101,6 +101,14 @@
           <div class="detail-label">Créé le</div>
           <div class="detail-value">{{ selectedOrder.createdAt | date:'dd/MM/yyyy HH:mm:ss' }}</div>
         </div>
+        <div class="detail-card" *ngIf="selectedOrder.plannedDeliveryDate">
+          <div class="detail-label">Date prévue</div>
+          <div class="detail-value">{{ selectedOrder.plannedDeliveryDate }}</div>
+        </div>
+        <div class="detail-card" *ngIf="selectedOrder.confirmedDeliveryDate">
+          <div class="detail-label">Date confirmée</div>
+          <div class="detail-value">{{ selectedOrder.confirmedDeliveryDate }}</div>
+        </div>
       </div>
 
       <div class="table-card" style="margin-top: 16px;" *ngIf="selectedOrder && selectedOrder.items && selectedOrder.items.length > 0">
@@ -182,6 +190,10 @@
           <option [ngValue]="0">-- Sélectionner --</option>
           <option *ngFor="let a of agents" [ngValue]="a.id">{{ a.firstName }} {{ a.lastName }}</option>
         </select>
+      </div>
+      <div class="form-group">
+        <label>Date prévue de livraison</label>
+        <input type="date" [(ngModel)]="assignPlannedDate" name="plannedDate" class="form-control" required>
       </div>
       <div class="form-actions">
         <button type="button" class="btn btn-secondary" (click)="closeAssign()">Annuler</button>

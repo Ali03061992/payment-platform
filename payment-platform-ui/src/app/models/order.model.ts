@@ -18,6 +18,8 @@ export interface Order {
   receivedBy: string | null;
   receivedAt: string | null;
   deliveredAt: string | null;
+  plannedDeliveryDate: string | null;
+  confirmedDeliveryDate: string | null;
   asapPayment: boolean;
   notes: string | null;
   version: number;

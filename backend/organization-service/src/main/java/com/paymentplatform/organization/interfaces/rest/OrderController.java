@@ -9,6 +9,7 @@ import com.paymentplatform.organization.application.dto.PageResponse;
 import com.paymentplatform.organization.application.usecase.*;
 import com.paymentplatform.organization.domain.repository.OrganizationRepository;
 import com.paymentplatform.organization.domain.valueobject.OrganizationId;
+import com.paymentplatform.organization.infrastructure.http.PaymentClient;
 import com.paymentplatform.shared.infrastructure.security.CurrentUser;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.PageRequest;
@@ -17,6 +18,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -32,6 +34,8 @@ public class OrderController {
     private final CancelOrderUseCase cancelOrder;
     private final RejectOrderUseCase rejectOrder;
     private final DeliveryRejectOrderUseCase deliveryRejectOrder;
+    private final ConfirmDeliveryUseCase confirmDeliveryUseCase;
+    private final PaymentClient paymentClient;
     private final com.paymentplatform.organization.domain.repository.OrderRepository orderRepository;
     private final com.paymentplatform.organization.domain.repository.OrderItemRepository orderItemRepository;
     private final OrganizationRepository organizationRepository;
@@ -44,6 +48,8 @@ public class OrderController {
                            CancelOrderUseCase cancelOrder,
                            RejectOrderUseCase rejectOrder,
                            DeliveryRejectOrderUseCase deliveryRejectOrder,
+                           ConfirmDeliveryUseCase confirmDeliveryUseCase,
+                           PaymentClient paymentClient,
                            com.paymentplatform.organization.domain.repository.OrderRepository orderRepository,
                            com.paymentplatform.organization.domain.repository.OrderItemRepository orderItemRepository,
                            OrganizationRepository organizationRepository) {
@@ -55,6 +61,8 @@ public class OrderController {
         this.cancelOrder = cancelOrder;
         this.rejectOrder = rejectOrder;
         this.deliveryRejectOrder = deliveryRejectOrder;
+        this.confirmDeliveryUseCase = confirmDeliveryUseCase;
+        this.paymentClient = paymentClient;
         this.orderRepository = orderRepository;
         this.orderItemRepository = orderItemRepository;
         this.organizationRepository = organizationRepository;
@@ -159,13 +167,27 @@ public class OrderController {
     @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN')")
     public ResponseEntity<OrderResponse> assignDeliveryAgent(
             @PathVariable UUID id,
-            @RequestBody Map<String, UUID> body) {
+            @RequestBody Map<String, Object> body) {
         var order = orderRepository.findById(id);
         if (order.isEmpty()) return ResponseEntity.notFound().build();
-        order.get().assignDeliveryAgent(body.get("agentId"));
+        UUID agentId = UUID.fromString(body.get("agentId").toString());
+        order.get().assignDeliveryAgent(agentId);
+        if (body.containsKey("plannedDeliveryDate") && body.get("plannedDeliveryDate") != null) {
+            order.get().setPlannedDeliveryDate(LocalDate.parse(body.get("plannedDeliveryDate").toString()));
+        }
         orderRepository.save(order.get());
         var items = orderItemRepository.findByOrderId(id);
         return ResponseEntity.ok(OrderResponse.from(order.get(), items, resolveOrgName(order.get().getSupplierId()), resolveOrgName(order.get().getShopId())));
+    }
+
+    @PostMapping("/{id}/confirm-delivery")
+    @PreAuthorize("hasAnyAuthority('DELIVERY_AGENT', 'SUPPLIER_ADMIN')")
+    public ResponseEntity<OrderResponse> confirmDelivery(
+            @PathVariable UUID id,
+            @RequestBody Map<String, String> body) {
+        var current = CurrentUser.get();
+        LocalDate confirmedDate = LocalDate.parse(body.get("confirmedDate"));
+        return ResponseEntity.ok(confirmDeliveryUseCase.execute(id, confirmedDate, current.userId()));
     }
 
     @PostMapping("/{id}/deliver")
@@ -189,7 +211,10 @@ public class OrderController {
     public ResponseEntity<OrderResponse> acceptAsapOrder(@PathVariable UUID id) {
         var current = CurrentUser.get();
         OrderResponse response = acceptOrder.execute(id, current.userId());
-        // TODO: auto-create payment for ASAP orders
+        if (response.asapPayment()) {
+            paymentClient.createAutoPayment(response.shopId(), response.supplierId(),
+                    response.currency(), current.userId());
+        }
         return ResponseEntity.ok(response);
     }
 

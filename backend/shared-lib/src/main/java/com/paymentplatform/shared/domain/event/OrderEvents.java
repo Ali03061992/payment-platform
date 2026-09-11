@@ -93,6 +93,16 @@ public final class OrderEvents {
         @Override public String aggregateId() { return String.valueOf(orderId); }
     }
 
+    public record OrderDeliveryConfirmedEvent(UUID eventId, Instant occurredAt, UUID orderId, String reference,
+                                               UUID shopId, UUID supplierId, UUID agentId, String confirmedDate)
+            implements DomainEvent {
+        public static final String EVENT_TYPE = "order.delivery_confirmed";
+
+        @Override public String eventType() { return EVENT_TYPE; }
+        @Override public int eventVersion() { return 1; }
+        @Override public String aggregateId() { return String.valueOf(orderId); }
+    }
+
     public record LowStockAlertEvent(UUID eventId, Instant occurredAt, UUID productId, String productName,
                                       String sku, int availableQty, int minQuantity, UUID supplierId)
             implements DomainEvent {

@@ -8,6 +8,7 @@ import jakarta.persistence.*;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "orders")
@@ -64,6 +65,12 @@ public class Order {
 
     @Column(name = "delivered_at")
     private Instant deliveredAt;
+
+    @Column(name = "planned_delivery_date")
+    private LocalDate plannedDeliveryDate;
+
+    @Column(name = "confirmed_delivery_date")
+    private LocalDate confirmedDeliveryDate;
 
     @Column(name = "asap_payment", nullable = false)
     private boolean asapPayment;
@@ -149,7 +156,18 @@ public class Order {
             throw new ConflictException("L'ID de l'agent de livraison est requis");
         }
         this.deliveryAgentId = agentId;
+        if (this.plannedDeliveryDate == null) {
+            this.plannedDeliveryDate = LocalDate.now().plusDays(1);
+        }
         this.updatedAt = Instant.now();
+    }
+
+    public void confirmDelivery(LocalDate confirmedDate) {
+        if (confirmedDate == null) {
+            throw new ConflictException("La date de livraison confirmée est requise");
+        }
+        this.confirmedDeliveryDate = confirmedDate;
+        transitionTo(OrderStatus.IN_DELIVERY);
     }
 
     public void deliver(UUID receivedBy) {
@@ -200,6 +218,8 @@ public class Order {
     public Instant getReceivedAt() { return receivedAt; }
     public Instant getDeliveredAt() { return deliveredAt; }
     public boolean isAsapPayment() { return asapPayment; }
+    public LocalDate getPlannedDeliveryDate() { return plannedDeliveryDate; }
+    public LocalDate getConfirmedDeliveryDate() { return confirmedDeliveryDate; }
     public String getNotes() { return notes; }
     public Long getVersion() { return version; }
     public Instant getCreatedAt() { return createdAt; }
@@ -207,5 +227,6 @@ public class Order {
 
     public void setSubtotal(BigDecimal subtotal) { this.subtotal = subtotal; }
     public void setTaxRate(BigDecimal taxRate) { this.taxRate = taxRate; }
+    public void setPlannedDeliveryDate(LocalDate plannedDeliveryDate) { this.plannedDeliveryDate = plannedDeliveryDate; }
     public void setNotes(String notes) { this.notes = notes; }
 }

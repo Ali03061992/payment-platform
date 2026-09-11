@@ -17,6 +17,11 @@ export class DeliveryManagementComponent implements OnInit {
   receivedBy = '';
   delivering = false;
 
+  showConfirmDateModal = false;
+  confirmDateOrder: Order | null = null;
+  confirmedDate = '';
+  confirming = false;
+
   constructor(private orderService: OrderService, private toast: ToastService) {}
 
   ngOnInit(): void {
@@ -31,12 +36,44 @@ export class DeliveryManagementComponent implements OnInit {
     });
   }
 
-  get pendingDeliveries(): Order[] {
+  get pendingConfirmations(): Order[] {
+    return this.deliveries.filter(d => d.status === 'READY_FOR_DELIVERY');
+  }
+
+  get activeDeliveries(): Order[] {
     return this.deliveries.filter(d => d.status === 'IN_DELIVERY');
   }
 
   get completedDeliveries(): Order[] {
     return this.deliveries.filter(d => d.status === 'DELIVERED');
+  }
+
+  openConfirmDate(order: Order): void {
+    this.confirmDateOrder = order;
+    this.confirmedDate = order.plannedDeliveryDate || '';
+    this.showConfirmDateModal = true;
+  }
+
+  closeConfirmDate(): void {
+    this.showConfirmDateModal = false;
+    this.confirmDateOrder = null;
+  }
+
+  submitConfirmDate(): void {
+    if (!this.confirmDateOrder || !this.confirmedDate) return;
+    this.confirming = true;
+    this.orderService.confirmDelivery(this.confirmDateOrder.id, this.confirmedDate).subscribe({
+      next: () => {
+        this.toast.success('Date de livraison confirmée');
+        this.closeConfirmDate();
+        this.confirming = false;
+        this.loadDeliveries();
+      },
+      error: (err: any) => {
+        this.toast.error(err.error?.message || 'Erreur');
+        this.confirming = false;
+      }
+    });
   }
 
   openDeliver(order: Order): void {
@@ -69,6 +106,7 @@ export class DeliveryManagementComponent implements OnInit {
 
   statusLabel(s: string): string {
     const map: Record<string, string> = {
+      READY_FOR_DELIVERY: 'En attente de confirmation',
       IN_DELIVERY: 'En livraison',
       DELIVERED: 'Livré'
     };
@@ -77,6 +115,7 @@ export class DeliveryManagementComponent implements OnInit {
 
   statusClass(s: string): string {
     const map: Record<string, string> = {
+      READY_FOR_DELIVERY: 'pending',
       IN_DELIVERY: 'in-delivery',
       DELIVERED: 'delivered'
     };

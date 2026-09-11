@@ -151,6 +151,19 @@ class OrderEventConsumerTest {
     }
 
     @Test
+    void onOrderEvent_deliveryConfirmed_createsNotifications() throws Exception {
+        String payload = """
+                {"eventId":"evt-ord-12","eventType":"order.delivery_confirmed","shopId":10,"supplierId":20,
+                 "reference":"ORD-012","confirmedDate":"2026-09-15"}
+                """;
+        Message message = createMessage(payload, "order.delivery_confirmed");
+
+        consumer.onOrderEvent(message);
+
+        assertThat(notifications.count()).isEqualTo(2);
+    }
+
+    @Test
     void onOrderEvent_lowStockAlert_createsNotification() throws Exception {
         String payload = """
                 {"eventId":"evt-ord-10","eventType":"order.low_stock_alert","supplierId":20,

@@ -45,8 +45,12 @@ export class OrderService {
     return this.http.post<Order>(`${this.apiUrl}/${id}/ready`, {});
   }
 
-  assignDelivery(id: string, agentId: string): Observable<Order> {
-    return this.http.post<Order>(`${this.apiUrl}/${id}/assign-delivery`, { agentId });
+  assignDelivery(id: string, agentId: string, plannedDeliveryDate?: string): Observable<Order> {
+    return this.http.post<Order>(`${this.apiUrl}/${id}/assign-delivery`, { agentId, plannedDeliveryDate });
+  }
+
+  confirmDelivery(id: string, confirmedDate: string): Observable<Order> {
+    return this.http.post<Order>(`${this.apiUrl}/${id}/confirm-delivery`, { confirmedDate });
   }
 
   deliver(id: string, receivedBy: string): Observable<Order> {
