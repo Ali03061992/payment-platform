@@ -26,10 +26,7 @@ public class OrganizationValidationClient {
     private final HttpClient httpClient = HttpClient.newHttpClient();
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    @Value("${app.gateway.base-url:http://localhost:8081}")
-    private String gatewayBaseUrl;
-
-    @Value("${app.organization-service.url:organization-service}")
+    @Value("${app.organization-service.url:localhost}")
     private String organizationServiceUrl;
 
     @Value("${app.organization-service.port:8083}")
@@ -45,7 +42,7 @@ public class OrganizationValidationClient {
     private String internalSecret;
 
     public void validateShop(UUID shopId) {
-        String url = gatewayBaseUrl + "/api/organizations/internal/" + shopId + "/status";
+        String url = "http://" + organizationServiceUrl + ":" + organizationServicePort + "/api/organizations/internal/" + shopId + "/status";
         try {
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(url))
@@ -75,7 +72,7 @@ public class OrganizationValidationClient {
     }
 
     public void validateSupplier(UUID supplierId) {
-        String url = gatewayBaseUrl + "/api/organizations/internal/" + supplierId + "/status";
+        String url = "http://" + organizationServiceUrl + ":" + organizationServicePort + "/api/organizations/internal/" + supplierId + "/status";
         try {
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(url))
@@ -105,7 +102,7 @@ public class OrganizationValidationClient {
     }
 
     public void validateRelation(UUID shopId, UUID supplierId) {
-        String url = gatewayBaseUrl + "/api/organizations/internal/relations/supplier/" + supplierId;
+        String url = "http://" + organizationServiceUrl + ":" + organizationServicePort + "/api/organizations/internal/relations/supplier/" + supplierId;
         try {
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(url))

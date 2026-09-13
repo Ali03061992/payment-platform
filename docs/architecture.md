@@ -4,7 +4,7 @@
 
 ```
                          ┌─────────────────┐
-                         │  Angular 22     │  (nginx, port 8080)
+                         │  Angular 16     │  (nginx, port 8080)
                          └────────┬────────┘
                                   │ HTTPS/REST + SSE (notifications)
                                   ▼

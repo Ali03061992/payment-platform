@@ -42,7 +42,7 @@ jobs:
     - mvnw -B verify              # compile + unit + integration (services: mysql+rabbitmq Testcontainers)
     - mvnw -B package -DskipTests # artifacts
   frontend:
-    - setup-node 22
+    - setup-node 18
     - npm ci && npm run lint && npm test && npm run build
   e2e:
     - docker compose -f deploy/docker-compose.yml up --build -d

@@ -74,4 +74,19 @@ public class NotificationBroadcaster {
     public int getActiveCount() {
         return emitters.values().stream().mapToInt(List::size).sum();
     }
+
+    public void sendHeartbeat() {
+        List<SseEmitter> dead = new ArrayList<>();
+        for (var entry : emitters.entrySet()) {
+            for (SseEmitter emitter : entry.getValue()) {
+                try {
+                    emitter.send(SseEmitter.event().name("heartbeat").data(""));
+                } catch (IOException | IllegalStateException e) {
+                    dead.add(emitter);
+                }
+            }
+            entry.getValue().removeAll(dead);
+            dead.clear();
+        }
+    }
 }

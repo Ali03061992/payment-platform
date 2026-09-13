@@ -90,8 +90,8 @@ public class GatewayProxyController {
             org.springframework.web.bind.annotation.RequestMethod.DELETE
     })
     public ResponseEntity<?> proxyNotification(HttpServletRequest request,
-                                                 @RequestBody(required = false) byte[] body,
-                                                 HttpServletResponse servletResponse) throws Exception {
+                                                  @RequestBody(required = false) byte[] body,
+                                                  HttpServletResponse servletResponse) throws Exception {
         String accept = request.getHeader("Accept");
         boolean isSse = accept != null && accept.contains("text/event-stream");
 

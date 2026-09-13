@@ -60,7 +60,7 @@ class OrderControllerTest {
     }
 
     private UsernamePasswordAuthenticationToken deliveryAgent() {
-        return auth(UUID.fromString("00000000-0000-0000-0000-000000000004"), "delivery.agent", List.of("DELIVERY_AGENT"), null);
+        return auth(UUID.fromString("00000000-0000-0000-0000-000000000004"), "delivery.agent", List.of("SUPPLIER_AGENT"), null);
     }
 
     @Test

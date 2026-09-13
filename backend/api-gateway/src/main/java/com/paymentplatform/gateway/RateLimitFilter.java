@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -22,6 +23,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Protège le gateway contre les abus et les attaques DDoS.
  */
 @Component
+@Order(3)
 public class RateLimitFilter extends OncePerRequestFilter {
 
     private static final Logger log = LoggerFactory.getLogger(RateLimitFilter.class);
@@ -39,7 +41,7 @@ public class RateLimitFilter extends OncePerRequestFilter {
         String clientIp = getClientIp(request);
         String path = request.getRequestURI();
 
-        if (isPublicPath(path)) {
+        if ("OPTIONS".equalsIgnoreCase(request.getMethod()) || isPublicPath(path)) {
             filterChain.doFilter(request, response);
             return;
         }

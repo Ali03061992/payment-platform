@@ -13,6 +13,7 @@ import com.paymentplatform.organization.infrastructure.http.PaymentClient;
 import com.paymentplatform.shared.infrastructure.security.CurrentUser;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -85,13 +86,13 @@ public class OrderController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SHOP_ADMIN', 'SHOP_MANAGER', 'DELIVERY_AGENT', 'SYSTEM_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_MANAGER', 'SYSTEM_ADMIN')")
     public ResponseEntity<PageResponse<OrderResponse>> listOrders(
             @RequestParam(required = false) String status,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "50") int size) {
         var current = CurrentUser.get();
-        var pageable = PageRequest.of(page, size);
+        var pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
         org.springframework.data.domain.Page<com.paymentplatform.organization.domain.model.Order> orderPage;
 
         if ((current.roles().contains("SUPPLIER_ADMIN") || current.roles().contains("SUPPLIER_AGENT")) && current.organizationId() != null) {
@@ -102,7 +103,7 @@ public class OrderController {
             orderPage = (status != null && !status.isBlank())
                     ? orderRepository.findByShopIdAndStatus(current.organizationId(), status, pageable)
                     : orderRepository.findByShopId(current.organizationId(), pageable);
-        } else if (current.roles().contains("DELIVERY_AGENT")) {
+        } else if (current.roles().contains("SUPPLIER_AGENT")) {
             List<com.paymentplatform.organization.domain.model.Order> orders = orderRepository.findByDeliveryAgentId(current.userId());
             List<OrderResponse> responses = orders.stream()
                     .map(o -> {
@@ -125,7 +126,7 @@ public class OrderController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SHOP_ADMIN', 'SHOP_MANAGER', 'DELIVERY_AGENT', 'SYSTEM_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_MANAGER', 'SYSTEM_ADMIN')")
     public ResponseEntity<OrderResponse> getOrder(@PathVariable UUID id) {
         var current = CurrentUser.get();
         var order = orderRepository.findById(id);
@@ -181,7 +182,7 @@ public class OrderController {
     }
 
     @PostMapping("/{id}/confirm-delivery")
-    @PreAuthorize("hasAnyAuthority('DELIVERY_AGENT', 'SUPPLIER_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('SUPPLIER_AGENT', 'SUPPLIER_ADMIN')")
     public ResponseEntity<OrderResponse> confirmDelivery(
             @PathVariable UUID id,
             @RequestBody Map<String, String> body) {
@@ -191,7 +192,7 @@ public class OrderController {
     }
 
     @PostMapping("/{id}/deliver")
-    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'DELIVERY_AGENT')")
+    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SUPPLIER_AGENT')")
     public ResponseEntity<OrderResponse> deliverOrder(
             @PathVariable UUID id,
             @RequestBody Map<String, UUID> body) {
@@ -200,14 +201,14 @@ public class OrderController {
     }
 
     @PostMapping("/{id}/accept")
-    @PreAuthorize("hasAnyAuthority('SHOP_MANAGER')")
+    @PreAuthorize("hasAnyAuthority('SHOP_MANAGER', 'SHOP_ADMIN')")
     public ResponseEntity<OrderResponse> acceptOrder(@PathVariable UUID id) {
         var current = CurrentUser.get();
         return ResponseEntity.ok(acceptOrder.execute(id, current.userId()));
     }
 
     @PostMapping("/{id}/accept-asap")
-    @PreAuthorize("hasAnyAuthority('SHOP_MANAGER')")
+    @PreAuthorize("hasAnyAuthority('SHOP_MANAGER', 'SHOP_ADMIN')")
     public ResponseEntity<OrderResponse> acceptAsapOrder(@PathVariable UUID id) {
         var current = CurrentUser.get();
         OrderResponse response = acceptOrder.execute(id, current.userId());
@@ -233,7 +234,7 @@ public class OrderController {
     }
 
     @PostMapping("/{id}/delivery-reject")
-    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'DELIVERY_AGENT')")
+    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SUPPLIER_AGENT')")
     public ResponseEntity<OrderResponse> deliveryRejectOrder(
             @PathVariable UUID id,
             @RequestBody(required = false) Map<String, String> body) {
@@ -243,7 +244,7 @@ public class OrderController {
     }
 
     @GetMapping("/my-deliveries")
-    @PreAuthorize("hasAnyAuthority('DELIVERY_AGENT')")
+    @PreAuthorize("hasAnyAuthority('SUPPLIER_AGENT')")
     public ResponseEntity<List<OrderResponse>> myDeliveries() {
         var current = CurrentUser.get();
         var orders = orderRepository.findByDeliveryAgentId(current.userId());

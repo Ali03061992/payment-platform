@@ -46,7 +46,7 @@ Alternative si tu veux garder `Context=.` :
 ### 1.2 Env Vars à mettre dans Render Dashboard > Environment
 
 ```
-JWT_SECRET=f3e388507bc3456fb1363eed165365856107d870ba1f47e692eaaf0b6d2c9fc1
+JWT_SECRET=<generate-a-random-secret-at-least-32-bytes>
 JWT_EXPIRATION=30m
 SERVICE_NAME=api-gateway
 SPRING_PROFILES_ACTIVE=prod

@@ -14,7 +14,7 @@ public class Notification {
     @Column(columnDefinition = "VARCHAR(36)")
     private UUID id;
 
-    @Column(name = "recipient_user_id", nullable = false, columnDefinition = "VARCHAR(36)")
+    @Column(name = "recipient_user_id", columnDefinition = "VARCHAR(36)")
     private UUID recipientUserId;
 
     @Column(name = "recipient_organization_id", columnDefinition = "VARCHAR(36)")

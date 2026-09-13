@@ -68,8 +68,8 @@ public class PaymentController {
         if (!current.roles().contains("SYSTEM_ADMIN")) {
             UUID orgId = current.organizationId();
             if (orgId == null) return ResponseEntity.status(403).build();
-            boolean isShop = response.shopId() == orgId;
-            boolean isSupplier = response.supplierId() == orgId;
+            boolean isShop = orgId.equals(response.shopId());
+            boolean isSupplier = orgId.equals(response.supplierId());
             if (!isShop && !isSupplier) return ResponseEntity.status(403).build();
         }
         return ResponseEntity.ok(response);
@@ -83,8 +83,8 @@ public class PaymentController {
         if (!current.roles().contains("SYSTEM_ADMIN")) {
             UUID orgId = current.organizationId();
             if (orgId == null) return ResponseEntity.status(403).build();
-            boolean isShop = response.shopId() == orgId;
-            boolean isSupplier = response.supplierId() == orgId;
+            boolean isShop = orgId.equals(response.shopId());
+            boolean isSupplier = orgId.equals(response.supplierId());
             if (!isShop && !isSupplier) return ResponseEntity.status(403).build();
         }
         return ResponseEntity.ok(response);

@@ -12,7 +12,7 @@
 
   <artifactId>notification-service</artifactId>
   <name>Notification Service</name>
-  <description>Notifications persistÃ©es, temps rÃ©el (SSE), consommation des domain events</description>
+  <description>Notifications persistées, temps réel (SSE), consommation des domain events</description>
 
   <dependencies>
     <dependency>
@@ -51,15 +51,7 @@
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-flyway</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.flywaydb</groupId>
-      <artifactId>flyway-core</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.flywaydb</groupId>
-      <artifactId>flyway-mysql</artifactId>
+      <artifactId>spring-boot-starter-liquibase</artifactId>
     </dependency>
     <dependency>
       <groupId>org.springdoc</groupId>

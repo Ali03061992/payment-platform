@@ -21,7 +21,7 @@ import org.springframework.stereotype.Component;
 
 /** Seed du compte SYSTEM_ADMIN de démonstration (username system.admin). */
 @Component
-@ConditionalOnProperty(name = "app.seed.enabled", havingValue = "true", matchIfMissing = true)
+@ConditionalOnProperty(name = "app.seed.enabled", havingValue = "true")
 public class DataInitializer implements ApplicationRunner {
 
     private static final Logger log = LoggerFactory.getLogger(DataInitializer.class);

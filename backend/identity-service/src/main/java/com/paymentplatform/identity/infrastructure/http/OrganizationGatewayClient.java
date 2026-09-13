@@ -20,7 +20,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Client vers Organization Service (via Gateway), avec cache court (10 s) du statut.
+ * Client vers Organization Service (appel direct), avec cache court (10 s) du statut.
  * Périmètre : ne consulte jamais les tables d'un autre service.
  */
 @Component
@@ -38,11 +38,15 @@ public class OrganizationGatewayClient implements OrganizationStatusPort {
     private static final long CACHE_TTL_MS = 10_000;
 
     private final RestClient restClient;
+    private final String internalSecret;
     private final Map<UUID, CacheEntry> cache = new ConcurrentHashMap<>();
 
     public OrganizationGatewayClient(RestClient.Builder builder,
-                                     @Value("${app.gateway.base-url}") String gatewayBaseUrl) {
-        this.restClient = builder.baseUrl(gatewayBaseUrl).build();
+                                     @Value("${ORGANIZATION_SERVICE_URL:localhost}") String orgHost,
+                                     @Value("${ORGANIZATION_SERVICE_PORT:8083}") String orgPort,
+                                     @Value("${app.internal-secret:dev-internal-secret-change-me}") String internalSecret) {
+        this.restClient = builder.baseUrl("http://" + orgHost + ":" + orgPort).build();
+        this.internalSecret = internalSecret;
     }
 
     @Override
@@ -60,7 +64,7 @@ public class OrganizationGatewayClient implements OrganizationStatusPort {
         try {
             OrganizationStatus status = restClient.get()
                     .uri("/api/organizations/internal/{id}/status", organizationId)
-                    .header("X-Internal-Token", "dev-internal-secret-change-me")
+                    .header("X-Internal-Token", internalSecret)
                     .retrieve()
                     .body(OrganizationStatus.class);
             if (status == null) {

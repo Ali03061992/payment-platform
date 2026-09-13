@@ -1,0 +1,4 @@
+app:
+  security:
+    secret: ${JWT_SECRET:local-dev-jwt-secret-change-me-in-production-32bytes}
+    expiration: ${JWT_EXPIRATION:30m}

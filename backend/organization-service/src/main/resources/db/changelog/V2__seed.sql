@@ -1,0 +1,33 @@
+--liquibase formatted sql
+
+--changeset platform:2 splitStatements:true
+
+INSERT INTO organizations (id, name, type, status, version, created_at, updated_at)
+VALUES ('20000000-0000-0000-0000-000000000001', 'Covale Fournisseur', 'SUPPLIER', 'ACTIVE', 0, NOW(6), NOW(6));
+
+INSERT INTO organizations (id, name, type, status, version, created_at, updated_at)
+VALUES ('20000000-0000-0000-0000-000000000002', 'Pointteck Boutique', 'SHOP', 'ACTIVE', 0, NOW(6), NOW(6));
+
+INSERT INTO supplier_shop_relations (id, supplier_id, shop_id, status, created_at)
+VALUES ('30000000-0000-0000-0000-000000000001', '20000000-0000-0000-0000-000000000001', '20000000-0000-0000-0000-000000000002', 'ACTIVE', NOW(6));
+
+INSERT INTO product_categories (id, supplier_id, name, code, status, created_at, updated_at) VALUES
+  ('40000000-0000-0000-0000-000000000001', '20000000-0000-0000-0000-000000000001', 'Alimentaire', 'ALIM', 'ACTIVE', NOW(6), NOW(6)),
+  ('40000000-0000-0000-0000-000000000002', '20000000-0000-0000-0000-000000000001', 'Boissons', 'BOISS', 'ACTIVE', NOW(6), NOW(6));
+
+INSERT INTO product_families (id, supplier_id, name, code, status, created_at, updated_at) VALUES
+  ('50000000-0000-0000-0000-000000000001', '20000000-0000-0000-0000-000000000001', 'Produits Laitiers', 'LAIT', 'ACTIVE', NOW(6), NOW(6)),
+  ('50000000-0000-0000-0000-000000000002', '20000000-0000-0000-0000-000000000001', 'Eaux', 'EAU', 'ACTIVE', NOW(6), NOW(6));
+
+INSERT INTO family_categories (family_id, category_id) VALUES
+  ('50000000-0000-0000-0000-000000000001', '40000000-0000-0000-0000-000000000001'),
+  ('50000000-0000-0000-0000-000000000002', '40000000-0000-0000-0000-000000000002');
+
+INSERT INTO product_subfamilies (id, supplier_id, family_id, name, code, status, created_at, updated_at) VALUES
+  ('60000000-0000-0000-0000-000000000001', '20000000-0000-0000-0000-000000000001', '50000000-0000-0000-0000-000000000001', 'Lait Entier', 'LAIT-ENT', 'ACTIVE', NOW(6), NOW(6)),
+  ('60000000-0000-0000-0000-000000000002', '20000000-0000-0000-0000-000000000001', '50000000-0000-0000-0000-000000000001', 'Yaourts', 'YAOURT', 'ACTIVE', NOW(6), NOW(6));
+
+INSERT INTO products (id, supplier_id, name, sku, description, category_id, family_id, subfamily_id, unit_price, currency, unit, quantity, status, version, created_at, updated_at) VALUES
+  ('70000000-0000-0000-0000-000000000001', '20000000-0000-0000-0000-000000000001', 'Lait Entier 1L', 'LAIT-ENT-001', 'Lait entier UHT 1 litre', '40000000-0000-0000-0000-000000000001', '50000000-0000-0000-0000-000000000001', '60000000-0000-0000-0000-000000000001', 2.50, 'TND', 'litre', 500, 'ACTIVE', 0, NOW(6), NOW(6)),
+  ('70000000-0000-0000-0000-000000000002', '20000000-0000-0000-0000-000000000001', 'Yaourt Nature 125g', 'YAOURT-NAT-001', 'Yaourt nature 125g x 6', '40000000-0000-0000-0000-000000000001', '50000000-0000-0000-0000-000000000001', '60000000-0000-0000-0000-000000000002', 3.80, 'TND', 'piece', 300, 'ACTIVE', 0, NOW(6), NOW(6)),
+  ('70000000-0000-0000-0000-000000000003', '20000000-0000-0000-0000-000000000001', 'Eau Minérale 1.5L', 'EAU-MIN-001', 'Eau minérale naturelle 1.5L', '40000000-0000-0000-0000-000000000002', '50000000-0000-0000-0000-000000000002', NULL, 1.20, 'TND', 'litre', 1000, 'ACTIVE', 0, NOW(6), NOW(6));

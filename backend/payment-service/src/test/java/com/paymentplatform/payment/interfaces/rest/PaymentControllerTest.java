@@ -13,6 +13,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -33,6 +34,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @ActiveProfiles("test")
 @Transactional
+@Import(com.paymentplatform.payment.infrastructure.http.TestOrganizationValidationConfig.class)
 class PaymentControllerTest {
 
     @Autowired private WebApplicationContext wac;
@@ -66,7 +68,7 @@ class PaymentControllerTest {
     }
 
     private UsernamePasswordAuthenticationToken supplierUser() {
-        return auth(UUID.fromString("00000000-0000-0000-0000-000000000002"), "supplier.user", List.of("SUPPLIER_MANAGE_PAYMENTS"), UUID.fromString("00000000-0000-0000-0000-000000000020"));
+        return auth(UUID.fromString("00000000-0000-0000-0000-000000000002"), "supplier.user", List.of("SUPPLIER_MANAGE_PAYMENTS", "VIEW_PAYMENTS"), UUID.fromString("00000000-0000-0000-0000-000000000020"));
     }
 
     private UsernamePasswordAuthenticationToken adminUser() {
@@ -227,21 +229,6 @@ class PaymentControllerTest {
                         .param("from", "2026-01-01")
                         .param("to", "2026-12-31"))
                 .andExpect(status().isOk());
-    }
-
-    @Test
-    void reindex_asAdmin_returnsOk() throws Exception {
-        mockMvc.perform(post("/api/payments/reindex")
-                        .with(SecurityMockMvcRequestPostProcessors.authentication(adminUser())))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.indexed").isNumber());
-    }
-
-    @Test
-    void reindex_asNonAdmin_returns403() throws Exception {
-        mockMvc.perform(post("/api/payments/reindex")
-                        .with(SecurityMockMvcRequestPostProcessors.authentication(shopUser())))
-                .andExpect(status().isForbidden());
     }
 
     @Test

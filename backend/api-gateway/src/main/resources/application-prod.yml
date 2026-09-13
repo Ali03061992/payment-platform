@@ -1,0 +1,6 @@
+app:
+  security:
+    secret: ${JWT_SECRET}
+    expiration: ${JWT_EXPIRATION:30m}
+  gateway:
+    allowed-ips: ${ALLOWED_IPS:127.0.0.1,10.0.1.50,10.0.1.51}
