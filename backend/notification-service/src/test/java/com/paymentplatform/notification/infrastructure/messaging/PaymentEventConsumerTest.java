@@ -11,7 +11,6 @@ import org.springframework.amqp.core.MessageProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.nio.charset.StandardCharsets;
@@ -36,8 +35,8 @@ class PaymentEventConsumerTest {
     @Test
     void onPaymentEvent_created_createsNotifications() throws Exception {
         String payload = """
-                {"eventId":"evt-pay-1","eventType":"payment.created","shopId":10,"supplierId":20,
-                 "reference":"PAY-001","createdBy":5,"amount":"100.00","currency":"TND"}
+                {"eventId":"evt-pay-1","eventType":"payment.created","shopId":"00000000-0000-0000-0000-000000000010","supplierId":"00000000-0000-0000-0000-000000000020",
+                 "reference":"PAY-001","createdBy":"00000000-0000-0000-0000-000000000005","amount":"100.00","currency":"TND"}
                 """;
         Message message = createMessage(payload, "payment.created");
 
@@ -49,8 +48,8 @@ class PaymentEventConsumerTest {
     @Test
     void onPaymentEvent_confirmed_createsNotifications() throws Exception {
         String payload = """
-                {"eventId":"evt-pay-2","eventType":"payment.confirmed","shopId":10,"supplierId":20,
-                 "reference":"PAY-002","confirmedBy":20}
+                {"eventId":"evt-pay-2","eventType":"payment.confirmed","shopId":"00000000-0000-0000-0000-000000000010","supplierId":"00000000-0000-0000-0000-000000000020",
+                 "reference":"PAY-002","confirmedBy":"00000000-0000-0000-0000-000000000020"}
                 """;
         Message message = createMessage(payload, "payment.confirmed");
 
@@ -62,7 +61,7 @@ class PaymentEventConsumerTest {
     @Test
     void onPaymentEvent_rejected_createsNotification() throws Exception {
         String payload = """
-                {"eventId":"evt-pay-3","eventType":"payment.rejected","shopId":10,"supplierId":20,
+                {"eventId":"evt-pay-3","eventType":"payment.rejected","shopId":"00000000-0000-0000-0000-000000000010","supplierId":"00000000-0000-0000-0000-000000000020",
                  "reference":"PAY-003","rejectionReason":"Insufficient funds"}
                 """;
         Message message = createMessage(payload, "payment.rejected");
@@ -75,8 +74,8 @@ class PaymentEventConsumerTest {
     @Test
     void onPaymentEvent_cancelled_createsNotifications() throws Exception {
         String payload = """
-                {"eventId":"evt-pay-4","eventType":"payment.cancelled","shopId":10,"supplierId":20,
-                 "reference":"PAY-004","cancelledBy":10}
+                {"eventId":"evt-pay-4","eventType":"payment.cancelled","shopId":"00000000-0000-0000-0000-000000000010","supplierId":"00000000-0000-0000-0000-000000000020",
+                 "reference":"PAY-004","cancelledBy":"00000000-0000-0000-0000-000000000010"}
                 """;
         Message message = createMessage(payload, "payment.cancelled");
 
@@ -88,8 +87,8 @@ class PaymentEventConsumerTest {
     @Test
     void onPaymentEvent_duplicateEvent_skips() throws Exception {
         String payload = """
-                {"eventId":"evt-pay-dup","eventType":"payment.created","shopId":10,"supplierId":20,
-                 "reference":"PAY-DUP","createdBy":5,"amount":"50.00","currency":"TND"}
+                {"eventId":"evt-pay-dup","eventType":"payment.created","shopId":"00000000-0000-0000-0000-000000000010","supplierId":"00000000-0000-0000-0000-000000000020",
+                 "reference":"PAY-DUP","createdBy":"00000000-0000-0000-0000-000000000005","amount":"50.00","currency":"TND"}
                 """;
         Message message = createMessage(payload, "payment.created");
 
@@ -100,7 +99,7 @@ class PaymentEventConsumerTest {
     @Test
     void onPaymentEvent_unknownRoutingKey_doesNothing() throws Exception {
         String payload = """
-                {"eventId":"evt-pay-5","eventType":"payment.unknown","shopId":10,"supplierId":20,
+                {"eventId":"evt-pay-5","eventType":"payment.unknown","shopId":"00000000-0000-0000-0000-000000000010","supplierId":"00000000-0000-0000-0000-000000000020",
                  "reference":"PAY-005"}
                 """;
         Message message = createMessage(payload, "payment.unknown");

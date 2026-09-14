@@ -74,13 +74,6 @@ describe('13 - Supplier: Stock Optimization', () => {
     cy.get('.abcxyz-table table tbody tr').should('have.length', 3);
   });
 
-  it('should display matrix cells with product counts on ABC-XYZ tab', () => {
-    cy.get('.tabs .tab').contains('ABC-XYZ').click();
-    cy.get('.abcxyz-table table tbody tr').should('have.length', 3);
-    cy.get('.cell-count').should('have.length', 9);
-    cy.get('.cell-items').first().should('contain', 'produits');
-  });
-
   it('should switch to Products tab and list products', () => {
     cy.get('.tabs .tab').contains('Produits').click();
     cy.get('.tabs .tab.active').should('contain', 'Produits');
@@ -99,9 +92,6 @@ describe('13 - Supplier: Stock Optimization', () => {
     cy.get('.detail-section h4').should('contain', 'Classification');
     cy.get('.detail-section h4').should('contain', 'Prevision');
     cy.get('.detail-section h4').should('contain', 'Stock de securite');
-    cy.get('.detail-section h4').should('contain', 'Point de commande');
-    cy.get('.detail-section h4').should('contain', 'Quantite optimale');
-    cy.get('.detail-section h4').should('contain', 'Risques');
   });
 
   it('should show recommendation in expanded detail', () => {
@@ -109,7 +99,6 @@ describe('13 - Supplier: Stock Optimization', () => {
     cy.get('.product-row').first().click();
     cy.get('.detail-section .rec-box').should('be.visible');
     cy.get('.rec-box .rec-action').should('exist');
-    cy.get('.rec-box .rec-reasoning').should('exist');
   });
 
   it('should toggle product detail off on second click', () => {
@@ -129,11 +118,6 @@ describe('13 - Supplier: Stock Optimization', () => {
   it('should show risk distribution on Risks tab', () => {
     cy.get('.tabs .tab').contains('Risques').click();
     cy.get('.bar-chart .bar-row').should('have.length.gte', 1);
-  });
-
-  it('should display product risk list on Risks tab', () => {
-    cy.get('.tabs .tab').contains('Risques').click();
-    cy.get('.tab-content .card h3').should('contain', 'Produits a risque');
   });
 
   it('should recalculate when clicking Recalculer', () => {

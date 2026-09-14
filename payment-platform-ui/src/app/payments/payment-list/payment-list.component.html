@@ -37,7 +37,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let p of filteredPayments">
+        <tr *ngFor="let p of filteredPayments" class="clickable-row" [routerLink]="['/dashboard/payments', p.id]">
           <td><strong>{{ p.reference }}</strong></td>
           <td>{{ p.shopName }}</td>
           <td>{{ p.createdByName }}</td>

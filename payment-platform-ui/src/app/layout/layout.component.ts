@@ -41,7 +41,7 @@ export class LayoutComponent implements OnInit, OnDestroy {
     { label: 'Stock', icon: '📦', route: 'supplier/stock', roles: ['SUPPLIER_ADMIN', 'SUPPLIER_AGENT'] },
     { label: 'Optimisation', icon: '🧠', route: 'supplier/optimization', roles: ['SUPPLIER_ADMIN'] },
     { label: 'Commandes', icon: '🛒', route: 'supplier/orders', roles: ['SUPPLIER_ADMIN'] },
-    { label: 'Livraisons', icon: '🚚', route: 'supplier/deliveries', roles: ['SUPPLIER_ADMIN', 'SUPPLIER_AGENT'] },
+    { label: 'Livraisons', icon: '🚚', route: 'supplier/deliveries', roles: ['SUPPLIER_AGENT'] },
     { label: 'Mes commandes', icon: '🛒', route: 'shop/orders', roles: ['SHOP_ADMIN', 'SHOP_MANAGER', 'SHOP_AGENT'] },
     { label: 'Nouvelle commande', icon: '➕', route: 'shop/orders/create', roles: ['SHOP_ADMIN', 'SHOP_MANAGER'] },
     { label: 'Balance', icon: '💰', route: 'shop/balance', roles: ['SHOP_ADMIN', 'SHOP_MANAGER'] },
@@ -50,6 +50,7 @@ export class LayoutComponent implements OnInit, OnDestroy {
     { label: 'Scanner QR', icon: '📱', route: 'scan', roles: ['SYSTEM_ADMIN', 'SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_AGENT'] },
     { label: 'Export', icon: '📤', route: 'export', roles: ['SYSTEM_ADMIN', 'SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_AGENT'] },
     { label: 'Paiements agents', icon: '👥', route: 'supplier/agent-payments', roles: ['SUPPLIER_ADMIN', 'SUPPLIER_AGENT'] },
+    { label: 'Changer mot de passe', icon: '🔑', route: 'change-password', roles: ['SYSTEM_ADMIN', 'SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_AGENT'] },
   ];
 
   constructor(

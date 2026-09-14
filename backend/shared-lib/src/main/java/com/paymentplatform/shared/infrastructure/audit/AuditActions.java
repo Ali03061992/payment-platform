@@ -24,4 +24,5 @@ public final class AuditActions {
     public static final String USER_DISABLED = "USER_DISABLED";
 
     public static final String USER_LOGIN = "USER_LOGIN";
+    public static final String USER_PASSWORD_CHANGE = "USER_PASSWORD_CHANGE";
 }

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <include file="V1__schema.sql" relativeToChangelogFile="true"/>
+    <include file="V2__seed_roles.sql" relativeToChangelogFile="true"/>
+    <include file="V3__seed_permissions.sql" relativeToChangelogFile="true"/>
+    <include file="V4__seed_users.sql" relativeToChangelogFile="true"/>
+    <include file="V5__fix_seed_password.sql" relativeToChangelogFile="true"/>
+
+</databaseChangeLog>

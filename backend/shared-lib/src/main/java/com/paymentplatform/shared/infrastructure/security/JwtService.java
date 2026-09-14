@@ -13,6 +13,8 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 
+import org.springframework.core.env.Environment;
+
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
@@ -36,12 +38,18 @@ public class JwtService {
 
     private static final String INSECURE_DEFAULT_SECRET = "dev-only-secret-change-me";
 
-    public JwtService(SecurityProperties properties) {
+    public JwtService(SecurityProperties properties, Environment environment) {
         String secret = properties.secret();
-        if (secret == null || secret.startsWith(INSECURE_DEFAULT_SECRET)) {
-            throw new IllegalStateException(
-                    "JWT_SECRET must be configured with a secure value in production. " +
-                    "Set the JWT_SECRET environment variable.");
+        boolean isProd = java.util.List.of(environment.getActiveProfiles()).contains("prod");
+        if (isProd) {
+            if (secret == null || secret.startsWith(INSECURE_DEFAULT_SECRET)) {
+                throw new IllegalStateException(
+                        "JWT_SECRET must be configured with a secure value in production. " +
+                        "Set the JWT_SECRET environment variable.");
+            }
+        }
+        if (secret == null || secret.isBlank()) {
+            throw new IllegalStateException("JWT_SECRET must be set.");
         }
         byte[] secretBytes = secret.getBytes(StandardCharsets.UTF_8);
         if (secretBytes.length < 32) {

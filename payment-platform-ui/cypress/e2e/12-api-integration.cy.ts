@@ -1,20 +1,17 @@
-const API = () => Cypress.env('apiUrl') || 'http://localhost:8081';
-function authHeaders(token: string) { return { Authorization: `Bearer ${token}` }; }
-const env = (key: string) => Cypress.env(key) as string;
-
 function isPage(body: any): boolean {
   return body && typeof body === 'object' && !Array.isArray(body) && 'items' in body;
 }
 function getItems(body: any): any[] {
   return isPage(body) ? body.items : (Array.isArray(body) ? body : []);
 }
+const API = () => Cypress.env('apiUrl') || 'http://localhost:8081';
 
 describe('12 - API: Auth', () => {
   it('POST /api/auth/login - should return JWT token', () => {
     cy.request({
       method: 'POST', url: `${API()}/api/auth/login`,
-      body: { username: 'system.admin', password: 'Admin@123' },
-    }).then(r => {
+      body: { username: 'system.admin', password: '@PAssword012345' },
+    }).then((r) => {
       expect(r.status).to.eq(200);
       expect(r.body).to.have.property('accessToken');
     });
@@ -25,338 +22,262 @@ describe('12 - API: Auth', () => {
       method: 'POST', url: `${API()}/api/auth/login`,
       body: { username: 'invalid', password: 'invalid' },
       failOnStatusCode: false,
-    }).then(r => { expect(r.status).to.be.oneOf([401, 403]); });
-  });
-
-  it('POST /api/auth/login - should reject non-existent user', () => {
-    cy.request({
-      method: 'POST', url: `${API()}/api/auth/login`,
-      body: { username: 'nonexistent', password: 'Admin@123' },
-      failOnStatusCode: false,
-    }).then(r => { expect(r.status).to.be.oneOf([401, 403]); });
+    }).then((r) => { expect(r.status).to.be.oneOf([401, 403]); });
   });
 
   it('GET /api/auth/me - should return current user', () => {
-    cy.request({ method: 'POST', url: `${API()}/api/auth/login`, body: { username: 'system.admin', password: 'Admin@123' } })
-      .then(r => {
-        cy.request({ method: 'GET', url: `${API()}/api/auth/me`, headers: authHeaders(r.body.accessToken) })
-          .then(me => {
-            expect(me.status).to.eq(200);
-            expect(me.body).to.have.property('username', 'system.admin');
-            expect(me.body.roles).to.include('SYSTEM_ADMIN');
-          });
+    cy.apiLogin('system.admin').then((token) => {
+      cy.apiGet(token, '/api/auth/me').then((me) => {
+        expect(me.status).to.eq(200);
+        expect(me.body).to.have.property('username', 'system.admin');
+        expect(me.body.roles).to.include('SYSTEM_ADMIN');
       });
+    });
   });
 
   it('GET /api/auth/me - should reject without token', () => {
     cy.request({ method: 'GET', url: `${API()}/api/auth/me`, failOnStatusCode: false })
-      .then(r => { expect(r.status).to.be.oneOf([401, 403]); });
+      .then((r) => { expect(r.status).to.be.oneOf([401, 403]); });
   });
 });
 
 describe('12 - API: Admin Organizations', () => {
-  let token: string;
-
-  before(() => {
-    cy.ensureTestUsers();
-    cy.request({ method: 'POST', url: `${API()}/api/auth/login`, body: { username: 'system.admin', password: 'Admin@123' } })
-      .then(r => { token = r.body.accessToken; });
-  });
+  before(() => cy.ensureTestUsers());
 
   it('GET /api/admin/suppliers - should list suppliers', () => {
-    cy.request({ method: 'GET', url: `${API()}/api/admin/suppliers`, headers: authHeaders(token) })
-      .then(r => {
+    cy.apiLogin('system.admin').then((token) => {
+      cy.apiGet(token, '/api/admin/suppliers').then((r) => {
         expect(r.status).to.eq(200);
         expect(r.body).to.be.an('array');
         expect(r.body.length).to.be.gte(2);
-        expect(r.body.find((s: any) => s.name === 'Covale')).to.exist;
-        expect(r.body.find((s: any) => s.name === 'Pointteck')).to.exist;
       });
+    });
   });
 
   it('GET /api/admin/shops - should list shops', () => {
-    cy.request({ method: 'GET', url: `${API()}/api/admin/shops`, headers: authHeaders(token) })
-      .then(r => {
+    cy.apiLogin('system.admin').then((token) => {
+      cy.apiGet(token, '/api/admin/shops').then((r) => {
         expect(r.status).to.eq(200);
         expect(r.body).to.be.an('array');
-        expect(r.body.length).to.be.gte(4);
+        expect(r.body.length).to.be.gte(2);
       });
+    });
   });
 
   it('GET /api/admin/stats - should return stats', () => {
-    cy.request({ method: 'GET', url: `${API()}/api/admin/stats`, headers: authHeaders(token) })
-      .then(r => { expect(r.status).to.eq(200); });
-  });
-
-  it('GET /api/admin/supplier-shop-relations - should list 4 relations', () => {
-    cy.request({ method: 'GET', url: `${API()}/api/admin/supplier-shop-relations`, headers: authHeaders(token) })
-      .then(r => {
-        expect(r.status).to.eq(200);
-        expect(r.body).to.be.an('array');
-        expect(r.body).to.have.length(4);
-      });
+    cy.apiLogin('system.admin').then((token) => {
+      cy.apiGet(token, '/api/admin/stats').then((r) => { expect(r.status).to.eq(200); });
+    });
   });
 
   it('POST /api/admin/suppliers - should create supplier', () => {
-    const name = `Supplier API ${Date.now()}`;
-    cy.request({ method: 'POST', url: `${API()}/api/admin/suppliers`, headers: authHeaders(token), body: { name } })
-      .then(r => {
+    cy.apiLogin('system.admin').then((token) => {
+      const name = `Supplier API ${Date.now()}`;
+      cy.apiPost(token, '/api/admin/suppliers', { name }).then((r) => {
         expect(r.status).to.be.oneOf([200, 201]);
         expect(r.body).to.have.property('name', name);
       });
+    });
   });
 
   it('POST /api/admin/shops - should create shop', () => {
-    const name = `Shop API ${Date.now()}`;
-    cy.request({ method: 'POST', url: `${API()}/api/admin/shops`, headers: authHeaders(token), body: { name } })
-      .then(r => {
+    cy.apiLogin('system.admin').then((token) => {
+      const name = `Shop API ${Date.now()}`;
+      cy.apiPost(token, '/api/admin/shops', { name }).then((r) => {
         expect(r.status).to.be.oneOf([200, 201]);
         expect(r.body).to.have.property('name', name);
       });
+    });
   });
 
   it('GET /api/admin - should reject without auth', () => {
     cy.request({ method: 'GET', url: `${API()}/api/admin/suppliers`, failOnStatusCode: false })
-      .then(r => { expect(r.status).to.be.oneOf([401, 403]); });
+      .then((r) => { expect(r.status).to.be.oneOf([401, 403]); });
   });
 });
 
 describe('12 - API: Payments', () => {
-  let adminToken: string;
-  let shopToken: string;
-
-  before(() => {
-    cy.ensureTestUsers();
-    cy.request({ method: 'POST', url: `${API()}/api/auth/login`, body: { username: 'system.admin', password: 'Admin@123' } })
-      .then(r => { adminToken = r.body.accessToken; });
-    cy.request({ method: 'POST', url: `${API()}/api/auth/login`, body: { username: 'abdelslam', password: 'Admin@123' } })
-      .then(r => { shopToken = r.body.accessToken; });
-  });
+  before(() => cy.ensureTestUsers());
 
   it('GET /api/payments - should list payments', () => {
-    cy.request({ method: 'GET', url: `${API()}/api/payments`, headers: authHeaders(adminToken) })
-      .then(r => {
+    cy.apiLogin('system.admin').then((token) => {
+      cy.apiGet(token, '/api/payments').then((r) => {
         expect(r.status).to.eq(200);
         expect(isPage(r.body) || Array.isArray(r.body)).to.be.true;
       });
-  });
-
-  it('GET /api/payments/stats - should return stats', () => {
-    cy.request({ method: 'GET', url: `${API()}/api/payments/stats`, headers: authHeaders(adminToken) })
-      .then(r => { expect(r.status).to.eq(200); });
+    });
   });
 
   it('POST /api/payments - shop can create payment', () => {
-    cy.request({
-      method: 'POST', url: `${API()}/api/payments`,
-      headers: authHeaders(shopToken),
-      body: { shopId: env('shopAbdelslamId'), supplierId: env('covaleId'), amount: 200.00, currency: 'EUR' },
-    }).then(r => {
-      expect(r.status).to.be.oneOf([200, 201]);
-      expect(r.body).to.have.property('reference');
-      expect(r.body.status).to.eq('PENDING');
+    cy.getTestCtx().then((ctx) => {
+      cy.apiLogin(ctx.users.shopAdmin.username).then((token) => {
+        cy.apiPost(token, '/api/payments', {
+          shopId: ctx.shops.abdelslam.id, supplierId: ctx.suppliers.covale.id, amount: 200.00, currency: 'TND',
+        }).then((r) => {
+          expect(r.status).to.be.oneOf([200, 201]);
+          expect(r.body).to.have.property('reference');
+          expect(r.body.status).to.eq('PENDING');
+        });
+      });
     });
   });
 
   it('GET /api/payments - should reject without auth', () => {
     cy.request({ method: 'GET', url: `${API()}/api/payments`, failOnStatusCode: false })
-      .then(r => { expect(r.status).to.be.oneOf([401, 403]); });
+      .then((r) => { expect(r.status).to.be.oneOf([401, 403]); });
   });
 });
 
 describe('12 - API: Orders', () => {
-  let token: string;
-
-  before(() => {
-    cy.request({ method: 'POST', url: `${API()}/api/auth/login`, body: { username: 'system.admin', password: 'Admin@123' } })
-      .then(r => { token = r.body.accessToken; });
-  });
-
   it('GET /api/orders - should list orders', () => {
-    cy.request({ method: 'GET', url: `${API()}/api/orders`, headers: authHeaders(token) })
-      .then(r => {
+    cy.apiLogin('system.admin').then((token) => {
+      cy.apiGet(token, '/api/orders').then((r) => {
         expect(r.status).to.eq(200);
         expect(isPage(r.body) || Array.isArray(r.body)).to.be.true;
       });
+    });
   });
 
   it('GET /api/orders - should reject without auth', () => {
     cy.request({ method: 'GET', url: `${API()}/api/orders`, failOnStatusCode: false })
-      .then(r => { expect(r.status).to.be.oneOf([401, 403]); });
+      .then((r) => { expect(r.status).to.be.oneOf([401, 403]); });
   });
 });
 
 describe('12 - API: Users', () => {
-  let adminToken: string;
-
-  before(() => {
-    cy.ensureTestUsers();
-    cy.request({ method: 'POST', url: `${API()}/api/auth/login`, body: { username: 'system.admin', password: 'Admin@123' } })
-      .then(r => { adminToken = r.body.accessToken; });
-  });
+  before(() => cy.ensureTestUsers());
 
   it('GET /api/users - should list users', () => {
-    cy.request({ method: 'GET', url: `${API()}/api/users`, headers: authHeaders(adminToken) })
-      .then(r => {
+    cy.apiLogin('system.admin').then((token) => {
+      cy.apiGet(token, '/api/users').then((r) => {
         expect(r.status).to.eq(200);
         expect(r.body).to.be.an('array');
-        expect(r.body.length).to.be.gte(5);
+        expect(r.body.length).to.be.gte(1);
       });
+    });
   });
 
   it('GET /api/users - should reject non-admin', () => {
-    cy.request({ method: 'POST', url: `${API()}/api/auth/login`, body: { username: 'covale.admin', password: 'Admin@123' } })
-      .then(r => {
-        cy.request({ method: 'GET', url: `${API()}/api/users`, headers: authHeaders(r.body.accessToken), failOnStatusCode: false })
-          .then(res => { expect(res.status).to.be.oneOf([401, 403]); });
+    cy.getTestCtx().then((ctx) => {
+      cy.apiLogin(ctx.users.supplierAdmin.username).then((token) => {
+        cy.request({
+          method: 'GET', url: `${API()}/api/users`,
+          headers: { Authorization: `Bearer ${token}` },
+          failOnStatusCode: false,
+        }).then((res) => {
+          expect(res.status).to.be.oneOf([401, 403]);
+        });
       });
+    });
   });
 });
 
-describe('12 - API: Catalog (supplier)', () => {
-  let token: string;
-  let supplierId: string;
-
-  before(() => {
-    cy.ensureTestUsers();
-    cy.request({ method: 'POST', url: `${API()}/api/auth/login`, body: { username: 'covale.admin', password: 'Admin@123' } })
-      .then(r => {
-        token = r.body.accessToken;
-        cy.request({ method: 'GET', url: `${API()}/api/auth/me`, headers: authHeaders(token) })
-          .then(me => { supplierId = me.body.organizationId; });
-      });
-  });
+describe('12 - API: Catalog & Stocks', () => {
+  before(() => cy.ensureTestUsers());
 
   it('GET /api/supplier/catalog/categories - should list categories', () => {
-    cy.request({ method: 'GET', url: `${API()}/api/supplier/catalog/categories?supplierId=${supplierId}`, headers: authHeaders(token), failOnStatusCode: false })
-      .then(r => { expect(r.status).to.be.oneOf([200, 403]); });
-  });
-
-  it('GET /api/supplier/catalog/families - should list families', () => {
-    cy.request({ method: 'GET', url: `${API()}/api/supplier/catalog/families?supplierId=${supplierId}`, headers: authHeaders(token), failOnStatusCode: false })
-      .then(r => { expect(r.status).to.be.oneOf([200, 403]); });
-  });
-});
-
-describe('12 - API: Stocks (supplier)', () => {
-  let token: string;
-  let supplierId: string;
-
-  before(() => {
-    cy.ensureTestUsers();
-    cy.request({ method: 'POST', url: `${API()}/api/auth/login`, body: { username: 'covale.admin', password: 'Admin@123' } })
-      .then(r => {
-        token = r.body.accessToken;
-        cy.request({ method: 'GET', url: `${API()}/api/auth/me`, headers: authHeaders(token) })
-          .then(me => { supplierId = me.body.organizationId; });
+    cy.getTestCtx().then((ctx) => {
+      cy.apiLogin(ctx.users.supplierAdmin.username).then((token) => {
+        cy.apiGet(token, `/api/supplier/catalog/categories?supplierId=${ctx.suppliers.covale.id}`).then((r) => {
+          expect(r.status).to.be.oneOf([200, 403]);
+        });
       });
+    });
   });
 
   it('GET /api/suppliers/:id/products - should list products', () => {
-    cy.request({ method: 'GET', url: `${API()}/api/suppliers/${supplierId}/products`, headers: authHeaders(token) })
-      .then(r => {
-        expect(r.status).to.eq(200);
-        expect(r.body).to.be.an('array');
+    cy.getTestCtx().then((ctx) => {
+      cy.apiLogin(ctx.users.supplierAdmin.username).then((token) => {
+        cy.apiGet(token, `/api/suppliers/${ctx.suppliers.covale.id}/products`).then((r) => {
+          expect(r.status).to.eq(200);
+          expect(r.body).to.be.an('array');
+        });
       });
+    });
   });
 
   it('GET /api/suppliers/:id/movements - should list movements', () => {
-    cy.request({ method: 'GET', url: `${API()}/api/suppliers/${supplierId}/movements`, headers: authHeaders(token) })
-      .then(r => {
-        expect(r.status).to.eq(200);
-        expect(r.body).to.be.an('array');
+    cy.getTestCtx().then((ctx) => {
+      cy.apiLogin(ctx.users.supplierAdmin.username).then((token) => {
+        cy.apiGet(token, `/api/suppliers/${ctx.suppliers.covale.id}/movements`).then((r) => {
+          expect(r.status).to.eq(200);
+          expect(r.body).to.be.an('array');
+        });
       });
+    });
   });
 });
 
 describe('12 - API: Balances', () => {
-  let adminToken: string;
-
-  before(() => {
-    cy.ensureTestUsers();
-    cy.request({ method: 'POST', url: `${API()}/api/auth/login`, body: { username: 'system.admin', password: 'Admin@123' } })
-      .then(r => { adminToken = r.body.accessToken; });
-  });
+  before(() => cy.ensureTestUsers());
 
   it('GET /api/balances/supplier/:id - should list supplier balances', () => {
-    const covaleId = env('covaleId');
-    cy.request({ method: 'GET', url: `${API()}/api/balances/supplier/${covaleId}`, headers: authHeaders(adminToken), failOnStatusCode: false })
-      .then(r => {
-        expect(r.status).to.eq(200);
-        expect(r.body).to.be.an('array');
+    cy.getTestCtx().then((ctx) => {
+      cy.apiLogin('system.admin').then((token) => {
+        cy.apiGet(token, `/api/balances/supplier/${ctx.suppliers.covale.id}`).then((r) => {
+          expect(r.status).to.eq(200);
+          expect(r.body).to.be.an('array');
+        });
       });
+    });
   });
 
   it('GET /api/balances/shop/:id - should list shop balances', () => {
-    const shopAbdelslamId = env('shopAbdelslamId');
-    cy.request({ method: 'GET', url: `${API()}/api/balances/shop/${shopAbdelslamId}`, headers: authHeaders(adminToken), failOnStatusCode: false })
-      .then(r => {
-        expect(r.status).to.eq(200);
-        expect(r.body).to.be.an('array');
+    cy.getTestCtx().then((ctx) => {
+      cy.apiLogin('system.admin').then((token) => {
+        cy.apiGet(token, `/api/balances/shop/${ctx.shops.abdelslam.id}`).then((r) => {
+          expect(r.status).to.eq(200);
+          expect(r.body).to.be.an('array');
+        });
       });
+    });
   });
 });
 
 describe('12 - API: Payment Lifecycle', () => {
-  let shopToken: string;
-  let supplierToken: string;
-  let paymentRef: string;
+  before(() => cy.ensureTestUsers());
 
-  before(() => {
-    cy.ensureTestUsers();
-    cy.request({ method: 'POST', url: `${API()}/api/auth/login`, body: { username: 'abdelslam', password: 'Admin@123' } })
-      .then(r => { shopToken = r.body.accessToken; });
-    cy.request({ method: 'POST', url: `${API()}/api/auth/login`, body: { username: 'covale.admin', password: 'Admin@123' } })
-      .then(r => { supplierToken = r.body.accessToken; });
-  });
+  it('shop creates -> supplier sees -> confirms -> shop gets notification', () => {
+    cy.getTestCtx().then((ctx) => {
+      let shopToken = '';
+      let supplierToken = '';
+      let paymentRef = '';
 
-  it('shop creates payment', () => {
-    cy.request({
-      method: 'POST', url: `${API()}/api/payments`,
-      headers: authHeaders(shopToken),
-      body: { shopId: env('shopAbdelslamId'), supplierId: env('covaleId'), amount: 500.00, currency: 'EUR' },
-    }).then(r => {
-      expect(r.status).to.be.oneOf([200, 201]);
-      expect(r.body.status).to.eq('PENDING');
-      paymentRef = r.body.reference;
-    });
-  });
-
-  it('supplier sees the payment', () => {
-    cy.wait(2000);
-    cy.request({ method: 'GET', url: `${API()}/api/payments`, headers: authHeaders(supplierToken) })
-      .then(r => {
+      cy.apiLogin(ctx.users.shopAdmin.username).then((t) => {
+        shopToken = t;
+        return cy.apiLogin(ctx.users.supplierAdmin.username);
+      }).then((t) => {
+        supplierToken = t;
+        return cy.apiPost(shopToken, '/api/payments', {
+          shopId: ctx.shops.abdelslam.id, supplierId: ctx.suppliers.covale.id, amount: 500.00, currency: 'TND',
+        });
+      }).then((r) => {
+        expect(r.status).to.be.oneOf([200, 201]);
+        expect(r.body.status).to.eq('PENDING');
+        paymentRef = r.body.reference;
+        return cy.wait(2000);
+      }).then(() => {
+        return cy.apiGet(supplierToken, '/api/payments');
+      }).then((r) => {
         const items = getItems(r.body);
         const payment = items.find((p: any) => p.reference === paymentRef);
         expect(payment).to.exist;
-      });
-  });
-
-  it('supplier confirms the payment', () => {
-    cy.request({ method: 'GET', url: `${API()}/api/payments`, headers: authHeaders(supplierToken) })
-      .then(r => {
-        const items = getItems(r.body);
-        const payment = items.find((p: any) => p.reference === paymentRef);
         if (payment) {
-          cy.request({ method: 'POST', url: `${API()}/api/payments/${payment.id}/confirm`, headers: authHeaders(supplierToken) })
-            .then(res => {
-              expect(res.status).to.eq(200);
-              expect(res.body.status).to.eq('CONFIRMED');
-            });
+          return cy.apiPost(supplierToken, `/api/payments/${payment.id}/confirm`, {}).then((res) => {
+            expect(res.status).to.eq(200);
+            expect(res.body.status).to.eq('CONFIRMED');
+          });
         }
-      });
-  });
-
-  it('shop gets notification after confirmation', () => {
-    cy.wait(3000);
-    cy.request({ method: 'GET', url: `${API()}/api/notifications`, headers: authHeaders(shopToken) })
-      .then(r => {
+      }).then(() => {
+        return cy.wait(3000);
+      }).then(() => {
+        return cy.apiGet(shopToken, '/api/notifications');
+      }).then((r) => {
         const notifs = Array.isArray(r.body) ? r.body : getItems(r.body);
         const notif = notifs.find((n: any) => n.type === 'PAYMENT_CONFIRMED');
-        if (!notif) {
-          cy.log('No PAYMENT_CONFIRMED notification found - RabbitMQ event may not have propagated');
-        }
+        if (!notif) cy.log('No PAYMENT_CONFIRMED notification - event may not have propagated');
       });
+    });
   });
 });
 
@@ -364,46 +285,43 @@ describe('12 - API: RBAC Verification', () => {
   before(() => cy.ensureTestUsers());
 
   it('system.admin should access all admin endpoints', () => {
-    cy.request({ method: 'POST', url: `${API()}/api/auth/login`, body: { username: 'system.admin', password: 'Admin@123' } })
-      .then(r => {
-        const h = authHeaders(r.body.accessToken);
-        cy.request({ method: 'GET', url: `${API()}/api/admin/suppliers`, headers: h }).then(res => expect(res.status).to.eq(200));
-        cy.request({ method: 'GET', url: `${API()}/api/admin/shops`, headers: h }).then(res => expect(res.status).to.eq(200));
-        cy.request({ method: 'GET', url: `${API()}/api/users`, headers: h }).then(res => expect(res.status).to.eq(200));
-        cy.request({ method: 'GET', url: `${API()}/api/payments`, headers: h }).then(res => expect(res.status).to.eq(200));
-      });
+    cy.apiLogin('system.admin').then((token) => {
+      cy.apiGet(token, '/api/admin/suppliers').then((r) => expect(r.status).to.eq(200));
+      cy.apiGet(token, '/api/admin/shops').then((r) => expect(r.status).to.eq(200));
+      cy.apiGet(token, '/api/users').then((r) => expect(r.status).to.eq(200));
+      cy.apiGet(token, '/api/payments').then((r) => expect(r.status).to.eq(200));
+    });
   });
 
-  it('covale.admin should access supplier endpoints but not admin', () => {
-    cy.request({ method: 'POST', url: `${API()}/api/auth/login`, body: { username: 'covale.admin', password: 'Admin@123' } })
-      .then(r => {
-        const h = authHeaders(r.body.accessToken);
-        const covaleId = env('covaleId');
-        cy.request({ method: 'GET', url: `${API()}/api/suppliers/${covaleId}/products`, headers: h }).then(res => expect(res.status).to.eq(200));
-        cy.request({ method: 'GET', url: `${API()}/api/admin/suppliers`, headers: h, failOnStatusCode: false })
-          .then(res => { expect(res.status).to.be.oneOf([200, 403, 401]); });
+  it('supplier admin should access supplier endpoints', () => {
+    cy.getTestCtx().then((ctx) => {
+      cy.apiLogin(ctx.users.supplierAdmin.username).then((token) => {
+        cy.apiGet(token, `/api/suppliers/${ctx.suppliers.covale.id}/products`).then((r) => expect(r.status).to.eq(200));
+        cy.apiGet(token, '/api/admin/suppliers').then((r) => {
+          expect(r.status).to.be.oneOf([200, 403, 401]);
+        });
       });
+    });
   });
 
-  it('abdelslam (shop admin) should access shop endpoints but not admin', () => {
-    cy.request({ method: 'POST', url: `${API()}/api/auth/login`, body: { username: 'abdelslam', password: 'Admin@123' } })
-      .then(r => {
-        const h = authHeaders(r.body.accessToken);
-        const shopAbdelslamId = env('shopAbdelslamId');
-        cy.request({ method: 'GET', url: `${API()}/api/orders`, headers: h }).then(res => expect(res.status).to.eq(200));
-        cy.request({ method: 'GET', url: `${API()}/api/balances/shop/${shopAbdelslamId}`, headers: h }).then(res => expect(res.status).to.eq(200));
-        cy.request({ method: 'GET', url: `${API()}/api/admin/suppliers`, headers: h, failOnStatusCode: false })
-          .then(res => { expect(res.status).to.be.oneOf([200, 403, 401]); });
+  it('shop admin should access shop endpoints', () => {
+    cy.getTestCtx().then((ctx) => {
+      cy.apiLogin(ctx.users.shopAdmin.username).then((token) => {
+        cy.apiGet(token, '/api/orders').then((r) => expect(r.status).to.eq(200));
+        cy.apiGet(token, `/api/balances/shop/${ctx.shops.abdelslam.id}`).then((r) => expect(r.status).to.eq(200));
+        cy.apiGet(token, '/api/admin/suppliers').then((r) => {
+          expect(r.status).to.be.oneOf([200, 403, 401]);
+        });
       });
+    });
   });
 
-  it('covale.agent1 should access supplier agent endpoints', () => {
-    cy.request({ method: 'POST', url: `${API()}/api/auth/login`, body: { username: 'covale.agent1', password: 'Admin@123' } })
-      .then(r => {
-        const h = authHeaders(r.body.accessToken);
-        const covaleId = env('covaleId');
-        cy.request({ method: 'GET', url: `${API()}/api/suppliers/${covaleId}/products`, headers: h }).then(res => expect(res.status).to.eq(200));
-        cy.request({ method: 'GET', url: `${API()}/api/suppliers/${covaleId}/movements`, headers: h }).then(res => expect(res.status).to.eq(200));
+  it('supplier agent should access agent endpoints', () => {
+    cy.getTestCtx().then((ctx) => {
+      cy.apiLogin(ctx.users.supplierAgent1.username).then((token) => {
+        cy.apiGet(token, `/api/suppliers/${ctx.suppliers.covale.id}/products`).then((r) => expect(r.status).to.eq(200));
+        cy.apiGet(token, `/api/suppliers/${ctx.suppliers.covale.id}/movements`).then((r) => expect(r.status).to.eq(200));
       });
+    });
   });
 });

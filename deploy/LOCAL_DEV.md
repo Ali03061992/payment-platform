@@ -212,7 +212,7 @@ Defined in `deploy/.env`:
 | `MYSQL_PASSWORD` | `app-password-change-me` | MySQL application password |
 | `RABBITMQ_USER` | `payment` | RabbitMQ user |
 | `RABBITMQ_PASSWORD` | `rabbit-password-change-me` | RabbitMQ password |
-| `SPRING_PROFILES_ACTIVE` | `prod` | Active Spring profile |
+| `SPRING_PROFILES_ACTIVE` | `local` | Active Spring profile |
 
 ---
 

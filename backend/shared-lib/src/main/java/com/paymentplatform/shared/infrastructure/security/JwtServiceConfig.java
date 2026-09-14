@@ -3,6 +3,7 @@ package com.paymentplatform.shared.infrastructure.security;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 
 /** Beans JWT partagés, actifs pour tous les services y compris le Gateway. */
 @Configuration
@@ -10,7 +11,7 @@ import org.springframework.context.annotation.Configuration;
 public class JwtServiceConfig {
 
     @Bean
-    public JwtService jwtService(SecurityProperties properties) {
-        return new JwtService(properties);
+    public JwtService jwtService(SecurityProperties properties, Environment environment) {
+        return new JwtService(properties, environment);
     }
 }

@@ -7,9 +7,14 @@ import com.paymentplatform.shared.infrastructure.security.JwtService;
 import com.paymentplatform.shared.infrastructure.security.SecurityProperties;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.mock.env.MockEnvironment;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.Base64;
+import java.nio.charset.StandardCharsets;
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -20,8 +25,10 @@ class JwtServiceTest {
 
     @BeforeEach
     void setUp() {
+        var env = new MockEnvironment();
+        env.setActiveProfiles("local");
         jwtService = new JwtService(new SecurityProperties(
-                "test-secret-key-for-jwt-signing-minimum-32-bytes-long-ok", Duration.ofMinutes(30)));
+                "test-secret-key-for-jwt-signing-minimum-32-bytes-long-ok", Duration.ofMinutes(30)), env);
     }
 
     @Test
@@ -59,16 +66,54 @@ class JwtServiceTest {
     }
 
     @Test
-    void issue_insecureSecret_throws() {
+    void issue_insecureSecret_inProd_throws() {
+        var prodEnv = new MockEnvironment();
+        prodEnv.setActiveProfiles("prod");
         assertThatThrownBy(() -> new JwtService(new SecurityProperties(
-                "dev-only-secret-change-me", Duration.ofMinutes(30))))
+                "dev-only-secret-change-me", Duration.ofMinutes(30)), prodEnv))
                 .isInstanceOf(IllegalStateException.class);
     }
 
     @Test
+    void issue_insecureSecret_inLocal_accepted() {
+        var localEnv = new MockEnvironment();
+        localEnv.setActiveProfiles("local");
+        var service = new JwtService(new SecurityProperties(
+                "dev-only-secret-change-me-0123456789abcdef0123456789abcdef", Duration.ofMinutes(30)), localEnv);
+        var user = new AuthenticatedUser(UUID.randomUUID(), "test", List.of("SYSTEM_ADMIN"), null);
+        String token = service.issue(user);
+        assertThat(token).isNotBlank();
+    }
+
+    @Test
     void issue_shortSecret_throws() {
+        var env = new MockEnvironment();
+        env.setActiveProfiles("local");
         assertThatThrownBy(() -> new JwtService(new SecurityProperties(
-                "short", Duration.ofMinutes(30))))
+                "short", Duration.ofMinutes(30)), env))
                 .isInstanceOf(IllegalStateException.class);
+    }
+
+    @Test
+    void gatewayManualValidation_compatibleWithJwtService() throws Exception {
+        String secret = "test-secret-key-for-jwt-signing-minimum-32-bytes-long-ok";
+        var user = new AuthenticatedUser(UUID.randomUUID(), "test", List.of("SYSTEM_ADMIN"), null);
+        String token = jwtService.issue(user);
+
+        String[] parts = token.split("\\.");
+        assertThat(parts.length).isEqualTo(3);
+
+        String header = parts[0];
+        String payload = parts[1];
+        String signature = parts[2];
+
+        byte[] keyBytes = secret.getBytes(StandardCharsets.UTF_8);
+        Mac mac = Mac.getInstance("HmacSHA256");
+        mac.init(new SecretKeySpec(keyBytes, "HmacSHA256"));
+
+        String expectedSignature = Base64.getUrlEncoder().withoutPadding()
+                .encodeToString(mac.doFinal((header + "." + payload).getBytes(StandardCharsets.UTF_8)));
+
+        assertThat(signature).isEqualTo(expectedSignature);
     }
 }

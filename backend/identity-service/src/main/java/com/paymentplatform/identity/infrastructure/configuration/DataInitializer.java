@@ -21,7 +21,7 @@ import org.springframework.stereotype.Component;
 
 /** Seed du compte SYSTEM_ADMIN de démonstration (username system.admin). */
 @Component
-@ConditionalOnProperty(name = "app.seed.enabled", havingValue = "true", matchIfMissing = true)
+@ConditionalOnProperty(name = "app.seed.enabled", havingValue = "true")
 public class DataInitializer implements ApplicationRunner {
 
     private static final Logger log = LoggerFactory.getLogger(DataInitializer.class);
@@ -37,7 +37,7 @@ public class DataInitializer implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments args) {
         String username = System.getenv().getOrDefault("SEED_ADMIN_USERNAME", "system.admin");
-        String password = System.getenv().getOrDefault("SEED_ADMIN_PASSWORD", "Admin@123");
+        String password = System.getenv().getOrDefault("SEED_ADMIN_PASSWORD", "@PAssword012345");
         if (!users.existsByUsername(Username.of(username))) {
             User admin = User.create(new UserId(null), Username.of(username),
                     Email.of(System.getenv().getOrDefault("SEED_ADMIN_EMAIL", "system.admin@payment-platform.local")),

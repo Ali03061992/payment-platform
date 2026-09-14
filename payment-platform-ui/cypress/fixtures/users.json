@@ -1,14 +1,10 @@
 {
-  "systemAdmin": { "username": "system.admin", "password": "Admin@123" },
-  "covaleAdmin": { "username": "covale.admin", "password": "Admin@123" },
-  "pointteckAdmin": { "username": "pointteck.admin", "password": "Admin@123" },
-  "covaleAgent1": { "username": "covale.agent1", "password": "Admin@123" },
-  "covaleAgent2": { "username": "covale.agent2", "password": "Admin@123" },
-  "pointteckAgent1": { "username": "pointteck.agent1", "password": "Admin@123" },
-  "pointteckAgent2": { "username": "pointteck.agent2", "password": "Admin@123" },
-  "shopAdminAbdelslam": { "username": "abdelslam", "password": "Admin@123" },
-  "shopAdminAli": { "username": "ali", "password": "Admin@123" },
-  "pointteckTunis": { "username": "pointteck.tunis.admin", "password": "Admin@123" },
-  "pointteckSfax": { "username": "pointteck.sfax.admin", "password": "Admin@123" },
-  "newUser": { "username": "test.user.e2e", "password": "Test@1234", "email": "test.e2e@platform.com", "firstName": "Test", "lastName": "E2E", "role": "SHOP_ADMIN" }
+  "systemAdmin": { "username": "system.admin", "password": "test1234" },
+  "supplierAdmin": { "username": "covale.admin.e2e", "password": "test1234" },
+  "supplierAgent1": { "username": "covale.agent1.e2e", "password": "test1234" },
+  "pointteckAdmin": { "username": "pointteck.admin.e2e", "password": "test1234" },
+  "pointteckAgent1": { "username": "pointteck.agent1.e2e", "password": "test1234" },
+  "shopAdmin": { "username": "abdelslam.e2e", "password": "test1234" },
+  "shopAli": { "username": "ali.e2e", "password": "test1234" },
+  "newUser": { "username": "test.user.new.e2e", "password": "Test@1234", "email": "new.user.e2e@platform.com", "firstName": "New", "lastName": "User", "role": "SHOP_ADMIN" }
 }

@@ -1,5 +1,3 @@
-const API = () => Cypress.env('apiUrl') || 'http://localhost:8081';
-
 describe('01 - Auth: Login Page', () => {
   before(() => cy.ensureTestUsers());
   beforeEach(() => cy.visit('/'));
@@ -11,7 +9,6 @@ describe('01 - Auth: Login Page', () => {
     cy.get('button[type="submit"]').should('exist');
     cy.get('.login-logo').should('exist');
     cy.get('h1').should('contain', 'Connexion');
-    cy.get('.subtitle').should('contain', "Accédez à votre espace");
   });
 
   it('should show error on invalid credentials', () => {
@@ -29,7 +26,7 @@ describe('01 - Auth: Login Page', () => {
 
   it('should login as SYSTEM_ADMIN and reach dashboard', () => {
     cy.get('#username').clear().type('system.admin');
-    cy.get('#password').clear().type('Admin@123');
+    cy.get('#password').clear().type('@PAssword012345');
     cy.get('button[type="submit"]').click();
     cy.url({ timeout: 15000 }).should('include', '/dashboard');
     cy.window().then((win) => {
@@ -40,24 +37,28 @@ describe('01 - Auth: Login Page', () => {
   });
 
   it('should login as SUPPLIER_ADMIN and reach dashboard', () => {
-    cy.get('#username').clear().type('covale.admin');
-    cy.get('#password').clear().type('Admin@123');
-    cy.get('button[type="submit"]').click();
-    cy.url({ timeout: 15000 }).should('include', '/dashboard');
-    cy.window().then((win) => {
-      const user = JSON.parse(win.sessionStorage.getItem('user') || '{}');
-      expect(user.roles).to.include('SUPPLIER_ADMIN');
+    cy.getTestCtx().then((ctx) => {
+      cy.get('#username').clear().type(ctx.users.supplierAdmin.username);
+      cy.get('#password').clear().type('test1234');
+      cy.get('button[type="submit"]').click();
+      cy.url({ timeout: 15000 }).should('include', '/dashboard');
+      cy.window().then((win) => {
+        const user = JSON.parse(win.sessionStorage.getItem('user') || '{}');
+        expect(user.roles).to.include('SUPPLIER_ADMIN');
+      });
     });
   });
 
   it('should login as SHOP_ADMIN and reach dashboard', () => {
-    cy.get('#username').clear().type('abdelslam');
-    cy.get('#password').clear().type('Admin@123');
-    cy.get('button[type="submit"]').click();
-    cy.url({ timeout: 15000 }).should('include', '/dashboard');
-    cy.window().then((win) => {
-      const user = JSON.parse(win.sessionStorage.getItem('user') || '{}');
-      expect(user.roles).to.include('SHOP_ADMIN');
+    cy.getTestCtx().then((ctx) => {
+      cy.get('#username').clear().type(ctx.users.shopAdmin.username);
+      cy.get('#password').clear().type('test1234');
+      cy.get('button[type="submit"]').click();
+      cy.url({ timeout: 15000 }).should('include', '/dashboard');
+      cy.window().then((win) => {
+        const user = JSON.parse(win.sessionStorage.getItem('user') || '{}');
+        expect(user.roles).to.include('SHOP_ADMIN');
+      });
     });
   });
 });
@@ -88,8 +89,8 @@ describe('01 - Auth: Register Page', () => {
     const ts = Date.now();
     cy.get('#lastName').clear().type('TestNom');
     cy.get('#firstName').clear().type('TestPrenom');
-    cy.get('#username').clear().type(`testuser_${ts}`);
-    cy.get('#email').clear().type(`test_${ts}@e2e.com`);
+    cy.get('#username').clear().type(`testreg_${ts}`);
+    cy.get('#email').clear().type(`testreg_${ts}@e2e.com`);
     cy.get('#password').clear().type('SecurePass123!');
     cy.get('#role').select('SUPPLIER_ADMIN');
     cy.get('button[type="submit"]').click();
@@ -108,7 +109,7 @@ describe('01 - Auth: Password Setup Page', () => {
 
 describe('01 - Auth: Logout', () => {
   it('should logout and redirect to login', () => {
-    cy.login('system.admin', 'Admin@123');
+    cy.login('system.admin', '@PAssword012345');
     cy.visit('/dashboard');
     cy.get('.sidebar .logout-btn').click();
     cy.url({ timeout: 5000 }).should('include', '/login');

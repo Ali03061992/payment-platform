@@ -12,8 +12,11 @@ import com.paymentplatform.shared.domain.exception.NotFoundException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
+
+import com.paymentplatform.payment.infrastructure.http.TestOrganizationValidationConfig;
 
 import java.math.BigDecimal;
 
@@ -23,6 +26,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 @SpringBootTest
 @ActiveProfiles("test")
 @Transactional
+@Import(TestOrganizationValidationConfig.class)
 class PaymentUseCaseH2Test {
 
     @Autowired private CreatePaymentUseCase createPayment;

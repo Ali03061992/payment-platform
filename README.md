@@ -17,6 +17,35 @@ Architecture **microservices** appliquant **DDD**, **Clean/Hexagonal Architectur
 | Angular | 16 |
 | Docker | Multi-stage builds |
 
+## Environments (Spring Profiles)
+
+| Profile | Usage | JWT Secret | MySQL Host | RabbitMQ Host | Redis Host |
+|---|---|---|---|---|---|
+| `local` | IDE + Docker deps | Default dev secret | `localhost:3307` | `localhost:5673` | `localhost:6379` |
+| `dev` | Docker Compose full stack | Default dev secret | `mysql` | `rabbitmq` | `redis` |
+| `test` | Unit/Integration tests | Test secret | H2 in-memory | Disabled | Disabled |
+| `prod` | Production (Render, etc.) | **Required via env var** | Env var required | Env var required | Env var required |
+
+### Activation
+
+- **Par défaut** : `local` (via `spring.profiles.active: ${SPRING_PROFILES_ACTIVE:local}`)
+- **IDE** : Lancé automatiquement avec le profil `local`
+- **Docker Compose** : `SPRING_PROFILES_ACTIVE=dev` (déjà configuré dans `docker-compose.yml`)
+- **Production** : `SPRING_PROFILES_ACTIVE=prod` (déjà configuré dans `render.yaml`)
+- **Tests** : Activé automatiquement via `src/test/resources/application.yml`
+
+### Configuration par profile
+
+Chaque microservice possède ses fichiers de configuration :
+
+```
+backend/{service}/src/main/resources/
+├── application.yml           # Config commune (port, noms)
+├── application-local.yml     # Local : localhost avec ports Docker
+├── application-dev.yml       # Dev : noms de containers Docker
+├── application-prod.yml      # Prod : valeurs depuis env vars uniquement
+```
+
 ## Structure
 
 ```
@@ -68,6 +97,59 @@ cd deploy
 cd deploy/
 docker compose up --build -d
 ```
+
+## Développement local (IDE)
+
+Lancer uniquement les dépendances (MySQL, RabbitMQ, Redis, etc.) depuis Docker, puis démarrer les services Spring Boot directement depuis ton IDE pour debugger.
+
+> **Profile actif** : `local` (activé par défaut dans `application.yml`)
+
+### 1. Démarrer les dépendances
+
+```bash
+cd deploy
+docker compose -f docker-compose.dev.yml up -d
+```
+
+### 2. Vérifier que les services sont prêts
+
+```bash
+docker compose -f docker-compose.dev.yml ps
+```
+
+Tous les containers doivent être `healthy` avant de lancer l'application.
+
+### 3. Lancer les services depuis l'IDE
+
+Dans IntelliJ/Eclipse, lance chaque microservice en tant que **Spring Boot Application** :
+
+| Service | Main class | Port |
+|---|---|---|
+| api-gateway | `ApiGatewayApplication` | 8081 |
+| identity-service | `IdentityServiceApplication` | 8082 |
+| organization-service | `OrganizationServiceApplication` | 8083 |
+| payment-service | `PaymentServiceApplication` | 8084 |
+| notification-service | `NotificationServiceApplication` | 8085 |
+
+> **Note :** Les services se connectent aux infrastructures Docker sur `localhost` aux ports mappés (3307, 5673, 6379, etc.).
+
+### 4. Arrêter les dépendances
+
+```bash
+cd deploy
+docker compose -f docker-compose.dev.yml down
+```
+
+### Ports des dépendances
+
+| Service | Port | Credentials |
+|---|---|---|
+| MySQL | `localhost:3307` | `payment_app` / `payment_app` |
+| RabbitMQ AMQP | `localhost:5673` | `payment` / `payment` |
+| RabbitMQ Management | `localhost:15673` | `payment` / `payment` |
+| Redis | `localhost:6379` | — |
+| Adminer | `localhost:8086` | — |
+| Mailpit | `localhost:8025` | — |
 
 ## URLs & Ports
 

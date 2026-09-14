@@ -167,7 +167,7 @@
       <form (ngSubmit)="confirmDeliver()">
         <div class="form-group">
           <label>ID de la personne qui a reçu</label>
-          <input type="number" [(ngModel)]="receivedBy" name="receivedBy" class="form-control" min="1" required placeholder="ID du destinataire">
+          <input type="text" [(ngModel)]="receivedBy" name="receivedBy" class="form-control" required placeholder="UUID du destinataire">
         </div>
         <div class="form-actions">
           <button type="button" class="btn btn-secondary" (click)="closeDeliver()">Annuler</button>

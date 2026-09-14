@@ -4,13 +4,25 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
+    "start:local": "ng serve --port 4200",
+    "start:dev": "ng serve --port 4200",
     "build": "ng build",
+    "build:local": "ng build --configuration development",
+    "build:dev": "ng build --configuration production",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "cy:open": "cypress open",
+    "cy:open:local": "cypress open --config-file cypress.config.local.ts",
+    "cy:open:dev": "cypress open --config-file cypress.config.dev.ts",
     "cy:run": "cypress run",
+    "cy:run:local": "cypress run --config-file cypress.config.local.ts --browser chrome --headless",
+    "cy:run:dev": "cypress run --config-file cypress.config.dev.ts --browser chrome --headless",
     "cy:run:headless": "cypress run --browser chrome --headless",
-    "e2e": "cypress run --browser chrome --headless"
+    "e2e": "cypress run --browser chrome --headless",
+    "e2e:local": "cypress run --config-file cypress.config.local.ts --browser chrome --headless",
+    "e2e:dev": "cypress run --config-file cypress.config.dev.ts --browser chrome --headless",
+    "e2e:open:local": "cypress open --config-file cypress.config.local.ts",
+    "e2e:open:dev": "cypress open --config-file cypress.config.dev.ts"
   },
   "private": true,
   "dependencies": {

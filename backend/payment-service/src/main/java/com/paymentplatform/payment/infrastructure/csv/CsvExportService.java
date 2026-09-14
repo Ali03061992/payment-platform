@@ -29,8 +29,8 @@ public class CsvExportService {
 
         List<Payment> filtered = allPayments.stream()
                 .filter(p -> p.createdAt().isAfter(from.minusMillis(1)) && p.createdAt().isBefore(to))
-                .filter(p -> supplierId == null || p.supplierId() == supplierId)
-                .filter(p -> shopId == null || p.shopId() == shopId)
+                .filter(p -> supplierId == null || supplierId.equals(p.supplierId()))
+                .filter(p -> shopId == null || shopId.equals(p.shopId()))
                 .toList();
 
         StringWriter sw = new StringWriter();

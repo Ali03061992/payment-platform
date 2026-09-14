@@ -12,4 +12,8 @@ export class AuthService {
   register(data: RegisterRequest): Observable<User> {
     return this.http.post<User>(`${this.apiUrl}/register`, data);
   }
+
+  changePassword(currentPassword: string, newPassword: string): Observable<void> {
+    return this.http.post<void>(`${this.apiUrl}/change-password`, { currentPassword, newPassword });
+  }
 }
