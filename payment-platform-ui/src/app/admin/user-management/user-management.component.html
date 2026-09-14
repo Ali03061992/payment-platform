@@ -19,46 +19,58 @@
   </select>
 </div>
 
-<div *ngIf="loading" class="loading">
-  <div class="spinner"></div>
-  <span>Chargement...</span>
-</div>
-
-<div class="table-card" *ngIf="!loading">
-  <div class="table-wrapper">
-    <table>
-      <thead>
-        <tr>
-          <th>Nom d'utilisateur</th>
-          <th>Nom complet</th>
-          <th>Email</th>
-          <th>Téléphone</th>
-          <th>Rôle</th>
-          <th>Statut</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let user of users">
-          <td><strong>{{ user.username }}</strong></td>
-          <td>{{ user.firstName }} {{ user.lastName }}</td>
-          <td>{{ user.email }}</td>
-          <td>{{ user.phone || '-' }}</td>
-          <td><span class="role-badge">{{ user.roles[0] }}</span></td>
-          <td>
-            <span class="status-badge" [class.active]="user.status === 'ACTIVE'" [class.disabled]="user.status === 'DISABLED'">
-              {{ user.status }}
-            </span>
-          </td>
-          <td class="actions">
-            <button *ngIf="user.status === 'ACTIVE'" class="btn btn-sm btn-danger" (click)="disable(user)">Désactiver</button>
-            <button *ngIf="user.status === 'DISABLED'" class="btn btn-sm btn-success" (click)="activate(user)">Activer</button>
-          </td>
-        </tr>
-        <tr *ngIf="users.length === 0">
-          <td colspan="7" class="empty">Aucun utilisateur trouvé</td>
-        </tr>
-      </tbody>
-    </table>
+@if (loading) {
+  <div class="loading">
+    <div class="spinner"></div>
+    <span>Chargement...</span>
   </div>
-</div>
+}
+
+@if (!loading) {
+  <div class="table-card">
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Nom d'utilisateur</th>
+            <th>Nom complet</th>
+            <th>Email</th>
+            <th>Téléphone</th>
+            <th>Rôle</th>
+            <th>Statut</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (user of users; track user) {
+            <tr>
+              <td><strong>{{ user.username }}</strong></td>
+              <td>{{ user.firstName }} {{ user.lastName }}</td>
+              <td>{{ user.email }}</td>
+              <td>{{ user.phone || '-' }}</td>
+              <td><span class="role-badge">{{ user.roles[0] }}</span></td>
+              <td>
+                <span class="status-badge" [class.active]="user.status === 'ACTIVE'" [class.disabled]="user.status === 'DISABLED'">
+                  {{ user.status }}
+                </span>
+              </td>
+              <td class="actions">
+                @if (user.status === 'ACTIVE') {
+                  <button class="btn btn-sm btn-danger" (click)="disable(user)">Désactiver</button>
+                }
+                @if (user.status === 'DISABLED') {
+                  <button class="btn btn-sm btn-success" (click)="activate(user)">Activer</button>
+                }
+              </td>
+            </tr>
+          }
+          @if (users.length === 0) {
+            <tr>
+              <td colspan="7" class="empty">Aucun utilisateur trouvé</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+}

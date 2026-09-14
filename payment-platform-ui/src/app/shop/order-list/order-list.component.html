@@ -3,98 +3,126 @@
   <button class="btn btn-primary" routerLink="/dashboard/shop/orders/create">+ Nouvelle commande</button>
 </div>
 
-<div class="filters" *ngIf="!loading">
-  <select [(ngModel)]="filterStatus" class="form-control" style="max-width:200px;">
-    <option value="">Tous les statuts</option>
-    <option value="DRAFT">Brouillon</option>
-    <option value="CONFIRMED">Confirmé</option>
-    <option value="PREPARING">En préparation</option>
-    <option value="READY_FOR_DELIVERY">Prêt pour livraison</option>
-    <option value="IN_DELIVERY">En livraison</option>
-    <option value="DELIVERED">Livré</option>
-    <option value="ACCEPTED">Accepté</option>
-    <option value="CANCELLED">Annulé</option>
-    <option value="REJECTED">Rejeté</option>
-    <option value="DELIVERY_REJECTED">Livraison rejetée</option>
-  </select>
-  <span class="result-count">{{ filteredOrders.length }} résultat(s)</span>
-</div>
+@if (!loading) {
+  <div class="filters">
+    <select [(ngModel)]="filterStatus" class="form-control" style="max-width:200px;">
+      <option value="">Tous les statuts</option>
+      <option value="DRAFT">Brouillon</option>
+      <option value="CONFIRMED">Confirmé</option>
+      <option value="PREPARING">En préparation</option>
+      <option value="READY_FOR_DELIVERY">Prêt pour livraison</option>
+      <option value="IN_DELIVERY">En livraison</option>
+      <option value="DELIVERED">Livré</option>
+      <option value="ACCEPTED">Accepté</option>
+      <option value="CANCELLED">Annulé</option>
+      <option value="REJECTED">Rejeté</option>
+      <option value="DELIVERY_REJECTED">Livraison rejetée</option>
+    </select>
+    <span class="result-count">{{ filteredOrders.length }} résultat(s)</span>
+  </div>
+}
 
-<div class="loading" *ngIf="loading">
-  <div class="spinner"></div>
-  <span>Chargement...</span>
-</div>
+@if (loading) {
+  <div class="loading">
+    <div class="spinner"></div>
+    <span>Chargement...</span>
+  </div>
+}
 
 <!-- Desktop Table View -->
-<div class="table-card hide-mobile" *ngIf="!loading">
-  <div class="table-wrapper">
-    <table>
-      <thead>
-        <tr>
-          <th>Référence</th>
-          <th>Fournisseur</th>
-          <th>Date</th>
-          <th>Total</th>
-          <th>Statut</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let o of filteredOrders" class="clickable-row" [routerLink]="['/dashboard/shop/orders', o.id]">
-          <td><strong>{{ o.reference }}</strong></td>
-          <td>{{ o.supplierName || o.supplierId }}</td>
-          <td>{{ o.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
-          <td>{{ o.total | number:'1.2-2' }} {{ o.currency }}</td>
-          <td>
-            <span class="payment-badge" [ngClass]="statusClass(o.status)">
-              {{ statusLabel(o.status) }}
-            </span>
-          </td>
-          <td class="actions" (click)="$event.stopPropagation()">
-            <a class="btn btn-sm btn-secondary" [routerLink]="['/dashboard/shop/orders', o.id]">Détail</a>
-            <button class="btn btn-sm btn-success" *ngIf="o.status === 'DELIVERED'" (click)="accept(o.id)">Accepter</button>
-            <button class="btn btn-sm btn-danger" *ngIf="o.status === 'DELIVERED'" (click)="reject(o.id)">Rejeter</button>
-            <button class="btn btn-sm btn-danger" *ngIf="o.status === 'DRAFT' || o.status === 'CONFIRMED' || o.status === 'PREPARING'" (click)="cancel(o.id)">Annuler</button>
-          </td>
-        </tr>
-        <tr *ngIf="filteredOrders.length === 0">
-          <td colspan="6" class="empty">Aucune commande trouvée</td>
-        </tr>
-      </tbody>
-    </table>
+@if (!loading) {
+  <div class="table-card hide-mobile">
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Référence</th>
+            <th>Fournisseur</th>
+            <th>Date</th>
+            <th>Total</th>
+            <th>Statut</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (o of filteredOrders; track o) {
+            <tr class="clickable-row" [routerLink]="['/dashboard/shop/orders', o.id]">
+              <td><strong>{{ o.reference }}</strong></td>
+              <td>{{ o.supplierName || o.supplierId }}</td>
+              <td>{{ o.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
+              <td>{{ o.total | number:'1.2-2' }} {{ o.currency }}</td>
+              <td>
+                <span class="payment-badge" [ngClass]="statusClass(o.status)">
+                  {{ statusLabel(o.status) }}
+                </span>
+              </td>
+              <td class="actions" (click)="$event.stopPropagation()">
+                <a class="btn btn-sm btn-secondary" [routerLink]="['/dashboard/shop/orders', o.id]">Détail</a>
+                @if (o.status === 'DELIVERED') {
+                  <button class="btn btn-sm btn-success" (click)="accept(o.id)">Accepter</button>
+                }
+                @if (o.status === 'DELIVERED') {
+                  <button class="btn btn-sm btn-danger" (click)="reject(o.id)">Rejeter</button>
+                }
+                @if (o.status === 'DRAFT' || o.status === 'CONFIRMED' || o.status === 'PREPARING') {
+                  <button class="btn btn-sm btn-danger" (click)="cancel(o.id)">Annuler</button>
+                }
+              </td>
+            </tr>
+          }
+          @if (filteredOrders.length === 0) {
+            <tr>
+              <td colspan="6" class="empty">Aucune commande trouvée</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
   </div>
-</div>
+}
 
 <!-- Mobile Card View -->
-<div class="order-cards show-mobile" *ngIf="!loading">
-  <div *ngIf="filteredOrders.length === 0" class="empty-card">
-    Aucune commande trouvée
+@if (!loading) {
+  <div class="order-cards show-mobile">
+    @if (filteredOrders.length === 0) {
+      <div class="empty-card">
+        Aucune commande trouvée
+      </div>
+    }
+    @for (o of filteredOrders; track o) {
+      <div class="order-card" [routerLink]="['/dashboard/shop/orders', o.id]">
+        <div class="order-card-header">
+          <span class="order-reference">{{ o.reference }}</span>
+          <span class="payment-badge" [ngClass]="statusClass(o.status)">
+            {{ statusLabel(o.status) }}
+          </span>
+        </div>
+        <div class="order-card-body">
+          <div class="order-row">
+            <span class="order-label">Fournisseur</span>
+            <span class="order-value">{{ o.supplierName || o.supplierId }}</span>
+          </div>
+          <div class="order-row">
+            <span class="order-label">Total</span>
+            <span class="order-amount">{{ o.total | number:'1.2-2' }} {{ o.currency }}</span>
+          </div>
+          <div class="order-row">
+            <span class="order-label">Date</span>
+            <span class="order-value">{{ o.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
+          </div>
+        </div>
+        <div class="order-card-actions" (click)="$event.stopPropagation()">
+          @if (o.status === 'DELIVERED') {
+            <button class="btn btn-sm btn-success" (click)="accept(o.id)">Accepter</button>
+          }
+          @if (o.status === 'DELIVERED') {
+            <button class="btn btn-sm btn-danger" (click)="reject(o.id)">Rejeter</button>
+          }
+          @if (o.status === 'DRAFT' || o.status === 'CONFIRMED' || o.status === 'PREPARING') {
+            <button class="btn btn-sm btn-danger" (click)="cancel(o.id)">Annuler</button>
+          }
+        </div>
+      </div>
+    }
   </div>
-  <div *ngFor="let o of filteredOrders" class="order-card" [routerLink]="['/dashboard/shop/orders', o.id]">
-    <div class="order-card-header">
-      <span class="order-reference">{{ o.reference }}</span>
-      <span class="payment-badge" [ngClass]="statusClass(o.status)">
-        {{ statusLabel(o.status) }}
-      </span>
-    </div>
-    <div class="order-card-body">
-      <div class="order-row">
-        <span class="order-label">Fournisseur</span>
-        <span class="order-value">{{ o.supplierName || o.supplierId }}</span>
-      </div>
-      <div class="order-row">
-        <span class="order-label">Total</span>
-        <span class="order-amount">{{ o.total | number:'1.2-2' }} {{ o.currency }}</span>
-      </div>
-      <div class="order-row">
-        <span class="order-label">Date</span>
-        <span class="order-value">{{ o.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
-      </div>
-    </div>
-    <div class="order-card-actions" (click)="$event.stopPropagation()">
-      <button class="btn btn-sm btn-success" *ngIf="o.status === 'DELIVERED'" (click)="accept(o.id)">Accepter</button>
-      <button class="btn btn-sm btn-danger" *ngIf="o.status === 'DELIVERED'" (click)="reject(o.id)">Rejeter</button>
-      <button class="btn btn-sm btn-danger" *ngIf="o.status === 'DRAFT' || o.status === 'CONFIRMED' || o.status === 'PREPARING'" (click)="cancel(o.id)">Annuler</button>
-    </div>
-  </div>
-</div>
+}

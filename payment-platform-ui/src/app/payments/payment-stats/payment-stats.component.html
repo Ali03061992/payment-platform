@@ -2,30 +2,34 @@
   <h2>Statistiques des paiements</h2>
 </div>
 
-<div class="loading" *ngIf="loading">
-  <div class="spinner"></div>
-  <span>Chargement...</span>
-</div>
+@if (loading) {
+  <div class="loading">
+    <div class="spinner"></div>
+    <span>Chargement...</span>
+  </div>
+}
 
-<div class="stats-grid" *ngIf="stats">
-  <div class="stat-card">
-    <div class="stat-value">{{ stats.total }}</div>
-    <div class="stat-label">Total</div>
+@if (stats) {
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-value">{{ stats.total }}</div>
+      <div class="stat-label">Total</div>
+    </div>
+    <div class="stat-card stat-pending">
+      <div class="stat-value">{{ stats.pending }}</div>
+      <div class="stat-label">En attente</div>
+    </div>
+    <div class="stat-card stat-confirmed">
+      <div class="stat-value">{{ stats.confirmed }}</div>
+      <div class="stat-label">Confirmés</div>
+    </div>
+    <div class="stat-card stat-rejected">
+      <div class="stat-value">{{ stats.rejected }}</div>
+      <div class="stat-label">Rejetés</div>
+    </div>
+    <div class="stat-card stat-cancelled">
+      <div class="stat-value">{{ stats.cancelled }}</div>
+      <div class="stat-label">Annulés</div>
+    </div>
   </div>
-  <div class="stat-card stat-pending">
-    <div class="stat-value">{{ stats.pending }}</div>
-    <div class="stat-label">En attente</div>
-  </div>
-  <div class="stat-card stat-confirmed">
-    <div class="stat-value">{{ stats.confirmed }}</div>
-    <div class="stat-label">Confirmés</div>
-  </div>
-  <div class="stat-card stat-rejected">
-    <div class="stat-value">{{ stats.rejected }}</div>
-    <div class="stat-label">Rejetés</div>
-  </div>
-  <div class="stat-card stat-cancelled">
-    <div class="stat-value">{{ stats.cancelled }}</div>
-    <div class="stat-label">Annulés</div>
-  </div>
-</div>
+}

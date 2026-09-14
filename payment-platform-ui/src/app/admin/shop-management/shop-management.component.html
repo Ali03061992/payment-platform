@@ -5,56 +5,66 @@
   </button>
 </div>
 
-<div class="form-card" *ngIf="showCreate" style="margin-bottom: 24px;">
-  <h3 style="margin-bottom: 16px;">Créer une boutique</h3>
-  <form (ngSubmit)="create()">
-    <div class="form-group">
-      <label>Nom de la boutique</label>
-      <input type="text" [(ngModel)]="newName" name="name" class="form-control"
-             placeholder="Ex: Boutique Sfax" required>
-    </div>
-    <button class="btn btn-primary" [disabled]="creating || !newName.trim()">
-      {{ creating ? 'Création...' : 'Créer' }}
-    </button>
-  </form>
-</div>
-
-<div class="loading" *ngIf="loading">
-  <div class="spinner"></div>
-  <span>Chargement...</span>
-</div>
-
-<div class="table-card" *ngIf="!loading">
-  <div class="table-wrapper">
-    <table>
-      <thead>
-        <tr>
-          <th>Nom</th>
-          <th>Statut</th>
-          <th>Créé le</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let s of shops">
-          <td><strong>{{ s.name }}</strong></td>
-          <td>
-            <span class="status-badge" [class.active]="s.status === 'ACTIVE'" [class.disabled]="s.status === 'DISABLED'">
-              {{ s.status === 'ACTIVE' ? 'Actif' : 'Désactivé' }}
-            </span>
-          </td>
-          <td>{{ s.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
-          <td>
-            <button class="btn btn-sm" [class.btn-success]="s.status === 'DISABLED'" [class.btn-danger]="s.status === 'ACTIVE'"
-                    (click)="toggle(s)">
-              {{ s.status === 'ACTIVE' ? 'Désactiver' : 'Activer' }}
-            </button>
-          </td>
-        </tr>
-        <tr *ngIf="shops.length === 0">
-          <td colspan="4" style="text-align:center;color:#8896ab;padding:32px;">Aucune boutique trouvée</td>
-        </tr>
-      </tbody>
-    </table>
+@if (showCreate) {
+  <div class="form-card" style="margin-bottom: 24px;">
+    <h3 style="margin-bottom: 16px;">Créer une boutique</h3>
+    <form (ngSubmit)="create()">
+      <div class="form-group">
+        <label>Nom de la boutique</label>
+        <input type="text" [(ngModel)]="newName" name="name" class="form-control"
+          placeholder="Ex: Boutique Sfax" required>
+      </div>
+      <button class="btn btn-primary" [disabled]="creating || !newName.trim()">
+        {{ creating ? 'Création...' : 'Créer' }}
+      </button>
+    </form>
   </div>
-</div>
+}
+
+@if (loading) {
+  <div class="loading">
+    <div class="spinner"></div>
+    <span>Chargement...</span>
+  </div>
+}
+
+@if (!loading) {
+  <div class="table-card">
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Nom</th>
+            <th>Statut</th>
+            <th>Créé le</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (s of shops; track s) {
+            <tr>
+              <td><strong>{{ s.name }}</strong></td>
+              <td>
+                <span class="status-badge" [class.active]="s.status === 'ACTIVE'" [class.disabled]="s.status === 'DISABLED'">
+                  {{ s.status === 'ACTIVE' ? 'Actif' : 'Désactivé' }}
+                </span>
+              </td>
+              <td>{{ s.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
+              <td>
+                <button class="btn btn-sm" [class.btn-success]="s.status === 'DISABLED'" [class.btn-danger]="s.status === 'ACTIVE'"
+                  (click)="toggle(s)">
+                  {{ s.status === 'ACTIVE' ? 'Désactiver' : 'Activer' }}
+                </button>
+              </td>
+            </tr>
+          }
+          @if (shops.length === 0) {
+            <tr>
+              <td colspan="4" style="text-align:center;color:#8896ab;padding:32px;">Aucune boutique trouvée</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+}

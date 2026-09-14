@@ -2,106 +2,122 @@
   <h2>Soldes fournisseurs</h2>
 </div>
 
-<div class="loading" *ngIf="loading">
-  <div class="spinner"></div>
-  <span>Chargement...</span>
-</div>
-
-<div *ngIf="!loading">
-  <div class="stats-grid" *ngIf="balances.length > 0" style="margin-bottom:24px;">
-    <div class="stat-card">
-      <div>
-        <div class="stat-value">{{ balances.length }}</div>
-        <div class="stat-label">Fournisseur(s)</div>
-      </div>
-    </div>
-    <div class="stat-card stat-pending">
-      <div>
-        <div class="stat-value">{{ getTotalRemaining() | number:'1.2-2' }}</div>
-        <div class="stat-label">Total dû</div>
-      </div>
-    </div>
+@if (loading) {
+  <div class="loading">
+    <div class="spinner"></div>
+    <span>Chargement...</span>
   </div>
+}
 
-  <div class="table-card">
-    <div class="table-wrapper">
-      <table>
-        <thead>
-          <tr>
-            <th>Fournisseur</th>
-            <th>Solde actuel</th>
-            <th>Total commandes</th>
-            <th>Total paiements</th>
-            <th>Reste à payer</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let b of balances" class="clickable-row" (click)="viewLedger(b.supplierId, b.shopId)">
-            <td><strong>{{ b.supplierName }}</strong></td>
-            <td [class.positive]="b.currentBalance >= 0" [class.negative]="b.currentBalance < 0">
-              {{ b.currentBalance | number:'1.2-2' }}
-            </td>
-            <td>{{ b.totalOrders | number:'1.2-2' }}</td>
-            <td>{{ b.totalPayments | number:'1.2-2' }}</td>
-            <td [class.negative]="b.remainingDue > 0">
-              {{ b.remainingDue | number:'1.2-2' }}
-            </td>
-            <td class="actions" (click)="$event.stopPropagation()">
-              <button class="btn btn-sm btn-secondary" (click)="viewLedger(b.supplierId, b.shopId)">Voir le journal</button>
-            </td>
-          </tr>
-          <tr *ngIf="balances.length === 0">
-            <td colspan="6" class="empty">Aucun solde trouvé</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-
-  <div class="ledger-panel" *ngIf="selectedSupplierId !== null">
-    <div class="ledger-header">
-      <h3>Journal des mouvements</h3>
-      <button class="btn btn-sm btn-secondary" (click)="closeLedger()">Fermer</button>
-    </div>
-
-    <div class="loading" *ngIf="loadingLedger">
-      <div class="spinner"></div>
-      <span>Chargement du journal...</span>
-    </div>
-
-    <div class="table-card" *ngIf="!loadingLedger">
+@if (!loading) {
+  <div>
+    @if (balances.length > 0) {
+      <div class="stats-grid" style="margin-bottom:24px;">
+        <div class="stat-card">
+          <div>
+            <div class="stat-value">{{ balances.length }}</div>
+            <div class="stat-label">Fournisseur(s)</div>
+          </div>
+        </div>
+        <div class="stat-card stat-pending">
+          <div>
+            <div class="stat-value">{{ getTotalRemaining() | number:'1.2-2' }}</div>
+            <div class="stat-label">Total dû</div>
+          </div>
+        </div>
+      </div>
+    }
+    <div class="table-card">
       <div class="table-wrapper">
         <table>
           <thead>
             <tr>
-              <th>Date</th>
-              <th>Type</th>
-              <th>Montant</th>
-              <th>Solde après</th>
-              <th>Référence</th>
+              <th>Fournisseur</th>
+              <th>Solde actuel</th>
+              <th>Total commandes</th>
+              <th>Total paiements</th>
+              <th>Reste à payer</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let e of ledgerEntries">
-              <td>{{ e.createdAt | date:'dd/MM/yyyy HH:mm:ss' }}</td>
-              <td>
-                <span class="status-badge" [ngClass]="typeClass(e.type)">
-                  {{ typeLabel(e.type) }}
-                </span>
-              </td>
-              <td [class.positive]="e.amount >= 0" [class.negative]="e.amount < 0">
-                {{ e.amount >= 0 ? '+' : '' }}{{ e.amount | number:'1.2-2' }}
-              </td>
-              <td><strong>{{ e.balanceAfter | number:'1.2-2' }}</strong></td>
-              <td>{{ e.reference || '-' }}</td>
-            </tr>
-            <tr *ngIf="ledgerEntries.length === 0">
-              <td colspan="5" class="empty">Aucun mouvement</td>
-            </tr>
+            @for (b of balances; track b) {
+              <tr class="clickable-row" (click)="viewLedger(b.supplierId, b.shopId)">
+                <td><strong>{{ b.supplierName }}</strong></td>
+                <td [class.positive]="b.currentBalance >= 0" [class.negative]="b.currentBalance < 0">
+                  {{ b.currentBalance | number:'1.2-2' }}
+                </td>
+                <td>{{ b.totalOrders | number:'1.2-2' }}</td>
+                <td>{{ b.totalPayments | number:'1.2-2' }}</td>
+                <td [class.negative]="b.remainingDue > 0">
+                  {{ b.remainingDue | number:'1.2-2' }}
+                </td>
+                <td class="actions" (click)="$event.stopPropagation()">
+                  <button class="btn btn-sm btn-secondary" (click)="viewLedger(b.supplierId, b.shopId)">Voir le journal</button>
+                </td>
+              </tr>
+            }
+            @if (balances.length === 0) {
+              <tr>
+                <td colspan="6" class="empty">Aucun solde trouvé</td>
+              </tr>
+            }
           </tbody>
         </table>
       </div>
     </div>
+    @if (selectedSupplierId !== null) {
+      <div class="ledger-panel">
+        <div class="ledger-header">
+          <h3>Journal des mouvements</h3>
+          <button class="btn btn-sm btn-secondary" (click)="closeLedger()">Fermer</button>
+        </div>
+        @if (loadingLedger) {
+          <div class="loading">
+            <div class="spinner"></div>
+            <span>Chargement du journal...</span>
+          </div>
+        }
+        @if (!loadingLedger) {
+          <div class="table-card">
+            <div class="table-wrapper">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Type</th>
+                    <th>Montant</th>
+                    <th>Solde après</th>
+                    <th>Référence</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (e of ledgerEntries; track e) {
+                    <tr>
+                      <td>{{ e.createdAt | date:'dd/MM/yyyy HH:mm:ss' }}</td>
+                      <td>
+                        <span class="status-badge" [ngClass]="typeClass(e.type)">
+                          {{ typeLabel(e.type) }}
+                        </span>
+                      </td>
+                      <td [class.positive]="e.amount >= 0" [class.negative]="e.amount < 0">
+                        {{ e.amount >= 0 ? '+' : '' }}{{ e.amount | number:'1.2-2' }}
+                      </td>
+                      <td><strong>{{ e.balanceAfter | number:'1.2-2' }}</strong></td>
+                      <td>{{ e.reference || '-' }}</td>
+                    </tr>
+                  }
+                  @if (ledgerEntries.length === 0) {
+                    <tr>
+                      <td colspan="5" class="empty">Aucun mouvement</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </div>
+        }
+      </div>
+    }
   </div>
-</div>
+}

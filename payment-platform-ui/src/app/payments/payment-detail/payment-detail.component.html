@@ -1,122 +1,140 @@
-<div class="loading" *ngIf="loading">
-  <div class="spinner"></div>
-  <span>Chargement...</span>
-</div>
-
-<div *ngIf="payment && !loading">
-  <div class="page-header">
-    <h2>Paiement {{ payment.reference }}</h2>
-    <div class="header-actions">
-      <button class="btn btn-secondary" (click)="toggleQR()">
-        {{ showQR ? 'Masquer QR' : '📱 QR Code' }}
-      </button>
-      <a class="btn btn-secondary" routerLink="/dashboard/payments">Retour</a>
-    </div>
+@if (loading) {
+  <div class="loading">
+    <div class="spinner"></div>
+    <span>Chargement...</span>
   </div>
+}
 
-  <!-- QR Code Section -->
-  <div class="qr-section" *ngIf="showQR">
-    <div class="qr-card">
-      <h3>QR Code de facture</h3>
-      <p class="qr-subtitle">Scannez pour accéder à la facture</p>
-      <div class="qr-container">
-        <qrcode [qrdata]="qrData" [width]="220" [margin]="2" [colorDark]="'#0f3460'" [colorLight]="'#ffffff'"></qrcode>
-      </div>
-      <p class="qr-reference">{{ payment.reference }}</p>
-      <p class="qr-amount">{{ payment.amount | number:'1.2-2' }} {{ payment.currency }}</p>
-      <div class="qr-actions">
-        <button class="btn btn-sm btn-primary" (click)="shareQR()" *ngIf="canShare">
-          📤 Partager
+@if (payment && !loading) {
+  <div>
+    <div class="page-header">
+      <h2>Paiement {{ payment.reference }}</h2>
+      <div class="header-actions">
+        <button class="btn btn-secondary" (click)="toggleQR()">
+          {{ showQR ? 'Masquer QR' : '📱 QR Code' }}
         </button>
+        <a class="btn btn-secondary" routerLink="/dashboard/payments">Retour</a>
       </div>
     </div>
-  </div>
-
-  <div class="detail-grid">
-    <div class="detail-card">
-      <div class="detail-label">Référence</div>
-      <div class="detail-value">{{ payment.reference }}</div>
-    </div>
-    <div class="detail-card">
-      <div class="detail-label">Statut</div>
-      <div class="detail-value">
-        <span class="payment-badge" [ngClass]="payment.status.toLowerCase()">{{ statusLabel(payment.status) }}</span>
+    <!-- QR Code Section -->
+    @if (showQR) {
+      <div class="qr-section">
+        <div class="qr-card">
+          <h3>QR Code de facture</h3>
+          <p class="qr-subtitle">Scannez pour accéder à la facture</p>
+          <div class="qr-container">
+            <qrcode [qrdata]="qrData" [width]="220" [margin]="2" [colorDark]="'#0f3460'" [colorLight]="'#ffffff'"></qrcode>
+          </div>
+          <p class="qr-reference">{{ payment.reference }}</p>
+          <p class="qr-amount">{{ payment.amount | number:'1.2-2' }} {{ payment.currency }}</p>
+          <div class="qr-actions">
+            @if (canShare) {
+              <button class="btn btn-sm btn-primary" (click)="shareQR()">
+                📤 Partager
+              </button>
+            }
+          </div>
+        </div>
+      </div>
+    }
+    <div class="detail-grid">
+      <div class="detail-card">
+        <div class="detail-label">Référence</div>
+        <div class="detail-value">{{ payment.reference }}</div>
+      </div>
+      <div class="detail-card">
+        <div class="detail-label">Statut</div>
+        <div class="detail-value">
+          <span class="payment-badge" [ngClass]="payment.status.toLowerCase()">{{ statusLabel(payment.status) }}</span>
+        </div>
+      </div>
+      <div class="detail-card">
+        <div class="detail-label">Montant</div>
+        <div class="detail-value amount">{{ payment.amount | number:'1.2-2' }} {{ payment.currency }}</div>
+      </div>
+      <div class="detail-card">
+        <div class="detail-label">Boutique</div>
+        <div class="detail-value">{{ payment.shopName }}</div>
+      </div>
+      <div class="detail-card">
+        <div class="detail-label">Fournisseur</div>
+        <div class="detail-value">{{ payment.supplierName }}</div>
+      </div>
+      <div class="detail-card">
+        <div class="detail-label">Créé par</div>
+        <div class="detail-value">{{ payment.createdByName }}</div>
+      </div>
+      @if (payment.status === 'CONFIRMED') {
+        <div class="detail-card">
+          <div class="detail-label">Confirmé par</div>
+          <div class="detail-value">{{ payment.confirmedByName }}</div>
+        </div>
+      }
+      @if (payment.status === 'REJECTED') {
+        <div class="detail-card">
+          <div class="detail-label">Rejeté par</div>
+          <div class="detail-value">{{ payment.rejectedByName }}</div>
+        </div>
+      }
+      @if (payment.status === 'CANCELLED') {
+        <div class="detail-card">
+          <div class="detail-label">Annulé par</div>
+          <div class="detail-value">{{ payment.cancelledByName }}</div>
+        </div>
+      }
+      <div class="detail-card">
+        <div class="detail-label">Créé le</div>
+        <div class="detail-value">{{ payment.createdAt | date:'dd/MM/yyyy HH:mm:ss' }}</div>
       </div>
     </div>
-    <div class="detail-card">
-      <div class="detail-label">Montant</div>
-      <div class="detail-value amount">{{ payment.amount | number:'1.2-2' }} {{ payment.currency }}</div>
-    </div>
-    <div class="detail-card">
-      <div class="detail-label">Boutique</div>
-      <div class="detail-value">{{ payment.shopName }}</div>
-    </div>
-    <div class="detail-card">
-      <div class="detail-label">Fournisseur</div>
-      <div class="detail-value">{{ payment.supplierName }}</div>
-    </div>
-    <div class="detail-card">
-      <div class="detail-label">Créé par</div>
-      <div class="detail-value">{{ payment.createdByName }}</div>
-    </div>
-    <div class="detail-card" *ngIf="payment.status === 'CONFIRMED'">
-      <div class="detail-label">Confirmé par</div>
-      <div class="detail-value">{{ payment.confirmedByName }}</div>
-    </div>
-    <div class="detail-card" *ngIf="payment.status === 'REJECTED'">
-      <div class="detail-label">Rejeté par</div>
-      <div class="detail-value">{{ payment.rejectedByName }}</div>
-    </div>
-    <div class="detail-card" *ngIf="payment.status === 'CANCELLED'">
-      <div class="detail-label">Annulé par</div>
-      <div class="detail-value">{{ payment.cancelledByName }}</div>
-    </div>
-    <div class="detail-card">
-      <div class="detail-label">Créé le</div>
-      <div class="detail-value">{{ payment.createdAt | date:'dd/MM/yyyy HH:mm:ss' }}</div>
-    </div>
+    @if (payment.rejectionReason && payment.rejectionReason !== 'null') {
+      <div class="info-box">
+        <strong>Motif de rejet :</strong> {{ payment.rejectionReason }}
+      </div>
+    }
+    @if (payment.status === 'PENDING') {
+      <div class="action-bar">
+        <button class="btn btn-success" (click)="confirm()">Confirmer</button>
+        <button class="btn btn-danger" (click)="showReject = !showReject">
+          {{ showReject ? 'Annuler' : 'Rejeter' }}
+        </button>
+        <button class="btn btn-secondary" (click)="cancel()">Annuler le paiement</button>
+      </div>
+    }
+    @if (showReject) {
+      <div class="form-card" style="margin-top:16px;">
+        <h3 style="margin-bottom:12px;">Motif du rejet</h3>
+        <div class="form-group">
+          <textarea [(ngModel)]="rejectReason" class="form-control" rows="3"
+          placeholder="Décrivez le motif du rejet..." required></textarea>
+        </div>
+        <button class="btn btn-danger" [disabled]="!rejectReason.trim()" (click)="reject()">Confirmer le rejet</button>
+      </div>
+    }
+    @if (payment.events.length > 0) {
+      <div class="table-card" style="margin-top:24px;">
+        <h3 style="padding:16px 20px 0;">Historique</h3>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Action</th>
+                <th>Date</th>
+                <th>Détails</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (e of payment.events; track e) {
+                <tr>
+                  <td><span class="payment-badge" [ngClass]="e.action.toLowerCase().replace('payment_', '')">{{ actionLabel(e.action) }}</span></td>
+                  <td>{{ e.timestamp | date:'dd/MM/yyyy HH:mm:ss' }}</td>
+                  <td>{{ e.details || '-' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    }
   </div>
-
-  <div class="info-box" *ngIf="payment.rejectionReason && payment.rejectionReason !== 'null'">
-    <strong>Motif de rejet :</strong> {{ payment.rejectionReason }}
-  </div>
-
-  <div class="action-bar" *ngIf="payment.status === 'PENDING'">
-    <button class="btn btn-success" (click)="confirm()">Confirmer</button>
-    <button class="btn btn-danger" (click)="showReject = !showReject">
-      {{ showReject ? 'Annuler' : 'Rejeter' }}
-    </button>
-    <button class="btn btn-secondary" (click)="cancel()">Annuler le paiement</button>
-  </div>
-
-  <div class="form-card" *ngIf="showReject" style="margin-top:16px;">
-    <h3 style="margin-bottom:12px;">Motif du rejet</h3>
-    <div class="form-group">
-      <textarea [(ngModel)]="rejectReason" class="form-control" rows="3"
-                placeholder="Décrivez le motif du rejet..." required></textarea>
-    </div>
-    <button class="btn btn-danger" [disabled]="!rejectReason.trim()" (click)="reject()">Confirmer le rejet</button>
-  </div>
-
-  <div class="table-card" style="margin-top:24px;" *ngIf="payment.events.length > 0">
-    <h3 style="padding:16px 20px 0;">Historique</h3>
-    <div class="table-wrapper">
-      <table>
-        <thead>
-          <tr>
-            <th>Action</th>
-            <th>Date</th>
-            <th>Détails</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let e of payment.events">
-            <td><span class="payment-badge" [ngClass]="e.action.toLowerCase().replace('payment_', '')">{{ actionLabel(e.action) }}</span></td>
-            <td>{{ e.timestamp | date:'dd/MM/yyyy HH:mm:ss' }}</td>
-            <td>{{ e.details || '-' }}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-</div>
+}

@@ -3,67 +3,81 @@
   <button class="btn btn-primary" (click)="openCreate()">+ Nouvelle famille</button>
 </div>
 
-<div class="form-card" *ngIf="showForm">
-  <h3>{{ editingFamily ? 'Modifier la famille' : 'Creer une famille' }}</h3>
-  <form (ngSubmit)="save()">
-    <div class="form-row">
-      <div class="form-group">
-        <label>Nom <span class="required">*</span></label>
-        <input type="text" [(ngModel)]="form.name" name="name" class="form-control" placeholder="Ex: Vetements" required>
+@if (showForm) {
+  <div class="form-card">
+    <h3>{{ editingFamily ? 'Modifier la famille' : 'Creer une famille' }}</h3>
+    <form (ngSubmit)="save()">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Nom <span class="required">*</span></label>
+          <input type="text" [(ngModel)]="form.name" name="name" class="form-control" placeholder="Ex: Vetements" required>
+        </div>
+        <div class="form-group">
+          <label>Code <span class="required">*</span></label>
+          <input type="text" [(ngModel)]="form.code" name="code" class="form-control" placeholder="Ex: VET" required>
+        </div>
       </div>
       <div class="form-group">
-        <label>Code <span class="required">*</span></label>
-        <input type="text" [(ngModel)]="form.code" name="code" class="form-control" placeholder="Ex: VET" required>
+        <label>Categories associees</label>
+        <div class="category-grid">
+          @for (cat of categories; track cat) {
+            <label class="category-chip" [class.selected]="isCategorySelected(cat.id)">
+              <input type="checkbox" [checked]="isCategorySelected(cat.id)" (change)="toggleCategory(cat.id)">
+              <span>{{ cat.name }}</span>
+            </label>
+          }
+          @if (categories.length === 0) {
+            <span class="no-cats">Aucune categorie disponible</span>
+          }
+        </div>
       </div>
-    </div>
-    <div class="form-group">
-      <label>Categories associees</label>
-      <div class="category-grid">
-        <label *ngFor="let cat of categories" class="category-chip" [class.selected]="isCategorySelected(cat.id)">
-          <input type="checkbox" [checked]="isCategorySelected(cat.id)" (change)="toggleCategory(cat.id)">
-          <span>{{ cat.name }}</span>
-        </label>
-        <span class="no-cats" *ngIf="categories.length === 0">Aucune categorie disponible</span>
+      <div class="form-actions">
+        <button type="button" class="btn btn-secondary" (click)="showForm = false">Annuler</button>
+        <button type="submit" class="btn btn-primary" [disabled]="saving || !form.name || !form.code">
+          {{ saving ? 'Enregistrement...' : (editingFamily ? 'Mettre a jour' : 'Creer') }}
+        </button>
       </div>
-    </div>
-    <div class="form-actions">
-      <button type="button" class="btn btn-secondary" (click)="showForm = false">Annuler</button>
-      <button type="submit" class="btn btn-primary" [disabled]="saving || !form.name || !form.code">
-        {{ saving ? 'Enregistrement...' : (editingFamily ? 'Mettre a jour' : 'Creer') }}
-      </button>
-    </div>
-  </form>
-</div>
-
-<div class="loading" *ngIf="loading"><div class="spinner"></div></div>
-
-<div class="table-card" *ngIf="!loading">
-  <div class="table-wrapper">
-    <table>
-      <thead>
-        <tr>
-          <th>Nom</th>
-          <th>Code</th>
-          <th>Categories</th>
-          <th>Statut</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let fam of families">
-          <td><strong>{{ fam.name }}</strong></td>
-          <td><code>{{ fam.code }}</code></td>
-          <td>{{ getCategoryNames(fam) }}</td>
-          <td><span class="badge badge-active">{{ fam.status }}</span></td>
-          <td class="actions">
-            <button class="btn btn-sm btn-secondary" (click)="openEdit(fam)">Modifier</button>
-            <button class="btn btn-sm btn-danger" (click)="deleteFamily(fam)">Supprimer</button>
-          </td>
-        </tr>
-        <tr *ngIf="families.length === 0">
-          <td colspan="5" class="empty">Aucune famille</td>
-        </tr>
-      </tbody>
-    </table>
+    </form>
   </div>
-</div>
+}
+
+@if (loading) {
+  <div class="loading"><div class="spinner"></div></div>
+}
+
+@if (!loading) {
+  <div class="table-card">
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Nom</th>
+            <th>Code</th>
+            <th>Categories</th>
+            <th>Statut</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (fam of families; track fam) {
+            <tr>
+              <td><strong>{{ fam.name }}</strong></td>
+              <td><code>{{ fam.code }}</code></td>
+              <td>{{ getCategoryNames(fam) }}</td>
+              <td><span class="badge badge-active">{{ fam.status }}</span></td>
+              <td class="actions">
+                <button class="btn btn-sm btn-secondary" (click)="openEdit(fam)">Modifier</button>
+                <button class="btn btn-sm btn-danger" (click)="deleteFamily(fam)">Supprimer</button>
+              </td>
+            </tr>
+          }
+          @if (families.length === 0) {
+            <tr>
+              <td colspan="5" class="empty">Aucune famille</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+}

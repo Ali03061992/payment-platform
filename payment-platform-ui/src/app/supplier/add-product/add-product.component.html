@@ -3,101 +3,108 @@
   <button class="btn btn-secondary" (click)="goBack()">← Retour</button>
 </div>
 
-<div class="form-card" *ngIf="!success">
-  <form (ngSubmit)="onSubmit()">
-    <div class="form-section">
-      <h3>Informations produit</h3>
-
-      <div class="form-row">
-        <div class="form-group">
-          <label for="name">Nom du produit <span class="required">*</span></label>
-          <input id="name" type="text" [(ngModel)]="form.name" name="name" required
-                 placeholder="Ex: T-shirt Premium" class="form-control"
-                 [class.input-error]="errors['name']">
-          <span class="field-error" *ngIf="errors['name']">{{ errors['name'] }}</span>
-        </div>
-        <div class="form-group">
-          <label for="sku">SKU <span class="required">*</span></label>
-          <input id="sku" type="text" [(ngModel)]="form.sku" name="sku" required
-                 placeholder="Ex: TS-001" class="form-control"
-                 [class.input-error]="errors['sku']">
-          <span class="field-error" *ngIf="errors['sku']">{{ errors['sku'] }}</span>
-          <span class="field-hint">Code unique du produit (ex: TSH-001)</span>
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label for="description">Description</label>
-        <textarea id="description" [(ngModel)]="form.description" name="description"
-                  placeholder="Description optionnelle du produit..." class="form-control"
-                  rows="2"></textarea>
-      </div>
-    </div>
-
-    <div class="form-section">
-      <h3>Prix et devise</h3>
-
-      <div class="form-row">
-        <div class="form-group">
-          <label for="unitPrice">Prix unitaire <span class="required">*</span></label>
-          <div class="input-with-symbol">
-            <input id="unitPrice" type="number" [(ngModel)]="form.unitPrice" name="unitPrice"
-                   required min="0.01" step="0.01" placeholder="0.00" class="form-control"
-                   [class.input-error]="errors['unitPrice']">
-            <span class="input-symbol">{{ getCurrencySymbol(form.currency) }}</span>
+@if (!success) {
+  <div class="form-card">
+    <form (ngSubmit)="onSubmit()">
+      <div class="form-section">
+        <h3>Informations produit</h3>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="name">Nom du produit <span class="required">*</span></label>
+            <input id="name" type="text" [(ngModel)]="form.name" name="name" required
+              placeholder="Ex: T-shirt Premium" class="form-control"
+              [class.input-error]="errors['name']">
+            @if (errors['name']) {
+              <span class="field-error">{{ errors['name'] }}</span>
+            }
           </div>
-          <span class="field-error" *ngIf="errors['unitPrice']">{{ errors['unitPrice'] }}</span>
+          <div class="form-group">
+            <label for="sku">SKU <span class="required">*</span></label>
+            <input id="sku" type="text" [(ngModel)]="form.sku" name="sku" required
+              placeholder="Ex: TS-001" class="form-control"
+              [class.input-error]="errors['sku']">
+            @if (errors['sku']) {
+              <span class="field-error">{{ errors['sku'] }}</span>
+            }
+            <span class="field-hint">Code unique du produit (ex: TSH-001)</span>
+          </div>
         </div>
         <div class="form-group">
-          <label for="currency">Devise <span class="required">*</span></label>
-          <select id="currency" [(ngModel)]="form.currency" name="currency" required class="form-control">
-            <option value="TND">TND - Dinar tunisien</option>
-            <option value="EUR">EUR - Euro</option>
-            <option value="USD">USD - Dollar américain</option>
-          </select>
-          <span class="field-hint">ISO 4217</span>
+          <label for="description">Description</label>
+          <textarea id="description" [(ngModel)]="form.description" name="description"
+            placeholder="Description optionnelle du produit..." class="form-control"
+          rows="2"></textarea>
         </div>
       </div>
-    </div>
-
-    <div class="form-section">
-      <h3>Stock</h3>
-
-      <div class="form-row">
-        <div class="form-group">
-          <label for="quantity">Quantité initiale <span class="required">*</span></label>
-          <input id="quantity" type="number" [(ngModel)]="form.quantity" name="quantity"
-                 required min="0" placeholder="0" class="form-control"
-                 [class.input-error]="errors['quantity']">
-          <span class="field-error" *ngIf="errors['quantity']">{{ errors['quantity'] }}</span>
-        </div>
-        <div class="form-group">
-          <label for="minQuantity">Seuil minimum <span class="required">*</span></label>
-          <input id="minQuantity" type="number" [(ngModel)]="form.minQuantity" name="minQuantity"
-                 required min="0" placeholder="0" class="form-control"
-                 [class.input-error]="errors['minQuantity']">
-          <span class="field-error" *ngIf="errors['minQuantity']">{{ errors['minQuantity'] }}</span>
-          <span class="field-hint">Alerte quand le stock descend en dessous de ce seuil</span>
+      <div class="form-section">
+        <h3>Prix et devise</h3>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="unitPrice">Prix unitaire <span class="required">*</span></label>
+            <div class="input-with-symbol">
+              <input id="unitPrice" type="number" [(ngModel)]="form.unitPrice" name="unitPrice"
+                required min="0.01" step="0.01" placeholder="0.00" class="form-control"
+                [class.input-error]="errors['unitPrice']">
+              <span class="input-symbol">{{ getCurrencySymbol(form.currency) }}</span>
+            </div>
+            @if (errors['unitPrice']) {
+              <span class="field-error">{{ errors['unitPrice'] }}</span>
+            }
+          </div>
+          <div class="form-group">
+            <label for="currency">Devise <span class="required">*</span></label>
+            <select id="currency" [(ngModel)]="form.currency" name="currency" required class="form-control">
+              <option value="TND">TND - Dinar tunisien</option>
+              <option value="EUR">EUR - Euro</option>
+              <option value="USD">USD - Dollar américain</option>
+            </select>
+            <span class="field-hint">ISO 4217</span>
+          </div>
         </div>
       </div>
-    </div>
-
-    <div class="form-actions">
-      <button type="button" class="btn btn-secondary" (click)="goBack()">Annuler</button>
-      <button type="submit" class="btn btn-primary" [disabled]="loading">
-        {{ loading ? 'Création...' : 'Créer le produit' }}
-      </button>
-    </div>
-  </form>
-</div>
+      <div class="form-section">
+        <h3>Stock</h3>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="quantity">Quantité initiale <span class="required">*</span></label>
+            <input id="quantity" type="number" [(ngModel)]="form.quantity" name="quantity"
+              required min="0" placeholder="0" class="form-control"
+              [class.input-error]="errors['quantity']">
+            @if (errors['quantity']) {
+              <span class="field-error">{{ errors['quantity'] }}</span>
+            }
+          </div>
+          <div class="form-group">
+            <label for="minQuantity">Seuil minimum <span class="required">*</span></label>
+            <input id="minQuantity" type="number" [(ngModel)]="form.minQuantity" name="minQuantity"
+              required min="0" placeholder="0" class="form-control"
+              [class.input-error]="errors['minQuantity']">
+            @if (errors['minQuantity']) {
+              <span class="field-error">{{ errors['minQuantity'] }}</span>
+            }
+            <span class="field-hint">Alerte quand le stock descend en dessous de ce seuil</span>
+          </div>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button type="button" class="btn btn-secondary" (click)="goBack()">Annuler</button>
+        <button type="submit" class="btn btn-primary" [disabled]="loading">
+          {{ loading ? 'Création...' : 'Créer le produit' }}
+        </button>
+      </div>
+    </form>
+  </div>
+}
 
 <!-- Success State -->
-<div class="success-card" *ngIf="success">
-  <div class="success-icon">✅</div>
-  <h2>Produit créé avec succès !</h2>
-  <p class="success-text">{{ form.name }} a été ajouté au stock.</p>
-  <div class="success-actions">
-    <button class="btn btn-primary" (click)="resetForm()">Ajouter un autre produit</button>
-    <button class="btn btn-secondary" (click)="goBack()">Retour au stock</button>
+@if (success) {
+  <div class="success-card">
+    <div class="success-icon">✅</div>
+    <h2>Produit créé avec succès !</h2>
+    <p class="success-text">{{ form.name }} a été ajouté au stock.</p>
+    <div class="success-actions">
+      <button class="btn btn-primary" (click)="resetForm()">Ajouter un autre produit</button>
+      <button class="btn btn-secondary" (click)="goBack()">Retour au stock</button>
+    </div>
   </div>
-</div>
+}

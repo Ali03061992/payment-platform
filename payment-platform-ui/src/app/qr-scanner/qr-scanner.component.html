@@ -6,75 +6,96 @@
   </div>
 
   <!-- HTTPS Warning -->
-  <div class="https-warning" *ngIf="!isSecureContext">
-    <div class="warning-icon">🔒</div>
-    <div class="warning-text">
-      <strong>HTTPS requis pour la caméra</strong>
-      <p>La caméra fonctionne uniquement sur HTTPS ou localhost.</p>
-      <p class="warning-hint">
-        Accédez via <code>https://votre-domaine</code> ou utilisez la <strong>saisie manuelle</strong> ci-dessous.
-      </p>
+  @if (!isSecureContext) {
+    <div class="https-warning">
+      <div class="warning-icon">🔒</div>
+      <div class="warning-text">
+        <strong>HTTPS requis pour la caméra</strong>
+        <p>La caméra fonctionne uniquement sur HTTPS ou localhost.</p>
+        <p class="warning-hint">
+          Accédez via <code>https://votre-domaine</code> ou utilisez la <strong>saisie manuelle</strong> ci-dessous.
+        </p>
+      </div>
     </div>
-  </div>
+  }
 
   <!-- Camera Error -->
-  <div class="camera-error" *ngIf="cameraError && isSecureContext">
-    <span class="error-icon">⚠️</span>
-    <span>{{ cameraError }}</span>
-  </div>
+  @if (cameraError && isSecureContext) {
+    <div class="camera-error">
+      <span class="error-icon">⚠️</span>
+      <span>{{ cameraError }}</span>
+    </div>
+  }
 
   <!-- Camera View -->
-  <div class="scanner-container" *ngIf="!useManual && isSecureContext">
-    <div class="camera-view" [class.active]="cameraActive">
-      <video #video autoplay playsinline muted></video>
-      <div class="scan-overlay" *ngIf="scanning">
-        <div class="scan-frame">
-          <div class="corner tl"></div>
-          <div class="corner tr"></div>
-          <div class="corner bl"></div>
-          <div class="corner br"></div>
-          <div class="scan-line"></div>
-        </div>
+  @if (!useManual && isSecureContext) {
+    <div class="scanner-container">
+      <div class="camera-view" [class.active]="cameraActive">
+        <video #video autoplay playsinline muted></video>
+        @if (scanning) {
+          <div class="scan-overlay">
+            <div class="scan-frame">
+              <div class="corner tl"></div>
+              <div class="corner tr"></div>
+              <div class="corner bl"></div>
+              <div class="corner br"></div>
+              <div class="scan-line"></div>
+            </div>
+          </div>
+        }
+        @if (!cameraActive) {
+          <div class="camera-placeholder" (click)="startCamera()">
+            <span class="camera-icon">📷</span>
+            <span>Appuyez pour activer la caméra</span>
+          </div>
+        }
       </div>
-      <div class="camera-placeholder" *ngIf="!cameraActive" (click)="startCamera()">
-        <span class="camera-icon">📷</span>
-        <span>Appuyez pour activer la caméra</span>
-      </div>
+      @if (!cameraActive) {
+        <button class="btn btn-primary btn-scan" (click)="startCamera()">
+          Activer la caméra
+        </button>
+      }
+      @if (cameraActive) {
+        <button class="btn btn-secondary btn-scan" (click)="stopCamera()">
+          Arrêter
+        </button>
+      }
     </div>
-
-    <button class="btn btn-primary btn-scan" (click)="startCamera()" *ngIf="!cameraActive">
-      Activer la caméra
-    </button>
-    <button class="btn btn-secondary btn-scan" (click)="stopCamera()" *ngIf="cameraActive">
-      Arrêter
-    </button>
-  </div>
+  }
 
   <!-- Manual Input -->
   <div class="manual-section">
-    <div class="divider" *ngIf="!useManual && isSecureContext">
-      <span>ou</span>
-    </div>
-    <button class="btn btn-link" (click)="useManual = true; stopCamera()" *ngIf="!useManual && isSecureContext">
-      Saisie manuelle du lien
-    </button>
+    @if (!useManual && isSecureContext) {
+      <div class="divider">
+        <span>ou</span>
+      </div>
+    }
+    @if (!useManual && isSecureContext) {
+      <button class="btn btn-link" (click)="useManual = true; stopCamera()">
+        Saisie manuelle du lien
+      </button>
+    }
 
-    <div class="manual-form" *ngIf="useManual">
-      <h3>Saisie manuelle</h3>
-      <p>Collez le lien de la facture ou entrez le numéro</p>
-      <div class="form-group">
-        <input type="text" [(ngModel)]="manualUrl" class="form-control"
-               placeholder="Ex: /dashboard/payments/42 ou juste 42"
-               (keyup.enter)="submitManual()">
+    @if (useManual) {
+      <div class="manual-form">
+        <h3>Saisie manuelle</h3>
+        <p>Collez le lien de la facture ou entrez le numéro</p>
+        <div class="form-group">
+          <input type="text" [(ngModel)]="manualUrl" class="form-control"
+            placeholder="Ex: /dashboard/payments/42 ou juste 42"
+            (keyup.enter)="submitManual()">
+        </div>
+        <div class="form-actions">
+          @if (isSecureContext) {
+            <button class="btn btn-secondary" (click)="useManual = false; startCamera()">
+              Retour caméra
+            </button>
+          }
+          <button class="btn btn-primary" [disabled]="!manualUrl.trim()" (click)="submitManual()">
+            Accéder à la facture
+          </button>
+        </div>
       </div>
-      <div class="form-actions">
-        <button class="btn btn-secondary" (click)="useManual = false; startCamera()" *ngIf="isSecureContext">
-          Retour caméra
-        </button>
-        <button class="btn btn-primary" [disabled]="!manualUrl.trim()" (click)="submitManual()">
-          Accéder à la facture
-        </button>
-      </div>
-    </div>
+    }
   </div>
 </div>

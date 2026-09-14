@@ -2,180 +2,206 @@
   <h2>Mes livraisons</h2>
 </div>
 
-<div class="loading" *ngIf="loading">
-  <div class="spinner"></div>
-  <span>Chargement des livraisons...</span>
-</div>
-
-<div *ngIf="!loading">
-  <div class="section-header" *ngIf="pendingConfirmations.length > 0">
-    <h3>En attente de confirmation de date</h3>
-    <span class="result-count">{{ pendingConfirmations.length }} livraison(s)</span>
+@if (loading) {
+  <div class="loading">
+    <div class="spinner"></div>
+    <span>Chargement des livraisons...</span>
   </div>
+}
 
-  <div class="table-card" *ngIf="pendingConfirmations.length > 0">
-    <div class="table-wrapper">
-      <table>
-        <thead>
-          <tr>
-            <th>Référence</th>
-            <th>Boutique</th>
-            <th>Total</th>
-            <th>Date prévue</th>
-            <th>Statut</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let d of pendingConfirmations">
-            <td><strong>{{ d.reference }}</strong></td>
-            <td>{{ d.shopName || d.shopId }}</td>
-            <td>{{ d.total | number:'1.2-2' }} {{ d.currency }}</td>
-            <td>{{ d.plannedDeliveryDate || '-' }}</td>
-            <td>
-              <span class="payment-badge" [ngClass]="statusClass(d.status)">
-                {{ statusLabel(d.status) }}
-              </span>
-            </td>
-            <td class="actions">
-              <button class="btn btn-sm btn-primary" (click)="openConfirmDate(d)">Confirmer la date</button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+@if (!loading) {
+  <div>
+    @if (pendingConfirmations.length > 0) {
+      <div class="section-header">
+        <h3>En attente de confirmation de date</h3>
+        <span class="result-count">{{ pendingConfirmations.length }} livraison(s)</span>
+      </div>
+    }
+    @if (pendingConfirmations.length > 0) {
+      <div class="table-card">
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Référence</th>
+                <th>Boutique</th>
+                <th>Total</th>
+                <th>Date prévue</th>
+                <th>Statut</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (d of pendingConfirmations; track d) {
+                <tr>
+                  <td><strong>{{ d.reference }}</strong></td>
+                  <td>{{ d.shopName || d.shopId }}</td>
+                  <td>{{ d.total | number:'1.2-2' }} {{ d.currency }}</td>
+                  <td>{{ d.plannedDeliveryDate || '-' }}</td>
+                  <td>
+                    <span class="payment-badge" [ngClass]="statusClass(d.status)">
+                      {{ statusLabel(d.status) }}
+                    </span>
+                  </td>
+                  <td class="actions">
+                    <button class="btn btn-sm btn-primary" (click)="openConfirmDate(d)">Confirmer la date</button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    }
+    @if (activeDeliveries.length > 0) {
+      <div class="section-header" style="margin-top: 32px;">
+        <h3>Livraisons en cours</h3>
+        <span class="result-count">{{ activeDeliveries.length }} livraison(s)</span>
+      </div>
+    }
+    @if (activeDeliveries.length > 0) {
+      <div class="table-card">
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Référence</th>
+                <th>Boutique</th>
+                <th>Total</th>
+                <th>Date confirmée</th>
+                <th>Statut</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (d of activeDeliveries; track d) {
+                <tr>
+                  <td><strong>{{ d.reference }}</strong></td>
+                  <td>{{ d.shopName || d.shopId }}</td>
+                  <td>{{ d.total | number:'1.2-2' }} {{ d.currency }}</td>
+                  <td>{{ d.confirmedDeliveryDate || '-' }}</td>
+                  <td>
+                    <span class="payment-badge" [ngClass]="statusClass(d.status)">
+                      {{ statusLabel(d.status) }}
+                    </span>
+                  </td>
+                  <td class="actions">
+                    <button class="btn btn-sm btn-success" (click)="openDeliver(d)">Marquer livré</button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    }
+    @if (completedDeliveries.length > 0) {
+      <div class="section-header" style="margin-top: 32px;">
+        <h3>Livraisons terminées</h3>
+        <span class="result-count">{{ completedDeliveries.length }} livraison(s)</span>
+      </div>
+    }
+    @if (completedDeliveries.length > 0) {
+      <div class="table-card">
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Référence</th>
+                <th>Boutique</th>
+                <th>Total</th>
+                <th>Date confirmée</th>
+                <th>Statut</th>
+                <th>Livré le</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (d of completedDeliveries; track d) {
+                <tr>
+                  <td><strong>{{ d.reference }}</strong></td>
+                  <td>{{ d.shopName || d.shopId }}</td>
+                  <td>{{ d.total | number:'1.2-2' }} {{ d.currency }}</td>
+                  <td>{{ d.confirmedDeliveryDate || '-' }}</td>
+                  <td>
+                    <span class="payment-badge" [ngClass]="statusClass(d.status)">
+                      {{ statusLabel(d.status) }}
+                    </span>
+                  </td>
+                  <td>{{ d.deliveredAt | date:'dd/MM/yyyy HH:mm' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    }
+    @if (deliveries.length === 0) {
+      <div class="empty">
+        Aucune livraison assignée
+      </div>
+    }
   </div>
-
-  <div class="section-header" *ngIf="activeDeliveries.length > 0" style="margin-top: 32px;">
-    <h3>Livraisons en cours</h3>
-    <span class="result-count">{{ activeDeliveries.length }} livraison(s)</span>
-  </div>
-
-  <div class="table-card" *ngIf="activeDeliveries.length > 0">
-    <div class="table-wrapper">
-      <table>
-        <thead>
-          <tr>
-            <th>Référence</th>
-            <th>Boutique</th>
-            <th>Total</th>
-            <th>Date confirmée</th>
-            <th>Statut</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let d of activeDeliveries">
-            <td><strong>{{ d.reference }}</strong></td>
-            <td>{{ d.shopName || d.shopId }}</td>
-            <td>{{ d.total | number:'1.2-2' }} {{ d.currency }}</td>
-            <td>{{ d.confirmedDeliveryDate || '-' }}</td>
-            <td>
-              <span class="payment-badge" [ngClass]="statusClass(d.status)">
-                {{ statusLabel(d.status) }}
-              </span>
-            </td>
-            <td class="actions">
-              <button class="btn btn-sm btn-success" (click)="openDeliver(d)">Marquer livré</button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-
-  <div class="section-header" *ngIf="completedDeliveries.length > 0" style="margin-top: 32px;">
-    <h3>Livraisons terminées</h3>
-    <span class="result-count">{{ completedDeliveries.length }} livraison(s)</span>
-  </div>
-
-  <div class="table-card" *ngIf="completedDeliveries.length > 0">
-    <div class="table-wrapper">
-      <table>
-        <thead>
-          <tr>
-            <th>Référence</th>
-            <th>Boutique</th>
-            <th>Total</th>
-            <th>Date confirmée</th>
-            <th>Statut</th>
-            <th>Livré le</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let d of completedDeliveries">
-            <td><strong>{{ d.reference }}</strong></td>
-            <td>{{ d.shopName || d.shopId }}</td>
-            <td>{{ d.total | number:'1.2-2' }} {{ d.currency }}</td>
-            <td>{{ d.confirmedDeliveryDate || '-' }}</td>
-            <td>
-              <span class="payment-badge" [ngClass]="statusClass(d.status)">
-                {{ statusLabel(d.status) }}
-              </span>
-            </td>
-            <td>{{ d.deliveredAt | date:'dd/MM/yyyy HH:mm' }}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-
-  <div class="empty" *ngIf="deliveries.length === 0">
-    Aucune livraison assignée
-  </div>
-</div>
+}
 
 <!-- Modal confirmation date -->
-<div class="modal-overlay" *ngIf="showConfirmDateModal" (click)="closeConfirmDate()">
-  <div class="modal-content" (click)="$event.stopPropagation()">
-    <div class="modal-header">
-      <h3>Confirmer la date de livraison</h3>
-      <button class="btn-close" (click)="closeConfirmDate()">&times;</button>
-    </div>
-    <div *ngIf="confirmDateOrder">
-      <p style="margin-bottom: 16px; color: #555;">
-        Commande <strong>{{ confirmDateOrder.reference }}</strong> — {{ confirmDateOrder.total | number:'1.2-2' }} {{ confirmDateOrder.currency }}
-      </p>
-      <form (ngSubmit)="submitConfirmDate()">
-        <div class="form-group">
-          <label>Date prévue : {{ confirmDateOrder.plannedDeliveryDate }}</label>
-          <label>Confirmer la date exacte de livraison</label>
-          <input type="date" [(ngModel)]="confirmedDate" name="confirmedDate" class="form-control" required>
+@if (showConfirmDateModal) {
+  <div class="modal-overlay" (click)="closeConfirmDate()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Confirmer la date de livraison</h3>
+        <button class="btn-close" (click)="closeConfirmDate()">&times;</button>
+      </div>
+      @if (confirmDateOrder) {
+        <div>
+          <p style="margin-bottom: 16px; color: #555;">
+            Commande <strong>{{ confirmDateOrder.reference }}</strong> — {{ confirmDateOrder.total | number:'1.2-2' }} {{ confirmDateOrder.currency }}
+          </p>
+          <form (ngSubmit)="submitConfirmDate()">
+            <div class="form-group">
+              <label>Date prévue : {{ confirmDateOrder.plannedDeliveryDate }}</label>
+              <label>Confirmer la date exacte de livraison</label>
+              <input type="date" [(ngModel)]="confirmedDate" name="confirmedDate" class="form-control" required>
+            </div>
+            <div class="form-actions">
+              <button type="button" class="btn btn-secondary" (click)="closeConfirmDate()">Annuler</button>
+              <button type="submit" class="btn btn-primary" [disabled]="confirming || !confirmedDate">
+                {{ confirming ? 'Confirmation...' : 'Confirmer la date' }}
+              </button>
+            </div>
+          </form>
         </div>
-        <div class="form-actions">
-          <button type="button" class="btn btn-secondary" (click)="closeConfirmDate()">Annuler</button>
-          <button type="submit" class="btn btn-primary" [disabled]="confirming || !confirmedDate">
-            {{ confirming ? 'Confirmation...' : 'Confirmer la date' }}
-          </button>
-        </div>
-      </form>
+      }
     </div>
   </div>
-</div>
+}
 
 <!-- Modal confirmation livraison -->
-<div class="modal-overlay" *ngIf="showDeliverModal" (click)="closeDeliver()">
-  <div class="modal-content" (click)="$event.stopPropagation()">
-    <div class="modal-header">
-      <h3>Confirmer la livraison</h3>
-      <button class="btn-close" (click)="closeDeliver()">&times;</button>
-    </div>
-    <div *ngIf="selectedOrder">
-      <p style="margin-bottom: 16px; color: #555;">
-        Commande <strong>{{ selectedOrder.reference }}</strong> — {{ selectedOrder.total | number:'1.2-2' }} {{ selectedOrder.currency }}
-      </p>
-      <form (ngSubmit)="confirmDeliver()">
-        <div class="form-group">
-          <label>ID de la personne qui a reçu</label>
-          <input type="text" [(ngModel)]="receivedBy" name="receivedBy" class="form-control" required placeholder="UUID du destinataire">
+@if (showDeliverModal) {
+  <div class="modal-overlay" (click)="closeDeliver()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Confirmer la livraison</h3>
+        <button class="btn-close" (click)="closeDeliver()">&times;</button>
+      </div>
+      @if (selectedOrder) {
+        <div>
+          <p style="margin-bottom: 16px; color: #555;">
+            Commande <strong>{{ selectedOrder.reference }}</strong> — {{ selectedOrder.total | number:'1.2-2' }} {{ selectedOrder.currency }}
+          </p>
+          <form (ngSubmit)="confirmDeliver()">
+            <div class="form-group">
+              <label>ID de la personne qui a reçu</label>
+              <input type="text" [(ngModel)]="receivedBy" name="receivedBy" class="form-control" required placeholder="UUID du destinataire">
+            </div>
+            <div class="form-actions">
+              <button type="button" class="btn btn-secondary" (click)="closeDeliver()">Annuler</button>
+              <button type="submit" class="btn btn-success" [disabled]="delivering || !receivedBy">
+                {{ delivering ? 'Confirmation...' : 'Confirmer la livraison' }}
+              </button>
+            </div>
+          </form>
         </div>
-        <div class="form-actions">
-          <button type="button" class="btn btn-secondary" (click)="closeDeliver()">Annuler</button>
-          <button type="submit" class="btn btn-success" [disabled]="delivering || !receivedBy">
-            {{ delivering ? 'Confirmation...' : 'Confirmer la livraison' }}
-          </button>
-        </div>
-      </form>
+      }
     </div>
   </div>
-</div>
+}

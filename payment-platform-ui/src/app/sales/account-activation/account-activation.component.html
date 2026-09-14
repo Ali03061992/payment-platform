@@ -11,39 +11,52 @@
   </select>
 </div>
 
-<div *ngIf="loading" class="loading">
-  <div class="spinner"></div>
-  <span>Chargement...</span>
-</div>
+@if (loading) {
+  <div class="loading">
+    <div class="spinner"></div>
+    <span>Chargement...</span>
+  </div>
+}
 
-<div class="cards-grid" *ngIf="!loading">
-  <div *ngFor="let user of filteredUsers" class="user-card" [class.disabled]="user.status === 'DISABLED'">
-    <div class="card-header">
-      <div class="avatar">{{ user.firstName[0] }}{{ user.lastName[0] }}</div>
-      <div class="card-info">
-        <div class="card-name">{{ user.firstName }} {{ user.lastName }}</div>
-        <div class="card-username">{{ '@' }}{{ user.username }}</div>
+@if (!loading) {
+  <div class="cards-grid">
+    @for (user of filteredUsers; track user) {
+      <div class="user-card" [class.disabled]="user.status === 'DISABLED'">
+        <div class="card-header">
+          <div class="avatar">{{ user.firstName[0] }}{{ user.lastName[0] }}</div>
+          <div class="card-info">
+            <div class="card-name">{{ user.firstName }} {{ user.lastName }}</div>
+            <div class="card-username">{{ '@' }}{{ user.username }}</div>
+          </div>
+          <span class="status-badge" [class.active]="user.status === 'ACTIVE'" [class.disabled]="user.status === 'DISABLED'">
+            {{ user.status }}
+          </span>
+        </div>
+        <div class="card-details">
+          <div class="detail-row">📧 {{ user.email }}</div>
+          <div class="detail-row">🏷️ {{ user.roles[0] }}</div>
+          @if (user.phone) {
+            <div class="detail-row">📱 {{ user.phone }}</div>
+          }
+        </div>
+        <div class="card-actions">
+          @if (user.status === 'ACTIVE') {
+            <button class="btn btn-danger btn-sm" (click)="disable(user)">
+              🚫 Désactiver
+            </button>
+          }
+          @if (user.status === 'DISABLED') {
+            <button class="btn btn-success btn-sm" (click)="activate(user)">
+              ✅ Activer
+            </button>
+          }
+        </div>
       </div>
-      <span class="status-badge" [class.active]="user.status === 'ACTIVE'" [class.disabled]="user.status === 'DISABLED'">
-        {{ user.status }}
-      </span>
-    </div>
-    <div class="card-details">
-      <div class="detail-row">📧 {{ user.email }}</div>
-      <div class="detail-row">🏷️ {{ user.roles[0] }}</div>
-      <div class="detail-row" *ngIf="user.phone">📱 {{ user.phone }}</div>
-    </div>
-    <div class="card-actions">
-      <button *ngIf="user.status === 'ACTIVE'" class="btn btn-danger btn-sm" (click)="disable(user)">
-        🚫 Désactiver
-      </button>
-      <button *ngIf="user.status === 'DISABLED'" class="btn btn-success btn-sm" (click)="activate(user)">
-        ✅ Activer
-      </button>
-    </div>
+    }
+    @if (filteredUsers.length === 0) {
+      <div class="empty-state">
+        Aucun compte trouvé
+      </div>
+    }
   </div>
-
-  <div *ngIf="filteredUsers.length === 0" class="empty-state">
-    Aucun compte trouvé
-  </div>
-</div>
+}

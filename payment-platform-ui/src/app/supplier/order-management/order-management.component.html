@@ -3,204 +3,246 @@
   <a class="btn btn-primary" routerLink="/dashboard/supplier/orders/create">+ Nouvelle commande</a>
 </div>
 
-<div class="loading" *ngIf="loading">
-  <div class="spinner"></div>
-  <span>Chargement des commandes...</span>
-</div>
-
-<div class="filters" *ngIf="!loading">
-  <select [(ngModel)]="filterStatus" class="form-control" style="max-width:200px;">
-    <option value="">Tous les statuts</option>
-    <option value="DRAFT">Brouillon</option>
-    <option value="CONFIRMED">Confirmé</option>
-    <option value="PREPARING">En préparation</option>
-    <option value="READY_FOR_DELIVERY">Prêt pour livraison</option>
-    <option value="IN_DELIVERY">En livraison</option>
-    <option value="DELIVERED">Livré</option>
-    <option value="ACCEPTED">Accepté</option>
-    <option value="CANCELLED">Annulé</option>
-    <option value="REJECTED">Rejeté</option>
-    <option value="DELIVERY_REJECTED">Livraison rejetée</option>
-  </select>
-  <span class="result-count">{{ filteredOrders.length }} résultat(s)</span>
-</div>
-
-<div class="table-card" *ngIf="!loading">
-  <div class="table-wrapper">
-    <table>
-      <thead>
-        <tr>
-          <th>Référence</th>
-          <th>Boutique</th>
-          <th>Date</th>
-          <th>Total</th>
-          <th>Statut</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let o of filteredOrders" class="clickable-row" (click)="viewDetail(o)">
-          <td><strong>{{ o.reference }}</strong></td>
-          <td>{{ o.shopName || o.shopId }}</td>
-          <td>{{ o.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
-          <td>{{ o.total | number:'1.2-2' }} {{ o.currency }}</td>
-          <td>
-            <span class="payment-badge" [ngClass]="statusClass(o.status)">
-              {{ statusLabel(o.status) }}
-            </span>
-          </td>
-          <td class="actions" (click)="$event.stopPropagation()">
-            <button class="btn btn-sm btn-success" *ngIf="canConfirm(o)" (click)="confirm(o)">Confirmer</button>
-            <button class="btn btn-sm btn-warning" *ngIf="canPrepare(o)" (click)="prepare(o)">Préparer</button>
-            <button class="btn btn-sm btn-primary" *ngIf="canReady(o)" (click)="ready(o)">Prêt</button>
-            <button class="btn btn-sm btn-secondary" *ngIf="canAssign(o)" (click)="openAssign(o)">Assigner</button>
-            <button class="btn btn-sm btn-danger" *ngIf="canDeliveryReject(o)" (click)="deliveryReject(o)">Rejeter livr.</button>
-            <button class="btn btn-sm btn-danger" *ngIf="canCancel(o)" (click)="cancel(o)">Annuler</button>
-          </td>
-        </tr>
-        <tr *ngIf="filteredOrders.length === 0">
-          <td colspan="6" class="empty">Aucune commande trouvée</td>
-        </tr>
-      </tbody>
-    </table>
+@if (loading) {
+  <div class="loading">
+    <div class="spinner"></div>
+    <span>Chargement des commandes...</span>
   </div>
-</div>
+}
+
+@if (!loading) {
+  <div class="filters">
+    <select [(ngModel)]="filterStatus" class="form-control" style="max-width:200px;">
+      <option value="">Tous les statuts</option>
+      <option value="DRAFT">Brouillon</option>
+      <option value="CONFIRMED">Confirmé</option>
+      <option value="PREPARING">En préparation</option>
+      <option value="READY_FOR_DELIVERY">Prêt pour livraison</option>
+      <option value="IN_DELIVERY">En livraison</option>
+      <option value="DELIVERED">Livré</option>
+      <option value="ACCEPTED">Accepté</option>
+      <option value="CANCELLED">Annulé</option>
+      <option value="REJECTED">Rejeté</option>
+      <option value="DELIVERY_REJECTED">Livraison rejetée</option>
+    </select>
+    <span class="result-count">{{ filteredOrders.length }} résultat(s)</span>
+  </div>
+}
+
+@if (!loading) {
+  <div class="table-card">
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Référence</th>
+            <th>Boutique</th>
+            <th>Date</th>
+            <th>Total</th>
+            <th>Statut</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (o of filteredOrders; track o) {
+            <tr class="clickable-row" (click)="viewDetail(o)">
+              <td><strong>{{ o.reference }}</strong></td>
+              <td>{{ o.shopName || o.shopId }}</td>
+              <td>{{ o.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
+              <td>{{ o.total | number:'1.2-2' }} {{ o.currency }}</td>
+              <td>
+                <span class="payment-badge" [ngClass]="statusClass(o.status)">
+                  {{ statusLabel(o.status) }}
+                </span>
+              </td>
+              <td class="actions" (click)="$event.stopPropagation()">
+                @if (canConfirm(o)) {
+                  <button class="btn btn-sm btn-success" (click)="confirm(o)">Confirmer</button>
+                }
+                @if (canPrepare(o)) {
+                  <button class="btn btn-sm btn-warning" (click)="prepare(o)">Préparer</button>
+                }
+                @if (canReady(o)) {
+                  <button class="btn btn-sm btn-primary" (click)="ready(o)">Prêt</button>
+                }
+                @if (canAssign(o)) {
+                  <button class="btn btn-sm btn-secondary" (click)="openAssign(o)">Assigner</button>
+                }
+                @if (canDeliveryReject(o)) {
+                  <button class="btn btn-sm btn-danger" (click)="deliveryReject(o)">Rejeter livr.</button>
+                }
+                @if (canCancel(o)) {
+                  <button class="btn btn-sm btn-danger" (click)="cancel(o)">Annuler</button>
+                }
+              </td>
+            </tr>
+          }
+          @if (filteredOrders.length === 0) {
+            <tr>
+              <td colspan="6" class="empty">Aucune commande trouvée</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+}
 
 <!-- Détail commande -->
-<div class="modal-overlay" *ngIf="showDetail" (click)="closeDetail()">
-  <div class="modal-content modal-lg" (click)="$event.stopPropagation()">
-    <div class="modal-header">
-      <h3>Commande {{ selectedOrder?.reference }}</h3>
-      <button class="btn-close" (click)="closeDetail()">&times;</button>
-    </div>
-    <div class="loading" *ngIf="loadingDetail" style="padding: 24px;">
-      <div class="spinner"></div>
-      <span>Chargement...</span>
-    </div>
-    <div *ngIf="selectedOrder && !loadingDetail">
-      <div class="detail-grid">
-        <div class="detail-card">
-          <div class="detail-label">Statut</div>
-          <div class="detail-value">
-            <span class="payment-badge" [ngClass]="statusClass(selectedOrder.status)">{{ statusLabel(selectedOrder.status) }}</span>
+@if (showDetail) {
+  <div class="modal-overlay" (click)="closeDetail()">
+    <div class="modal-content modal-lg" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Commande {{ selectedOrder?.reference }}</h3>
+        <button class="btn-close" (click)="closeDetail()">&times;</button>
+      </div>
+      @if (loadingDetail) {
+        <div class="loading" style="padding: 24px;">
+          <div class="spinner"></div>
+          <span>Chargement...</span>
+        </div>
+      }
+      @if (selectedOrder && !loadingDetail) {
+        <div>
+          <div class="detail-grid">
+            <div class="detail-card">
+              <div class="detail-label">Statut</div>
+              <div class="detail-value">
+                <span class="payment-badge" [ngClass]="statusClass(selectedOrder.status)">{{ statusLabel(selectedOrder.status) }}</span>
+              </div>
+            </div>
+            <div class="detail-card">
+              <div class="detail-label">Total</div>
+              <div class="detail-value amount">{{ selectedOrder.total | number:'1.2-2' }} {{ selectedOrder.currency }}</div>
+            </div>
+            <div class="detail-card">
+              <div class="detail-label">Boutique</div>
+              <div class="detail-value">{{ selectedOrder.shopName || selectedOrder.shopId }}</div>
+            </div>
+            <div class="detail-card">
+              <div class="detail-label">Source</div>
+              <div class="detail-value">{{ selectedOrder.source === 'SUPPLIER' ? 'Fournisseur' : 'Boutique' }}</div>
+            </div>
+            <div class="detail-card">
+              <div class="detail-label">Créé le</div>
+              <div class="detail-value">{{ selectedOrder.createdAt | date:'dd/MM/yyyy HH:mm:ss' }}</div>
+            </div>
+            @if (selectedOrder.plannedDeliveryDate) {
+              <div class="detail-card">
+                <div class="detail-label">Date prévue</div>
+                <div class="detail-value">{{ selectedOrder.plannedDeliveryDate }}</div>
+              </div>
+            }
+            @if (selectedOrder.confirmedDeliveryDate) {
+              <div class="detail-card">
+                <div class="detail-label">Date confirmée</div>
+                <div class="detail-value">{{ selectedOrder.confirmedDeliveryDate }}</div>
+              </div>
+            }
           </div>
+          @if (selectedOrder && selectedOrder.items && selectedOrder.items.length > 0) {
+            <div class="table-card" style="margin-top: 16px;">
+              <h4 style="padding: 16px 20px 0;">Articles</h4>
+              <div class="table-wrapper">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Produit</th>
+                      <th>Quantité</th>
+                      <th>Prix unitaire</th>
+                      <th>Remise</th>
+                      <th>Total</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (item of selectedOrder.items; track item) {
+                      <tr>
+                        <td><strong>{{ item.productName }}</strong></td>
+                        <td>{{ item.quantity }}</td>
+                        <td>{{ item.unitPrice | number:'1.2-2' }}</td>
+                        <td>{{ item.discount > 0 ? item.discount + '%' : '-' }}</td>
+                        <td>{{ item.lineTotal | number:'1.2-2' }}</td>
+                      </tr>
+                    }
+                  </tbody>
+                  <tfoot>
+                    <tr>
+                      <td colspan="4" style="text-align:right;font-weight:600;">Sous-total</td>
+                      <td><strong>{{ selectedOrder.subtotal | number:'1.2-2' }} {{ selectedOrder.currency }}</strong></td>
+                    </tr>
+                    <tr>
+                      <td colspan="4" style="text-align:right;font-weight:600;">TVA ({{ selectedOrder.taxRate }}%)</td>
+                      <td><strong>{{ selectedOrder.taxAmount | number:'1.2-2' }} {{ selectedOrder.currency }}</strong></td>
+                    </tr>
+                    <tr>
+                      <td colspan="4" style="text-align:right;font-weight:700;font-size:16px;">Total</td>
+                      <td><strong style="font-size:16px;color:#0f3460;">{{ selectedOrder.total | number:'1.2-2' }} {{ selectedOrder.currency }}</strong></td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+            </div>
+          }
+          @if (selectedOrder && selectedOrder.events && selectedOrder.events.length > 0) {
+            <div class="table-card" style="margin-top: 16px;">
+              <h4 style="padding: 16px 20px 0;">Historique</h4>
+              <div class="table-wrapper">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Action</th>
+                      <th>Date</th>
+                      <th>Détails</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (e of selectedOrder.events; track e) {
+                      <tr>
+                        <td><span class="payment-badge confirmed">{{ e.action }}</span></td>
+                        <td>{{ e.timestamp | date:'dd/MM/yyyy HH:mm:ss' }}</td>
+                        <td>{{ e.details || '-' }}</td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          }
         </div>
-        <div class="detail-card">
-          <div class="detail-label">Total</div>
-          <div class="detail-value amount">{{ selectedOrder.total | number:'1.2-2' }} {{ selectedOrder.currency }}</div>
-        </div>
-        <div class="detail-card">
-          <div class="detail-label">Boutique</div>
-          <div class="detail-value">{{ selectedOrder.shopName || selectedOrder.shopId }}</div>
-        </div>
-        <div class="detail-card">
-          <div class="detail-label">Source</div>
-          <div class="detail-value">{{ selectedOrder.source === 'SUPPLIER' ? 'Fournisseur' : 'Boutique' }}</div>
-        </div>
-        <div class="detail-card">
-          <div class="detail-label">Créé le</div>
-          <div class="detail-value">{{ selectedOrder.createdAt | date:'dd/MM/yyyy HH:mm:ss' }}</div>
-        </div>
-        <div class="detail-card" *ngIf="selectedOrder.plannedDeliveryDate">
-          <div class="detail-label">Date prévue</div>
-          <div class="detail-value">{{ selectedOrder.plannedDeliveryDate }}</div>
-        </div>
-        <div class="detail-card" *ngIf="selectedOrder.confirmedDeliveryDate">
-          <div class="detail-label">Date confirmée</div>
-          <div class="detail-value">{{ selectedOrder.confirmedDeliveryDate }}</div>
-        </div>
-      </div>
-
-      <div class="table-card" style="margin-top: 16px;" *ngIf="selectedOrder && selectedOrder.items && selectedOrder.items.length > 0">
-        <h4 style="padding: 16px 20px 0;">Articles</h4>
-        <div class="table-wrapper">
-          <table>
-            <thead>
-              <tr>
-                <th>Produit</th>
-                <th>Quantité</th>
-                <th>Prix unitaire</th>
-                <th>Remise</th>
-                <th>Total</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let item of selectedOrder.items">
-                <td><strong>{{ item.productName }}</strong></td>
-                <td>{{ item.quantity }}</td>
-                <td>{{ item.unitPrice | number:'1.2-2' }}</td>
-                <td>{{ item.discount > 0 ? item.discount + '%' : '-' }}</td>
-                <td>{{ item.lineTotal | number:'1.2-2' }}</td>
-              </tr>
-            </tbody>
-            <tfoot>
-              <tr>
-                <td colspan="4" style="text-align:right;font-weight:600;">Sous-total</td>
-                <td><strong>{{ selectedOrder.subtotal | number:'1.2-2' }} {{ selectedOrder.currency }}</strong></td>
-              </tr>
-              <tr>
-                <td colspan="4" style="text-align:right;font-weight:600;">TVA ({{ selectedOrder.taxRate }}%)</td>
-                <td><strong>{{ selectedOrder.taxAmount | number:'1.2-2' }} {{ selectedOrder.currency }}</strong></td>
-              </tr>
-              <tr>
-                <td colspan="4" style="text-align:right;font-weight:700;font-size:16px;">Total</td>
-                <td><strong style="font-size:16px;color:#0f3460;">{{ selectedOrder.total | number:'1.2-2' }} {{ selectedOrder.currency }}</strong></td>
-              </tr>
-            </tfoot>
-          </table>
-        </div>
-      </div>
-
-      <div class="table-card" style="margin-top: 16px;" *ngIf="selectedOrder && selectedOrder.events && selectedOrder.events.length > 0">
-        <h4 style="padding: 16px 20px 0;">Historique</h4>
-        <div class="table-wrapper">
-          <table>
-            <thead>
-              <tr>
-                <th>Action</th>
-                <th>Date</th>
-                <th>Détails</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let e of selectedOrder.events">
-                <td><span class="payment-badge confirmed">{{ e.action }}</span></td>
-                <td>{{ e.timestamp | date:'dd/MM/yyyy HH:mm:ss' }}</td>
-                <td>{{ e.details || '-' }}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
+      }
     </div>
   </div>
-</div>
+}
 
 <!-- Assign agent modal -->
-<div class="modal-overlay" *ngIf="showAssignModal" (click)="closeAssign()">
-  <div class="modal-content" (click)="$event.stopPropagation()">
-    <div class="modal-header">
-      <h3>Assigner un livreur</h3>
-      <button class="btn-close" (click)="closeAssign()">&times;</button>
+@if (showAssignModal) {
+  <div class="modal-overlay" (click)="closeAssign()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Assigner un livreur</h3>
+        <button class="btn-close" (click)="closeAssign()">&times;</button>
+      </div>
+      <form (ngSubmit)="submitAssign()">
+        <div class="form-group">
+          <label>Livreur</label>
+          <select [(ngModel)]="assignAgentId" name="agentId" class="form-control" required>
+            <option [ngValue]="0">-- Sélectionner --</option>
+            @for (a of agents; track a) {
+              <option [ngValue]="a.id">{{ a.firstName }} {{ a.lastName }}</option>
+            }
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Date prévue de livraison</label>
+          <input type="date" [(ngModel)]="assignPlannedDate" name="plannedDate" class="form-control" required>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary" (click)="closeAssign()">Annuler</button>
+          <button type="submit" class="btn btn-primary" [disabled]="assigning || !assignAgentId">
+            {{ assigning ? 'Assignation...' : 'Assigner' }}
+          </button>
+        </div>
+      </form>
     </div>
-    <form (ngSubmit)="submitAssign()">
-      <div class="form-group">
-        <label>Livreur</label>
-        <select [(ngModel)]="assignAgentId" name="agentId" class="form-control" required>
-          <option [ngValue]="0">-- Sélectionner --</option>
-          <option *ngFor="let a of agents" [ngValue]="a.id">{{ a.firstName }} {{ a.lastName }}</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>Date prévue de livraison</label>
-        <input type="date" [(ngModel)]="assignPlannedDate" name="plannedDate" class="form-control" required>
-      </div>
-      <div class="form-actions">
-        <button type="button" class="btn btn-secondary" (click)="closeAssign()">Annuler</button>
-        <button type="submit" class="btn btn-primary" [disabled]="assigning || !assignAgentId">
-          {{ assigning ? 'Assignation...' : 'Assigner' }}
-        </button>
-      </div>
-    </form>
   </div>
-</div>
+}

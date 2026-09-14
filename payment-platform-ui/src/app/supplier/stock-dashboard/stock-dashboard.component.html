@@ -2,160 +2,179 @@
   <h2>Stock 360</h2>
 </div>
 
-<div class="loading" *ngIf="loading">
-  <div class="spinner"></div>
-  <span>Chargement du tableau de bord...</span>
-</div>
-
-<div *ngIf="!loading">
-  <div class="stats-grid">
-    <div class="stat-card">
-      <div class="stat-value">{{ totalProducts }}</div>
-      <div class="stat-label">Total produits</div>
-    </div>
-    <div class="stat-card stat-confirmed">
-      <div class="stat-value">{{ totalQuantity }}</div>
-      <div class="stat-label">Quantité totale</div>
-    </div>
-    <div class="stat-card stat-pending">
-      <div class="stat-value">{{ totalValue | number:'1.2-2' }}</div>
-      <div class="stat-label">Valeur totale</div>
-    </div>
-    <div class="stat-card stat-rejected">
-      <div class="stat-value">{{ lowStock }}</div>
-      <div class="stat-label">Stock bas</div>
-    </div>
-    <div class="stat-card stat-cancelled">
-      <div class="stat-value">{{ outOfStock }}</div>
-      <div class="stat-label">Rupture de stock</div>
-    </div>
+@if (loading) {
+  <div class="loading">
+    <div class="spinner"></div>
+    <span>Chargement du tableau de bord...</span>
   </div>
+}
 
-  <div class="table-card" style="margin-top: 24px;">
-    <div class="table-wrapper">
-      <table>
-        <thead>
-          <tr>
-            <th>SKU</th>
-            <th>Produit</th>
-            <th>Prix unitaire</th>
-            <th>Quantité</th>
-            <th>Seuil min</th>
-            <th>Valeur stock</th>
-            <th>Statut</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let p of products" [class.low-stock]="getStockStatus(p) === 'LOW'" [class.out-of-stock]="getStockStatus(p) === 'OUT_OF_STOCK'">
-            <td><code>{{ p.sku }}</code></td>
-            <td><strong>{{ p.name }}</strong></td>
-            <td>{{ p.unitPrice | number:'1.2-2' }} {{ p.currency }}</td>
-            <td class="qty-cell">{{ p.quantity }}</td>
-            <td>{{ p.minQuantity }}</td>
-            <td>{{ (p.quantity * p.unitPrice) | number:'1.2-2' }} {{ p.currency }}</td>
-            <td>
+@if (!loading) {
+  <div>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-value">{{ totalProducts }}</div>
+        <div class="stat-label">Total produits</div>
+      </div>
+      <div class="stat-card stat-confirmed">
+        <div class="stat-value">{{ totalQuantity }}</div>
+        <div class="stat-label">Quantité totale</div>
+      </div>
+      <div class="stat-card stat-pending">
+        <div class="stat-value">{{ totalValue | number:'1.2-2' }}</div>
+        <div class="stat-label">Valeur totale</div>
+      </div>
+      <div class="stat-card stat-rejected">
+        <div class="stat-value">{{ lowStock }}</div>
+        <div class="stat-label">Stock bas</div>
+      </div>
+      <div class="stat-card stat-cancelled">
+        <div class="stat-value">{{ outOfStock }}</div>
+        <div class="stat-label">Rupture de stock</div>
+      </div>
+    </div>
+    <div class="table-card" style="margin-top: 24px;">
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>SKU</th>
+              <th>Produit</th>
+              <th>Prix unitaire</th>
+              <th>Quantité</th>
+              <th>Seuil min</th>
+              <th>Valeur stock</th>
+              <th>Statut</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (p of products; track p) {
+              <tr [class.low-stock]="getStockStatus(p) === 'LOW'" [class.out-of-stock]="getStockStatus(p) === 'OUT_OF_STOCK'">
+                <td><code>{{ p.sku }}</code></td>
+                <td><strong>{{ p.name }}</strong></td>
+                <td>{{ p.unitPrice | number:'1.2-2' }} {{ p.currency }}</td>
+                <td class="qty-cell">{{ p.quantity }}</td>
+                <td>{{ p.minQuantity }}</td>
+                <td>{{ (p.quantity * p.unitPrice) | number:'1.2-2' }} {{ p.currency }}</td>
+                <td>
               <span class="stock-badge" [ngClass]="{
                 'stock-ok': getStockStatus(p) === 'OK',
                 'stock-low': getStockStatus(p) === 'LOW',
                 'stock-out': getStockStatus(p) === 'OUT_OF_STOCK'
               }">
-                {{ getStockStatus(p) === 'OK' ? 'OK' : getStockStatus(p) === 'LOW' ? 'Bas' : 'Rupture' }}
-              </span>
-            </td>
-            <td class="actions">
-              <button class="btn btn-sm btn-success" (click)="openMovement(p, 'IN')" title="Entrée">+</button>
-              <button class="btn btn-sm btn-danger" (click)="openMovement(p, 'OUT')" title="Sortie">-</button>
-              <button class="btn btn-sm btn-warning" (click)="openMovement(p, 'ADJUSTMENT')" title="Ajuster">~</button>
-              <button class="btn btn-sm btn-secondary" (click)="openHistory(p)" title="Historique">📋</button>
-            </td>
-          </tr>
-          <tr *ngIf="products.length === 0">
-            <td colspan="8" class="empty">Aucun produit dans le stock</td>
-          </tr>
-        </tbody>
-      </table>
+                    {{ getStockStatus(p) === 'OK' ? 'OK' : getStockStatus(p) === 'LOW' ? 'Bas' : 'Rupture' }}
+                  </span>
+                </td>
+                <td class="actions">
+                  <button class="btn btn-sm btn-success" (click)="openMovement(p, 'IN')" title="Entrée">+</button>
+                  <button class="btn btn-sm btn-danger" (click)="openMovement(p, 'OUT')" title="Sortie">-</button>
+                  <button class="btn btn-sm btn-warning" (click)="openMovement(p, 'ADJUSTMENT')" title="Ajuster">~</button>
+                  <button class="btn btn-sm btn-secondary" (click)="openHistory(p)" title="Historique">📋</button>
+                </td>
+              </tr>
+            }
+            @if (products.length === 0) {
+              <tr>
+                <td colspan="8" class="empty">Aucun produit dans le stock</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
-</div>
+}
 
 <!-- Mouvement modal -->
-<div class="modal-overlay" *ngIf="showMovementModal" (click)="closeMovement()">
-  <div class="modal-content" (click)="$event.stopPropagation()">
-    <div class="modal-header">
-      <h3>Mouvement de stock — {{ selectedProduct?.name }}</h3>
-      <button class="btn-close" (click)="closeMovement()">&times;</button>
+@if (showMovementModal) {
+  <div class="modal-overlay" (click)="closeMovement()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Mouvement de stock — {{ selectedProduct?.name }}</h3>
+        <button class="btn-close" (click)="closeMovement()">&times;</button>
+      </div>
+      <form (ngSubmit)="submitMovement()">
+        <div class="form-group">
+          <label>Type de mouvement</label>
+          <select [(ngModel)]="movementType" name="type" class="form-control">
+            <option value="IN">Entrée</option>
+            <option value="OUT">Sortie</option>
+            <option value="ADJUSTMENT">Ajustement</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Quantité</label>
+          <input type="number" [(ngModel)]="movementQty" name="qty" class="form-control" min="1" required>
+        </div>
+        <div class="form-group">
+          <label>Référence</label>
+          <input type="text" [(ngModel)]="movementRef" name="ref" class="form-control" placeholder="Ex: BON-001">
+        </div>
+        <div class="form-group">
+          <label>Notes</label>
+          <input type="text" [(ngModel)]="movementNotes" name="notes" class="form-control" placeholder="Notes optionnelles">
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary" (click)="closeMovement()">Annuler</button>
+          <button type="submit" class="btn btn-primary" [disabled]="savingMovement || movementQty <= 0">
+            {{ savingMovement ? 'Enregistrement...' : 'Enregistrer' }}
+          </button>
+        </div>
+      </form>
     </div>
-    <form (ngSubmit)="submitMovement()">
-      <div class="form-group">
-        <label>Type de mouvement</label>
-        <select [(ngModel)]="movementType" name="type" class="form-control">
-          <option value="IN">Entrée</option>
-          <option value="OUT">Sortie</option>
-          <option value="ADJUSTMENT">Ajustement</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>Quantité</label>
-        <input type="number" [(ngModel)]="movementQty" name="qty" class="form-control" min="1" required>
-      </div>
-      <div class="form-group">
-        <label>Référence</label>
-        <input type="text" [(ngModel)]="movementRef" name="ref" class="form-control" placeholder="Ex: BON-001">
-      </div>
-      <div class="form-group">
-        <label>Notes</label>
-        <input type="text" [(ngModel)]="movementNotes" name="notes" class="form-control" placeholder="Notes optionnelles">
-      </div>
-      <div class="form-actions">
-        <button type="button" class="btn btn-secondary" (click)="closeMovement()">Annuler</button>
-        <button type="submit" class="btn btn-primary" [disabled]="savingMovement || movementQty <= 0">
-          {{ savingMovement ? 'Enregistrement...' : 'Enregistrer' }}
-        </button>
-      </div>
-    </form>
   </div>
-</div>
+}
 
 <!-- Historique modal -->
-<div class="modal-overlay" *ngIf="showHistoryModal" (click)="closeHistory()">
-  <div class="modal-content modal-lg" (click)="$event.stopPropagation()">
-    <div class="modal-header">
-      <h3>Historique des mouvements — {{ historyProduct?.name }}</h3>
-      <button class="btn-close" (click)="closeHistory()">&times;</button>
-    </div>
-    <div class="loading" *ngIf="loadingHistory" style="padding: 24px;">
-      <div class="spinner"></div>
-      <span>Chargement...</span>
-    </div>
-    <div class="table-wrapper" *ngIf="!loadingHistory">
-      <table>
-        <thead>
-          <tr>
-            <th>Date</th>
-            <th>Type</th>
-            <th>Quantité</th>
-            <th>Référence</th>
-            <th>Notes</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let m of historyMovements">
-            <td>{{ m.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
-            <td>
-              <span class="payment-badge" [ngClass]="movementTypeClass(m.type)">
-                {{ movementTypeLabel(m.type) }}
-              </span>
-            </td>
-            <td>{{ m.quantity }}</td>
-            <td>{{ m.reference || '-' }}</td>
-            <td>{{ m.notes || '-' }}</td>
-          </tr>
-          <tr *ngIf="historyMovements.length === 0">
-            <td colspan="5" class="empty">Aucun mouvement enregistré</td>
-          </tr>
-        </tbody>
-      </table>
+@if (showHistoryModal) {
+  <div class="modal-overlay" (click)="closeHistory()">
+    <div class="modal-content modal-lg" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Historique des mouvements — {{ historyProduct?.name }}</h3>
+        <button class="btn-close" (click)="closeHistory()">&times;</button>
+      </div>
+      @if (loadingHistory) {
+        <div class="loading" style="padding: 24px;">
+          <div class="spinner"></div>
+          <span>Chargement...</span>
+        </div>
+      }
+      @if (!loadingHistory) {
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Type</th>
+                <th>Quantité</th>
+                <th>Référence</th>
+                <th>Notes</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (m of historyMovements; track m) {
+                <tr>
+                  <td>{{ m.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
+                  <td>
+                    <span class="payment-badge" [ngClass]="movementTypeClass(m.type)">
+                      {{ movementTypeLabel(m.type) }}
+                    </span>
+                  </td>
+                  <td>{{ m.quantity }}</td>
+                  <td>{{ m.reference || '-' }}</td>
+                  <td>{{ m.notes || '-' }}</td>
+                </tr>
+              }
+              @if (historyMovements.length === 0) {
+                <tr>
+                  <td colspan="5" class="empty">Aucun mouvement enregistré</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
     </div>
   </div>
-</div>
+}

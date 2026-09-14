@@ -17,7 +17,9 @@
         <input id="password" type="password" [(ngModel)]="form.password" name="password" required placeholder="••••••••" autocomplete="current-password">
       </div>
 
-      <div *ngIf="error" class="error-message">{{ error }}</div>
+      @if (error) {
+        <div class="error-message">{{ error }}</div>
+      }
 
       <button type="submit" class="btn btn-primary btn-block" [disabled]="loading">
         {{ loading ? 'Connexion...' : 'Se connecter' }}

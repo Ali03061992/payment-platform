@@ -3,142 +3,161 @@
   <button class="btn btn-primary" (click)="openCreate()">+ Nouveau produit</button>
 </div>
 
-<div class="form-card" *ngIf="showForm">
-  <h3>{{ editingProduct ? 'Modifier le produit' : 'Creer un produit' }}</h3>
-  <form (ngSubmit)="save()">
-    <div class="form-section">
-      <h4>Informations produit</h4>
-      <div class="form-row">
-        <div class="form-group">
-          <label>Nom <span class="required">*</span></label>
-          <input type="text" [(ngModel)]="form.name" name="name" class="form-control" placeholder="Ex: T-shirt Premium" required>
+@if (showForm) {
+  <div class="form-card">
+    <h3>{{ editingProduct ? 'Modifier le produit' : 'Creer un produit' }}</h3>
+    <form (ngSubmit)="save()">
+      <div class="form-section">
+        <h4>Informations produit</h4>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Nom <span class="required">*</span></label>
+            <input type="text" [(ngModel)]="form.name" name="name" class="form-control" placeholder="Ex: T-shirt Premium" required>
+          </div>
+          <div class="form-group">
+            <label>SKU <span class="required">*</span></label>
+            <input type="text" [(ngModel)]="form.sku" name="sku" class="form-control" placeholder="Ex: TS-001" [disabled]="!!editingProduct" required>
+          </div>
         </div>
         <div class="form-group">
-          <label>SKU <span class="required">*</span></label>
-          <input type="text" [(ngModel)]="form.sku" name="sku" class="form-control" placeholder="Ex: TS-001" [disabled]="!!editingProduct" required>
-        </div>
-      </div>
-      <div class="form-group">
-        <label>Description</label>
-        <input type="text" [(ngModel)]="form.description" name="description" class="form-control" placeholder="Description optionnelle">
-      </div>
-    </div>
-
-    <div class="form-section">
-      <h4>Classification</h4>
-      <div class="form-row">
-        <div class="form-group">
-          <label>Categorie</label>
-          <select [(ngModel)]="form.categoryId" name="categoryId" class="form-control" (change)="onCategoryChange()">
-            <option [ngValue]="0">-- Aucune --</option>
-            <option *ngFor="let c of categories" [ngValue]="c.id">{{ c.name }}</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Famille</label>
-          <select [(ngModel)]="form.familyId" name="familyId" class="form-control">
-            <option [ngValue]="0">-- Aucune --</option>
-            <option *ngFor="let f of getFamiliesForCategory()" [ngValue]="f.id">{{ f.name }}</option>
-          </select>
+          <label>Description</label>
+          <input type="text" [(ngModel)]="form.description" name="description" class="form-control" placeholder="Description optionnelle">
         </div>
       </div>
-    </div>
-
-    <div class="form-section">
-      <h4>Prix et unite</h4>
-      <div class="form-row">
-        <div class="form-group">
-          <label>Prix unitaire <span class="required">*</span></label>
-          <input type="number" [(ngModel)]="form.unitPrice" name="unitPrice" class="form-control" min="0" step="0.01" required>
-        </div>
-        <div class="form-group">
-          <label>Devise</label>
-          <select [(ngModel)]="form.currency" name="currency" class="form-control">
-            <option value="TND">TND - Dinar tunisien</option>
-            <option value="EUR">EUR - Euro</option>
-            <option value="USD">USD - Dollar</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Unite</label>
-          <select [(ngModel)]="form.unit" name="unit" class="form-control">
-            <option value="unite">Unite</option>
-            <option value="kg">Kilogramme</option>
-            <option value="m">Metre</option>
-            <option value="l">Litre</option>
-            <option value="carton">Carton</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Seuil min</label>
-          <input type="number" [(ngModel)]="form.minQuantity" name="minQuantity" class="form-control" min="0">
+      <div class="form-section">
+        <h4>Classification</h4>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Categorie</label>
+            <select [(ngModel)]="form.categoryId" name="categoryId" class="form-control" (change)="onCategoryChange()">
+              <option [ngValue]="0">-- Aucune --</option>
+              @for (c of categories; track c) {
+                <option [ngValue]="c.id">{{ c.name }}</option>
+              }
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Famille</label>
+            <select [(ngModel)]="form.familyId" name="familyId" class="form-control">
+              <option [ngValue]="0">-- Aucune --</option>
+              @for (f of getFamiliesForCategory(); track f) {
+                <option [ngValue]="f.id">{{ f.name }}</option>
+              }
+            </select>
+          </div>
         </div>
       </div>
-    </div>
+      <div class="form-section">
+        <h4>Prix et unite</h4>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Prix unitaire <span class="required">*</span></label>
+            <input type="number" [(ngModel)]="form.unitPrice" name="unitPrice" class="form-control" min="0" step="0.01" required>
+          </div>
+          <div class="form-group">
+            <label>Devise</label>
+            <select [(ngModel)]="form.currency" name="currency" class="form-control">
+              <option value="TND">TND - Dinar tunisien</option>
+              <option value="EUR">EUR - Euro</option>
+              <option value="USD">USD - Dollar</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Unite</label>
+            <select [(ngModel)]="form.unit" name="unit" class="form-control">
+              <option value="unite">Unite</option>
+              <option value="kg">Kilogramme</option>
+              <option value="m">Metre</option>
+              <option value="l">Litre</option>
+              <option value="carton">Carton</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Seuil min</label>
+            <input type="number" [(ngModel)]="form.minQuantity" name="minQuantity" class="form-control" min="0">
+          </div>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button type="button" class="btn btn-secondary" (click)="showForm = false">Annuler</button>
+        <button type="submit" class="btn btn-primary" [disabled]="saving || !form.name || !form.sku">
+          {{ saving ? 'Enregistrement...' : (editingProduct ? 'Mettre a jour' : 'Creer') }}
+        </button>
+      </div>
+    </form>
+  </div>
+}
 
-    <div class="form-actions">
-      <button type="button" class="btn btn-secondary" (click)="showForm = false">Annuler</button>
-      <button type="submit" class="btn btn-primary" [disabled]="saving || !form.name || !form.sku">
-        {{ saving ? 'Enregistrement...' : (editingProduct ? 'Mettre a jour' : 'Creer') }}
-      </button>
-    </div>
-  </form>
-</div>
+@if (loading) {
+  <div class="loading"><div class="spinner"></div></div>
+}
 
-<div class="loading" *ngIf="loading"><div class="spinner"></div></div>
+@if (!loading) {
+  <div class="filter-bar">
+    <select [(ngModel)]="filterCategory" class="form-control filter-select" (change)="filterFamily = ''">
+      <option value="">Toutes les categories</option>
+      @for (c of categories; track c) {
+        <option [value]="c.id">{{ c.name }}</option>
+      }
+    </select>
+    <select [(ngModel)]="filterFamily" class="form-control filter-select">
+      <option value="">Toutes les familles</option>
+      @for (f of families; track f) {
+        <option [value]="f.id">{{ f.name }}</option>
+      }
+    </select>
+    <span class="result-count">{{ filteredProducts.length }} resultat(s)</span>
+  </div>
+}
 
-<div class="filter-bar" *ngIf="!loading">
-  <select [(ngModel)]="filterCategory" class="form-control filter-select" (change)="filterFamily = ''">
-    <option value="">Toutes les categories</option>
-    <option *ngFor="let c of categories" [value]="c.id">{{ c.name }}</option>
-  </select>
-  <select [(ngModel)]="filterFamily" class="form-control filter-select">
-    <option value="">Toutes les familles</option>
-    <option *ngFor="let f of families" [value]="f.id">{{ f.name }}</option>
-  </select>
-  <span class="result-count">{{ filteredProducts.length }} resultat(s)</span>
-</div>
-
-<div class="table-card" *ngIf="!loading">
-  <div class="table-wrapper">
-    <table>
-      <thead>
-        <tr>
-          <th>SKU</th>
-          <th>Nom</th>
-          <th>Categorie</th>
-          <th>Famille</th>
-          <th>Prix</th>
-          <th>Unite</th>
-          <th>Statut</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let p of filteredProducts">
-          <td><code>{{ p.sku }}</code></td>
-          <td><strong>{{ p.name }}</strong><div class="desc" *ngIf="p.description">{{ p.description }}</div></td>
-          <td>{{ getCategoryName(p.categoryId) }}</td>
-          <td>{{ getFamilyName(p.familyId) }}</td>
-          <td>{{ p.unitPrice | number:'1.2-2' }} {{ p.currency }}</td>
-          <td>{{ p.unit }}</td>
-          <td>
-            <span class="badge" [class.badge-active]="p.status === 'ACTIVE'" [class.badge-inactive]="p.status !== 'ACTIVE'">
-              {{ statusLabel(p.status) }}
-            </span>
-          </td>
-          <td class="actions">
-            <button class="btn btn-sm btn-secondary" (click)="openEdit(p)">Modifier</button>
-            <button class="btn btn-sm" [class.btn-warning]="p.status === 'ACTIVE'" [class.btn-success]="p.status !== 'ACTIVE'" (click)="toggleStatus(p)">
-              {{ p.status === 'ACTIVE' ? 'Desactiver' : 'Activer' }}
-            </button>
-            <button class="btn btn-sm btn-danger" (click)="deleteProduct(p)">Supprimer</button>
-          </td>
-        </tr>
-        <tr *ngIf="filteredProducts.length === 0">
-          <td colspan="8" class="empty">Aucun produit</td>
-        </tr>
+@if (!loading) {
+  <div class="table-card">
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>SKU</th>
+            <th>Nom</th>
+            <th>Categorie</th>
+            <th>Famille</th>
+            <th>Prix</th>
+            <th>Unite</th>
+            <th>Statut</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (p of filteredProducts; track p) {
+            <tr>
+              <td><code>{{ p.sku }}</code></td>
+              <td><strong>{{ p.name }}</strong>@if (p.description) {
+              <div class="desc">{{ p.description }}</div>
+            }</td>
+            <td>{{ getCategoryName(p.categoryId) }}</td>
+            <td>{{ getFamilyName(p.familyId) }}</td>
+            <td>{{ p.unitPrice | number:'1.2-2' }} {{ p.currency }}</td>
+            <td>{{ p.unit }}</td>
+            <td>
+              <span class="badge" [class.badge-active]="p.status === 'ACTIVE'" [class.badge-inactive]="p.status !== 'ACTIVE'">
+                {{ statusLabel(p.status) }}
+              </span>
+            </td>
+            <td class="actions">
+              <button class="btn btn-sm btn-secondary" (click)="openEdit(p)">Modifier</button>
+              <button class="btn btn-sm" [class.btn-warning]="p.status === 'ACTIVE'" [class.btn-success]="p.status !== 'ACTIVE'" (click)="toggleStatus(p)">
+                {{ p.status === 'ACTIVE' ? 'Desactiver' : 'Activer' }}
+              </button>
+              <button class="btn btn-sm btn-danger" (click)="deleteProduct(p)">Supprimer</button>
+            </td>
+          </tr>
+        }
+        @if (filteredProducts.length === 0) {
+          <tr>
+            <td colspan="8" class="empty">Aucun produit</td>
+          </tr>
+        }
       </tbody>
     </table>
   </div>
 </div>
+}

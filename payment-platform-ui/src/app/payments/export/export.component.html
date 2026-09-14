@@ -18,12 +18,18 @@
       </div>
     </div>
 
-    <div class="error" *ngIf="error">{{ error }}</div>
+    @if (error) {
+      <div class="error">{{ error }}</div>
+    }
 
     <div class="actions">
       <button class="btn btn-primary" (click)="exportCsv()" [disabled]="loading">
-        <span *ngIf="!loading">📥 Télécharger CSV</span>
-        <span *ngIf="loading">Export en cours...</span>
+        @if (!loading) {
+          <span>📥 Télécharger CSV</span>
+        }
+        @if (loading) {
+          <span>Export en cours...</span>
+        }
       </button>
     </div>
   </div>

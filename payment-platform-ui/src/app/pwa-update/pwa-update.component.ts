@@ -5,12 +5,14 @@ import { filter } from 'rxjs/operators';
 @Component({
     selector: 'app-pwa-update',
     template: `
-    <div *ngIf="showUpdate" class="pwa-update-banner">
-      <span>Nouvelle version disponible !</span>
-      <button (click)="updateApp()" class="btn-update">Mettre à jour</button>
-      <button (click)="dismiss()" class="btn-dismiss">&times;</button>
-    </div>
-  `,
+    @if (showUpdate) {
+      <div class="pwa-update-banner">
+        <span>Nouvelle version disponible !</span>
+        <button (click)="updateApp()" class="btn-update">Mettre à jour</button>
+        <button (click)="dismiss()" class="btn-dismiss">&times;</button>
+      </div>
+    }
+    `,
     styles: [`
     .pwa-update-banner {
       position: fixed;

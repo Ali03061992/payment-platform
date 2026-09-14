@@ -9,277 +9,313 @@
 </div>
 
 <!-- Config Panel -->
-<div class="config-panel" *ngIf="showConfig">
-  <h3>Parametres d'optimisation</h3>
-  <div class="config-row">
-    <div class="config-group">
-      <label>Delai moyen (jours)</label>
-      <input type="number" [(ngModel)]="configLeadTime" class="form-control" min="1">
+@if (showConfig) {
+  <div class="config-panel">
+    <h3>Parametres d'optimisation</h3>
+    <div class="config-row">
+      <div class="config-group">
+        <label>Delai moyen (jours)</label>
+        <input type="number" [(ngModel)]="configLeadTime" class="form-control" min="1">
+      </div>
+      <div class="config-group">
+        <label>Cout de commande (€)</label>
+        <input type="number" [(ngModel)]="configOrderingCost" class="form-control" min="0">
+      </div>
+      <div class="config-group">
+        <label>Cout de possession (%/an)</label>
+        <input type="number" [(ngModel)]="configHoldingCost" class="form-control" min="0" max="100">
+      </div>
+      <button class="btn btn-primary" (click)="applyConfig()">Appliquer</button>
     </div>
-    <div class="config-group">
-      <label>Cout de commande (€)</label>
-      <input type="number" [(ngModel)]="configOrderingCost" class="form-control" min="0">
-    </div>
-    <div class="config-group">
-      <label>Cout de possession (%/an)</label>
-      <input type="number" [(ngModel)]="configHoldingCost" class="form-control" min="0" max="100">
-    </div>
-    <button class="btn btn-primary" (click)="applyConfig()">Appliquer</button>
   </div>
-</div>
+}
 
 <!-- Loading -->
-<div class="loading" *ngIf="loading"><div class="spinner"></div><span>Calcul en cours...</span></div>
+@if (loading) {
+  <div class="loading"><div class="spinner"></div><span>Calcul en cours...</span></div>
+}
 
 <!-- Error -->
-<div class="error-state" *ngIf="error && !loading">
-  <div class="error-icon">⚠️</div>
-  <p>{{ error }}</p>
-  <button class="btn btn-primary" (click)="loadOptimization()">Reessayer</button>
-</div>
-
-<div *ngIf="!loading && data">
-  <!-- Overview KPIs -->
-  <div class="kpi-grid">
-    <div class="kpi-card">
-      <div class="kpi-icon" style="background:#e3f2fd">📦</div>
-      <div class="kpi-value">{{ data.products.length }}</div>
-      <div class="kpi-label">Produits analyses</div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-icon" style="background:#fff3e0">💰</div>
-      <div class="kpi-value">{{ data.totalStockValue | number:'1.0-0' }}</div>
-      <div class="kpi-label">Valeur stock</div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-icon" style="background:#fce4ec">🔒</div>
-      <div class="kpi-value">{{ data.totalSafetyStockValue | number:'1.0-0' }}</div>
-      <div class="kpi-label">Stock securite</div>
-    </div>
-    <div class="kpi-card" *ngIf="data.productsToOrder > 0">
-      <div class="kpi-icon" style="background:#fce4ec">🛒</div>
-      <div class="kpi-value">{{ data.productsToOrder }}</div>
-      <div class="kpi-label">A commander</div>
-    </div>
-    <div class="kpi-card" *ngIf="data.productsAtRisk > 0">
-      <div class="kpi-icon" style="background:#fce4ec">⚠️</div>
-      <div class="kpi-value">{{ data.productsAtRisk }}</div>
-      <div class="kpi-label">Rupture</div>
-    </div>
-    <div class="kpi-card" *ngIf="data.productsOverstocked > 0">
-      <div class="kpi-icon" style="background:#fff3e0">📈</div>
-      <div class="kpi-value">{{ data.productsOverstocked }}</div>
-      <div class="kpi-label">Surstock</div>
-    </div>
+@if (error && !loading) {
+  <div class="error-state">
+    <div class="error-icon">⚠️</div>
+    <p>{{ error }}</p>
+    <button class="btn btn-primary" (click)="loadOptimization()">Reessayer</button>
   </div>
+}
 
-  <!-- Tabs -->
-  <div class="tabs">
-    <button class="tab" [class.active]="activeTab === 'overview'" (click)="activeTab = 'overview'">Vue d'ensemble</button>
-    <button class="tab" [class.active]="activeTab === 'abcxyz'" (click)="activeTab = 'abcxyz'">ABC-XYZ</button>
-    <button class="tab" [class.active]="activeTab === 'products'" (click)="activeTab = 'products'">Produits</button>
-    <button class="tab" [class.active]="activeTab === 'risks'" (click)="activeTab = 'risks'">Risques</button>
-  </div>
-
-  <!-- Tab: Overview -->
-  <div *ngIf="activeTab === 'overview'" class="tab-content">
-    <div class="grid-2">
-      <div class="card">
-        <h3>Distribution ABC</h3>
-        <div class="bar-chart">
-          <div *ngFor="let item of data.abcDistribution | keyvalue" class="bar-row">
-            <span class="bar-label">{{ item.key }}</span>
-            <div class="bar-track"><div class="bar-fill" [style.width.%]="(item.value / data.products.length) * 100" [style.background]="abcColor(item.key)"></div></div>
-            <span class="bar-value">{{ item.value }}</span>
-          </div>
-        </div>
+@if (!loading && data) {
+  <div>
+    <!-- Overview KPIs -->
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-icon" style="background:#e3f2fd">📦</div>
+        <div class="kpi-value">{{ data.products.length }}</div>
+        <div class="kpi-label">Produits analyses</div>
       </div>
-      <div class="card">
-        <h3>Distribution XYZ</h3>
-        <div class="bar-chart">
-          <div *ngFor="let item of data.xyzDistribution | keyvalue" class="bar-row">
-            <span class="bar-label">{{ item.key }}</span>
-            <div class="bar-track"><div class="bar-fill" [style.width.%]="(item.value / data.products.length) * 100" [style.background]="xyzColor(item.key)"></div></div>
-            <span class="bar-value">{{ item.value }}</span>
-          </div>
-        </div>
+      <div class="kpi-card">
+        <div class="kpi-icon" style="background:#fff3e0">💰</div>
+        <div class="kpi-value">{{ data.totalStockValue | number:'1.0-0' }}</div>
+        <div class="kpi-label">Valeur stock</div>
       </div>
+      <div class="kpi-card">
+        <div class="kpi-icon" style="background:#fce4ec">🔒</div>
+        <div class="kpi-value">{{ data.totalSafetyStockValue | number:'1.0-0' }}</div>
+        <div class="kpi-label">Stock securite</div>
+      </div>
+      @if (data.productsToOrder > 0) {
+        <div class="kpi-card">
+          <div class="kpi-icon" style="background:#fce4ec">🛒</div>
+          <div class="kpi-value">{{ data.productsToOrder }}</div>
+          <div class="kpi-label">A commander</div>
+        </div>
+      }
+      @if (data.productsAtRisk > 0) {
+        <div class="kpi-card">
+          <div class="kpi-icon" style="background:#fce4ec">⚠️</div>
+          <div class="kpi-value">{{ data.productsAtRisk }}</div>
+          <div class="kpi-label">Rupture</div>
+        </div>
+      }
+      @if (data.productsOverstocked > 0) {
+        <div class="kpi-card">
+          <div class="kpi-icon" style="background:#fff3e0">📈</div>
+          <div class="kpi-value">{{ data.productsOverstocked }}</div>
+          <div class="kpi-label">Surstock</div>
+        </div>
+      }
     </div>
-
-    <div class="card" style="margin-top:16px">
-      <h3>Matrice ABC x XYZ</h3>
-      <div class="matrix-grid">
-        <div *ngFor="let item of data.abcxzDistribution | keyvalue" class="matrix-cell">
-          <span class="matrix-label">{{ item.key }}</span>
-          <span class="matrix-value">{{ item.value }}</span>
-        </div>
-      </div>
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab" [class.active]="activeTab === 'overview'" (click)="activeTab = 'overview'">Vue d'ensemble</button>
+      <button class="tab" [class.active]="activeTab === 'abcxyz'" (click)="activeTab = 'abcxyz'">ABC-XYZ</button>
+      <button class="tab" [class.active]="activeTab === 'products'" (click)="activeTab = 'products'">Produits</button>
+      <button class="tab" [class.active]="activeTab === 'risks'" (click)="activeTab = 'risks'">Risques</button>
     </div>
-
-    <div class="card" style="margin-top:16px">
-      <h3>Actions recommandees</h3>
-      <div class="bar-chart">
-        <div *ngFor="let item of data.actionDistribution | keyvalue" class="bar-row">
-          <span class="bar-label">{{ item.key }}</span>
-          <div class="bar-track"><div class="bar-fill" [style.width.%]="(item.value / data.products.length) * 100" [style.background]="actionColor(item.key)"></div></div>
-          <span class="bar-value">{{ item.value }}</span>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Tab: ABC-XYZ Matrix -->
-  <div *ngIf="activeTab === 'abcxyz'" class="tab-content">
-    <div class="card">
-      <h3>Matrice ABC x XYZ — Politiques de gestion</h3>
-      <div class="abcxyz-table">
-        <table>
-          <thead>
-            <tr><th></th><th>X (Stable)</th><th>Y (Variable)</th><th>Z (Sporadique)</th></tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let abc of ['A', 'B', 'C']">
-              <td class="abc-label" [style.background]="abcBg(abc)" [style.color]="abcColor(abc)">{{ abc }}</td>
-              <td *ngFor="let xyz of ['X', 'Y', 'Z']">
-                <div class="cell-content" [class.cell-highlight]="data.abcxzDistribution[abc+xyz]">
-                  <span class="cell-count">{{ data.abcxzDistribution[abc+xyz] || 0 }}</span>
-                  <span class="cell-items">produits</span>
+    <!-- Tab: Overview -->
+    @if (activeTab === 'overview') {
+      <div class="tab-content">
+        <div class="grid-2">
+          <div class="card">
+            <h3>Distribution ABC</h3>
+            <div class="bar-chart">
+              @for (item of data.abcDistribution | keyvalue; track item) {
+                <div class="bar-row">
+                  <span class="bar-label">{{ item.key }}</span>
+                  <div class="bar-track"><div class="bar-fill" [style.width.%]="(item.value / data.products.length) * 100" [style.background]="abcColor(item.key)"></div></div>
+                  <span class="bar-value">{{ item.value }}</span>
                 </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-
-  <!-- Tab: Products Detail -->
-  <div *ngIf="activeTab === 'products'" class="tab-content">
-    <div class="product-list">
-      <div *ngFor="let p of data.products" class="product-row" [class.selected]="selectedProduct?.productId === p.productId" (click)="selectProduct(p)">
-        <div class="product-header">
-          <div class="product-info">
-            <strong>{{ p.productName }}</strong>
-            <span class="sku">{{ p.sku }}</span>
+              }
+            </div>
           </div>
-          <div class="product-badges">
-            <span class="badge" [style.background]="abcBg(p.abcClass)" [style.color]="abcColor(p.abcClass)">ABC: {{ p.abcClass }}</span>
-            <span class="badge" [style.background]="xyzColor(p.xyzClass) + '22'" [style.color]="xyzColor(p.xyzClass)">XYZ: {{ p.xyzClass }}</span>
-            <span class="badge" [style.background]="actionColor(p.recommendation.action) + '22'" [style.color]="actionColor(p.recommendation.action)">{{ p.recommendation.action }}</span>
+          <div class="card">
+            <h3>Distribution XYZ</h3>
+            <div class="bar-chart">
+              @for (item of data.xyzDistribution | keyvalue; track item) {
+                <div class="bar-row">
+                  <span class="bar-label">{{ item.key }}</span>
+                  <div class="bar-track"><div class="bar-fill" [style.width.%]="(item.value / data.products.length) * 100" [style.background]="xyzColor(item.key)"></div></div>
+                  <span class="bar-value">{{ item.value }}</span>
+                </div>
+              }
+            </div>
           </div>
         </div>
-
-        <!-- Expanded Detail -->
-        <div class="product-detail" *ngIf="selectedProduct?.productId === p.productId">
-          <div class="detail-grid">
-            <!-- Classification -->
-            <div class="detail-section">
-              <h4>Classification</h4>
-              <div class="detail-row"><span>ABC:</span><span class="val" [style.color]="abcColor(p.abcClass)">{{ p.abcClass }} (rang #{{ p.abcRank }})</span></div>
-              <div class="detail-row"><span>XYZ:</span><span class="val" [style.color]="xyzColor(p.xyzClass)">{{ p.xyzClass }} — {{ p.demandPattern }}</span></div>
-              <div class="detail-row"><span>CV:</span><span class="val">{{ formatPercent(p.coefficientOfVariation) }}</span></div>
-              <div class="detail-row"><span>Politique:</span><span class="val small">{{ p.policyDescription }}</span></div>
-            </div>
-
-            <!-- Forecast -->
-            <div class="detail-section">
-              <h4>Prevision</h4>
-              <div class="detail-row"><span>Methode:</span><span class="val">{{ p.forecastMethod }}</span></div>
-              <div class="detail-row"><span>Precision:</span><span class="val">{{ formatPercent(p.forecastAccuracy) }}</span></div>
-              <div class="detail-row"><span>Demande moy/j:</span><span class="val">{{ formatNumber(p.avgDailyDemand) }}</span></div>
-            </div>
-
-            <!-- Safety Stock -->
-            <div class="detail-section">
-              <h4>Stock de securite</h4>
-              <div class="detail-row"><span>SS calcule:</span><span class="val">{{ p.safetyStock | number:'1.0-0' }}</span></div>
-              <div class="detail-row"><span>Niveau service:</span><span class="val">{{ formatPercent(p.targetServiceLevel) }}</span></div>
-              <div class="detail-row"><span>Z-score:</span><span class="val">{{ p.zScore | number:'1.3-3' }}</span></div>
-            </div>
-
-            <!-- Reorder -->
-            <div class="detail-section">
-              <h4>Point de commande</h4>
-              <div class="detail-row"><span>ROP:</span><span class="val">{{ p.reorderPoint | number:'1.0-0' }}</span></div>
-              <div class="detail-row"><span>Commander?</span><span class="val" [class.urgent]="p.shouldReorder">{{ p.shouldReorder ? 'OUI' : 'Non' }}</span></div>
-              <div class="detail-row"><span>Jours avant:</span><span class="val">{{ p.daysUntilReorder | number:'1.0-0' }}</span></div>
-            </div>
-
-            <!-- EOQ -->
-            <div class="detail-section">
-              <h4>Quantite optimale</h4>
-              <div class="detail-row"><span>EOQ:</span><span class="val">{{ p.economicOrderQty | number:'1.0-0' }}</span></div>
-              <div class="detail-row"><span>Qte ajustee:</span><span class="val">{{ p.adjustedOrderQty | number:'1.0-0' }}</span></div>
-              <div class="detail-row"><span>Cmd/an:</span><span class="val">{{ p.ordersPerYear | number:'1.1-1' }}</span></div>
-              <div class="detail-row"><span>Cout/an:</span><span class="val">{{ p.totalAnnualCost | number:'1.0-0' }}</span></div>
-            </div>
-
-            <!-- Risk -->
-            <div class="detail-section">
-              <h4>Risques</h4>
-              <div class="detail-row"><span>Rupture:</span><span class="val" [style.color]="riskColor(p.stockoutLevel)">{{ formatPercent(p.stockoutRisk) }} ({{ p.stockoutLevel }})</span></div>
-              <div class="detail-row"><span>Surstock:</span><span class="val">{{ formatPercent(p.overstockRisk) }}</span></div>
-              <div class="detail-row"><span>Jours de stock:</span><span class="val">{{ p.daysOfSupply | number:'1.0-0' }}</span></div>
-              <div class="detail-row"><span>Rotation:</span><span class="val">{{ p.turnoverRate | number:'1.1-1' }}/an</span></div>
-              <div class="detail-row"><span>Sante:</span><span class="val">{{ p.healthScore }}/100</span></div>
-            </div>
-
-            <!-- Recommendation -->
-            <div class="detail-section full-width">
-              <h4>Recommandation</h4>
-              <div class="rec-box" [style.border-left-color]="actionColor(p.recommendation.action)">
-                <div class="rec-action" [style.color]="actionColor(p.recommendation.action)">{{ p.recommendation.action }} — Priorite {{ p.recommendation.priority }}</div>
-                <p class="rec-reasoning">{{ p.recommendation.reasoning }}</p>
-                <div class="rec-factors">
-                  <span *ngFor="let f of p.recommendation.keyFactors" class="factor-tag">{{ f }}</span>
+        <div class="card" style="margin-top:16px">
+          <h3>Matrice ABC x XYZ</h3>
+          <div class="matrix-grid">
+            @for (item of data.abcxzDistribution | keyvalue; track item) {
+              <div class="matrix-cell">
+                <span class="matrix-label">{{ item.key }}</span>
+                <span class="matrix-value">{{ item.value }}</span>
+              </div>
+            }
+          </div>
+        </div>
+        <div class="card" style="margin-top:16px">
+          <h3>Actions recommandees</h3>
+          <div class="bar-chart">
+            @for (item of data.actionDistribution | keyvalue; track item) {
+              <div class="bar-row">
+                <span class="bar-label">{{ item.key }}</span>
+                <div class="bar-track"><div class="bar-fill" [style.width.%]="(item.value / data.products.length) * 100" [style.background]="actionColor(item.key)"></div></div>
+                <span class="bar-value">{{ item.value }}</span>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    }
+    <!-- Tab: ABC-XYZ Matrix -->
+    @if (activeTab === 'abcxyz') {
+      <div class="tab-content">
+        <div class="card">
+          <h3>Matrice ABC x XYZ — Politiques de gestion</h3>
+          <div class="abcxyz-table">
+            <table>
+              <thead>
+                <tr><th></th><th>X (Stable)</th><th>Y (Variable)</th><th>Z (Sporadique)</th></tr>
+              </thead>
+              <tbody>
+                @for (abc of ['A', 'B', 'C']; track abc) {
+                  <tr>
+                    <td class="abc-label" [style.background]="abcBg(abc)" [style.color]="abcColor(abc)">{{ abc }}</td>
+                    @for (xyz of ['X', 'Y', 'Z']; track xyz) {
+                      <td>
+                        <div class="cell-content" [class.cell-highlight]="data.abcxzDistribution[abc+xyz]">
+                          <span class="cell-count">{{ data.abcxzDistribution[abc+xyz] || 0 }}</span>
+                          <span class="cell-items">produits</span>
+                        </div>
+                      </td>
+                    }
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    }
+    <!-- Tab: Products Detail -->
+    @if (activeTab === 'products') {
+      <div class="tab-content">
+        <div class="product-list">
+          @for (p of data.products; track p) {
+            <div class="product-row" [class.selected]="selectedProduct?.productId === p.productId" (click)="selectProduct(p)">
+              <div class="product-header">
+                <div class="product-info">
+                  <strong>{{ p.productName }}</strong>
+                  <span class="sku">{{ p.sku }}</span>
+                </div>
+                <div class="product-badges">
+                  <span class="badge" [style.background]="abcBg(p.abcClass)" [style.color]="abcColor(p.abcClass)">ABC: {{ p.abcClass }}</span>
+                  <span class="badge" [style.background]="xyzColor(p.xyzClass) + '22'" [style.color]="xyzColor(p.xyzClass)">XYZ: {{ p.xyzClass }}</span>
+                  <span class="badge" [style.background]="actionColor(p.recommendation.action) + '22'" [style.color]="actionColor(p.recommendation.action)">{{ p.recommendation.action }}</span>
                 </div>
               </div>
+              <!-- Expanded Detail -->
+              @if (selectedProduct?.productId === p.productId) {
+                <div class="product-detail">
+                  <div class="detail-grid">
+                    <!-- Classification -->
+                    <div class="detail-section">
+                      <h4>Classification</h4>
+                      <div class="detail-row"><span>ABC:</span><span class="val" [style.color]="abcColor(p.abcClass)">{{ p.abcClass }} (rang #{{ p.abcRank }})</span></div>
+                      <div class="detail-row"><span>XYZ:</span><span class="val" [style.color]="xyzColor(p.xyzClass)">{{ p.xyzClass }} — {{ p.demandPattern }}</span></div>
+                      <div class="detail-row"><span>CV:</span><span class="val">{{ formatPercent(p.coefficientOfVariation) }}</span></div>
+                      <div class="detail-row"><span>Politique:</span><span class="val small">{{ p.policyDescription }}</span></div>
+                    </div>
+                    <!-- Forecast -->
+                    <div class="detail-section">
+                      <h4>Prevision</h4>
+                      <div class="detail-row"><span>Methode:</span><span class="val">{{ p.forecastMethod }}</span></div>
+                      <div class="detail-row"><span>Precision:</span><span class="val">{{ formatPercent(p.forecastAccuracy) }}</span></div>
+                      <div class="detail-row"><span>Demande moy/j:</span><span class="val">{{ formatNumber(p.avgDailyDemand) }}</span></div>
+                    </div>
+                    <!-- Safety Stock -->
+                    <div class="detail-section">
+                      <h4>Stock de securite</h4>
+                      <div class="detail-row"><span>SS calcule:</span><span class="val">{{ p.safetyStock | number:'1.0-0' }}</span></div>
+                      <div class="detail-row"><span>Niveau service:</span><span class="val">{{ formatPercent(p.targetServiceLevel) }}</span></div>
+                      <div class="detail-row"><span>Z-score:</span><span class="val">{{ p.zScore | number:'1.3-3' }}</span></div>
+                    </div>
+                    <!-- Reorder -->
+                    <div class="detail-section">
+                      <h4>Point de commande</h4>
+                      <div class="detail-row"><span>ROP:</span><span class="val">{{ p.reorderPoint | number:'1.0-0' }}</span></div>
+                      <div class="detail-row"><span>Commander?</span><span class="val" [class.urgent]="p.shouldReorder">{{ p.shouldReorder ? 'OUI' : 'Non' }}</span></div>
+                      <div class="detail-row"><span>Jours avant:</span><span class="val">{{ p.daysUntilReorder | number:'1.0-0' }}</span></div>
+                    </div>
+                    <!-- EOQ -->
+                    <div class="detail-section">
+                      <h4>Quantite optimale</h4>
+                      <div class="detail-row"><span>EOQ:</span><span class="val">{{ p.economicOrderQty | number:'1.0-0' }}</span></div>
+                      <div class="detail-row"><span>Qte ajustee:</span><span class="val">{{ p.adjustedOrderQty | number:'1.0-0' }}</span></div>
+                      <div class="detail-row"><span>Cmd/an:</span><span class="val">{{ p.ordersPerYear | number:'1.1-1' }}</span></div>
+                      <div class="detail-row"><span>Cout/an:</span><span class="val">{{ p.totalAnnualCost | number:'1.0-0' }}</span></div>
+                    </div>
+                    <!-- Risk -->
+                    <div class="detail-section">
+                      <h4>Risques</h4>
+                      <div class="detail-row"><span>Rupture:</span><span class="val" [style.color]="riskColor(p.stockoutLevel)">{{ formatPercent(p.stockoutRisk) }} ({{ p.stockoutLevel }})</span></div>
+                      <div class="detail-row"><span>Surstock:</span><span class="val">{{ formatPercent(p.overstockRisk) }}</span></div>
+                      <div class="detail-row"><span>Jours de stock:</span><span class="val">{{ p.daysOfSupply | number:'1.0-0' }}</span></div>
+                      <div class="detail-row"><span>Rotation:</span><span class="val">{{ p.turnoverRate | number:'1.1-1' }}/an</span></div>
+                      <div class="detail-row"><span>Sante:</span><span class="val">{{ p.healthScore }}/100</span></div>
+                    </div>
+                    <!-- Recommendation -->
+                    <div class="detail-section full-width">
+                      <h4>Recommandation</h4>
+                      <div class="rec-box" [style.border-left-color]="actionColor(p.recommendation.action)">
+                        <div class="rec-action" [style.color]="actionColor(p.recommendation.action)">{{ p.recommendation.action }} — Priorite {{ p.recommendation.priority }}</div>
+                        <p class="rec-reasoning">{{ p.recommendation.reasoning }}</p>
+                        <div class="rec-factors">
+                          @for (f of p.recommendation.keyFactors; track f) {
+                            <span class="factor-tag">{{ f }}</span>
+                          }
+                        </div>
+                      </div>
+                    </div>
+                    <!-- Anomalies -->
+                    @if (p.anomalies.length > 0) {
+                      <div class="detail-section full-width">
+                        <h4>Anomalies detectees</h4>
+                        @for (a of p.anomalies; track a) {
+                          <div class="anomaly-box" [class.anomaly-high]="a.severity === 'HIGH'" [class.anomaly-med]="a.severity === 'MEDIUM'">
+                            <strong>{{ a.type }}</strong> ({{ a.severity }})
+                            <p>{{ a.explanation }}</p>
+                          </div>
+                        }
+                      </div>
+                    }
+                  </div>
+                </div>
+              }
             </div>
-
-            <!-- Anomalies -->
-            <div class="detail-section full-width" *ngIf="p.anomalies.length > 0">
-              <h4>Anomalies detectees</h4>
-              <div *ngFor="let a of p.anomalies" class="anomaly-box" [class.anomaly-high]="a.severity === 'HIGH'" [class.anomaly-med]="a.severity === 'MEDIUM'">
-                <strong>{{ a.type }}</strong> ({{ a.severity }})
-                <p>{{ a.explanation }}</p>
+          }
+        </div>
+      </div>
+    }
+    <!-- Tab: Risks -->
+    @if (activeTab === 'risks') {
+      <div class="tab-content">
+        <div class="card">
+          <h3>Niveaux de risque</h3>
+          <div class="bar-chart">
+            @for (item of data.riskDistribution | keyvalue; track item) {
+              <div class="bar-row">
+                <span class="bar-label">{{ item.key }}</span>
+                <div class="bar-track"><div class="bar-fill" [style.width.%]="(item.value / data.products.length) * 100" [style.background]="riskColor(item.key)"></div></div>
+                <span class="bar-value">{{ item.value }}</span>
               </div>
-            </div>
+            }
           </div>
         </div>
+        <div class="card" style="margin-top:16px">
+          <h3>Produits a risque eleve</h3>
+          @for (p of data.products | filterByRisk; track p) {
+            <div class="risk-row">
+              <div class="risk-info">
+                <strong>{{ p.productName }}</strong>
+                <span class="sku">{{ p.sku }}</span>
+              </div>
+              <div class="risk-badges">
+                <span class="badge" [style.background]="riskColor(p.stockoutLevel) + '22'" [style.color]="riskColor(p.stockoutLevel)">
+                  Rupture: {{ formatPercent(p.stockoutRisk) }}
+                </span>
+                @if (p.overstockRisk > 0.5) {
+                  <span class="badge badge-out">
+                    Surstock: {{ formatPercent(p.overstockRisk) }}
+                  </span>
+                }
+              </div>
+            </div>
+          }
+          @if ((data.products | filterByRisk).length === 0) {
+            <div class="empty">Aucun produit a risque eleve</div>
+          }
+        </div>
       </div>
-    </div>
+    }
   </div>
-
-  <!-- Tab: Risks -->
-  <div *ngIf="activeTab === 'risks'" class="tab-content">
-    <div class="card">
-      <h3>Niveaux de risque</h3>
-      <div class="bar-chart">
-        <div *ngFor="let item of data.riskDistribution | keyvalue" class="bar-row">
-          <span class="bar-label">{{ item.key }}</span>
-          <div class="bar-track"><div class="bar-fill" [style.width.%]="(item.value / data.products.length) * 100" [style.background]="riskColor(item.key)"></div></div>
-          <span class="bar-value">{{ item.value }}</span>
-        </div>
-      </div>
-    </div>
-
-    <div class="card" style="margin-top:16px">
-      <h3>Produits a risque eleve</h3>
-      <div *ngFor="let p of data.products | filterByRisk" class="risk-row">
-        <div class="risk-info">
-          <strong>{{ p.productName }}</strong>
-          <span class="sku">{{ p.sku }}</span>
-        </div>
-        <div class="risk-badges">
-          <span class="badge" [style.background]="riskColor(p.stockoutLevel) + '22'" [style.color]="riskColor(p.stockoutLevel)">
-            Rupture: {{ formatPercent(p.stockoutRisk) }}
-          </span>
-          <span class="badge badge-out" *ngIf="p.overstockRisk > 0.5">
-            Surstock: {{ formatPercent(p.overstockRisk) }}
-          </span>
-        </div>
-      </div>
-      <div class="empty" *ngIf="(data.products | filterByRisk).length === 0">Aucun produit a risque eleve</div>
-    </div>
-  </div>
-</div>
+}

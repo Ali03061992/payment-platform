@@ -3,71 +3,74 @@
   <button class="btn btn-secondary" (click)="goBack()">← Retour</button>
 </div>
 
-<div class="form-card" *ngIf="!success">
-  <form (ngSubmit)="onSubmit()">
-    <div class="form-row">
-      <div class="form-group">
-        <label for="lastName">Nom</label>
-        <input id="lastName" type="text" [(ngModel)]="form.lastName" name="lastName" required placeholder="Dupont">
+@if (!success) {
+  <div class="form-card">
+    <form (ngSubmit)="onSubmit()">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="lastName">Nom</label>
+          <input id="lastName" type="text" [(ngModel)]="form.lastName" name="lastName" required placeholder="Dupont">
+        </div>
+        <div class="form-group">
+          <label for="firstName">Prénom</label>
+          <input id="firstName" type="text" [(ngModel)]="form.firstName" name="firstName" required placeholder="Jean">
+        </div>
       </div>
       <div class="form-group">
-        <label for="firstName">Prénom</label>
-        <input id="firstName" type="text" [(ngModel)]="form.firstName" name="firstName" required placeholder="Jean">
+        <label for="username">Nom d'utilisateur</label>
+        <input id="username" type="text" [(ngModel)]="form.username" name="username" required placeholder="jean.dupont">
       </div>
-    </div>
-
-    <div class="form-group">
-      <label for="username">Nom d'utilisateur</label>
-      <input id="username" type="text" [(ngModel)]="form.username" name="username" required placeholder="jean.dupont">
-    </div>
-
-    <div class="form-group">
-      <label for="email">Email <span class="required">*</span></label>
-      <input id="email" type="email" [(ngModel)]="form.email" name="email" required placeholder="jean@exemple.com">
-    </div>
-
-    <div class="form-group">
-      <label for="phone">Téléphone (optionnel)</label>
-      <div class="phone-input">
-        <span class="phone-prefix">+216</span>
-        <input id="phone" type="tel" [(ngModel)]="form.phone" name="phone" placeholder="XX XXX XXX" class="phone-field">
+      <div class="form-group">
+        <label for="email">Email <span class="required">*</span></label>
+        <input id="email" type="email" [(ngModel)]="form.email" name="email" required placeholder="jean@exemple.com">
       </div>
-    </div>
-
-    <div class="form-group">
-      <label for="role">Rôle</label>
-      <select id="role" [(ngModel)]="form.role" name="role" required>
-        <option *ngFor="let r of roles" [value]="r.value">{{ r.label }}</option>
-      </select>
-    </div>
-
-    <div class="form-group" *ngIf="requiresOrganization">
-      <label for="org">{{ organizationLabel }} <span class="required">*</span></label>
-      <select id="org" [(ngModel)]="form.organizationId" name="organizationId" required>
-        <option [ngValue]="null">-- Sélectionner un(e) {{ organizationLabel | lowercase }} --</option>
-        <option *ngFor="let org of availableOrgs" [ngValue]="org.id">{{ org.name }}</option>
-      </select>
-    </div>
-
-    <div class="info-box">
-      <span class="info-icon">🔑</span>
-      <span>Mot de passe par défaut : <strong>test1234</strong></span>
-    </div>
-
-    <button type="submit" class="btn btn-primary btn-block" [disabled]="loading || (requiresOrganization && !form.organizationId)">
-      {{ loading ? 'Création...' : 'Créer le compte' }}
-    </button>
-  </form>
-</div>
-
-<div class="success-card" *ngIf="success">
-  <div class="success-icon">✅</div>
-  <h2>Compte créé avec succès !</h2>
-  <p>L'utilisateur <strong>{{ form.username }}</strong> a été créé avec le mot de passe <strong>test1234</strong>.</p>
-  <div class="success-actions">
-    <button class="btn btn-primary" (click)="success = false; form = {username:'',email:'',firstName:'',lastName:'',phone:'',role:'SHOP_AGENT',organizationId:null}">
-      Créer un autre compte
-    </button>
-    <button class="btn btn-secondary" (click)="goBack()">Retour à la liste</button>
+      <div class="form-group">
+        <label for="phone">Téléphone (optionnel)</label>
+        <div class="phone-input">
+          <span class="phone-prefix">+216</span>
+          <input id="phone" type="tel" [(ngModel)]="form.phone" name="phone" placeholder="XX XXX XXX" class="phone-field">
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="role">Rôle</label>
+        <select id="role" [(ngModel)]="form.role" name="role" required>
+          @for (r of roles; track r) {
+            <option [value]="r.value">{{ r.label }}</option>
+          }
+        </select>
+      </div>
+      @if (requiresOrganization) {
+        <div class="form-group">
+          <label for="org">{{ organizationLabel }} <span class="required">*</span></label>
+          <select id="org" [(ngModel)]="form.organizationId" name="organizationId" required>
+            <option [ngValue]="null">-- Sélectionner un(e) {{ organizationLabel | lowercase }} --</option>
+            @for (org of availableOrgs; track org) {
+              <option [ngValue]="org.id">{{ org.name }}</option>
+            }
+          </select>
+        </div>
+      }
+      <div class="info-box">
+        <span class="info-icon">🔑</span>
+        <span>Mot de passe par défaut : <strong>test1234</strong></span>
+      </div>
+      <button type="submit" class="btn btn-primary btn-block" [disabled]="loading || (requiresOrganization && !form.organizationId)">
+        {{ loading ? 'Création...' : 'Créer le compte' }}
+      </button>
+    </form>
   </div>
-</div>
+}
+
+@if (success) {
+  <div class="success-card">
+    <div class="success-icon">✅</div>
+    <h2>Compte créé avec succès !</h2>
+    <p>L'utilisateur <strong>{{ form.username }}</strong> a été créé avec le mot de passe <strong>test1234</strong>.</p>
+    <div class="success-actions">
+      <button class="btn btn-primary" (click)="success = false; form = {username:'',email:'',firstName:'',lastName:'',phone:'',role:'SHOP_AGENT',organizationId:null}">
+        Créer un autre compte
+      </button>
+      <button class="btn btn-secondary" (click)="goBack()">Retour à la liste</button>
+    </div>
+  </div>
+}
