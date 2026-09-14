@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { of, throwError } from 'rxjs';
@@ -7,6 +7,7 @@ import { CreateUserComponent } from './create-user.component';
 import { UserService } from '../../services/user.service';
 import { OrganizationService } from '../../services/organization.service';
 import { ToastService } from '../../services/toast.service';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('CreateUserComponent', () => {
   let component: CreateUserComponent;
@@ -25,15 +26,17 @@ describe('CreateUserComponent', () => {
     orgSpy.listShops.and.returnValue(of([]));
 
     TestBed.configureTestingModule({
-      imports: [HttpClientTestingModule, FormsModule],
-      declarations: [CreateUserComponent],
-      providers: [
+    declarations: [CreateUserComponent],
+    imports: [FormsModule],
+    providers: [
         { provide: UserService, useValue: userSpy },
         { provide: OrganizationService, useValue: orgSpy },
         { provide: ToastService, useValue: toastSpy },
-        { provide: Router, useValue: routerSpy }
-      ]
-    });
+        { provide: Router, useValue: routerSpy },
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting()
+    ]
+});
     fixture = TestBed.createComponent(CreateUserComponent);
     component = fixture.componentInstance;
     userService = TestBed.inject(UserService) as jasmine.SpyObj<UserService>;

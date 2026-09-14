@@ -1,7 +1,8 @@
 import { TestBed } from '@angular/core/testing';
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { StockService } from './stock.service';
 import { Product } from '../models/stock.model';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 const mockProduct: Product = {
   id: 1, supplierId: 1, name: 'Product A', sku: 'SKU-001', description: 'Desc',
@@ -17,9 +18,9 @@ describe('StockService', () => {
     sessionStorage.clear();
     sessionStorage.setItem('user', JSON.stringify({ organizationId: 1 }));
     TestBed.configureTestingModule({
-      imports: [HttpClientTestingModule],
-      providers: [StockService]
-    });
+    imports: [],
+    providers: [StockService, provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()]
+});
     service = TestBed.inject(StockService);
     httpMock = TestBed.inject(HttpTestingController);
   });

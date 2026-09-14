@@ -1,9 +1,10 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { Router, ActivatedRoute, convertToParamMap } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { PasswordSetupComponent } from './password-setup.component';
 import { ToastService } from '../services/toast.service';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('PasswordSetupComponent', () => {
   let component: PasswordSetupComponent;
@@ -16,14 +17,16 @@ describe('PasswordSetupComponent', () => {
     const toastSpy = jasmine.createSpyObj('ToastService', ['error', 'success']);
     const routerSpy = jasmine.createSpyObj('Router', ['navigate']);
     TestBed.configureTestingModule({
-      imports: [HttpClientTestingModule, FormsModule],
-      declarations: [PasswordSetupComponent],
-      providers: [
+    declarations: [PasswordSetupComponent],
+    imports: [FormsModule],
+    providers: [
         { provide: ToastService, useValue: toastSpy },
         { provide: Router, useValue: routerSpy },
-        { provide: ActivatedRoute, useValue: { snapshot: { queryParamMap: convertToParamMap({ token: 'valid-token' }) } } }
-      ]
-    });
+        { provide: ActivatedRoute, useValue: { snapshot: { queryParamMap: convertToParamMap({ token: 'valid-token' }) } } },
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting()
+    ]
+});
     fixture = TestBed.createComponent(PasswordSetupComponent);
     component = fixture.componentInstance;
     httpMock = TestBed.inject(HttpTestingController);
@@ -127,14 +130,16 @@ describe('PasswordSetupComponent (no token)', () => {
     const toastSpy = jasmine.createSpyObj('ToastService', ['error', 'success']);
     const routerSpy = jasmine.createSpyObj('Router', ['navigate']);
     TestBed.configureTestingModule({
-      imports: [HttpClientTestingModule, FormsModule],
-      declarations: [PasswordSetupComponent],
-      providers: [
+    declarations: [PasswordSetupComponent],
+    imports: [FormsModule],
+    providers: [
         { provide: ToastService, useValue: toastSpy },
         { provide: Router, useValue: routerSpy },
-        { provide: ActivatedRoute, useValue: { snapshot: { queryParamMap: convertToParamMap({}) } } }
-      ]
-    });
+        { provide: ActivatedRoute, useValue: { snapshot: { queryParamMap: convertToParamMap({}) } } },
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting()
+    ]
+});
     fixture = TestBed.createComponent(PasswordSetupComponent);
     component = fixture.componentInstance;
     httpMock = TestBed.inject(HttpTestingController);

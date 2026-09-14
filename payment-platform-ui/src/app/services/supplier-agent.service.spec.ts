@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { SupplierAgentService, SupplierAgent } from './supplier-agent.service';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 const mockAgent: SupplierAgent = {
   id: 1, username: 'agent1', firstName: 'Agent', lastName: 'One',
@@ -13,9 +14,9 @@ describe('SupplierAgentService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [HttpClientTestingModule],
-      providers: [SupplierAgentService]
-    });
+    imports: [],
+    providers: [SupplierAgentService, provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()]
+});
     service = TestBed.inject(SupplierAgentService);
     httpMock = TestBed.inject(HttpTestingController);
   });

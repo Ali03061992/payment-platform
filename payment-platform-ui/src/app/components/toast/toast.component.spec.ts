@@ -1,8 +1,9 @@
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ToastComponent } from './toast.component';
 import { ToastService, Toast } from '../../services/toast.service';
 import { of, Subject, Subscription } from 'rxjs';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('ToastComponent', () => {
   let component: ToastComponent;
@@ -17,12 +18,14 @@ describe('ToastComponent', () => {
     });
 
     TestBed.configureTestingModule({
-      imports: [HttpClientTestingModule],
-      declarations: [ToastComponent],
-      providers: [
-        { provide: ToastService, useValue: toastSpy }
-      ]
-    });
+    declarations: [ToastComponent],
+    imports: [],
+    providers: [
+        { provide: ToastService, useValue: toastSpy },
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting()
+    ]
+});
     fixture = TestBed.createComponent(ToastComponent);
     component = fixture.componentInstance;
     toastService = TestBed.inject(ToastService) as jasmine.SpyObj<ToastService>;

@@ -1,7 +1,8 @@
 import { TestBed } from '@angular/core/testing';
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { LoginService } from './login.service';
 import { LoginResponse, User } from '../models/user.model';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('LoginService', () => {
   let service: LoginService;
@@ -10,9 +11,9 @@ describe('LoginService', () => {
   beforeEach(() => {
     sessionStorage.clear();
     TestBed.configureTestingModule({
-      imports: [HttpClientTestingModule],
-      providers: [LoginService]
-    });
+    imports: [],
+    providers: [LoginService, provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()]
+});
     service = TestBed.inject(LoginService);
     httpMock = TestBed.inject(HttpTestingController);
   });

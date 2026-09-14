@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { FormsModule } from '@angular/forms';
 import { of, throwError } from 'rxjs';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
@@ -8,6 +8,7 @@ import { StockService } from '../../services/stock.service';
 import { CatalogService } from '../../services/catalog.service';
 import { ToastService } from '../../services/toast.service';
 import { Product } from '../../models/stock.model';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('ProductManagementComponent', () => {
   let component: ProductManagementComponent;
@@ -32,15 +33,17 @@ describe('ProductManagementComponent', () => {
     catalogSpy.listFamilies.and.returnValue(of([]));
 
     TestBed.configureTestingModule({
-      imports: [HttpClientTestingModule, FormsModule],
-      declarations: [ProductManagementComponent],
-      schemas: [NO_ERRORS_SCHEMA],
-      providers: [
+    declarations: [ProductManagementComponent],
+    schemas: [NO_ERRORS_SCHEMA],
+    imports: [FormsModule],
+    providers: [
         { provide: StockService, useValue: stockSpy },
         { provide: CatalogService, useValue: catalogSpy },
-        { provide: ToastService, useValue: toastSpy }
-      ]
-    });
+        { provide: ToastService, useValue: toastSpy },
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting()
+    ]
+});
     fixture = TestBed.createComponent(ProductManagementComponent);
     component = fixture.componentInstance;
     stockService = TestBed.inject(StockService) as jasmine.SpyObj<StockService>;

@@ -1,10 +1,11 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { DashboardComponent } from './dashboard.component';
 import { LoginService } from '../services/login.service';
 import { UserService } from '../services/user.service';
 import { of } from 'rxjs';
 import { User } from '../models/user.model';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('DashboardComponent', () => {
   let component: DashboardComponent;
@@ -17,13 +18,15 @@ describe('DashboardComponent', () => {
     const userSpy = jasmine.createSpyObj('UserService', ['list']);
 
     TestBed.configureTestingModule({
-      imports: [HttpClientTestingModule],
-      declarations: [DashboardComponent],
-      providers: [
+    declarations: [DashboardComponent],
+    imports: [],
+    providers: [
         { provide: LoginService, useValue: loginSpy },
-        { provide: UserService, useValue: userSpy }
-      ]
-    });
+        { provide: UserService, useValue: userSpy },
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting()
+    ]
+});
     fixture = TestBed.createComponent(DashboardComponent);
     component = fixture.componentInstance;
     loginService = TestBed.inject(LoginService) as jasmine.SpyObj<LoginService>;

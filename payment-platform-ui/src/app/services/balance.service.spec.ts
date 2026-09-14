@@ -1,7 +1,8 @@
 import { TestBed } from '@angular/core/testing';
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { BalanceService } from './balance.service';
 import { BalanceSummary, BalanceEntry } from '../models/balance.model';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('BalanceService', () => {
   let service: BalanceService;
@@ -9,9 +10,9 @@ describe('BalanceService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [HttpClientTestingModule],
-      providers: [BalanceService]
-    });
+    imports: [],
+    providers: [BalanceService, provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()]
+});
     service = TestBed.inject(BalanceService);
     httpMock = TestBed.inject(HttpTestingController);
   });

@@ -1,11 +1,12 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { FormsModule } from '@angular/forms';
 import { of, throwError } from 'rxjs';
 import { CategoryManagementComponent } from './category-management.component';
 import { CatalogService } from '../../services/catalog.service';
 import { ToastService } from '../../services/toast.service';
 import { ProductCategory } from '../../models/catalog.model';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('CategoryManagementComponent', () => {
   let component: CategoryManagementComponent;
@@ -20,13 +21,15 @@ describe('CategoryManagementComponent', () => {
     catalogSpy.listCategories.and.returnValue(of([]));
 
     TestBed.configureTestingModule({
-      imports: [HttpClientTestingModule, FormsModule],
-      declarations: [CategoryManagementComponent],
-      providers: [
+    declarations: [CategoryManagementComponent],
+    imports: [FormsModule],
+    providers: [
         { provide: CatalogService, useValue: catalogSpy },
-        { provide: ToastService, useValue: toastSpy }
-      ]
-    });
+        { provide: ToastService, useValue: toastSpy },
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting()
+    ]
+});
     fixture = TestBed.createComponent(CategoryManagementComponent);
     component = fixture.componentInstance;
     catalogService = TestBed.inject(CatalogService) as jasmine.SpyObj<CatalogService>;

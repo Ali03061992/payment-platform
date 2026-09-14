@@ -1,11 +1,12 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { FormsModule } from '@angular/forms';
 import { of, throwError } from 'rxjs';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { OrderListComponent } from './order-list.component';
 import { OrderService } from '../../services/order.service';
 import { ToastService } from '../../services/toast.service';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('OrderListComponent', () => {
   let component: OrderListComponent;
@@ -26,14 +27,16 @@ describe('OrderListComponent', () => {
     orderSpy.list.and.returnValue(of([]));
 
     TestBed.configureTestingModule({
-      imports: [HttpClientTestingModule, FormsModule],
-      declarations: [OrderListComponent],
-      schemas: [NO_ERRORS_SCHEMA],
-      providers: [
+    declarations: [OrderListComponent],
+    schemas: [NO_ERRORS_SCHEMA],
+    imports: [FormsModule],
+    providers: [
         { provide: OrderService, useValue: orderSpy },
-        { provide: ToastService, useValue: toastSpy }
-      ]
-    });
+        { provide: ToastService, useValue: toastSpy },
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting()
+    ]
+});
     fixture = TestBed.createComponent(OrderListComponent);
     component = fixture.componentInstance;
     orderService = TestBed.inject(OrderService) as jasmine.SpyObj<OrderService>;

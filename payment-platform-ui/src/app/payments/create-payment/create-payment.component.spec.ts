@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { Router } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
@@ -7,6 +7,7 @@ import { CreatePaymentComponent } from './create-payment.component';
 import { PaymentService } from '../../services/payment.service';
 import { OrganizationService } from '../../services/organization.service';
 import { ToastService } from '../../services/toast.service';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('CreatePaymentComponent', () => {
   let component: CreatePaymentComponent;
@@ -29,16 +30,18 @@ describe('CreatePaymentComponent', () => {
     sessionStorage.clear();
 
     TestBed.configureTestingModule({
-      imports: [HttpClientTestingModule],
-      declarations: [CreatePaymentComponent],
-      schemas: [NO_ERRORS_SCHEMA],
-      providers: [
+    declarations: [CreatePaymentComponent],
+    schemas: [NO_ERRORS_SCHEMA],
+    imports: [],
+    providers: [
         { provide: Router, useValue: routerSpy },
         { provide: PaymentService, useValue: psSpy },
         { provide: OrganizationService, useValue: orgSpy },
-        { provide: ToastService, useValue: toastSpy }
-      ]
-    });
+        { provide: ToastService, useValue: toastSpy },
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting()
+    ]
+});
     fixture = TestBed.createComponent(CreatePaymentComponent);
     component = fixture.componentInstance;
     router = TestBed.inject(Router) as jasmine.SpyObj<Router>;

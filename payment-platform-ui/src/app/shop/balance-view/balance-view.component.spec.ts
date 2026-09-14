@@ -1,10 +1,11 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { of, throwError } from 'rxjs';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { BalanceViewComponent } from './balance-view.component';
 import { BalanceService } from '../../services/balance.service';
 import { ToastService } from '../../services/toast.service';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('BalanceViewComponent', () => {
   let component: BalanceViewComponent;
@@ -19,14 +20,16 @@ describe('BalanceViewComponent', () => {
     balanceSpy.listByShop.and.returnValue(of([]));
 
     TestBed.configureTestingModule({
-      imports: [HttpClientTestingModule],
-      declarations: [BalanceViewComponent],
-      schemas: [NO_ERRORS_SCHEMA],
-      providers: [
+    declarations: [BalanceViewComponent],
+    schemas: [NO_ERRORS_SCHEMA],
+    imports: [],
+    providers: [
         { provide: BalanceService, useValue: balanceSpy },
-        { provide: ToastService, useValue: toastSpy }
-      ]
-    });
+        { provide: ToastService, useValue: toastSpy },
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting()
+    ]
+});
     fixture = TestBed.createComponent(BalanceViewComponent);
     component = fixture.componentInstance;
     balanceService = TestBed.inject(BalanceService) as jasmine.SpyObj<BalanceService>;

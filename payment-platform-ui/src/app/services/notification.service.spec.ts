@@ -1,7 +1,8 @@
 import { TestBed } from '@angular/core/testing';
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { NotificationService } from './notification.service';
 import { Notification } from '../models/notification.model';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('NotificationService', () => {
   let service: NotificationService;
@@ -9,9 +10,9 @@ describe('NotificationService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [HttpClientTestingModule],
-      providers: [NotificationService]
-    });
+    imports: [],
+    providers: [NotificationService, provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()]
+});
     service = TestBed.inject(NotificationService);
     httpMock = TestBed.inject(HttpTestingController);
   });

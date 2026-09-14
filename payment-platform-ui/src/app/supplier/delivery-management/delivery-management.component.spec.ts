@@ -1,11 +1,12 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { FormsModule } from '@angular/forms';
 import { of, throwError } from 'rxjs';
 import { DeliveryManagementComponent } from './delivery-management.component';
 import { OrderService } from '../../services/order.service';
 import { ToastService } from '../../services/toast.service';
 import { Order } from '../../models/order.model';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('DeliveryManagementComponent', () => {
   let component: DeliveryManagementComponent;
@@ -26,13 +27,15 @@ describe('DeliveryManagementComponent', () => {
     orderSpy.myDeliveries.and.returnValue(of([]));
 
     TestBed.configureTestingModule({
-      imports: [HttpClientTestingModule, FormsModule],
-      declarations: [DeliveryManagementComponent],
-      providers: [
+    declarations: [DeliveryManagementComponent],
+    imports: [FormsModule],
+    providers: [
         { provide: OrderService, useValue: orderSpy },
-        { provide: ToastService, useValue: toastSpy }
-      ]
-    });
+        { provide: ToastService, useValue: toastSpy },
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting()
+    ]
+});
     fixture = TestBed.createComponent(DeliveryManagementComponent);
     component = fixture.componentInstance;
     orderService = TestBed.inject(OrderService) as jasmine.SpyObj<OrderService>;

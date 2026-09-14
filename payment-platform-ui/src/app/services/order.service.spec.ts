@@ -1,7 +1,8 @@
 import { TestBed } from '@angular/core/testing';
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { OrderService } from './order.service';
 import { Order } from '../models/order.model';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 const mockOrder: Order = {
   id: 1, reference: 'ORD-001', supplierId: 1, shopId: 2, createdBy: 3, createdByRole: 'SHOP_ADMIN',
@@ -16,9 +17,9 @@ describe('OrderService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [HttpClientTestingModule],
-      providers: [OrderService]
-    });
+    imports: [],
+    providers: [OrderService, provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()]
+});
     service = TestBed.inject(OrderService);
     httpMock = TestBed.inject(HttpTestingController);
   });

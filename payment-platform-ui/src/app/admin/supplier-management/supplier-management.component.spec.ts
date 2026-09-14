@@ -1,10 +1,11 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { of, throwError } from 'rxjs';
 import { SupplierManagementComponent } from './supplier-management.component';
 import { OrganizationService } from '../../services/organization.service';
 import { ToastService } from '../../services/toast.service';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('SupplierManagementComponent', () => {
   let component: SupplierManagementComponent;
@@ -21,14 +22,16 @@ describe('SupplierManagementComponent', () => {
     orgSpy.disable.and.returnValue(of({} as any));
 
     TestBed.configureTestingModule({
-      imports: [HttpClientTestingModule],
-      declarations: [SupplierManagementComponent],
-      schemas: [NO_ERRORS_SCHEMA],
-      providers: [
+    declarations: [SupplierManagementComponent],
+    schemas: [NO_ERRORS_SCHEMA],
+    imports: [],
+    providers: [
         { provide: OrganizationService, useValue: orgSpy },
-        { provide: ToastService, useValue: toastSpy }
-      ]
-    });
+        { provide: ToastService, useValue: toastSpy },
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting()
+    ]
+});
     fixture = TestBed.createComponent(SupplierManagementComponent);
     component = fixture.componentInstance;
     orgService = TestBed.inject(OrganizationService) as jasmine.SpyObj<OrganizationService>;

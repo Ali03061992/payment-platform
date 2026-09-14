@@ -1,11 +1,12 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { of, throwError } from 'rxjs';
 import { AgentPaymentsComponent } from './agent-payments.component';
 import { PaymentService } from '../../services/payment.service';
 import { LoginService } from '../../services/login.service';
 import { ToastService } from '../../services/toast.service';
 import { AgentPaymentSummary } from '../../models/agent-payment.model';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('AgentPaymentsComponent', () => {
   let component: AgentPaymentsComponent;
@@ -27,14 +28,16 @@ describe('AgentPaymentsComponent', () => {
     paymentSpy.getAgentSummary.and.returnValue(of([mockSummary]));
 
     TestBed.configureTestingModule({
-      imports: [HttpClientTestingModule],
-      declarations: [AgentPaymentsComponent],
-      providers: [
+    declarations: [AgentPaymentsComponent],
+    imports: [],
+    providers: [
         { provide: PaymentService, useValue: paymentSpy },
         { provide: LoginService, useValue: loginSpy },
-        { provide: ToastService, useValue: toastSpy }
-      ]
-    });
+        { provide: ToastService, useValue: toastSpy },
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting()
+    ]
+});
     fixture = TestBed.createComponent(AgentPaymentsComponent);
     component = fixture.componentInstance;
     paymentService = TestBed.inject(PaymentService) as jasmine.SpyObj<PaymentService>;

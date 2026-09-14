@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { FormsModule } from '@angular/forms';
-import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
+import { HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { RouterModule, Routes } from '@angular/router';
 import { ServiceWorkerModule } from '@angular/service-worker';
 import { QRCodeModule } from 'angularx-qrcode';
@@ -102,60 +102,54 @@ const routes: Routes = [
   { path: '**', redirectTo: '/login' }
 ];
 
-@NgModule({
-  declarations: [
-    AppComponent,
-    LoginComponent,
-    RegisterComponent,
-    PasswordSetupComponent,
-    ChangePasswordComponent,
-    LayoutComponent,
-    DashboardComponent,
-    UserManagementComponent,
-    CreateUserComponent,
-    AccountActivationComponent,
-    StockManagementComponent,
-    AddProductComponent,
-    SupplierManagementComponent,
-    ShopManagementComponent,
-    RelationManagementComponent,
-    OrganizationStatsComponent,
-    PaymentListComponent,
-    CreatePaymentComponent,
-    PaymentDetailComponent,
-    PaymentStatsComponent,
-    ProductManagementComponent,
-    CategoryManagementComponent,
-    FamilyManagementComponent,
-    StockDashboardComponent,
-    StockOptimizationComponent,
-    FilterByRiskPipe,
-    OrderManagementComponent,
-    DeliveryManagementComponent,
-    SupplierCreateOrderComponent,
-    OrderListComponent,
-    CreateOrderComponent,
-    ShopOrderDetailComponent,
-    BalanceViewComponent,
-    PwaUpdateComponent,
-    QrScannerComponent,
-    AgentPaymentsComponent,
-    ExportComponent,
-    NotificationBannerComponent,
-    ToastComponent,
-    StatusLabelPipe
-  ],
-  imports: [
-    BrowserModule,
-    FormsModule,
-    HttpClientModule,
-    QRCodeModule,
-    RouterModule.forRoot(routes, { scrollPositionRestoration: 'top' }),
-    ServiceWorkerModule.register('ngsw-worker.js', { enabled: environment.production })
-  ],
-  providers: [
-    { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true }
-  ],
-  bootstrap: [AppComponent]
-})
+@NgModule({ declarations: [
+        AppComponent,
+        LoginComponent,
+        RegisterComponent,
+        PasswordSetupComponent,
+        ChangePasswordComponent,
+        LayoutComponent,
+        DashboardComponent,
+        UserManagementComponent,
+        CreateUserComponent,
+        AccountActivationComponent,
+        StockManagementComponent,
+        AddProductComponent,
+        SupplierManagementComponent,
+        ShopManagementComponent,
+        RelationManagementComponent,
+        OrganizationStatsComponent,
+        PaymentListComponent,
+        CreatePaymentComponent,
+        PaymentDetailComponent,
+        PaymentStatsComponent,
+        ProductManagementComponent,
+        CategoryManagementComponent,
+        FamilyManagementComponent,
+        StockDashboardComponent,
+        StockOptimizationComponent,
+        FilterByRiskPipe,
+        OrderManagementComponent,
+        DeliveryManagementComponent,
+        SupplierCreateOrderComponent,
+        OrderListComponent,
+        CreateOrderComponent,
+        ShopOrderDetailComponent,
+        BalanceViewComponent,
+        PwaUpdateComponent,
+        QrScannerComponent,
+        AgentPaymentsComponent,
+        ExportComponent,
+        NotificationBannerComponent,
+        ToastComponent,
+        StatusLabelPipe
+    ],
+    bootstrap: [AppComponent], imports: [BrowserModule,
+        FormsModule,
+        QRCodeModule,
+        RouterModule.forRoot(routes, { scrollPositionRestoration: 'top' }),
+        ServiceWorkerModule.register('ngsw-worker.js', { enabled: environment.production })], providers: [
+        { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true },
+        provideHttpClient(withInterceptorsFromDi())
+    ] })
 export class AppModule { }

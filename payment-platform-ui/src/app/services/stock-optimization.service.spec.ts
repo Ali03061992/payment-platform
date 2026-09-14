@@ -1,7 +1,8 @@
 import { TestBed } from '@angular/core/testing';
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { StockOptimizationService } from './stock-optimization.service';
 import { StockOptimizationResponse } from '../models/stock-optimization.model';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('StockOptimizationService', () => {
   let service: StockOptimizationService;
@@ -11,9 +12,9 @@ describe('StockOptimizationService', () => {
     sessionStorage.clear();
     sessionStorage.setItem('user', JSON.stringify({ organizationId: 1 }));
     TestBed.configureTestingModule({
-      imports: [HttpClientTestingModule],
-      providers: [StockOptimizationService]
-    });
+    imports: [],
+    providers: [StockOptimizationService, provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()]
+});
     service = TestBed.inject(StockOptimizationService);
     httpMock = TestBed.inject(HttpTestingController);
   });

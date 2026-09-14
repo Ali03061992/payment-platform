@@ -1,11 +1,12 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { Router, ActivatedRoute, convertToParamMap } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { PaymentDetailComponent } from './payment-detail.component';
 import { PaymentService } from '../../services/payment.service';
 import { ToastService } from '../../services/toast.service';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('PaymentDetailComponent', () => {
   let component: PaymentDetailComponent;
@@ -26,19 +27,21 @@ describe('PaymentDetailComponent', () => {
     psSpy.cancel.and.returnValue(of({ ...mockPayment, status: 'CANCELLED' }));
 
     TestBed.configureTestingModule({
-      imports: [HttpClientTestingModule],
-      declarations: [PaymentDetailComponent],
-      schemas: [NO_ERRORS_SCHEMA],
-      providers: [
+    declarations: [PaymentDetailComponent],
+    schemas: [NO_ERRORS_SCHEMA],
+    imports: [],
+    providers: [
         { provide: Router, useValue: routerSpy },
         { provide: PaymentService, useValue: psSpy },
         { provide: ToastService, useValue: toastSpy },
         {
-          provide: ActivatedRoute,
-          useValue: { snapshot: { paramMap: convertToParamMap({ id: '1' }) } }
-        }
-      ]
-    });
+            provide: ActivatedRoute,
+            useValue: { snapshot: { paramMap: convertToParamMap({ id: '1' }) } }
+        },
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting()
+    ]
+});
     fixture = TestBed.createComponent(PaymentDetailComponent);
     component = fixture.componentInstance;
     router = TestBed.inject(Router) as jasmine.SpyObj<Router>;

@@ -1,11 +1,12 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { of, throwError } from 'rxjs';
 import { LoginComponent } from './login.component';
 import { LoginService } from '../services/login.service';
 import { NotificationService } from '../services/notification.service';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('LoginComponent', () => {
   let component: LoginComponent;
@@ -19,14 +20,16 @@ describe('LoginComponent', () => {
     const routerSpy = jasmine.createSpyObj('Router', ['navigate']);
 
     TestBed.configureTestingModule({
-      imports: [HttpClientTestingModule, FormsModule],
-      declarations: [LoginComponent],
-      providers: [
+    declarations: [LoginComponent],
+    imports: [FormsModule],
+    providers: [
         { provide: LoginService, useValue: loginSpy },
         { provide: NotificationService, useValue: notifSpy },
-        { provide: Router, useValue: routerSpy }
-      ]
-    });
+        { provide: Router, useValue: routerSpy },
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting()
+    ]
+});
     fixture = TestBed.createComponent(LoginComponent);
     component = fixture.componentInstance;
     loginService = TestBed.inject(LoginService) as jasmine.SpyObj<LoginService>;

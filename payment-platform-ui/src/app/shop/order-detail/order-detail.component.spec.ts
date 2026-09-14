@@ -1,11 +1,12 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { Router, ActivatedRoute, convertToParamMap } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { ShopOrderDetailComponent } from './order-detail.component';
 import { OrderService } from '../../services/order.service';
 import { ToastService } from '../../services/toast.service';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('ShopOrderDetailComponent', () => {
   let component: ShopOrderDetailComponent;
@@ -28,16 +29,18 @@ describe('ShopOrderDetailComponent', () => {
     orderSpy.getById.and.returnValue(of(mockOrder));
 
     TestBed.configureTestingModule({
-      imports: [HttpClientTestingModule],
-      declarations: [ShopOrderDetailComponent],
-      schemas: [NO_ERRORS_SCHEMA],
-      providers: [
+    declarations: [ShopOrderDetailComponent],
+    schemas: [NO_ERRORS_SCHEMA],
+    imports: [],
+    providers: [
         { provide: OrderService, useValue: orderSpy },
         { provide: ToastService, useValue: toastSpy },
         { provide: Router, useValue: routerSpy },
-        { provide: ActivatedRoute, useValue: { snapshot: { paramMap: convertToParamMap({ id: '1' }) } } }
-      ]
-    });
+        { provide: ActivatedRoute, useValue: { snapshot: { paramMap: convertToParamMap({ id: '1' }) } } },
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting()
+    ]
+});
     fixture = TestBed.createComponent(ShopOrderDetailComponent);
     component = fixture.componentInstance;
     orderService = TestBed.inject(OrderService) as jasmine.SpyObj<OrderService>;

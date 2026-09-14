@@ -1,10 +1,11 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { of, throwError } from 'rxjs';
 import { RegisterComponent } from './register.component';
 import { AuthService } from '../services/auth.service';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('RegisterComponent', () => {
   let component: RegisterComponent;
@@ -16,13 +17,15 @@ describe('RegisterComponent', () => {
     const authSpy = jasmine.createSpyObj('AuthService', ['register']);
     const routerSpy = jasmine.createSpyObj('Router', ['navigate']);
     TestBed.configureTestingModule({
-      imports: [HttpClientTestingModule, FormsModule],
-      declarations: [RegisterComponent],
-      providers: [
+    declarations: [RegisterComponent],
+    imports: [FormsModule],
+    providers: [
         { provide: AuthService, useValue: authSpy },
-        { provide: Router, useValue: routerSpy }
-      ]
-    });
+        { provide: Router, useValue: routerSpy },
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting()
+    ]
+});
     fixture = TestBed.createComponent(RegisterComponent);
     component = fixture.componentInstance;
     authService = TestBed.inject(AuthService) as jasmine.SpyObj<AuthService>;

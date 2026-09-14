@@ -1,11 +1,12 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { FormsModule } from '@angular/forms';
 import { of, throwError } from 'rxjs';
 import { AccountActivationComponent } from './account-activation.component';
 import { UserService } from '../../services/user.service';
 import { ToastService } from '../../services/toast.service';
 import { User } from '../../models/user.model';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('AccountActivationComponent', () => {
   let component: AccountActivationComponent;
@@ -24,13 +25,15 @@ describe('AccountActivationComponent', () => {
     userSpy.list.and.returnValue(of(mockUsers));
 
     TestBed.configureTestingModule({
-      imports: [HttpClientTestingModule, FormsModule],
-      declarations: [AccountActivationComponent],
-      providers: [
+    declarations: [AccountActivationComponent],
+    imports: [FormsModule],
+    providers: [
         { provide: UserService, useValue: userSpy },
-        { provide: ToastService, useValue: toastSpy }
-      ]
-    });
+        { provide: ToastService, useValue: toastSpy },
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting()
+    ]
+});
     fixture = TestBed.createComponent(AccountActivationComponent);
     component = fixture.componentInstance;
     userService = TestBed.inject(UserService) as jasmine.SpyObj<UserService>;

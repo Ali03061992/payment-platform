@@ -1,11 +1,12 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { FormsModule } from '@angular/forms';
 import { of, throwError } from 'rxjs';
 import { StockOptimizationComponent } from './stock-optimization.component';
 import { StockOptimizationService } from '../../services/stock-optimization.service';
 import { ToastService } from '../../services/toast.service';
 import { StockOptimizationResponse, ProductOptimization } from '../../models/stock-optimization.model';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('StockOptimizationComponent', () => {
   let component: StockOptimizationComponent;
@@ -26,13 +27,15 @@ describe('StockOptimizationComponent', () => {
     optSpy.optimize.and.returnValue(of(mockResponse));
 
     TestBed.configureTestingModule({
-      imports: [HttpClientTestingModule, FormsModule],
-      declarations: [StockOptimizationComponent],
-      providers: [
+    declarations: [StockOptimizationComponent],
+    imports: [FormsModule],
+    providers: [
         { provide: StockOptimizationService, useValue: optSpy },
-        { provide: ToastService, useValue: toastSpy }
-      ]
-    });
+        { provide: ToastService, useValue: toastSpy },
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting()
+    ]
+});
     fixture = TestBed.createComponent(StockOptimizationComponent);
     component = fixture.componentInstance;
     optService = TestBed.inject(StockOptimizationService) as jasmine.SpyObj<StockOptimizationService>;

@@ -1,11 +1,12 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { Router } from '@angular/router';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { of, Subject } from 'rxjs';
 import { LayoutComponent } from './layout.component';
 import { LoginService } from '../services/login.service';
 import { NotificationService } from '../services/notification.service';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('LayoutComponent', () => {
   let component: LayoutComponent;
@@ -28,15 +29,17 @@ describe('LayoutComponent', () => {
     loginSpy.getCurrentUser.and.returnValue({ id: 1, username: 'admin', firstName: 'A', lastName: 'B', roles: ['SYSTEM_ADMIN'], organizationId: 1 } as any);
 
     TestBed.configureTestingModule({
-      imports: [HttpClientTestingModule],
-      declarations: [LayoutComponent],
-      schemas: [NO_ERRORS_SCHEMA],
-      providers: [
+    declarations: [LayoutComponent],
+    schemas: [NO_ERRORS_SCHEMA],
+    imports: [],
+    providers: [
         { provide: LoginService, useValue: loginSpy },
         { provide: NotificationService, useValue: notifSpy },
-        { provide: Router, useValue: routerSpy }
-      ]
-    });
+        { provide: Router, useValue: routerSpy },
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting()
+    ]
+});
     fixture = TestBed.createComponent(LayoutComponent);
     component = fixture.componentInstance;
     loginService = TestBed.inject(LoginService) as jasmine.SpyObj<LoginService>;

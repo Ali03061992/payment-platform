@@ -1,7 +1,8 @@
 import { TestBed } from '@angular/core/testing';
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { CatalogService } from './catalog.service';
 import { ProductCategory, ProductFamily } from '../models/catalog.model';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('CatalogService', () => {
   let service: CatalogService;
@@ -9,9 +10,9 @@ describe('CatalogService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [HttpClientTestingModule],
-      providers: [CatalogService]
-    });
+    imports: [],
+    providers: [CatalogService, provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()]
+});
     service = TestBed.inject(CatalogService);
     httpMock = TestBed.inject(HttpTestingController);
   });
