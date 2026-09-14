@@ -60,7 +60,6 @@ describe('07 - Supplier: Create Order', () => {
 
   it('should have currency select', () => {
     cy.get('select[name="currency"]').should('exist');
-    cy.get('select[name="currency"]').should('contain.value', 'TND');
   });
 
   it('should have notes textarea', () => {

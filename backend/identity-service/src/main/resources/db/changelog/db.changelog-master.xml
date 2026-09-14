@@ -9,5 +9,6 @@
     <include file="V2__seed_roles.sql" relativeToChangelogFile="true"/>
     <include file="V3__seed_permissions.sql" relativeToChangelogFile="true"/>
     <include file="V4__seed_users.sql" relativeToChangelogFile="true"/>
+    <include file="V5__fix_seed_password.sql" relativeToChangelogFile="true"/>
 
 </databaseChangeLog>

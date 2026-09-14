@@ -11,6 +11,7 @@ import { AppComponent } from './app.component';
 import { LoginComponent } from './login/login.component';
 import { RegisterComponent } from './register/register.component';
 import { PasswordSetupComponent } from './password-setup/password-setup.component';
+import { ChangePasswordComponent } from './change-password/change-password.component';
 import { LayoutComponent } from './layout/layout.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { UserManagementComponent } from './admin/user-management/user-management.component';
@@ -94,7 +95,8 @@ const routes: Routes = [
       { path: 'shop/orders', component: OrderListComponent, canActivate: [RoleGuard], data: { roles: shopRoles } },
       { path: 'shop/orders/create', component: CreateOrderComponent, canActivate: [RoleGuard], data: { roles: shopRoles } },
       { path: 'shop/orders/:id', component: ShopOrderDetailComponent, canActivate: [RoleGuard], data: { roles: shopRoles } },
-      { path: 'shop/balance', component: BalanceViewComponent, canActivate: [RoleGuard], data: { roles: shopRoles } }
+      { path: 'shop/balance', component: BalanceViewComponent, canActivate: [RoleGuard], data: { roles: shopRoles } },
+      { path: 'change-password', component: ChangePasswordComponent }
     ]
   },
   { path: '**', redirectTo: '/login' }
@@ -106,6 +108,7 @@ const routes: Routes = [
     LoginComponent,
     RegisterComponent,
     PasswordSetupComponent,
+    ChangePasswordComponent,
     LayoutComponent,
     DashboardComponent,
     UserManagementComponent,

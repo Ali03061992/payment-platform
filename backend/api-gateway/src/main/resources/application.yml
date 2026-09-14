@@ -18,7 +18,7 @@ app:
     shared: false
   gateway:
     rate-limit-per-minute: ${RATE_LIMIT_PER_MINUTE:120}
-    allowed-ips: ${ALLOWED_IPS:0:0:0:0:0:0:0:1}
+    allowed-ips: ${ALLOWED_IPS:0:0:0:0:0:0:0:1,127.0.0.1}
 
 management:
   endpoints:

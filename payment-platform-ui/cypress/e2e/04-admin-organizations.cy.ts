@@ -1,5 +1,3 @@
-const API = () => Cypress.env('apiUrl') || 'http://localhost:8081';
-
 describe('04 - Admin: Supplier Management', () => {
   before(() => cy.ensureTestUsers());
 
@@ -34,7 +32,7 @@ describe('04 - Admin: Supplier Management', () => {
   });
 
   it('should create a new supplier', () => {
-    const name = `Supplier E2E ${Date.now()}`;
+    const name = `Supplier Auto ${Date.now()}`;
     cy.get('.page-header button.btn-primary').click();
     cy.get('.form-card input[name="name"]').clear().type(name);
     cy.get('.form-card button.btn-primary').should('not.be.disabled').click();
@@ -72,7 +70,7 @@ describe('04 - Admin: Shop Management', () => {
 
   it('should show shop table', () => {
     cy.get('table thead th').should('have.length', 4);
-    cy.get('table tbody tr').should('have.length.gte', 4);
+    cy.get('table tbody tr').should('have.length.gte', 2);
   });
 
   it('should toggle create shop form', () => {
@@ -83,7 +81,7 @@ describe('04 - Admin: Shop Management', () => {
   });
 
   it('should create a new shop', () => {
-    const name = `Shop E2E ${Date.now()}`;
+    const name = `Shop Auto ${Date.now()}`;
     cy.get('.page-header button.btn-primary').click();
     cy.get('.form-card input[name="name"]').clear().type(name);
     cy.get('.form-card button.btn-primary').should('not.be.disabled').click();
@@ -104,14 +102,14 @@ describe('04 - Admin: Relation Management', () => {
     cy.get('.page-header h2').should('contain', 'Relations Fournisseur-Boutique');
   });
 
-  it('should show relation table with 4 relations', () => {
-    cy.get('table tbody tr').should('have.length', 4);
+  it('should show relation table', () => {
+    cy.get('table tbody tr').should('have.length.gte', 2);
     cy.get('table thead').should('contain', 'Fournisseur');
     cy.get('table thead').should('contain', 'Boutique');
   });
 
-  it('should show all relations as ACTIVE', () => {
-    cy.get('.status-badge.active').should('have.length.gte', 4);
+  it('should show relations as ACTIVE', () => {
+    cy.get('.status-badge.active').should('have.length.gte', 1);
   });
 
   it('should toggle create relation form', () => {

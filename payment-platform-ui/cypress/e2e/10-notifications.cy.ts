@@ -1,7 +1,3 @@
-const API = () => Cypress.env('apiUrl') || 'http://localhost:8081';
-function authHeaders(token: string) { return { Authorization: `Bearer ${token}` }; }
-const env = (key: string) => Cypress.env(key) as string;
-
 function isPage(body: any): boolean {
   return body && typeof body === 'object' && !Array.isArray(body) && 'items' in body;
 }
@@ -88,63 +84,61 @@ describe('10 - Notifications: API', () => {
 
   before(() => {
     cy.ensureTestUsers();
-    cy.request({ method: 'POST', url: `${API()}/api/auth/login`, body: { username: 'system.admin', password: 'Admin@123' } })
-      .then(r => { adminToken = r.body.accessToken; });
-    cy.request({ method: 'POST', url: `${API()}/api/auth/login`, body: { username: 'abdelslam', password: 'Admin@123' } })
-      .then(r => { shopToken = r.body.accessToken; });
-    cy.request({ method: 'POST', url: `${API()}/api/auth/login`, body: { username: 'covale.admin', password: 'Admin@123' } })
-      .then(r => { supplierToken = r.body.accessToken; });
+    cy.apiLogin('system.admin').then((t) => { adminToken = t; });
+    cy.getTestCtx().then((ctx) => {
+      cy.apiLogin(ctx.users.shopAdmin.username).then((t) => { shopToken = t; });
+      cy.apiLogin(ctx.users.supplierAdmin.username).then((t) => { supplierToken = t; });
+    });
   });
 
   it('GET /api/notifications - should return array or page', () => {
-    cy.request({ method: 'GET', url: `${API()}/api/notifications`, headers: authHeaders(adminToken) })
-      .then(r => {
-        expect(r.status).to.eq(200);
-        expect(isPage(r.body) || Array.isArray(r.body)).to.be.true;
-      });
+    cy.apiGet(adminToken, '/api/notifications').then((r) => {
+      expect(r.status).to.eq(200);
+      expect(isPage(r.body) || Array.isArray(r.body)).to.be.true;
+    });
   });
 
   it('GET /api/notifications - should reject without token', () => {
-    cy.request({ method: 'GET', url: `${API()}/api/notifications`, failOnStatusCode: false })
-      .then(r => { expect(r.status).to.eq(401); });
+    cy.request({ method: 'GET', url: `${Cypress.env('apiUrl') || 'http://localhost:8081'}/api/notifications`, failOnStatusCode: false })
+      .then((r) => { expect(r.status).to.eq(401); });
   });
 
   it('GET /api/notifications/unread-count - should return count', () => {
-    cy.request({ method: 'GET', url: `${API()}/api/notifications/unread-count`, headers: authHeaders(adminToken) })
-      .then(r => {
-        expect(r.status).to.eq(200);
-        expect(r.body).to.have.property('count');
-        expect(r.body.count).to.be.a('number');
-      });
+    cy.apiGet(adminToken, '/api/notifications/unread-count').then((r) => {
+      expect(r.status).to.eq(200);
+      expect(r.body).to.have.property('count');
+      expect(r.body.count).to.be.a('number');
+    });
   });
 
   it('POST /api/notifications/read-all - should mark all as read', () => {
-    cy.request({ method: 'POST', url: `${API()}/api/notifications/read-all`, headers: authHeaders(adminToken) })
-      .then(r => {
-        expect(r.status).to.eq(200);
-        expect(r.body).to.have.property('updated');
-      });
+    cy.apiPost(adminToken, '/api/notifications/read-all', {}).then((r) => {
+      expect(r.status).to.eq(200);
+      expect(r.body).to.have.property('updated');
+    });
   });
 
   it('Payment creation generates notifications', () => {
-    const shopAbdelslamId = env('shopAbdelslamId');
-    const covaleId = env('covaleId');
-    if (!shopAbdelslamId || !covaleId) { cy.log('Missing env vars - skipping'); return; }
-
-    cy.request({ method: 'POST', url: `${API()}/api/payments`, body: { shopId: shopAbdelslamId, supplierId: covaleId, amount: 75.00, currency: 'EUR' }, headers: authHeaders(shopToken), failOnStatusCode: false })
-      .then(r => {
+    const api = Cypress.env('apiUrl') || 'http://localhost:8081';
+    cy.getTestCtx().then((ctx) => {
+      cy.request({
+        method: 'POST', url: `${api}/api/payments`,
+        body: { shopId: ctx.shops.abdelslam.id, supplierId: ctx.suppliers.covale.id, amount: 75.00, currency: 'TND' },
+        headers: { Authorization: `Bearer ${shopToken}` },
+        failOnStatusCode: false,
+      }).then((r) => {
         if (r.status !== 200 && r.status !== 201) {
           cy.log('Payment creation failed - skipping notification check');
           return;
         }
         expect(r.body).to.have.property('reference');
         cy.wait(5000);
-        cy.request({ method: 'GET', url: `${API()}/api/notifications`, headers: authHeaders(supplierToken) })
-          .then(nr => {
-            const notifs = getItems(nr.body);
-            const matching = notifs.filter((n: any) => n.type === 'PAYMENT_CREATED');
-            cy.log(`Found ${matching.length} PAYMENT_CREATED notifications`);
-          });
+        cy.apiGet(supplierToken, '/api/notifications').then((nr) => {
+          const notifs = getItems(nr.body);
+          const matching = notifs.filter((n: any) => n.type === 'PAYMENT_CREATED');
+          cy.log(`Found ${matching.length} PAYMENT_CREATED notifications`);
+        });
       });
+    });
   });
 });

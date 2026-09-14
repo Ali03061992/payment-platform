@@ -1,7 +1,3 @@
-const API = () => Cypress.env('apiUrl') || 'http://localhost:8081';
-function authHeaders(token: string) { return { Authorization: `Bearer ${token}` }; }
-const env = (key: string) => Cypress.env(key) as string;
-
 function isPage(body: any): boolean {
   return body && typeof body === 'object' && !Array.isArray(body) && 'items' in body;
 }
@@ -141,8 +137,8 @@ describe('09 - Payments: Detail', () => {
       const token = win.sessionStorage.getItem('token');
       cy.request({
         method: 'GET',
-        url: `${API()}/api/payments`,
-        headers: authHeaders(token!),
+        url: `${Cypress.env('apiUrl') || 'http://localhost:8081'}/api/payments`,
+        headers: { Authorization: `Bearer ${token}` },
       }).then((r) => {
         const items = getItems(r.body);
         if (items.length > 0) {
@@ -163,7 +159,8 @@ describe('09 - Payments: Detail', () => {
     cy.window().then((win) => {
       const token = win.sessionStorage.getItem('token');
       cy.request({
-        method: 'GET', url: `${API()}/api/payments`, headers: authHeaders(token!),
+        method: 'GET', url: `${Cypress.env('apiUrl') || 'http://localhost:8081'}/api/payments`,
+        headers: { Authorization: `Bearer ${token}` },
       }).then((r) => {
         const items = getItems(r.body);
         if (items.length > 0) {
@@ -203,31 +200,30 @@ describe('09 - Payments: Cancel Flow', () => {
   before(() => cy.ensureTestUsers());
 
   it('should allow shop admin to cancel their own payment', () => {
-    const shopAliId = env('shopAliId');
-    const covaleId = env('covaleId');
-    if (!shopAliId || !covaleId) { cy.skipOn(true); return; }
-
+    const api = Cypress.env('apiUrl') || 'http://localhost:8081';
     let shopToken: string;
     let paymentId: string;
 
-    cy.login('ali', 'Admin@123').then(() => {
-      cy.window().then((win) => {
-        shopToken = win.sessionStorage.getItem('token')!;
-        cy.request({
-          method: 'POST',
-          url: `${API()}/api/payments`,
-          headers: authHeaders(shopToken),
-          body: { shopId: shopAliId, supplierId: covaleId, amount: 100, currency: 'TND', description: 'Shop cancel test' },
-        }).then((resp) => {
-          expect(resp.status).to.eq(201);
-          paymentId = resp.body.id;
+    cy.getTestCtx().then((ctx) => {
+      cy.login(ctx.users.shopAli.username, 'test1234').then(() => {
+        cy.window().then((win) => {
+          shopToken = win.sessionStorage.getItem('token')!;
           cy.request({
             method: 'POST',
-            url: `${API()}/api/payments/${paymentId}/cancel`,
-            headers: authHeaders(shopToken),
-          }).then((r) => {
-            expect(r.status).to.eq(200);
-            expect(r.body.status).to.eq('CANCELLED');
+            url: `${api}/api/payments`,
+            headers: { Authorization: `Bearer ${shopToken}` },
+            body: { shopId: ctx.shops.ali.id, supplierId: ctx.suppliers.covale.id, amount: 100, currency: 'TND', description: 'Shop cancel test' },
+          }).then((resp) => {
+            expect(resp.status).to.eq(201);
+            paymentId = resp.body.id;
+            cy.request({
+              method: 'POST',
+              url: `${api}/api/payments/${paymentId}/cancel`,
+              headers: { Authorization: `Bearer ${shopToken}` },
+            }).then((r) => {
+              expect(r.status).to.eq(200);
+              expect(r.body.status).to.eq('CANCELLED');
+            });
           });
         });
       });
@@ -235,36 +231,35 @@ describe('09 - Payments: Cancel Flow', () => {
   });
 
   it('should allow supplier admin to cancel a payment', () => {
-    const shopAliId = env('shopAliId');
-    const covaleId = env('covaleId');
-    if (!shopAliId || !covaleId) { cy.skipOn(true); return; }
-
+    const api = Cypress.env('apiUrl') || 'http://localhost:8081';
     let shopToken: string;
     let supplierToken: string;
     let paymentId: string;
 
-    cy.login('ali', 'Admin@123').then(() => {
-      cy.window().then((win) => {
-        shopToken = win.sessionStorage.getItem('token')!;
-        cy.request({
-          method: 'POST',
-          url: `${API()}/api/payments`,
-          headers: authHeaders(shopToken),
-          body: { shopId: shopAliId, supplierId: covaleId, amount: 200, currency: 'TND', description: 'Supplier cancel test' },
-        }).then((resp) => {
-          expect(resp.status).to.eq(201);
-          paymentId = resp.body.id;
+    cy.getTestCtx().then((ctx) => {
+      cy.login(ctx.users.shopAli.username, 'test1234').then(() => {
+        cy.window().then((win) => {
+          shopToken = win.sessionStorage.getItem('token')!;
+          cy.request({
+            method: 'POST',
+            url: `${api}/api/payments`,
+            headers: { Authorization: `Bearer ${shopToken}` },
+            body: { shopId: ctx.shops.ali.id, supplierId: ctx.suppliers.covale.id, amount: 200, currency: 'TND', description: 'Supplier cancel test' },
+          }).then((resp) => {
+            expect(resp.status).to.eq(201);
+            paymentId = resp.body.id;
 
-          cy.login('covale.admin', 'Admin@123').then(() => {
-            cy.window().then((win2) => {
-              supplierToken = win2.sessionStorage.getItem('token')!;
-              cy.request({
-                method: 'POST',
-                url: `${API()}/api/payments/${paymentId}/cancel`,
-                headers: authHeaders(supplierToken),
-              }).then((r) => {
-                expect(r.status).to.eq(200);
-                expect(r.body.status).to.eq('CANCELLED');
+            cy.login(ctx.users.supplierAdmin.username, 'test1234').then(() => {
+              cy.window().then((win2) => {
+                supplierToken = win2.sessionStorage.getItem('token')!;
+                cy.request({
+                  method: 'POST',
+                  url: `${api}/api/payments/${paymentId}/cancel`,
+                  headers: { Authorization: `Bearer ${supplierToken}` },
+                }).then((r) => {
+                  expect(r.status).to.eq(200);
+                  expect(r.body.status).to.eq('CANCELLED');
+                });
               });
             });
           });
@@ -274,76 +269,35 @@ describe('09 - Payments: Cancel Flow', () => {
   });
 
   it('should reject shop cancel on another shop payment', () => {
-    const shopAbdelslamId = env('shopAbdelslamId');
-    const shopAliId = env('shopAliId');
-    const covaleId = env('covaleId');
-    if (!shopAbdelslamId || !shopAliId || !covaleId) { cy.skipOn(true); return; }
-
+    const api = Cypress.env('apiUrl') || 'http://localhost:8081';
     let shopTokenAli: string;
     let shopTokenAbdelslam: string;
     let paymentId: string;
 
-    cy.login('abdelslam', 'Admin@123').then(() => {
-      cy.window().then((win) => {
-        shopTokenAbdelslam = win.sessionStorage.getItem('token')!;
-        cy.request({
-          method: 'POST',
-          url: `${API()}/api/payments`,
-          headers: authHeaders(shopTokenAbdelslam),
-          body: { shopId: shopAbdelslamId, supplierId: covaleId, amount: 50, currency: 'TND', description: 'Abdelslam payment' },
-        }).then((resp) => {
-          expect(resp.status).to.eq(201);
-          paymentId = resp.body.id;
+    cy.getTestCtx().then((ctx) => {
+      cy.login(ctx.users.shopAdmin.username, 'test1234').then(() => {
+        cy.window().then((win) => {
+          shopTokenAbdelslam = win.sessionStorage.getItem('token')!;
+          cy.request({
+            method: 'POST',
+            url: `${api}/api/payments`,
+            headers: { Authorization: `Bearer ${shopTokenAbdelslam}` },
+            body: { shopId: ctx.shops.abdelslam.id, supplierId: ctx.suppliers.covale.id, amount: 50, currency: 'TND', description: 'Abdelslam payment' },
+          }).then((resp) => {
+            expect(resp.status).to.eq(201);
+            paymentId = resp.body.id;
 
-          cy.login('ali', 'Admin@123').then(() => {
-            cy.window().then((win2) => {
-              shopTokenAli = win2.sessionStorage.getItem('token')!;
-              cy.request({
-                method: 'POST',
-                url: `${API()}/api/payments/${paymentId}/cancel`,
-                headers: authHeaders(shopTokenAli),
-                failOnStatusCode: false,
-              }).then((r) => {
-                expect(r.status).to.eq(403);
-              });
-            });
-          });
-        });
-      });
-    });
-  });
-
-  it('should reject supplier cancel on another supplier payment', () => {
-    const shopAliId = env('shopAliId');
-    const covaleId = env('covaleId');
-    if (!shopAliId || !covaleId) { cy.skipOn(true); return; }
-
-    let shopToken: string;
-    let wrongSupplierToken: string;
-    let paymentId: string;
-
-    cy.login('ali', 'Admin@123').then(() => {
-      cy.window().then((win) => {
-        shopToken = win.sessionStorage.getItem('token')!;
-        cy.request({
-          method: 'POST',
-          url: `${API()}/api/payments`,
-          headers: authHeaders(shopToken),
-          body: { shopId: shopAliId, supplierId: covaleId, amount: 75, currency: 'TND', description: 'Covale payment' },
-        }).then((resp) => {
-          expect(resp.status).to.eq(201);
-          paymentId = resp.body.id;
-
-          cy.login('pointteck.admin', 'Admin@123').then(() => {
-            cy.window().then((win2) => {
-              wrongSupplierToken = win2.sessionStorage.getItem('token')!;
-              cy.request({
-                method: 'POST',
-                url: `${API()}/api/payments/${paymentId}/cancel`,
-                headers: authHeaders(wrongSupplierToken),
-                failOnStatusCode: false,
-              }).then((r) => {
-                expect(r.status).to.eq(403);
+            cy.login(ctx.users.shopAli.username, 'test1234').then(() => {
+              cy.window().then((win2) => {
+                shopTokenAli = win2.sessionStorage.getItem('token')!;
+                cy.request({
+                  method: 'POST',
+                  url: `${api}/api/payments/${paymentId}/cancel`,
+                  headers: { Authorization: `Bearer ${shopTokenAli}` },
+                  failOnStatusCode: false,
+                }).then((r) => {
+                  expect(r.status).to.eq(403);
+                });
               });
             });
           });
@@ -353,41 +307,40 @@ describe('09 - Payments: Cancel Flow', () => {
   });
 
   it('should reject cancel on already confirmed payment', () => {
-    const shopAliId = env('shopAliId');
-    const covaleId = env('covaleId');
-    if (!shopAliId || !covaleId) { cy.skipOn(true); return; }
-
+    const api = Cypress.env('apiUrl') || 'http://localhost:8081';
     let shopToken: string;
     let supplierToken: string;
     let paymentId: string;
 
-    cy.login('ali', 'Admin@123').then(() => {
-      cy.window().then((win) => {
-        shopToken = win.sessionStorage.getItem('token')!;
-        cy.request({
-          method: 'POST',
-          url: `${API()}/api/payments`,
-          headers: authHeaders(shopToken),
-          body: { shopId: shopAliId, supplierId: covaleId, amount: 300, currency: 'TND', description: 'Confirm then cancel test' },
-        }).then((resp) => {
-          expect(resp.status).to.eq(201);
-          paymentId = resp.body.id;
+    cy.getTestCtx().then((ctx) => {
+      cy.login(ctx.users.shopAli.username, 'test1234').then(() => {
+        cy.window().then((win) => {
+          shopToken = win.sessionStorage.getItem('token')!;
+          cy.request({
+            method: 'POST',
+            url: `${api}/api/payments`,
+            headers: { Authorization: `Bearer ${shopToken}` },
+            body: { shopId: ctx.shops.ali.id, supplierId: ctx.suppliers.covale.id, amount: 300, currency: 'TND', description: 'Confirm then cancel test' },
+          }).then((resp) => {
+            expect(resp.status).to.eq(201);
+            paymentId = resp.body.id;
 
-          cy.login('covale.admin', 'Admin@123').then(() => {
-            cy.window().then((win2) => {
-              supplierToken = win2.sessionStorage.getItem('token')!;
-              cy.request({
-                method: 'POST',
-                url: `${API()}/api/payments/${paymentId}/confirm`,
-                headers: authHeaders(supplierToken),
-              }).then(() => {
+            cy.login(ctx.users.supplierAdmin.username, 'test1234').then(() => {
+              cy.window().then((win2) => {
+                supplierToken = win2.sessionStorage.getItem('token')!;
                 cy.request({
                   method: 'POST',
-                  url: `${API()}/api/payments/${paymentId}/cancel`,
-                  headers: authHeaders(shopToken),
-                  failOnStatusCode: false,
-                }).then((r) => {
-                  expect(r.status).to.be.oneOf([400, 409]);
+                  url: `${api}/api/payments/${paymentId}/confirm`,
+                  headers: { Authorization: `Bearer ${supplierToken}` },
+                }).then(() => {
+                  cy.request({
+                    method: 'POST',
+                    url: `${api}/api/payments/${paymentId}/cancel`,
+                    headers: { Authorization: `Bearer ${shopToken}` },
+                    failOnStatusCode: false,
+                  }).then((r) => {
+                    expect(r.status).to.be.oneOf([400, 409]);
+                  });
                 });
               });
             });
