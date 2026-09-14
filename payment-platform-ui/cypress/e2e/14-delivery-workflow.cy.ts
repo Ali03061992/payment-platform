@@ -7,14 +7,15 @@ function me(token: string) {
 }
 
 function createOrder(ctx: any, notes: string, asap = false) {
-  const items = ctx.productId
-    ? [{ productId: ctx.productId, quantity: 2, discount: 0 }]
-    : [];
+  expect(ctx.productId, 'productId must be set before creating order').to.not.be.null;
+  expect(ctx.covaleId, 'covaleId must be set').to.not.be.null;
+  expect(ctx.shopAbdelslamId, 'shopAbdelslamId must be set').to.not.be.null;
+  const items = [{ productId: ctx.productId, quantity: 2, discount: 0 }];
   return cy.apiPost(ctx.shopToken, '/api/orders', {
     supplierId: ctx.covaleId, shopId: ctx.shopAbdelslamId,
     asapPayment: asap, currency: 'TND', notes, items,
   }).then((r) => {
-    expect(r.status).to.be.oneOf([200, 201]);
+    expect(r.status).to.be.oneOf([200, 201], `Order creation failed: ${JSON.stringify(r.body)}`);
     return cy.wrap(r.body.id as string);
   });
 }

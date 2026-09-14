@@ -4,7 +4,7 @@
 </div>
 
 <div class="filters">
-  <select [(ngModel)]="filterRole" (change)="applyFilter()">
+  <select [(ngModel)]="filterRole" (change)="applyFilter()" class="form-control filter-select">
     <option value="">Tous les rôles</option>
     <option value="SYSTEM_ADMIN">SYSTEM_ADMIN</option>
     <option value="SUPPLIER_ADMIN">SUPPLIER_ADMIN</option>
@@ -12,7 +12,7 @@
     <option value="SHOP_ADMIN">SHOP_ADMIN</option>
     <option value="SHOP_AGENT">SHOP_AGENT</option>
   </select>
-  <select [(ngModel)]="filterStatus" (change)="applyFilter()">
+  <select [(ngModel)]="filterStatus" (change)="applyFilter()" class="form-control filter-select">
     <option value="">Tous les statuts</option>
     <option value="ACTIVE">Actif</option>
     <option value="DISABLED">Désactivé</option>
