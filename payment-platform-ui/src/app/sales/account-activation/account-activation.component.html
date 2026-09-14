@@ -22,7 +22,7 @@
       <div class="avatar">{{ user.firstName[0] }}{{ user.lastName[0] }}</div>
       <div class="card-info">
         <div class="card-name">{{ user.firstName }} {{ user.lastName }}</div>
-        <div class="card-username">@{{ user.username }}</div>
+        <div class="card-username">{{ '@' }}{{ user.username }}</div>
       </div>
       <span class="status-badge" [class.active]="user.status === 'ACTIVE'" [class.disabled]="user.status === 'DISABLED'">
         {{ user.status }}

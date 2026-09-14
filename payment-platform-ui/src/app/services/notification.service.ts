@@ -147,7 +147,7 @@ export class NotificationService {
           icon: 'assets/icons/icon-192x192.png',
           tag: 'payment-notification',
           renotify: true
-        });
+        } as NotificationOptions);
       }
     }
   }

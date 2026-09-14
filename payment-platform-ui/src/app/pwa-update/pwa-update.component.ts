@@ -54,7 +54,7 @@ export class PwaUpdateComponent implements OnInit {
   ngOnInit() {
     if (this.swUpdate.isEnabled) {
       this.swUpdate.versionUpdates
-        .pipe(filter((evt): evt is VersionReadyEvent => evt.type === 'VERSION_READY'))
+        .pipe(filter((evt: any): evt is VersionReadyEvent => evt.type === 'VERSION_READY'))
         .subscribe(() => {
           this.showUpdate = true;
         });
