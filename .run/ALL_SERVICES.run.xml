@@ -1,0 +1,12 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="ALL SERVICES" type="CompoundRunConfigurationType" factoryName="Compound">
+    <toRun name="1 - Identity Service" type="SpringBootApplicationConfigurationType" />
+    <toRun name="2 - Organization Service" type="SpringBootApplicationConfigurationType" />
+    <toRun name="3 - Payment Service" type="SpringBootApplicationConfigurationType" />
+    <toRun name="4 - Notification Service" type="SpringBootApplicationConfigurationType" />
+    <toRun name="5 - API Gateway" type="SpringBootApplicationConfigurationType" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

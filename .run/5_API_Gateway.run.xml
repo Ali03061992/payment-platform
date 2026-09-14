@@ -1,0 +1,11 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="5 - API Gateway" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
+    <module name="payment-platform_api-gateway_main" />
+    <option name="SPRING_BOOT_MAIN_CLASS" value="com.paymentplatform.gateway.ApiGatewayApplication" />
+    <option name="ACTIVE_PROFILES" value="local" />
+    <option name="VM_PARAMETERS" value="-Dspring.profiles.active=local" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

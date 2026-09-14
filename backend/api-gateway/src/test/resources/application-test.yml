@@ -1,0 +1,27 @@
+server:
+  port: 0
+
+spring:
+  application:
+    name: api-gateway-test
+  profiles:
+    active: test
+
+app:
+  security:
+    secret: test-secret-key-for-jwt-signing-minimum-32-bytes-long
+    expiration: 30m
+    shared: false
+  gateway:
+    rate-limit-per-minute: 10000
+    allowed-ips: ""
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html

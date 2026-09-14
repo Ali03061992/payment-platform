@@ -1,0 +1,11 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="3 - Payment Service" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
+    <module name="payment-platform_payment-service_main" />
+    <option name="SPRING_BOOT_MAIN_CLASS" value="com.paymentplatform.payment.PaymentServiceApplication" />
+    <option name="ACTIVE_PROFILES" value="local" />
+    <option name="VM_PARAMETERS" value="-Dspring.profiles.active=local" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>
