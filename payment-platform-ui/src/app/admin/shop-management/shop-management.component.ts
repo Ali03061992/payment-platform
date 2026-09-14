@@ -4,9 +4,10 @@ import { Organization } from '../../models/organization.model';
 import { ToastService } from '../../services/toast.service';
 
 @Component({
-  selector: 'app-shop-management',
-  templateUrl: './shop-management.component.html',
-  styleUrls: ['./shop-management.component.css']
+    selector: 'app-shop-management',
+    templateUrl: './shop-management.component.html',
+    styleUrls: ['./shop-management.component.css'],
+    standalone: false
 })
 export class ShopManagementComponent implements OnInit {
   shops: Organization[] = [];

@@ -4,9 +4,10 @@ import { AuthService } from '../services/auth.service';
 import { ToastService } from '../services/toast.service';
 
 @Component({
-  selector: 'app-change-password',
-  templateUrl: './change-password.component.html',
-  styleUrls: ['./change-password.component.css']
+    selector: 'app-change-password',
+    templateUrl: './change-password.component.html',
+    styleUrls: ['./change-password.component.css'],
+    standalone: false
 })
 export class ChangePasswordComponent {
   currentPassword = '';

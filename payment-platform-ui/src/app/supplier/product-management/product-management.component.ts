@@ -6,9 +6,10 @@ import { ProductFamily, ProductCategory } from '../../models/catalog.model';
 import { ToastService } from '../../services/toast.service';
 
 @Component({
-  selector: 'app-product-management',
-  templateUrl: './product-management.component.html',
-  styleUrls: ['./product-management.component.css']
+    selector: 'app-product-management',
+    templateUrl: './product-management.component.html',
+    styleUrls: ['./product-management.component.css'],
+    standalone: false
 })
 export class ProductManagementComponent implements OnInit {
   products: Product[] = [];

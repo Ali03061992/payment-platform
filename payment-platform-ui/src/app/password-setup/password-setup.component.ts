@@ -4,9 +4,10 @@ import { HttpClient } from '@angular/common/http';
 import { ToastService } from '../services/toast.service';
 
 @Component({
-  selector: 'app-password-setup',
-  templateUrl: './password-setup.component.html',
-  styleUrls: ['./password-setup.component.css']
+    selector: 'app-password-setup',
+    templateUrl: './password-setup.component.html',
+    styleUrls: ['./password-setup.component.css'],
+    standalone: false
 })
 export class PasswordSetupComponent implements OnInit {
   token = '';

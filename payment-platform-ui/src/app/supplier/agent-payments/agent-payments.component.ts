@@ -5,9 +5,10 @@ import { AgentPaymentSummary, Payment } from '../../models/agent-payment.model';
 import { ToastService } from '../../services/toast.service';
 
 @Component({
-  selector: 'app-agent-payments',
-  templateUrl: './agent-payments.component.html',
-  styleUrls: ['./agent-payments.component.css']
+    selector: 'app-agent-payments',
+    templateUrl: './agent-payments.component.html',
+    styleUrls: ['./agent-payments.component.css'],
+    standalone: false
 })
 export class AgentPaymentsComponent implements OnInit {
   summaries: AgentPaymentSummary[] = [];

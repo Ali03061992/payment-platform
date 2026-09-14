@@ -4,9 +4,10 @@ import { LoginService } from '../services/login.service';
 import { NotificationService } from '../services/notification.service';
 
 @Component({
-  selector: 'app-login',
-  templateUrl: './login.component.html',
-  styleUrls: ['./login.component.css']
+    selector: 'app-login',
+    templateUrl: './login.component.html',
+    styleUrls: ['./login.component.css'],
+    standalone: false
 })
 export class LoginComponent {
   form = { username: '', password: '' };

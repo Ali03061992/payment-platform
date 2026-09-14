@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { RouterModule, Routes } from '@angular/router';
 import { ServiceWorkerModule } from '@angular/service-worker';
-import { QRCodeModule } from 'angularx-qrcode';
+import { QRCodeComponent } from 'angularx-qrcode';
 import { environment } from '../environments/environment';
 
 import { AppComponent } from './app.component';
@@ -146,7 +146,7 @@ const routes: Routes = [
     ],
     bootstrap: [AppComponent], imports: [BrowserModule,
         FormsModule,
-        QRCodeModule,
+        QRCodeComponent,
         RouterModule.forRoot(routes, { scrollPositionRestoration: 'top' }),
         ServiceWorkerModule.register('ngsw-worker.js', { enabled: environment.production })], providers: [
         { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true },

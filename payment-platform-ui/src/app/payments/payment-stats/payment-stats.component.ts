@@ -3,9 +3,10 @@ import { PaymentService } from '../../services/payment.service';
 import { PaymentStats } from '../../models/payment.model';
 
 @Component({
-  selector: 'app-payment-stats',
-  templateUrl: './payment-stats.component.html',
-  styleUrls: ['./payment-stats.component.css']
+    selector: 'app-payment-stats',
+    templateUrl: './payment-stats.component.html',
+    styleUrls: ['./payment-stats.component.css'],
+    standalone: false
 })
 export class PaymentStatsComponent implements OnInit {
   stats: PaymentStats | null = null;

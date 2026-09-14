@@ -4,9 +4,10 @@ import { ToastService } from '../services/toast.service';
 import { BrowserMultiFormatReader } from '@zxing/library';
 
 @Component({
-  selector: 'app-qr-scanner',
-  templateUrl: './qr-scanner.component.html',
-  styleUrls: ['./qr-scanner.component.css']
+    selector: 'app-qr-scanner',
+    templateUrl: './qr-scanner.component.html',
+    styleUrls: ['./qr-scanner.component.css'],
+    standalone: false
 })
 export class QrScannerComponent implements OnInit, OnDestroy {
   @ViewChild('video') videoRef!: ElementRef<HTMLVideoElement>;

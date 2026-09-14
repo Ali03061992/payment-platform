@@ -6,9 +6,10 @@ import { ToastService } from '../../services/toast.service';
 import { Subscription } from 'rxjs';
 
 @Component({
-  selector: 'app-order-detail',
-  templateUrl: './order-detail.component.html',
-  styleUrls: ['./order-detail.component.css']
+    selector: 'app-order-detail',
+    templateUrl: './order-detail.component.html',
+    styleUrls: ['./order-detail.component.css'],
+    standalone: false
 })
 export class ShopOrderDetailComponent implements OnInit, OnDestroy {
   order: Order | null = null;

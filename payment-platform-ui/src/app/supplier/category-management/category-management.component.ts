@@ -4,9 +4,10 @@ import { ProductCategory } from '../../models/catalog.model';
 import { ToastService } from '../../services/toast.service';
 
 @Component({
-  selector: 'app-category-management',
-  templateUrl: './category-management.component.html',
-  styleUrls: ['./category-management.component.css']
+    selector: 'app-category-management',
+    templateUrl: './category-management.component.html',
+    styleUrls: ['./category-management.component.css'],
+    standalone: false
 })
 export class CategoryManagementComponent implements OnInit {
   categories: ProductCategory[] = [];

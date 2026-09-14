@@ -2,9 +2,10 @@ import { Component, OnInit } from '@angular/core';
 import { NotificationService } from '../../services/notification.service';
 
 @Component({
-  selector: 'app-notification-banner',
-  templateUrl: './notification-banner.component.html',
-  styleUrls: ['./notification-banner.component.css']
+    selector: 'app-notification-banner',
+    templateUrl: './notification-banner.component.html',
+    styleUrls: ['./notification-banner.component.css'],
+    standalone: false
 })
 export class NotificationBannerComponent implements OnInit {
   showBanner = false;

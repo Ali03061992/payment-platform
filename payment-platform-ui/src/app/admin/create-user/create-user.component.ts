@@ -6,9 +6,10 @@ import { Organization } from '../../models/organization.model';
 import { ToastService } from '../../services/toast.service';
 
 @Component({
-  selector: 'app-create-user',
-  templateUrl: './create-user.component.html',
-  styleUrls: ['./create-user.component.css']
+    selector: 'app-create-user',
+    templateUrl: './create-user.component.html',
+    styleUrls: ['./create-user.component.css'],
+    standalone: false
 })
 export class CreateUserComponent implements OnInit {
   form = {

@@ -4,9 +4,10 @@ import { User } from '../../models/user.model';
 import { ToastService } from '../../services/toast.service';
 
 @Component({
-  selector: 'app-user-management',
-  templateUrl: './user-management.component.html',
-  styleUrls: ['./user-management.component.css']
+    selector: 'app-user-management',
+    templateUrl: './user-management.component.html',
+    styleUrls: ['./user-management.component.css'],
+    standalone: false
 })
 export class UserManagementComponent implements OnInit {
   users: User[] = [];

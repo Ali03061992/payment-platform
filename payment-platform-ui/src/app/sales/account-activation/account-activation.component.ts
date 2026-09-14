@@ -4,9 +4,10 @@ import { User } from '../../models/user.model';
 import { ToastService } from '../../services/toast.service';
 
 @Component({
-  selector: 'app-account-activation',
-  templateUrl: './account-activation.component.html',
-  styleUrls: ['./account-activation.component.css']
+    selector: 'app-account-activation',
+    templateUrl: './account-activation.component.html',
+    styleUrls: ['./account-activation.component.css'],
+    standalone: false
 })
 export class AccountActivationComponent implements OnInit {
   users: User[] = [];

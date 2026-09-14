@@ -3,15 +3,15 @@ import { SwUpdate, VersionReadyEvent } from '@angular/service-worker';
 import { filter } from 'rxjs/operators';
 
 @Component({
-  selector: 'app-pwa-update',
-  template: `
+    selector: 'app-pwa-update',
+    template: `
     <div *ngIf="showUpdate" class="pwa-update-banner">
       <span>Nouvelle version disponible !</span>
       <button (click)="updateApp()" class="btn-update">Mettre à jour</button>
       <button (click)="dismiss()" class="btn-dismiss">&times;</button>
     </div>
   `,
-  styles: [`
+    styles: [`
     .pwa-update-banner {
       position: fixed;
       bottom: 0;
@@ -44,7 +44,8 @@ import { filter } from 'rxjs/operators';
       cursor: pointer;
       padding: 0 4px;
     }
-  `]
+  `],
+    standalone: false
 })
 export class PwaUpdateComponent implements OnInit {
   showUpdate = false;

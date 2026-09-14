@@ -16,9 +16,10 @@ interface OrderLine {
 }
 
 @Component({
-  selector: 'app-supplier-create-order',
-  templateUrl: './create-order.component.html',
-  styleUrls: ['./create-order.component.css']
+    selector: 'app-supplier-create-order',
+    templateUrl: './create-order.component.html',
+    styleUrls: ['./create-order.component.css'],
+    standalone: false
 })
 export class SupplierCreateOrderComponent implements OnInit, OnDestroy {
   shops: Organization[] = [];

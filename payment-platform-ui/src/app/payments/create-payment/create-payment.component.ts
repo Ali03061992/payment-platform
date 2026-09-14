@@ -6,9 +6,10 @@ import { Organization } from '../../models/organization.model';
 import { ToastService } from '../../services/toast.service';
 
 @Component({
-  selector: 'app-create-payment',
-  templateUrl: './create-payment.component.html',
-  styleUrls: ['./create-payment.component.css']
+    selector: 'app-create-payment',
+    templateUrl: './create-payment.component.html',
+    styleUrls: ['./create-payment.component.css'],
+    standalone: false
 })
 export class CreatePaymentComponent implements OnInit {
   shopId = '';

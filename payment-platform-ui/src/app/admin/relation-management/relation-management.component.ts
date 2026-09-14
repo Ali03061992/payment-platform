@@ -4,9 +4,10 @@ import { Organization, SupplierShopRelation } from '../../models/organization.mo
 import { ToastService } from '../../services/toast.service';
 
 @Component({
-  selector: 'app-relation-management',
-  templateUrl: './relation-management.component.html',
-  styleUrls: ['./relation-management.component.css']
+    selector: 'app-relation-management',
+    templateUrl: './relation-management.component.html',
+    styleUrls: ['./relation-management.component.css'],
+    standalone: false
 })
 export class RelationManagementComponent implements OnInit {
   relations: SupplierShopRelation[] = [];

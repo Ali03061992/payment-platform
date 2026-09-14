@@ -4,9 +4,10 @@ import { Product, StockMovement } from '../../models/stock.model';
 import { ToastService } from '../../services/toast.service';
 
 @Component({
-  selector: 'app-stock-dashboard',
-  templateUrl: './stock-dashboard.component.html',
-  styleUrls: ['./stock-dashboard.component.css']
+    selector: 'app-stock-dashboard',
+    templateUrl: './stock-dashboard.component.html',
+    styleUrls: ['./stock-dashboard.component.css'],
+    standalone: false
 })
 export class StockDashboardComponent implements OnInit {
   products: Product[] = [];

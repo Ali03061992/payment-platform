@@ -4,9 +4,10 @@ import { StockService } from '../../services/stock.service';
 import { ToastService } from '../../services/toast.service';
 
 @Component({
-  selector: 'app-add-product',
-  templateUrl: './add-product.component.html',
-  styleUrls: ['./add-product.component.css']
+    selector: 'app-add-product',
+    templateUrl: './add-product.component.html',
+    styleUrls: ['./add-product.component.css'],
+    standalone: false
 })
 export class AddProductComponent {
   form = {

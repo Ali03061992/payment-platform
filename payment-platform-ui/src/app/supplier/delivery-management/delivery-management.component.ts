@@ -4,9 +4,10 @@ import { Order } from '../../models/order.model';
 import { ToastService } from '../../services/toast.service';
 
 @Component({
-  selector: 'app-delivery-management',
-  templateUrl: './delivery-management.component.html',
-  styleUrls: ['./delivery-management.component.css']
+    selector: 'app-delivery-management',
+    templateUrl: './delivery-management.component.html',
+    styleUrls: ['./delivery-management.component.css'],
+    standalone: false
 })
 export class DeliveryManagementComponent implements OnInit {
   deliveries: Order[] = [];

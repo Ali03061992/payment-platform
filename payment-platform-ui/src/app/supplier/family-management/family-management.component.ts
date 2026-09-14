@@ -4,9 +4,10 @@ import { ProductFamily, ProductCategory } from '../../models/catalog.model';
 import { ToastService } from '../../services/toast.service';
 
 @Component({
-  selector: 'app-family-management',
-  templateUrl: './family-management.component.html',
-  styleUrls: ['./family-management.component.css']
+    selector: 'app-family-management',
+    templateUrl: './family-management.component.html',
+    styleUrls: ['./family-management.component.css'],
+    standalone: false
 })
 export class FamilyManagementComponent implements OnInit {
   families: ProductFamily[] = [];

@@ -15,9 +15,10 @@ interface OrderLine {
 }
 
 @Component({
-  selector: 'app-create-order',
-  templateUrl: './create-order.component.html',
-  styleUrls: ['./create-order.component.css']
+    selector: 'app-create-order',
+    templateUrl: './create-order.component.html',
+    styleUrls: ['./create-order.component.css'],
+    standalone: false
 })
 export class CreateOrderComponent implements OnInit {
   suppliers: Organization[] = [];

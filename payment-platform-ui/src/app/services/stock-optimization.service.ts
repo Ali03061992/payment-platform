@@ -11,7 +11,7 @@ export class StockOptimizationService {
 
   private getSupplierId(): string {
     const u = sessionStorage.getItem('user');
-    return u ? JSON.parse(u).organizationId || '' : 0;
+    return u ? JSON.parse(u).organizationId || '' : '';
   }
 
   optimize(): Observable<StockOptimizationResponse> {

@@ -4,9 +4,10 @@ import { Product, StockMovement } from '../../models/stock.model';
 import { ToastService } from '../../services/toast.service';
 
 @Component({
-  selector: 'app-stock-management',
-  templateUrl: './stock-management.component.html',
-  styleUrls: ['./stock-management.component.css']
+    selector: 'app-stock-management',
+    templateUrl: './stock-management.component.html',
+    styleUrls: ['./stock-management.component.css'],
+    standalone: false
 })
 export class StockManagementComponent implements OnInit {
   products: Product[] = [];

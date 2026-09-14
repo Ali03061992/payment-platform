@@ -7,9 +7,10 @@ import { environment } from '../../../environments/environment';
 import { Subscription } from 'rxjs';
 
 @Component({
-  selector: 'app-payment-detail',
-  templateUrl: './payment-detail.component.html',
-  styleUrls: ['./payment-detail.component.css']
+    selector: 'app-payment-detail',
+    templateUrl: './payment-detail.component.html',
+    styleUrls: ['./payment-detail.component.css'],
+    standalone: false
 })
 export class PaymentDetailComponent implements OnInit, OnDestroy {
   payment: Payment | null = null;

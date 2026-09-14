@@ -72,10 +72,10 @@
           },
           "configurations": {
             "production": {
-              "browserTarget": "payment-platform-ui:build:production"
+              "buildTarget": "payment-platform-ui:build:production"
             },
             "development": {
-              "browserTarget": "payment-platform-ui:build:development"
+              "buildTarget": "payment-platform-ui:build:development"
             }
           },
           "defaultConfiguration": "development"
@@ -83,7 +83,7 @@
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "payment-platform-ui:build"
+            "buildTarget": "payment-platform-ui:build"
           }
         },
         "test": {

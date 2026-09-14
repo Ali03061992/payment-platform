@@ -5,9 +5,10 @@ import { ToastService } from '../../services/toast.service';
 import { Subscription } from 'rxjs';
 
 @Component({
-  selector: 'app-payment-list',
-  templateUrl: './payment-list.component.html',
-  styleUrls: ['./payment-list.component.css']
+    selector: 'app-payment-list',
+    templateUrl: './payment-list.component.html',
+    styleUrls: ['./payment-list.component.css'],
+    standalone: false
 })
 export class PaymentListComponent implements OnInit, OnDestroy {
   payments: Payment[] = [];

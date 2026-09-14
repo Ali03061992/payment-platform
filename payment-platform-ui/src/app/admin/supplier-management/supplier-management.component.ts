@@ -4,9 +4,10 @@ import { Organization } from '../../models/organization.model';
 import { ToastService } from '../../services/toast.service';
 
 @Component({
-  selector: 'app-supplier-management',
-  templateUrl: './supplier-management.component.html',
-  styleUrls: ['./supplier-management.component.css']
+    selector: 'app-supplier-management',
+    templateUrl: './supplier-management.component.html',
+    styleUrls: ['./supplier-management.component.css'],
+    standalone: false
 })
 export class SupplierManagementComponent implements OnInit {
   suppliers: Organization[] = [];

@@ -2,9 +2,10 @@ import { Component } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 
 @Component({
-  selector: 'app-export',
-  templateUrl: './export.component.html',
-  styleUrls: ['./export.component.css']
+    selector: 'app-export',
+    templateUrl: './export.component.html',
+    styleUrls: ['./export.component.css'],
+    standalone: false
 })
 export class ExportComponent {
   from = '';

@@ -6,9 +6,10 @@ import { Notification } from '../models/notification.model';
 import { Subscription } from 'rxjs';
 
 @Component({
-  selector: 'app-layout',
-  templateUrl: './layout.component.html',
-  styleUrls: ['./layout.component.css']
+    selector: 'app-layout',
+    templateUrl: './layout.component.html',
+    styleUrls: ['./layout.component.css'],
+    standalone: false
 })
 export class LayoutComponent implements OnInit, OnDestroy {
   user: any;

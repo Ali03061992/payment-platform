@@ -7,9 +7,10 @@ import { ToastService } from '../../services/toast.service';
 import { Subscription } from 'rxjs';
 
 @Component({
-  selector: 'app-order-management',
-  templateUrl: './order-management.component.html',
-  styleUrls: ['./order-management.component.css']
+    selector: 'app-order-management',
+    templateUrl: './order-management.component.html',
+    styleUrls: ['./order-management.component.css'],
+    standalone: false
 })
 export class OrderManagementComponent implements OnInit, OnDestroy {
   orders: Order[] = [];

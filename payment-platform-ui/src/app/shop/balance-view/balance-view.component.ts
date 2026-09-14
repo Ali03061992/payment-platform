@@ -4,9 +4,10 @@ import { BalanceSummary, BalanceEntry } from '../../models/balance.model';
 import { ToastService } from '../../services/toast.service';
 
 @Component({
-  selector: 'app-balance-view',
-  templateUrl: './balance-view.component.html',
-  styleUrls: ['./balance-view.component.css']
+    selector: 'app-balance-view',
+    templateUrl: './balance-view.component.html',
+    styleUrls: ['./balance-view.component.css'],
+    standalone: false
 })
 export class BalanceViewComponent implements OnInit {
   balances: BalanceSummary[] = [];

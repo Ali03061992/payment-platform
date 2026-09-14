@@ -4,9 +4,10 @@ import { StockOptimizationResponse, ProductOptimization } from '../../models/sto
 import { ToastService } from '../../services/toast.service';
 
 @Component({
-  selector: 'app-stock-optimization',
-  templateUrl: './stock-optimization.component.html',
-  styleUrls: ['./stock-optimization.component.css']
+    selector: 'app-stock-optimization',
+    templateUrl: './stock-optimization.component.html',
+    styleUrls: ['./stock-optimization.component.css'],
+    standalone: false
 })
 export class StockOptimizationComponent implements OnInit {
   data: StockOptimizationResponse | null = null;

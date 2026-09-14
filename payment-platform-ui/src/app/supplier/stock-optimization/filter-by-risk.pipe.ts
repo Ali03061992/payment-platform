@@ -1,7 +1,10 @@
 import { Pipe, PipeTransform } from '@angular/core';
 import { ProductOptimization } from '../../models/stock-optimization.model';
 
-@Pipe({ name: 'filterByRisk', pure: false })
+@Pipe({
+    name: 'filterByRisk', pure: false,
+    standalone: false
+})
 export class FilterByRiskPipe implements PipeTransform {
   transform(products: ProductOptimization[]): ProductOptimization[] {
     if (!products) return [];

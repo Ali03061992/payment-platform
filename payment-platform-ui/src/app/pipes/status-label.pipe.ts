@@ -1,6 +1,9 @@
 import { Pipe, PipeTransform } from '@angular/core';
 
-@Pipe({ name: 'statusLabel' })
+@Pipe({
+    name: 'statusLabel',
+    standalone: false
+})
 export class StatusLabelPipe implements PipeTransform {
   private labels: Record<string, string> = {
     'PENDING': 'En attente',

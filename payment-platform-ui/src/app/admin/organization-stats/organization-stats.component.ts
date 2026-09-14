@@ -3,9 +3,10 @@ import { OrganizationService } from '../../services/organization.service';
 import { OrganizationStats } from '../../models/organization.model';
 
 @Component({
-  selector: 'app-organization-stats',
-  templateUrl: './organization-stats.component.html',
-  styleUrls: ['./organization-stats.component.css']
+    selector: 'app-organization-stats',
+    templateUrl: './organization-stats.component.html',
+    styleUrls: ['./organization-stats.component.css'],
+    standalone: false
 })
 export class OrganizationStatsComponent implements OnInit {
   stats: OrganizationStats | null = null;
