@@ -38,26 +38,46 @@ function setupTestData() {
     .then(() => cy.apiLogin('pointteck.agent1.e2e')).then((t) => { ctx.ptAgentToken = t; })
     .then(() => me(ctx.agentToken)).then((u) => { ctx.agentId = u.id; })
     .then(() => cy.apiGet(ctx.adminToken, '/api/admin/suppliers')).then((r) => {
-      const list = Array.isArray(r.body) ? r.body : (r.body.value || []);
+      const body = r.body;
+      const list = Array.isArray(body) ? body
+        : Array.isArray(body?.content) ? body.content
+        : Array.isArray(body?.items) ? body.items
+        : Array.isArray(body?.value) ? body.value
+        : Array.isArray(body?.data) ? body.data
+        : [];
       const covale = list.find((s: any) => s.name.includes('Covale E2E'));
       ctx.covaleId = covale?.id;
     })
     .then(() => cy.apiGet(ctx.adminToken, '/api/admin/shops')).then((r) => {
-      const list = Array.isArray(r.body) ? r.body : (r.body.value || []);
-      ctx.shopAbdelslamId = list.find((s: any) => s.name.includes('Abdelslam E2E'))?.id;
+      const body = r.body;
+      const list = Array.isArray(body) ? body
+        : Array.isArray(body?.content) ? body.content
+        : Array.isArray(body?.items) ? body.items
+        : Array.isArray(body?.value) ? body.value
+        : Array.isArray(body?.data) ? body.data
+        : [];
+      ctx.shopAbdelslamId = list.find((s: any) => s.name.includes('Abdelslam'))?.id;
     })
     .then(() => {
       if (!ctx.covaleId) return;
       return cy.apiGet(ctx.supplierToken, `/api/suppliers/${ctx.covaleId}/products`).then((r) => {
-        const products = Array.isArray(r.body) ? r.body : (r.body.items || r.body.value || []);
-        const available = products.find((p: any) => (p.quantity - p.reservedQty) >= 10);
+        const body = r.body;
+        const products = Array.isArray(body) ? body
+          : Array.isArray(body?.content) ? body.content
+          : Array.isArray(body?.items) ? body.items
+          : Array.isArray(body?.value) ? body.value
+          : Array.isArray(body?.data) ? body.data
+          : [];
+        const available = products.find((p: any) => (p.quantity - (p.reservedQty || 0)) >= 10);
         ctx.productId = available ? available.id : null;
         if (!ctx.productId) {
           return cy.apiPost(ctx.supplierToken, `/api/suppliers/${ctx.covaleId}/products`, {
-            name: 'Produit E2E Delivery', sku: `DEL-E2E-${Date.now()}`,
+            name: `Produit E2E Delivery ${Date.now()}`, sku: `DEL-E2E-${Date.now()}`,
             description: 'Produit pour tests delivery', unitPrice: 25.50,
             currency: 'TND', quantity: 500, minQuantity: 5,
-          }).then((r2) => { ctx.productId = r2.body.id; });
+          }).then((r2) => {
+            ctx.productId = r2.body?.id || r2.body?.productId || null;
+          });
         }
       });
     })
@@ -193,29 +213,38 @@ describe('14 - Delivery: Supplier Admin Order Management UI', () => {
 
   it('should show Assigner for READY_FOR_DELIVERY', () => {
     setupTestData().then((ctx) => {
-      createOrder(ctx, 'Assign test').then((id) => { advanceToReady(ctx, id); });
-    });
-    cy.loginAsSupplierAdmin();
-    cy.visit('/dashboard/supplier/orders');
-    cy.get('.filters select').select('READY_FOR_DELIVERY');
-    cy.get('table tbody tr', { timeout: 10000 }).should('have.length.gte', 1);
-    cy.get('table tbody tr').first().within(() => {
-      cy.get('button').contains('Assigner').should('exist');
+      return createOrder(ctx, 'Assign test').then((id) => {
+        return advanceToReady(ctx, id).then(() => {
+          cy.loginAsSupplierAdmin();
+          cy.visit('/dashboard/supplier/orders');
+          cy.get('.filters select').select('READY_FOR_DELIVERY');
+          cy.get('table tbody tr', { timeout: 10000 }).should('have.length.gte', 1);
+          cy.get('table tbody tr').first().within(() => {
+            cy.get('button').contains('Assigner').should('exist');
+          });
+        });
+      });
     });
   });
 
   it('should open assign modal with agent select and date', () => {
-    cy.loginAsSupplierAdmin();
-    cy.visit('/dashboard/supplier/orders');
-    cy.get('.filters select').select('READY_FOR_DELIVERY');
-    cy.get('table tbody tr', { timeout: 10000 }).first().within(() => {
-      cy.get('button').contains('Assigner').click();
+    setupTestData().then((ctx) => {
+      return createOrder(ctx, 'Modal test').then((id) => {
+        return advanceToReady(ctx, id).then(() => {
+          cy.loginAsSupplierAdmin();
+          cy.visit('/dashboard/supplier/orders');
+          cy.get('.filters select').select('READY_FOR_DELIVERY');
+          cy.get('table tbody tr', { timeout: 10000 }).first().within(() => {
+            cy.get('button').contains('Assigner').click();
+          });
+          cy.get('.modal-overlay').should('be.visible');
+          cy.get('.modal-content').should('contain', 'Assigner un livreur');
+          cy.get('select[name="agentId"]').should('exist');
+          cy.get('input[name="plannedDate"]').should('exist');
+          cy.get('.btn-secondary').contains('Annuler').click();
+        });
+      });
     });
-    cy.get('.modal-overlay').should('be.visible');
-    cy.get('.modal-content').should('contain', 'Assigner un livreur');
-    cy.get('select[name="agentId"]').should('exist');
-    cy.get('input[name="plannedDate"]').should('exist');
-    cy.get('.btn-secondary').contains('Annuler').click();
   });
 });
 

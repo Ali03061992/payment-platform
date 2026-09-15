@@ -88,7 +88,13 @@ function createOrg(token: string, name: string, type: string) {
       url: `${API_URL()}/api/admin/${endpoint}`,
       headers: authHeaders(token),
     }).then((list) => {
-      const items = Array.isArray(list.body) ? list.body : list.body.items || [];
+      const body = list.body;
+      const items = Array.isArray(body) ? body
+        : Array.isArray(body?.content) ? body.content
+        : Array.isArray(body?.items) ? body.items
+        : Array.isArray(body?.value) ? body.value
+        : Array.isArray(body?.data) ? body.data
+        : [];
       const existing = items.find((o: any) => o.name === name);
       if (existing) return existing;
       // Fuzzy match
@@ -126,7 +132,13 @@ function createRelation(token: string, supplierId: string, shopId: string) {
       url: `${API_URL()}/api/admin/supplier-shop-relations`,
       headers: authHeaders(token),
     }).then((list) => {
-      const items = Array.isArray(list.body) ? list.body : list.body.items || [];
+      const body = list.body;
+      const items = Array.isArray(body) ? body
+        : Array.isArray(body?.content) ? body.content
+        : Array.isArray(body?.items) ? body.items
+        : Array.isArray(body?.value) ? body.value
+        : Array.isArray(body?.data) ? body.data
+        : [];
       return items.find((r: any) => r.supplierId === supplierId && r.shopId === shopId) || { id: 'unknown' };
     });
   });

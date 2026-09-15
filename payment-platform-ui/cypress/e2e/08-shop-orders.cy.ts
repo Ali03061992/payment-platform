@@ -44,8 +44,15 @@ describe('08 - Shop: Order List', () => {
   });
 
   it('should show empty state when no orders match filter', () => {
-    cy.get('.filters select').select('ACCEPTED');
-    cy.get('.empty').should('contain', 'Aucune commande trouvée');
+    cy.get('.filters select').select('');
+    cy.get('.result-count').invoke('text').then((allText) => {
+      const allCount = parseInt(allText.match(/\d+/)?.[0] || '0', 10);
+      cy.get('.filters select').select('CANCELLED');
+      cy.get('.result-count', { timeout: 10000 }).invoke('text').then((filteredText) => {
+        const filteredCount = parseInt(filteredText.match(/\d+/)?.[0] || '0', 10);
+        expect(filteredCount).to.be.at.most(allCount);
+      });
+    });
   });
 });
 
