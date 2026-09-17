@@ -22,10 +22,12 @@ describe('LayoutComponent', () => {
     notificationsSubject = new Subject();
     unreadCountSubject = new Subject();
     const loginSpy = jasmine.createSpyObj('LoginService', ['getCurrentUser', 'logout']);
-    const notifSpy = jasmine.createSpyObj('NotificationService', ['startPolling', 'stopPolling', 'markAllAsRead']);
+    const notifSpy = jasmine.createSpyObj('NotificationService', ['fetchNotifications', 'fetchUnreadCount', 'startRealtime', 'stopRealtime', 'markAllAsRead']);
     const routerSpy = jasmine.createSpyObj('Router', ['navigate']);
     notifSpy.notifications$ = notificationsSubject.asObservable();
     notifSpy.unreadCount$ = unreadCountSubject.asObservable();
+    notifSpy.fetchNotifications.and.returnValue(of([]));
+    notifSpy.fetchUnreadCount.and.returnValue(of({ count: 0 } as any));
     notifSpy.markAllAsRead.and.returnValue(of({ updated: 1 } as any));
     loginSpy.getCurrentUser.and.returnValue({ id: 1, username: 'admin', firstName: 'A', lastName: 'B', roles: ['SYSTEM_ADMIN'], organizationId: 1 } as any);
 
@@ -58,9 +60,11 @@ describe('LayoutComponent', () => {
   });
 
   describe('ngOnInit', () => {
-    it('should start polling and subscribe to notifications', () => {
+    it('should start realtime and subscribe to notifications', () => {
       component.ngOnInit();
-      expect(notificationService.startPolling).toHaveBeenCalledWith(30000);
+      expect(notificationService.fetchNotifications).toHaveBeenCalled();
+      expect(notificationService.fetchUnreadCount).toHaveBeenCalled();
+      expect(notificationService.startRealtime).toHaveBeenCalled();
       notificationsSubject.next([{ id: 1 } as any]);
       unreadCountSubject.next(5);
       expect(component.notifications.length).toBe(1);

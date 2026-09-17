@@ -67,17 +67,17 @@ describe('StockOptimizationService', () => {
   });
 
   describe('getSupplierId', () => {
-    it('should return 0 when no user in session', () => {
+    it('should return empty string when no user in session', () => {
       sessionStorage.clear();
       service.optimize().subscribe();
-      const req = httpMock.expectOne(r => r.url === '/api/suppliers/0/optimization');
+      const req = httpMock.expectOne(r => r.url === '/api/suppliers//optimization');
       req.flush({ summary: '' });
     });
 
-    it('should return 0 when user has no organizationId', () => {
+    it('should return empty string when user has no organizationId', () => {
       sessionStorage.setItem('user', JSON.stringify({}));
       service.optimize().subscribe();
-      const req = httpMock.expectOne(r => r.url === '/api/suppliers/0/optimization');
+      const req = httpMock.expectOne(r => r.url === '/api/suppliers//optimization');
       req.flush({ summary: '' });
     });
   });

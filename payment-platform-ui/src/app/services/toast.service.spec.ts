@@ -121,9 +121,9 @@ describe('ToastService', () => {
       service.show('First', 'info', 0);
       service.show('Second', 'info', 0);
       service.show('Third', 'info', 0);
-      expect(toasts[0].id).toBe(1);
-      expect(toasts[1].id).toBe(2);
-      expect(toasts[2].id).toBe(3);
+      expect(toasts[0].id).toBe('1');
+      expect(toasts[1].id).toBe('2');
+      expect(toasts[2].id).toBe('3');
     });
   });
 });

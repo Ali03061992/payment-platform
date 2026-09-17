@@ -204,7 +204,6 @@ jobs:
         if: steps.check-token.outputs.available == 'true'
         uses: sonarsource/sonarqube-quality-gate-action@v1
         with:
-          scanStatusVar: SONAR_SCAN_STATUS
           pollingTimeoutSec: 300
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}

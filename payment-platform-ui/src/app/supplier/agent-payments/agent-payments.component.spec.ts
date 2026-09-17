@@ -152,7 +152,7 @@ describe('AgentPaymentsComponent', () => {
     it('should handle null user', () => {
       loginService.getCurrentUser.and.returnValue(null as any);
       component.ngOnInit();
-      expect(component.supplierId).toBe(0);
+      expect(component.supplierId).toBe('');
     });
   });
 

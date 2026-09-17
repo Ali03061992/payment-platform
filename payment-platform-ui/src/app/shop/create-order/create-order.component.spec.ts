@@ -23,13 +23,15 @@ describe('CreateOrderComponent (shop)', () => {
   beforeEach(() => {
     sessionStorage.setItem('user', JSON.stringify({ organizationId: 2 }));
     const orderSpy = jasmine.createSpyObj('OrderService', ['create']);
-    const orgSpy = jasmine.createSpyObj('OrganizationService', ['listRelations', 'listSuppliers']);
-    const stockSpy = jasmine.createSpyObj('StockService', ['getProducts']);
+    const orgSpy = jasmine.createSpyObj('OrganizationService', ['listRelations', 'listSuppliers', 'listRelationsByShop']);
+    const stockSpy = jasmine.createSpyObj('StockService', ['getProducts', 'getProductsBySupplier']);
     const toastSpy = jasmine.createSpyObj('ToastService', ['success', 'error']);
     const routerSpy = jasmine.createSpyObj('Router', ['navigate']);
     orgSpy.listRelations.and.returnValue(of([]));
+    orgSpy.listRelationsByShop.and.returnValue(of([]));
     orgSpy.listSuppliers.and.returnValue(of([]));
     stockSpy.getProducts.and.returnValue(of([]));
+    stockSpy.getProductsBySupplier.and.returnValue(of([]));
 
     TestBed.configureTestingModule({
     declarations: [CreateOrderComponent],
@@ -149,20 +151,20 @@ describe('CreateOrderComponent (shop)', () => {
     it('should not load products when supplierId is 0', () => {
       component.selectedSupplierId = '';
       component.onSupplierChange();
-      expect(stockService.getProducts).not.toHaveBeenCalled();
+      expect(stockService.getProductsBySupplier).not.toHaveBeenCalled();
     });
 
     it('should load products when supplier is selected', () => {
-      stockService.getProducts.and.returnValue(of([{ id: 1, supplierId: 1 } as any]));
+      stockService.getProductsBySupplier.and.returnValue(of([{ id: 1, supplierId: 1 } as any]));
       component.selectedSupplierId = 1;
       component.onSupplierChange();
-      expect(stockService.getProducts).toHaveBeenCalledWith('ACTIVE');
+      expect(stockService.getProductsBySupplier).toHaveBeenCalledWith(1, 'ACTIVE');
     });
 
     it('should clear searchQuery', () => {
       component.searchQuery = 'test';
       component.selectedSupplierId = 1;
-      stockService.getProducts.and.returnValue(of([]));
+      stockService.getProductsBySupplier.and.returnValue(of([]));
       component.onSupplierChange();
       expect(component.searchQuery).toBe('');
     });
@@ -170,7 +172,7 @@ describe('CreateOrderComponent (shop)', () => {
 
   describe('ngOnInit', () => {
     it('should load suppliers from relations', () => {
-      orgService.listRelations.and.returnValue(of([
+      orgService.listRelationsByShop.and.returnValue(of([
         { shopId: 2, supplierId: 10, status: 'ACTIVE' },
         { shopId: 2, supplierId: 20, status: 'ACTIVE' },
         { shopId: 3, supplierId: 30, status: 'ACTIVE' }
@@ -187,11 +189,11 @@ describe('CreateOrderComponent (shop)', () => {
     it('should handle no user in session', () => {
       sessionStorage.removeItem('user');
       component.ngOnInit();
-      expect(component.shopId).toBe(0);
+      expect(component.shopId).toBe('');
     });
 
     it('should handle empty relations', () => {
-      orgService.listRelations.and.returnValue(of([]));
+      orgService.listRelationsByShop.and.returnValue(of([]));
       orgService.listSuppliers.and.returnValue(of([]));
       component.ngOnInit();
       expect(component.suppliers.length).toBe(0);

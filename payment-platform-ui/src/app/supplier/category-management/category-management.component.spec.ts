@@ -136,9 +136,9 @@ describe('CategoryManagementComponent', () => {
       expect(component.supplierId).toBe(1);
     });
 
-    it('should return 0 when no user in session', () => {
+    it('should return empty when no user in session', () => {
       sessionStorage.clear();
-      expect(component.supplierId).toBe(0);
+      expect(component.supplierId).toBe('');
     });
   });
 

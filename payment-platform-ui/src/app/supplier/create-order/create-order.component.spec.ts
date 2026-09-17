@@ -24,11 +24,12 @@ describe('SupplierCreateOrderComponent', () => {
   beforeEach(() => {
     sessionStorage.setItem('user', JSON.stringify({ organizationId: 1 }));
     const orderSpy = jasmine.createSpyObj('OrderService', ['create']);
-    const orgSpy = jasmine.createSpyObj('OrganizationService', ['listRelations', 'listShops']);
+    const orgSpy = jasmine.createSpyObj('OrganizationService', ['listRelations', 'listShops', 'listRelationsBySupplier']);
     const stockSpy = jasmine.createSpyObj('StockService', ['getProducts']);
     const toastSpy = jasmine.createSpyObj('ToastService', ['success', 'error']);
     const routerSpy = jasmine.createSpyObj('Router', ['navigate']);
     orgSpy.listRelations.and.returnValue(of([]));
+    orgSpy.listRelationsBySupplier.and.returnValue(of([]));
     orgSpy.listShops.and.returnValue(of([]));
     stockSpy.getProducts.and.returnValue(of([]));
 
@@ -63,17 +64,17 @@ describe('SupplierCreateOrderComponent', () => {
 
   describe('ngOnInit', () => {
     it('should load shops and set supplierId', () => {
-      orgService.listRelations.and.returnValue(of([
+      orgService.listRelationsBySupplier.and.returnValue(of([
         { supplierId: 1, shopId: 10, status: 'ACTIVE' },
         { supplierId: 1, shopId: 20, status: 'ACTIVE' },
         { supplierId: 2, shopId: 10, status: 'ACTIVE' },
         { supplierId: 1, shopId: 30, status: 'INACTIVE' }
       ] as any));
       orgService.listShops.and.returnValue(of([
-        { id: 10, name: 'Shop10' } as any,
-        { id: 20, name: 'Shop20' } as any,
-        { id: 30, name: 'Shop30' } as any,
-        { id: 40, name: 'Shop40' } as any
+        { id: 10, name: 'Shop10', status: 'ACTIVE' } as any,
+        { id: 20, name: 'Shop20', status: 'ACTIVE' } as any,
+        { id: 30, name: 'Shop30', status: 'ACTIVE' } as any,
+        { id: 40, name: 'Shop40', status: 'ACTIVE' } as any
       ]));
       component.ngOnInit();
       expect(component.supplierId).toBe(1);
@@ -83,13 +84,13 @@ describe('SupplierCreateOrderComponent', () => {
     it('should handle no user in session', () => {
       sessionStorage.clear();
       component.ngOnInit();
-      expect(component.supplierId).toBe(0);
+      expect(component.supplierId).toBe('');
     });
 
     it('should handle user with no organizationId', () => {
       sessionStorage.setItem('user', JSON.stringify({ username: 'test' }));
       component.ngOnInit();
-      expect(component.supplierId).toBe(0);
+      expect(component.supplierId).toBe('');
     });
   });
 

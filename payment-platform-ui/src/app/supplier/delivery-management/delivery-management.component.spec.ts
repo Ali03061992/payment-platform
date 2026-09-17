@@ -47,10 +47,10 @@ describe('DeliveryManagementComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  describe('pendingDeliveries', () => {
+  describe('activeDeliveries', () => {
     it('should filter IN_DELIVERY orders', () => {
       component.deliveries = [mockOrder, { ...mockOrder, id: 2, status: 'DELIVERED' }];
-      expect(component.pendingDeliveries.length).toBe(1);
+      expect(component.activeDeliveries.length).toBe(1);
     });
   });
 

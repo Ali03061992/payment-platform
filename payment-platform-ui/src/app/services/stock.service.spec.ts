@@ -129,10 +129,10 @@ describe('StockService', () => {
   });
 
   describe('getSupplierId', () => {
-    it('should return 0 when no user in session', () => {
+    it('should return empty string when no user in session', () => {
       sessionStorage.clear();
       service.getProducts().subscribe();
-      const req = httpMock.expectOne(r => r.url === '/api/suppliers/0/products');
+      const req = httpMock.expectOne(r => r.url === '/api/suppliers//products');
       req.flush([]);
     });
   });

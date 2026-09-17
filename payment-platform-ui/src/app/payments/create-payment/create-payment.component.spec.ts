@@ -58,8 +58,8 @@ describe('CreatePaymentComponent', () => {
   });
 
   it('should have initial state', () => {
-    expect(component.shopId).toBe(0);
-    expect(component.supplierId).toBe(0);
+    expect(component.shopId).toBe('');
+    expect(component.supplierId).toBe('');
     expect(component.amount).toBe(0);
     expect(component.currency).toBe('TND');
     expect(component.creating).toBeFalse();
@@ -108,7 +108,7 @@ describe('CreatePaymentComponent', () => {
     it('should not load shopId when organizationId is missing', () => {
       sessionStorage.setItem('user', JSON.stringify({ roles: ['SHOP_ADMIN'], username: 'shop1' }));
       component.ngOnInit();
-      expect(component.shopId).toBe(0);
+      expect(component.shopId).toBe('');
     });
   });
 

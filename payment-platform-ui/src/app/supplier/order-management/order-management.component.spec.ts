@@ -7,7 +7,7 @@ import { of, throwError, Subscription } from 'rxjs';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { OrderManagementComponent } from './order-management.component';
 import { OrderService } from '../../services/order.service';
-import { OrganizationService } from '../../services/organization.service';
+import { SupplierAgentService } from '../../services/supplier-agent.service';
 import { ToastService } from '../../services/toast.service';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
@@ -15,7 +15,7 @@ describe('OrderManagementComponent', () => {
   let component: OrderManagementComponent;
   let fixture: ComponentFixture<OrderManagementComponent>;
   let orderService: jasmine.SpyObj<OrderService>;
-  let orgService: jasmine.SpyObj<OrganizationService>;
+  let agentService: jasmine.SpyObj<SupplierAgentService>;
   let toast: jasmine.SpyObj<ToastService>;
 
   const mockOrder = {
@@ -26,12 +26,13 @@ describe('OrderManagementComponent', () => {
   };
 
   beforeEach(() => {
+    sessionStorage.setItem('user', JSON.stringify({ organizationId: '1' }));
     const orderSpy = jasmine.createSpyObj('OrderService', ['list', 'getById', 'confirm', 'prepare', 'readyForDelivery', 'assignDelivery', 'deliveryReject', 'cancel']);
-    const orgSpy = jasmine.createSpyObj('OrganizationService', ['listUsers']);
+    const agentSpy = jasmine.createSpyObj('SupplierAgentService', ['listAgents']);
     const toastSpy = jasmine.createSpyObj('ToastService', ['success', 'error']);
     const routerSpy = jasmine.createSpyObj('Router', ['navigate']);
     orderSpy.list.and.returnValue(of([]));
-    orgSpy.listUsers.and.returnValue(of([]));
+    agentSpy.listAgents.and.returnValue(of([]));
 
     TestBed.configureTestingModule({
     declarations: [OrderManagementComponent],
@@ -39,7 +40,7 @@ describe('OrderManagementComponent', () => {
     imports: [FormsModule],
     providers: [
         { provide: OrderService, useValue: orderSpy },
-        { provide: OrganizationService, useValue: orgSpy },
+        { provide: SupplierAgentService, useValue: agentSpy },
         { provide: ToastService, useValue: toastSpy },
         { provide: Router, useValue: routerSpy },
         provideHttpClient(withInterceptorsFromDi()),
@@ -49,7 +50,7 @@ describe('OrderManagementComponent', () => {
     fixture = TestBed.createComponent(OrderManagementComponent);
     component = fixture.componentInstance;
     orderService = TestBed.inject(OrderService) as jasmine.SpyObj<OrderService>;
-    orgService = TestBed.inject(OrganizationService) as jasmine.SpyObj<OrganizationService>;
+    agentService = TestBed.inject(SupplierAgentService) as jasmine.SpyObj<SupplierAgentService>;
     toast = TestBed.inject(ToastService) as jasmine.SpyObj<ToastService>;
   });
 
@@ -60,10 +61,9 @@ describe('OrderManagementComponent', () => {
   describe('ngOnInit', () => {
     it('should load orders and agents', () => {
       orderService.list.and.returnValue(of([mockOrder]));
-      orgService.listUsers.and.returnValue(of([
-        { id: 1, firstName: 'A', lastName: 'B', roles: ['SUPPLIER_AGENT'] },
-        { id: 2, firstName: 'C', lastName: 'D', roles: ['DELIVERY_AGENT'] },
-        { id: 3, firstName: 'E', lastName: 'F', roles: ['SHOP_ADMIN'] }
+      agentService.listAgents.and.returnValue(of([
+        { id: '1', firstName: 'A', lastName: 'B' },
+        { id: '2', firstName: 'C', lastName: 'D' }
       ]));
       component.ngOnInit();
       expect(component.orders.length).toBe(1);
@@ -78,7 +78,7 @@ describe('OrderManagementComponent', () => {
     });
 
     it('should handle load agents error', () => {
-      orgService.listUsers.and.returnValue(throwError(() => new Error('fail')));
+      agentService.listAgents.and.returnValue(throwError(() => new Error('fail')));
       component.ngOnInit();
       expect(component.loading).toBeFalse();
     });
@@ -215,7 +215,7 @@ describe('OrderManagementComponent', () => {
       component.openAssign(mockOrder);
       expect(component.showAssignModal).toBeTrue();
       expect(component.assignOrderId).toBe(1);
-      expect(component.assignAgentId).toBe(0);
+      expect(component.assignAgentId).toBe('');
       component.closeAssign();
       expect(component.showAssignModal).toBeFalse();
     });

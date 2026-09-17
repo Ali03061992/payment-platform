@@ -64,7 +64,7 @@ describe('PaymentDetailComponent', () => {
   describe('ngOnInit', () => {
     it('should load payment by id', () => {
       component.ngOnInit();
-      expect(paymentService.getById).toHaveBeenCalledWith(1);
+      expect(paymentService.getById).toHaveBeenCalledWith('1');
       expect(component.payment).toBeTruthy();
       expect(component.loading).toBeFalse();
     });

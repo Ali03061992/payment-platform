@@ -74,9 +74,9 @@ describe('FamilyManagementComponent', () => {
       expect(component.supplierId).toBe(1);
     });
 
-    it('should return 0 when no user', () => {
+    it('should return empty when no user', () => {
       sessionStorage.clear();
-      expect(component.supplierId).toBe(0);
+      expect(component.supplierId).toBe('');
     });
   });
 

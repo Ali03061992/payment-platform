@@ -97,10 +97,10 @@ describe('OrderService', () => {
 
   describe('assignDelivery', () => {
     it('should POST assign-delivery with agentId', () => {
-      service.assignDelivery(1, 5).subscribe();
+      service.assignDelivery('1', '5').subscribe();
       const req = httpMock.expectOne('/api/orders/1/assign-delivery');
       expect(req.request.method).toBe('POST');
-      expect(req.request.body).toEqual({ agentId: 5 });
+      expect(req.request.body).toEqual({ agentId: '5', plannedDeliveryDate: undefined });
       req.flush(mockOrder);
     });
   });

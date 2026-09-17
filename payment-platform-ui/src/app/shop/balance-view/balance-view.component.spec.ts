@@ -55,14 +55,14 @@ describe('BalanceViewComponent', () => {
       expect(component['getShopId']()).toBe(2);
     });
 
-    it('should return 0 when no user', () => {
+    it('should return empty string when no user', () => {
       sessionStorage.clear();
-      expect(component['getShopId']()).toBe(0);
+      expect(component['getShopId']()).toBe('');
     });
 
-    it('should return 0 when user has no organizationId', () => {
+    it('should return empty string when user has no organizationId', () => {
       sessionStorage.setItem('user', JSON.stringify({ username: 'test' }));
-      expect(component['getShopId']()).toBe(0);
+      expect(component['getShopId']()).toBe('');
     });
   });
 
