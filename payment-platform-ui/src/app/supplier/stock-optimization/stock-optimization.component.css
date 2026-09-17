@@ -83,7 +83,7 @@
 .detail-row span:first-child { color: #8896ab; }
 .detail-row .val { font-weight: 600; color: #1a1a2e; }
 .detail-row .val.small { font-size: 11px; font-weight: 400; max-width: 200px; text-align: right; }
-.urgent { color: #c62828 !important; }
+.urgent { color: #c62828; }
 
 /* Recommendation */
 .rec-box { padding: 14px; border-left: 4px solid; background: #f8f9fa; border-radius: 0 8px 8px 0; }

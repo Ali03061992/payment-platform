@@ -374,11 +374,11 @@
   }
 
   .hide-mobile {
-    display: none !important;
+    display: none;
   }
 
   .show-mobile {
-    display: block !important;
+    display: block;
   }
 
   .agent-total-row {

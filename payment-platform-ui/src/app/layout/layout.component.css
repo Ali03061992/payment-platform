@@ -340,7 +340,7 @@
   }
 
   .main-content {
-    margin-left: 0 !important;
+    margin-left: 0;
   }
 
   .top-bar {
@@ -403,7 +403,7 @@
 
 @media (max-width: 768px) {
   .hide-mobile {
-    display: none !important;
+    display: none;
   }
 }
 

@@ -10,7 +10,7 @@
 .actions .btn:last-child { margin-right: 0; }
 
 .clickable-row { cursor: pointer; }
-.clickable-row:hover { background: #f0f4ff !important; }
+.clickable-row:hover { background: #f0f4ff; }
 
 .empty { text-align: center; padding: 48px; color: #8896ab; }
 

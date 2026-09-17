@@ -471,7 +471,7 @@ tr:hover { background: #fafbfc; }
 
   /* Stats grid becomes 2 columns on mobile */
   .stats-grid {
-    grid-template-columns: 1fr 1fr !important;
+    grid-template-columns: 1fr 1fr;
     gap: 10px;
   }
 
@@ -573,7 +573,7 @@ tr:hover { background: #fafbfc; }
 @media (max-width: 480px) {
   /* Stats grid becomes 1 column on very small screens */
   .stats-grid {
-    grid-template-columns: 1fr !important;
+    grid-template-columns: 1fr;
   }
 
   .stat-card {
@@ -619,7 +619,7 @@ input[type="url"],
 input[type="search"],
 select,
 textarea {
-  font-size: 16px !important;
+  font-size: 16px;
 }
 
 /* Safe area for notched phones */
@@ -685,13 +685,12 @@ textarea {
   }
 
   .main-content {
-    margin-left: 0 !important;
-    padding: 16px !important;
-    width: 100% !important;
+    padding: 16px;
+    width: 100%;
   }
 
   .mobile-header {
-    display: flex !important;
+    display: flex;
     align-items: center;
     justify-content: space-between;
     padding: 12px 16px;
@@ -762,6 +761,6 @@ textarea {
 
 @media (max-width: 768px) {
   .hide-mobile {
-    display: none !important;
+    display: none;
   }
 }
