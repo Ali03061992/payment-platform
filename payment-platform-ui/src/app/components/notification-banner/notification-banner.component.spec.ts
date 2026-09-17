@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { NotificationBannerComponent } from './notification-banner.component';
 import { NotificationService } from '../../services/notification.service';

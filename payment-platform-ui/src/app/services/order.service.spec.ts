@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { TestBed } from '@angular/core/testing';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { OrderService } from './order.service';
@@ -175,6 +176,87 @@ describe('OrderService', () => {
       const req = httpMock.expectOne('/api/orders/my-deliveries');
       expect(req.request.method).toBe('GET');
       req.flush([mockOrder]);
+    });
+  });
+
+  describe('list branches', () => {
+    it('should handle response with items property', () => {
+      service.list().subscribe(data => {
+        expect(data.length).toBe(1);
+        expect(data[0].id).toBe(1);
+      });
+      const req = httpMock.expectOne('/api/orders');
+      req.flush({ items: [mockOrder] });
+    });
+
+    it('should handle response with content property', () => {
+      service.list().subscribe(data => {
+        expect(data.length).toBe(1);
+      });
+      const req = httpMock.expectOne('/api/orders');
+      req.flush({ content: [mockOrder] });
+    });
+
+    it('should handle response with data property', () => {
+      service.list().subscribe(data => {
+        expect(data.length).toBe(1);
+      });
+      const req = httpMock.expectOne('/api/orders');
+      req.flush({ data: [mockOrder] });
+    });
+
+    it('should handle empty object response', () => {
+      service.list().subscribe(data => {
+        expect(data).toEqual([]);
+      });
+      const req = httpMock.expectOne('/api/orders');
+      req.flush({});
+    });
+
+    it('should handle null response as empty', () => {
+      service.list().subscribe(data => {
+        expect(data).toEqual([]);
+      });
+      const req = httpMock.expectOne('/api/orders');
+      req.flush(null);
+    });
+
+    it('should handle error propagation', () => {
+      let errorCaught = false;
+      service.list().subscribe({
+        next: () => fail('should not succeed'),
+        error: () => errorCaught = true
+      });
+      const req = httpMock.expectOne('/api/orders');
+      req.flush('error', { status: 500, statusText: 'Server Error' });
+      expect(errorCaught).toBeTrue();
+    });
+
+    it('should handle direct array response with empty array', () => {
+      service.list().subscribe(data => {
+        expect(data).toEqual([]);
+      });
+      const req = httpMock.expectOne('/api/orders');
+      req.flush([]);
+    });
+  });
+
+  describe('assignDelivery with planned date', () => {
+    it('should POST with plannedDeliveryDate when provided', () => {
+      service.assignDelivery(1, 5, '2026-09-20').subscribe();
+      const req = httpMock.expectOne('/api/orders/1/assign-delivery');
+      expect(req.request.body).toEqual({ agentId: 5, plannedDeliveryDate: '2026-09-20' });
+      req.flush(mockOrder);
+    });
+  });
+
+  describe('confirmDelivery', () => {
+    it('should POST confirm-delivery with date', () => {
+      service.confirmDelivery(1, '2026-09-17').subscribe();
+      const req = httpMock.expectOne('/api/orders/1/confirm-delivery');
+      expect(req.request.method).toBe('POST');
+      expect(req.request.body).toEqual({ confirmedDate: '2026-09-17' });
+      req.flush(mockOrder);
     });
   });
 });

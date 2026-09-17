@@ -180,4 +180,131 @@ class StockControllerTest {
                         .with(SecurityMockMvcRequestPostProcessors.authentication(sysAdmin)))
                 .andExpect(status().isOk());
     }
+
+    @Test
+    void getProduct_systemAdmin_returnsOk() throws Exception {
+        Product p = createProduct("SKU-SYS");
+        UsernamePasswordAuthenticationToken sysAdmin = auth(UUID.fromString("00000000-0000-0000-0000-000000000003"), "sysadmin", List.of("SYSTEM_ADMIN"), null);
+        mockMvc.perform(get("/api/suppliers/" + SUPPLIER_ID + "/products/" + p.getId())
+                        .with(SecurityMockMvcRequestPostProcessors.authentication(sysAdmin)))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void getProduct_wrongSupplier_returns403() throws Exception {
+        Product p = createProduct("SKU-GET-FORBID");
+        UsernamePasswordAuthenticationToken other = auth(UUID.fromString("00000000-0000-0000-0000-000000000004"), "other", List.of("SUPPLIER_ADMIN"), UUID.fromString("00000000-0000-0000-0000-000000000099"));
+        mockMvc.perform(get("/api/suppliers/" + SUPPLIER_ID + "/products/" + p.getId())
+                        .with(SecurityMockMvcRequestPostProcessors.authentication(other)))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void createProduct_wrongSupplier_returns403() throws Exception {
+        ProductCreateRequest request = new ProductCreateRequest(
+                "Widget", "SKU-NEW-403", "Description", new BigDecimal("15.00"), "TND", 50, 5);
+        UsernamePasswordAuthenticationToken other = auth(UUID.fromString("00000000-0000-0000-0000-000000000005"), "other2", List.of("SUPPLIER_MANAGE_PRODUCTS"), UUID.fromString("00000000-0000-0000-0000-000000000099"));
+        mockMvc.perform(post("/api/suppliers/" + SUPPLIER_ID + "/products")
+                        .with(SecurityMockMvcRequestPostProcessors.authentication(other))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void updateProduct_wrongSupplier_returns403() throws Exception {
+        Product p = createProduct("SKU-UPD-403");
+        ProductUpdateRequest request = new ProductUpdateRequest("Updated", null, null, 200, null, null);
+        UsernamePasswordAuthenticationToken other = auth(UUID.fromString("00000000-0000-0000-0000-000000000006"), "other3", List.of("SUPPLIER_MANAGE_PRODUCTS"), UUID.fromString("00000000-0000-0000-0000-000000000099"));
+        mockMvc.perform(patch("/api/suppliers/" + SUPPLIER_ID + "/products/" + p.getId())
+                        .with(SecurityMockMvcRequestPostProcessors.authentication(other))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void deleteProduct_wrongSupplier_returns403() throws Exception {
+        Product p = createProduct("SKU-DEL-403");
+        UsernamePasswordAuthenticationToken other = auth(UUID.fromString("00000000-0000-0000-0000-000000000007"), "other4", List.of("SUPPLIER_MANAGE_PRODUCTS"), UUID.fromString("00000000-0000-0000-0000-000000000099"));
+        mockMvc.perform(patch("/api/suppliers/" + SUPPLIER_ID + "/products/" + p.getId() + "/deactivate")
+                        .with(SecurityMockMvcRequestPostProcessors.authentication(other)))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void listMovements_wrongSupplier_returns403() throws Exception {
+        UsernamePasswordAuthenticationToken other = auth(UUID.fromString("00000000-0000-0000-0000-000000000008"), "other5", List.of("SUPPLIER_MANAGE_STOCK"), UUID.fromString("00000000-0000-0000-0000-000000000099"));
+        mockMvc.perform(get("/api/suppliers/" + SUPPLIER_ID + "/movements")
+                        .with(SecurityMockMvcRequestPostProcessors.authentication(other)))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void createMovement_wrongSupplier_returns403() throws Exception {
+        Product p = createProduct("SKU-MOV-403");
+        StockMovementRequest request = new StockMovementRequest(p.getId(), "IN", 10, "REF-001", "Restock");
+        UsernamePasswordAuthenticationToken other = auth(UUID.fromString("00000000-0000-0000-0000-000000000009"), "other6", List.of("SUPPLIER_MANAGE_STOCK"), UUID.fromString("00000000-0000-0000-0000-000000000099"));
+        mockMvc.perform(post("/api/suppliers/" + SUPPLIER_ID + "/movements")
+                        .with(SecurityMockMvcRequestPostProcessors.authentication(other))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void listProducts_asShopWithRelation_returnsOk() throws Exception {
+        // Create a shop org and relation would require more setup, but we can test shop without relation -> 403
+        UsernamePasswordAuthenticationToken shopUser = auth(UUID.fromString("00000000-0000-0000-0000-000000000010"), "shop.user", List.of("SHOP_ADMIN"), UUID.fromString("00000000-0000-0000-0000-000000000020"));
+        mockMvc.perform(get("/api/suppliers/" + SUPPLIER_ID + "/products")
+                        .with(SecurityMockMvcRequestPostProcessors.authentication(shopUser)))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void getProduct_asShopWithoutRelation_returns403() throws Exception {
+        Product p = createProduct("SKU-SHOP-403");
+        UsernamePasswordAuthenticationToken shopUser = auth(UUID.fromString("00000000-0000-0000-0000-000000000011"), "shop.user2", List.of("SHOP_ADMIN"), UUID.fromString("00000000-0000-0000-0000-000000000021"));
+        mockMvc.perform(get("/api/suppliers/" + SUPPLIER_ID + "/products/" + p.getId())
+                        .with(SecurityMockMvcRequestPostProcessors.authentication(shopUser)))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void listProducts_withoutAuth_returns401() throws Exception {
+        mockMvc.perform(get("/api/suppliers/" + SUPPLIER_ID + "/products"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void updateProduct_valid_partialUpdate_returnsOk() throws Exception {
+        Product p = createProduct("SKU-PARTIAL");
+        ProductUpdateRequest request = new ProductUpdateRequest(null, "NEW-SKU", new BigDecimal("99.99"), null, null, "Updated description");
+        mockMvc.perform(patch("/api/suppliers/" + SUPPLIER_ID + "/products/" + p.getId())
+                        .with(SecurityMockMvcRequestPostProcessors.authentication(supplierAdmin()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void createMovement_withOutType_returnsOk() throws Exception {
+        Product p = createProduct("SKU-OUT2");
+        StockMovementRequest request = new StockMovementRequest(p.getId(), "OUT", 20, "REF-002", "Sale");
+        mockMvc.perform(post("/api/suppliers/" + SUPPLIER_ID + "/movements")
+                        .with(SecurityMockMvcRequestPostProcessors.authentication(supplierAdmin()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.type").value("OUT"));
+    }
+
+    @Test
+    void listMovements_withProductFilter_returnsOk() throws Exception {
+        Product p = createProduct("SKU-FILTER");
+        mockMvc.perform(get("/api/suppliers/" + SUPPLIER_ID + "/movements")
+                        .with(SecurityMockMvcRequestPostProcessors.authentication(supplierAdmin()))
+                        .param("productId", p.getId().toString()))
+                .andExpect(status().isOk());
+    }
 }

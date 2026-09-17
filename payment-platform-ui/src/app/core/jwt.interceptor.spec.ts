@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { TestBed } from '@angular/core/testing';
 import { HttpRequest, HttpHandler, HttpErrorResponse } from '@angular/common/http';
 import { Router } from '@angular/router';

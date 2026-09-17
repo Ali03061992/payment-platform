@@ -73,8 +73,55 @@ services:
     networks:
       - payment-net
 
+  # SonarQube – analyse qualité + coverage (profil local)
+  # Démarrage : docker compose -f docker-compose.dev.yml --profile sonar up -d
+  # UI : http://localhost:9000 (admin/admin, change au premier login)
+  # Pour scan local : SONAR_TOKEN=<token> mvn -f ../backend/pom.xml verify sonar:sonar -Dsonar.host.url=http://localhost:9000
+  sonarqube:
+    image: sonarqube:community
+    container_name: payment-sonarqube
+    profiles: ["sonar"]
+    environment:
+      SONAR_ES_BOOTSTRAP_CHECKS_DISABLE: "true"
+      SONAR_JDBC_URL: jdbc:postgresql://sonar-postgres:5432/sonar
+      SONAR_JDBC_USERNAME: sonar
+      SONAR_JDBC_PASSWORD: sonar
+    ports:
+      - "9000:9000"
+    volumes:
+      - sonarqube-data:/opt/sonarqube/data
+      - sonarqube-extensions:/opt/sonarqube/extensions
+      - sonarqube-logs:/opt/sonarqube/logs
+    depends_on:
+      sonar-postgres:
+        condition: service_healthy
+    networks:
+      - payment-net
+
+  sonar-postgres:
+    image: postgres:16-alpine
+    container_name: payment-sonar-postgres
+    profiles: ["sonar"]
+    environment:
+      POSTGRES_DB: sonar
+      POSTGRES_USER: sonar
+      POSTGRES_PASSWORD: sonar
+    volumes:
+      - sonar-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sonar"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - payment-net
+
 volumes:
   mysql-data:
+  sonarqube-data:
+  sonarqube-logs:
+  sonarqube-extensions:
+  sonar-postgres-data:
 
 networks:
   payment-net:

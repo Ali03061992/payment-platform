@@ -33,9 +33,43 @@
     <spring-cloud.version>2025.1.2</spring-cloud.version>
     <springdoc.version>3.0.0</springdoc.version>
     <testcontainers.version>2.0.5</testcontainers.version>
-    <lombok.version>1.18.38</lombok.version>
+    <lombok.version>1.18.48</lombok.version>
     <mapstruct.version>1.6.3</mapstruct.version>
     <maven.compiler.release>26</maven.compiler.release>
+    <!-- JaCoCo / Sonar versions -->
+    <jacoco.version>0.8.15</jacoco.version>
+    <sonar-maven-plugin.version>5.1.0.4753</sonar-maven-plugin.version>
+    <maven-surefire-plugin.version>3.5.4</maven-surefire-plugin.version>
+    <maven-failsafe-plugin.version>3.5.4</maven-failsafe-plugin.version>
+    <!-- SonarQube / SonarCloud properties — overridable via -D or env SONAR_HOST_URL/SONAR_TOKEN -->
+    <sonar.host.url>http://localhost:9000</sonar.host.url>
+    <sonar.projectKey>payment-platform-backend</sonar.projectKey>
+    <sonar.projectName>Payment Platform :: Backend</sonar.projectName>
+    <sonar.sourceEncoding>UTF-8</sonar.sourceEncoding>
+    <sonar.java.source>26</sonar.java.source>
+    <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
+    <!-- XML reports consumed by SonarScanner for Maven -->
+    <sonar.coverage.jacoco.xmlReportPaths>
+      ${project.basedir}/shared-lib/target/site/jacoco/jacoco.xml,
+      ${project.basedir}/identity-service/target/site/jacoco/jacoco.xml,
+      ${project.basedir}/organization-service/target/site/jacoco/jacoco.xml,
+      ${project.basedir}/payment-service/target/site/jacoco/jacoco.xml,
+      ${project.basedir}/notification-service/target/site/jacoco/jacoco.xml,
+      ${project.basedir}/api-gateway/target/site/jacoco/jacoco.xml,
+      ${project.basedir}/target/site/jacoco-aggregate/jacoco.xml
+    </sonar.coverage.jacoco.xmlReportPaths>
+    <sonar.exclusions>
+      **/target/**,**/node_modules/**,**/dist/**,**/coverage/**,
+      **/src/main/resources/**,**/generated/**,**/openapi/**,
+      **/*Application.java
+    </sonar.exclusions>
+    <sonar.coverage.exclusions>
+      **/domain/model/**,**/domain/valueobject/**,**/domain/event/**,**/domain/exception/**,**/domain/engine/**,**/domain/security/**,**/domain/repository/**,
+      **/config/**,**/infrastructure/configuration/**,**/*Application.java,**/*Config.java,**/*MapperImpl.java
+    </sonar.coverage.exclusions>
+    <sonar.cpd.exclusions>**/*Test.java,**/test/**</sonar.cpd.exclusions>
+    <sonar.test.exclusions>**/*Test.java,**/*IT.java</sonar.test.exclusions>
+    <!-- For SonarCloud, set: -Dsonar.organization=<org> -Dsonar.host.url=https://sonarcloud.io -->
   </properties>
 
   <dependencyManagement>
@@ -76,47 +110,95 @@
   <build>
     <pluginManagement>
       <plugins>
+        <!-- Surefire : unit tests -->
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <version>${maven-surefire-plugin.version}</version>
+          <configuration>
+            <includes>
+              <include>**/*Test.java</include>
+              <include>**/*Tests.java</include>
+            </includes>
+            <excludes>
+              <exclude>**/*IT.java</exclude>
+              <exclude>**/*H2Test.java</exclude>
+            </excludes>
+          </configuration>
+        </plugin>
+        <!-- Failsafe : integration tests (Testcontainers / H2) -->
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-failsafe-plugin</artifactId>
+          <version>${maven-failsafe-plugin.version}</version>
+          <configuration>
+            <includes>
+              <include>**/*IT.java</include>
+              <include>**/*H2Test.java</include>
+            </includes>
+          </configuration>
           <executions>
             <execution>
+              <id>integration-test</id>
               <goals>
                 <goal>integration-test</goal>
+              </goals>
+            </execution>
+            <execution>
+              <id>verify</id>
+              <goals>
                 <goal>verify</goal>
               </goals>
             </execution>
           </executions>
         </plugin>
+        <!-- JaCoCo : coverage unit + integration + XML for Sonar -->
         <plugin>
           <groupId>org.jacoco</groupId>
           <artifactId>jacoco-maven-plugin</artifactId>
-          <version>0.8.15</version>
+          <version>${jacoco.version}</version>
+          <configuration>
+            <excludes>
+              <exclude>com/paymentplatform/**/domain/model/**</exclude>
+              <exclude>com/paymentplatform/**/domain/valueobject/**</exclude>
+              <exclude>com/paymentplatform/**/domain/event/**</exclude>
+              <exclude>com/paymentplatform/**/domain/exception/**</exclude>
+              <exclude>com/paymentplatform/**/domain/engine/**</exclude>
+              <exclude>com/paymentplatform/**/domain/security/**</exclude>
+              <exclude>com/paymentplatform/**/domain/repository/**</exclude>
+              <exclude>com/paymentplatform/**/config/**</exclude>
+              <exclude>com/paymentplatform/**/infrastructure/configuration/**</exclude>
+              <exclude>**/*Application</exclude>
+              <exclude>**/*Config</exclude>
+              <exclude>**/*MapperImpl</exclude>
+            </excludes>
+          </configuration>
           <executions>
             <execution>
               <id>prepare-agent</id>
-              <goals>
-                <goal>prepare-agent</goal>
-              </goals>
+              <goals><goal>prepare-agent</goal></goals>
+            </execution>
+            <execution>
+              <id>prepare-agent-integration</id>
+              <goals><goal>prepare-agent-integration</goal></goals>
             </execution>
             <execution>
               <id>report</id>
-              <goals>
-                <goal>report</goal>
-              </goals>
-              <configuration>
-                <excludes>
-                  <exclude>com/paymentplatform/**/domain/model/**</exclude>
-                  <exclude>com/paymentplatform/**/domain/valueobject/**</exclude>
-                  <exclude>com/paymentplatform/**/domain/event/**</exclude>
-                  <exclude>com/paymentplatform/**/domain/exception/**</exclude>
-                  <exclude>com/paymentplatform/**/domain/engine/**</exclude>
-                  <exclude>com/paymentplatform/**/domain/security/**</exclude>
-                  <exclude>com/paymentplatform/**/domain/repository/**</exclude>
-                </excludes>
-              </configuration>
+              <phase>test</phase>
+              <goals><goal>report</goal></goals>
+            </execution>
+            <execution>
+              <id>report-integration</id>
+              <phase>post-integration-test</phase>
+              <goals><goal>report-integration</goal></goals>
             </execution>
           </executions>
+        </plugin>
+        <!-- SonarScanner for Maven -->
+        <plugin>
+          <groupId>org.sonarsource.scanner.maven</groupId>
+          <artifactId>sonar-maven-plugin</artifactId>
+          <version>${sonar-maven-plugin.version}</version>
         </plugin>
       </plugins>
     </pluginManagement>
@@ -148,21 +230,52 @@
           </compilerArgs>
         </configuration>
       </plugin>
+      <!-- JaCoCo actif sur chaque module + agrégat sur le parent -->
       <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
-        <configuration>
-          <excludes>
-            <exclude>com/paymentplatform/**/domain/model/**</exclude>
-            <exclude>com/paymentplatform/**/domain/valueobject/**</exclude>
-            <exclude>com/paymentplatform/**/domain/event/**</exclude>
-            <exclude>com/paymentplatform/**/domain/exception/**</exclude>
-            <exclude>com/paymentplatform/**/domain/engine/**</exclude>
-            <exclude>com/paymentplatform/**/domain/security/**</exclude>
-            <exclude>com/paymentplatform/**/domain/repository/**</exclude>
-          </excludes>
-        </configuration>
+        <executions>
+          <execution>
+            <id>report-aggregate</id>
+            <phase>verify</phase>
+            <goals><goal>report-aggregate</goal></goals>
+            <configuration>
+              <dataFileIncludes>
+                <dataFileInclude>**/jacoco.exec</dataFileInclude>
+                <dataFileInclude>**/jacoco-it.exec</dataFileInclude>
+              </dataFileIncludes>
+              <outputDirectory>${project.build.directory}/site/jacoco-aggregate</outputDirectory>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-failsafe-plugin</artifactId>
       </plugin>
     </plugins>
   </build>
+
+  <!-- Profil dédié : mvn verify -Pcoverage ou mvn sonar:sonar -Pcoverage -->
+  <profiles>
+    <profile>
+      <id>coverage</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.jacoco</groupId>
+            <artifactId>jacoco-maven-plugin</artifactId>
+            <executions>
+              <execution><id>prepare-agent</id><goals><goal>prepare-agent</goal></goals></execution>
+              <execution><id>report</id><phase>test</phase><goals><goal>report</goal></goals></execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 </project>

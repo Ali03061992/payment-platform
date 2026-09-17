@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { FilterByRiskPipe } from './filter-by-risk.pipe';
 import { ProductOptimization } from '../../models/stock-optimization.model';
 

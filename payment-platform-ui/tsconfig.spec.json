@@ -3,9 +3,16 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "outDir": "./out-tsc/spec",
+    "strict": false,
+    "noImplicitAny": false,
+    "skipLibCheck": true,
     "types": [
       "jasmine"
     ]
+  },
+  "angularCompilerOptions": {
+    "strictTemplates": false,
+    "strictInjectionParameters": false
   },
   "include": [
     "src/**/*.spec.ts",

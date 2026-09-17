@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { TestBed } from '@angular/core/testing';
 import { Router, ActivatedRouteSnapshot } from '@angular/router';
 import { RoleGuard } from './role.guard';

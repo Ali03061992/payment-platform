@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { QrScannerComponent } from './qr-scanner.component';

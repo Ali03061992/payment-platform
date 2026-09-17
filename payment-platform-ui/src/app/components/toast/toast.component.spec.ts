@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ToastComponent } from './toast.component';

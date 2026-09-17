@@ -1,0 +1,52 @@
+# Docker Compose – SonarQube only (alternative léger pour analyse locale)
+# Usage :
+#   docker compose -f deploy/docker-compose.sonar.yml up -d
+#   # ou depuis deploy/ : docker compose -f docker-compose.sonar.yml up -d
+# UI : http://localhost:9000 (admin/admin)
+services:
+  sonarqube:
+    image: sonarqube:community
+    container_name: payment-sonarqube
+    environment:
+      SONAR_ES_BOOTSTRAP_CHECKS_DISABLE: "true"
+      SONAR_JDBC_URL: jdbc:postgresql://sonar-postgres:5432/sonar
+      SONAR_JDBC_USERNAME: sonar
+      SONAR_JDBC_PASSWORD: sonar
+    ports:
+      - "9000:9000"
+    volumes:
+      - sonarqube-data:/opt/sonarqube/data
+      - sonarqube-extensions:/opt/sonarqube/extensions
+      - sonarqube-logs:/opt/sonarqube/logs
+    depends_on:
+      sonar-postgres:
+        condition: service_healthy
+    networks:
+      - payment-net
+
+  sonar-postgres:
+    image: postgres:16-alpine
+    container_name: payment-sonar-postgres
+    environment:
+      POSTGRES_DB: sonar
+      POSTGRES_USER: sonar
+      POSTGRES_PASSWORD: sonar
+    volumes:
+      - sonar-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sonar"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - payment-net
+
+volumes:
+  sonarqube-data:
+  sonarqube-extensions:
+  sonarqube-logs:
+  sonar-postgres-data:
+
+networks:
+  payment-net:
+    driver: bridge

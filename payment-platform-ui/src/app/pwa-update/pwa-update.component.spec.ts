@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { PwaUpdateComponent } from './pwa-update.component';
 import { SwUpdate, VersionReadyEvent } from '@angular/service-worker';

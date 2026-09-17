@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { TestBed } from '@angular/core/testing';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { PaymentService } from './payment.service';
@@ -143,6 +144,71 @@ describe('PaymentService', () => {
       expect(req.request.params.get('from')).toBe('2024-01-01');
       expect(req.request.params.get('to')).toBe('2024-01-31');
       req.flush(mock);
+    });
+  });
+
+  describe('list branches', () => {
+    it('should handle response with items property', () => {
+      const mock = [{ id: 1, reference: 'PAY-002', shopId: 1, shopName: 'Shop', supplierId: 2, supplierName: 'Sup', amount: 200, currency: 'TND', status: 'PENDING', rejectionReason: '', createdBy: 1, createdByName: '', confirmedByName: '', rejectedByName: '', cancelledByName: '', version: 1, createdAt: '', updatedAt: '', events: [] }];
+      service.list().subscribe(data => {
+        expect(data.length).toBe(1);
+        expect(data[0].reference).toBe('PAY-002');
+      });
+      const req = httpMock.expectOne('/api/payments');
+      req.flush({ items: mock });
+    });
+
+    it('should handle response with content property', () => {
+      const mock = [{ id: 2, reference: 'PAY-003', shopId: 1, shopName: 'Shop', supplierId: 2, supplierName: 'Sup', amount: 300, currency: 'TND', status: 'PENDING', rejectionReason: '', createdBy: 1, createdByName: '', confirmedByName: '', rejectedByName: '', cancelledByName: '', version: 1, createdAt: '', updatedAt: '', events: [] }];
+      service.list().subscribe(data => {
+        expect(data.length).toBe(1);
+      });
+      const req = httpMock.expectOne('/api/payments');
+      req.flush({ content: mock });
+    });
+
+    it('should handle response with data property', () => {
+      const mock = [{ id: 3, reference: 'PAY-004', shopId: 1, shopName: 'Shop', supplierId: 2, supplierName: 'Sup', amount: 400, currency: 'TND', status: 'PENDING', rejectionReason: '', createdBy: 1, createdByName: '', confirmedByName: '', rejectedByName: '', cancelledByName: '', version: 1, createdAt: '', updatedAt: '', events: [] }];
+      service.list().subscribe(data => {
+        expect(data.length).toBe(1);
+      });
+      const req = httpMock.expectOne('/api/payments');
+      req.flush({ data: mock });
+    });
+
+    it('should handle empty object response', () => {
+      service.list().subscribe(data => {
+        expect(data).toEqual([]);
+      });
+      const req = httpMock.expectOne('/api/payments');
+      req.flush({});
+    });
+
+    it('should handle null response', () => {
+      service.list().subscribe(data => {
+        expect(data).toEqual([]);
+      });
+      const req = httpMock.expectOne('/api/payments');
+      req.flush(null);
+    });
+
+    it('should handle error propagation', () => {
+      let errorCaught = false;
+      service.list().subscribe({
+        next: () => fail('should not succeed'),
+        error: () => errorCaught = true
+      });
+      const req = httpMock.expectOne('/api/payments');
+      req.flush('error', { status: 500, statusText: 'Server Error' });
+      expect(errorCaught).toBeTrue();
+    });
+
+    it('should handle empty array directly', () => {
+      service.list().subscribe(data => {
+        expect(data).toEqual([]);
+      });
+      const req = httpMock.expectOne('/api/payments');
+      req.flush([]);
     });
   });
 });

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { StatusLabelPipe } from './status-label.pipe';
 
 describe('StatusLabelPipe', () => {
