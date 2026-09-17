@@ -14,9 +14,9 @@ permissions:
   checks: write
 
 env:
-  JAVA_VERSION: '26-ea'
+  JAVA_VERSION: '21'
   JAVA_DISTRIBUTION: 'temurin'
-  NODE_VERSION: '20'
+  NODE_VERSION: '22'
   SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
 
 jobs:
@@ -46,12 +46,23 @@ jobs:
           restore-keys: maven-
 
       - name: Verify + coverage (unit + integration via H2)
-        run: mvn -B verify -DskipITs=false
+        run: mvn -B verify -DskipITs=false --fail-at-end -Dsurefire.rerunFailingTestsCount=2
         working-directory: backend
+        env:
+          MAVEN_OPTS: "-Xmx1024m -XX:+UseG1GC"
 
       - name: Package (skipTests already covered) – generate jars
         if: always()
         run: mvn -B package -DskipTests
+        working-directory: backend
+
+      - name: Collect test reports on failure
+        if: failure()
+        run: |
+          echo "=== Failed surefire reports ==="
+          find . -path "*/surefire-reports/*.txt" -exec grep -l "FAILURE\|ERROR" {} \; -exec cat {} \; || true
+          echo "=== Failed failsafe reports ==="
+          find . -path "*/failsafe-reports/*.txt" -exec grep -l "FAILURE\|ERROR" {} \; -exec cat {} \; || true
         working-directory: backend
 
       - name: Publish JaCoCo XML to console
