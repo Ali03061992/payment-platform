@@ -83,7 +83,7 @@ jobs:
             backend/**/target/site/jacoco-aggregate/jacoco.xml
             backend/**/target/surefire-reports/**
             backend/**/target/failsafe-reports/**
-          retention-days: 7
+          retention-days: 1
           if-no-files-found: warn
 
       - name: Upload backend artifacts
@@ -91,8 +91,8 @@ jobs:
         with:
           name: backend-jars
           path: backend/*/target/*.jar
-          retention-days: 3
-          if-no-files-found: error
+          retention-days: 1
+          if-no-files-found: warn
 
   # ──────────────────────────────────────────────────────────────
   # Frontend : install + Karma tests + coverage (lcov pour Sonar)
@@ -140,7 +140,7 @@ jobs:
           path: |
             payment-platform-ui/coverage/**
             frontend/coverage/**
-          retention-days: 7
+          retention-days: 1
           if-no-files-found: warn
 
       - name: Upload frontend dist
@@ -148,7 +148,7 @@ jobs:
         with:
           name: frontend-dist
           path: payment-platform-ui/dist/
-          retention-days: 3
+          retention-days: 1
 
   # ──────────────────────────────────────────────────────────────
   # Sonar – Backend (Maven)
@@ -321,7 +321,7 @@ jobs:
         with:
           name: docker-images
           path: docker-images.tar.gz
-          retention-days: 3
+          retention-days: 1
 
   # ──────────────────────────────────────────────────────────────
   # E2E (Cypress) – lance le stack via docker-compose
