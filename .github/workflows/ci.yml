@@ -21,10 +21,38 @@ env:
 
 jobs:
   # ──────────────────────────────────────────────────────────────
+  # Cleanup: delete old artifacts & workflow runs to free quota
+  # ──────────────────────────────────────────────────────────────
+  cleanup:
+    name: Cleanup old artifacts & runs
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete old artifacts (older than 1 day)
+        uses: geekyeggo/delete-artifact@v5
+        with:
+          name: |
+            jacoco-reports
+            backend-jars
+            frontend-coverage
+            frontend-dist
+            docker-images
+          failOnError: false
+
+      - name: Delete old workflow runs (older than 7 days)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api repos/${{ github.repository }}/actions/runs --paginate -q '.workflow_runs[] | select(.created_at < (now - 604800 | todate) and .status != "in_progress") | .id' | head -50 | while read id; do
+            echo "Deleting run $id"
+            gh api -X DELETE repos/${{ github.repository }}/actions/runs/$id || true
+          done
+
+  # ──────────────────────────────────────────────────────────────
   # Backend : compile + tests + JaCoCo (XML pour Sonar)
   # ──────────────────────────────────────────────────────────────
   build-backend:
     name: Backend – Build & Tests (JaCoCo)
+    needs: [cleanup]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -99,6 +127,7 @@ jobs:
   # ──────────────────────────────────────────────────────────────
   build-frontend:
     name: Frontend – Tests & Build (lcov)
+    needs: [cleanup]
     runs-on: ubuntu-latest
     defaults:
       run:
