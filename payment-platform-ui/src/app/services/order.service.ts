@@ -78,6 +78,18 @@ export class OrderService {
   }
 
   myDeliveries(): Observable<Order[]> {
-    return this.http.get<Order[]>(`${this.apiUrl}/my-deliveries`);
+    return new Observable<Order[]>(observer => {
+      this.http.get<any>(`${this.apiUrl}/my-deliveries`).subscribe({
+        next: (res: any) => {
+          if (Array.isArray(res)) observer.next(res as Order[]);
+          else if (res && Array.isArray(res.items)) observer.next(res.items as Order[]);
+          else if (res && Array.isArray(res.content)) observer.next(res.content as Order[]);
+          else if (res && Array.isArray(res.data)) observer.next(res.data as Order[]);
+          else observer.next([]);
+          observer.complete();
+        },
+        error: (err) => observer.error(err)
+      });
+    });
   }
 }

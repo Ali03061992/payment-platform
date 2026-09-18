@@ -25,9 +25,15 @@ export class JwtInterceptor implements HttpInterceptor {
           return throwError(() => error);
         }
         if (error.status === 401) {
-          sessionStorage.removeItem('token');
-          sessionStorage.removeItem('user');
-          this.router.navigate(['/login']);
+          const url = req.url || '';
+          const isAuthEndpoint = url.includes('/api/auth/login') || url.includes('/api/auth/me');
+          const isProtectedEndpoint = url.startsWith('/api/') && !url.includes('/api/notifications') && !url.includes('/api/users');
+
+          if (isAuthEndpoint || isProtectedEndpoint) {
+            sessionStorage.removeItem('token');
+            sessionStorage.removeItem('user');
+            this.router.navigate(['/login']);
+          }
         }
         return throwError(() => error);
       })
