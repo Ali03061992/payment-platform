@@ -14,7 +14,7 @@ permissions:
   checks: write
 
 env:
-  JAVA_VERSION: '21'
+  JAVA_VERSION: '26-ea'
   JAVA_DISTRIBUTION: 'temurin'
   NODE_VERSION: '22'
   SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
