@@ -26,10 +26,9 @@ export class JwtInterceptor implements HttpInterceptor {
         }
         if (error.status === 401) {
           const url = req.url || '';
-          const isAuthEndpoint = url.includes('/api/auth/login') || url.includes('/api/auth/me');
-          const isProtectedEndpoint = url.startsWith('/api/') && !url.includes('/api/notifications') && !url.includes('/api/users');
+          const isLoginCall = url.includes('/api/auth/login');
 
-          if (isAuthEndpoint || isProtectedEndpoint) {
+          if (isLoginCall) {
             sessionStorage.removeItem('token');
             sessionStorage.removeItem('user');
             this.router.navigate(['/login']);

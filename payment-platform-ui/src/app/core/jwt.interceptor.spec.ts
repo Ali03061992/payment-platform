@@ -63,11 +63,11 @@ describe('JwtInterceptor', () => {
       });
     });
 
-    it('should clear token and redirect for 401 error', () => {
+    it('should clear token and redirect for 401 error on login call', () => {
       sessionStorage.setItem('token', 'expired-token');
       sessionStorage.setItem('user', '{"id":1}');
       const error = new HttpErrorResponse({ status: 401, statusText: 'Unauthorized' });
-      const req = new HttpRequest('GET', '/api/test');
+      const req = new HttpRequest('GET', '/api/auth/login');
       next.handle.and.returnValue(throwError(() => error));
       interceptor.intercept(req, next).subscribe({
         error: (e) => {
@@ -75,6 +75,22 @@ describe('JwtInterceptor', () => {
           expect(sessionStorage.getItem('token')).toBeNull();
           expect(sessionStorage.getItem('user')).toBeNull();
           expect(router.navigate).toHaveBeenCalledWith(['/login']);
+        }
+      });
+    });
+
+    it('should not clear token for 401 error on non-login call', () => {
+      sessionStorage.setItem('token', 'valid-token');
+      sessionStorage.setItem('user', '{"id":1}');
+      const error = new HttpErrorResponse({ status: 401, statusText: 'Unauthorized' });
+      const req = new HttpRequest('GET', '/api/test');
+      next.handle.and.returnValue(throwError(() => error));
+      interceptor.intercept(req, next).subscribe({
+        error: (e) => {
+          expect(e.status).toBe(401);
+          expect(sessionStorage.getItem('token')).toBe('valid-token');
+          expect(sessionStorage.getItem('user')).toBe('{"id":1}');
+          expect(router.navigate).not.toHaveBeenCalled();
         }
       });
     });

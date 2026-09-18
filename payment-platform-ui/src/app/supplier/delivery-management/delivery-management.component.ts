@@ -32,8 +32,15 @@ export class DeliveryManagementComponent implements OnInit {
   loadDeliveries(): void {
     this.loading = true;
     this.orderService.myDeliveries().subscribe({
-      next: (data: Order[]) => { this.deliveries = data; this.loading = false; },
-      error: (err: any) => { this.toast.error(err.error?.message || 'Erreur de chargement'); this.loading = false; }
+      next: (data: Order[]) => {
+        this.deliveries = data;
+        this.loading = false;
+      },
+      error: (err: any) => {
+        console.error('Deliveries error:', err);
+        this.toast.error(err.error?.message || 'Erreur de chargement');
+        this.loading = false;
+      }
     });
   }
 

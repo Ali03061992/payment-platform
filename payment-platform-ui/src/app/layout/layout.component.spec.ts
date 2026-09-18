@@ -256,7 +256,7 @@ describe('LayoutComponent', () => {
   describe('navigateNotification', () => {
     it('should navigate for payment entity', () => {
       component.navigateNotification({ relatedEntityType: 'PAYMENT', relatedEntityId: 42 } as any);
-      expect(router.navigate).toHaveBeenCalledWith(['/dashboard/payments'], { queryParams: { ref: 42 } });
+      expect(router.navigate).toHaveBeenCalledWith(['/dashboard/payments', 42]);
       expect(component.showNotifications).toBeFalse();
     });
 
