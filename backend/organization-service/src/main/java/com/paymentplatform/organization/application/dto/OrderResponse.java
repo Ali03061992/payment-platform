@@ -17,6 +17,7 @@ public record OrderResponse(
         String supplierName,
         String shopName,
         UUID createdBy,
+        String createdByName,
         String createdByRole,
         String source,
         String status,
@@ -42,15 +43,20 @@ public record OrderResponse(
         List<OrderItemResponse> items
 ) {
     public static OrderResponse from(Order order, List<OrderItem> orderItems) {
-        return from(order, orderItems, null, null, null, null);
+        return from(order, orderItems, null, null, null, null, null);
     }
 
     public static OrderResponse from(Order order, List<OrderItem> orderItems, String supplierName, String shopName) {
-        return from(order, orderItems, supplierName, shopName, null, null);
+        return from(order, orderItems, supplierName, shopName, null, null, null);
     }
 
     public static OrderResponse from(Order order, List<OrderItem> orderItems, String supplierName, String shopName,
                                      String deliveryAgentName, String receivedByName) {
+        return from(order, orderItems, supplierName, shopName, deliveryAgentName, receivedByName, null);
+    }
+
+    public static OrderResponse from(Order order, List<OrderItem> orderItems, String supplierName, String shopName,
+                                     String deliveryAgentName, String receivedByName, String createdByName) {
         List<OrderItemResponse> items = orderItems.stream()
                 .map(OrderItemResponse::from)
                 .toList();
@@ -62,6 +68,7 @@ public record OrderResponse(
                 supplierName,
                 shopName,
                 order.getCreatedBy(),
+                createdByName,
                 order.getCreatedByRole(),
                 order.getSource(),
                 order.getStatus(),

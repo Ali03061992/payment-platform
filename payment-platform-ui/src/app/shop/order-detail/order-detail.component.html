@@ -38,6 +38,12 @@
         <div class="detail-label">Créé le</div>
         <div class="detail-value">{{ order.createdAt | date:'dd/MM/yyyy HH:mm:ss' }}</div>
       </div>
+      @if (order.createdByName) {
+        <div class="detail-card">
+          <div class="detail-label">Créé par</div>
+          <div class="detail-value">{{ order.createdByName }}</div>
+        </div>
+      }
       @if (order.plannedDeliveryDate) {
         <div class="detail-card">
           <div class="detail-label">Date prévue</div>

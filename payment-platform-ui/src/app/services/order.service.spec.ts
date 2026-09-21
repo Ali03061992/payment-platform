@@ -6,7 +6,7 @@ import { Order } from '../models/order.model';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 const mockOrder: Order = {
-  id: 1, reference: 'ORD-001', supplierId: 1, shopId: 2, createdBy: 3, createdByRole: 'SHOP_ADMIN',
+  id: 1, reference: 'ORD-001', supplierId: 1, shopId: 2, createdBy: 3, createdByName: null, createdByRole: 'SHOP_ADMIN',
   source: 'MANUAL', status: 'DRAFT', subtotal: 100, taxRate: 0.19, taxAmount: 19, total: 119,
   currency: 'TND', deliveryAgentId: null, receivedBy: null, receivedAt: null, deliveredAt: null,
   asapPayment: false, notes: '', version: 1, createdAt: '', updatedAt: '', items: [], events: []

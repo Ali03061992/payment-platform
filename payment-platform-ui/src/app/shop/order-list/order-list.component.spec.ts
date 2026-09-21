@@ -16,7 +16,7 @@ describe('OrderListComponent', () => {
   let toast: jasmine.SpyObj<ToastService>;
 
   const mockOrder = {
-    id: 1, reference: 'ORD-001', supplierId: 1, shopId: 2, createdBy: 3, createdByRole: 'SHOP_ADMIN',
+    id: 1, reference: 'ORD-001', supplierId: 1, shopId: 2, createdBy: 3, createdByName: null, createdByRole: 'SHOP_ADMIN',
     source: 'MANUAL', status: 'DRAFT', subtotal: 100, taxRate: 0.19, taxAmount: 19, total: 119,
     currency: 'TND', deliveryAgentId: null, deliveryAgentName: null, receivedBy: null, receivedByName: null,
     receivedAt: null, deliveredAt: null, plannedDeliveryDate: null, confirmedDeliveryDate: null,

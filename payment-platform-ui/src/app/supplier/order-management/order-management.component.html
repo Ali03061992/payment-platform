@@ -195,9 +195,19 @@
               <div class="detail-label">Créé le</div>
               <div class="detail-value">{{ selectedOrder.createdAt | date:'dd/MM/yyyy HH:mm:ss' }}</div>
             </div>
+            @if (selectedOrder.createdByName) {
+              <div class="detail-card">
+                <div class="detail-label">Créé par</div>
+                <div class="detail-value">{{ selectedOrder.createdByName }}</div>
+              </div>
+            }
+            <div class="detail-card">
+              <div class="detail-label">Paiement ASAP</div>
+              <div class="detail-value">{{ selectedOrder.asapPayment ? 'Oui' : 'Non' }}</div>
+            </div>
             @if (selectedOrder.deliveryAgentName) {
               <div class="detail-card">
-                <div class="detail-label">Livreur</div>
+                <div class="detail-label">Livreur assigné</div>
                 <div class="detail-value">{{ selectedOrder.deliveryAgentName }}</div>
               </div>
             }
@@ -211,6 +221,24 @@
               <div class="detail-card">
                 <div class="detail-label">Date confirmée</div>
                 <div class="detail-value">{{ selectedOrder.confirmedDeliveryDate }}</div>
+              </div>
+            }
+            @if (selectedOrder.deliveredAt) {
+              <div class="detail-card">
+                <div class="detail-label">Livré le</div>
+                <div class="detail-value">{{ selectedOrder.deliveredAt | date:'dd/MM/yyyy HH:mm:ss' }}</div>
+              </div>
+            }
+            @if (selectedOrder.receivedByName) {
+              <div class="detail-card">
+                <div class="detail-label">Reçu par</div>
+                <div class="detail-value">{{ selectedOrder.receivedByName }}</div>
+              </div>
+            }
+            @if (selectedOrder.receivedAt) {
+              <div class="detail-card">
+                <div class="detail-label">Reçu le</div>
+                <div class="detail-value">{{ selectedOrder.receivedAt | date:'dd/MM/yyyy HH:mm:ss' }}</div>
               </div>
             }
             @if (selectedOrder.deliveryRejectionReason) {

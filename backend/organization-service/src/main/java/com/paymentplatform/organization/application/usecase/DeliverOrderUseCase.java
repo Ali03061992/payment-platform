@@ -60,7 +60,7 @@ public class DeliverOrderUseCase {
         if (order.isAsapPayment()) {
             try {
                 paymentClient.createAutoPayment(order.getShopId(), order.getSupplierId(),
-                        order.getCurrency(), actorUserId);
+                        order.getCurrency(), actorUserId, order.getTotal());
                 log.info("Auto-payment ASAP créé pour la commande {} lors de la livraison", order.getReference());
             } catch (Exception e) {
                 log.error("Erreur lors de la création du paiement ASAP pour la commande {}", order.getReference(), e);

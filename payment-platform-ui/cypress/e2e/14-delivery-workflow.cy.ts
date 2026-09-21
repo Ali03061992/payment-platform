@@ -388,4 +388,75 @@ describe('14 - Delivery: Cross-role Access Control', () => {
     cy.get('.tabs .tab-btn').should('have.length', 2);
     cy.get('.tabs .tab-btn').eq(1).should('contain', 'Livraisons');
   });
+
+  it('order detail should show createdByName', () => {
+    setupTestData().then((ctx) => {
+      return createOrder(ctx, 'Detail createdByName test').then((id) => {
+        cy.apiGet(ctx.supplierToken, `/api/orders/${id}`).then((r) => {
+          expect(r.body).to.have.property('createdByName');
+          expect(r.body.createdByName).to.not.be.null;
+        });
+      });
+    });
+  });
+
+  it('deliver ASAP order should auto-create payment', () => {
+    setupTestData().then((ctx) => {
+      return createOrder(ctx, 'ASAP delivery payment test', true).then((id) => {
+        return advanceToReady(ctx, id).then(() =>
+          cy.apiPost(ctx.supplierToken, `/api/orders/${id}/assign-delivery`, {
+            agentId: ctx.agentId, plannedDeliveryDate: '2026-09-15',
+          })
+        ).then(() =>
+          cy.apiPost(ctx.agentToken, `/api/orders/${id}/accept-delivery`, { accepted: true })
+        ).then(() =>
+          cy.apiPost(ctx.agentToken, `/api/orders/${id}/confirm-delivery`, { confirmedDate: '2026-09-14' })
+        ).then(() =>
+          cy.apiPost(ctx.agentToken, `/api/orders/${id}/deliver`, { receivedBy: ctx.agentId })
+        ).then((r) => {
+          expect(r.body.status).to.eq('DELIVERED');
+        }).then(() =>
+          cy.apiPost(ctx.shopToken, `/api/orders/${id}/accept-asap`, {})
+        ).then((r) => {
+          expect(r.body.status).to.eq('ACCEPTED');
+          expect(r.body.asapPayment).to.be.true;
+        });
+      });
+    });
+  });
+
+  it('supplier admin order management should switch tabs', () => {
+    setupTestData().then((ctx) => {
+      return createOrder(ctx, 'Tab switch test').then((id) => {
+        return advanceToReady(ctx, id);
+      }).then(() => {
+        cy.loginAsSupplierAdmin();
+        cy.visit('/dashboard/supplier/orders');
+        cy.get('.tabs .tab-btn').contains('Livraisons').click();
+        cy.get('.tabs .tab-btn').eq(1).should('have.class', 'active');
+        cy.get('.tabs .tab-btn').contains('Commandes').click();
+        cy.get('.tabs .tab-btn').eq(0).should('have.class', 'active');
+      });
+    });
+  });
+
+  it('delivery detail modal should display full info', () => {
+    setupTestData().then((ctx) => {
+      return fullDelivery(ctx, 'Delivery detail test').then(() => {
+        cy.loginAsSupplierAdmin();
+        cy.visit('/dashboard/supplier/orders');
+        cy.get('.tabs .tab-btn').contains('Livraisons').click();
+        cy.get('table tbody tr', { timeout: 10000 }).should('have.length.gte', 1);
+        cy.get('table tbody tr').first().click();
+        cy.get('.modal-overlay').should('be.visible');
+        cy.get('.modal-content').should('contain', 'Livraison');
+        cy.get('.detail-grid').should('exist');
+        cy.get('.detail-grid .detail-label').should('contain', 'Statut');
+        cy.get('.detail-grid .detail-label').should('contain', 'Total');
+        cy.get('.detail-grid .detail-label').should('contain', 'Boutique');
+        cy.get('.btn-close').click();
+        cy.get('.modal-overlay').should('not.exist');
+      });
+    });
+  });
 });

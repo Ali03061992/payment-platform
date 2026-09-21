@@ -87,7 +87,8 @@ public class OrderController {
                 resolveOrgName(o.getSupplierId()),
                 resolveOrgName(o.getShopId()),
                 identityClient.resolveUserName(o.getDeliveryAgentId()),
-                identityClient.resolveUserName(o.getReceivedBy()));
+                identityClient.resolveUserName(o.getReceivedBy()),
+                identityClient.resolveUserName(o.getCreatedBy()));
     }
 
     @PostMapping
@@ -286,7 +287,7 @@ public class OrderController {
         OrderResponse response = acceptOrder.execute(id, current.userId());
         if (response.asapPayment()) {
             paymentClient.createAutoPayment(response.shopId(), response.supplierId(),
-                    response.currency(), current.userId());
+                    response.currency(), current.userId(), response.total());
         }
         return ResponseEntity.ok(response);
     }

@@ -18,7 +18,7 @@ describe('DeliveryManagementComponent', () => {
 
   const mockOrder: Order = {
     id: '1', reference: 'ORD-001', supplierId: '1', shopId: '2', supplierName: null, shopName: null,
-    createdBy: '3', createdByRole: 'SUPPLIER_AGENT',
+    createdBy: '3', createdByName: 'John Doe', createdByRole: 'SUPPLIER_AGENT',
     source: 'MANUAL', status: 'IN_DELIVERY', subtotal: 100, taxRate: 0.19, taxAmount: 19, total: 119,
     currency: 'TND', deliveryAgentId: '5', deliveryAgentName: null, receivedBy: null, receivedByName: null,
     receivedAt: null, deliveredAt: null, plannedDeliveryDate: null, confirmedDeliveryDate: null,

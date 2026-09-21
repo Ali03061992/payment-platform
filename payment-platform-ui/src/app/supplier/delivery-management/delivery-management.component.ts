@@ -19,6 +19,7 @@ export class DeliveryManagementComponent implements OnInit {
   receivedBy = '';
   delivering = false;
   shopAgents: {id: string, name: string}[] = [];
+  loadingShopAgents = false;
 
   showConfirmDateModal = false;
   confirmDateOrder: Order | null = null;
@@ -31,6 +32,9 @@ export class DeliveryManagementComponent implements OnInit {
   rejecting = false;
 
   highlightedOrderId: string | null = null;
+
+  showDetail = false;
+  selectedDetailOrder: Order | null = null;
 
   constructor(
     private orderService: OrderService,
@@ -161,12 +165,15 @@ export class DeliveryManagementComponent implements OnInit {
     this.selectedOrder = order;
     this.receivedBy = '';
     this.shopAgents = [];
+    this.loadingShopAgents = true;
     this.showDeliverModal = true;
     if (order.shopId) {
       this.orderService.getShopAgents(order.shopId).subscribe({
-        next: (agents) => this.shopAgents = agents,
-        error: () => this.shopAgents = []
+        next: (agents) => { this.shopAgents = agents; this.loadingShopAgents = false; },
+        error: () => { this.shopAgents = []; this.loadingShopAgents = false; }
       });
+    } else {
+      this.loadingShopAgents = false;
     }
   }
 
@@ -214,5 +221,15 @@ export class DeliveryManagementComponent implements OnInit {
       DELIVERY_REJECTED: 'rejected'
     };
     return map[s] || '';
+  }
+
+  openDetail(order: Order): void {
+    this.selectedDetailOrder = order;
+    this.showDetail = true;
+  }
+
+  closeDetail(): void {
+    this.showDetail = false;
+    this.selectedDetailOrder = null;
   }
 }

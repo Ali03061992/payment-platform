@@ -6,6 +6,7 @@ export interface Order {
   supplierName: string | null;
   shopName: string | null;
   createdBy: string;
+  createdByName: string | null;
   createdByRole: string;
   source: string;
   status: string;
