@@ -1,9 +1,9 @@
 package com.paymentplatform.shared.infrastructure.audit;
 
-import java.util.UUID;
-
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+
+import java.util.UUID;
 
 public interface AuditLogRepository extends JpaRepository<AuditLogEntity, UUID>,
         JpaSpecificationExecutor<AuditLogEntity> {

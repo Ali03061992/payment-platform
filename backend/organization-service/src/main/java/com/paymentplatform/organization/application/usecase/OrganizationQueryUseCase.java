@@ -1,8 +1,5 @@
 package com.paymentplatform.organization.application.usecase;
 
-import java.util.UUID;
-
-import com.paymentplatform.shared.domain.exception.NotFoundException;
 import com.paymentplatform.organization.application.dto.OrganizationResponse;
 import com.paymentplatform.organization.domain.model.Organization;
 import com.paymentplatform.organization.domain.model.SupplierShopRelation;
@@ -10,10 +7,12 @@ import com.paymentplatform.organization.domain.repository.OrganizationRepository
 import com.paymentplatform.organization.domain.repository.SupplierShopRelationRepository;
 import com.paymentplatform.organization.domain.valueobject.OrganizationId;
 import com.paymentplatform.organization.domain.valueobject.OrganizationType;
+import com.paymentplatform.shared.domain.exception.NotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class OrganizationQueryUseCase {

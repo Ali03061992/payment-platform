@@ -1,12 +1,9 @@
 package com.paymentplatform.payment.application.dto;
 
-import java.util.UUID;
-
 import com.paymentplatform.payment.infrastructure.http.OrganizationValidationClient;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 public class PaymentNameResolver {

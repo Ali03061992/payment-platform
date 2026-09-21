@@ -1,7 +1,6 @@
 package com.paymentplatform.identity.interfaces.rest;
 
-import java.util.UUID;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.paymentplatform.identity.domain.model.User;
 import com.paymentplatform.identity.domain.repository.UserRepository;
 import com.paymentplatform.identity.domain.valueobject.Email;
@@ -13,7 +12,6 @@ import com.paymentplatform.identity.infrastructure.email.PasswordSetupTokenRepos
 import com.paymentplatform.shared.domain.model.OrganizationId;
 import com.paymentplatform.shared.domain.model.RoleCode;
 import com.paymentplatform.shared.domain.model.UserId;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,9 +26,12 @@ import org.springframework.web.context.WebApplicationContext;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Map;
+import java.util.UUID;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @ActiveProfiles("test")

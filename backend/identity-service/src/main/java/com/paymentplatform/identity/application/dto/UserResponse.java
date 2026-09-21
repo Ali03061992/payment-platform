@@ -1,12 +1,10 @@
 package com.paymentplatform.identity.application.dto;
 
-import java.util.UUID;
-
 import com.paymentplatform.identity.domain.model.User;
-import com.paymentplatform.identity.domain.model.UserStatus;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.UUID;
 
 public record UserResponse(UUID id, String username, String email, String firstName, String lastName,
                            String phone, UUID organizationId, List<String> roles, String status,

@@ -1,14 +1,12 @@
 package com.paymentplatform.organization.interfaces.rest;
 
-import java.util.UUID;
-import java.util.Optional;
-
 import com.paymentplatform.organization.application.dto.CreateOrderRequest;
 import com.paymentplatform.organization.application.dto.OrderResponse;
 import com.paymentplatform.organization.application.dto.PageResponse;
 import com.paymentplatform.organization.application.usecase.*;
 import com.paymentplatform.organization.domain.repository.OrganizationRepository;
 import com.paymentplatform.organization.domain.valueobject.OrganizationId;
+import com.paymentplatform.organization.infrastructure.http.IdentityClient;
 import com.paymentplatform.organization.infrastructure.http.PaymentClient;
 import com.paymentplatform.shared.infrastructure.security.CurrentUser;
 import jakarta.validation.Valid;
@@ -22,6 +20,7 @@ import java.net.URI;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/orders")
@@ -36,7 +35,9 @@ public class OrderController {
     private final RejectOrderUseCase rejectOrder;
     private final DeliveryRejectOrderUseCase deliveryRejectOrder;
     private final ConfirmDeliveryUseCase confirmDeliveryUseCase;
+    private final AcceptDeliveryUseCase acceptDeliveryUseCase;
     private final PaymentClient paymentClient;
+    private final IdentityClient identityClient;
     private final com.paymentplatform.organization.domain.repository.OrderRepository orderRepository;
     private final com.paymentplatform.organization.domain.repository.OrderItemRepository orderItemRepository;
     private final OrganizationRepository organizationRepository;
@@ -50,7 +51,9 @@ public class OrderController {
                            RejectOrderUseCase rejectOrder,
                            DeliveryRejectOrderUseCase deliveryRejectOrder,
                            ConfirmDeliveryUseCase confirmDeliveryUseCase,
+                           AcceptDeliveryUseCase acceptDeliveryUseCase,
                            PaymentClient paymentClient,
+                           IdentityClient identityClient,
                            com.paymentplatform.organization.domain.repository.OrderRepository orderRepository,
                            com.paymentplatform.organization.domain.repository.OrderItemRepository orderItemRepository,
                            OrganizationRepository organizationRepository) {
@@ -63,7 +66,9 @@ public class OrderController {
         this.rejectOrder = rejectOrder;
         this.deliveryRejectOrder = deliveryRejectOrder;
         this.confirmDeliveryUseCase = confirmDeliveryUseCase;
+        this.acceptDeliveryUseCase = acceptDeliveryUseCase;
         this.paymentClient = paymentClient;
+        this.identityClient = identityClient;
         this.orderRepository = orderRepository;
         this.orderItemRepository = orderItemRepository;
         this.organizationRepository = organizationRepository;
@@ -74,6 +79,15 @@ public class OrderController {
         return organizationRepository.findById(OrganizationId.of(orgId))
                 .map(org -> org.name().value())
                 .orElse(null);
+    }
+
+    private OrderResponse buildOrderResponse(com.paymentplatform.organization.domain.model.Order o) {
+        var items = orderItemRepository.findByOrderId(o.getId());
+        return OrderResponse.from(o, items,
+                resolveOrgName(o.getSupplierId()),
+                resolveOrgName(o.getShopId()),
+                identityClient.resolveUserName(o.getDeliveryAgentId()),
+                identityClient.resolveUserName(o.getReceivedBy()));
     }
 
     @PostMapping
@@ -106,23 +120,55 @@ public class OrderController {
         } else if (current.roles().contains("SUPPLIER_AGENT")) {
             List<com.paymentplatform.organization.domain.model.Order> orders = orderRepository.findByDeliveryAgentId(current.userId());
             List<OrderResponse> responses = orders.stream()
-                    .map(o -> {
-                        var items = orderItemRepository.findByOrderId(o.getId());
-                        return OrderResponse.from(o, items, resolveOrgName(o.getSupplierId()), resolveOrgName(o.getShopId()));
-                    })
+                    .map(this::buildOrderResponse)
                     .toList();
             return ResponseEntity.ok(new PageResponse<>(responses, responses.size(), 1, 0));
         } else {
-            return ResponseEntity.ok(PageResponse.of(orderRepository.findAll(pageable).map(o -> {
-                var items = orderItemRepository.findByOrderId(o.getId());
-                return OrderResponse.from(o, items, resolveOrgName(o.getSupplierId()), resolveOrgName(o.getShopId()));
-            })));
+            return ResponseEntity.ok(PageResponse.of(orderRepository.findAll(pageable).map(this::buildOrderResponse)));
         }
 
-        return ResponseEntity.ok(PageResponse.of(orderPage.map(o -> {
-            var items = orderItemRepository.findByOrderId(o.getId());
-            return OrderResponse.from(o, items, resolveOrgName(o.getSupplierId()), resolveOrgName(o.getShopId()));
-        })));
+        return ResponseEntity.ok(PageResponse.of(orderPage.map(this::buildOrderResponse)));
+    }
+
+    @GetMapping("/deliveries")
+    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_AGENT', 'SYSTEM_ADMIN')")
+    public ResponseEntity<List<OrderResponse>> listDeliveries(
+            @RequestParam(required = false) UUID agentId) {
+        var current = CurrentUser.get();
+        List<com.paymentplatform.organization.domain.model.Order> orders;
+
+        if (agentId != null) {
+            orders = orderRepository.findByDeliveryAgentId(agentId);
+        } else if (current.roles().contains("SUPPLIER_AGENT")) {
+            orders = orderRepository.findByDeliveryAgentId(current.userId());
+        } else if (current.organizationId() != null) {
+            orders = orderRepository.findBySupplierId(current.organizationId()).stream()
+                    .filter(o -> o.getDeliveryAgentId() != null)
+                    .toList();
+        } else {
+            orders = List.of();
+        }
+
+        List<OrderResponse> responses = orders.stream()
+                .map(this::buildOrderResponse)
+                .toList();
+        return ResponseEntity.ok(responses);
+    }
+
+    @GetMapping("/shop-agents")
+    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_AGENT', 'SYSTEM_ADMIN')")
+    public ResponseEntity<List<Map<String, String>>> getShopAgents(@RequestParam UUID shopId) {
+        var users = identityClient.getUsersByOrganization(shopId);
+        List<Map<String, String>> agents = new java.util.ArrayList<>();
+        if (users != null && users.isArray()) {
+            for (var user : users) {
+                String firstName = user.has("firstName") ? user.get("firstName").asText() : "";
+                String lastName = user.has("lastName") ? user.get("lastName").asText() : "";
+                String id = user.has("id") ? user.get("id").asText() : "";
+                agents.add(Map.of("id", id, "name", (firstName + " " + lastName).trim()));
+            }
+        }
+        return ResponseEntity.ok(agents);
     }
 
     @GetMapping("/{id}")
@@ -139,8 +185,7 @@ public class OrderController {
             boolean isDeliveryAgent = o.getDeliveryAgentId() != null && o.getDeliveryAgentId().equals(current.userId());
             if (!isSupplier && !isShop && !isDeliveryAgent) return ResponseEntity.status(403).build();
         }
-        var items = orderItemRepository.findByOrderId(id);
-        return ResponseEntity.ok(OrderResponse.from(o, items, resolveOrgName(o.getSupplierId()), resolveOrgName(o.getShopId())));
+        return ResponseEntity.ok(buildOrderResponse(o));
     }
 
     @PostMapping("/{id}/confirm")
@@ -177,8 +222,18 @@ public class OrderController {
             order.get().setPlannedDeliveryDate(LocalDate.parse(body.get("plannedDeliveryDate").toString()));
         }
         orderRepository.save(order.get());
-        var items = orderItemRepository.findByOrderId(id);
-        return ResponseEntity.ok(OrderResponse.from(order.get(), items, resolveOrgName(order.get().getSupplierId()), resolveOrgName(order.get().getShopId())));
+        return ResponseEntity.ok(buildOrderResponse(order.get()));
+    }
+
+    @PostMapping("/{id}/accept-delivery")
+    @PreAuthorize("hasAnyAuthority('SUPPLIER_AGENT')")
+    public ResponseEntity<OrderResponse> acceptDelivery(
+            @PathVariable UUID id,
+            @RequestBody Map<String, Object> body) {
+        var current = CurrentUser.get();
+        boolean accepted = Boolean.TRUE.equals(body.get("accepted"));
+        String reason = body.containsKey("reason") ? (String) body.get("reason") : null;
+        return ResponseEntity.ok(acceptDeliveryUseCase.execute(id, accepted, reason, current.userId()));
     }
 
     @PostMapping("/{id}/confirm-delivery")
@@ -249,10 +304,7 @@ public class OrderController {
         var current = CurrentUser.get();
         var orders = orderRepository.findByDeliveryAgentId(current.userId());
         List<OrderResponse> responses = orders.stream()
-                .map(o -> {
-                    var items = orderItemRepository.findByOrderId(o.getId());
-                    return OrderResponse.from(o, items, resolveOrgName(o.getSupplierId()), resolveOrgName(o.getShopId()));
-                })
+                .map(this::buildOrderResponse)
                 .toList();
         return ResponseEntity.ok(responses);
     }

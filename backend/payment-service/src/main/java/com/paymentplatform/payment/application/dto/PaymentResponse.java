@@ -1,13 +1,12 @@
 package com.paymentplatform.payment.application.dto;
 
-import java.util.UUID;
-
 import com.paymentplatform.payment.domain.model.Payment;
 import com.paymentplatform.payment.domain.model.PaymentEvent;
 
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
+import java.util.UUID;
 
 public record PaymentResponse(
         UUID id,

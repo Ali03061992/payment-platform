@@ -1,22 +1,14 @@
 package com.paymentplatform.identity.interfaces.rest;
 
-import com.paymentplatform.shared.infrastructure.security.CurrentUser;
-import com.paymentplatform.identity.application.dto.ChangePasswordRequest;
-import com.paymentplatform.identity.application.dto.LoginRequest;
-import com.paymentplatform.identity.application.dto.LoginResponse;
-import com.paymentplatform.identity.application.dto.RegisterRequest;
-import com.paymentplatform.identity.application.dto.UserResponse;
+import com.paymentplatform.identity.application.dto.*;
 import com.paymentplatform.identity.application.usecase.AuthUseCase;
 import com.paymentplatform.identity.application.usecase.ChangePasswordUseCase;
 import com.paymentplatform.identity.application.usecase.RegisterUseCase;
 import com.paymentplatform.identity.application.usecase.UserQueryUseCase;
+import com.paymentplatform.shared.infrastructure.security.CurrentUser;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/auth")

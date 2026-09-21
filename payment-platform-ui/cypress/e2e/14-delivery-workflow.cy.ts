@@ -94,6 +94,8 @@ function fullDelivery(ctx: any, notes: string, asap = false) {
       agentId: ctx.agentId, plannedDeliveryDate: '2026-09-15',
     })
   ).then(() =>
+    cy.apiPost(ctx.agentToken, `/api/orders/${orderId}/accept-delivery`, { accepted: true })
+  ).then(() =>
     cy.apiPost(ctx.agentToken, `/api/orders/${orderId}/confirm-delivery`, { confirmedDate: '2026-09-14' })
   ).then(() =>
     cy.apiPost(ctx.agentToken, `/api/orders/${orderId}/deliver`, { receivedBy: ctx.agentId })
@@ -120,6 +122,8 @@ describe('14 - Delivery: Full API Lifecycle', () => {
               expect(r.body.deliveryAgentId).to.eq(ctx.agentId);
               expect(r.body.plannedDeliveryDate).to.eq('2026-09-15');
             })
+            .then(() => cy.apiPost(ctx.agentToken, `/api/orders/${orderId}/accept-delivery`, { accepted: true }))
+            .then((r) => { expect(r.body.status).to.eq('DELIVERY_ACCEPTED'); })
             .then(() => cy.apiPost(ctx.agentToken, `/api/orders/${orderId}/confirm-delivery`, { confirmedDate: '2026-09-14' }))
             .then((r) => {
               expect(r.body.status).to.eq('IN_DELIVERY');
@@ -169,6 +173,8 @@ describe('14 - Delivery: Full API Lifecycle', () => {
               agentId: ctx.agentId, plannedDeliveryDate: '2026-09-15',
             })
           ).then(() =>
+            cy.apiPost(ctx.agentToken, `/api/orders/${id}/accept-delivery`, { accepted: true })
+          ).then(() =>
             cy.apiPost(ctx.agentToken, `/api/orders/${id}/confirm-delivery`, { confirmedDate: '2026-09-14' })
           ).then(() =>
             cy.apiPost(ctx.supplierToken, `/api/orders/${id}/delivery-reject`, { reason: 'Vehicle broken' })
@@ -187,12 +193,51 @@ describe('14 - Delivery: Full API Lifecycle', () => {
               agentId: ctx.agentId, plannedDeliveryDate: '2026-09-15',
             })
           ).then(() =>
+            cy.apiPost(ctx.agentToken, `/api/orders/${id}/accept-delivery`, { accepted: true })
+          ).then(() =>
             cy.apiPost(ctx.agentToken, `/api/orders/${id}/confirm-delivery`, { confirmedDate: '2026-09-14' })
           ).then(() =>
             cy.apiPost(ctx.agentToken, `/api/orders/${id}/deliver`, { receivedBy: ctx.agentId })
           ).then(() =>
             cy.apiPost(ctx.shopToken, `/api/orders/${id}/accept-asap`, {})
           ).then((r) => expect(r.body.status).to.eq('ACCEPTED'));
+        });
+      });
+    });
+  });
+
+  it('should accept delivery from READY_FOR_DELIVERY', () => {
+    cy.wrap(null).then(() => {
+      return setupTestData().then((ctx) => {
+        return createOrder(ctx, 'Accept delivery').then((id) => {
+          return advanceToReady(ctx, id).then(() =>
+            cy.apiPost(ctx.supplierToken, `/api/orders/${id}/assign-delivery`, {
+              agentId: ctx.agentId, plannedDeliveryDate: '2026-09-15',
+            })
+          ).then(() =>
+            cy.apiPost(ctx.agentToken, `/api/orders/${id}/accept-delivery`, { accepted: true })
+          ).then((r) => {
+            expect(r.body.status).to.eq('DELIVERY_ACCEPTED');
+          });
+        });
+      });
+    });
+  });
+
+  it('should reject delivery from READY_FOR_DELIVERY with motif', () => {
+    cy.wrap(null).then(() => {
+      return setupTestData().then((ctx) => {
+        return createOrder(ctx, 'Reject at ready').then((id) => {
+          return advanceToReady(ctx, id).then(() =>
+            cy.apiPost(ctx.supplierToken, `/api/orders/${id}/assign-delivery`, {
+              agentId: ctx.agentId, plannedDeliveryDate: '2026-09-15',
+            })
+          ).then(() =>
+            cy.apiPost(ctx.agentToken, `/api/orders/${id}/accept-delivery`, { accepted: false, reason: 'Vehicle unavailable' })
+          ).then((r) => {
+            expect(r.body.status).to.eq('DELIVERY_REJECTED');
+            expect(r.body.deliveryRejectionReason).to.eq('Vehicle unavailable');
+          });
         });
       });
     });
@@ -315,5 +360,32 @@ describe('14 - Delivery: Cross-role Access Control', () => {
         });
       });
     });
+  });
+
+  it('supplier admin should see deliveries filtered by agent via API', () => {
+    setupTestData().then((ctx) => {
+      cy.apiGet(ctx.supplierToken, `/api/orders/deliveries?agentId=${ctx.agentId}`).then((r) => {
+        const deliveries = Array.isArray(r.body) ? r.body : [];
+        deliveries.forEach((d: any) => {
+          expect(d.deliveryAgentId).to.eq(ctx.agentId);
+        });
+      });
+    });
+  });
+
+  it('supplier admin should see deliveries without filter', () => {
+    setupTestData().then((ctx) => {
+      cy.apiGet(ctx.supplierToken, '/api/orders/deliveries').then((r) => {
+        expect(r.status).to.eq(200);
+        expect(r.body).to.be.an('array');
+      });
+    });
+  });
+
+  it('supplier admin should see deliveries tab in order management', () => {
+    cy.loginAsSupplierAdmin();
+    cy.visit('/dashboard/supplier/orders');
+    cy.get('.tabs .tab-btn').should('have.length', 2);
+    cy.get('.tabs .tab-btn').eq(1).should('contain', 'Livraisons');
   });
 });

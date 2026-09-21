@@ -1,9 +1,8 @@
 package com.paymentplatform.organization.application.dto;
 
-import java.util.UUID;
-
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.UUID;
 
 public record BalanceResponse(
         UUID supplierId,

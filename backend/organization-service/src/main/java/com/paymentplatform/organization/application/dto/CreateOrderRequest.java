@@ -1,14 +1,11 @@
 package com.paymentplatform.organization.application.dto;
 
-import java.util.UUID;
-
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
-import java.math.BigDecimal;
 import java.util.List;
+import java.util.UUID;
 
 public record CreateOrderRequest(
         @NotNull(message = "L'ID du fournisseur est requis") UUID supplierId,

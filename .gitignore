@@ -21,8 +21,23 @@ dist/
 # Secrets
 .env
 .env.local
+.env.*.local
 *.pem
 *.key
+!deploy/.env.example
+
+# JVM crash logs
+hs_err_pid*.log
+replay_pid*.log
+
+# Temp / backup
+*.swp
+*.bak
+*.tmp
+out.txt
+
+# Build output
+build/
 
 # OS
 Thumbs.db
@@ -36,3 +51,7 @@ coverage/
 .scannerwork/
 .sonar/
 sonar-reports/
+
+# Cypress
+cypress/screenshots/
+cypress/videos/

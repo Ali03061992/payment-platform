@@ -1,14 +1,18 @@
 package com.paymentplatform.organization;
 
-import java.util.UUID;
-
-import com.paymentplatform.shared.domain.exception.DomainException;
 import com.paymentplatform.organization.domain.model.Organization;
 import com.paymentplatform.organization.domain.model.SupplierShopRelation;
-import com.paymentplatform.organization.domain.valueobject.*;
+import com.paymentplatform.organization.domain.valueobject.OrganizationId;
+import com.paymentplatform.organization.domain.valueobject.OrganizationName;
+import com.paymentplatform.organization.domain.valueobject.OrganizationStatus;
+import com.paymentplatform.organization.domain.valueobject.OrganizationType;
+import com.paymentplatform.shared.domain.exception.DomainException;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
+import java.util.UUID;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class OrganizationTest {
 

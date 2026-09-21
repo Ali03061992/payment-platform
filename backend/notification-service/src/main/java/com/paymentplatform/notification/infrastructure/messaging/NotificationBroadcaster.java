@@ -1,11 +1,5 @@
 package com.paymentplatform.notification.infrastructure.messaging;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.paymentplatform.notification.application.dto.NotificationResponse;
 import com.paymentplatform.notification.domain.model.Notification;
@@ -13,6 +7,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 @Component
 public class NotificationBroadcaster {

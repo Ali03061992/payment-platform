@@ -11,13 +11,11 @@
 
 @if (!loading) {
   <div>
-    @if (pendingConfirmations.length > 0) {
+    @if (pendingAcceptance.length > 0) {
       <div class="section-header">
-        <h3>En attente de confirmation de date</h3>
-        <span class="result-count">{{ pendingConfirmations.length }} livraison(s)</span>
+        <h3>En attente d'acceptation</h3>
+        <span class="result-count">{{ pendingAcceptance.length }} livraison(s)</span>
       </div>
-    }
-    @if (pendingConfirmations.length > 0) {
       <div class="table-card">
         <div class="table-wrapper">
           <table>
@@ -32,7 +30,7 @@
               </tr>
             </thead>
             <tbody>
-              @for (d of pendingConfirmations; track d) {
+              @for (d of pendingAcceptance; track d.id) {
                 <tr>
                   <td><strong>{{ d.reference }}</strong></td>
                   <td>{{ d.shopName || d.shopId }}</td>
@@ -44,7 +42,8 @@
                     </span>
                   </td>
                   <td class="actions">
-                    <button class="btn btn-sm btn-primary" (click)="openConfirmDate(d)">Confirmer la date</button>
+                    <button class="btn btn-sm btn-success" (click)="acceptDelivery(d)">Accepter</button>
+                    <button class="btn btn-sm btn-danger" (click)="openRejectModal(d)">Rejeter</button>
                   </td>
                 </tr>
               }
@@ -55,11 +54,9 @@
     }
     @if (activeDeliveries.length > 0) {
       <div class="section-header" style="margin-top: 32px;">
-        <h3>Livraisons en cours</h3>
+        <h3>Livraisons actives</h3>
         <span class="result-count">{{ activeDeliveries.length }} livraison(s)</span>
       </div>
-    }
-    @if (activeDeliveries.length > 0) {
       <div class="table-card">
         <div class="table-wrapper">
           <table>
@@ -74,7 +71,7 @@
               </tr>
             </thead>
             <tbody>
-              @for (d of activeDeliveries; track d) {
+              @for (d of activeDeliveries; track d.id) {
                 <tr>
                   <td><strong>{{ d.reference }}</strong></td>
                   <td>{{ d.shopName || d.shopId }}</td>
@@ -86,7 +83,12 @@
                     </span>
                   </td>
                   <td class="actions">
-                    <button class="btn btn-sm btn-success" (click)="openDeliver(d)">Marquer livré</button>
+                    @if (d.status === 'DELIVERY_ACCEPTED') {
+                      <button class="btn btn-sm btn-primary" (click)="openConfirmDate(d)">Confirmer la date</button>
+                    }
+                    @if (d.status === 'IN_DELIVERY') {
+                      <button class="btn btn-sm btn-success" (click)="openDeliver(d)">Marquer livré</button>
+                    }
                   </td>
                 </tr>
               }
@@ -100,8 +102,6 @@
         <h3>Livraisons terminées</h3>
         <span class="result-count">{{ completedDeliveries.length }} livraison(s)</span>
       </div>
-    }
-    @if (completedDeliveries.length > 0) {
       <div class="table-card">
         <div class="table-wrapper">
           <table>
@@ -110,24 +110,54 @@
                 <th>Référence</th>
                 <th>Boutique</th>
                 <th>Total</th>
-                <th>Date confirmée</th>
                 <th>Statut</th>
+                <th>Reçu par</th>
                 <th>Livré le</th>
               </tr>
             </thead>
             <tbody>
-              @for (d of completedDeliveries; track d) {
+              @for (d of completedDeliveries; track d.id) {
                 <tr>
                   <td><strong>{{ d.reference }}</strong></td>
                   <td>{{ d.shopName || d.shopId }}</td>
                   <td>{{ d.total | number:'1.2-2' }} {{ d.currency }}</td>
-                  <td>{{ d.confirmedDeliveryDate || '-' }}</td>
                   <td>
                     <span class="payment-badge" [ngClass]="statusClass(d.status)">
                       {{ statusLabel(d.status) }}
                     </span>
                   </td>
+                  <td>{{ d.receivedByName || '-' }}</td>
                   <td>{{ d.deliveredAt | date:'dd/MM/yyyy HH:mm' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    }
+    @if (rejectedDeliveries.length > 0) {
+      <div class="section-header" style="margin-top: 32px;">
+        <h3>Livraisons rejetées</h3>
+        <span class="result-count">{{ rejectedDeliveries.length }} livraison(s)</span>
+      </div>
+      <div class="table-card">
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Référence</th>
+                <th>Boutique</th>
+                <th>Total</th>
+                <th>Motif</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (d of rejectedDeliveries; track d.id) {
+                <tr>
+                  <td><strong>{{ d.reference }}</strong></td>
+                  <td>{{ d.shopName || d.shopId }}</td>
+                  <td>{{ d.total | number:'1.2-2' }} {{ d.currency }}</td>
+                  <td>{{ d.deliveryRejectionReason || '-' }}</td>
                 </tr>
               }
             </tbody>
@@ -188,15 +218,61 @@
           <p style="margin-bottom: 16px; color: #555;">
             Commande <strong>{{ selectedOrder.reference }}</strong> — {{ selectedOrder.total | number:'1.2-2' }} {{ selectedOrder.currency }}
           </p>
+          @if (selectedOrder.asapPayment) {
+            <div class="info-box" style="margin-bottom: 16px; background: #e8f5e9; border: 1px solid #4caf50; padding: 12px; border-radius: 8px;">
+              <strong>Paiement ASAP :</strong> Un paiement sera automatiquement créé lors de la validation.
+            </div>
+          }
           <form (ngSubmit)="confirmDeliver()">
             <div class="form-group">
-              <label>ID de la personne qui a reçu</label>
-              <input type="text" [(ngModel)]="receivedBy" name="receivedBy" class="form-control" required placeholder="UUID du destinataire">
+              <label>Personne qui a reçu la livraison</label>
+              @if (shopAgents.length > 0) {
+                <select [(ngModel)]="receivedBy" name="receivedBy" class="form-control" required>
+                  <option value="">-- Sélectionner --</option>
+                  @for (agent of shopAgents; track agent.id) {
+                    <option [value]="agent.id">{{ agent.name }}</option>
+                  }
+                </select>
+              } @else {
+                <input type="text" [(ngModel)]="receivedBy" name="receivedBy" class="form-control" required placeholder="UUID du destinataire">
+              }
             </div>
             <div class="form-actions">
               <button type="button" class="btn btn-secondary" (click)="closeDeliver()">Annuler</button>
               <button type="submit" class="btn btn-success" [disabled]="delivering || !receivedBy">
                 {{ delivering ? 'Confirmation...' : 'Confirmer la livraison' }}
+              </button>
+            </div>
+          </form>
+        </div>
+      }
+    </div>
+  </div>
+}
+
+<!-- Modal rejet livraison -->
+@if (showRejectModal) {
+  <div class="modal-overlay" (click)="closeRejectModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Rejeter la livraison</h3>
+        <button class="btn-close" (click)="closeRejectModal()">&times;</button>
+      </div>
+      @if (rejectOrder) {
+        <div>
+          <p style="margin-bottom: 16px; color: #555;">
+            Commande <strong>{{ rejectOrder.reference }}</strong> — {{ rejectOrder.total | number:'1.2-2' }} {{ rejectOrder.currency }}
+          </p>
+          <form (ngSubmit)="submitReject()">
+            <div class="form-group">
+              <label>Motif du rejet</label>
+              <textarea [(ngModel)]="rejectReason" name="rejectReason" class="form-control" rows="3"
+                placeholder="Indiquez le motif du rejet..." required></textarea>
+            </div>
+            <div class="form-actions">
+              <button type="button" class="btn btn-secondary" (click)="closeRejectModal()">Annuler</button>
+              <button type="submit" class="btn btn-danger" [disabled]="rejecting || !rejectReason">
+                {{ rejecting ? 'Rejet...' : 'Rejeter la livraison' }}
               </button>
             </div>
           </form>

@@ -1,14 +1,12 @@
 package com.paymentplatform.organization.interfaces.rest;
 
-import java.util.UUID;
-
-import com.paymentplatform.shared.infrastructure.security.AuthenticatedUser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.paymentplatform.organization.application.dto.ProductCreateRequest;
 import com.paymentplatform.organization.application.dto.ProductUpdateRequest;
 import com.paymentplatform.organization.application.dto.StockMovementRequest;
 import com.paymentplatform.organization.domain.model.Product;
 import com.paymentplatform.organization.domain.repository.ProductRepository;
+import com.paymentplatform.shared.infrastructure.security.AuthenticatedUser;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,9 +24,11 @@ import org.springframework.web.context.WebApplicationContext;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.UUID;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @ActiveProfiles("test")

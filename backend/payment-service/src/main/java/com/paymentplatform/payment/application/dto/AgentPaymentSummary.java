@@ -1,9 +1,8 @@
 package com.paymentplatform.payment.application.dto;
 
-import java.util.UUID;
-
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.UUID;
 
 public record AgentPaymentSummary(
         UUID userId,

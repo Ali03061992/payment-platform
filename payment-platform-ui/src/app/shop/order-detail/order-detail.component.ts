@@ -15,7 +15,7 @@ export class ShopOrderDetailComponent implements OnInit, OnDestroy {
   order: Order | null = null;
   loading = true;
 
-  statusSteps = ['DRAFT', 'CONFIRMED', 'PREPARING', 'READY_FOR_DELIVERY', 'IN_DELIVERY', 'DELIVERED', 'ACCEPTED'];
+  statusSteps = ['DRAFT', 'CONFIRMED', 'PREPARING', 'READY_FOR_DELIVERY', 'DELIVERY_ACCEPTED', 'IN_DELIVERY', 'DELIVERED', 'ACCEPTED'];
 
   private subscriptions = new Subscription();
 
@@ -75,6 +75,7 @@ export class ShopOrderDetailComponent implements OnInit, OnDestroy {
     const map: Record<string, string> = {
       DRAFT: 'Brouillon', CONFIRMED: 'Confirmé',
       PREPARING: 'En préparation', READY_FOR_DELIVERY: 'Prêt pour livraison',
+      DELIVERY_ACCEPTED: 'Livraison acceptée',
       IN_DELIVERY: 'En livraison', DELIVERED: 'Livré', ACCEPTED: 'Accepté',
       CANCELLED: 'Annulé', REJECTED: 'Rejeté', DELIVERY_REJECTED: 'Livraison rejetée'
     };
@@ -85,6 +86,7 @@ export class ShopOrderDetailComponent implements OnInit, OnDestroy {
     const map: Record<string, string> = {
       DRAFT: 'draft', CONFIRMED: 'confirmed',
       PREPARING: 'preparing', READY_FOR_DELIVERY: 'ready',
+      DELIVERY_ACCEPTED: 'confirmed',
       IN_DELIVERY: 'delivery', DELIVERED: 'delivered',
       ACCEPTED: 'accepted', CANCELLED: 'cancelled',
       REJECTED: 'rejected', DELIVERY_REJECTED: 'delivery-rejected'

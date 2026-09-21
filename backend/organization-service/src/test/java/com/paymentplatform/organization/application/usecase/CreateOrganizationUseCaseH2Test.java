@@ -1,7 +1,5 @@
 package com.paymentplatform.organization.application.usecase;
 
-import java.util.UUID;
-
 import com.paymentplatform.organization.application.dto.CreateOrganizationRequest;
 import com.paymentplatform.organization.domain.repository.OrganizationRepository;
 import com.paymentplatform.shared.domain.exception.ConflictException;
@@ -10,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;

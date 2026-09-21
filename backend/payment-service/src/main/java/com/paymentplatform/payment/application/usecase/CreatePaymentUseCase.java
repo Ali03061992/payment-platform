@@ -1,10 +1,5 @@
 package com.paymentplatform.payment.application.usecase;
 
-import com.paymentplatform.shared.domain.exception.ConflictException;
-import com.paymentplatform.shared.infrastructure.audit.AuditActions;
-import com.paymentplatform.shared.infrastructure.audit.AuditRecorder;
-import com.paymentplatform.shared.infrastructure.outbox.OutboxEventStore;
-import com.paymentplatform.shared.domain.event.PaymentEvents.PaymentCreatedEvent;
 import com.paymentplatform.payment.application.dto.CreatePaymentRequest;
 import com.paymentplatform.payment.application.dto.PaymentNameResolver;
 import com.paymentplatform.payment.application.dto.PaymentResponse;
@@ -12,6 +7,10 @@ import com.paymentplatform.payment.domain.model.Payment;
 import com.paymentplatform.payment.domain.repository.PaymentRepository;
 import com.paymentplatform.payment.domain.valueobject.Money;
 import com.paymentplatform.payment.infrastructure.http.OrganizationValidationClient;
+import com.paymentplatform.shared.domain.event.PaymentEvents.PaymentCreatedEvent;
+import com.paymentplatform.shared.infrastructure.audit.AuditActions;
+import com.paymentplatform.shared.infrastructure.audit.AuditRecorder;
+import com.paymentplatform.shared.infrastructure.outbox.OutboxEventStore;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

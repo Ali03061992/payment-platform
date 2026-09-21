@@ -1,19 +1,18 @@
 package com.paymentplatform.identity.interfaces.rest;
 
-import java.util.UUID;
-
-import com.paymentplatform.shared.infrastructure.security.CurrentUser;
 import com.paymentplatform.identity.application.dto.CreateInternalUserRequest;
 import com.paymentplatform.identity.application.dto.UserResponse;
 import com.paymentplatform.identity.application.usecase.InternalUserCreationUseCase;
 import com.paymentplatform.identity.application.usecase.UserQueryUseCase;
 import com.paymentplatform.identity.application.usecase.UserStatusUseCase;
+import com.paymentplatform.shared.infrastructure.security.CurrentUser;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/users")

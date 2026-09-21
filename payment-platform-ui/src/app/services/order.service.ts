@@ -77,6 +77,32 @@ export class OrderService {
     return this.http.post<Order>(`${this.apiUrl}/${id}/delivery-reject`, { reason });
   }
 
+  acceptDelivery(id: string, accepted: boolean, reason?: string): Observable<Order> {
+    return this.http.post<Order>(`${this.apiUrl}/${id}/accept-delivery`, { accepted, reason });
+  }
+
+  listDeliveries(agentId?: string): Observable<Order[]> {
+    return new Observable<Order[]>(observer => {
+      let url = `${this.apiUrl}/deliveries`;
+      if (agentId) url += `?agentId=${agentId}`;
+      this.http.get<any>(url).subscribe({
+        next: (res: any) => {
+          if (Array.isArray(res)) observer.next(res as Order[]);
+          else if (res && Array.isArray(res.items)) observer.next(res.items as Order[]);
+          else if (res && Array.isArray(res.content)) observer.next(res.content as Order[]);
+          else if (res && Array.isArray(res.data)) observer.next(res.data as Order[]);
+          else observer.next([]);
+          observer.complete();
+        },
+        error: (err) => observer.error(err)
+      });
+    });
+  }
+
+  getShopAgents(shopId: string): Observable<{id: string, name: string}[]> {
+    return this.http.get<{id: string, name: string}[]>(`${this.apiUrl}/shop-agents?shopId=${shopId}`);
+  }
+
   myDeliveries(): Observable<Order[]> {
     return new Observable<Order[]>(observer => {
       this.http.get<any>(`${this.apiUrl}/my-deliveries`).subscribe({

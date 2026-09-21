@@ -1,7 +1,5 @@
 package com.paymentplatform.payment.infrastructure.csv;
 
-import java.util.UUID;
-
 import com.paymentplatform.payment.application.dto.CreatePaymentRequest;
 import com.paymentplatform.payment.application.usecase.CreatePaymentUseCase;
 import org.junit.jupiter.api.Test;
@@ -14,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

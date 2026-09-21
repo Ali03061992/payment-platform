@@ -120,9 +120,24 @@
 }
 
 .sidebar-nav {
-  flex: 1;
+  flex: 2;
   padding: 16px 0;
   overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.2) transparent;
+}
+
+.sidebar-nav::-webkit-scrollbar {
+  width: 4px;
+}
+
+.sidebar-nav::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar-nav::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.2);
+  border-radius: 2px;
 }
 
 .nav-item {
@@ -507,11 +522,11 @@
 }
 
 @keyframes slideIn {
-  from { 
+  from {
     transform: translateX(100%);
     opacity: 0;
   }
-  to { 
+  to {
     transform: translateX(0);
     opacity: 1;
   }

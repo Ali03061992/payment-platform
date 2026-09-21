@@ -1,7 +1,5 @@
 package com.paymentplatform.organization.domain.engine;
 
-import java.util.*;
-
 /**
  * Risk analyzer for stockout and overstock situations.
  * Uses probabilistic methods based on demand and lead time variability.

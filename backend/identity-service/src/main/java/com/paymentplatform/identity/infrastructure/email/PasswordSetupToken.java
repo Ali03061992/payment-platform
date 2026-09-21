@@ -1,10 +1,9 @@
 package com.paymentplatform.identity.infrastructure.email;
 
-import java.util.UUID;
-import jakarta.persistence.PrePersist;
-
 import jakarta.persistence.*;
+
 import java.time.Instant;
+import java.util.UUID;
 
 @Entity
 @Table(name = "password_setup_tokens")

@@ -15,12 +15,15 @@ export interface Order {
   total: number;
   currency: string;
   deliveryAgentId: string | null;
+  deliveryAgentName: string | null;
   receivedBy: string | null;
+  receivedByName: string | null;
   receivedAt: string | null;
   deliveredAt: string | null;
   plannedDeliveryDate: string | null;
   confirmedDeliveryDate: string | null;
   asapPayment: boolean;
+  deliveryRejectionReason: string | null;
   notes: string | null;
   version: number;
   createdAt: string;

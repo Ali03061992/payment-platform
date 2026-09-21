@@ -1,6 +1,6 @@
 package com.paymentplatform.organization.domain.engine;
 
-import java.util.*;
+import java.util.Arrays;
 
 /**
  * XYZ Classification based on demand variability (coefficient of variation).

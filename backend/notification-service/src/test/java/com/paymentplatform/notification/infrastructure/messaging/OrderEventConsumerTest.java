@@ -1,8 +1,8 @@
 package com.paymentplatform.notification.infrastructure.messaging;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.paymentplatform.notification.domain.model.NotificationRepository;
 import com.paymentplatform.shared.infrastructure.eventing.EventDeduplicator;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.amqp.core.Message;

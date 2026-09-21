@@ -1,18 +1,17 @@
 package com.paymentplatform.payment.application.usecase;
 
-import java.util.UUID;
-
 import com.paymentplatform.payment.application.dto.AgentPaymentSummary;
 import com.paymentplatform.payment.application.dto.PaymentNameResolver;
 import com.paymentplatform.payment.application.dto.PaymentResponse;
-import com.paymentplatform.payment.infrastructure.persistence.PaymentJpaRepository;
 import com.paymentplatform.payment.infrastructure.persistence.PaymentJpaEntity;
+import com.paymentplatform.payment.infrastructure.persistence.PaymentJpaRepository;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class AgentPaymentsBySupplierUseCase {

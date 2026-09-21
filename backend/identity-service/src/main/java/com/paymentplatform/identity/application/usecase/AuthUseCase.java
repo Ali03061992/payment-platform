@@ -1,9 +1,5 @@
 package com.paymentplatform.identity.application.usecase;
 
-import com.paymentplatform.shared.domain.exception.UnauthorizedException;
-import com.paymentplatform.shared.infrastructure.audit.AuditActions;
-import com.paymentplatform.shared.infrastructure.audit.AuditRecorder;
-import com.paymentplatform.shared.infrastructure.security.AuthenticatedUser;
 import com.paymentplatform.identity.application.dto.LoginRequest;
 import com.paymentplatform.identity.application.dto.LoginResponse;
 import com.paymentplatform.identity.application.dto.UserResponse;
@@ -12,6 +8,10 @@ import com.paymentplatform.identity.application.port.TokenIssuer;
 import com.paymentplatform.identity.domain.model.User;
 import com.paymentplatform.identity.domain.repository.UserRepository;
 import com.paymentplatform.identity.domain.valueobject.Username;
+import com.paymentplatform.shared.domain.exception.UnauthorizedException;
+import com.paymentplatform.shared.infrastructure.audit.AuditActions;
+import com.paymentplatform.shared.infrastructure.audit.AuditRecorder;
+import com.paymentplatform.shared.infrastructure.security.AuthenticatedUser;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

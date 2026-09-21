@@ -2,7 +2,8 @@ package com.paymentplatform.organization.infrastructure.mapper;
 
 import com.paymentplatform.organization.application.dto.RelationResponse;
 import com.paymentplatform.organization.domain.model.SupplierShopRelation;
-import org.mapstruct.*;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring")
 public interface SupplierShopRelationMapper {

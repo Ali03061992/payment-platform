@@ -1,11 +1,6 @@
 package com.paymentplatform.shared.infrastructure.web;
 
-import com.paymentplatform.shared.domain.exception.ConflictException;
-import com.paymentplatform.shared.domain.exception.DomainException;
-import com.paymentplatform.shared.domain.exception.ForbiddenException;
-import com.paymentplatform.shared.domain.exception.NotFoundException;
-import com.paymentplatform.shared.domain.exception.UnauthorizedException;
-import com.paymentplatform.shared.domain.exception.UnprocessableEntityException;
+import com.paymentplatform.shared.domain.exception.*;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -1,14 +1,12 @@
 package com.paymentplatform.organization.domain.model;
 
-import java.util.UUID;
-
 import com.paymentplatform.shared.domain.exception.ConflictException;
-import com.paymentplatform.shared.domain.exception.DomainException;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.UUID;
 
 @Entity
 @Table(name = "orders")
@@ -74,6 +72,9 @@ public class Order {
 
     @Column(name = "asap_payment", nullable = false)
     private boolean asapPayment;
+
+    @Column(name = "delivery_rejection_reason", columnDefinition = "TEXT")
+    private String deliveryRejectionReason;
 
     @Column(columnDefinition = "TEXT")
     private String notes;
@@ -181,6 +182,10 @@ public class Order {
         transitionTo(OrderStatus.ACCEPTED);
     }
 
+    public void acceptDelivery() {
+        transitionTo(OrderStatus.DELIVERY_ACCEPTED);
+    }
+
     public void cancel() {
         transitionTo(OrderStatus.CANCELLED);
     }
@@ -189,7 +194,8 @@ public class Order {
         transitionTo(OrderStatus.REJECTED);
     }
 
-    public void deliveryReject() {
+    public void deliveryReject(String reason) {
+        this.deliveryRejectionReason = reason;
         transitionTo(OrderStatus.DELIVERY_REJECTED);
     }
 
@@ -218,6 +224,7 @@ public class Order {
     public Instant getReceivedAt() { return receivedAt; }
     public Instant getDeliveredAt() { return deliveredAt; }
     public boolean isAsapPayment() { return asapPayment; }
+    public String getDeliveryRejectionReason() { return deliveryRejectionReason; }
     public LocalDate getPlannedDeliveryDate() { return plannedDeliveryDate; }
     public LocalDate getConfirmedDeliveryDate() { return confirmedDeliveryDate; }
     public String getNotes() { return notes; }

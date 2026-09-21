@@ -1,7 +1,5 @@
 package com.paymentplatform.notification.infrastructure.rest;
 
-import java.util.UUID;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.paymentplatform.notification.application.dto.NotificationResponse;
@@ -24,7 +22,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/notifications")

@@ -1,8 +1,5 @@
 package com.paymentplatform.organization.application.usecase;
 
-import java.util.UUID;
-
-import com.paymentplatform.shared.domain.exception.NotFoundException;
 import com.paymentplatform.organization.application.dto.BalanceResponse;
 import com.paymentplatform.organization.domain.model.BalanceEntry;
 import com.paymentplatform.organization.domain.repository.BalanceRepository;
@@ -11,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @Transactional

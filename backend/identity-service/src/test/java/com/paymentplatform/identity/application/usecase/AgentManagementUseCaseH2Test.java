@@ -1,9 +1,6 @@
 package com.paymentplatform.identity.application.usecase;
 
-import java.util.UUID;
-
 import com.paymentplatform.identity.application.dto.AgentRequest;
-import com.paymentplatform.identity.application.port.OrganizationStatusPort;
 import com.paymentplatform.identity.domain.model.User;
 import com.paymentplatform.identity.domain.repository.UserRepository;
 import com.paymentplatform.identity.domain.valueobject.Email;
@@ -24,6 +21,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;

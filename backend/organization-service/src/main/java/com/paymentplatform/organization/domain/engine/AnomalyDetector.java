@@ -1,6 +1,8 @@
 package com.paymentplatform.organization.domain.engine;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Anomaly detection for stock data.

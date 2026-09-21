@@ -1,11 +1,10 @@
 package com.paymentplatform.organization.domain.model;
 
-import java.util.UUID;
-
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.UUID;
 
 @Entity
 @Table(name = "order_items")

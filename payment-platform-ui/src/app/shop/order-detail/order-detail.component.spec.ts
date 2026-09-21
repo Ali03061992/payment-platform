@@ -19,8 +19,9 @@ describe('ShopOrderDetailComponent', () => {
   const mockOrder = {
     id: 1, reference: 'ORD-001', supplierId: 1, shopId: 2, createdBy: 3, createdByRole: 'SHOP_ADMIN',
     source: 'MANUAL', status: 'DRAFT', subtotal: 100, taxRate: 0.19, taxAmount: 19, total: 119,
-    currency: 'TND', deliveryAgentId: null, receivedBy: null, receivedAt: null, deliveredAt: null,
-    asapPayment: false, notes: '', version: 1, createdAt: '', updatedAt: '', items: [], events: []
+    currency: 'TND', deliveryAgentId: null, deliveryAgentName: null, receivedBy: null, receivedByName: null,
+    receivedAt: null, deliveredAt: null, plannedDeliveryDate: null, confirmedDeliveryDate: null,
+    asapPayment: false, deliveryRejectionReason: null, notes: '', version: 1, createdAt: '', updatedAt: '', items: [], events: []
   };
 
   beforeEach(() => {
@@ -185,6 +186,7 @@ describe('ShopOrderDetailComponent', () => {
       expect(component.statusLabel('CONFIRMED')).toBe('Confirmé');
       expect(component.statusLabel('PREPARING')).toBe('En préparation');
       expect(component.statusLabel('READY_FOR_DELIVERY')).toBe('Prêt pour livraison');
+      expect(component.statusLabel('DELIVERY_ACCEPTED')).toBe('Livraison acceptée');
       expect(component.statusLabel('IN_DELIVERY')).toBe('En livraison');
       expect(component.statusLabel('DELIVERED')).toBe('Livré');
       expect(component.statusLabel('ACCEPTED')).toBe('Accepté');
@@ -201,6 +203,7 @@ describe('ShopOrderDetailComponent', () => {
       expect(component.statusClass('CONFIRMED')).toBe('confirmed');
       expect(component.statusClass('PREPARING')).toBe('preparing');
       expect(component.statusClass('READY_FOR_DELIVERY')).toBe('ready');
+      expect(component.statusClass('DELIVERY_ACCEPTED')).toBe('confirmed');
       expect(component.statusClass('IN_DELIVERY')).toBe('delivery');
       expect(component.statusClass('DELIVERED')).toBe('delivered');
       expect(component.statusClass('ACCEPTED')).toBe('accepted');

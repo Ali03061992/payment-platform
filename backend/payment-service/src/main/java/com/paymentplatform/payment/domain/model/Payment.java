@@ -1,17 +1,16 @@
 package com.paymentplatform.payment.domain.model;
 
-import java.util.UUID;
-
-import com.paymentplatform.shared.domain.exception.DomainException;
-import com.paymentplatform.shared.infrastructure.audit.AuditActions;
 import com.paymentplatform.payment.domain.valueobject.Money;
 import com.paymentplatform.payment.domain.valueobject.PaymentReference;
 import com.paymentplatform.payment.domain.valueobject.RejectionReason;
+import com.paymentplatform.shared.domain.exception.DomainException;
+import com.paymentplatform.shared.infrastructure.audit.AuditActions;
 
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 public class Payment {
 

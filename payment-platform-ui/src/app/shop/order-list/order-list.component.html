@@ -11,6 +11,7 @@
       <option value="CONFIRMED">Confirmé</option>
       <option value="PREPARING">En préparation</option>
       <option value="READY_FOR_DELIVERY">Prêt pour livraison</option>
+      <option value="DELIVERY_ACCEPTED">Livraison acceptée</option>
       <option value="IN_DELIVERY">En livraison</option>
       <option value="DELIVERED">Livré</option>
       <option value="ACCEPTED">Accepté</option>
@@ -38,6 +39,7 @@
           <tr>
             <th>Référence</th>
             <th>Fournisseur</th>
+            <th>Livreur</th>
             <th>Date</th>
             <th>Total</th>
             <th>Statut</th>
@@ -49,6 +51,7 @@
             <tr class="clickable-row" [routerLink]="['/dashboard/shop/orders', o.id]">
               <td><strong>{{ o.reference }}</strong></td>
               <td>{{ o.supplierName || o.supplierId }}</td>
+              <td>{{ o.deliveryAgentName || '-' }}</td>
               <td>{{ o.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
               <td>{{ o.total | number:'1.2-2' }} {{ o.currency }}</td>
               <td>
@@ -72,7 +75,7 @@
           }
           @if (filteredOrders.length === 0) {
             <tr>
-              <td colspan="6" class="empty">Aucune commande trouvée</td>
+              <td colspan="7" class="empty">Aucune commande trouvée</td>
             </tr>
           }
         </tbody>
@@ -101,6 +104,10 @@
           <div class="order-row">
             <span class="order-label">Fournisseur</span>
             <span class="order-value">{{ o.supplierName || o.supplierId }}</span>
+          </div>
+          <div class="order-row">
+            <span class="order-label">Livreur</span>
+            <span class="order-value">{{ o.deliveryAgentName || '-' }}</span>
           </div>
           <div class="order-row">
             <span class="order-label">Total</span>

@@ -1,7 +1,5 @@
 package com.paymentplatform.identity.application.usecase;
 
-import java.util.UUID;
-
 import com.paymentplatform.identity.application.dto.RegisterRequest;
 import com.paymentplatform.identity.domain.model.User;
 import com.paymentplatform.identity.domain.repository.UserRepository;
@@ -10,7 +8,6 @@ import com.paymentplatform.identity.domain.valueobject.PasswordHash;
 import com.paymentplatform.identity.domain.valueobject.PhoneNumber;
 import com.paymentplatform.identity.domain.valueobject.Username;
 import com.paymentplatform.shared.domain.exception.ConflictException;
-import com.paymentplatform.shared.domain.model.OrganizationId;
 import com.paymentplatform.shared.domain.model.RoleCode;
 import com.paymentplatform.shared.domain.model.UserId;
 import org.junit.jupiter.api.Test;

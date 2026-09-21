@@ -1,12 +1,5 @@
 package com.paymentplatform.organization.application.usecase;
 
-import com.paymentplatform.shared.domain.exception.ConflictException;
-import com.paymentplatform.shared.domain.exception.NotFoundException;
-import com.paymentplatform.shared.infrastructure.audit.AuditActions;
-import com.paymentplatform.shared.infrastructure.audit.AuditRecorder;
-import com.paymentplatform.shared.infrastructure.outbox.OutboxEventStore;
-import com.paymentplatform.shared.domain.event.OrganizationEvents.SupplierCreatedEvent;
-import com.paymentplatform.shared.domain.event.OrganizationEvents.ShopCreatedEvent;
 import com.paymentplatform.organization.application.dto.CreateOrganizationRequest;
 import com.paymentplatform.organization.application.dto.OrganizationResponse;
 import com.paymentplatform.organization.domain.model.Organization;
@@ -14,6 +7,12 @@ import com.paymentplatform.organization.domain.repository.OrganizationRepository
 import com.paymentplatform.organization.domain.valueobject.OrganizationId;
 import com.paymentplatform.organization.domain.valueobject.OrganizationName;
 import com.paymentplatform.organization.domain.valueobject.OrganizationType;
+import com.paymentplatform.shared.domain.event.OrganizationEvents.ShopCreatedEvent;
+import com.paymentplatform.shared.domain.event.OrganizationEvents.SupplierCreatedEvent;
+import com.paymentplatform.shared.domain.exception.ConflictException;
+import com.paymentplatform.shared.infrastructure.audit.AuditActions;
+import com.paymentplatform.shared.infrastructure.audit.AuditRecorder;
+import com.paymentplatform.shared.infrastructure.outbox.OutboxEventStore;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

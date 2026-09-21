@@ -1,8 +1,8 @@
 package com.paymentplatform.identity.infrastructure.security;
 
+import com.paymentplatform.identity.application.port.TokenIssuer;
 import com.paymentplatform.shared.infrastructure.security.AuthenticatedUser;
 import com.paymentplatform.shared.infrastructure.security.JwtService;
-import com.paymentplatform.identity.application.port.TokenIssuer;
 import org.springframework.stereotype.Component;
 
 @Component

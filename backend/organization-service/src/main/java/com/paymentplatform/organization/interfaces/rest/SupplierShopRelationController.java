@@ -1,8 +1,5 @@
 package com.paymentplatform.organization.interfaces.rest;
 
-import java.util.UUID;
-
-import com.paymentplatform.shared.infrastructure.security.CurrentUser;
 import com.paymentplatform.organization.application.dto.CreateRelationRequest;
 import com.paymentplatform.organization.application.dto.RelationResponse;
 import com.paymentplatform.organization.application.usecase.SupplierShopRelationUseCase;
@@ -12,6 +9,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/admin/supplier-shop-relations")

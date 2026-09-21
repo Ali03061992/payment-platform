@@ -1,6 +1,5 @@
 package com.paymentplatform.shared.infrastructure.web;
 
-import com.paymentplatform.shared.infrastructure.web.ApiError;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;

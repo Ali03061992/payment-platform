@@ -1,18 +1,18 @@
 package com.paymentplatform.payment;
 
-import java.util.UUID;
-
-import com.paymentplatform.shared.domain.exception.DomainException;
 import com.paymentplatform.payment.domain.model.Payment;
 import com.paymentplatform.payment.domain.model.PaymentStatus;
 import com.paymentplatform.payment.domain.valueobject.Money;
 import com.paymentplatform.payment.domain.valueobject.PaymentReference;
 import com.paymentplatform.payment.domain.valueobject.RejectionReason;
+import com.paymentplatform.shared.domain.exception.DomainException;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class PaymentTest {
 

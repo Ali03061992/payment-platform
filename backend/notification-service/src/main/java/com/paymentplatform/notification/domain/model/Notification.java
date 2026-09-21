@@ -1,10 +1,9 @@
 package com.paymentplatform.notification.domain.model;
 
-import java.util.UUID;
-import jakarta.persistence.PrePersist;
-
 import jakarta.persistence.*;
+
 import java.time.Instant;
+import java.util.UUID;
 
 @Entity
 @Table(name = "notifications")

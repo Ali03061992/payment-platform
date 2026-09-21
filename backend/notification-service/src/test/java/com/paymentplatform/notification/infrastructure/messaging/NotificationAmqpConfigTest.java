@@ -2,7 +2,6 @@ package com.paymentplatform.notification.infrastructure.messaging;
 
 import com.paymentplatform.shared.infrastructure.outbox.AmqpTopology;
 import org.junit.jupiter.api.Test;
-import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.core.TopicExchange;
 import org.springframework.beans.factory.annotation.Autowired;

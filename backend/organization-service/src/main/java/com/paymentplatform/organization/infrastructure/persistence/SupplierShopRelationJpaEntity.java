@@ -1,10 +1,9 @@
 package com.paymentplatform.organization.infrastructure.persistence;
 
-import java.util.UUID;
-import jakarta.persistence.PrePersist;
-
 import jakarta.persistence.*;
+
 import java.time.Instant;
+import java.util.UUID;
 
 @Entity
 @Table(name = "supplier_shop_relations")

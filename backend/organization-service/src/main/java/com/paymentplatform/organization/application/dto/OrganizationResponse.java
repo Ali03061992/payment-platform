@@ -1,12 +1,11 @@
 package com.paymentplatform.organization.application.dto;
 
-import java.util.UUID;
-
 import com.paymentplatform.organization.domain.model.Organization;
 import com.paymentplatform.organization.domain.model.SupplierShopRelation;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.UUID;
 
 public record OrganizationResponse(
         UUID id,

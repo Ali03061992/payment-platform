@@ -1,13 +1,12 @@
 package com.paymentplatform.organization.application.dto;
 
-import java.util.UUID;
-
 import com.paymentplatform.organization.domain.engine.AnomalyDetector;
 import com.paymentplatform.organization.domain.engine.RecommendationEngine;
 
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 public record StockOptimizationResponse(
     List<ProductOptimizationResult> products,

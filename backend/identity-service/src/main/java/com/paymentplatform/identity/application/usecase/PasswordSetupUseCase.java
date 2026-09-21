@@ -1,14 +1,14 @@
 package com.paymentplatform.identity.application.usecase;
 
+import com.paymentplatform.identity.domain.model.User;
+import com.paymentplatform.identity.domain.repository.UserRepository;
+import com.paymentplatform.identity.domain.valueobject.PasswordHash;
+import com.paymentplatform.identity.domain.valueobject.Username;
 import com.paymentplatform.identity.infrastructure.email.EmailService;
 import com.paymentplatform.identity.infrastructure.email.PasswordSetupToken;
 import com.paymentplatform.identity.infrastructure.email.PasswordSetupTokenRepository;
 import com.paymentplatform.shared.domain.exception.ConflictException;
 import com.paymentplatform.shared.domain.exception.NotFoundException;
-import com.paymentplatform.identity.domain.model.User;
-import com.paymentplatform.identity.domain.repository.UserRepository;
-import com.paymentplatform.identity.domain.valueobject.PasswordHash;
-import com.paymentplatform.identity.domain.valueobject.Username;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;

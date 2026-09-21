@@ -4,10 +4,12 @@ import com.paymentplatform.organization.application.dto.OrderResponse;
 import com.paymentplatform.organization.domain.model.Order;
 import com.paymentplatform.organization.domain.model.OrderEvent;
 import com.paymentplatform.organization.domain.model.OrderItem;
-import com.paymentplatform.organization.domain.repository.*;
+import com.paymentplatform.organization.domain.repository.OrderEventRepository;
+import com.paymentplatform.organization.domain.repository.OrderItemRepository;
+import com.paymentplatform.organization.domain.repository.OrderRepository;
+import com.paymentplatform.shared.domain.event.OrderEvents;
 import com.paymentplatform.shared.domain.exception.ConflictException;
 import com.paymentplatform.shared.domain.exception.NotFoundException;
-import com.paymentplatform.shared.domain.event.OrderEvents;
 import com.paymentplatform.shared.infrastructure.outbox.OutboxEventStore;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,8 +44,8 @@ public class ConfirmDeliveryUseCase {
             throw new ConflictException("Aucun agent de livraison assigné à cette commande");
         }
 
-        if (!"READY_FOR_DELIVERY".equals(order.getStatus())) {
-            throw new ConflictException("La commande doit être en statut READY_FOR_DELIVERY pour confirmer la livraison");
+        if (!"DELIVERY_ACCEPTED".equals(order.getStatus())) {
+            throw new ConflictException("La commande doit être en statut DELIVERY_ACCEPTED pour confirmer la livraison");
         }
 
         order.confirmDelivery(confirmedDate);

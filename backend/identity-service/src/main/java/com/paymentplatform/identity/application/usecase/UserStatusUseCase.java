@@ -1,15 +1,15 @@
 package com.paymentplatform.identity.application.usecase;
 
+import com.paymentplatform.identity.application.dto.UserResponse;
+import com.paymentplatform.identity.domain.model.User;
+import com.paymentplatform.identity.domain.repository.UserRepository;
+import com.paymentplatform.shared.domain.event.IdentityEvents.UserActivatedEvent;
+import com.paymentplatform.shared.domain.event.IdentityEvents.UserDisabledEvent;
 import com.paymentplatform.shared.domain.exception.NotFoundException;
 import com.paymentplatform.shared.domain.model.UserId;
 import com.paymentplatform.shared.infrastructure.audit.AuditActions;
 import com.paymentplatform.shared.infrastructure.audit.AuditRecorder;
 import com.paymentplatform.shared.infrastructure.outbox.OutboxEventStore;
-import com.paymentplatform.shared.domain.event.IdentityEvents.UserActivatedEvent;
-import com.paymentplatform.shared.domain.event.IdentityEvents.UserDisabledEvent;
-import com.paymentplatform.identity.application.dto.UserResponse;
-import com.paymentplatform.identity.domain.model.User;
-import com.paymentplatform.identity.domain.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

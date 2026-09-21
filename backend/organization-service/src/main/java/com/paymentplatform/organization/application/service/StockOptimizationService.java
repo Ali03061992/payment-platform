@@ -1,9 +1,7 @@
 package com.paymentplatform.organization.application.service;
 
-import java.util.UUID;
-
 import com.paymentplatform.organization.application.dto.StockOptimizationResponse;
-import com.paymentplatform.organization.domain.engine.*;
+import com.paymentplatform.organization.domain.engine.StockOptimizationEngine;
 import com.paymentplatform.organization.domain.model.Product;
 import com.paymentplatform.organization.domain.model.StockMovement;
 import com.paymentplatform.organization.domain.repository.ProductRepository;
@@ -11,7 +9,6 @@ import com.paymentplatform.organization.domain.repository.StockMovementRepositor
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 public class StockOptimizationService {

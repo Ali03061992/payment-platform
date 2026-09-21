@@ -1,12 +1,12 @@
 package com.paymentplatform.organization.interfaces.rest;
 
-import java.util.UUID;
-
 import com.paymentplatform.organization.application.dto.StockOptimizationResponse;
 import com.paymentplatform.organization.application.service.StockOptimizationService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/suppliers/{supplierId}/optimization")

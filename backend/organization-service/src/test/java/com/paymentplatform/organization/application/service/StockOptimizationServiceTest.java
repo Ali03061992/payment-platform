@@ -1,7 +1,5 @@
 package com.paymentplatform.organization.application.service;
 
-import java.util.UUID;
-
 import com.paymentplatform.organization.domain.model.Product;
 import com.paymentplatform.organization.domain.model.StockMovement;
 import com.paymentplatform.organization.domain.repository.ProductRepository;
@@ -14,6 +12,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

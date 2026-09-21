@@ -1,7 +1,5 @@
 package com.paymentplatform.shared.infrastructure;
 
-import java.util.UUID;
-
 import com.paymentplatform.shared.infrastructure.security.AuthenticatedUser;
 import com.paymentplatform.shared.infrastructure.security.JwtService;
 import com.paymentplatform.shared.infrastructure.security.SecurityProperties;
@@ -9,12 +7,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.env.MockEnvironment;
 
-import java.time.Duration;
-import java.util.List;
-import java.util.Base64;
-import java.nio.charset.StandardCharsets;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
+import java.nio.charset.StandardCharsets;
+import java.time.Duration;
+import java.util.Base64;
+import java.util.List;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;

@@ -1,11 +1,9 @@
 package com.paymentplatform.payment.application.usecase;
 
-import java.util.UUID;
-
 import com.paymentplatform.payment.application.dto.CreatePaymentRequest;
 import com.paymentplatform.payment.application.dto.RejectPaymentRequest;
-import com.paymentplatform.payment.domain.model.PaymentStatus;
 import com.paymentplatform.payment.domain.repository.PaymentRepository;
+import com.paymentplatform.payment.infrastructure.http.TestOrganizationValidationConfig;
 import com.paymentplatform.shared.domain.exception.DomainException;
 import com.paymentplatform.shared.domain.exception.ForbiddenException;
 import com.paymentplatform.shared.domain.exception.NotFoundException;
@@ -16,9 +14,8 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.paymentplatform.payment.infrastructure.http.TestOrganizationValidationConfig;
-
 import java.math.BigDecimal;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;

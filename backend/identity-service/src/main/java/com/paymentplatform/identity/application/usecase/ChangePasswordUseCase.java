@@ -1,14 +1,14 @@
 package com.paymentplatform.identity.application.usecase;
 
+import com.paymentplatform.identity.application.dto.ChangePasswordRequest;
+import com.paymentplatform.identity.domain.model.User;
+import com.paymentplatform.identity.domain.repository.UserRepository;
+import com.paymentplatform.identity.domain.valueobject.PasswordHash;
 import com.paymentplatform.shared.domain.exception.UnauthorizedException;
 import com.paymentplatform.shared.domain.model.UserId;
 import com.paymentplatform.shared.infrastructure.audit.AuditActions;
 import com.paymentplatform.shared.infrastructure.audit.AuditRecorder;
 import com.paymentplatform.shared.infrastructure.security.CurrentUser;
-import com.paymentplatform.identity.application.dto.ChangePasswordRequest;
-import com.paymentplatform.identity.domain.model.User;
-import com.paymentplatform.identity.domain.repository.UserRepository;
-import com.paymentplatform.identity.domain.valueobject.PasswordHash;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

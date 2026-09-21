@@ -62,11 +62,31 @@
           <div class="detail-value">{{ order.receivedAt | date:'dd/MM/yyyy HH:mm:ss' }}</div>
         </div>
       }
+      @if (order.deliveryAgentName) {
+        <div class="detail-card">
+          <div class="detail-label">Livreur</div>
+          <div class="detail-value">{{ order.deliveryAgentName }}</div>
+        </div>
+      }
+      @if (order.receivedByName) {
+        <div class="detail-card">
+          <div class="detail-label">Reçu par</div>
+          <div class="detail-value">{{ order.receivedByName }}</div>
+        </div>
+      }
+      @if (order.deliveryRejectionReason) {
+        <div class="detail-card" style="grid-column: 1 / -1;">
+          <div class="detail-label">Motif de rejet de livraison</div>
+          <div class="detail-value" style="color: #e53935;">{{ order.deliveryRejectionReason }}</div>
+        </div>
+      }
     </div>
     @if (order.status === 'DELIVERED') {
       <div class="action-bar">
         <button class="btn btn-success" (click)="accept()">Accepter</button>
-        <button class="btn btn-primary" (click)="acceptAsap()">Accepter avec paiement ASAP</button>
+        @if (order.asapPayment) {
+          <button class="btn btn-primary" (click)="acceptAsap()">Accepter avec paiement ASAP</button>
+        }
         <button class="btn btn-danger" (click)="reject()">Rejeter</button>
       </div>
     }

@@ -1,7 +1,5 @@
 package com.paymentplatform.identity.infrastructure.test;
 
-import java.util.UUID;
-
 import com.paymentplatform.identity.application.port.OrganizationStatus;
 import com.paymentplatform.identity.application.port.OrganizationStatusPort;
 import org.springframework.context.annotation.Profile;
@@ -9,6 +7,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * Implémentation test du port OrganizationStatus.

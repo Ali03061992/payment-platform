@@ -1,13 +1,5 @@
 package com.paymentplatform.identity.application.usecase;
 
-import com.paymentplatform.shared.domain.exception.ConflictException;
-import com.paymentplatform.shared.domain.model.OrganizationId;
-import com.paymentplatform.shared.domain.model.RoleCode;
-import com.paymentplatform.shared.domain.model.UserId;
-import com.paymentplatform.shared.infrastructure.audit.AuditActions;
-import com.paymentplatform.shared.infrastructure.audit.AuditRecorder;
-import com.paymentplatform.shared.infrastructure.outbox.OutboxEventStore;
-import com.paymentplatform.shared.domain.event.IdentityEvents.UserCreatedEvent;
 import com.paymentplatform.identity.application.dto.CreateInternalUserRequest;
 import com.paymentplatform.identity.application.dto.UserResponse;
 import com.paymentplatform.identity.domain.model.User;
@@ -16,6 +8,14 @@ import com.paymentplatform.identity.domain.valueobject.Email;
 import com.paymentplatform.identity.domain.valueobject.PasswordHash;
 import com.paymentplatform.identity.domain.valueobject.PhoneNumber;
 import com.paymentplatform.identity.domain.valueobject.Username;
+import com.paymentplatform.shared.domain.event.IdentityEvents.UserCreatedEvent;
+import com.paymentplatform.shared.domain.exception.ConflictException;
+import com.paymentplatform.shared.domain.model.OrganizationId;
+import com.paymentplatform.shared.domain.model.RoleCode;
+import com.paymentplatform.shared.domain.model.UserId;
+import com.paymentplatform.shared.infrastructure.audit.AuditActions;
+import com.paymentplatform.shared.infrastructure.audit.AuditRecorder;
+import com.paymentplatform.shared.infrastructure.outbox.OutboxEventStore;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

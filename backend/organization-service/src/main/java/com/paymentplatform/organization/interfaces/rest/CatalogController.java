@@ -1,12 +1,9 @@
 package com.paymentplatform.organization.interfaces.rest;
 
-import java.util.UUID;
-
 import com.paymentplatform.organization.domain.model.ProductCategory;
 import com.paymentplatform.organization.domain.model.ProductFamily;
 import com.paymentplatform.organization.domain.repository.ProductCategoryRepository;
 import com.paymentplatform.organization.domain.repository.ProductFamilyRepository;
-import com.paymentplatform.shared.domain.exception.ConflictException;
 import com.paymentplatform.shared.infrastructure.security.CurrentUser;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -16,10 +13,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 @RestController
 @RequestMapping("/api/supplier/catalog")

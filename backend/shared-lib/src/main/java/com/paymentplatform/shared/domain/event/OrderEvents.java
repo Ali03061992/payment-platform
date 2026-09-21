@@ -84,9 +84,18 @@ public final class OrderEvents {
     }
 
     public record OrderDeliveryRejectedEvent(UUID eventId, Instant occurredAt, UUID orderId, String reference,
-                                              UUID shopId, UUID supplierId, UUID rejectedBy, String reason)
+                                               UUID shopId, UUID supplierId, UUID rejectedBy, String reason)
             implements DomainEvent {
         public static final String EVENT_TYPE = "order.delivery_rejected";
+
+        @Override public String eventType() { return EVENT_TYPE; }
+        @Override public int eventVersion() { return 1; }
+        @Override public String aggregateId() { return String.valueOf(orderId); }
+    }
+
+    public record OrderDeliveryAcceptedEvent(UUID eventId, Instant occurredAt, UUID orderId, String reference,
+                                              UUID shopId, UUID supplierId, UUID acceptedBy) implements DomainEvent {
+        public static final String EVENT_TYPE = "order.delivery_accepted";
 
         @Override public String eventType() { return EVENT_TYPE; }
         @Override public int eventVersion() { return 1; }

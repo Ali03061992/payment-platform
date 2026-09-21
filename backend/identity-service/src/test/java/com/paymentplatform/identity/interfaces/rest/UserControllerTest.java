@@ -1,17 +1,14 @@
 package com.paymentplatform.identity.interfaces.rest;
 
-import java.util.UUID;
-
-import com.paymentplatform.identity.application.dto.LoginRequest;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.paymentplatform.identity.application.dto.CreateInternalUserRequest;
+import com.paymentplatform.identity.application.dto.LoginRequest;
 import com.paymentplatform.identity.domain.model.User;
 import com.paymentplatform.identity.domain.repository.UserRepository;
 import com.paymentplatform.identity.domain.valueobject.Email;
 import com.paymentplatform.identity.domain.valueobject.PasswordHash;
 import com.paymentplatform.identity.domain.valueobject.PhoneNumber;
 import com.paymentplatform.identity.domain.valueobject.Username;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.paymentplatform.shared.domain.model.OrganizationId;
 import com.paymentplatform.shared.domain.model.RoleCode;
 import com.paymentplatform.shared.domain.model.UserId;
 import jakarta.persistence.EntityManager;
@@ -31,7 +28,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @ActiveProfiles("test")

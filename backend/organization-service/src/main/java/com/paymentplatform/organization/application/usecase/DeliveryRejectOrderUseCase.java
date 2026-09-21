@@ -5,10 +5,13 @@ import com.paymentplatform.organization.domain.model.Order;
 import com.paymentplatform.organization.domain.model.OrderEvent;
 import com.paymentplatform.organization.domain.model.OrderItem;
 import com.paymentplatform.organization.domain.model.Product;
-import com.paymentplatform.organization.domain.repository.*;
+import com.paymentplatform.organization.domain.repository.OrderEventRepository;
+import com.paymentplatform.organization.domain.repository.OrderItemRepository;
+import com.paymentplatform.organization.domain.repository.OrderRepository;
+import com.paymentplatform.organization.domain.repository.ProductRepository;
+import com.paymentplatform.shared.domain.event.OrderEvents;
 import com.paymentplatform.shared.domain.exception.ConflictException;
 import com.paymentplatform.shared.domain.exception.NotFoundException;
-import com.paymentplatform.shared.domain.event.OrderEvents;
 import com.paymentplatform.shared.infrastructure.outbox.OutboxEventStore;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,20 +44,15 @@ public class DeliveryRejectOrderUseCase {
         Order order = orders.findById(orderId)
                 .orElseThrow(() -> new NotFoundException("Commande non trouvée : " + orderId));
 
-        if (!"IN_DELIVERY".equals(order.getStatus())) {
-            throw new ConflictException("La commande doit être en statut IN_DELIVERY pour rejeter la livraison");
+        String status = order.getStatus();
+        if (!"READY_FOR_DELIVERY".equals(status) && !"IN_DELIVERY".equals(status)) {
+            throw new ConflictException("La commande doit être en statut READY_FOR_DELIVERY ou IN_DELIVERY pour rejeter la livraison");
         }
 
-        order.deliveryReject();
+        order.deliveryReject(reason);
         orders.save(order);
 
         List<OrderItem> items = orderItems.findByOrderId(orderId);
-        for (OrderItem item : items) {
-            Product product = products.findByIdForUpdate(item.getProductId())
-                    .orElseThrow(() -> new NotFoundException("Produit non trouvé : " + item.getProductId()));
-            product.setReservedQty(Math.max(0, product.getReservedQty() - item.getQuantity()));
-            products.save(product);
-        }
 
         events.save(OrderEvent.create(orderId, "ORDER_DELIVERY_REJECTED", actorUserId,
                 reason != null ? reason : "Livraison rejetée"));

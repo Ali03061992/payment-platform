@@ -1,6 +1,5 @@
 package com.paymentplatform.shared.infrastructure.web;
 
-import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockHttpServletRequest;

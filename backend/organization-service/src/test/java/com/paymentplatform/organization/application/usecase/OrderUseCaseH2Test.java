@@ -1,7 +1,5 @@
 package com.paymentplatform.organization.application.usecase;
 
-import java.util.UUID;
-
 import com.paymentplatform.organization.application.dto.*;
 import com.paymentplatform.organization.domain.model.Product;
 import com.paymentplatform.organization.domain.repository.ProductRepository;
@@ -16,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -187,11 +186,11 @@ class OrderUseCaseH2Test {
     }
 
     @Test
-    void deliveryReject_notInDelivery_throwsConflict() {
+    void deliveryReject_notReadyForDelivery_throwsConflict() {
         var order = createShopOrder();
         assertThatThrownBy(() -> deliveryRejectOrder.execute(order.id(), UUID.fromString("00000000-0000-0000-0000-000000000010"), "Bad delivery"))
                 .isInstanceOf(ConflictException.class)
-                .hasMessageContaining("IN_DELIVERY");
+                .hasMessageContaining("READY_FOR_DELIVERY");
     }
 
     @Test

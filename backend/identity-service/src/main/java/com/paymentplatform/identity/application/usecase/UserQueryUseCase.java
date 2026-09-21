@@ -1,20 +1,19 @@
 package com.paymentplatform.identity.application.usecase;
 
-import java.util.UUID;
-
+import com.paymentplatform.identity.application.dto.UserResponse;
+import com.paymentplatform.identity.domain.model.User;
+import com.paymentplatform.identity.domain.model.UserStatus;
+import com.paymentplatform.identity.domain.repository.UserRepository;
 import com.paymentplatform.shared.domain.exception.ForbiddenException;
 import com.paymentplatform.shared.domain.exception.NotFoundException;
 import com.paymentplatform.shared.domain.model.OrganizationId;
 import com.paymentplatform.shared.domain.model.RoleCode;
 import com.paymentplatform.shared.domain.model.UserId;
-import com.paymentplatform.identity.application.dto.UserResponse;
-import com.paymentplatform.identity.domain.model.User;
-import com.paymentplatform.identity.domain.model.UserStatus;
-import com.paymentplatform.identity.domain.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.UUID;
 
 /** Consultation des utilisateurs avec respect du périmètre d'accès. */
 @Service

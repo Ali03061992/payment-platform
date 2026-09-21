@@ -107,6 +107,7 @@
           routerLinkActive="active"
           class="nav-item"
           (click)="onNavClick()">
+          <span class="nav-icon">{{ item.icon }}</span>
           @if (sidebarOpen) {
             <span class="nav-label">{{ item.label }}</span>
           }

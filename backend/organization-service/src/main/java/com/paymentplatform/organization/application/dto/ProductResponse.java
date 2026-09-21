@@ -1,10 +1,10 @@
 package com.paymentplatform.organization.application.dto;
 
-import java.util.UUID;
-
 import com.paymentplatform.organization.domain.model.Product;
+
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.UUID;
 
 public record ProductResponse(
     UUID id,

@@ -1,9 +1,9 @@
 package com.paymentplatform.shared.infrastructure.audit;
 
-import java.util.UUID;
-
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.UUID;
 
 @Component
 public class JpaAuditRecorder implements AuditRecorder {

@@ -17,11 +17,17 @@ export class DeliveryManagementComponent implements OnInit {
   selectedOrder: Order | null = null;
   receivedBy = '';
   delivering = false;
+  shopAgents: {id: string, name: string}[] = [];
 
   showConfirmDateModal = false;
   confirmDateOrder: Order | null = null;
   confirmedDate = '';
   confirming = false;
+
+  showRejectModal = false;
+  rejectOrder: Order | null = null;
+  rejectReason = '';
+  rejecting = false;
 
   constructor(private orderService: OrderService, private toast: ToastService) {}
 
@@ -44,16 +50,61 @@ export class DeliveryManagementComponent implements OnInit {
     });
   }
 
-  get pendingConfirmations(): Order[] {
+  get pendingAcceptance(): Order[] {
     return this.deliveries.filter(d => d.status === 'READY_FOR_DELIVERY');
   }
 
   get activeDeliveries(): Order[] {
-    return this.deliveries.filter(d => d.status === 'IN_DELIVERY');
+    return this.deliveries.filter(d => d.status === 'DELIVERY_ACCEPTED' || d.status === 'IN_DELIVERY');
   }
 
   get completedDeliveries(): Order[] {
-    return this.deliveries.filter(d => d.status === 'DELIVERED');
+    return this.deliveries.filter(d => d.status === 'DELIVERED' || d.status === 'ACCEPTED');
+  }
+
+  get rejectedDeliveries(): Order[] {
+    return this.deliveries.filter(d => d.status === 'DELIVERY_REJECTED');
+  }
+
+  acceptDelivery(order: Order): void {
+    this.orderService.acceptDelivery(order.id, true).subscribe({
+      next: () => {
+        this.toast.success('Livraison acceptée');
+        this.loadDeliveries();
+      },
+      error: (err: any) => {
+        this.toast.error(err.error?.message || 'Erreur');
+      }
+    });
+  }
+
+  openRejectModal(order: Order): void {
+    this.rejectOrder = order;
+    this.rejectReason = '';
+    this.showRejectModal = true;
+  }
+
+  closeRejectModal(): void {
+    this.showRejectModal = false;
+    this.rejectOrder = null;
+    this.rejectReason = '';
+  }
+
+  submitReject(): void {
+    if (!this.rejectOrder) return;
+    this.rejecting = true;
+    this.orderService.acceptDelivery(this.rejectOrder.id, false, this.rejectReason).subscribe({
+      next: () => {
+        this.toast.success('Livraison rejetée');
+        this.closeRejectModal();
+        this.rejecting = false;
+        this.loadDeliveries();
+      },
+      error: (err: any) => {
+        this.toast.error(err.error?.message || 'Erreur');
+        this.rejecting = false;
+      }
+    });
   }
 
   openConfirmDate(order: Order): void {
@@ -87,7 +138,14 @@ export class DeliveryManagementComponent implements OnInit {
   openDeliver(order: Order): void {
     this.selectedOrder = order;
     this.receivedBy = '';
+    this.shopAgents = [];
     this.showDeliverModal = true;
+    if (order.shopId) {
+      this.orderService.getShopAgents(order.shopId).subscribe({
+        next: (agents) => this.shopAgents = agents,
+        error: () => this.shopAgents = []
+      });
+    }
   }
 
   closeDeliver(): void {
@@ -114,9 +172,12 @@ export class DeliveryManagementComponent implements OnInit {
 
   statusLabel(s: string): string {
     const map: Record<string, string> = {
-      READY_FOR_DELIVERY: 'En attente de confirmation',
+      READY_FOR_DELIVERY: 'En attente d\'acceptation',
+      DELIVERY_ACCEPTED: 'Acceptée - En attente de livraison',
       IN_DELIVERY: 'En livraison',
-      DELIVERED: 'Livré'
+      DELIVERED: 'Livré',
+      ACCEPTED: 'Accepté par la boutique',
+      DELIVERY_REJECTED: 'Rejetée'
     };
     return map[s] || s;
   }
@@ -124,8 +185,11 @@ export class DeliveryManagementComponent implements OnInit {
   statusClass(s: string): string {
     const map: Record<string, string> = {
       READY_FOR_DELIVERY: 'pending',
+      DELIVERY_ACCEPTED: 'confirmed',
       IN_DELIVERY: 'in-delivery',
-      DELIVERED: 'delivered'
+      DELIVERED: 'delivered',
+      ACCEPTED: 'accepted',
+      DELIVERY_REJECTED: 'rejected'
     };
     return map[s] || '';
   }

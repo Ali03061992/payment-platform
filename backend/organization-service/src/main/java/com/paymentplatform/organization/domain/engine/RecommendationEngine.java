@@ -1,8 +1,8 @@
 package com.paymentplatform.organization.domain.engine;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
-
-import java.util.*;
 
 /**
  * Recommendation engine that generates actionable stock management recommendations.

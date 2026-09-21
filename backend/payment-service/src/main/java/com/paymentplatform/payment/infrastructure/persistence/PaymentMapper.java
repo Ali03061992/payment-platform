@@ -1,7 +1,5 @@
 package com.paymentplatform.payment.infrastructure.persistence;
 
-import java.util.UUID;
-
 import com.paymentplatform.payment.domain.model.Payment;
 import com.paymentplatform.payment.domain.model.PaymentEvent;
 import com.paymentplatform.payment.domain.model.PaymentStatus;
@@ -10,8 +8,8 @@ import com.paymentplatform.payment.domain.valueobject.PaymentReference;
 import com.paymentplatform.payment.domain.valueobject.RejectionReason;
 import org.springframework.stereotype.Component;
 
-import java.math.BigDecimal;
 import java.util.List;
+import java.util.UUID;
 
 @Component
 public class PaymentMapper {

@@ -1,7 +1,5 @@
 package com.paymentplatform.organization.infrastructure.persistence;
 
-import java.util.UUID;
-
 import com.paymentplatform.organization.domain.model.SupplierShopRelation;
 import com.paymentplatform.organization.domain.repository.SupplierShopRelationRepository;
 import com.paymentplatform.organization.domain.valueobject.OrganizationId;
@@ -11,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Component
 public class JpaSupplierShopRelationRepository implements SupplierShopRelationRepository {

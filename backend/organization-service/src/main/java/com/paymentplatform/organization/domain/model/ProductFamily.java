@@ -1,11 +1,11 @@
 package com.paymentplatform.organization.domain.model;
 
-import java.util.UUID;
-
 import jakarta.persistence.*;
+
 import java.time.Instant;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 
 @Entity
 @Table(name = "product_families")

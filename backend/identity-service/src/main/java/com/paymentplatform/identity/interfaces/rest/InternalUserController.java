@@ -1,16 +1,16 @@
 package com.paymentplatform.identity.interfaces.rest;
 
-import java.util.UUID;
-
-import com.paymentplatform.shared.domain.exception.ForbiddenException;
 import com.paymentplatform.identity.application.dto.CreateInternalUserRequest;
 import com.paymentplatform.identity.application.dto.UserResponse;
 import com.paymentplatform.identity.application.usecase.InternalUserCreationUseCase;
 import com.paymentplatform.identity.application.usecase.UserQueryUseCase;
 import com.paymentplatform.identity.infrastructure.http.InternalAuthGuard;
+import com.paymentplatform.shared.domain.exception.ForbiddenException;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
 
 /** Endpoint interne (secret partagé) utilisé par Organization Service. */
 @RestController

@@ -1,10 +1,10 @@
 package com.paymentplatform.shared.infrastructure.security;
 
-import java.util.UUID;
-
 import com.paymentplatform.shared.domain.exception.UnauthorizedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+
+import java.util.UUID;
 
 /** Accès à l'utilisateur courant authentifié. */
 public final class CurrentUser {

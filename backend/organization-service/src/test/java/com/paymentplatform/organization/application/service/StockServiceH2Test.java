@@ -1,11 +1,8 @@
 package com.paymentplatform.organization.application.service;
 
-import java.util.UUID;
-
 import com.paymentplatform.organization.application.dto.ProductCreateRequest;
 import com.paymentplatform.organization.application.dto.ProductUpdateRequest;
 import com.paymentplatform.organization.application.dto.StockMovementRequest;
-import com.paymentplatform.organization.domain.model.Product;
 import com.paymentplatform.organization.domain.repository.ProductRepository;
 import com.paymentplatform.shared.domain.exception.ConflictException;
 import com.paymentplatform.shared.domain.exception.NotFoundException;
@@ -17,6 +14,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;

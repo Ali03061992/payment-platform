@@ -29,7 +29,7 @@
     "strictTemplates": true
   },
   "exclude": [
-    "cypress/**/*.cy.ts",
+    "./cypress/e2e/*.cy.ts",
     "src/**/*.cy.ts"
   ]
 }

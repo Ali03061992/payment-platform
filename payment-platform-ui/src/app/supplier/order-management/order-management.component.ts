@@ -14,8 +14,11 @@ import { Subscription } from 'rxjs';
 })
 export class OrderManagementComponent implements OnInit, OnDestroy {
   orders: Order[] = [];
+  deliveries: Order[] = [];
   loading = true;
   filterStatus = '';
+  activeTab: 'orders' | 'deliveries' = 'orders';
+  filterAgentId = '';
 
   showDetail = false;
   selectedOrder: Order | null = null;
@@ -54,6 +57,14 @@ export class OrderManagementComponent implements OnInit, OnDestroy {
     }));
   }
 
+  loadDeliveries(agentId?: string): void {
+    this.loading = true;
+    this.subscriptions.add(this.orderService.listDeliveries(agentId).subscribe({
+      next: (data: Order[]) => { this.deliveries = data; this.loading = false; },
+      error: (err: any) => { this.toast.error(err.error?.message || 'Erreur de chargement'); this.loading = false; }
+    }));
+  }
+
   loadAgents(): void {
     const userJson = sessionStorage.getItem('user');
     let supplierId = '';
@@ -70,15 +81,38 @@ export class OrderManagementComponent implements OnInit, OnDestroy {
         }));
       },
       error: () => {
-        // pas de toast, 403 silencieux si pas SUPPLIER_MANAGE_AGENTS
         this.agents = [];
       }
     }));
   }
 
+  switchTab(tab: 'orders' | 'deliveries'): void {
+    this.activeTab = tab;
+    this.filterStatus = '';
+    this.filterAgentId = '';
+    if (tab === 'deliveries') {
+      this.loadDeliveries();
+    } else {
+      this.loadOrders();
+    }
+  }
+
+  onAgentFilterChange(): void {
+    if (this.filterAgentId) {
+      this.loadDeliveries(this.filterAgentId);
+    } else {
+      this.loadDeliveries();
+    }
+  }
+
   get filteredOrders(): Order[] {
     if (!this.filterStatus) return this.orders;
     return this.orders.filter(o => o.status === this.filterStatus);
+  }
+
+  get filteredDeliveries(): Order[] {
+    if (!this.filterStatus) return this.deliveries;
+    return this.deliveries.filter(o => o.status === this.filterStatus);
   }
 
   statusLabel(s: string): string {
@@ -87,12 +121,13 @@ export class OrderManagementComponent implements OnInit, OnDestroy {
       CONFIRMED: 'Confirmé',
       PREPARING: 'En préparation',
       READY_FOR_DELIVERY: 'Prêt pour livraison',
+      DELIVERY_ACCEPTED: 'Livraison acceptée',
+      DELIVERY_REJECTED: 'Livraison rejetée',
       IN_DELIVERY: 'En livraison',
       DELIVERED: 'Livré',
       ACCEPTED: 'Accepté',
       CANCELLED: 'Annulé',
-      REJECTED: 'Rejeté',
-      DELIVERY_REJECTED: 'Livraison rejetée'
+      REJECTED: 'Rejeté'
     };
     return map[s] || s;
   }
@@ -103,12 +138,13 @@ export class OrderManagementComponent implements OnInit, OnDestroy {
       CONFIRMED: 'confirmed',
       PREPARING: 'preparing',
       READY_FOR_DELIVERY: 'ready',
+      DELIVERY_ACCEPTED: 'confirmed',
+      DELIVERY_REJECTED: 'rejected',
       IN_DELIVERY: 'in-delivery',
       DELIVERED: 'delivered',
       ACCEPTED: 'accepted',
       CANCELLED: 'cancelled',
-      REJECTED: 'rejected',
-      DELIVERY_REJECTED: 'delivery-rejected'
+      REJECTED: 'rejected'
     };
     return map[s] || '';
   }

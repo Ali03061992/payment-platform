@@ -1,15 +1,9 @@
 package com.paymentplatform.shared.infrastructure.audit;
 
-import java.util.UUID;
-import jakarta.persistence.PrePersist;
-
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
 import java.time.Instant;
+import java.util.UUID;
 
 /** Entrée d'audit (table audit_logs, présente dans chaque base). */
 @Entity

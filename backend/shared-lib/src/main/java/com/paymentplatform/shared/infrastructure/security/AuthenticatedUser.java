@@ -1,8 +1,7 @@
 package com.paymentplatform.shared.infrastructure.security;
 
-import java.util.UUID;
-
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Utilisateur authentifié extrait du JWT.

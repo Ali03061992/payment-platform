@@ -1,12 +1,11 @@
 package com.paymentplatform.organization.domain.model;
 
-import java.util.UUID;
-
-import com.paymentplatform.shared.domain.exception.DomainException;
 import com.paymentplatform.organization.domain.valueobject.OrganizationId;
 import com.paymentplatform.organization.domain.valueobject.RelationStatus;
+import com.paymentplatform.shared.domain.exception.DomainException;
 
 import java.time.Instant;
+import java.util.UUID;
 
 /**
  * Entity representing a relation between a supplier and a shop.

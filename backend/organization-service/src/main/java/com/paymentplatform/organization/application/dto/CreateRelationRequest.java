@@ -1,8 +1,8 @@
 package com.paymentplatform.organization.application.dto;
 
-import java.util.UUID;
-
 import jakarta.validation.constraints.NotNull;
+
+import java.util.UUID;
 
 public record CreateRelationRequest(
         @NotNull(message = "L'ID du fournisseur est requis") UUID supplierId,

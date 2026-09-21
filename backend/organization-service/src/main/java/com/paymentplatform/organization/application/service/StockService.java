@@ -1,7 +1,5 @@
 package com.paymentplatform.organization.application.service;
 
-import java.util.UUID;
-
 import com.paymentplatform.organization.application.dto.*;
 import com.paymentplatform.organization.domain.model.Product;
 import com.paymentplatform.organization.domain.model.StockMovement;
@@ -13,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service

@@ -1,7 +1,5 @@
 package com.paymentplatform.payment.infrastructure.persistence;
 
-import java.util.UUID;
-
 import com.paymentplatform.payment.domain.model.Payment;
 import com.paymentplatform.payment.domain.model.PaymentEvent;
 import com.paymentplatform.payment.domain.model.PaymentStatus;
@@ -11,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Component
 public class JpaPaymentRepository implements PaymentRepository {

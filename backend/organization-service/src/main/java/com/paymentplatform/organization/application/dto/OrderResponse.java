@@ -1,7 +1,5 @@
 package com.paymentplatform.organization.application.dto;
 
-import java.util.UUID;
-
 import com.paymentplatform.organization.domain.model.Order;
 import com.paymentplatform.organization.domain.model.OrderItem;
 
@@ -9,6 +7,7 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 
 public record OrderResponse(
         UUID id,
@@ -27,12 +26,15 @@ public record OrderResponse(
         BigDecimal total,
         String currency,
         UUID deliveryAgentId,
+        String deliveryAgentName,
         UUID receivedBy,
+        String receivedByName,
         Instant receivedAt,
         Instant deliveredAt,
         LocalDate plannedDeliveryDate,
         LocalDate confirmedDeliveryDate,
         boolean asapPayment,
+        String deliveryRejectionReason,
         String notes,
         Long version,
         Instant createdAt,
@@ -40,10 +42,15 @@ public record OrderResponse(
         List<OrderItemResponse> items
 ) {
     public static OrderResponse from(Order order, List<OrderItem> orderItems) {
-        return from(order, orderItems, null, null);
+        return from(order, orderItems, null, null, null, null);
     }
 
     public static OrderResponse from(Order order, List<OrderItem> orderItems, String supplierName, String shopName) {
+        return from(order, orderItems, supplierName, shopName, null, null);
+    }
+
+    public static OrderResponse from(Order order, List<OrderItem> orderItems, String supplierName, String shopName,
+                                     String deliveryAgentName, String receivedByName) {
         List<OrderItemResponse> items = orderItems.stream()
                 .map(OrderItemResponse::from)
                 .toList();
@@ -64,12 +71,15 @@ public record OrderResponse(
                 order.getTotal(),
                 order.getCurrency(),
                 order.getDeliveryAgentId(),
+                deliveryAgentName,
                 order.getReceivedBy(),
+                receivedByName,
                 order.getReceivedAt(),
                 order.getDeliveredAt(),
                 order.getPlannedDeliveryDate(),
                 order.getConfirmedDeliveryDate(),
                 order.isAsapPayment(),
+                order.getDeliveryRejectionReason(),
                 order.getNotes(),
                 order.getVersion(),
                 order.getCreatedAt(),

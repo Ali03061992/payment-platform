@@ -1,15 +1,14 @@
 package com.paymentplatform.identity.application.usecase;
 
-import com.paymentplatform.shared.domain.exception.DomainException;
+import com.paymentplatform.identity.domain.model.User;
+import com.paymentplatform.identity.domain.repository.UserRepository;
+import com.paymentplatform.shared.domain.event.IdentityEvents.UserDisabledEvent;
 import com.paymentplatform.shared.domain.model.OrganizationId;
 import com.paymentplatform.shared.domain.model.RoleCode;
 import com.paymentplatform.shared.infrastructure.audit.AuditActions;
 import com.paymentplatform.shared.infrastructure.audit.AuditRecorder;
 import com.paymentplatform.shared.infrastructure.eventing.EventDeduplicator;
 import com.paymentplatform.shared.infrastructure.outbox.OutboxEventStore;
-import com.paymentplatform.shared.domain.event.IdentityEvents.UserDisabledEvent;
-import com.paymentplatform.identity.domain.model.User;
-import com.paymentplatform.identity.domain.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;

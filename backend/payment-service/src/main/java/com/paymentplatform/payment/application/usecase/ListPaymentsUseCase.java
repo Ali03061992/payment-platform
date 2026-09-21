@@ -1,7 +1,5 @@
 package com.paymentplatform.payment.application.usecase;
 
-import java.util.UUID;
-
 import com.paymentplatform.payment.application.dto.PageResponse;
 import com.paymentplatform.payment.application.dto.PaymentNameResolver;
 import com.paymentplatform.payment.application.dto.PaymentResponse;
@@ -10,14 +8,10 @@ import com.paymentplatform.payment.domain.model.Payment;
 import com.paymentplatform.payment.domain.model.PaymentStatus;
 import com.paymentplatform.payment.domain.repository.PaymentRepository;
 import com.paymentplatform.payment.infrastructure.http.OrganizationValidationClient;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 public class ListPaymentsUseCase {

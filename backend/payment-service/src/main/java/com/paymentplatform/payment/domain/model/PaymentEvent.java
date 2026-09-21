@@ -1,8 +1,7 @@
 package com.paymentplatform.payment.domain.model;
 
-import java.util.UUID;
-
 import java.time.Instant;
+import java.util.UUID;
 
 public record PaymentEvent(UUID id, UUID paymentId, String action, UUID userId, Instant timestamp, String details) {
 

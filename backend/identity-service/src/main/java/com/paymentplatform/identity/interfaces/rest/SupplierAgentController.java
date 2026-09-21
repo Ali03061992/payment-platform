@@ -1,26 +1,19 @@
 package com.paymentplatform.identity.interfaces.rest;
 
-import java.util.UUID;
-
-import com.paymentplatform.shared.domain.model.RoleCode;
-import com.paymentplatform.shared.infrastructure.security.CurrentUser;
 import com.paymentplatform.identity.application.dto.AgentCreatedResponse;
 import com.paymentplatform.identity.application.dto.AgentRequest;
 import com.paymentplatform.identity.application.dto.UpdateAgentRequest;
 import com.paymentplatform.identity.application.dto.UserResponse;
 import com.paymentplatform.identity.application.usecase.AgentManagementUseCase;
+import com.paymentplatform.shared.domain.model.RoleCode;
+import com.paymentplatform.shared.infrastructure.security.CurrentUser;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Gestion des agents d'un fournisseur : seule l'organisation propriétaire

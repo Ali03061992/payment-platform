@@ -1,17 +1,17 @@
 package com.paymentplatform.identity.domain.model;
 
-import java.util.UUID;
-
+import com.paymentplatform.identity.domain.valueobject.Email;
+import com.paymentplatform.identity.domain.valueobject.PasswordHash;
+import com.paymentplatform.identity.domain.valueobject.PhoneNumber;
+import com.paymentplatform.identity.domain.valueobject.Username;
 import com.paymentplatform.shared.domain.exception.ConflictException;
 import com.paymentplatform.shared.domain.exception.DomainException;
 import com.paymentplatform.shared.domain.model.OrganizationId;
 import com.paymentplatform.shared.domain.model.RoleCode;
 import com.paymentplatform.shared.domain.model.UserId;
-import com.paymentplatform.identity.domain.valueobject.Email;
-import com.paymentplatform.identity.domain.valueobject.PasswordHash;
-import com.paymentplatform.identity.domain.valueobject.PhoneNumber;
-import com.paymentplatform.identity.domain.valueobject.Username;
 import org.junit.jupiter.api.Test;
+
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;

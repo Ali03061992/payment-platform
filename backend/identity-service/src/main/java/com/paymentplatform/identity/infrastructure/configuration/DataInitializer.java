@@ -1,16 +1,14 @@
 package com.paymentplatform.identity.infrastructure.configuration;
 
-import java.util.UUID;
-
-import com.paymentplatform.shared.domain.model.OrganizationId;
-import com.paymentplatform.shared.domain.model.RoleCode;
-import com.paymentplatform.shared.domain.model.UserId;
 import com.paymentplatform.identity.domain.model.User;
 import com.paymentplatform.identity.domain.repository.UserRepository;
 import com.paymentplatform.identity.domain.valueobject.Email;
 import com.paymentplatform.identity.domain.valueobject.PasswordHash;
 import com.paymentplatform.identity.domain.valueobject.PhoneNumber;
 import com.paymentplatform.identity.domain.valueobject.Username;
+import com.paymentplatform.shared.domain.model.OrganizationId;
+import com.paymentplatform.shared.domain.model.RoleCode;
+import com.paymentplatform.shared.domain.model.UserId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationArguments;

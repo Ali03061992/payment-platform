@@ -1,11 +1,10 @@
 package com.paymentplatform.payment.infrastructure.persistence;
 
-import java.util.UUID;
-import jakarta.persistence.PrePersist;
-
 import jakarta.persistence.*;
+
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.UUID;
 
 @Entity
 @Table(name = "payments")

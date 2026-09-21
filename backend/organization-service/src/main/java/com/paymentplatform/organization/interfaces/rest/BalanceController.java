@@ -1,7 +1,5 @@
 package com.paymentplatform.organization.interfaces.rest;
 
-import java.util.UUID;
-
 import com.paymentplatform.organization.application.dto.BalanceResponse;
 import com.paymentplatform.organization.application.usecase.BalanceUseCase;
 import com.paymentplatform.organization.domain.model.BalanceEntry;
@@ -14,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/balances")

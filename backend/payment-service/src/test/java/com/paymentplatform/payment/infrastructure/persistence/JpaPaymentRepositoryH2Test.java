@@ -1,11 +1,9 @@
 package com.paymentplatform.payment.infrastructure.persistence;
 
-import java.util.UUID;
-
 import com.paymentplatform.payment.domain.model.Payment;
 import com.paymentplatform.payment.domain.model.PaymentStatus;
-import com.paymentplatform.payment.domain.valueobject.Money;
 import com.paymentplatform.payment.domain.repository.PaymentRepository;
+import com.paymentplatform.payment.domain.valueobject.Money;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +12,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

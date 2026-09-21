@@ -1,11 +1,10 @@
 package com.paymentplatform.organization.application.dto;
 
-import java.util.UUID;
-
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
 public record OrderItemRequest(
         @NotNull(message = "L'ID du produit est requis") UUID productId,

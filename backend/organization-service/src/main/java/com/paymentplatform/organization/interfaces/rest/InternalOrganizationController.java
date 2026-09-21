@@ -1,7 +1,5 @@
 package com.paymentplatform.organization.interfaces.rest;
 
-import java.util.UUID;
-
 import com.paymentplatform.organization.application.dto.OrganizationStatusResponse;
 import com.paymentplatform.organization.application.usecase.OrganizationValidationUseCase;
 import com.paymentplatform.organization.domain.model.SupplierShopRelation;
@@ -11,10 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @RestController
 @RequestMapping("/api/organizations/internal")

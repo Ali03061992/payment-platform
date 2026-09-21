@@ -1,12 +1,11 @@
 package com.paymentplatform.payment.domain.repository;
 
-import java.util.UUID;
-
 import com.paymentplatform.payment.domain.model.Payment;
 import com.paymentplatform.payment.domain.model.PaymentStatus;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 public interface PaymentRepository {
     Payment save(Payment payment);

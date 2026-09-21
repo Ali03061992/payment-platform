@@ -1,13 +1,10 @@
 package com.paymentplatform.organization.domain.engine;
 
-import java.util.UUID;
-
 import com.paymentplatform.organization.domain.model.Product;
 import com.paymentplatform.organization.domain.model.StockMovement;
 
-import java.util.*;
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
+import java.util.*;
 
 /**
  * Main stock optimization engine.

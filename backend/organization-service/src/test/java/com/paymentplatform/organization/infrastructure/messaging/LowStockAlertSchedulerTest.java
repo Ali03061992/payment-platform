@@ -1,7 +1,5 @@
 package com.paymentplatform.organization.infrastructure.messaging;
 
-import java.util.UUID;
-
 import com.paymentplatform.organization.domain.model.Product;
 import com.paymentplatform.organization.domain.repository.ProductRepository;
 import com.paymentplatform.shared.infrastructure.outbox.OutboxEventStore;
@@ -13,6 +11,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

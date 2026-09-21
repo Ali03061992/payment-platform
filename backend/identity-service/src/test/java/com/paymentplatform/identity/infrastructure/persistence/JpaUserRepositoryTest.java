@@ -1,16 +1,13 @@
 package com.paymentplatform.identity.infrastructure.persistence;
 
-import java.util.UUID;
-
-import com.paymentplatform.shared.domain.model.OrganizationId;
-import com.paymentplatform.shared.domain.model.RoleCode;
-import com.paymentplatform.shared.domain.model.UserId;
 import com.paymentplatform.identity.domain.model.User;
-import com.paymentplatform.identity.domain.repository.UserRepository;
 import com.paymentplatform.identity.domain.valueobject.Email;
 import com.paymentplatform.identity.domain.valueobject.PasswordHash;
 import com.paymentplatform.identity.domain.valueobject.PhoneNumber;
 import com.paymentplatform.identity.domain.valueobject.Username;
+import com.paymentplatform.shared.domain.model.OrganizationId;
+import com.paymentplatform.shared.domain.model.RoleCode;
+import com.paymentplatform.shared.domain.model.UserId;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +17,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

@@ -2,7 +2,7 @@ package com.paymentplatform.organization.infrastructure.mapper;
 
 import com.paymentplatform.organization.application.dto.ProductResponse;
 import com.paymentplatform.organization.domain.model.Product;
-import org.mapstruct.*;
+import org.mapstruct.Mapper;
 
 @Mapper(componentModel = "spring")
 public interface ProductMapper {

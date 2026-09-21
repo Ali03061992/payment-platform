@@ -1,10 +1,10 @@
 package com.paymentplatform.identity.application.dto;
 
-import java.util.UUID;
-
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+
+import java.util.UUID;
 
 /** Création d'un utilisateur par un service interne (ex. admin initial d'une organisation). */
 public record CreateInternalUserRequest(

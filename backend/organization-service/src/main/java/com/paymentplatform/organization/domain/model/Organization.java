@@ -1,11 +1,10 @@
 package com.paymentplatform.organization.domain.model;
 
-import com.paymentplatform.shared.domain.exception.ConflictException;
-import com.paymentplatform.shared.domain.exception.DomainException;
 import com.paymentplatform.organization.domain.valueobject.OrganizationId;
 import com.paymentplatform.organization.domain.valueobject.OrganizationName;
 import com.paymentplatform.organization.domain.valueobject.OrganizationStatus;
 import com.paymentplatform.organization.domain.valueobject.OrganizationType;
+import com.paymentplatform.shared.domain.exception.DomainException;
 
 import java.time.Instant;
 

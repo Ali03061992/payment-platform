@@ -2,7 +2,8 @@ package com.paymentplatform.organization.infrastructure.mapper;
 
 import com.paymentplatform.organization.application.dto.OrganizationResponse;
 import com.paymentplatform.organization.domain.model.Organization;
-import org.mapstruct.*;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring")
 public interface OrganizationMapper {

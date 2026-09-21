@@ -7,7 +7,6 @@ import com.paymentplatform.organization.domain.model.Order;
 import com.paymentplatform.organization.domain.model.OrderEvent;
 import com.paymentplatform.organization.domain.model.OrderItem;
 import com.paymentplatform.organization.domain.model.Product;
-import com.paymentplatform.organization.domain.model.SupplierShopRelation;
 import com.paymentplatform.organization.domain.repository.*;
 import com.paymentplatform.shared.domain.event.OrderEvents;
 import com.paymentplatform.shared.domain.exception.ConflictException;

@@ -7,19 +7,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static com.paymentplatform.shared.domain.security.Permissions.ADMIN_MANAGE_ORGANIZATIONS;
-import static com.paymentplatform.shared.domain.security.Permissions.ADMIN_MANAGE_USERS;
-import static com.paymentplatform.shared.domain.security.Permissions.ADMIN_VIEW_AUDIT;
-import static com.paymentplatform.shared.domain.security.Permissions.ADMIN_VIEW_STATS;
-import static com.paymentplatform.shared.domain.security.Permissions.SHOP_CANCEL_PAYMENTS;
-import static com.paymentplatform.shared.domain.security.Permissions.SHOP_CREATE_PAYMENTS;
-import static com.paymentplatform.shared.domain.security.Permissions.SHOP_MANAGE_AGENTS;
-import static com.paymentplatform.shared.domain.security.Permissions.SUPPLIER_MANAGE_AGENTS;
-import static com.paymentplatform.shared.domain.security.Permissions.SUPPLIER_MANAGE_PAYMENTS;
-import static com.paymentplatform.shared.domain.security.Permissions.SUPPLIER_MANAGE_PRODUCTS;
-import static com.paymentplatform.shared.domain.security.Permissions.SUPPLIER_MANAGE_STOCK;
-import static com.paymentplatform.shared.domain.security.Permissions.VIEW_NOTIFICATIONS;
-import static com.paymentplatform.shared.domain.security.Permissions.VIEW_PAYMENTS;
+import static com.paymentplatform.shared.domain.security.Permissions.*;
 
 /** Catalogue statique rôle → permissions (miroir de la table role_permissions seedée). */
 public final class PermissionCatalog {

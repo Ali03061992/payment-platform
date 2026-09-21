@@ -1,14 +1,11 @@
 package com.paymentplatform.organization.interfaces.rest;
 
-import java.util.UUID;
-
-import com.paymentplatform.shared.infrastructure.security.CurrentUser;
 import com.paymentplatform.organization.application.dto.CreateOrganizationRequest;
 import com.paymentplatform.organization.application.dto.OrganizationResponse;
-import com.paymentplatform.organization.application.dto.UpdateOrganizationRequest;
 import com.paymentplatform.organization.application.usecase.CreateOrganizationUseCase;
 import com.paymentplatform.organization.application.usecase.OrganizationQueryUseCase;
 import com.paymentplatform.organization.application.usecase.OrganizationStatusUseCase;
+import com.paymentplatform.shared.infrastructure.security.CurrentUser;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -16,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/admin")

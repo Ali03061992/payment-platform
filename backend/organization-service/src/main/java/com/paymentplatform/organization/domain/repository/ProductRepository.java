@@ -1,14 +1,14 @@
 package com.paymentplatform.organization.domain.repository;
 
-import java.util.UUID;
-
 import com.paymentplatform.organization.domain.model.Product;
+import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
-import jakarta.persistence.LockModeType;
+
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 public interface ProductRepository extends JpaRepository<Product, UUID> {
     List<Product> findBySupplierIdAndStatus(UUID supplierId, String status);
