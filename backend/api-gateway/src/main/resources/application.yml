@@ -17,7 +17,7 @@ app:
     expiration: ${JWT_EXPIRATION:30m}
     shared: false
   gateway:
-    rate-limit-per-minute: ${RATE_LIMIT_PER_MINUTE:120}
+    rate-limit-per-minute: ${RATE_LIMIT_PER_MINUTE:500}
     allowed-ips: ${ALLOWED_IPS:0:0:0:0:0:0:0:1,127.0.0.1}
 
 management:

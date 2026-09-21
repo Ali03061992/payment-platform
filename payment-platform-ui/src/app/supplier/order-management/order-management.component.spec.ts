@@ -1,9 +1,9 @@
 // @ts-nocheck
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { of, throwError, Subscription } from 'rxjs';
+import { of, throwError, Subscription, BehaviorSubject } from 'rxjs';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { OrderManagementComponent } from './order-management.component';
 import { OrderService } from '../../services/order.service';
@@ -17,6 +17,7 @@ describe('OrderManagementComponent', () => {
   let orderService: jasmine.SpyObj<OrderService>;
   let agentService: jasmine.SpyObj<SupplierAgentService>;
   let toast: jasmine.SpyObj<ToastService>;
+  let queryParamsSubject: Subject<any>;
 
   const mockOrder = {
     id: 1, reference: 'ORD-001', supplierId: 1, shopId: 2, createdBy: 3, createdByRole: 'SHOP_ADMIN',
@@ -27,13 +28,15 @@ describe('OrderManagementComponent', () => {
   };
 
   beforeEach(() => {
+    queryParamsSubject = new BehaviorSubject<any>({});
     sessionStorage.setItem('user', JSON.stringify({ organizationId: '1' }));
-    const orderSpy = jasmine.createSpyObj('OrderService', ['list', 'getById', 'confirm', 'prepare', 'readyForDelivery', 'assignDelivery', 'deliveryReject', 'cancel', 'listDeliveries']);
+    const orderSpy = jasmine.createSpyObj('OrderService', ['list', 'getById', 'getByReference', 'confirm', 'prepare', 'readyForDelivery', 'assignDelivery', 'deliveryReject', 'cancel', 'listDeliveries']);
     const agentSpy = jasmine.createSpyObj('SupplierAgentService', ['listAgents']);
     const toastSpy = jasmine.createSpyObj('ToastService', ['success', 'error']);
     const routerSpy = jasmine.createSpyObj('Router', ['navigate']);
     orderSpy.list.and.returnValue(of([]));
     orderSpy.listDeliveries.and.returnValue(of([]));
+    orderSpy.getByReference.and.returnValue(of(mockOrder));
     agentSpy.listAgents.and.returnValue(of([]));
 
     TestBed.configureTestingModule({
@@ -45,6 +48,7 @@ describe('OrderManagementComponent', () => {
         { provide: SupplierAgentService, useValue: agentSpy },
         { provide: ToastService, useValue: toastSpy },
         { provide: Router, useValue: routerSpy },
+        { provide: ActivatedRoute, useValue: { queryParams: queryParamsSubject.asObservable() } },
         provideHttpClient(withInterceptorsFromDi()),
         provideHttpClientTesting()
     ]
@@ -83,6 +87,16 @@ describe('OrderManagementComponent', () => {
       agentService.listAgents.and.returnValue(throwError(() => new Error('fail')));
       component.ngOnInit();
       expect(component.loading).toBeFalse();
+    });
+
+    it('should auto-open detail when ref query param is present', () => {
+      orderService.list.and.returnValue(of([mockOrder]));
+      orderService.getByReference.and.returnValue(of(mockOrder));
+      agentService.listAgents.and.returnValue(of([]));
+      queryParamsSubject.next({ ref: 'ORD-001' });
+      component.ngOnInit();
+      expect(component.showDetail).toBeTrue();
+      expect(component.selectedOrder).toBeTruthy();
     });
   });
 
@@ -143,7 +157,7 @@ describe('OrderManagementComponent', () => {
 
   describe('viewDetail', () => {
     it('should load order detail', () => {
-      orderService.getById.and.returnValue(of(mockOrder));
+      orderService.getByReference.and.returnValue(of(mockOrder));
       component.viewDetail(mockOrder);
       expect(component.selectedOrder).toBe(mockOrder);
       expect(component.showDetail).toBeTrue();
@@ -151,7 +165,7 @@ describe('OrderManagementComponent', () => {
     });
 
     it('should fallback to passed order on error', () => {
-      orderService.getById.and.returnValue(throwError(() => new Error('fail')));
+      orderService.getByReference.and.returnValue(throwError(() => new Error('fail')));
       component.viewDetail(mockOrder);
       expect(component.selectedOrder).toBe(mockOrder);
       expect(component.loadingDetail).toBeFalse();

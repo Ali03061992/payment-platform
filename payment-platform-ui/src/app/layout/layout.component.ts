@@ -177,9 +177,9 @@ export class LayoutComponent implements OnInit, OnDestroy {
     } else if (notif.relatedEntityType === 'ORDER' && notif.relatedEntityId) {
       this.router.navigate(['/dashboard/supplier/orders'], { queryParams: { ref: notif.relatedEntityId } });
     } else if (notif.relatedEntityType === 'DELIVERY' && notif.relatedEntityId) {
-      this.router.navigate(['/dashboard/supplier/deliveries']);
+      this.router.navigate(['/dashboard/supplier/deliveries'], { queryParams: { orderId: notif.relatedEntityId } });
     } else if (notif.relatedEntityType === 'SHOP_ORDER' && notif.relatedEntityId) {
-      this.router.navigate(['/dashboard/shop/orders'], { queryParams: { ref: notif.relatedEntityId } });
+      this.router.navigate(['/dashboard/shop/orders', notif.relatedEntityId]);
     }
     this.showNotifications = false;
   }

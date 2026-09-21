@@ -1,8 +1,9 @@
 // @ts-nocheck
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { of, throwError } from 'rxjs';
+import { of, throwError, Subject } from 'rxjs';
 import { DeliveryManagementComponent } from './delivery-management.component';
 import { OrderService } from '../../services/order.service';
 import { ToastService } from '../../services/toast.service';
@@ -36,6 +37,7 @@ describe('DeliveryManagementComponent', () => {
     providers: [
         { provide: OrderService, useValue: orderSpy },
         { provide: ToastService, useValue: toastSpy },
+        { provide: ActivatedRoute, useValue: { queryParams: of({}) } },
         provideHttpClient(withInterceptorsFromDi()),
         provideHttpClientTesting()
     ]

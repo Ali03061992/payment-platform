@@ -33,6 +33,10 @@ export class OrderService {
     return this.http.get<Order>(`${this.apiUrl}/${id}`);
   }
 
+  getByReference(reference: string): Observable<Order> {
+    return this.http.get<Order>(`${this.apiUrl}/reference/${reference}`);
+  }
+
   confirm(id: string): Observable<Order> {
     return this.http.post<Order>(`${this.apiUrl}/${id}/confirm`, {});
   }

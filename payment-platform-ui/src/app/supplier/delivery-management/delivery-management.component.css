@@ -76,3 +76,12 @@
 @media (max-width: 768px) {
   .modal-content { width: 95%; padding: 16px; }
 }
+
+.highlight-pulse {
+  animation: highlightFade 2s ease-out;
+}
+
+@keyframes highlightFade {
+  0% { background-color: #bbdefb; }
+  100% { background-color: transparent; }
+}

@@ -260,7 +260,25 @@ describe('LayoutComponent', () => {
       expect(component.showNotifications).toBeFalse();
     });
 
-    it('should not navigate for non-payment entity', () => {
+    it('should navigate to supplier orders with ref for ORDER entity', () => {
+      component.navigateNotification({ relatedEntityType: 'ORDER', relatedEntityId: 'ORD-123' } as any);
+      expect(router.navigate).toHaveBeenCalledWith(['/dashboard/supplier/orders'], { queryParams: { ref: 'ORD-123' } });
+      expect(component.showNotifications).toBeFalse();
+    });
+
+    it('should navigate to supplier deliveries with orderId for DELIVERY entity', () => {
+      component.navigateNotification({ relatedEntityType: 'DELIVERY', relatedEntityId: 'DEL-456' } as any);
+      expect(router.navigate).toHaveBeenCalledWith(['/dashboard/supplier/deliveries'], { queryParams: { orderId: 'DEL-456' } });
+      expect(component.showNotifications).toBeFalse();
+    });
+
+    it('should navigate to shop order detail for SHOP_ORDER entity', () => {
+      component.navigateNotification({ relatedEntityType: 'SHOP_ORDER', relatedEntityId: 'SO-789' } as any);
+      expect(router.navigate).toHaveBeenCalledWith(['/dashboard/shop/orders', 'SO-789']);
+      expect(component.showNotifications).toBeFalse();
+    });
+
+    it('should not navigate for unknown entity type', () => {
       component.navigateNotification({ relatedEntityType: 'OTHER', relatedEntityId: 1 } as any);
       expect(router.navigate).not.toHaveBeenCalled();
       expect(component.showNotifications).toBeFalse();

@@ -28,7 +28,11 @@ export class ShopOrderDetailComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id')!;
-    this.subscriptions.add(this.orderService.getById(id).subscribe({
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+    const request$ = isUuid
+      ? this.orderService.getById(id)
+      : this.orderService.getByReference(id);
+    this.subscriptions.add(request$.subscribe({
       next: (data: Order) => { this.order = data; this.loading = false; },
       error: () => { this.loading = false; this.router.navigate(['/dashboard/shop/orders']); }
     }));

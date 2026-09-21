@@ -32,7 +32,11 @@ export class PaymentDetailComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id')!;
-    this.subscriptions.add(this.paymentService.getById(id).subscribe({
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+    const request$ = isUuid
+      ? this.paymentService.getById(id)
+      : this.paymentService.getByReference(id);
+    this.subscriptions.add(request$.subscribe({
       next: (data: Payment) => {
         this.payment = data;
         this.qrData = `${environment.appUrl}/dashboard/payments/${data.id}`;

@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { OrderService } from '../../services/order.service';
 import { Order } from '../../models/order.model';
 import { ToastService } from '../../services/toast.service';
@@ -29,9 +30,18 @@ export class DeliveryManagementComponent implements OnInit {
   rejectReason = '';
   rejecting = false;
 
-  constructor(private orderService: OrderService, private toast: ToastService) {}
+  highlightedOrderId: string | null = null;
+
+  constructor(
+    private orderService: OrderService,
+    private route: ActivatedRoute,
+    private toast: ToastService
+  ) {}
 
   ngOnInit(): void {
+    this.route.queryParams.subscribe(params => {
+      this.highlightedOrderId = params['orderId'] || null;
+    });
     this.loadDeliveries();
   }
 
@@ -41,6 +51,18 @@ export class DeliveryManagementComponent implements OnInit {
       next: (data: Order[]) => {
         this.deliveries = data;
         this.loading = false;
+        if (this.highlightedOrderId) {
+          const id = this.highlightedOrderId;
+          this.highlightedOrderId = null;
+          setTimeout(() => {
+            const el = document.getElementById('delivery-' + id);
+            if (el) {
+              el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              el.classList.add('highlight-pulse');
+              setTimeout(() => el.classList.remove('highlight-pulse'), 2000);
+            }
+          }, 300);
+        }
       },
       error: (err: any) => {
         console.error('Deliveries error:', err);

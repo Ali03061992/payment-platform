@@ -20,9 +20,10 @@ describe('PaymentDetailComponent', () => {
 
   beforeEach(() => {
     const routerSpy = jasmine.createSpyObj('Router', ['navigate']);
-    const psSpy = jasmine.createSpyObj('PaymentService', ['getById', 'confirm', 'reject', 'cancel']);
+    const psSpy = jasmine.createSpyObj('PaymentService', ['getById', 'getByReference', 'confirm', 'reject', 'cancel']);
     const toastSpy = jasmine.createSpyObj('ToastService', ['success', 'error']);
     psSpy.getById.and.returnValue(of(mockPayment));
+    psSpy.getByReference.and.returnValue(of(mockPayment));
     psSpy.confirm.and.returnValue(of({ ...mockPayment, status: 'CONFIRMED' }));
     psSpy.reject.and.returnValue(of({ ...mockPayment, status: 'REJECTED' }));
     psSpy.cancel.and.returnValue(of({ ...mockPayment, status: 'CANCELLED' }));
@@ -64,7 +65,7 @@ describe('PaymentDetailComponent', () => {
   describe('ngOnInit', () => {
     it('should load payment by id', () => {
       component.ngOnInit();
-      expect(paymentService.getById).toHaveBeenCalledWith('1');
+      expect(paymentService.getByReference).toHaveBeenCalledWith('1');
       expect(component.payment).toBeTruthy();
       expect(component.loading).toBeFalse();
     });
@@ -75,7 +76,7 @@ describe('PaymentDetailComponent', () => {
     });
 
     it('should handle load error and navigate', () => {
-      paymentService.getById.and.returnValue(throwError(() => new Error('fail')));
+      paymentService.getByReference.and.returnValue(throwError(() => new Error('fail')));
       component.ngOnInit();
       expect(component.loading).toBeFalse();
       expect(router.navigate).toHaveBeenCalledWith(['/dashboard/payments']);

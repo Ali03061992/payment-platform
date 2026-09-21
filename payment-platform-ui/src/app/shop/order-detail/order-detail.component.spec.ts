@@ -25,10 +25,11 @@ describe('ShopOrderDetailComponent', () => {
   };
 
   beforeEach(() => {
-    const orderSpy = jasmine.createSpyObj('OrderService', ['getById', 'accept', 'acceptAsap', 'reject', 'cancel']);
+    const orderSpy = jasmine.createSpyObj('OrderService', ['getById', 'getByReference', 'accept', 'acceptAsap', 'reject', 'cancel']);
     const toastSpy = jasmine.createSpyObj('ToastService', ['success', 'error']);
     const routerSpy = jasmine.createSpyObj('Router', ['navigate']);
     orderSpy.getById.and.returnValue(of(mockOrder));
+    orderSpy.getByReference.and.returnValue(of(mockOrder));
 
     TestBed.configureTestingModule({
     declarations: [ShopOrderDetailComponent],
@@ -62,7 +63,7 @@ describe('ShopOrderDetailComponent', () => {
     });
 
     it('should navigate on load error', () => {
-      orderService.getById.and.returnValue(throwError(() => new Error('fail')));
+      orderService.getByReference.and.returnValue(throwError(() => new Error('fail')));
       component.ngOnInit();
       expect(component.loading).toBeFalse();
       expect(router.navigate).toHaveBeenCalledWith(['/dashboard/shop/orders']);

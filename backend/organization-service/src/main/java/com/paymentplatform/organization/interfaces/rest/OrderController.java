@@ -188,6 +188,23 @@ public class OrderController {
         return ResponseEntity.ok(buildOrderResponse(o));
     }
 
+    @GetMapping("/reference/{reference}")
+    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_MANAGER', 'SYSTEM_ADMIN')")
+    public ResponseEntity<OrderResponse> getOrderByReference(@PathVariable String reference) {
+        var current = CurrentUser.get();
+        var order = orderRepository.findByReference(reference);
+        if (order.isEmpty()) return ResponseEntity.notFound().build();
+        var o = order.get();
+        if (!current.roles().contains("SYSTEM_ADMIN")) {
+            if (current.organizationId() == null) return ResponseEntity.status(403).build();
+            boolean isSupplier = o.getSupplierId() != null && o.getSupplierId().equals(current.organizationId());
+            boolean isShop = o.getShopId() != null && o.getShopId().equals(current.organizationId());
+            boolean isDeliveryAgent = o.getDeliveryAgentId() != null && o.getDeliveryAgentId().equals(current.userId());
+            if (!isSupplier && !isShop && !isDeliveryAgent) return ResponseEntity.status(403).build();
+        }
+        return ResponseEntity.ok(buildOrderResponse(o));
+    }
+
     @PostMapping("/{id}/confirm")
     @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN')")
     public ResponseEntity<OrderResponse> confirmOrder(@PathVariable UUID id) {

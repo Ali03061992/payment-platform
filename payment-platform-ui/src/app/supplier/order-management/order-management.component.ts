@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { OrderService } from '../../services/order.service';
 import { SupplierAgentService } from '../../services/supplier-agent.service';
 import { Order } from '../../models/order.model';
@@ -37,13 +37,22 @@ export class OrderManagementComponent implements OnInit, OnDestroy {
     private orderService: OrderService,
     private agentService: SupplierAgentService,
     private router: Router,
+    private route: ActivatedRoute,
     private toast: ToastService
   ) {}
 
   ngOnInit(): void {
+    this.route.queryParams.subscribe(params => {
+      if (params['ref']) {
+        this.pendingRef = params['ref'];
+      }
+    });
+
     this.loadOrders();
     this.loadAgents();
   }
+
+  private pendingRef: string | null = null;
 
   ngOnDestroy(): void {
     this.subscriptions.unsubscribe();
@@ -52,7 +61,18 @@ export class OrderManagementComponent implements OnInit, OnDestroy {
   loadOrders(): void {
     this.loading = true;
     this.subscriptions.add(this.orderService.list().subscribe({
-      next: (data: Order[]) => { this.orders = data; this.loading = false; },
+      next: (data: Order[]) => {
+        this.orders = data;
+        this.loading = false;
+        if (this.pendingRef) {
+          const ref = this.pendingRef;
+          this.pendingRef = null;
+          const order = this.orders.find(o => o.reference === ref || o.id === ref);
+          if (order) {
+            this.viewDetail(order);
+          }
+        }
+      },
       error: (err: any) => { this.toast.error(err.error?.message || 'Erreur de chargement'); this.loading = false; }
     }));
   }
@@ -152,7 +172,11 @@ export class OrderManagementComponent implements OnInit, OnDestroy {
   viewDetail(order: Order): void {
     this.loadingDetail = true;
     this.showDetail = true;
-    this.subscriptions.add(this.orderService.getById(order.id).subscribe({
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(order.id);
+    const request$ = isUuid
+      ? this.orderService.getById(order.id)
+      : this.orderService.getByReference(order.reference || order.id);
+    this.subscriptions.add(request$.subscribe({
       next: (data) => { this.selectedOrder = data; this.loadingDetail = false; },
       error: () => { this.selectedOrder = order; this.loadingDetail = false; }
     }));
