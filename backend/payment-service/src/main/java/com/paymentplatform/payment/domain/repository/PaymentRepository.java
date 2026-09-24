@@ -18,6 +18,7 @@ public interface PaymentRepository {
     List<Payment> findByStatus(PaymentStatus status);
     long countByStatus(PaymentStatus status);
     boolean existsByReference(String reference);
+    Optional<Payment> findByIdempotencyKey(String idempotencyKey);
     List<Payment> findOverdue(LocalDate today);
     List<Payment> findOverdueBySupplier(LocalDate today, UUID supplierId);
     List<Payment> findOverdueByShop(LocalDate today, UUID shopId);

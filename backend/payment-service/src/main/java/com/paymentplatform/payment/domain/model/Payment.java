@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+import java.util.Optional;
 
 public class Payment {
 
@@ -26,6 +27,7 @@ public class Payment {
     private final Instant createdAt;
     private Instant updatedAt;
     private long version;
+    private final String idempotencyKey;
     private final List<PaymentEvent> events;
     private UUID orderId;
     private LocalDate dueDate;
@@ -33,7 +35,7 @@ public class Payment {
     private Payment(UUID id, PaymentReference reference, UUID shopId, UUID supplierId,
                     Money money, PaymentStatus status, RejectionReason rejectionReason,
                     UUID createdBy, Instant createdAt, Instant updatedAt, long version,
-                    List<PaymentEvent> events, UUID orderId, LocalDate dueDate) {
+                    String idempotencyKey, List<PaymentEvent> events, UUID orderId, LocalDate dueDate) {
         this.id = id;
         this.reference = reference;
         this.shopId = shopId;
@@ -45,17 +47,23 @@ public class Payment {
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
         this.version = version;
+        this.idempotencyKey = idempotencyKey;
         this.events = new ArrayList<>(events);
         this.orderId = orderId;
         this.dueDate = dueDate;
     }
 
-    public static Payment create(UUID shopId, UUID supplierId, Money money, UUID createdBy) {
-        return create(shopId, supplierId, money, createdBy, null, null);
+public static Payment create(UUID shopId, UUID supplierId, Money money, UUID createdBy) {
+        return create(shopId, supplierId, money, createdBy, null);
     }
 
     public static Payment create(UUID shopId, UUID supplierId, Money money, UUID createdBy,
                                  UUID orderId, LocalDate dueDate) {
+        return create(shopId, supplierId, money, createdBy, orderId, dueDate, null);
+    }
+
+    public static Payment create(UUID shopId, UUID supplierId, Money money, UUID createdBy,
+                                 UUID orderId, LocalDate dueDate, String idempotencyKey) {
         if (shopId == null) throw new DomainException("L'ID de la boutique est obligatoire");
         if (supplierId == null) throw new DomainException("L'ID du fournisseur est obligatoire");
         if (shopId.equals(supplierId)) throw new DomainException("La boutique et le fournisseur doivent être différents");
@@ -69,6 +77,7 @@ public class Payment {
         PaymentReference ref = PaymentReference.generate();
         return new Payment(null, ref, shopId, supplierId, money, PaymentStatus.PENDING,
                 null, createdBy, now, now, 0,
+                idempotencyKey,
                 List.of(PaymentEvent.create(null, AuditActions.PAYMENT_CREATED, createdBy,
                         "{\"reference\":\"" + ref.value() + "\"}")),
                 orderId, dueDate);
@@ -140,6 +149,7 @@ public class Payment {
     public Instant createdAt() { return createdAt; }
     public Instant updatedAt() { return updatedAt; }
     public long version() { return version; }
+    public String idempotencyKey() { return idempotencyKey; }
     public List<PaymentEvent> events() { return Collections.unmodifiableList(events); }
     public UUID orderId() { return orderId; }
     public LocalDate dueDate() { return dueDate; }
