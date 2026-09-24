@@ -30,6 +30,7 @@ public class PaymentMapper {
         entity.setUpdatedAt(payment.updatedAt());
         entity.setOrderId(payment.orderId());
         entity.setDueDate(payment.dueDate());
+        entity.setIdempotencyKey(payment.idempotencyKey());
         return entity;
     }
 
@@ -39,7 +40,7 @@ public class PaymentMapper {
                     UUID.class, PaymentReference.class, UUID.class, UUID.class,
                     Money.class, PaymentStatus.class, RejectionReason.class,
                     UUID.class, java.time.Instant.class, java.time.Instant.class,
-                    long.class, List.class, UUID.class, java.time.LocalDate.class);
+                    long.class, String.class, List.class, UUID.class, java.time.LocalDate.class);
             ctor.setAccessible(true);
             return ctor.newInstance(
                     entity.getId(),
@@ -53,6 +54,7 @@ public class PaymentMapper {
                     entity.getCreatedAt(),
                     entity.getUpdatedAt(),
                     entity.getVersion() != null ? entity.getVersion() : 0L,
+                    entity.getIdempotencyKey(),
                     events,
                     entity.getOrderId(),
                     entity.getDueDate()

@@ -65,6 +65,15 @@ public class JpaPaymentRepository implements PaymentRepository {
     }
 
     @Override
+    public Optional<Payment> findByIdempotencyKey(String idempotencyKey) {
+        return jpaRepo.findByIdempotencyKey(idempotencyKey).map(entity -> {
+            List<PaymentEvent> events = eventJpaRepo.findByPaymentIdOrderByTimestampAsc(entity.getId())
+                    .stream().map(mapper::toEventDomain).toList();
+            return mapper.fromFields(entity, events);
+        });
+    }
+
+    @Override
     public List<Payment> findAll() {
         return jpaRepo.findAll().stream().map(entity -> {
             List<PaymentEvent> events = eventJpaRepo.findByPaymentIdOrderByTimestampAsc(entity.getId())

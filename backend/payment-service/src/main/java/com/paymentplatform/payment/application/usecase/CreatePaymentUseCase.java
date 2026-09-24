@@ -11,6 +11,7 @@ import com.paymentplatform.shared.domain.event.PaymentEvents.PaymentCreatedEvent
 import com.paymentplatform.shared.infrastructure.audit.AuditActions;
 import com.paymentplatform.shared.infrastructure.audit.AuditRecorder;
 import com.paymentplatform.shared.infrastructure.outbox.OutboxEventStore;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,6 +40,20 @@ public class CreatePaymentUseCase {
 
     @Transactional
     public PaymentResponse execute(CreatePaymentRequest request, UUID actorUserId, UUID organizationId) {
+        return execute(request, actorUserId, organizationId, null);
+    }
+
+    @Transactional
+    public PaymentResponse execute(CreatePaymentRequest request, UUID actorUserId, UUID organizationId,
+                                   String idempotencyKey) {
+        String key = (idempotencyKey != null && !idempotencyKey.isBlank()) ? idempotencyKey : null;
+        if (key != null) {
+            var existing = payments.findByIdempotencyKey(key);
+            if (existing.isPresent()) {
+                return PaymentResponse.from(existing.get(), nameResolver.toNameResolver());
+            }
+        }
+
         orgClient.validateShop(request.shopId());
         orgClient.validateSupplier(request.supplierId());
         orgClient.validateRelation(request.shopId(), request.supplierId());
@@ -46,9 +61,21 @@ public class CreatePaymentUseCase {
         Money money = Money.of(request.amount(), request.currency());
 
         Payment payment = Payment.create(request.shopId(), request.supplierId(), money, actorUserId,
-                request.orderId(), request.dueDate());
+                request.orderId(), request.dueDate(), key);
 
-        Payment saved = payments.save(payment);
+        Payment saved;
+        try {
+            saved = payments.save(payment);
+        } catch (DataIntegrityViolationException e) {
+            // Race : deux requêtes concurrentes avec la même clé — la contrainte unique a rejeté la 2e.
+            if (key != null) {
+                var existing = payments.findByIdempotencyKey(key);
+                if (existing.isPresent()) {
+                    return PaymentResponse.from(existing.get(), nameResolver.toNameResolver());
+                }
+            }
+            throw e;
+        }
 
         audit.record(actorUserId, organizationId, AuditActions.PAYMENT_CREATED,
                 saved.id(), "{\"reference\":\"" + saved.reference().value() + "\"}");

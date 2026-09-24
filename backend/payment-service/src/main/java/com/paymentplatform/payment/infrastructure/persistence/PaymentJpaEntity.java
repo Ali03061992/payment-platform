@@ -47,6 +47,9 @@ public class PaymentJpaEntity {
     @Column(name = "due_date")
     private LocalDate dueDate;
 
+    @Column(name = "idempotency_key", length = 64, unique = true)
+    private String idempotencyKey;
+
     @Version
     private Long version;
 
@@ -84,6 +87,8 @@ public class PaymentJpaEntity {
     public void setOrderId(UUID orderId) { this.orderId = orderId; }
     public LocalDate getDueDate() { return dueDate; }
     public void setDueDate(LocalDate dueDate) { this.dueDate = dueDate; }
+    public String getIdempotencyKey() { return idempotencyKey; }
+    public void setIdempotencyKey(String idempotencyKey) { this.idempotencyKey = idempotencyKey; }
 
     @PrePersist
     protected void onCreate() {

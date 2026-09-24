@@ -27,6 +27,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -305,5 +306,58 @@ class PaymentControllerTest {
         mockMvc.perform(get("/api/payments/00000000-0000-0000-0000-000000099999")
                         .with(SecurityMockMvcRequestPostProcessors.authentication(shopUser())))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void create_sameIdempotencyKey_returnsSameId() throws Exception {
+        CreatePaymentRequest request = new CreatePaymentRequest(UUID.fromString("00000000-0000-0000-0000-000000000010"), UUID.fromString("00000000-0000-0000-0000-000000000020"), new BigDecimal("150.00"), "TND", null, null);
+        String body = objectMapper.writeValueAsString(request);
+        String key = "ctrl-key-" + UUID.randomUUID();
+
+        var first = mockMvc.perform(post("/api/payments")
+                        .with(SecurityMockMvcRequestPostProcessors.authentication(shopUser()))
+                        .header("Idempotency-Key", key)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id").isNotEmpty())
+                .andReturn();
+        String firstId = objectMapper.readTree(first.getResponse().getContentAsString()).get("id").asText();
+
+        var second = mockMvc.perform(post("/api/payments")
+                        .with(SecurityMockMvcRequestPostProcessors.authentication(shopUser()))
+                        .header("Idempotency-Key", key)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id").value(firstId))
+                .andReturn();
+        String secondId = objectMapper.readTree(second.getResponse().getContentAsString()).get("id").asText();
+
+        assertThat(secondId).isEqualTo(firstId);
+    }
+
+    @Test
+    void create_withoutIdempotencyKey_createsTwoDifferentPayments() throws Exception {
+        CreatePaymentRequest request = new CreatePaymentRequest(UUID.fromString("00000000-0000-0000-0000-000000000010"), UUID.fromString("00000000-0000-0000-0000-000000000020"), new BigDecimal("150.00"), "TND", null, null);
+        String body = objectMapper.writeValueAsString(request);
+
+        var first = mockMvc.perform(post("/api/payments")
+                        .with(SecurityMockMvcRequestPostProcessors.authentication(shopUser()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isCreated())
+                .andReturn();
+        var second = mockMvc.perform(post("/api/payments")
+                        .with(SecurityMockMvcRequestPostProcessors.authentication(shopUser()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isCreated())
+                .andReturn();
+
+        String firstId = objectMapper.readTree(first.getResponse().getContentAsString()).get("id").asText();
+        String secondId = objectMapper.readTree(second.getResponse().getContentAsString()).get("id").asText();
+
+        assertThat(secondId).isNotEqualTo(firstId);
     }
 }

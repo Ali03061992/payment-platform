@@ -12,7 +12,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
-import java.util.Optional;
 
 public class Payment {
 
@@ -53,7 +52,7 @@ public class Payment {
         this.dueDate = dueDate;
     }
 
-public static Payment create(UUID shopId, UUID supplierId, Money money, UUID createdBy) {
+    public static Payment create(UUID shopId, UUID supplierId, Money money, UUID createdBy) {
         return create(shopId, supplierId, money, createdBy, null, null);
     }
 

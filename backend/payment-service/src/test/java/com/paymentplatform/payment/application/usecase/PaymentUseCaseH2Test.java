@@ -203,4 +203,33 @@ class PaymentUseCaseH2Test {
         var stats = listPayments.stats();
         assertThat(stats.total()).isGreaterThanOrEqualTo(0);
     }
+
+    @Test
+    void createPayment_sameIdempotencyKey_returnsSamePaymentOnce() {
+        var request = new CreatePaymentRequest(UUID.fromString("00000000-0000-0000-0000-000000000001"), UUID.fromString("00000000-0000-0000-0000-000000000002"), new BigDecimal("150.50"), "TND", null, null);
+        UUID actor = UUID.fromString("00000000-0000-0000-0000-000000000010");
+        UUID org = UUID.fromString("00000000-0000-0000-0000-000000000001");
+        String key = "idem-key-" + UUID.randomUUID();
+
+        var first = createPayment.execute(request, actor, org, key);
+        var second = createPayment.execute(request, actor, org, key);
+
+        assertThat(second.id()).isEqualTo(first.id());
+        assertThat(payments.findByIdempotencyKey(key)).isPresent();
+        assertThat(payments.findByIdempotencyKey(key).get().id()).isEqualTo(first.id());
+        assertThat(payments.findAll()).hasSize(1);
+    }
+
+    @Test
+    void createPayment_differentIdempotencyKeys_createsTwoPayments() {
+        var request = new CreatePaymentRequest(UUID.fromString("00000000-0000-0000-0000-000000000001"), UUID.fromString("00000000-0000-0000-0000-000000000002"), new BigDecimal("150.50"), "TND", null, null);
+        UUID actor = UUID.fromString("00000000-0000-0000-0000-000000000010");
+        UUID org = UUID.fromString("00000000-0000-0000-0000-000000000001");
+
+        var first = createPayment.execute(request, actor, org, "key-a-" + UUID.randomUUID());
+        var second = createPayment.execute(request, actor, org, "key-b-" + UUID.randomUUID());
+
+        assertThat(second.id()).isNotEqualTo(first.id());
+        assertThat(payments.findAll()).hasSize(2);
+    }
 }

@@ -76,6 +76,22 @@ describe('PaymentService', () => {
       expect(req.request.body).toEqual({ shopId: 1, supplierId: 2, amount: 100, currency: 'TND' });
       req.flush(mock);
     });
+
+    it('should send an Idempotency-Key header (generated when absent)', () => {
+      const mock: Payment = { id: 1, reference: 'PAY-001', shopId: 1, shopName: 'Shop', supplierId: 2, supplierName: 'Sup', amount: 100, currency: 'TND', status: 'PENDING', rejectionReason: '', createdBy: 1, createdByName: '', confirmedByName: '', rejectedByName: '', cancelledByName: '', version: 1, createdAt: '', updatedAt: '', events: [] };
+      service.create({ shopId: 1, supplierId: 2, amount: 100, currency: 'TND' }).subscribe();
+      const req = httpMock.expectOne('/api/payments');
+      expect(req.request.headers.get('Idempotency-Key')).toBeTruthy();
+      req.flush(mock);
+    });
+
+    it('should reuse the provided Idempotency-Key on retry', () => {
+      const mock: Payment = { id: 1, reference: 'PAY-001', shopId: 1, shopName: 'Shop', supplierId: 2, supplierName: 'Sup', amount: 100, currency: 'TND', status: 'PENDING', rejectionReason: '', createdBy: 1, createdByName: '', confirmedByName: '', rejectedByName: '', cancelledByName: '', version: 1, createdAt: '', updatedAt: '', events: [] };
+      service.create({ shopId: 1, supplierId: 2, amount: 100, currency: 'TND' }, 'key-123').subscribe();
+      const req = httpMock.expectOne('/api/payments');
+      expect(req.request.headers.get('Idempotency-Key')).toBe('key-123');
+      req.flush(mock);
+    });
   });
 
   describe('confirm', () => {

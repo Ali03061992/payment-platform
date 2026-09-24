@@ -19,6 +19,8 @@ export class CreatePaymentComponent implements OnInit {
   shops: Organization[] = [];
   suppliers: Organization[] = [];
   creating = false;
+  private idempotencyKey: string | null = null;
+  private lastPayloadFingerprint: string | null = null;
 
   constructor(
     private paymentService: PaymentService,
@@ -60,10 +62,23 @@ export class CreatePaymentComponent implements OnInit {
   }
 
   create(): void {
+    if (this.creating) return;
     if (!this.shopId || !this.supplierId || this.amount < 0.01 || this.amount > 999999.99) return;
+    const payload = { shopId: this.shopId, supplierId: this.supplierId, amount: this.amount, currency: this.currency };
+    const fingerprint = JSON.stringify(payload);
+    // Une clé par intention de paiement : réutilisée sur retry/double-clic,
+    // régénérée si l'utilisateur modifie le formulaire (le backend rejoue sans comparer le payload).
+    if (this.idempotencyKey === null || this.lastPayloadFingerprint !== fingerprint) {
+      this.idempotencyKey = PaymentService.newIdempotencyKey();
+      this.lastPayloadFingerprint = fingerprint;
+    }
     this.creating = true;
-    this.paymentService.create({ shopId: this.shopId, supplierId: this.supplierId, amount: this.amount, currency: this.currency }).subscribe({
-      next: (payment) => this.router.navigate(['/dashboard/payments', payment.id]),
+    this.paymentService.create(payload, this.idempotencyKey).subscribe({
+      next: (payment) => {
+        this.idempotencyKey = null;
+        this.lastPayloadFingerprint = null;
+        this.router.navigate(['/dashboard/payments', payment.id]);
+      },
       error: (err: any) => {
         this.toast.error(err.error?.message || 'Erreur lors de la création');
         this.creating = false;

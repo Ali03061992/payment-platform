@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Payment, PaymentStats, CreatePaymentRequest, RejectPaymentRequest } from '../models/payment.model';
 import { AgentPaymentSummary } from '../models/agent-payment.model';
@@ -36,8 +36,22 @@ export class PaymentService {
     return this.http.get<Payment>(`${this.apiUrl}/reference/${reference}`);
   }
 
-  create(data: CreatePaymentRequest): Observable<Payment> {
-    return this.http.post<Payment>(this.apiUrl, data);
+  create(data: CreatePaymentRequest, idempotencyKey?: string): Observable<Payment> {
+    const key = idempotencyKey ?? PaymentService.newIdempotencyKey();
+    const headers = new HttpHeaders({ 'Idempotency-Key': key });
+    return this.http.post<Payment>(this.apiUrl, data, { headers });
+  }
+
+  static newIdempotencyKey(): string {
+    try {
+      const c = globalThis.crypto as unknown as { randomUUID?: () => string } | undefined;
+      if (c?.randomUUID) return c.randomUUID();
+    } catch { /* fallback ci-dessous */ }
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (ch) => {
+      const r = Math.floor(Math.random() * 16);
+      const v = ch === 'x' ? r : (r & 0x3 | 0x8);
+      return v.toString(16);
+    });
   }
 
   confirm(id: string): Observable<Payment> {
