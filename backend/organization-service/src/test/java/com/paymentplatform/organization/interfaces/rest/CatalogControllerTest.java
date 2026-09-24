@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -354,5 +355,76 @@ class CatalogControllerTest {
                         .with(SecurityMockMvcRequestPostProcessors.authentication(supplierAdmin()))
                         .param("supplierId", "00000000-0000-0000-0000-000000000010"))
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    void deleteCategory_softDelete_keepsRowExcludedFromList() throws Exception {
+        String code = "CAT-SOFT-" + System.nanoTime();
+        String body = objectMapper.writeValueAsString(
+                new com.paymentplatform.organization.interfaces.rest.CatalogController.CategoryRequest(UUID.fromString("00000000-0000-0000-0000-000000000010"), "Soft-" + System.nanoTime(), code));
+        String result = mockMvc.perform(post("/api/supplier/catalog/categories")
+                        .with(SecurityMockMvcRequestPostProcessors.authentication(supplierAdmin()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isCreated())
+                .andReturn().getResponse().getContentAsString();
+        UUID id = UUID.fromString(objectMapper.readTree(result).get("id").asText());
+
+        mockMvc.perform(delete("/api/supplier/catalog/categories/" + id)
+                        .with(SecurityMockMvcRequestPostProcessors.authentication(supplierAdmin())))
+                .andExpect(status().isNoContent());
+
+        // La ligne survit (soft-delete) mais disparaît des listes…
+        String list = mockMvc.perform(get("/api/supplier/catalog/categories")
+                        .with(SecurityMockMvcRequestPostProcessors.authentication(supplierAdmin()))
+                        .param("supplierId", "00000000-0000-0000-0000-000000000010"))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+        assertThat(list).doesNotContain(id.toString());
+
+        // …le code redevient réutilisable…
+        String reBody = objectMapper.writeValueAsString(
+                new com.paymentplatform.organization.interfaces.rest.CatalogController.CategoryRequest(UUID.fromString("00000000-0000-0000-0000-000000000010"), "SoftAgain-" + System.nanoTime(), code));
+        mockMvc.perform(post("/api/supplier/catalog/categories")
+                        .with(SecurityMockMvcRequestPostProcessors.authentication(supplierAdmin()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(reBody))
+                .andExpect(status().isCreated());
+
+        // …et le doublon sur une ligne ACTIVE reste refusé.
+        mockMvc.perform(post("/api/supplier/catalog/categories")
+                        .with(SecurityMockMvcRequestPostProcessors.authentication(supplierAdmin()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(reBody))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void deleteFamily_softDelete_excludedFromList() throws Exception {
+        String body = objectMapper.writeValueAsString(
+                new com.paymentplatform.organization.interfaces.rest.CatalogController.FamilyRequest(UUID.fromString("00000000-0000-0000-0000-000000000010"), "SoftFam-" + System.nanoTime(), "FAM-SOFT", new HashSet<>()));
+        String result = mockMvc.perform(post("/api/supplier/catalog/families")
+                        .with(SecurityMockMvcRequestPostProcessors.authentication(supplierAdmin()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isCreated())
+                .andReturn().getResponse().getContentAsString();
+        UUID id = UUID.fromString(objectMapper.readTree(result).get("id").asText());
+
+        mockMvc.perform(delete("/api/supplier/catalog/families/" + id)
+                        .with(SecurityMockMvcRequestPostProcessors.authentication(supplierAdmin())))
+                .andExpect(status().isNoContent());
+
+        String list = mockMvc.perform(get("/api/supplier/catalog/families")
+                        .with(SecurityMockMvcRequestPostProcessors.authentication(supplierAdmin()))
+                        .param("supplierId", "00000000-0000-0000-0000-000000000010"))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+        assertThat(list).doesNotContain(id.toString());
+
+        // Second delete => 404 (déjà supprimée).
+        mockMvc.perform(delete("/api/supplier/catalog/families/" + id)
+                        .with(SecurityMockMvcRequestPostProcessors.authentication(supplierAdmin())))
+                .andExpect(status().isNotFound());
     }
 }

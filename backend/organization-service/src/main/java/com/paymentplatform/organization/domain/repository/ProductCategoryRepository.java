@@ -8,7 +8,8 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface ProductCategoryRepository extends JpaRepository<ProductCategory, UUID> {
-    List<ProductCategory> findBySupplierId(UUID supplierId);
-    Optional<ProductCategory> findBySupplierIdAndCode(UUID supplierId, String code);
-    boolean existsBySupplierIdAndCode(UUID supplierId, String code);
+    /** M3 : les lignes soft-deletées sont exclues des listes. */
+    List<ProductCategory> findBySupplierIdAndDeletedAtIsNull(UUID supplierId);
+    Optional<ProductCategory> findBySupplierIdAndCodeAndDeletedAtIsNull(UUID supplierId, String code);
+    boolean existsBySupplierIdAndCodeAndDeletedAtIsNull(UUID supplierId, String code);
 }

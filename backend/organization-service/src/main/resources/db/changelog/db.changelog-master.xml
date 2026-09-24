@@ -17,5 +17,6 @@
     <include file="V7__add_location_tracking.sql" relativeToChangelogFile="true"/>
     <include file="V8__add_payment_terms.sql" relativeToChangelogFile="true"/>
     <include file="V9__add_disputes.sql" relativeToChangelogFile="true"/>
+    <include file="V10__catalog_soft_delete.sql" relativeToChangelogFile="true"/>
 
 </databaseChangeLog>

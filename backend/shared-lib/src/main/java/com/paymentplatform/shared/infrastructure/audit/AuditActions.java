@@ -27,4 +27,7 @@ public final class AuditActions {
     public static final String USER_LOGOUT = "USER_LOGOUT";
     public static final String USER_TOKEN_REFRESH = "USER_TOKEN_REFRESH";
     public static final String USER_PASSWORD_CHANGE = "USER_PASSWORD_CHANGE";
+
+    public static final String CATEGORY_DELETED = "CATEGORY_DELETED";
+    public static final String FAMILY_DELETED = "FAMILY_DELETED";
 }

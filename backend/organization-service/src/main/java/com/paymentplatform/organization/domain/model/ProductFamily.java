@@ -41,6 +41,10 @@ public class ProductFamily {
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
+    /** M3 : soft-delete — null = actif. L'historique est préservé. */
+    @Column(name = "deleted_at")
+    private Instant deletedAt;
+
     @PrePersist
     void prePersist() {
         if (this.id == null) { this.id = java.util.UUID.randomUUID(); }
@@ -68,4 +72,7 @@ public class ProductFamily {
     public void setCategories(Set<ProductCategory> categories) { this.categories = categories; }
     public Instant getCreatedAt() { return createdAt; }
     public Instant getUpdatedAt() { return updatedAt; }
+    public Instant getDeletedAt() { return deletedAt; }
+    public void setDeletedAt(Instant deletedAt) { this.deletedAt = deletedAt; }
+    public boolean isDeleted() { return deletedAt != null; }
 }
