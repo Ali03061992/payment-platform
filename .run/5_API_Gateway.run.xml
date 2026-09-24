@@ -4,6 +4,13 @@
     <option name="SPRING_BOOT_MAIN_CLASS" value="com.paymentplatform.gateway.ApiGatewayApplication" />
     <option name="ACTIVE_PROFILES" value="local" />
     <option name="VM_PARAMETERS" value="-Dspring.profiles.active=local" />
+    <!-- B2 : la suite Cypress fait ~70 logins depuis une seule IP : budget auth
+         assoupli en local. La prod garde le défaut strict (10/min). -->
+    <option name="ENV_VARIABLES">
+      <envs>
+        <env name="RATE_LIMIT_AUTH_PER_MINUTE" value="1000" />
+      </envs>
+    </option>
     <method v="2">
       <option name="Make" enabled="true" />
     </method>

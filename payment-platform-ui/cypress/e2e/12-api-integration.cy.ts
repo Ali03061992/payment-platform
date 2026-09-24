@@ -48,8 +48,9 @@ describe('12 - API: Admin Organizations', () => {
     cy.apiLogin('system.admin').then((token) => {
       cy.apiGet(token, '/api/admin/suppliers').then((r) => {
         expect(r.status).to.eq(200);
-        expect(r.body).to.be.an('array');
-        expect(r.body.length).to.be.gte(2);
+        expect(r.body).to.have.property('items');
+        expect(getItems(r.body).length).to.be.gte(2);
+        expect(r.body.totalElements).to.be.gte(2);
       });
     });
   });
@@ -58,8 +59,9 @@ describe('12 - API: Admin Organizations', () => {
     cy.apiLogin('system.admin').then((token) => {
       cy.apiGet(token, '/api/admin/shops').then((r) => {
         expect(r.status).to.eq(200);
-        expect(r.body).to.be.an('array');
-        expect(r.body.length).to.be.gte(2);
+        expect(r.body).to.have.property('items');
+        expect(getItems(r.body).length).to.be.gte(2);
+        expect(r.body.totalElements).to.be.gte(2);
       });
     });
   });
@@ -151,8 +153,9 @@ describe('12 - API: Users', () => {
     cy.apiLogin('system.admin').then((token) => {
       cy.apiGet(token, '/api/users').then((r) => {
         expect(r.status).to.eq(200);
-        expect(r.body).to.be.an('array');
-        expect(r.body.length).to.be.gte(1);
+        expect(r.body).to.have.property('items');
+        expect(getItems(r.body).length).to.be.gte(1);
+        expect(r.body.totalElements).to.be.gte(1);
       });
     });
   });

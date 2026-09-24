@@ -32,6 +32,10 @@ describe('06 - Supplier: Stock Management', () => {
   });
 
   it('should filter stock by status', () => {
+    // Attendre la fin du chargement AVANT le snapshot : sinon la photo DOM
+    // prise pendant le spinner choisit la mauvaise branche (données non vides
+    // -> table rendue, .empty-state absent -> timeout de 10s).
+    cy.get('.loading').should('not.exist');
     cy.get('body').then(($body) => {
       if ($body.find('.filter-bar .filter-select').length > 0) {
         cy.get('.filter-bar .filter-select').first().select('OK');
@@ -47,6 +51,7 @@ describe('06 - Supplier: Stock Management', () => {
   });
 
   it('should have quantity +/- buttons', () => {
+    cy.get('.loading').should('not.exist');
     cy.get('body').then(($body) => {
       if ($body.find('table tbody tr').length > 0) {
         cy.get('table tbody tr').first().then(($row) => {
