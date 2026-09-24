@@ -39,6 +39,54 @@ describe('12 - API: Auth', () => {
     cy.request({ method: 'GET', url: `${API()}/api/auth/me`, failOnStatusCode: false })
       .then((r) => { expect(r.status).to.be.oneOf([401, 403]); });
   });
+
+  it('M1 - refresh should rotate tokens and logout should revoke', () => {
+    cy.request({
+      method: 'POST', url: `${API()}/api/auth/login`,
+      body: { username: 'system.admin', password: '@PAssword012345' },
+    }).then((login) => {
+      expect(login.status).to.eq(200);
+      expect(login.body.refreshToken, 'refreshToken issued').to.be.a('string').and.not.be.empty;
+      const firstRefresh = login.body.refreshToken as string;
+      cy.request({
+        method: 'POST', url: `${API()}/api/auth/refresh`,
+        body: { refreshToken: firstRefresh },
+      }).then((refreshed) => {
+        expect(refreshed.status).to.eq(200);
+        expect(refreshed.body.accessToken, 'new access token').to.be.a('string').and.not.be.empty;
+        expect(refreshed.body.refreshToken, 'rotated refresh token').to.be.a('string')
+          .and.not.eq(firstRefresh);
+        const secondRefresh = refreshed.body.refreshToken as string;
+        // Le nouveau access token fonctionne.
+        cy.request({
+          method: 'GET', url: `${API()}/api/auth/me`,
+          headers: { Authorization: `Bearer ${refreshed.body.accessToken}` },
+        }).then((me) => {
+          expect(me.status).to.eq(200);
+          // L'ancien refresh est consommé (rotation).
+          cy.request({
+            method: 'POST', url: `${API()}/api/auth/refresh`,
+            body: { refreshToken: firstRefresh }, failOnStatusCode: false,
+          }).then((reused) => {
+            expect(reused.status).to.eq(401);
+            // Logout révoque le courant.
+            cy.request({
+              method: 'POST', url: `${API()}/api/auth/logout`,
+              body: { refreshToken: secondRefresh }, failOnStatusCode: false,
+            }).then((logout) => {
+              expect(logout.status).to.eq(204);
+              cy.request({
+                method: 'POST', url: `${API()}/api/auth/refresh`,
+                body: { refreshToken: secondRefresh }, failOnStatusCode: false,
+              }).then((afterLogout) => {
+                expect(afterLogout.status).to.eq(401);
+              });
+            });
+          });
+        });
+      });
+    });
+  });
 });
 
 describe('12 - API: Admin Organizations', () => {

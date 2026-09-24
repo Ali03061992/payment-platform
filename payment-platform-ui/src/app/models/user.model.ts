@@ -19,6 +19,8 @@ export interface LoginRequest {
 
 export interface LoginResponse {
   accessToken: string;
+  refreshToken?: string;
+  refreshExpiresIn?: number;
 }
 
 export interface RegisterRequest {

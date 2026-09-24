@@ -97,7 +97,8 @@ public class RateLimitFilter extends OncePerRequestFilter {
     private boolean isAuthPath(String path) {
         return path.startsWith("/api/auth/login")
                 || path.startsWith("/api/auth/register")
-                || path.startsWith("/api/auth/refresh");
+                || path.startsWith("/api/auth/refresh")
+                || path.startsWith("/api/auth/logout");
     }
 
     private boolean isExcludedPath(String path) {

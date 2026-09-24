@@ -44,6 +44,7 @@ public class GatewaySecurityConfig {
                                 "/api/auth/login",
                                 "/api/auth/register",
                                 "/api/auth/refresh",
+                                "/api/auth/logout",
                                 "/api/auth/password-setup/**",
                                 "/actuator/health",
                                 "/actuator/info",

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, tap } from 'rxjs';
+import { Observable, tap, throwError } from 'rxjs';
 import { LoginRequest, LoginResponse, User } from '../models/user.model';
 
 @Injectable({ providedIn: 'root' })
@@ -13,6 +13,28 @@ export class LoginService {
     return this.http.post<LoginResponse>(`${this.apiUrl}/login`, data).pipe(
       tap(res => {
         sessionStorage.setItem('token', res.accessToken);
+        if (res.refreshToken) {
+          sessionStorage.setItem('refreshToken', res.refreshToken);
+        }
+      })
+    );
+  }
+
+  /**
+   * M1 : renouvellement silencieux (rotation côté serveur : le refreshToken
+   * stocké est remplacé à chaque appel réussi).
+   */
+  refresh(): Observable<LoginResponse> {
+    const stored = sessionStorage.getItem('refreshToken');
+    if (!stored) {
+      return throwError(() => new Error('No refresh token'));
+    }
+    return this.http.post<LoginResponse>(`${this.apiUrl}/refresh`, { refreshToken: stored }).pipe(
+      tap(res => {
+        sessionStorage.setItem('token', res.accessToken);
+        if (res.refreshToken) {
+          sessionStorage.setItem('refreshToken', res.refreshToken);
+        }
       })
     );
   }
@@ -22,7 +44,15 @@ export class LoginService {
   }
 
   logout(): void {
+    const stored = sessionStorage.getItem('refreshToken');
+    if (stored) {
+      // Best-effort : la déconnexion locale ne doit jamais être bloquée par le réseau.
+      this.http.post(`${this.apiUrl}/logout`, { refreshToken: stored }).subscribe({
+        error: () => {}
+      });
+    }
     sessionStorage.removeItem('token');
+    sessionStorage.removeItem('refreshToken');
     sessionStorage.removeItem('user');
   }
 

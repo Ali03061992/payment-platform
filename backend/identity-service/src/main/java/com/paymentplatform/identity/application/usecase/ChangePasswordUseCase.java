@@ -18,11 +18,14 @@ public class ChangePasswordUseCase {
 
     private final UserRepository users;
     private final PasswordEncoder passwordEncoder;
+    private final RefreshTokenService refreshTokens;
     private final AuditRecorder audit;
 
-    public ChangePasswordUseCase(UserRepository users, PasswordEncoder passwordEncoder, AuditRecorder audit) {
+    public ChangePasswordUseCase(UserRepository users, PasswordEncoder passwordEncoder,
+                                 RefreshTokenService refreshTokens, AuditRecorder audit) {
         this.users = users;
         this.passwordEncoder = passwordEncoder;
+        this.refreshTokens = refreshTokens;
         this.audit = audit;
     }
 
@@ -39,6 +42,9 @@ public class ChangePasswordUseCase {
         String encodedNew = passwordEncoder.encode(request.newPassword());
         user.changePassword(PasswordHash.of(encodedNew));
         users.save(user);
+
+        // M1 : changement de mot de passe => toutes les sessions sont révoquées.
+        refreshTokens.revokeAll(user.id().value());
 
         audit.record(user.id().value(),
                 user.organizationId() == null ? null : user.organizationId().value(),

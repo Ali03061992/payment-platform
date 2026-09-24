@@ -40,6 +40,37 @@ describe('LoginService', () => {
       expect(req.request.body).toEqual({ username: 'admin', password: 'pass' });
       req.flush(mockResponse);
     });
+
+    it('should store refresh token when provided', () => {
+      const mockResponse: LoginResponse = { accessToken: 'jwt', refreshToken: 'ref-123', refreshExpiresIn: 604800 };
+      service.login({ username: 'admin', password: 'pass' }).subscribe();
+      const req = httpMock.expectOne('/api/auth/login');
+      req.flush(mockResponse);
+      expect(sessionStorage.getItem('refreshToken')).toBe('ref-123');
+    });
+  });
+
+  describe('refresh', () => {
+    it('should POST stored refresh token and rotate stored pair', () => {
+      sessionStorage.setItem('token', 'old-access');
+      sessionStorage.setItem('refreshToken', 'old-refresh');
+      service.refresh().subscribe(res => {
+        expect(res.accessToken).toBe('new-access');
+        expect(sessionStorage.getItem('token')).toBe('new-access');
+        expect(sessionStorage.getItem('refreshToken')).toBe('new-refresh');
+      });
+      const req = httpMock.expectOne('/api/auth/refresh');
+      expect(req.request.method).toBe('POST');
+      expect(req.request.body).toEqual({ refreshToken: 'old-refresh' });
+      req.flush({ accessToken: 'new-access', tokenType: 'Bearer', expiresIn: 1800, refreshToken: 'new-refresh', refreshExpiresIn: 604800 });
+    });
+
+    it('should error when no refresh token stored', () => {
+      service.refresh().subscribe({
+        error: (e) => expect(e.message).toBe('No refresh token')
+      });
+      httpMock.expectNone('/api/auth/refresh');
+    });
   });
 
   describe('getMe', () => {
@@ -65,6 +96,18 @@ describe('LoginService', () => {
       service.logout();
       expect(sessionStorage.getItem('token')).toBeNull();
       expect(sessionStorage.getItem('user')).toBeNull();
+    });
+
+    it('should revoke server-side refresh token best-effort', () => {
+      sessionStorage.setItem('token', 'test-token');
+      sessionStorage.setItem('refreshToken', 'ref-1');
+      sessionStorage.setItem('user', '{"id":1}');
+      service.logout();
+      const req = httpMock.expectOne('/api/auth/logout');
+      expect(req.request.method).toBe('POST');
+      expect(req.request.body).toEqual({ refreshToken: 'ref-1' });
+      req.flush(null);
+      expect(sessionStorage.getItem('refreshToken')).toBeNull();
     });
   });
 

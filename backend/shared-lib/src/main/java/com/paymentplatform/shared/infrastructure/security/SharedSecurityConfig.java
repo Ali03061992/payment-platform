@@ -38,6 +38,7 @@ public class SharedSecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/login", "/api/auth/register", "/api/auth/refresh",
+                                "/api/auth/logout",
                                 "/api/auth/password-setup/**",
                                 "/api/organizations/internal/**",
                                 "/api/internal/**",

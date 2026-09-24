@@ -26,14 +26,17 @@ public class AuthUseCase {
     private final OrganizationStatusPort organizationStatus;
     private final PasswordEncoder passwordEncoder;
     private final TokenIssuer tokenIssuer;
+    private final RefreshTokenService refreshTokens;
     private final AuditRecorder audit;
 
     public AuthUseCase(UserRepository users, OrganizationStatusPort organizationStatus,
-                       PasswordEncoder passwordEncoder, TokenIssuer tokenIssuer, AuditRecorder audit) {
+                       PasswordEncoder passwordEncoder, TokenIssuer tokenIssuer,
+                       RefreshTokenService refreshTokens, AuditRecorder audit) {
         this.users = users;
         this.organizationStatus = organizationStatus;
         this.passwordEncoder = passwordEncoder;
         this.tokenIssuer = tokenIssuer;
+        this.refreshTokens = refreshTokens;
         this.audit = audit;
     }
 
@@ -62,6 +65,8 @@ public class AuthUseCase {
         var authenticated = new AuthenticatedUser(user.id().value(), user.username().value(), roles,
                 user.organizationId() == null ? null : user.organizationId().value());
         String token = tokenIssuer.issue(authenticated);
-        return LoginResponse.of(token, tokenIssuer.expirationSeconds(), UserResponse.from(user));
+        var refresh = refreshTokens.issue(user.id().value());
+        return LoginResponse.of(token, tokenIssuer.expirationSeconds(), UserResponse.from(user),
+                refresh.rawToken(), refresh.expiresInSeconds());
     }
 }
