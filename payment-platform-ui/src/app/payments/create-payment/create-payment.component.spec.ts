@@ -80,10 +80,11 @@ describe('CreatePaymentComponent', () => {
       expect(component.shops.length).toBe(1);
     });
 
-    it('should set shopId for SHOP_MANAGER role', () => {
-      sessionStorage.setItem('user', JSON.stringify({ roles: ['SHOP_MANAGER'], organizationId: 3, username: 'mgr' }));
+    it('should not set shopId for unknown role', () => {
+      sessionStorage.setItem('user', JSON.stringify({ roles: ['UNKNOWN_ROLE'], organizationId: 3, username: 'mgr' }));
       component.ngOnInit();
-      expect(component.shopId).toBe(3);
+      expect(component.shopId).toBe('');
+      expect(orgService.listShops).not.toHaveBeenCalled();
     });
 
     it('should load suppliers for shop with active relations', () => {
@@ -118,8 +119,23 @@ describe('CreatePaymentComponent', () => {
       component.supplierId = 2;
       component.amount = 100;
       component.create();
-      expect(paymentService.create).toHaveBeenCalledWith({ shopId: 1, supplierId: 2, amount: 100, currency: 'TND' });
+      expect(paymentService.create).toHaveBeenCalledWith(
+        { shopId: 1, supplierId: 2, amount: 100, currency: 'TND' },
+        jasmine.any(String));
       expect(router.navigate).toHaveBeenCalledWith(['/dashboard/payments', 1]);
+    });
+
+    it('should reuse the idempotency key on retry after error', () => {
+      component.shopId = 1;
+      component.supplierId = 2;
+      component.amount = 100;
+      paymentService.create.and.returnValue(throwError(() => ({ error: { message: 'boom' } })));
+      component.create();
+      const firstKey = paymentService.create.calls.first().args[1];
+      expect(firstKey).toMatch(/^[0-9a-f-]{36}$/);
+      expect(component.creating).toBeFalse();
+      component.create();
+      expect(paymentService.create.calls.mostRecent().args[1]).toBe(firstKey);
     });
 
     it('should not create when shopId is 0', () => {

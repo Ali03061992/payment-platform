@@ -47,6 +47,8 @@ import { ExportComponent } from './payments/export/export.component';
 import { LowStockAlertsComponent } from './supplier/low-stock-alerts/low-stock-alerts.component';
 import { NotificationsComponent } from './dashboard/notifications/notifications.component';
 import { AuditLogManagementComponent } from './admin/audit-log-management/audit-log-management.component';
+import { ForbiddenComponent } from './errors/forbidden/forbidden.component';
+import { NotFoundComponent } from './errors/not-found/not-found.component';
 
 export const adminRoles = ['SYSTEM_ADMIN'];
 export const supplierRoles = ['SUPPLIER_ADMIN', 'SUPPLIER_AGENT'];
@@ -58,6 +60,8 @@ const routes: Routes = [
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
   { path: 'setup-password', component: PasswordSetupComponent },
+  { path: '403', component: ForbiddenComponent },
+  { path: '404', component: NotFoundComponent },
   {
     path: 'dashboard',
     component: LayoutComponent,
@@ -101,7 +105,7 @@ const routes: Routes = [
       { path: 'change-password', component: ChangePasswordComponent }
     ]
   },
-  { path: '**', redirectTo: '/login' }
+  { path: '**', redirectTo: '/404' }
 ];
 
 @NgModule({

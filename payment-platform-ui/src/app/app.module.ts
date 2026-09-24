@@ -53,6 +53,8 @@ import { ExportComponent } from './payments/export/export.component';
 import { LowStockAlertsComponent } from './supplier/low-stock-alerts/low-stock-alerts.component';
 import { NotificationsComponent } from './dashboard/notifications/notifications.component';
 import { AuditLogManagementComponent } from './admin/audit-log-management/audit-log-management.component';
+import { ForbiddenComponent } from './errors/forbidden/forbidden.component';
+import { NotFoundComponent } from './errors/not-found/not-found.component';
 import { NotificationBannerComponent } from './components/notification-banner/notification-banner.component';
 import { ToastComponent } from './components/toast/toast.component';
 import { TourComponent } from './components/tour/tour.component';
@@ -112,6 +114,8 @@ import { LanguageSwitcherComponent } from './i18n/language-switcher.component';
         NotificationsComponent,
         NotificationBannerComponent,
         AuditLogManagementComponent,
+        ForbiddenComponent,
+        NotFoundComponent,
         ToastComponent,
         TourComponent,
         StatusLabelPipe

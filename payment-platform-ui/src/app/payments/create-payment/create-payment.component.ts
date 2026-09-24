@@ -34,7 +34,7 @@ export class CreatePaymentComponent implements OnInit {
     if (userJson) {
       const user = JSON.parse(userJson);
       const roles: string[] = user.roles || [];
-      if (roles.includes('SHOP_ADMIN') || roles.includes('SHOP_MANAGER')) {
+      if (roles.includes('SHOP_ADMIN')) {
         const shopId = user.organizationId;
         if (shopId) {
           this.shopId = shopId;

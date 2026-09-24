@@ -140,8 +140,9 @@ describe('01 - Auth: Guards', () => {
     cy.url({ timeout: 5000 }).should('include', '/login');
   });
 
-  it('should redirect unknown routes to login', () => {
+  it('should show 404 page for unknown routes', () => {
     cy.visit('/totally-unknown-page');
-    cy.url({ timeout: 5000 }).should('include', '/login');
+    cy.url({ timeout: 5000 }).should('include', '/404');
+    cy.contains('404').should('exist');
   });
 });

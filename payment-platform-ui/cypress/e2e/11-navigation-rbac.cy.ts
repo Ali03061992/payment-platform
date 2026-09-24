@@ -56,9 +56,10 @@ describe('11 - Navigation: Guards', () => {
     cy.url({ timeout: 5000 }).should('include', '/login');
   });
 
-  it('should redirect unknown routes to login', () => {
+  it('should show 404 page for unknown routes', () => {
     cy.visit('/unknown-route-xyz');
-    cy.url({ timeout: 5000 }).should('include', '/login');
+    cy.url({ timeout: 5000 }).should('include', '/404');
+    cy.contains('404').should('exist');
   });
 });
 
@@ -172,6 +173,14 @@ describe('11 - Navigation: Role-based Access Control', () => {
       cy.url({ timeout: 5000 }).should('satisfy', (url: string) =>
         !url.includes('/supplier/products')
       );
+    });
+
+    it('denied role lands on the 403 page with content', () => {
+      cy.loginAsSupplierAdmin();
+      cy.visit('/dashboard/admin/users');
+      cy.url({ timeout: 5000 }).should('include', '/403');
+      cy.contains('403').should('exist');
+      cy.contains('Accès refusé').should('exist');
     });
   });
 });

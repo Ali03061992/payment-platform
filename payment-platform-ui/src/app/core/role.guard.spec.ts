@@ -70,7 +70,7 @@ describe('RoleGuard', () => {
       const route = createRoute({ roles: ['SYSTEM_ADMIN'] });
       const result = guard.canActivate(route);
       expect(result).toBeFalse();
-      expect(router.navigate).toHaveBeenCalledWith(['/dashboard']);
+      expect(router.navigate).toHaveBeenCalledWith(['/403']);
     });
 
     it('should return true when user has one of multiple required roles', () => {
