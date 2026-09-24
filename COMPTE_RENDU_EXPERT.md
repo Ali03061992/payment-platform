@@ -46,7 +46,7 @@ ligne→détail paiements au clic Confirmer/Annuler.
 |---|---|---|---|
 | B1 | `Idempotency-Key` désormais **traité** : clé persistée + vérification en use-case - double POST identique = 1 seul paiement | Financier direct | `PaymentController.java:67-70`, `CreatePaymentUseCase.java:41-59`, `Payment.java`, `PaymentRepository.java` |
 | B2 | Rate-limit **désormais actif** sur `login/register/refresh` : bucket strict 10/min/IP + `Retry-After: 60` + headers `X-RateLimit-*` (brute-force freiné) | Sécurité | `RateLimitFilter.java`, `RateLimitFilterTest.java` (7 tests), `15-rate-limit-auth.cy.ts` |
-| B3 | `"/api/**".permitAll()` au gateway : sécurité = un seul filtre JWT ; routes `internal/**` accessibles sans JWT, protégées par un secret **par défaut committé** (`dev-internal-secret-change-me`) | Sécurité | `GatewaySecurityConfig.java:44`, `GatewayProxyController.java:45`, `InternalOrganizationController.java:21`, `PaymentInternalSecretConfig.java:10` |
+| B3 | Gateway **deny-by-default** (plus de `"/api/**".permitAll()`, SecurityContext alimenté par JWT, `internal/**` exige JWT + secret) ; secret interne **obligatoire au boot** (défauts Java supprimés, `PaymentInternalSecretConfig` morte supprimée, validator prod) ; **401 unifié** inter-services | Sécurité | `GatewaySecurityConfig.java`, `JwtValidationFilter.java`, `InternalSecretValidator.java`, `GatewaySecurityTest.java` (3 tests), `16-gateway-security.cy.ts` |
 | B4 | Seed `Admin@123` + 10 hashes BCrypt identiques + `SEED_ADMIN_PASSWORD` en dur : exécution accidentelle en prod = backdoor connue | Sécurité | `V4__seed_users.sql:5`, `DataInitializer.java:38` |
 | B5 | Listes non paginées (`findAll()` users/orgs) + `listPayments(..., Integer.MAX_VALUE)` : OOM/DoS | Disponibilité | `PaymentController.java:190`, `JpaUserRepository.java:77-78`, `JpaOrganizationRepository.java:32-33` |
 
@@ -89,7 +89,7 @@ ligne→détail paiements au clic Confirmer/Annuler.
 ### Phase 0 — Feu vert sécurité (3-5 j, BLOQUANT, critères : re-audit OK)
 - [x] B1 : persister `Idempotency-Key` (contrainte d'unicité + table ou cache) et la transmettre au use-case. **Critère :** double POST identique = 1 seul paiement (test E2E).
 - [x] B2 : inclure `login/register` dans le rate-limit (compteur par IP, ex. 10/min) + délai progressif.
-- [ ] B3 : supprimer `"/api/**".permitAll()`, auth par défaut ; `INTERNAL_SECRET` obligatoire au boot (échec si absent) ; unifier 401/403 inter-services.
+- [x] B3 : supprimer `"/api/**".permitAll()`, auth par défaut ; `INTERNAL_SECRET` obligatoire au boot (échec si absent) ; unifier 401/403 inter-services.
 - [ ] B4 : seed réservé au profil `dev/local` (garde `spring.profiles`), mot de passe admin initial généré et affiché une seule fois au premier boot.
 - [ ] B5 : paginer `list users/orgs` (`Pageable`, max 100) ; remplacer `Integer.MAX_VALUE` par agrégats SQL (`SUM/COUNT`).
 

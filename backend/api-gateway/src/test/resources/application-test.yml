@@ -4,8 +4,9 @@ server:
 spring:
   application:
     name: api-gateway-test
-  profiles:
-    active: test
+  # NOTE : ne pas remettre `profiles.active` ici — Spring Boot 4 refuse
+  # cette propriété dans une ressource déjà spécifique au profil test
+  # (InvalidConfigDataPropertyException). Le profil est activé via @ActiveProfiles.
 
 app:
   security:

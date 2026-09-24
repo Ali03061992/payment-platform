@@ -1,6 +1,7 @@
 package com.paymentplatform.gateway;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.paymentplatform.shared.domain.security.PermissionCatalog;
 import com.paymentplatform.shared.infrastructure.security.AuthenticatedUser;
 import com.paymentplatform.shared.infrastructure.security.JwtService;
 import jakarta.servlet.FilterChain;
@@ -12,11 +13,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 @Component
@@ -45,12 +51,24 @@ public class JwtValidationFilter extends OncePerRequestFilter {
         String token = extractToken(request);
 
         if (token == null) {
+            SecurityContextHolder.clearContext();
             sendError(response, 401, "Token d'authentification manquant", path);
             return;
         }
 
         try {
             AuthenticatedUser user = jwtService.parse(token);
+
+            // B3 : alimente le SecurityContext pour que la chaîne Spring Security
+            // (deny-by-default, sans "/api/**".permitAll()) authentifie la requête.
+            List<SimpleGrantedAuthority> authorities = new ArrayList<>(user.roles().stream()
+                    .map(SimpleGrantedAuthority::new)
+                    .toList());
+            authorities.addAll(PermissionCatalog.permissionsFor(user.roles()).stream()
+                    .map(SimpleGrantedAuthority::new)
+                    .toList());
+            SecurityContextHolder.getContext().setAuthentication(
+                    new UsernamePasswordAuthenticationToken(user, null, authorities));
 
             String finalToken = token;
             AuthenticatedUser finalUser = user;
@@ -75,6 +93,7 @@ public class JwtValidationFilter extends OncePerRequestFilter {
             filterChain.doFilter(wrappedRequest, response);
         } catch (Exception e) {
             log.warn("JWT rejected for {}: {}", path, e.getMessage());
+            SecurityContextHolder.clearContext();
             sendError(response, 401, "Token invalide ou expiré", path);
         }
     }
@@ -99,12 +118,13 @@ public class JwtValidationFilter extends OncePerRequestFilter {
     }
 
     private boolean isPublicPath(String path) {
+        // B3 : les routes internal/** exigent désormais un JWT valide au gateway
+        // (défense en profondeur : JWT + X-Internal-Token côté service appelé).
+        // Les appels inter-services directs (hors gateway) ne sont pas impactés.
         return path.startsWith("/api/auth/login")
                 || path.startsWith("/api/auth/register")
                 || path.startsWith("/api/auth/refresh")
                 || path.startsWith("/api/auth/password-setup/")
-                || path.startsWith("/api/organizations/internal/")
-                || path.startsWith("/api/internal/")
                 || path.startsWith("/actuator/")
                 || path.startsWith("/swagger-ui")
                 || path.startsWith("/v3/api-docs");

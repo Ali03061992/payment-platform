@@ -4,10 +4,14 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.paymentplatform.shared.domain.exception.ConflictException;
 import com.paymentplatform.shared.domain.exception.NotFoundException;
+import com.paymentplatform.shared.domain.security.InternalSecretValidator;
+import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
 import java.net.URI;
@@ -36,8 +40,17 @@ public class OrganizationValidationClient {
     @Value("${app.identity-service.port:8082}")
     private int identityServicePort;
 
-    @Value("${app.internal-secret:dev-internal-secret-change-me}")
+    @Value("${app.internal-secret}")
     private String internalSecret;
+
+    @Autowired
+    private Environment environment;
+
+    @PostConstruct
+    void validateInternalSecret() {
+        // B3 : échec au boot si absent ; refus des défauts connus sous profil prod.
+        this.internalSecret = InternalSecretValidator.requireValid(internalSecret, environment);
+    }
 
     public void validateShop(UUID shopId) {
         String url = "http://" + organizationServiceUrl + ":" + organizationServicePort + "/api/organizations/internal/" + shopId + "/status";

@@ -44,7 +44,7 @@ public class OrganizationGatewayClient implements OrganizationStatusPort {
     public OrganizationGatewayClient(RestClient.Builder builder,
                                      @Value("${ORGANIZATION_SERVICE_URL:localhost}") String orgHost,
                                      @Value("${ORGANIZATION_SERVICE_PORT:8083}") String orgPort,
-                                     @Value("${app.internal-secret:dev-internal-secret-change-me}") String internalSecret) {
+                                     @Value("${app.internal-secret}") String internalSecret) {
         this.restClient = builder.baseUrl("http://" + orgHost + ":" + orgPort).build();
         this.internalSecret = internalSecret;
     }

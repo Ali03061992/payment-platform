@@ -50,7 +50,7 @@ class InternalUserControllerTest {
     }
 
     @Test
-    void create_invalidToken_returns403() throws Exception {
+    void create_invalidToken_returns401() throws Exception {
         CreateInternalUserRequest request = new CreateInternalUserRequest(
                 "internaluser." + System.nanoTime(), "internal." + System.nanoTime() + "@example.com", "Password@1",
                 "Internal", "User", null, UUID.fromString("00000000-0000-0000-0000-000000000005"), "SHOP_ADMIN");
@@ -59,7 +59,19 @@ class InternalUserControllerTest {
                         .header("X-Internal-Token", "wrong-token")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void create_missingToken_returns401() throws Exception {
+        CreateInternalUserRequest request = new CreateInternalUserRequest(
+                "internaluser." + System.nanoTime(), "internal." + System.nanoTime() + "@example.com", "Password@1",
+                "Internal", "User", null, UUID.fromString("00000000-0000-0000-0000-000000000005"), "SHOP_ADMIN");
+
+        mockMvc.perform(post("/api/internal/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
@@ -85,9 +97,15 @@ class InternalUserControllerTest {
     }
 
     @Test
-    void getById_invalidToken_returns403() throws Exception {
+    void getById_invalidToken_returns401() throws Exception {
         mockMvc.perform(get("/api/internal/users/00000000-0000-0000-0000-000000000001")
                         .header("X-Internal-Token", "wrong-token"))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void getById_missingToken_returns401() throws Exception {
+        mockMvc.perform(get("/api/internal/users/00000000-0000-0000-0000-000000000001"))
+                .andExpect(status().isUnauthorized());
     }
 }

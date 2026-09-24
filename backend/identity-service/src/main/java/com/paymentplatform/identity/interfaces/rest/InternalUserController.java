@@ -5,7 +5,7 @@ import com.paymentplatform.identity.application.dto.UserResponse;
 import com.paymentplatform.identity.application.usecase.InternalUserCreationUseCase;
 import com.paymentplatform.identity.application.usecase.UserQueryUseCase;
 import com.paymentplatform.identity.infrastructure.http.InternalAuthGuard;
-import com.paymentplatform.shared.domain.exception.ForbiddenException;
+import com.paymentplatform.shared.domain.exception.UnauthorizedException;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -30,19 +30,23 @@ public class InternalUserController {
     }
 
     @PostMapping
-    public ResponseEntity<UserResponse> create(@RequestHeader("X-Internal-Token") String token,
-                                               @Valid @RequestBody CreateInternalUserRequest request) {
+    public ResponseEntity<UserResponse> create(
+            @RequestHeader(value = "X-Internal-Token", required = false) String token,
+            @Valid @RequestBody CreateInternalUserRequest request) {
+        // B3 : 401 unifié (manquant OU invalide), comme InternalOrganizationController.
         if (!guard.isValid(token)) {
-            throw new ForbiddenException("Secret interne invalide");
+            throw new UnauthorizedException("Secret interne invalide ou manquant");
         }
         return ResponseEntity.status(201).body(useCase.createInternalUser(request));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<UserResponse> getById(@RequestHeader("X-Internal-Token") String token,
-                                                @PathVariable UUID id) {
+    public ResponseEntity<UserResponse> getById(
+            @RequestHeader(value = "X-Internal-Token", required = false) String token,
+            @PathVariable UUID id) {
+        // B3 : 401 unifié (manquant OU invalide), comme InternalOrganizationController.
         if (!guard.isValid(token)) {
-            throw new ForbiddenException("Secret interne invalide");
+            throw new UnauthorizedException("Secret interne invalide ou manquant");
         }
         return ResponseEntity.ok(query.findByIdInternal(id));
     }

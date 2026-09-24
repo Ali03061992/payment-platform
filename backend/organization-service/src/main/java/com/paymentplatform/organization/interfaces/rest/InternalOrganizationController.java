@@ -5,7 +5,9 @@ import com.paymentplatform.organization.application.usecase.OrganizationValidati
 import com.paymentplatform.organization.domain.model.SupplierShopRelation;
 import com.paymentplatform.organization.domain.repository.SupplierShopRelationRepository;
 import com.paymentplatform.organization.domain.valueobject.OrganizationId;
+import com.paymentplatform.shared.domain.security.InternalSecretValidator;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,14 +19,16 @@ public class InternalOrganizationController {
 
     private final OrganizationValidationUseCase validation;
     private final SupplierShopRelationRepository relations;
-
-    @Value("${app.internal-secret:dev-internal-secret-change-me}")
-    private String expectedSecret;
+    private final String expectedSecret;
 
     public InternalOrganizationController(OrganizationValidationUseCase validation,
-                                           SupplierShopRelationRepository relations) {
+                                           SupplierShopRelationRepository relations,
+                                           @Value("${app.internal-secret}") String expectedSecret,
+                                           Environment environment) {
         this.validation = validation;
         this.relations = relations;
+        // B3 : échec au boot si absent ; refus des défauts connus sous profil prod.
+        this.expectedSecret = InternalSecretValidator.requireValid(expectedSecret, environment);
     }
 
     @GetMapping("/{id}/status")
