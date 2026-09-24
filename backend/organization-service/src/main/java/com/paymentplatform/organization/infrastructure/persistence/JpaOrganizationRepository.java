@@ -6,6 +6,9 @@ import com.paymentplatform.organization.domain.valueobject.OrganizationId;
 import com.paymentplatform.organization.domain.valueobject.OrganizationName;
 import com.paymentplatform.organization.domain.valueobject.OrganizationStatus;
 import com.paymentplatform.organization.domain.valueobject.OrganizationType;
+import com.paymentplatform.shared.domain.model.PageResult;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,8 +38,10 @@ public class JpaOrganizationRepository implements OrganizationRepository {
 
     @Override
     @Transactional(readOnly = true)
-    public List<Organization> findByType(OrganizationType type) {
-        return jpa.findByType(type.name()).stream().map(this::toDomain).toList();
+    public PageResult<Organization> findByType(OrganizationType type, int page, int size) {
+        Page<OrganizationJpaEntity> result = jpa.findByType(type.name(), PageRequest.of(page, size));
+        return new PageResult<>(result.getContent().stream().map(this::toDomain).toList(),
+                result.getTotalElements());
     }
 
     @Override

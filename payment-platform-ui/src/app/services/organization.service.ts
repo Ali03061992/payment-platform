@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { Organization, OrganizationStats, SupplierShopRelation, CreateRelationRequest } from '../models/organization.model';
 
 @Injectable({ providedIn: 'root' })
@@ -9,12 +10,24 @@ export class OrganizationService {
 
   constructor(private http: HttpClient) {}
 
-  listSuppliers(): Observable<Organization[]> {
-    return this.http.get<Organization[]>(`${this.apiUrl}/suppliers`);
+  private static unwrap<T>(res: T[] | { items?: T[]; content?: T[]; data?: T[] }): T[] {
+    if (Array.isArray(res)) return res;
+    if (res && Array.isArray((res as any).items)) return (res as any).items;
+    if (res && Array.isArray((res as any).content)) return (res as any).content;
+    if (res && Array.isArray((res as any).data)) return (res as any).data;
+    return [];
   }
 
-  listShops(): Observable<Organization[]> {
-    return this.http.get<Organization[]>(`${this.apiUrl}/shops`);
+  listSuppliers(page = 0, size = 100): Observable<Organization[]> {
+    const params = new HttpParams().set('page', page).set('size', size);
+    return this.http.get<Organization[] | { items: Organization[] }>(`${this.apiUrl}/suppliers`, { params })
+      .pipe(map(OrganizationService.unwrap<Organization>));
+  }
+
+  listShops(page = 0, size = 100): Observable<Organization[]> {
+    const params = new HttpParams().set('page', page).set('size', size);
+    return this.http.get<Organization[] | { items: Organization[] }>(`${this.apiUrl}/shops`, { params })
+      .pipe(map(OrganizationService.unwrap<Organization>));
   }
 
   getById(id: string): Observable<Organization> {
@@ -63,7 +76,9 @@ export class OrganizationService {
     return this.http.delete<void>(`/api/admin/supplier-shop-relations/${id}`);
   }
 
-  listUsers(): Observable<any[]> {
-    return this.http.get<any[]>('/api/users');
+  listUsers(page = 0, size = 100): Observable<any[]> {
+    const params = new HttpParams().set('page', page).set('size', size);
+    return this.http.get<any[] | { items: any[] }>('/api/users', { params })
+      .pipe(map(OrganizationService.unwrap<any>));
   }
 }

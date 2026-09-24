@@ -1,5 +1,7 @@
 package com.paymentplatform.organization.infrastructure.persistence;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -15,6 +17,9 @@ public interface OrganizationJpaRepository extends JpaRepository<OrganizationJpa
     Optional<OrganizationJpaEntity> findByName(String name);
     boolean existsByName(String name);
     List<OrganizationJpaEntity> findByType(String type);
+
+    /** B5 : variante paginée en base pour les listes exposées. */
+    Page<OrganizationJpaEntity> findByType(String type, Pageable pageable);
     List<OrganizationJpaEntity> findByStatus(String status);
     List<OrganizationJpaEntity> findByTypeAndStatus(String type, String status);
 

@@ -2,6 +2,7 @@ package com.paymentplatform.organization.interfaces.rest;
 
 import com.paymentplatform.organization.application.dto.CreateOrganizationRequest;
 import com.paymentplatform.organization.application.dto.OrganizationResponse;
+import com.paymentplatform.organization.application.dto.PageResponse;
 import com.paymentplatform.organization.application.usecase.CreateOrganizationUseCase;
 import com.paymentplatform.organization.application.usecase.OrganizationQueryUseCase;
 import com.paymentplatform.organization.application.usecase.OrganizationStatusUseCase;
@@ -11,7 +12,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -42,8 +42,10 @@ public class AdminOrganizationController {
 
     @GetMapping("/suppliers")
     @PreAuthorize("hasAuthority('ADMIN_MANAGE_ORGANIZATIONS') or hasAuthority('SHOP_CREATE_PAYMENTS') or hasAuthority('SHOP_MANAGE_AGENTS') or hasAuthority('SUPPLIER_MANAGE_AGENTS') or hasAuthority('SUPPLIER_MANAGE_PRODUCTS')")
-    public ResponseEntity<List<OrganizationResponse>> listSuppliers() {
-        return ResponseEntity.ok(queryOrg.listByType("SUPPLIER"));
+    public ResponseEntity<PageResponse<OrganizationResponse>> listSuppliers(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        return ResponseEntity.ok(queryOrg.listByType("SUPPLIER", page, size));
     }
 
     @GetMapping("/suppliers/{id}")
@@ -77,8 +79,10 @@ public class AdminOrganizationController {
 
     @GetMapping("/shops")
     @PreAuthorize("hasAuthority('ADMIN_MANAGE_ORGANIZATIONS') or hasAuthority('SHOP_CREATE_PAYMENTS') or hasAuthority('SHOP_MANAGE_AGENTS') or hasAuthority('SUPPLIER_MANAGE_AGENTS') or hasAuthority('SUPPLIER_MANAGE_PRODUCTS')")
-    public ResponseEntity<List<OrganizationResponse>> listShops() {
-        return ResponseEntity.ok(queryOrg.listByType("SHOP"));
+    public ResponseEntity<PageResponse<OrganizationResponse>> listShops(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        return ResponseEntity.ok(queryOrg.listByType("SHOP", page, size));
     }
 
     @GetMapping("/shops/{id}")

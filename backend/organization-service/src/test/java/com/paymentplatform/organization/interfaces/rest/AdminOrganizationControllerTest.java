@@ -70,7 +70,19 @@ class AdminOrganizationControllerTest {
         mockMvc.perform(get("/api/admin/suppliers")
                         .with(SecurityMockMvcRequestPostProcessors.authentication(adminUser())))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$").isArray());
+                .andExpect(jsonPath("$.items").isArray())
+                .andExpect(jsonPath("$.totalElements").isNumber());
+    }
+
+    @Test
+    void listSuppliers_paginationRespectsSize() throws Exception {
+        mockMvc.perform(get("/api/admin/suppliers")
+                        .with(SecurityMockMvcRequestPostProcessors.authentication(adminUser()))
+                        .param("page", "0")
+                        .param("size", "1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.items").isArray())
+                .andExpect(jsonPath("$.number").value(0));
     }
 
     @Test
@@ -92,7 +104,8 @@ class AdminOrganizationControllerTest {
         mockMvc.perform(get("/api/admin/shops")
                         .with(SecurityMockMvcRequestPostProcessors.authentication(adminUser())))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$").isArray());
+                .andExpect(jsonPath("$.items").isArray())
+                .andExpect(jsonPath("$.totalElements").isNumber());
     }
 
     @Test

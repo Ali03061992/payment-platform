@@ -205,6 +205,27 @@ class PaymentUseCaseH2Test {
     }
 
     @Test
+    void summarizeBySupplier_sqlAggregates_noFullLoad() {
+        var shop = UUID.fromString("00000000-0000-0000-0000-000000000001");
+        var supplier = UUID.fromString("00000000-0000-0000-0000-000000000002");
+        var actor = UUID.fromString("00000000-0000-0000-0000-000000000010");
+        var p1 = createPayment.execute(
+                new CreatePaymentRequest(shop, supplier, new BigDecimal("100"), "TND", null, null), actor, shop);
+        var p2 = createPayment.execute(
+                new CreatePaymentRequest(shop, supplier, new BigDecimal("50"), "TND", null, null), actor, shop);
+        confirmPayment.execute(p1.id(), UUID.fromString("00000000-0000-0000-0000-000000000020"), supplier);
+
+        var summary = listPayments.summarizeBySupplier(supplier);
+
+        assertThat(summary.confirmedCount()).isEqualTo(1);
+        assertThat(summary.confirmedTotal()).isEqualByComparingTo(new BigDecimal("100"));
+        assertThat(summary.pendingCount()).isEqualTo(1);
+        assertThat(summary.pendingTotal()).isEqualByComparingTo(new BigDecimal("50"));
+        assertThat(summary.rejectedCount()).isZero();
+        assertThat(summary.rejectedTotal()).isEqualByComparingTo(BigDecimal.ZERO);
+    }
+
+    @Test
     void createPayment_sameIdempotencyKey_returnsSamePaymentOnce() {
         var request = new CreatePaymentRequest(UUID.fromString("00000000-0000-0000-0000-000000000001"), UUID.fromString("00000000-0000-0000-0000-000000000002"), new BigDecimal("150.50"), "TND", null, null);
         UUID actor = UUID.fromString("00000000-0000-0000-0000-000000000010");

@@ -1,6 +1,7 @@
 package com.paymentplatform.organization.application.usecase;
 
 import com.paymentplatform.organization.application.dto.OrganizationResponse;
+import com.paymentplatform.organization.application.dto.PageResponse;
 import com.paymentplatform.organization.domain.model.Organization;
 import com.paymentplatform.organization.domain.model.SupplierShopRelation;
 import com.paymentplatform.organization.domain.repository.OrganizationRepository;
@@ -8,6 +9,7 @@ import com.paymentplatform.organization.domain.repository.SupplierShopRelationRe
 import com.paymentplatform.organization.domain.valueobject.OrganizationId;
 import com.paymentplatform.organization.domain.valueobject.OrganizationType;
 import com.paymentplatform.shared.domain.exception.NotFoundException;
+import com.paymentplatform.shared.domain.model.PageResult;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,11 +19,14 @@ import java.util.UUID;
 @Service
 public class OrganizationQueryUseCase {
 
+    /** B5 : taille de page plafonnée — aucune liste exposée ne charge plus de 100 lignes. */
+    public static final int MAX_PAGE_SIZE = 100;
+
     private final OrganizationRepository organizations;
     private final SupplierShopRelationRepository relations;
 
     public OrganizationQueryUseCase(OrganizationRepository organizations,
-                                    SupplierShopRelationRepository relations) {
+                                     SupplierShopRelationRepository relations) {
         this.organizations = organizations;
         this.relations = relations;
     }
@@ -34,11 +39,16 @@ public class OrganizationQueryUseCase {
     }
 
     @Transactional(readOnly = true)
-    public List<OrganizationResponse> listByType(String type) {
+    public PageResponse<OrganizationResponse> listByType(String type, int page, int size) {
         OrganizationType orgType = OrganizationType.from(type);
-        return organizations.findByType(orgType).stream()
+        int safePage = Math.max(page, 0);
+        int safeSize = Math.min(Math.max(size, 1), MAX_PAGE_SIZE);
+        PageResult<Organization> result = organizations.findByType(orgType, safePage, safeSize);
+        List<OrganizationResponse> items = result.items().stream()
                 .map(org -> OrganizationResponse.from(org, getRelations(org)))
                 .toList();
+        int totalPages = (int) Math.ceil((double) result.totalElements() / safeSize);
+        return new PageResponse<>(items, result.totalElements(), totalPages, safePage);
     }
 
     @Transactional(readOnly = true)

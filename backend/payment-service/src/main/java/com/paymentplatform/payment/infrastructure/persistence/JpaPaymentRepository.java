@@ -3,6 +3,7 @@ package com.paymentplatform.payment.infrastructure.persistence;
 import com.paymentplatform.payment.domain.model.Payment;
 import com.paymentplatform.payment.domain.model.PaymentEvent;
 import com.paymentplatform.payment.domain.model.PaymentStatus;
+import com.paymentplatform.payment.domain.model.PaymentStatusSummary;
 import com.paymentplatform.payment.domain.repository.PaymentRepository;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -117,6 +118,14 @@ public class JpaPaymentRepository implements PaymentRepository {
     @Override
     public boolean existsByReference(String reference) {
         return jpaRepo.existsByReference(reference);
+    }
+
+    @Override
+    public List<PaymentStatusSummary> summarizeBySupplier(UUID supplierId) {
+        return jpaRepo.summarizeBySupplier(supplierId).stream()
+                .map(a -> new PaymentStatusSummary(a.getStatus(), a.getCnt(),
+                        a.getTotal() == null ? java.math.BigDecimal.ZERO : a.getTotal()))
+                .toList();
     }
 
     @Override

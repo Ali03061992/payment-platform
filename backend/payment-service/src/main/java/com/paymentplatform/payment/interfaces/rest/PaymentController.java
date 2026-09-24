@@ -13,12 +13,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 import static com.paymentplatform.payment.domain.model.PaymentStatus.*;
@@ -178,7 +176,7 @@ public class PaymentController {
 
     @GetMapping("/supplier-summary")
     @PreAuthorize("hasAuthority('SUPPLIER_MANAGE_PAYMENTS')")
-    public ResponseEntity<Map<String, Object>> supplierSummary(
+    public ResponseEntity<SupplierPaymentSummaryResponse> supplierSummary(
             @RequestParam UUID supplierId) {
         var current = CurrentUser.get();
         if (!current.roles().contains("SYSTEM_ADMIN")) {
@@ -187,30 +185,8 @@ public class PaymentController {
                 return ResponseEntity.status(403).build();
             }
         }
-        var payments = listPayments.executeBySupplier(supplierId, 0, Integer.MAX_VALUE);
-        var items = payments.items();
-        BigDecimal confirmedTotal = BigDecimal.ZERO;
-        long confirmedCount = 0;
-        BigDecimal pendingTotal = BigDecimal.ZERO;
-        long pendingCount = 0;
-        BigDecimal rejectedTotal = BigDecimal.ZERO;
-        long rejectedCount = 0;
-        for (var p : items) {
-            switch (p.status()) {
-                case CONFIRMED -> { confirmedTotal = confirmedTotal.add(p.amount()); confirmedCount++; }
-                case PENDING -> { pendingTotal = pendingTotal.add(p.amount()); pendingCount++; }
-                case REJECTED -> { rejectedTotal = rejectedTotal.add(p.amount()); rejectedCount++; }
-                default -> {}
-            }
-        }
-        return ResponseEntity.ok(Map.of(
-                "confirmedTotal", confirmedTotal,
-                "confirmedCount", confirmedCount,
-                "pendingTotal", pendingTotal,
-                "pendingCount", pendingCount,
-                "rejectedTotal", rejectedTotal,
-                "rejectedCount", rejectedCount
-        ));
+        // B5 : agrégats SQL, aucun chargement des paiements (contrat JSON inchangé).
+        return ResponseEntity.ok(listPayments.summarizeBySupplier(supplierId));
     }
 
     @GetMapping("/export")

@@ -122,16 +122,26 @@ class JpaUserRepositoryTest {
     }
 
     @Test
-    void findAll_returnsAll() {
-        long before = repository.findAll().size();
+    void findPage_returnsPagedResults() {
+        long before = repository.findPage(null, null, null, 0, 100).totalElements();
         repository.save(User.create(new UserId(null),
                 Username.of("other"), Email.of("other@example.com"),
                 PasswordHash.of(passwordEncoder.encode("Test@1")),
                 "Other", "User", new PhoneNumber(null),
                 OrganizationId.of(UUID.fromString("00000000-0000-0000-0000-000000000020")), RoleCode.SUPPLIER_ADMIN));
 
-        List<User> all = repository.findAll();
-        assertThat(all).hasSize((int) (before + 1));
+        var page = repository.findPage(null, null, null, 0, 100);
+        assertThat(page.totalElements()).isEqualTo(before + 1);
+        assertThat(page.items()).hasSize((int) (before + 1));
+    }
+
+    @Test
+    void findPage_filtersByRoleAndStatus() {
+        var page = repository.findPage(
+                OrganizationId.of(UUID.fromString("00000000-0000-0000-0000-000000000010")),
+                "ACTIVE", RoleCode.SHOP_AGENT, 0, 100);
+        assertThat(page.items()).hasSize(1);
+        assertThat(page.items().get(0).username().value()).isEqualTo("testuser");
     }
 
     @Test

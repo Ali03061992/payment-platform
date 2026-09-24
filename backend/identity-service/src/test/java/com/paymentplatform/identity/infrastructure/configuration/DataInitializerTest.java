@@ -37,7 +37,7 @@ class DataInitializerTest {
         init.run(null);
         init.run(null);
 
-        assertThat(users.findAll().stream()
+        assertThat(users.findPage(null, null, null, 0, 100).items().stream()
                 .filter(u -> u.username().value().equals("system.admin"))
                 .count()).isEqualTo(1);
     }

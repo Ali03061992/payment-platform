@@ -35,9 +35,17 @@ describe('OrganizationService', () => {
         expect(data.length).toBe(1);
         expect(data[0].name).toBe('Supplier A');
       });
-      const req = httpMock.expectOne('/api/admin/suppliers');
+      const req = httpMock.expectOne(r => r.url === '/api/admin/suppliers');
       expect(req.request.method).toBe('GET');
-      req.flush(mock);
+      req.flush({ items: mock, totalElements: 1, totalPages: 1, number: 0 });
+    });
+
+    it('should send bounded page params', () => {
+      service.listSuppliers(2, 50).subscribe();
+      const req = httpMock.expectOne(r => r.url === '/api/admin/suppliers');
+      expect(req.request.params.get('page')).toBe('2');
+      expect(req.request.params.get('size')).toBe('50');
+      req.flush({ items: [], totalElements: 0, totalPages: 0, number: 2 });
     });
   });
 
@@ -50,9 +58,9 @@ describe('OrganizationService', () => {
         expect(data.length).toBe(1);
         expect(data[0].type).toBe('SHOP');
       });
-      const req = httpMock.expectOne('/api/admin/shops');
+      const req = httpMock.expectOne(r => r.url === '/api/admin/shops');
       expect(req.request.method).toBe('GET');
-      req.flush(mock);
+      req.flush({ items: mock, totalElements: 1, totalPages: 1, number: 0 });
     });
   });
 
@@ -198,9 +206,9 @@ describe('OrganizationService', () => {
       service.listUsers().subscribe(data => {
         expect(data.length).toBe(0);
       });
-      const req = httpMock.expectOne('/api/users');
+      const req = httpMock.expectOne(r => r.url === '/api/users');
       expect(req.request.method).toBe('GET');
-      req.flush([]);
+      req.flush({ items: [], totalElements: 0, totalPages: 0, number: 0 });
     });
   });
 

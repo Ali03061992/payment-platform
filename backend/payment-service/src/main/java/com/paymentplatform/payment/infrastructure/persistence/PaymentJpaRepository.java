@@ -40,4 +40,12 @@ public interface PaymentJpaRepository extends JpaRepository<PaymentJpaEntity, UU
 
     List<PaymentJpaEntity> findBySupplierIdAndCreatedByAndCreatedAtBetweenOrderByCreatedAtDesc(
             UUID supplierId, UUID createdBy, Instant from, Instant to);
+
+    /**
+     * B5 : agrégats SQL par statut pour un fournisseur (COUNT + SUM en base,
+     * aucun chargement des lignes de paiement).
+     */
+    @Query("SELECT p.status AS status, COUNT(p) AS cnt, SUM(p.amount) AS total"
+            + " FROM PaymentJpaEntity p WHERE p.supplierId = :supplierId GROUP BY p.status")
+    List<SupplierPaymentAggregate> summarizeBySupplier(@Param("supplierId") UUID supplierId);
 }

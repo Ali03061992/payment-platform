@@ -8,8 +8,11 @@ import com.paymentplatform.identity.domain.valueobject.PasswordHash;
 import com.paymentplatform.identity.domain.valueobject.PhoneNumber;
 import com.paymentplatform.identity.domain.valueobject.Username;
 import com.paymentplatform.shared.domain.model.OrganizationId;
+import com.paymentplatform.shared.domain.model.PageResult;
 import com.paymentplatform.shared.domain.model.RoleCode;
 import com.paymentplatform.shared.domain.model.UserId;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -74,8 +77,13 @@ public class JpaUserRepository implements UserRepository {
 
     @Override
     @Transactional(readOnly = true)
-    public List<User> findAll() {
-        return jpa.findAll().stream().map(this::toDomain).toList();
+    public PageResult<User> findPage(OrganizationId organizationId, String status, RoleCode role,
+                                     int page, int size) {
+        Page<UserJpaEntity> result = jpa.search(
+                organizationId == null ? null : organizationId.value(),
+                status, role, PageRequest.of(page, size));
+        return new PageResult<>(result.getContent().stream().map(this::toDomain).toList(),
+                result.getTotalElements());
     }
 
     @Override

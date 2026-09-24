@@ -48,7 +48,7 @@ ligne→détail paiements au clic Confirmer/Annuler.
 | B2 | Rate-limit **désormais actif** sur `login/register/refresh` : bucket strict 10/min/IP + `Retry-After: 60` + headers `X-RateLimit-*` (brute-force freiné) | Sécurité | `RateLimitFilter.java`, `RateLimitFilterTest.java` (7 tests), `15-rate-limit-auth.cy.ts` |
 | B3 | Gateway **deny-by-default** (plus de `"/api/**".permitAll()`, SecurityContext alimenté par JWT, `internal/**` exige JWT + secret) ; secret interne **obligatoire au boot** (défauts Java supprimés, `PaymentInternalSecretConfig` morte supprimée, validator prod) ; **401 unifié** inter-services | Sécurité | `GatewaySecurityConfig.java`, `JwtValidationFilter.java`, `InternalSecretValidator.java`, `GatewaySecurityTest.java` (3 tests), `16-gateway-security.cy.ts` |
 | B4 | Seed `Admin@123` + 10 hashes BCrypt identiques + `SEED_ADMIN_PASSWORD` en dur : exécution accidentelle en prod = backdoor connue | Sécurité | `V4__seed_users.sql:5`, `DataInitializer.java:38` |
-| B5 | Listes non paginées (`findAll()` users/orgs) + `listPayments(..., Integer.MAX_VALUE)` : OOM/DoS | Disponibilité | `PaymentController.java:190`, `JpaUserRepository.java:77-78`, `JpaOrganizationRepository.java:32-33` |
+| B5 | Listes **paginées** (`page/size`, max 100, enveloppes `{items,totalElements}`) users/orgs + `supplier-summary` en **agrégats SQL** (plus de `Integer.MAX_VALUE`) | Disponibilité | `ListPaymentsUseCase.java`, `UserQueryUseCase.java`, `OrganizationQueryUseCase.java`, `17-pagination-aggregates.cy.ts` |
 
 ### 3.2 MAJEUR (phase 1, ~1 sem)
 
@@ -91,7 +91,7 @@ ligne→détail paiements au clic Confirmer/Annuler.
 - [x] B2 : inclure `login/register` dans le rate-limit (compteur par IP, ex. 10/min) + délai progressif.
 - [x] B3 : supprimer `"/api/**".permitAll()`, auth par défaut ; `INTERNAL_SECRET` obligatoire au boot (échec si absent) ; unifier 401/403 inter-services.
 - [ ] B4 : seed réservé au profil `dev/local` (garde `spring.profiles`), mot de passe admin initial généré et affiché une seule fois au premier boot.
-- [ ] B5 : paginer `list users/orgs` (`Pageable`, max 100) ; remplacer `Integer.MAX_VALUE` par agrégats SQL (`SUM/COUNT`).
+- [x] B5 : paginer `list users/orgs` (`Pageable`, max 100) ; remplacer `Integer.MAX_VALUE` par agrégats SQL (`SUM/COUNT`).
 
 ### Phase 1 — Robustesse & cohérence (1 sem)
 - [ ] M1 : refresh-token (rotation + révocation, table ou Redis) ; front : intercepteur de refresh silencieux.

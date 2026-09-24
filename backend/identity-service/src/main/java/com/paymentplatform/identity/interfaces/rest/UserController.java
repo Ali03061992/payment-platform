@@ -1,6 +1,7 @@
 package com.paymentplatform.identity.interfaces.rest;
 
 import com.paymentplatform.identity.application.dto.CreateInternalUserRequest;
+import com.paymentplatform.identity.application.dto.PageResponse;
 import com.paymentplatform.identity.application.dto.UserResponse;
 import com.paymentplatform.identity.application.usecase.InternalUserCreationUseCase;
 import com.paymentplatform.identity.application.usecase.UserQueryUseCase;
@@ -11,7 +12,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -36,12 +36,14 @@ public class UserController {
 
     @GetMapping
     @PreAuthorize("hasAuthority('ADMIN_MANAGE_USERS')")
-    public ResponseEntity<List<UserResponse>> list(@RequestParam(required = false) UUID organizationId,
-                                                   @RequestParam(required = false) String role,
-                                                   @RequestParam(required = false) String statusFilter) {
+    public ResponseEntity<PageResponse<UserResponse>> list(@RequestParam(required = false) UUID organizationId,
+                                                           @RequestParam(required = false) String role,
+                                                           @RequestParam(required = false) String statusFilter,
+                                                           @RequestParam(defaultValue = "0") int page,
+                                                           @RequestParam(defaultValue = "20") int size) {
         var current = CurrentUser.get();
         return ResponseEntity.ok(query.list(current.userId(), current.roles(), current.organizationId(),
-                organizationId, role, statusFilter));
+                organizationId, role, statusFilter, page, size));
     }
 
     @GetMapping("/{id}")

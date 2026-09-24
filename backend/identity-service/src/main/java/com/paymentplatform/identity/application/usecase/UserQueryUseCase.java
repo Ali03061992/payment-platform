@@ -1,5 +1,6 @@
 package com.paymentplatform.identity.application.usecase;
 
+import com.paymentplatform.identity.application.dto.PageResponse;
 import com.paymentplatform.identity.application.dto.UserResponse;
 import com.paymentplatform.identity.domain.model.User;
 import com.paymentplatform.identity.domain.model.UserStatus;
@@ -7,6 +8,7 @@ import com.paymentplatform.identity.domain.repository.UserRepository;
 import com.paymentplatform.shared.domain.exception.ForbiddenException;
 import com.paymentplatform.shared.domain.exception.NotFoundException;
 import com.paymentplatform.shared.domain.model.OrganizationId;
+import com.paymentplatform.shared.domain.model.PageResult;
 import com.paymentplatform.shared.domain.model.RoleCode;
 import com.paymentplatform.shared.domain.model.UserId;
 import org.springframework.stereotype.Service;
@@ -41,25 +43,36 @@ public class UserQueryUseCase {
         return UserResponse.from(target);
     }
 
+    /** B5 : taille de page plafonnée — aucune liste exposée ne charge plus de 100 lignes. */
+    public static final int MAX_PAGE_SIZE = 100;
+
     @Transactional(readOnly = true)
-    public List<UserResponse> list(UUID actorUserId, List<String> actorRoles, UUID actorOrganizationId,
-                                   UUID organizationId, String role, String status) {
-        List<User> result;
+    public PageResponse<UserResponse> list(UUID actorUserId, List<String> actorRoles, UUID actorOrganizationId,
+                                           UUID organizationId, String role, String status, int page, int size) {
         boolean isSystemAdmin = actorRoles.contains(RoleCode.SYSTEM_ADMIN.name());
+        UUID scopeOrg;
         if (isSystemAdmin) {
-            result = organizationId == null ? users.findAll()
-                    : users.findByOrganizationId(OrganizationId.of(organizationId));
+            scopeOrg = organizationId;
         } else {
             if (actorOrganizationId == null) {
                 throw new ForbiddenException("Accès hors périmètre");
             }
-            result = users.findByOrganizationId(OrganizationId.of(actorOrganizationId));
+            scopeOrg = actorOrganizationId;
         }
-        return result.stream()
-                .filter(u -> role == null || u.roles().contains(RoleCode.from(role)))
-                .filter(u -> status == null || u.status() == UserStatus.valueOf(status))
-                .map(UserResponse::from)
-                .toList();
+        // Mêmes validations qu'avant (valeur inconnue => exception), filtres poussés en SQL.
+        RoleCode roleCode = role == null ? null : RoleCode.from(role);
+        String statusCode = null;
+        if (status != null) {
+            statusCode = UserStatus.valueOf(status).name();
+        }
+        int safePage = Math.max(page, 0);
+        int safeSize = Math.min(Math.max(size, 1), MAX_PAGE_SIZE);
+        PageResult<User> result = users.findPage(
+                scopeOrg == null ? null : OrganizationId.of(scopeOrg),
+                statusCode, roleCode, safePage, safeSize);
+        int totalPages = (int) Math.ceil((double) result.totalElements() / safeSize);
+        return new PageResponse<>(result.items().stream().map(UserResponse::from).toList(),
+                result.totalElements(), totalPages, safePage);
     }
 
     private void assertCanView(List<String> actorRoles, UUID actorOrganizationId, User target) {

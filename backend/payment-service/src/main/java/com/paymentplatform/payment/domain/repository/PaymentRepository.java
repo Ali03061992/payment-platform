@@ -2,6 +2,7 @@ package com.paymentplatform.payment.domain.repository;
 
 import com.paymentplatform.payment.domain.model.Payment;
 import com.paymentplatform.payment.domain.model.PaymentStatus;
+import com.paymentplatform.payment.domain.model.PaymentStatusSummary;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -19,6 +20,10 @@ public interface PaymentRepository {
     long countByStatus(PaymentStatus status);
     boolean existsByReference(String reference);
     Optional<Payment> findByIdempotencyKey(String idempotencyKey);
+    /**
+     * B5 : agrégats (COUNT/SUM) par statut calculés en base, sans charger les paiements.
+     */
+    List<PaymentStatusSummary> summarizeBySupplier(UUID supplierId);
     List<Payment> findOverdue(LocalDate today);
     List<Payment> findOverdueBySupplier(LocalDate today, UUID supplierId);
     List<Payment> findOverdueByShop(LocalDate today, UUID shopId);

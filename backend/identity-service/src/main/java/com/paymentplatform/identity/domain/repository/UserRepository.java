@@ -4,6 +4,7 @@ import com.paymentplatform.identity.domain.model.User;
 import com.paymentplatform.identity.domain.valueobject.Email;
 import com.paymentplatform.identity.domain.valueobject.Username;
 import com.paymentplatform.shared.domain.model.OrganizationId;
+import com.paymentplatform.shared.domain.model.PageResult;
 import com.paymentplatform.shared.domain.model.RoleCode;
 import com.paymentplatform.shared.domain.model.UserId;
 
@@ -23,7 +24,12 @@ public interface UserRepository {
 
     List<User> findByOrganizationIdAndRole(OrganizationId organizationId, RoleCode role);
 
-    List<User> findAll();
+    /**
+     * B5 : remplace {@code findAll()} pour les listes exposées — recherche
+     * filtrée et paginée en base (page 0-based, taille déjà bornée par l'appelant).
+     * Paramètres de filtre nullables.
+     */
+    PageResult<User> findPage(OrganizationId organizationId, String status, RoleCode role, int page, int size);
 
     boolean existsByUsername(Username username);
 

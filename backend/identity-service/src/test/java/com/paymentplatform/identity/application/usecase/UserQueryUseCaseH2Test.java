@@ -99,21 +99,46 @@ class UserQueryUseCaseH2Test {
 
     @Test
     void list_systemAdmin_canListAll() {
-        var result = query.list(adminId, List.of("SYSTEM_ADMIN"), null, null, null, null);
-        assertThat(result).hasSizeGreaterThanOrEqualTo(2);
+        var result = query.list(adminId, List.of("SYSTEM_ADMIN"), null, null, null, null, 0, 20);
+        assertThat(result.items()).hasSizeGreaterThanOrEqualTo(2);
+        assertThat(result.totalElements()).isGreaterThanOrEqualTo(2);
     }
 
     @Test
     void list_systemAdmin_filterByOrg() {
-        var result = query.list(adminId, List.of("SYSTEM_ADMIN"), null, UNIQUE_ORG, null, null);
-        assertThat(result).hasSize(1);
-        assertThat(result.get(0).organizationId()).isEqualTo(UNIQUE_ORG);
+        var result = query.list(adminId, List.of("SYSTEM_ADMIN"), null, UNIQUE_ORG, null, null, 0, 20);
+        assertThat(result.items()).hasSize(1);
+        assertThat(result.items().get(0).organizationId()).isEqualTo(UNIQUE_ORG);
     }
 
     @Test
     void list_systemAdmin_filterByRole() {
-        var result = query.list(adminId, List.of("SYSTEM_ADMIN"), null, UNIQUE_ORG, "SUPPLIER_AGENT", null);
-        assertThat(result).hasSize(1);
+        var result = query.list(adminId, List.of("SYSTEM_ADMIN"), null, UNIQUE_ORG, "SUPPLIER_AGENT", null, 0, 20);
+        assertThat(result.items()).hasSize(1);
+    }
+
+    @Test
+    void list_pagination_secondPage() {
+        var page0 = query.list(adminId, List.of("SYSTEM_ADMIN"), null, null, null, null, 0, 1);
+        var page1 = query.list(adminId, List.of("SYSTEM_ADMIN"), null, null, null, null, 1, 1);
+        assertThat(page0.items()).hasSize(1);
+        assertThat(page1.items()).hasSize(1);
+        assertThat(page1.totalElements()).isEqualTo(page0.totalElements());
+        assertThat(page1.number()).isEqualTo(1);
+    }
+
+    @Test
+    void list_sizeIsCappedAt100() {
+        for (int i = 0; i < 105; i++) {
+            User u = User.create(new UserId(null), Username.of("uq3bulk" + i),
+                    Email.of("uq3bulk" + i + "@x.com"), PasswordHash.of(passwordEncoder.encode("pass")),
+                    "Bulk", "User", new PhoneNumber(null),
+                    OrganizationId.of(UNIQUE_ORG), RoleCode.SHOP_AGENT);
+            users.save(u);
+        }
+        var result = query.list(adminId, List.of("SYSTEM_ADMIN"), null, UNIQUE_ORG, null, null, 0, 500);
+        assertThat(result.items()).hasSizeLessThanOrEqualTo(100);
+        assertThat(result.totalElements()).isGreaterThanOrEqualTo(105);
     }
 
     @Test
@@ -125,13 +150,13 @@ class UserQueryUseCaseH2Test {
         users.save(shopAgent);
         UUID shopAgentId = users.findByUsername(Username.of("uq3shop.ag")).orElseThrow().id().value();
 
-        var result = query.list(shopAgentId, List.of("SHOP_AGENT"), UNIQUE_ORG, null, null, null);
-        assertThat(result).isNotEmpty();
+        var result = query.list(shopAgentId, List.of("SHOP_AGENT"), UNIQUE_ORG, null, null, null, 0, 20);
+        assertThat(result.items()).isNotEmpty();
     }
 
     @Test
     void list_nonAdmin_nullOrg_throwsForbidden() {
-        assertThatThrownBy(() -> query.list(UUID.fromString("00000000-0000-0000-0000-000000000001"), List.of("SHOP_AGENT"), null, null, null, null))
+        assertThatThrownBy(() -> query.list(UUID.fromString("00000000-0000-0000-0000-000000000001"), List.of("SHOP_AGENT"), null, null, null, null, 0, 20))
                 .isInstanceOf(ForbiddenException.class);
     }
 

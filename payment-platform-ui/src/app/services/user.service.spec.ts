@@ -34,9 +34,9 @@ describe('UserService', () => {
       service.list().subscribe(data => {
         expect(data.length).toBe(1);
       });
-      const req = httpMock.expectOne('/api/users');
+      const req = httpMock.expectOne(r => r.url === '/api/users');
       expect(req.request.method).toBe('GET');
-      req.flush(mock);
+      req.flush({ items: mock, totalElements: 1, totalPages: 1, number: 0 });
     });
 
     it('should GET users with all params', () => {
@@ -45,7 +45,7 @@ describe('UserService', () => {
       expect(req.request.params.get('organizationId')).toBe('5');
       expect(req.request.params.get('role')).toBe('SHOP_AGENT');
       expect(req.request.params.get('statusFilter')).toBe('ACTIVE');
-      req.flush([]);
+      req.flush({ items: [], totalElements: 0, totalPages: 0, number: 0 });
     });
 
     it('should omit undefined params', () => {
@@ -53,7 +53,15 @@ describe('UserService', () => {
       const req = httpMock.expectOne(r => r.url === '/api/users');
       expect(req.request.params.has('organizationId')).toBeFalse();
       expect(req.request.params.get('role')).toBe('SYSTEM_ADMIN');
-      req.flush([]);
+      req.flush({ items: [], totalElements: 0, totalPages: 0, number: 0 });
+    });
+
+    it('should send bounded page params by default', () => {
+      service.list().subscribe();
+      const req = httpMock.expectOne(r => r.url === '/api/users');
+      expect(req.request.params.get('page')).toBe('0');
+      expect(req.request.params.get('size')).toBe('100');
+      req.flush({ items: [], totalElements: 0, totalPages: 0, number: 0 });
     });
   });
 

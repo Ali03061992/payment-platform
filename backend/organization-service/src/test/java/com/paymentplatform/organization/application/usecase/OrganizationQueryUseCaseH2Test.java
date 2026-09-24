@@ -39,14 +39,27 @@ class OrganizationQueryUseCaseH2Test {
 
     @Test
     void listByType_supplier() {
-        var result = query.listByType("SUPPLIER");
-        assertThat(result).hasSize(2);
+        var result = query.listByType("SUPPLIER", 0, 20);
+        assertThat(result.items()).hasSize(2);
+        assertThat(result.totalElements()).isEqualTo(2);
     }
 
     @Test
     void listByType_shop() {
-        var result = query.listByType("SHOP");
-        assertThat(result).hasSize(1);
+        var result = query.listByType("SHOP", 0, 20);
+        assertThat(result.items()).hasSize(1);
+    }
+
+    @Test
+    void listByType_pagination() {
+        var page0 = query.listByType("SUPPLIER", 0, 1);
+        assertThat(page0.items()).hasSize(1);
+        assertThat(page0.totalElements()).isEqualTo(2);
+        assertThat(page0.totalPages()).isEqualTo(2);
+        var page1 = query.listByType("SUPPLIER", 1, 1);
+        assertThat(page1.items()).hasSize(1);
+        assertThat(page1.items().get(0).id())
+                .isNotEqualTo(page0.items().get(0).id());
     }
 
     @Test

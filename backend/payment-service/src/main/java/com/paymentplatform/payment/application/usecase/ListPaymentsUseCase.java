@@ -4,6 +4,7 @@ import com.paymentplatform.payment.application.dto.PageResponse;
 import com.paymentplatform.payment.application.dto.PaymentNameResolver;
 import com.paymentplatform.payment.application.dto.PaymentResponse;
 import com.paymentplatform.payment.application.dto.PaymentStatsResponse;
+import com.paymentplatform.payment.application.dto.SupplierPaymentSummaryResponse;
 import com.paymentplatform.payment.domain.model.Payment;
 import com.paymentplatform.payment.domain.model.PaymentStatus;
 import com.paymentplatform.payment.domain.repository.PaymentRepository;
@@ -11,6 +12,7 @@ import com.paymentplatform.payment.infrastructure.http.OrganizationValidationCli
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.*;
 
 @Service
@@ -91,6 +93,32 @@ public class ListPaymentsUseCase {
         return domainPayments.stream()
                 .map(p -> PaymentResponse.from(p, resolver))
                 .toList();
+    }
+
+    /**
+     * B5 : totaux par statut calculés en SQL (COUNT/SUM + GROUP BY) — remplace
+     * l'ancien chargement complet ({@code size = Integer.MAX_VALUE}) + boucle Java.
+     * Les statuts absents valent zéro ; les autres statuts (ex. CANCELLED) sont
+     * ignorés comme dans l'ancien calcul.
+     */
+    @Transactional(readOnly = true)
+    public SupplierPaymentSummaryResponse summarizeBySupplier(UUID supplierId) {
+        BigDecimal confirmedTotal = BigDecimal.ZERO;
+        long confirmedCount = 0;
+        BigDecimal pendingTotal = BigDecimal.ZERO;
+        long pendingCount = 0;
+        BigDecimal rejectedTotal = BigDecimal.ZERO;
+        long rejectedCount = 0;
+        for (var summary : payments.summarizeBySupplier(supplierId)) {
+            switch (summary.status()) {
+                case CONFIRMED -> { confirmedTotal = summary.total(); confirmedCount = summary.count(); }
+                case PENDING -> { pendingTotal = summary.total(); pendingCount = summary.count(); }
+                case REJECTED -> { rejectedTotal = summary.total(); rejectedCount = summary.count(); }
+                default -> {}
+            }
+        }
+        return new SupplierPaymentSummaryResponse(confirmedTotal, confirmedCount,
+                pendingTotal, pendingCount, rejectedTotal, rejectedCount);
     }
 
     @Transactional(readOnly = true)
