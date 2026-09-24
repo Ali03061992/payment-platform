@@ -44,7 +44,7 @@ ligne→détail paiements au clic Confirmer/Annuler.
 
 | # | Défaut | Impact | Preuve |
 |---|---|---|---|
-| B1 | `Idempotency-Key` lue puis **ignorée** : double-clic/retry = **double paiement** + double outbox | Financier direct | `PaymentController.java:67-70`, `CreatePaymentUseCase.java:41-59` |
+| B1 | `Idempotency-Key` désormais **traité** : clé persistée + vérification en use-case - double POST identique = 1 seul paiement | Financier direct | `PaymentController.java:67-70`, `CreatePaymentUseCase.java:41-59`, `Payment.java`, `PaymentRepository.java` |
 | B2 | Rate-limit **exclut** `login/register/refresh` : brute-force non freiné | Sécurité | `RateLimitFilter.java:44-47,67-73` |
 | B3 | `"/api/**".permitAll()` au gateway : sécurité = un seul filtre JWT ; routes `internal/**` accessibles sans JWT, protégées par un secret **par défaut committé** (`dev-internal-secret-change-me`) | Sécurité | `GatewaySecurityConfig.java:44`, `GatewayProxyController.java:45`, `InternalOrganizationController.java:21`, `PaymentInternalSecretConfig.java:10` |
 | B4 | Seed `Admin@123` + 10 hashes BCrypt identiques + `SEED_ADMIN_PASSWORD` en dur : exécution accidentelle en prod = backdoor connue | Sécurité | `V4__seed_users.sql:5`, `DataInitializer.java:38` |
@@ -87,7 +87,7 @@ ligne→détail paiements au clic Confirmer/Annuler.
 ## 5. PLAN D'ACTION CLAIR
 
 ### Phase 0 — Feu vert sécurité (3-5 j, BLOQUANT, critères : re-audit OK)
-- [ ] B1 : persister `Idempotency-Key` (contrainte d'unicité + table ou cache) et la transmettre au use-case. **Critère :** double POST identique = 1 seul paiement (test E2E).
+- [x] B1 : persister `Idempotency-Key` (contrainte d'unicité + table ou cache) et la transmettre au use-case. **Critère :** double POST identique = 1 seul paiement (test E2E).
 - [ ] B2 : inclure `login/register` dans le rate-limit (compteur par IP, ex. 10/min) + délai progressif.
 - [ ] B3 : supprimer `"/api/**".permitAll()`, auth par défaut ; `INTERNAL_SECRET` obligatoire au boot (échec si absent) ; unifier 401/403 inter-services.
 - [ ] B4 : seed réservé au profil `dev/local` (garde `spring.profiles`), mot de passe admin initial généré et affiché une seule fois au premier boot.
