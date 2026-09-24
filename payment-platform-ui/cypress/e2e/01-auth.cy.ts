@@ -106,6 +106,9 @@ describe('01 - Auth: Register Page', () => {
     cy.url({ timeout: 10000 }).should('satisfy', (url: string) =>
       url.includes('/login') || url.includes('/register')
     );
+    // M5 : le compte naît désactivé — message de validation admin affiché.
+    cy.contains('Inscription réussie').should('exist');
+    cy.contains('administrateur').should('exist');
   });
 });
 

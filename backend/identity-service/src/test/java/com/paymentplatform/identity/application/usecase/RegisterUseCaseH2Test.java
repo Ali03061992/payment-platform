@@ -40,7 +40,20 @@ class RegisterUseCaseH2Test {
         assertThat(response.firstName()).isEqualTo("Jean");
         assertThat(response.lastName()).isEqualTo("Dupont");
         assertThat(response.roles()).containsExactly("SUPPLIER_ADMIN");
-        assertThat(response.status()).isEqualTo("ACTIVE");
+        // M5 : auto-inscription => compte désactivé en attente de validation admin.
+        assertThat(response.status()).isEqualTo("DISABLED");
+        assertThat(response.organizationId()).isNull();
+    }
+
+    @Test
+    void register_selfRegistered_cannotLoginUntilActivated() {
+        var request = new RegisterRequest("reg.pending", "reg.pending@example.com", "Password123",
+                "Jean", "Dupont", "+21620123456", "SUPPLIER_ADMIN");
+        register.register(request);
+
+        User stored = users.findByUsername(Username.of("reg.pending")).orElseThrow();
+        assertThat(stored.isActive()).isFalse();
+        assertThat(stored.organizationId()).isNull();
     }
 
     @Test

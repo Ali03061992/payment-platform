@@ -24,7 +24,15 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-/** Inscription publique : crée un compte utilisateur (sans organisation). */
+/**
+ * Inscription publique : crée un compte utilisateur (sans organisation).
+ *
+ * <p>M5 : tout compte auto-inscrit naît DÉSACTIVÉ — un administrateur le
+ * rattache à une organisation puis l'active via le workflow de validation
+ * (page « Activation comptes », {@code PATCH /api/users/{id}/activate}).
+ * Sans cela, un SUPPLIER_ADMIN/SHOP_ADMIN auto-inscrit serait opérationnel
+ * sans aucun rattachement ni contrôle.</p>
+ */
 @Service
 public class RegisterUseCase {
 
@@ -70,10 +78,12 @@ public class RegisterUseCase {
         User user = User.create(new UserId(null), username, email, hash,
                 request.firstName(), request.lastName(),
                 PhoneNumber.of(request.phone()), null, role);
+        user.disable();
         users.save(user);
 
         audit.record(null, null, AuditActions.USER_CREATED, user.id().value(),
-                "{\"username\":\"" + user.username().value() + "\",\"role\":\"" + role + "\",\"by\":\"self-register\"}");
+                "{\"username\":\"" + user.username().value() + "\",\"role\":\"" + role
+                        + "\",\"by\":\"self-register\",\"status\":\"DISABLED\",\"pendingValidation\":true}");
         outbox.append(new UserCreatedEvent(UUID.randomUUID(), Instant.now(), user.id().value(), null,
                 List.of(role.name())), String.valueOf(user.id().value()));
 
