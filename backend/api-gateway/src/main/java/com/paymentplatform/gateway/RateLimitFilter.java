@@ -21,6 +21,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Rate limiting par IP avec fenêtre glissante d'une minute.
  * Protège le gateway contre les abus et les attaques DDoS.
+ *
+ * <p>B2 : les endpoints d'authentification (login/register/refresh) ont un bucket
+ * strict dédié (défaut 10/min/IP) pour freiner le brute-force. Les autres routes
+ * gardent le bucket général. Les réponses 429 portent {@code Retry-After: 60}
+ * (backoff progressif côté client — pas de sleep serveur pour ne pas épuiser
+ * les threads Tomcat).</p>
  */
 @Component
 @Order(3)
@@ -29,10 +35,14 @@ public class RateLimitFilter extends OncePerRequestFilter {
     private static final Logger log = LoggerFactory.getLogger(RateLimitFilter.class);
 
     private final int maxRequestsPerMinute;
+    private final int maxAuthRequestsPerMinute;
     private final ConcurrentHashMap<String, SlidingWindowCounter> counters = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, SlidingWindowCounter> authCounters = new ConcurrentHashMap<>();
 
-    public RateLimitFilter(@Value("${app.gateway.rate-limit-per-minute:120}") int maxRequestsPerMinute) {
+    public RateLimitFilter(@Value("${app.gateway.rate-limit-per-minute:120}") int maxRequestsPerMinute,
+                           @Value("${app.gateway.rate-limit-auth-per-minute:10}") int maxAuthRequestsPerMinute) {
         this.maxRequestsPerMinute = maxRequestsPerMinute;
+        this.maxAuthRequestsPerMinute = maxAuthRequestsPerMinute;
     }
 
     @Override
@@ -41,7 +51,22 @@ public class RateLimitFilter extends OncePerRequestFilter {
         String clientIp = getClientIp(request);
         String path = request.getRequestURI();
 
-        if ("OPTIONS".equalsIgnoreCase(request.getMethod()) || isPublicPath(path)) {
+        if ("OPTIONS".equalsIgnoreCase(request.getMethod()) || isExcludedPath(path)) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        if (isAuthPath(path)) {
+            SlidingWindowCounter counter = authCounters.computeIfAbsent(clientIp, k -> new SlidingWindowCounter());
+            int count = counter.incrementAndGet();
+            response.setHeader("X-RateLimit-Limit", String.valueOf(maxAuthRequestsPerMinute));
+            response.setHeader("X-RateLimit-Remaining", String.valueOf(Math.max(0, maxAuthRequestsPerMinute - count)));
+            if (count > maxAuthRequestsPerMinute) {
+                log.warn("Auth rate limit exceeded for IP {} ({} auth requests in 1 minute, path {})",
+                        clientIp, count, path);
+                reject(response, maxAuthRequestsPerMinute);
+                return;
+            }
             filterChain.doFilter(request, response);
             return;
         }
@@ -51,24 +76,32 @@ public class RateLimitFilter extends OncePerRequestFilter {
 
         if (count > maxRequestsPerMinute) {
             log.warn("Rate limit exceeded for IP {} ({} requests in 1 minute)", clientIp, count);
-            response.setStatus(429);
-            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-            response.getWriter().write(new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(Map.of(
-                    "timestamp", Instant.now().toString(),
-                    "status", 429,
-                    "error", "TOO_MANY_REQUESTS",
-                    "message", "Trop de requêtes. Limite: " + maxRequestsPerMinute + " requêtes par minute.")));
+            reject(response, maxRequestsPerMinute);
             return;
         }
 
         filterChain.doFilter(request, response);
     }
 
-    private boolean isPublicPath(String path) {
+    private void reject(HttpServletResponse response, int limit) throws IOException {
+        response.setStatus(429);
+        response.setHeader("Retry-After", "60");
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        response.getWriter().write(new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(Map.of(
+                "timestamp", Instant.now().toString(),
+                "status", 429,
+                "error", "TOO_MANY_REQUESTS",
+                "message", "Trop de requêtes. Limite: " + limit + " requêtes par minute.")));
+    }
+
+    private boolean isAuthPath(String path) {
         return path.startsWith("/api/auth/login")
                 || path.startsWith("/api/auth/register")
-                || path.startsWith("/api/auth/refresh")
-                || path.startsWith("/actuator/")
+                || path.startsWith("/api/auth/refresh");
+    }
+
+    private boolean isExcludedPath(String path) {
+        return path.startsWith("/actuator/")
                 || path.startsWith("/swagger-ui")
                 || path.startsWith("/v3/api-docs");
     }

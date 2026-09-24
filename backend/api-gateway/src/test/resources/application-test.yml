@@ -14,6 +14,7 @@ app:
     shared: false
   gateway:
     rate-limit-per-minute: 10000
+    rate-limit-auth-per-minute: 10000
     allowed-ips: ""
 
 management:

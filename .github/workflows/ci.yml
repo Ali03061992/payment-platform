@@ -394,6 +394,9 @@ jobs:
           JWT_EXPIRATION: 86400000
           CORS_ALLOWED_ORIGINS: http://localhost:8080
           RATE_LIMIT_PER_MINUTE: 100
+          # Suite E2E = ~70 logins depuis une seule IP : budget auth assoupli pour la CI.
+          # La prod garde le défaut strict (10/min). Le 429 est couvert par RateLimitFilterTest.
+          RATE_LIMIT_AUTH_PER_MINUTE: 1000
           INTERNAL_SECRET: test-internal-secret
 
       - name: Wait for gateway & frontend
