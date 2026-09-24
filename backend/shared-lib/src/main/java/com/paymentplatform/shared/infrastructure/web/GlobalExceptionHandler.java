@@ -73,6 +73,11 @@ public class GlobalExceptionHandler {
         return error(HttpStatus.NOT_FOUND, "NOT_FOUND", "Ressource introuvable", request);
     }
 
+    @ExceptionHandler(ServiceUnavailableException.class)
+    public ResponseEntity<ApiError> unavailable(ServiceUnavailableException e, HttpServletRequest request) {
+        return error(HttpStatus.SERVICE_UNAVAILABLE, "SERVICE_UNAVAILABLE", e.getMessage(), request);
+    }
+
     @ExceptionHandler(DomainException.class)
     public ResponseEntity<ApiError> domain(DomainException e, HttpServletRequest request) {
         return error(HttpStatus.BAD_REQUEST, "DOMAIN_ERROR", e.getMessage(), request);

@@ -55,7 +55,7 @@ ligne→détail paiements au clic Confirmer/Annuler.
 | # | Défaut | Preuve |
 |---|---|---|
 | M1 | Refresh-token **implémenté** : rotation + révocation en table `refresh_tokens` (hash SHA-256 seul persisté, TTL 7 j), `POST /refresh` + `/logout`, révocation au changement de mot de passe / désactivation ; front : refresh silencieux single-flight dans `JwtInterceptor` | `RefreshTokenService.java`, `V6__refresh_tokens.sql`, `jwt.interceptor.ts`, spec Cypress 12 (non exécutée, en attente validation) |
-| M2 | Validation inter-services en HTTP synchrone sans timeout/retry/circuit-breaker, parsing par `body.contains("\"SHOP\"")`, 409 métier confondu avec 503 infra, fenêtre TOCTOU avant `@Transactional` | `OrganizationValidationClient.java:24,58-61,68,113`, `CreatePaymentUseCase.java:42-44` |
+| M2 | Validation inter-services **durcie** : timeouts 2s/5s + retry 3x backoff + circuit-breaker 5 échecs/30s, parsing JSON typé, **409 métier vs 503 infra** (`ServiceUnavailableException`) | `OrganizationValidationClient.java`, `OrganizationValidationClientTest.java` (12 tests) |
 | M3 | Hard-delete catégories/familles (`deleteById`) sans soft-delete/audit : casse l'historique | `CatalogController.java:72,146` |
 | M4 | `SHOP_MANAGER` visible dans la nav mais refusé par `RoleGuard` (redirect silencieux vers `/dashboard`), pas de page 403/404 | `layout.component.ts:53-55` vs `app-routing.module.ts:53,95-99` |
 | M5 | Register public : un inscrit `SUPPLIER_ADMIN` n'est rattaché à **aucune** organisation (`organizationId=null`) — auto-élévation à valider métier | `RegisterUseCase.java:55-58,70-72` |
@@ -95,7 +95,7 @@ ligne→détail paiements au clic Confirmer/Annuler.
 
 ### Phase 1 — Robustesse & cohérence (1 sem)
 - [x] M1 : refresh-token (rotation + révocation, table ou Redis) ; front : intercepteur de refresh silencieux.
-- [ ] M2 : timeouts + retry + circuit-breaker sur `OrganizationValidationClient`, parsing JSON typé, distinguer 409/503.
+- [x] M2 : timeouts + retry + circuit-breaker sur `OrganizationValidationClient`, parsing JSON typé, distinguer 409/503.
 - [ ] M3 : soft-delete catalogue (`deletedAt` + filtre) + audit.
 - [ ] M4 : aligner `SHOP_MANAGER` (nav ou rôles) + pages 403/404 dédiées.
 - [ ] M5 : rattachement org obligatoire à l'inscription `SUPPLIER_ADMIN` (ou workflow de validation admin).
