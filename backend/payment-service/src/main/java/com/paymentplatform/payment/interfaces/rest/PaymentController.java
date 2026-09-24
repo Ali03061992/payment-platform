@@ -67,7 +67,7 @@ public class PaymentController {
             @RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKey) {
         var current = CurrentUser.get();
         return ResponseEntity.status(201).body(
-                createPayment.execute(request, current.userId(), current.organizationId()));
+                createPayment.execute(request, current.userId(), current.organizationId(), idempotencyKey));
     }
 
     @GetMapping("/{id}")
