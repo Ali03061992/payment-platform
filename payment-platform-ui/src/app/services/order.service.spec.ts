@@ -33,6 +33,50 @@ describe('OrderService', () => {
     expect(service).toBeTruthy();
   });
 
+  describe('downloadInvoice', () => {
+    it('should GET invoice as blob and save it', () => {
+      const blob = new Blob(['%PDF-1.4'], { type: 'application/pdf' });
+      const createSpy = spyOn(window.URL, 'createObjectURL').and.returnValue('blob:test');
+      const revokeSpy = spyOn(window.URL, 'revokeObjectURL');
+      const clickSpy = spyOn(HTMLAnchorElement.prototype, 'click');
+
+      service.downloadInvoice('ord-1');
+
+      const req = httpMock.expectOne('/api/orders/ord-1/invoice');
+      expect(req.request.method).toBe('GET');
+      expect(req.request.responseType).toBe('blob');
+      req.flush(blob, {
+        headers: { 'Content-Disposition': 'attachment; filename="facture-ORD-001.pdf"' }
+      });
+
+      expect(createSpy).toHaveBeenCalled();
+      expect(clickSpy).toHaveBeenCalled();
+      expect(revokeSpy).toHaveBeenCalled();
+    });
+  });
+
+  describe('exportCsv', () => {
+    it('should GET CSV as blob and save it', () => {
+      const blob = new Blob(['ref,status'], { type: 'text/csv' });
+      const createSpy = spyOn(window.URL, 'createObjectURL').and.returnValue('blob:test');
+      const revokeSpy = spyOn(window.URL, 'revokeObjectURL');
+      const clickSpy = spyOn(HTMLAnchorElement.prototype, 'click');
+
+      service.exportCsv({ status: 'CONFIRMED' });
+
+      const req = httpMock.expectOne('/api/orders/export/csv?status=CONFIRMED');
+      expect(req.request.method).toBe('GET');
+      expect(req.request.responseType).toBe('blob');
+      req.flush(blob, {
+        headers: { 'Content-Disposition': 'attachment; filename="commandes.csv"' }
+      });
+
+      expect(createSpy).toHaveBeenCalled();
+      expect(clickSpy).toHaveBeenCalled();
+      expect(revokeSpy).toHaveBeenCalled();
+    });
+  });
+
   describe('create', () => {
     it('should POST to create order', () => {
       service.create({ supplierId: 1, shopId: 2, asapPayment: false, currency: 'TND', notes: '', items: [] }).subscribe(data => {
@@ -256,6 +300,19 @@ describe('OrderService', () => {
       const req = httpMock.expectOne('/api/orders/1/confirm-delivery');
       expect(req.request.method).toBe('POST');
       expect(req.request.body).toEqual({ confirmedDate: '2026-09-17' });
+      req.flush(mockOrder);
+    });
+  });
+
+  describe('update', () => {
+    it('should PUT to update order', () => {
+      const updateData = { notes: 'Updated', asapPayment: false, items: [{ productId: '1', quantity: 5, discount: 0 }] };
+      service.update('1', updateData).subscribe(data => {
+        expect(data.id).toBe(1);
+      });
+      const req = httpMock.expectOne('/api/orders/1');
+      expect(req.request.method).toBe('PUT');
+      expect(req.request.body).toEqual(updateData);
       req.flush(mockOrder);
     });
   });

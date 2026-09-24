@@ -4,6 +4,7 @@ describe('05 - Supplier: Product Management', () => {
   beforeEach(() => {
     cy.loginAsSupplierAdmin();
     cy.visit('/dashboard/supplier/products');
+    cy.dismissOverlays();
   });
 
   it('should display product management page', () => {
@@ -32,7 +33,7 @@ describe('05 - Supplier: Product Management', () => {
     cy.get('.form-card h3').should('contain', 'Creer un produit');
     cy.get('input[name="name"]').should('exist');
     cy.get('input[name="sku"]').should('exist');
-    cy.get('input[name="description"]').should('exist');
+    cy.get('.form-card input[name="description"]').should('exist');
     cy.get('select[name="familyId"]').should('exist');
     cy.get('select[name="categoryId"]').should('exist');
     cy.get('select[name="currency"]').should('exist');
@@ -62,15 +63,17 @@ describe('05 - Supplier: Product CRUD', () => {
   beforeEach(() => {
     cy.loginAsSupplierAdmin();
     cy.visit('/dashboard/supplier/products');
+    cy.dismissOverlays();
   });
 
   it('should create a new product', () => {
     const sku = `E2E-${Date.now()}`;
     cy.get('.page-header button.btn-primary').click();
-    cy.get('.form-card').should('be.visible');
+    cy.dismissOverlays();
+    cy.get('.form-card', { timeout: 10000 }).should('be.visible');
     cy.get('input[name="name"]').clear().type('Produit E2E Test');
     cy.get('input[name="sku"]').clear().type(sku);
-    cy.get('input[name="description"]').clear().type('Description test');
+    cy.get('.form-card input[name="description"]').clear().type('Description test');
     cy.get('input[name="unitPrice"]').clear().type('25.50');
     cy.get('input[name="minQuantity"]').clear().type('5');
     cy.get('.form-card button[type="submit"]').should('not.be.disabled').click();

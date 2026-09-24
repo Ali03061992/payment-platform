@@ -9,19 +9,20 @@
     <form (ngSubmit)="onSubmit()">
       <div class="form-group">
         <label for="username">Nom d'utilisateur</label>
-        <input id="username" type="text" [(ngModel)]="form.username" name="username" required placeholder="system.admin" autocomplete="username">
+        <input id="username" type="text" [(ngModel)]="form.username" name="username" required placeholder="system.admin" autocomplete="username" aria-required="true">
       </div>
 
       <div class="form-group">
         <label for="password">Mot de passe</label>
-        <input id="password" type="password" [(ngModel)]="form.password" name="password" required placeholder="••••••••" autocomplete="current-password">
+        <input id="password" type="password" [(ngModel)]="form.password" name="password" required placeholder="••••••••" autocomplete="current-password" aria-required="true">
       </div>
 
       @if (error) {
-        <div class="error-message">{{ error }}</div>
+        <div class="error-message" role="alert" aria-live="assertive">{{ error }}</div>
       }
 
-      <button type="submit" class="btn btn-primary btn-block" [disabled]="loading">
+      <button type="submit" class="btn btn-primary btn-block" [disabled]="loading"
+        [attr.aria-label]="loading ? 'Connexion en cours...' : 'Se connecter'">
         {{ loading ? 'Connexion...' : 'Se connecter' }}
       </button>
     </form>

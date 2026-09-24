@@ -78,6 +78,11 @@ export class PaymentDetailComponent implements OnInit, OnDestroy {
     this.showQR = !this.showQR;
   }
 
+  downloadInvoice(): void {
+    if (!this.payment) return;
+    this.paymentService.downloadInvoice(this.payment.id);
+  }
+
   shareQR(): void {
     if (navigator.share && this.payment) {
       navigator.share({

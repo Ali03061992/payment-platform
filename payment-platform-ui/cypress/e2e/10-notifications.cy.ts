@@ -11,6 +11,7 @@ describe('10 - Notifications: UI', () => {
   beforeEach(() => {
     cy.loginAsAdmin();
     cy.visit('/dashboard');
+    cy.dismissOverlays();
   });
 
   it('should display notification bell in top bar', () => {
@@ -26,10 +27,11 @@ describe('10 - Notifications: UI', () => {
 
   it('should show notification list or empty state', () => {
     cy.get('.notif-bell').click();
+    cy.dismissOverlays();
     cy.get('.notif-panel').should('be.visible');
     cy.get('.notif-panel').within(() => {
-      cy.get('.notif-list').should('exist');
-      cy.get('.notif-empty, .notif-item').should('exist');
+      cy.get('.notif-list', { timeout: 10000 }).should('exist');
+      cy.get('.notif-empty, .notif-item', { timeout: 10000 }).should('exist');
     });
   });
 
@@ -63,9 +65,11 @@ describe('10 - Notifications: UI', () => {
 
   it('should display notification items with icon and message', () => {
     cy.get('.notif-bell').click();
+    cy.dismissOverlays();
     cy.get('.notif-panel').should('be.visible');
+    cy.get('.notif-empty, .notif-item', { timeout: 10000 }).should('exist');
     cy.get('body').then(($body) => {
-      if ($body.find('.notif-item').length > 0) {
+      if ($body.find('.notif-panel .notif-item').length > 0) {
         cy.get('.notif-item').first().within(() => {
           cy.get('.notif-icon').should('exist');
           cy.get('.notif-content').should('exist');

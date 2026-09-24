@@ -60,7 +60,7 @@ export class CreatePaymentComponent implements OnInit {
   }
 
   create(): void {
-    if (!this.shopId || !this.supplierId || this.amount <= 0) return;
+    if (!this.shopId || !this.supplierId || this.amount < 0.01 || this.amount > 999999.99) return;
     this.creating = true;
     this.paymentService.create({ shopId: this.shopId, supplierId: this.supplierId, amount: this.amount, currency: this.currency }).subscribe({
       next: (payment) => this.router.navigate(['/dashboard/payments', payment.id]),

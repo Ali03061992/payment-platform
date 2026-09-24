@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { LoginService } from '../services/login.service';
-import { UserService } from '../services/user.service';
 import { User } from '../models/user.model';
 
 @Component({
@@ -11,21 +10,23 @@ import { User } from '../models/user.model';
 })
 export class DashboardComponent implements OnInit {
   user: User | null = null;
-  stats = { totalUsers: 0, activeUsers: 0, disabledUsers: 0, suppliers: 0, shops: 0 };
+  activeRole: string | null = null;
 
-  constructor(private loginService: LoginService, private userService: UserService) {}
+  constructor(private loginService: LoginService) {}
 
   ngOnInit(): void {
     this.user = this.loginService.getCurrentUser();
-    if (this.loginService.hasRole('SYSTEM_ADMIN')) {
-      this.userService.list().subscribe(users => {
-        this.stats.totalUsers = users.length;
-        this.stats.activeUsers = users.filter(u => u.status === 'ACTIVE').length;
-        this.stats.disabledUsers = users.filter(u => u.status === 'DISABLED').length;
-        this.stats.suppliers = users.filter(u => u.roles.some(r => r.startsWith('SUPPLIER'))).length;
-        this.stats.shops = users.filter(u => u.roles.some(r => r.startsWith('SHOP'))).length;
-      });
-    }
+    this.activeRole = this.detectRole();
+  }
+
+  private detectRole(): string | null {
+    if (!this.user?.roles?.length) return null;
+    if (this.user.roles.includes('SYSTEM_ADMIN')) return 'SYSTEM_ADMIN';
+    if (this.user.roles.includes('SUPPLIER_AGENT')) return 'SUPPLIER_AGENT';
+    if (this.user.roles.includes('SUPPLIER_ADMIN')) return 'SUPPLIER_ADMIN';
+    if (this.user.roles.includes('SHOP_ADMIN')) return 'SHOP_ADMIN';
+    if (this.user.roles.includes('SHOP_AGENT')) return 'SHOP_AGENT';
+    return null;
   }
 
   getGreeting(): string {

@@ -4,6 +4,7 @@ describe('07 - Supplier: Order Management', () => {
   beforeEach(() => {
     cy.loginAsSupplierAdmin();
     cy.visit('/dashboard/supplier/orders');
+    cy.dismissOverlays();
   });
 
   it('should display order management page', () => {
@@ -27,13 +28,13 @@ describe('07 - Supplier: Order Management', () => {
   });
 
   it('should have status filter', () => {
-    cy.get('.filters select').should('exist');
+    cy.get('select[aria-label="Filtrer par statut"]').should('exist');
     cy.get('.result-count').should('exist');
   });
 
   it('should filter orders by status', () => {
-    cy.get('.filters select').select('CONFIRMED');
-    cy.get('table tbody tr').should('have.length.gte', 0);
+    cy.get('select[aria-label="Filtrer par statut"]').select('CONFIRMED');
+    cy.get('table tbody tr').should('have.length.gte', 1);
   });
 
   it('should show create order link in nav', () => {

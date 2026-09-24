@@ -9,6 +9,7 @@ public record ProductCreateRequest(
     @NotBlank String name,
     @NotBlank String sku,
     String description,
+    String imageUrl,
     @NotNull @PositiveOrZero BigDecimal unitPrice,
     @NotBlank String currency,
     @NotNull @PositiveOrZero Integer quantity,

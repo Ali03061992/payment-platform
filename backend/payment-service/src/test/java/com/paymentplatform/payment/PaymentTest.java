@@ -92,14 +92,21 @@ class PaymentTest {
     void cannotCreateWithZeroAmount() {
         assertThatThrownBy(() -> Payment.create(UUID.fromString("00000000-0000-0000-0000-000000000001"), UUID.fromString("00000000-0000-0000-0000-000000000002"), Money.of(BigDecimal.ZERO, "TND"), UUID.fromString("00000000-0000-0000-0000-000000000010")))
                 .isInstanceOf(DomainException.class)
-                .hasMessageContaining("supérieur à 0");
+                .hasMessageContaining("supérieur ou égal à 0.01");
     }
 
     @Test
     void cannotCreateWithNegativeAmount() {
         assertThatThrownBy(() -> Payment.create(UUID.fromString("00000000-0000-0000-0000-000000000001"), UUID.fromString("00000000-0000-0000-0000-000000000002"), Money.of(new BigDecimal("-10"), "TND"), UUID.fromString("00000000-0000-0000-0000-000000000010")))
                 .isInstanceOf(DomainException.class)
-                .hasMessageContaining("supérieur à 0");
+                .hasMessageContaining("supérieur ou égal à 0.01");
+    }
+
+    @Test
+    void cannotCreateWithAmountExceedingMaximum() {
+        assertThatThrownBy(() -> Payment.create(UUID.fromString("00000000-0000-0000-0000-000000000001"), UUID.fromString("00000000-0000-0000-0000-000000000002"), Money.of(new BigDecimal("1000000.00"), "TND"), UUID.fromString("00000000-0000-0000-0000-000000000010")))
+                .isInstanceOf(DomainException.class)
+                .hasMessageContaining("ne doit pas dépasser 999999.99");
     }
 
     @Test

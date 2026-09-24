@@ -49,7 +49,8 @@ public class ConfirmPaymentUseCase {
 
         outbox.append(new PaymentConfirmedEvent(UUID.randomUUID(), Instant.now(),
                 saved.id(), saved.reference().value(), saved.shopId(), saved.supplierId(),
-                actorUserId), String.valueOf(saved.id()));
+                actorUserId, saved.money().amount(), saved.money().currency()),
+                String.valueOf(saved.id()));
 
         return PaymentResponse.from(saved, nameResolver.toNameResolver());
     }

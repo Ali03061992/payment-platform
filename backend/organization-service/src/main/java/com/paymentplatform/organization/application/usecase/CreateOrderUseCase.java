@@ -31,12 +31,13 @@ public class CreateOrderUseCase {
     private final OrganizationRepository organizations;
     private final SupplierShopRelationRepository relations;
     private final OutboxEventStore outbox;
+    private final BalanceUseCase balanceUseCase;
 
     public CreateOrderUseCase(OrderRepository orders, OrderItemRepository orderItems,
                               OrderEventRepository events, ProductRepository products,
                               OrganizationRepository organizations,
                               SupplierShopRelationRepository relations,
-                              OutboxEventStore outbox) {
+                              OutboxEventStore outbox, BalanceUseCase balanceUseCase) {
         this.orders = orders;
         this.orderItems = orderItems;
         this.events = events;
@@ -44,6 +45,7 @@ public class CreateOrderUseCase {
         this.organizations = organizations;
         this.relations = relations;
         this.outbox = outbox;
+        this.balanceUseCase = balanceUseCase;
     }
 
     @Transactional
@@ -66,10 +68,17 @@ public class CreateOrderUseCase {
                 actorRole,
                 source,
                 Boolean.TRUE.equals(request.asapPayment()),
-                request.currency()
+                request.currency(),
+                request.paymentTerms()
         );
         if (request.notes() != null) {
             order.setNotes(request.notes());
+        }
+        if (request.globalDiscount() != null) {
+            order.setGlobalDiscount(request.globalDiscount());
+        }
+        if ("SUPPLIER".equals(actorRole) && request.taxRate() != null) {
+            order.setTaxRate(request.taxRate());
         }
 
         Order savedOrder = orders.save(order);
@@ -97,6 +106,7 @@ public class CreateOrderUseCase {
             item.setQuantity(itemReq.quantity());
             item.setUnitPrice(product.getUnitPrice());
             item.setDiscount(discount);
+            item.setProductSnapshot(buildProductSnapshot(product));
 
             product.setReservedQty(product.getReservedQty() + itemReq.quantity());
             products.save(product);
@@ -121,6 +131,8 @@ public class CreateOrderUseCase {
             savedOrder.confirm();
             savedOrder.prepare();
             orders.save(savedOrder);
+            balanceUseCase.creditBalance(savedOrder.getSupplierId(), savedOrder.getShopId(),
+                    savedOrder.getTotal(), savedOrder.getId(), actorUserId);
             events.save(OrderEvent.create(savedOrder.getId(), "ORDER_CONFIRMED", actorUserId, "Auto-confirmé (source SUPPLIER)"));
             events.save(OrderEvent.create(savedOrder.getId(), "ORDER_PREPARING", actorUserId, "Auto-mis en préparation (source SUPPLIER)"));
             outbox.append(new OrderEvents.OrderConfirmedEvent(UUID.randomUUID(), Instant.now(),
@@ -150,5 +162,17 @@ public class CreateOrderUseCase {
                 com.paymentplatform.organization.domain.valueobject.RelationStatus.ACTIVE)) {
             throw new ConflictException("Aucune relation active entre le fournisseur et la boutique");
         }
+    }
+
+    private String buildProductSnapshot(Product product) {
+        String name = product.getName() != null ? product.getName() : "";
+        String sku = product.getSku() != null ? product.getSku() : "";
+        String price = product.getUnitPrice() != null ? product.getUnitPrice().toPlainString() : "0";
+        return "{\"name\":\"" + escapeJson(name) + "\",\"sku\":\"" + escapeJson(sku)
+                + "\",\"unitPrice\":" + price + "}";
+    }
+
+    private String escapeJson(String value) {
+        return value.replace("\\", "\\\\").replace("\"", "\\\"");
     }
 }

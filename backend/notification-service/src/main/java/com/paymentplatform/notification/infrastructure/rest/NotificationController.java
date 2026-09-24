@@ -10,6 +10,9 @@ import com.paymentplatform.shared.infrastructure.security.AuthenticatedUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -46,15 +49,36 @@ public class NotificationController {
     }
 
     @GetMapping
-    public ResponseEntity<List<NotificationResponse>> getNotifications(
-            @AuthenticationPrincipal AuthenticatedUser user) {
-        List<Notification> list;
-        if (user.organizationId() != null) {
-            list = notifications.findByRecipientOrganizationIdOrderByCreatedAtDesc(user.organizationId());
+    public ResponseEntity<?> getNotifications(
+            @AuthenticationPrincipal AuthenticatedUser user,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(required = false) String type) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Notification> notifPage;
+
+        if (type != null && !type.isBlank()) {
+            if (user.organizationId() != null) {
+                notifPage = notifications.findByRecipientOrganizationIdAndTypeOrderByCreatedAtDesc(user.organizationId(), type, pageable);
+            } else {
+                notifPage = notifications.findByRecipientUserIdAndTypeOrderByCreatedAtDesc(user.userId(), type, pageable);
+            }
         } else {
-            list = notifications.findByRecipientUserIdOrderByCreatedAtDesc(user.userId());
+            if (user.organizationId() != null) {
+                notifPage = notifications.findByRecipientOrganizationIdOrderByCreatedAtDesc(user.organizationId(), pageable);
+            } else {
+                notifPage = notifications.findByRecipientUserIdOrderByCreatedAtDesc(user.userId(), pageable);
+            }
         }
-        return ResponseEntity.ok(list.stream().map(NotificationResponse::from).toList());
+
+        Map<String, Object> result = Map.of(
+                "items", notifPage.getContent().stream().map(NotificationResponse::from).toList(),
+                "totalElements", notifPage.getTotalElements(),
+                "totalPages", notifPage.getTotalPages(),
+                "currentPage", notifPage.getNumber(),
+                "size", notifPage.getSize()
+        );
+        return ResponseEntity.ok(result);
     }
 
     @GetMapping("/unread-count")

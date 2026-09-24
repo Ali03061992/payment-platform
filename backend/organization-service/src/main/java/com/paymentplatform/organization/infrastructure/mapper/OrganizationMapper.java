@@ -13,5 +13,8 @@ public interface OrganizationMapper {
     @Mapping(target = "type", expression = "java(org.type() != null ? org.type().name() : \"\")")
     @Mapping(target = "status", expression = "java(org.status() != null ? org.status().name() : \"\")")
     @Mapping(target = "relations", ignore = true)
+    @Mapping(target = "version", expression = "java(org.version())")
+    @Mapping(target = "createdAt", expression = "java(org.createdAt())")
+    @Mapping(target = "updatedAt", expression = "java(org.updatedAt())")
     OrganizationResponse toResponse(Organization org);
 }

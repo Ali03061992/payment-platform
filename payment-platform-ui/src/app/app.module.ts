@@ -2,7 +2,6 @@ import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { FormsModule } from '@angular/forms';
 import { HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
-import { RouterModule, Routes } from '@angular/router';
 import { ServiceWorkerModule } from '@angular/service-worker';
 import { QRCodeComponent } from 'angularx-qrcode';
 import { environment } from '../environments/environment';
@@ -14,6 +13,10 @@ import { PasswordSetupComponent } from './password-setup/password-setup.componen
 import { ChangePasswordComponent } from './change-password/change-password.component';
 import { LayoutComponent } from './layout/layout.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
+import { DashboardAdminComponent } from './dashboard/dashboard-admin/dashboard-admin.component';
+import { DashboardSupplierComponent } from './dashboard/dashboard-supplier/dashboard-supplier.component';
+import { DashboardShopComponent } from './dashboard/dashboard-shop/dashboard-shop.component';
+import { DashboardAgentComponent } from './dashboard/dashboard-agent/dashboard-agent.component';
 import { UserManagementComponent } from './admin/user-management/user-management.component';
 import { CreateUserComponent } from './admin/create-user/create-user.component';
 import { AccountActivationComponent } from './sales/account-activation/account-activation.component';
@@ -39,68 +42,26 @@ import { SupplierCreateOrderComponent } from './supplier/create-order/create-ord
 import { OrderListComponent } from './shop/order-list/order-list.component';
 import { CreateOrderComponent } from './shop/create-order/create-order.component';
 import { ShopOrderDetailComponent } from './shop/order-detail/order-detail.component';
+import { DisputeDetailComponent } from './shop/dispute-detail/dispute-detail.component';
 import { BalanceViewComponent } from './shop/balance-view/balance-view.component';
 import { PwaUpdateComponent } from './pwa-update/pwa-update.component';
 import { QrScannerComponent } from './qr-scanner/qr-scanner.component';
 import { AgentPaymentsComponent } from './supplier/agent-payments/agent-payments.component';
+import { SupplierFinancialComponent } from './supplier/supplier-financial/supplier-financial.component';
+import { SupplierBalanceComponent } from './supplier/supplier-balance/supplier-balance.component';
 import { ExportComponent } from './payments/export/export.component';
+import { LowStockAlertsComponent } from './supplier/low-stock-alerts/low-stock-alerts.component';
+import { NotificationsComponent } from './dashboard/notifications/notifications.component';
+import { AuditLogManagementComponent } from './admin/audit-log-management/audit-log-management.component';
 import { NotificationBannerComponent } from './components/notification-banner/notification-banner.component';
 import { ToastComponent } from './components/toast/toast.component';
+import { TourComponent } from './components/tour/tour.component';
 import { StatusLabelPipe } from './pipes/status-label.pipe';
 
 import { JwtInterceptor } from './core/jwt.interceptor';
-import { AuthGuard } from './core/auth.guard';
-import { RoleGuard } from './core/role.guard';
-
-const adminRoles = ['SYSTEM_ADMIN'];
-const supplierRoles = ['SUPPLIER_ADMIN', 'SUPPLIER_AGENT'];
-const shopRoles = ['SHOP_ADMIN', 'SHOP_AGENT'];
-const allRoles = [...adminRoles, ...supplierRoles, ...shopRoles];
-
-const routes: Routes = [
-  { path: '', redirectTo: '/login', pathMatch: 'full' },
-  { path: 'login', component: LoginComponent },
-  { path: 'register', component: RegisterComponent },
-  { path: 'setup-password', component: PasswordSetupComponent },
-  {
-    path: 'dashboard',
-    component: LayoutComponent,
-    canActivate: [AuthGuard],
-    children: [
-      { path: '', component: DashboardComponent },
-      { path: 'admin/users', component: UserManagementComponent, canActivate: [RoleGuard], data: { roles: adminRoles } },
-      { path: 'admin/users/create', component: CreateUserComponent, canActivate: [RoleGuard], data: { roles: adminRoles } },
-      { path: 'sales/accounts', component: AccountActivationComponent, canActivate: [RoleGuard], data: { roles: adminRoles } },
-      { path: 'admin/suppliers', component: SupplierManagementComponent, canActivate: [RoleGuard], data: { roles: adminRoles } },
-      { path: 'admin/shops', component: ShopManagementComponent, canActivate: [RoleGuard], data: { roles: adminRoles } },
-      { path: 'admin/relations', component: RelationManagementComponent, canActivate: [RoleGuard], data: { roles: adminRoles } },
-      { path: 'admin/org-stats', component: OrganizationStatsComponent, canActivate: [RoleGuard], data: { roles: adminRoles } },
-      { path: 'payments', component: PaymentListComponent, canActivate: [RoleGuard], data: { roles: allRoles } },
-      { path: 'payments/create', component: CreatePaymentComponent, canActivate: [RoleGuard], data: { roles: [...adminRoles, ...shopRoles] } },
-      { path: 'payments/stats', component: PaymentStatsComponent, canActivate: [RoleGuard], data: { roles: allRoles } },
-      { path: 'payments/:id', component: PaymentDetailComponent, canActivate: [RoleGuard], data: { roles: allRoles } },
-      { path: 'scan', component: QrScannerComponent, canActivate: [RoleGuard], data: { roles: allRoles } },
-      { path: 'export', component: ExportComponent, canActivate: [RoleGuard], data: { roles: allRoles } },
-      { path: 'supplier/agent-payments', component: AgentPaymentsComponent, canActivate: [RoleGuard], data: { roles: supplierRoles } },
-      { path: 'supplier/stock', component: StockManagementComponent, canActivate: [RoleGuard], data: { roles: supplierRoles } },
-      { path: 'supplier/optimization', component: StockOptimizationComponent, canActivate: [RoleGuard], data: { roles: ['SUPPLIER_ADMIN'] } },
-      { path: 'supplier/stock/create', component: AddProductComponent, canActivate: [RoleGuard], data: { roles: ['SUPPLIER_ADMIN'] } },
-      { path: 'supplier/categories', component: CategoryManagementComponent, canActivate: [RoleGuard], data: { roles: ['SUPPLIER_ADMIN'] } },
-      { path: 'supplier/families', component: FamilyManagementComponent, canActivate: [RoleGuard], data: { roles: ['SUPPLIER_ADMIN'] } },
-      { path: 'supplier/products', component: ProductManagementComponent, canActivate: [RoleGuard], data: { roles: ['SUPPLIER_ADMIN'] } },
-      { path: 'supplier/dashboard', component: StockDashboardComponent, canActivate: [RoleGuard], data: { roles: supplierRoles } },
-      { path: 'supplier/orders', component: OrderManagementComponent, canActivate: [RoleGuard], data: { roles: supplierRoles } },
-      { path: 'supplier/orders/create', component: SupplierCreateOrderComponent, canActivate: [RoleGuard], data: { roles: ['SUPPLIER_ADMIN'] } },
-      { path: 'supplier/deliveries', component: DeliveryManagementComponent, canActivate: [RoleGuard], data: { roles: ['SUPPLIER_AGENT'] } },
-      { path: 'shop/orders', component: OrderListComponent, canActivate: [RoleGuard], data: { roles: shopRoles } },
-      { path: 'shop/orders/create', component: CreateOrderComponent, canActivate: [RoleGuard], data: { roles: shopRoles } },
-      { path: 'shop/orders/:id', component: ShopOrderDetailComponent, canActivate: [RoleGuard], data: { roles: shopRoles } },
-      { path: 'shop/balance', component: BalanceViewComponent, canActivate: [RoleGuard], data: { roles: shopRoles } },
-      { path: 'change-password', component: ChangePasswordComponent }
-    ]
-  },
-  { path: '**', redirectTo: '/login' }
-];
+import { AppRoutingModule } from './app-routing.module';
+import { AppTranslateModule } from './i18n/app-translate.module';
+import { LanguageSwitcherComponent } from './i18n/language-switcher.component';
 
 @NgModule({ declarations: [
         AppComponent,
@@ -110,6 +71,10 @@ const routes: Routes = [
         ChangePasswordComponent,
         LayoutComponent,
         DashboardComponent,
+        DashboardAdminComponent,
+        DashboardSupplierComponent,
+        DashboardShopComponent,
+        DashboardAgentComponent,
         UserManagementComponent,
         CreateUserComponent,
         AccountActivationComponent,
@@ -135,20 +100,28 @@ const routes: Routes = [
         OrderListComponent,
         CreateOrderComponent,
         ShopOrderDetailComponent,
+        DisputeDetailComponent,
         BalanceViewComponent,
         PwaUpdateComponent,
         QrScannerComponent,
         AgentPaymentsComponent,
+        SupplierFinancialComponent,
+        SupplierBalanceComponent,
         ExportComponent,
+        LowStockAlertsComponent,
+        NotificationsComponent,
         NotificationBannerComponent,
+        AuditLogManagementComponent,
         ToastComponent,
+        TourComponent,
         StatusLabelPipe
     ],
     bootstrap: [AppComponent], imports: [BrowserModule,
         FormsModule,
         QRCodeComponent,
-        RouterModule.forRoot(routes, { scrollPositionRestoration: 'top' }),
-        ServiceWorkerModule.register('ngsw-worker.js', { enabled: environment.production })], providers: [
+        AppRoutingModule,
+        ServiceWorkerModule.register('ngsw-worker.js', { enabled: environment.production })
+    ], providers: [
         { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true },
         provideHttpClient(withInterceptorsFromDi())
     ] })

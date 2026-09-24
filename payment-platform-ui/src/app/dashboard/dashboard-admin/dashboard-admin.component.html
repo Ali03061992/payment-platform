@@ -1,0 +1,85 @@
+<div class="dashboard">
+  <div class="welcome-section">
+    <h1>{{ getGreeting() }}, {{ user?.firstName }} !</h1>
+    <p>Vue d'ensemble de la plateforme.</p>
+  </div>
+
+  @if (loading) {
+    <div class="loading">Chargement...</div>
+  } @else {
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon blue">👥</div>
+        <div class="stat-info">
+          <div class="stat-value">{{ stats.totalUsers }}</div>
+          <div class="stat-label">Total utilisateurs</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon green">✅</div>
+        <div class="stat-info">
+          <div class="stat-value">{{ stats.activeUsers }}</div>
+          <div class="stat-label">Comptes actifs</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon red">🚫</div>
+        <div class="stat-info">
+          <div class="stat-value">{{ stats.disabledUsers }}</div>
+          <div class="stat-label">Comptes désactivés</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon orange">🏭</div>
+        <div class="stat-info">
+          <div class="stat-value">{{ stats.suppliers }}</div>
+          <div class="stat-label">Fournisseurs</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon purple">🏪</div>
+        <div class="stat-info">
+          <div class="stat-value">{{ stats.shops }}</div>
+          <div class="stat-label">Boutiques</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-cards">
+      <div class="info-card">
+        <h3>📋 Mon profil</h3>
+        <div class="info-row"><span>Nom :</span><strong>{{ user?.firstName }} {{ user?.lastName }}</strong></div>
+        <div class="info-row"><span>Email :</span><strong>{{ user?.email }}</strong></div>
+        <div class="info-row"><span>Rôle :</span><strong>{{ user?.roles?.[0] }}</strong></div>
+        <div class="info-row"><span>Statut :</span>
+          <span class="badge" [class]="user?.status === 'ACTIVE' ? 'badge-success' : 'badge-danger'">
+            {{ user?.status }}
+          </span>
+        </div>
+      </div>
+
+      <div class="info-card">
+        <h3>💳 Paiements</h3>
+        <div class="info-row"><span>Total :</span><strong>{{ paymentStats.total }}</strong></div>
+        <div class="info-row"><span>En attente :</span><strong class="text-orange">{{ paymentStats.pending }}</strong></div>
+        <div class="info-row"><span>Confirmés :</span><strong class="text-green">{{ paymentStats.confirmed }}</strong></div>
+        <div class="info-row"><span>Rejetés :</span><strong class="text-red">{{ paymentStats.rejected }}</strong></div>
+      </div>
+
+      <div class="info-card">
+        <h3>📦 Commandes</h3>
+        <div class="info-row"><span>Total commandes :</span><strong>{{ recentOrdersCount }}</strong></div>
+      </div>
+
+      <div class="info-card">
+        <h3>⚡ Actions rapides</h3>
+        <a routerLink="admin/users" class="quick-action">👥 Gérer les utilisateurs</a>
+        <a routerLink="admin/users/create" class="quick-action">➕ Créer un compte</a>
+        <a routerLink="sales/accounts" class="quick-action">🔑 Activer / Désactiver</a>
+        <a routerLink="admin/suppliers" class="quick-action">🏭 Gérer les fournisseurs</a>
+        <a routerLink="admin/shops" class="quick-action">🏪 Gérer les boutiques</a>
+        <a routerLink="admin/audit-logs" class="quick-action">📋 Journal d'audit</a>
+      </div>
+    </div>
+  }
+</div>

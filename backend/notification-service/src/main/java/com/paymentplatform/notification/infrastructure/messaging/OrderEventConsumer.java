@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.paymentplatform.notification.domain.model.Notification;
 import com.paymentplatform.notification.domain.model.NotificationRepository;
+import com.paymentplatform.notification.infrastructure.email.EmailNotificationService;
+import com.paymentplatform.notification.infrastructure.push.PushNotificationService;
 import com.paymentplatform.shared.infrastructure.eventing.EventDeduplicator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,15 +24,21 @@ public class OrderEventConsumer {
     private final EventDeduplicator deduplicator;
     private final ObjectMapper objectMapper;
     private final NotificationBroadcaster broadcaster;
+    private final EmailNotificationService emailService;
+    private final PushNotificationService pushService;
 
     public OrderEventConsumer(NotificationRepository notifications,
                                EventDeduplicator deduplicator,
                                ObjectMapper objectMapper,
-                               NotificationBroadcaster broadcaster) {
+                               NotificationBroadcaster broadcaster,
+                               EmailNotificationService emailService,
+                               PushNotificationService pushService) {
         this.notifications = notifications;
         this.deduplicator = deduplicator;
         this.objectMapper = objectMapper;
         this.broadcaster = broadcaster;
+        this.emailService = emailService;
+        this.pushService = pushService;
     }
 
     @RabbitListener(queues = "notification.orders")
@@ -53,10 +61,12 @@ public class OrderEventConsumer {
                 case "order.delivered" -> handleOrderDelivered(event);
                 case "order.accepted" -> handleOrderAccepted(event);
                 case "order.cancelled" -> handleOrderCancelled(event);
+                case "order.auto_cancelled" -> handleOrderAutoCancelled(event);
                 case "order.rejected" -> handleOrderRejected(event);
                 case "order.delivery_confirmed" -> handleOrderDeliveryConfirmed(event);
                 case "order.delivery_rejected" -> handleOrderDeliveryRejected(event);
                 case "order.low_stock_alert" -> handleLowStockAlert(event);
+                case "order.comment_created" -> handleOrderCommentCreated(event);
                 default -> log.warn("Unknown order routing key: {}", routingKey);
             }
         } catch (Exception e) {
@@ -81,6 +91,9 @@ public class OrderEventConsumer {
                 "Commande " + reference + " créée",
                 "ORDER", reference
         )));
+
+        pushService.sendToUser(supplierId, "Nouvelle commande",
+                "Nouvelle commande " + reference + " reçue", "ORDER_CREATED", "/dashboard/supplier/orders");
     }
 
     private void handleOrderConfirmed(JsonNode event) {
@@ -92,6 +105,8 @@ public class OrderEventConsumer {
                 "Commande " + reference + " confirmée par le fournisseur",
                 "ORDER", reference
         )));
+
+        emailService.sendOrderConfirmation(null, "la boutique", reference, "");
     }
 
     private void handleOrderPreparing(JsonNode event) {
@@ -125,6 +140,11 @@ public class OrderEventConsumer {
                 "Commande " + reference + " livrée — en attente d'acceptation",
                 "ORDER", reference
         )));
+
+        emailService.sendDeliveryNotification(null, "la boutique", reference, "");
+
+        pushService.sendToUser(shopId, "Commande livrée",
+                "La commande " + reference + " est prête à être acceptée", "ORDER_DELIVERED", "/dashboard/shop/orders");
     }
 
     private void handleOrderAccepted(JsonNode event) {
@@ -136,6 +156,9 @@ public class OrderEventConsumer {
                 "Commande " + reference + " acceptée par la boutique",
                 "ORDER", reference
         )));
+
+        pushService.sendToUser(supplierId, "Commande acceptée",
+                "La commande " + reference + " a été acceptée par la boutique", "ORDER_ACCEPTED", "/dashboard/supplier/orders");
     }
 
     private void handleOrderCancelled(JsonNode event) {
@@ -152,6 +175,19 @@ public class OrderEventConsumer {
         broadcaster.broadcastNotification(notifications.save(new Notification(null, shopId,
                 "ORDER_CANCELLED",
                 "Commande " + reference + " annulée",
+                "ORDER", reference
+        )));
+    }
+
+    private void handleOrderAutoCancelled(JsonNode event) {
+        UUID shopId = UUID.fromString(event.get("shopId").asText());
+        UUID supplierId = UUID.fromString(event.get("supplierId").asText());
+        String reference = event.get("reference").asText();
+        String reason = event.has("reason") ? event.get("reason").asText() : "Annulée automatiquement";
+
+        broadcaster.broadcastNotification(notifications.save(new Notification(null, shopId,
+                "ORDER_AUTO_CANCELLED",
+                "Commande " + reference + " annulée automatiquement : " + reason,
                 "ORDER", reference
         )));
     }
@@ -195,6 +231,25 @@ public class OrderEventConsumer {
                 "ORDER_DELIVERY_REJECTED",
                 "Livraison de la commande " + reference + " rejetée"
                         + (reason.isEmpty() ? "" : " : " + reason),
+                "ORDER", reference
+        )));
+    }
+
+    private void handleOrderCommentCreated(JsonNode event) {
+        UUID shopId = UUID.fromString(event.get("shopId").asText());
+        UUID supplierId = UUID.fromString(event.get("supplierId").asText());
+        UUID authorId = UUID.fromString(event.get("authorId").asText());
+        String authorName = event.get("authorName").asText();
+        String reference = event.get("reference").asText();
+        String content = event.get("content").asText();
+
+        String message = "Nouveau commentaire de " + authorName + " sur la commande " + reference;
+
+        UUID recipientOrgId = authorId.equals(shopId) ? supplierId : shopId;
+
+        broadcaster.broadcastNotification(notifications.save(new Notification(null, recipientOrgId,
+                "ORDER_COMMENT",
+                message,
                 "ORDER", reference
         )));
     }

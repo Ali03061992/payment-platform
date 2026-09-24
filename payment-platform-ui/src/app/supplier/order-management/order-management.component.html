@@ -1,23 +1,44 @@
 <div class="page-header">
   <h2>Gestion des commandes</h2>
-  <a class="btn btn-primary" routerLink="/dashboard/supplier/orders/create">+ Nouvelle commande</a>
+  <a class="btn btn-primary" routerLink="/dashboard/supplier/orders/create" aria-label="Créer une nouvelle commande">+ Nouvelle commande</a>
 </div>
 
-<div class="tabs" style="margin-bottom: 24px;">
-  <button class="tab-btn" [class.active]="activeTab === 'orders'" (click)="switchTab('orders')">Commandes</button>
-  <button class="tab-btn" [class.active]="activeTab === 'deliveries'" (click)="switchTab('deliveries')">Livraisons</button>
+<div class="tabs" style="margin-bottom: 24px;" role="tablist" aria-label="Affichage des commandes et livraisons">
+  <button class="tab-btn" [class.active]="activeTab === 'orders'" (click)="switchTab('orders')" role="tab" [attr.aria-selected]="activeTab === 'orders'" id="tab-orders">Commandes</button>
+  <button class="tab-btn" [class.active]="activeTab === 'deliveries'" (click)="switchTab('deliveries')" role="tab" [attr.aria-selected]="activeTab === 'deliveries'" id="tab-deliveries">Livraisons</button>
 </div>
 
 @if (loading) {
-  <div class="loading">
-    <div class="spinner"></div>
-    <span>Chargement...</span>
+  <div class="loading" role="status" aria-live="polite">
+    <div class="spinner" aria-hidden="true"></div>
+    <span>Chargement des commandes...</span>
   </div>
 }
 
 @if (!loading && activeTab === 'orders') {
   <div class="filters">
-    <select [(ngModel)]="filterStatus" class="form-control" style="max-width:200px;">
+    <div class="search-container">
+      <input type="text" [(ngModel)]="searchQuery" (ngModelChange)="searchSubject.next($event)"
+        class="form-control" placeholder="Rechercher par référence ou boutique..." style="max-width:300px;"
+        aria-label="Rechercher une commande par référence ou boutique">
+      @if (searching) {
+        <div class="search-spinner" role="status" aria-label="Recherche en cours"></div>
+      }
+      @if (showSearchDropdown && searchResults.length > 0) {
+        <div class="search-dropdown">
+          @for (r of searchResults; track r) {
+            <div class="search-dropdown-item" (click)="viewDetail(r)">
+              <div class="search-dropdown-ref">{{ r.reference }}</div>
+              <div class="search-dropdown-meta">
+                <span class="payment-badge" [ngClass]="statusClass(r.status)">{{ statusLabel(r.status) }}</span>
+                <span>{{ r.shopName || r.shopId }}</span>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+    <select [(ngModel)]="filterStatus" class="form-control" style="max-width:200px;" aria-label="Filtrer par statut">
       <option value="">Tous les statuts</option>
       <option value="DRAFT">Brouillon</option>
       <option value="CONFIRMED">Confirmé</option>
@@ -31,7 +52,14 @@
       <option value="REJECTED">Rejeté</option>
       <option value="DELIVERY_REJECTED">Livraison rejetée</option>
     </select>
-    <span class="result-count">{{ filteredOrders.length }} résultat(s)</span>
+    <select [(ngModel)]="filterShopId" class="form-control" style="max-width:200px;" aria-label="Filtrer par boutique">
+      <option value="">Toutes les boutiques</option>
+      @for (s of shops; track s.id) {
+        <option [value]="s.id">{{ s.name }}</option>
+      }
+    </select>
+    <span class="result-count" aria-live="polite">{{ filteredOrders.length }} résultat(s)</span>
+    <button class="btn btn-secondary" style="margin-left:auto;" (click)="exportCsv()" aria-label="Exporter les commandes en CSV">Exporter CSV</button>
   </div>
 }
 
@@ -57,28 +85,35 @@
               <td>{{ o.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
               <td>{{ o.total | number:'1.2-2' }} {{ o.currency }}</td>
               <td>
-                <span class="payment-badge" [ngClass]="statusClass(o.status)">
+                <span class="payment-badge" [ngClass]="statusClass(o.status)"
+                  [attr.aria-label]="'Statut de la commande : ' + statusLabel(o.status)" role="status">
                   {{ statusLabel(o.status) }}
                 </span>
               </td>
               <td class="actions" (click)="$event.stopPropagation()">
+                @if (canEdit(o)) {
+                  <button class="btn btn-sm btn-info" (click)="openEdit(o)" [attr.aria-label]="'Modifier la commande ' + o.reference">Modifier</button>
+                }
                 @if (canConfirm(o)) {
-                  <button class="btn btn-sm btn-success" (click)="confirm(o)">Confirmer</button>
+                  <button class="btn btn-sm btn-success" (click)="confirm(o)" [attr.aria-label]="'Confirmer la commande ' + o.reference">Confirmer</button>
                 }
                 @if (canPrepare(o)) {
-                  <button class="btn btn-sm btn-warning" (click)="prepare(o)">Préparer</button>
+                  <button class="btn btn-sm btn-warning" (click)="prepare(o)" [attr.aria-label]="'Mettre en préparation la commande ' + o.reference">Préparer</button>
                 }
                 @if (canReady(o)) {
-                  <button class="btn btn-sm btn-primary" (click)="ready(o)">Prêt</button>
+                  <button class="btn btn-sm btn-primary" (click)="ready(o)" [attr.aria-label]="'Marquer la commande ' + o.reference + ' comme prête'">Prêt</button>
                 }
                 @if (canAssign(o)) {
-                  <button class="btn btn-sm btn-secondary" (click)="openAssign(o)">Assigner</button>
+                  <button class="btn btn-sm btn-secondary" (click)="openAssign(o)" [attr.aria-label]="'Assigner un livreur à la commande ' + o.reference">Assigner</button>
                 }
                 @if (canDeliveryReject(o)) {
-                  <button class="btn btn-sm btn-danger" (click)="deliveryReject(o)">Rejeter livr.</button>
+                  <button class="btn btn-sm btn-danger" (click)="deliveryReject(o)" [attr.aria-label]="'Rejeter la livraison de la commande ' + o.reference">Rejeter livr.</button>
+                }
+                @if (o.status === 'DELIVERED' || o.status === 'ACCEPTED') {
+                  <button class="btn btn-sm btn-primary" (click)="downloadInvoice(o)" [attr.aria-label]="'Télécharger la facture de la commande ' + o.reference">Facture</button>
                 }
                 @if (canCancel(o)) {
-                  <button class="btn btn-sm btn-danger" (click)="cancel(o)">Annuler</button>
+                  <button class="btn btn-sm btn-danger" (click)="cancel(o)" [attr.aria-label]="'Annuler la commande ' + o.reference">Annuler</button>
                 }
               </td>
             </tr>
@@ -96,13 +131,34 @@
 
 @if (!loading && activeTab === 'deliveries') {
   <div class="filters">
-    <select [(ngModel)]="filterAgentId" (change)="onAgentFilterChange()" class="form-control" style="max-width:250px;">
+    <div class="search-container">
+      <input type="text" [(ngModel)]="searchQuery" (ngModelChange)="searchSubject.next($event)"
+        class="form-control" placeholder="Rechercher par référence ou boutique..." style="max-width:300px;"
+        aria-label="Rechercher une livraison par référence ou boutique">
+      @if (searching) {
+        <div class="search-spinner" role="status" aria-label="Recherche en cours"></div>
+      }
+      @if (showSearchDropdown && searchResults.length > 0) {
+        <div class="search-dropdown">
+          @for (r of searchResults; track r) {
+            <div class="search-dropdown-item" (click)="viewDetail(r)">
+              <div class="search-dropdown-ref">{{ r.reference }}</div>
+              <div class="search-dropdown-meta">
+                <span class="payment-badge" [ngClass]="statusClass(r.status)">{{ statusLabel(r.status) }}</span>
+                <span>{{ r.shopName || r.shopId }}</span>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+    <select [(ngModel)]="filterAgentId" (change)="onAgentFilterChange()" class="form-control" style="max-width:250px;" aria-label="Filtrer par livreur">
       <option value="">Tous les livreurs</option>
       @for (a of agents; track a) {
         <option [value]="a.id">{{ a.firstName }} {{ a.lastName }}</option>
       }
     </select>
-    <select [(ngModel)]="filterStatus" class="form-control" style="max-width:200px;">
+    <select [(ngModel)]="filterStatus" class="form-control" style="max-width:200px;" aria-label="Filtrer par statut de livraison">
       <option value="">Tous les statuts</option>
       <option value="READY_FOR_DELIVERY">En attente d'acceptation</option>
       <option value="DELIVERY_ACCEPTED">Acceptée</option>
@@ -111,7 +167,13 @@
       <option value="ACCEPTED">Accepté</option>
       <option value="DELIVERY_REJECTED">Rejetée</option>
     </select>
-    <span class="result-count">{{ filteredDeliveries.length }} résultat(s)</span>
+    <select [(ngModel)]="filterShopId" class="form-control" style="max-width:200px;" aria-label="Filtrer par boutique">
+      <option value="">Toutes les boutiques</option>
+      @for (s of shops; track s.id) {
+        <option [value]="s.id">{{ s.name }}</option>
+      }
+    </select>
+    <span class="result-count" aria-live="polite">{{ filteredDeliveries.length }} résultat(s)</span>
   </div>
   <div class="table-card">
     <div class="table-wrapper">
@@ -136,12 +198,13 @@
               <td>{{ o.plannedDeliveryDate || '-' }}</td>
               <td>{{ o.total | number:'1.2-2' }} {{ o.currency }}</td>
               <td>
-                <span class="payment-badge" [ngClass]="statusClass(o.status)">
+                <span class="payment-badge" [ngClass]="statusClass(o.status)"
+                  [attr.aria-label]="'Statut de la livraison : ' + statusLabel(o.status)" role="status">
                   {{ statusLabel(o.status) }}
                 </span>
               </td>
               <td class="actions" (click)="$event.stopPropagation()">
-                <button class="btn btn-sm btn-secondary" (click)="viewDetail(o)">Détail</button>
+                <button class="btn btn-sm btn-secondary" (click)="viewDetail(o)" [attr.aria-label]="'Voir le détail de la commande ' + o.reference">Détail</button>
               </td>
             </tr>
           }
@@ -158,11 +221,16 @@
 
 <!-- Détail commande -->
 @if (showDetail) {
-  <div class="modal-overlay" (click)="closeDetail()">
+  <div class="modal-overlay" (click)="closeDetail()" role="dialog" aria-modal="true" aria-labelledby="detail-modal-title">
     <div class="modal-content modal-lg" (click)="$event.stopPropagation()">
       <div class="modal-header">
-        <h3>Commande {{ selectedOrder?.reference }}</h3>
-        <button class="btn-close" (click)="closeDetail()">&times;</button>
+        <h3 id="detail-modal-title">Commande {{ selectedOrder?.reference }}</h3>
+        <div>
+          @if (selectedOrder && (selectedOrder.status === 'DELIVERED' || selectedOrder.status === 'ACCEPTED')) {
+            <button class="btn btn-sm btn-primary" style="margin-right:8px;" (click)="downloadInvoice(selectedOrder)" aria-label="Télécharger la facture">Télécharger facture</button>
+          }
+          <button class="btn-close" (click)="closeDetail()" aria-label="Fermer le détail de la commande">&times;</button>
+        </div>
       </div>
       @if (loadingDetail) {
         <div class="loading" style="padding: 24px;">
@@ -176,7 +244,8 @@
             <div class="detail-card">
               <div class="detail-label">Statut</div>
               <div class="detail-value">
-                <span class="payment-badge" [ngClass]="statusClass(selectedOrder.status)">{{ statusLabel(selectedOrder.status) }}</span>
+                <span class="payment-badge" [ngClass]="statusClass(selectedOrder.status)"
+                  [attr.aria-label]="'Statut de la commande : ' + statusLabel(selectedOrder.status)" role="status">{{ statusLabel(selectedOrder.status) }}</span>
               </div>
             </div>
             <div class="detail-card">
@@ -221,6 +290,12 @@
               <div class="detail-card">
                 <div class="detail-label">Date confirmée</div>
                 <div class="detail-value">{{ selectedOrder.confirmedDeliveryDate }}</div>
+              </div>
+            }
+            @if (selectedOrder.estimatedArrival) {
+              <div class="detail-card">
+                <div class="detail-label">Arrivée estimée</div>
+                <div class="detail-value" style="color:#e65100;font-weight:600;">{{ selectedOrder.estimatedArrival | date:'dd/MM/yyyy HH:mm' }}</div>
               </div>
             }
             @if (selectedOrder.deliveredAt) {
@@ -282,6 +357,12 @@
                       <td colspan="4" style="text-align:right;font-weight:600;">TVA ({{ selectedOrder.taxRate }}%)</td>
                       <td><strong>{{ selectedOrder.taxAmount | number:'1.2-2' }} {{ selectedOrder.currency }}</strong></td>
                     </tr>
+                    @if (selectedOrder.globalDiscount > 0) {
+                      <tr>
+                        <td colspan="4" style="text-align:right;font-weight:600;">Remise globale ({{ selectedOrder.globalDiscount }}%)</td>
+                        <td><strong style="color:#e53935;">-{{ (selectedOrder.subtotal + selectedOrder.taxAmount) * selectedOrder.globalDiscount / 100 | number:'1.2-2' }} {{ selectedOrder.currency }}</strong></td>
+                      </tr>
+                    }
                     <tr>
                       <td colspan="4" style="text-align:right;font-weight:700;font-size:16px;">Total</td>
                       <td><strong style="font-size:16px;color:#0f3460;">{{ selectedOrder.total | number:'1.2-2' }} {{ selectedOrder.currency }}</strong></td>
@@ -316,6 +397,37 @@
               </div>
             </div>
           }
+          <div class="table-card" style="margin-top: 16px;">
+            <h4 style="padding: 16px 20px 0;">Commentaires</h4>
+            <div style="padding: 16px 20px;">
+              @if (detailComments.length === 0) {
+                <p style="color:#8896ab;font-size:14px;">Aucun commentaire pour le moment.</p>
+              }
+              @for (c of detailComments; track c) {
+                <div style="border-bottom:1px solid #eee;padding:12px 0;">
+                  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+                    <strong style="font-size:14px;">{{ c.authorName }}</strong>
+                    <small style="color:#8896ab;">{{ c.createdAt | date:'dd/MM/yyyy HH:mm' }}</small>
+                  </div>
+                  <p style="margin:0;font-size:14px;white-space:pre-wrap;">{{ c.content }}</p>
+                </div>
+              }
+              <div style="margin-top:12px;display:flex;gap:8px;">
+                <textarea
+                  [(ngModel)]="detailNewComment"
+                  placeholder="Ajouter un commentaire..."
+                  rows="2"
+                  style="flex:1;padding:10px;border:1px solid #ddd;border-radius:8px;font-family:inherit;font-size:14px;resize:vertical;"
+                  [disabled]="detailSubmittingComment"
+                  aria-label="Ajouter un commentaire sur la commande"></textarea>
+                <button class="btn btn-primary" style="align-self:flex-end;" (click)="addDetailComment()"
+                  [disabled]="detailSubmittingComment || !detailNewComment.trim()"
+                  aria-label="Envoyer le commentaire">
+                  {{ detailSubmittingComment ? 'Envoi...' : 'Envoyer' }}
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       }
     </div>
@@ -324,16 +436,16 @@
 
 <!-- Assign agent modal -->
 @if (showAssignModal) {
-  <div class="modal-overlay" (click)="closeAssign()">
+  <div class="modal-overlay" (click)="closeAssign()" role="dialog" aria-modal="true" aria-labelledby="assign-modal-title">
     <div class="modal-content" (click)="$event.stopPropagation()">
       <div class="modal-header">
-        <h3>Assigner un livreur</h3>
-        <button class="btn-close" (click)="closeAssign()">&times;</button>
+        <h3 id="assign-modal-title">Assigner un livreur</h3>
+        <button class="btn-close" (click)="closeAssign()" aria-label="Fermer">&times;</button>
       </div>
       <form (ngSubmit)="submitAssign()">
         <div class="form-group">
-          <label>Livreur</label>
-          <select [(ngModel)]="assignAgentId" name="agentId" class="form-control" required>
+          <label for="assignAgentId">Livreur</label>
+          <select [(ngModel)]="assignAgentId" name="agentId" id="assignAgentId" class="form-control" required aria-required="true">
             <option [ngValue]="0">-- Sélectionner --</option>
             @for (a of agents; track a) {
               <option [ngValue]="a.id">{{ a.firstName }} {{ a.lastName }}</option>
@@ -341,13 +453,121 @@
           </select>
         </div>
         <div class="form-group">
-          <label>Date prévue de livraison</label>
-          <input type="date" [(ngModel)]="assignPlannedDate" name="plannedDate" class="form-control" required>
+          <label for="assignPlannedDate">Date prévue de livraison</label>
+          <input type="date" [(ngModel)]="assignPlannedDate" name="plannedDate" id="assignPlannedDate" class="form-control" required aria-required="true">
         </div>
         <div class="form-actions">
-          <button type="button" class="btn btn-secondary" (click)="closeAssign()">Annuler</button>
-          <button type="submit" class="btn btn-primary" [disabled]="assigning || !assignAgentId">
+          <button type="button" class="btn btn-secondary" (click)="closeAssign()" aria-label="Annuler l'assignation">Annuler</button>
+          <button type="submit" class="btn btn-primary" [disabled]="assigning || !assignAgentId"
+            [attr.aria-label]="assigning ? 'Assignation en cours...' : 'Confirmer l\'assignation du livreur'">
             {{ assigning ? 'Assignation...' : 'Assigner' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+<!-- Edit order modal -->
+@if (showEditModal) {
+  <div class="modal-overlay" (click)="closeEdit()" role="dialog" aria-modal="true" aria-labelledby="edit-modal-title">
+    <div class="modal-content modal-lg" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3 id="edit-modal-title">Modifier la commande</h3>
+        <button class="btn-close" (click)="closeEdit()" aria-label="Fermer">&times;</button>
+      </div>
+      <form (ngSubmit)="submitEdit()">
+        <div class="form-group">
+          <label for="editSearchQuery">Rechercher un produit</label>
+          <input type="text" [(ngModel)]="editSearchQuery" name="editSearch" id="editSearchQuery" class="form-control"
+            placeholder="Nom ou SKU...">
+        </div>
+        @if (loadingEditProducts) {
+          <div class="text-muted" style="padding:12px;">Chargement des produits...</div>
+        }
+        @if (!loadingEditProducts && filteredEditProducts.length > 0) {
+          <div class="table-card" style="margin-bottom:16px;">
+            <h4 style="padding:12px 16px 0;">Produits disponibles</h4>
+            <div class="table-wrapper" style="max-height:200px;overflow-y:auto;">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Nom</th>
+                    <th>SKU</th>
+                    <th>Prix</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (p of filteredEditProducts; track p) {
+                    <tr>
+                      <td>{{ p.name }}</td>
+                      <td>{{ p.sku }}</td>
+                      <td>{{ p.unitPrice | number:'1.2-2' }}</td>
+                      <td>
+                        <button class="btn btn-sm btn-primary" type="button" (click)="addEditProduct(p)">Ajouter</button>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </div>
+        }
+        @if (editOrderLines.length > 0) {
+          <div class="table-card" style="margin-bottom:16px;">
+            <h4 style="padding:12px 16px 0;">Articles de la commande</h4>
+            <div class="table-wrapper">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Produit</th>
+                    <th>Quantité</th>
+                    <th>Remise %</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (line of editOrderLines; track line; let i = $index) {
+                    <tr>
+                      <td>{{ line.productName }}</td>
+                      <td>
+                        <input type="number" [(ngModel)]="line.quantity" [name]="'editQty_' + i"
+                          class="form-control" min="1" style="width:80px;" required
+                          [attr.aria-label]="'Quantité pour ' + line.productName">
+                      </td>
+                      <td>
+                        <input type="number" [(ngModel)]="line.discount" [name]="'editDiscount_' + i"
+                          class="form-control" min="0" max="100" style="width:80px;"
+                          [attr.aria-label]="'Remise en pourcentage pour ' + line.productName">
+                      </td>
+                      <td>
+                        <button class="btn btn-sm btn-danger" type="button" (click)="removeEditLine(i)"
+                          [attr.aria-label]="'Supprimer ' + line.productName">Supprimer</button>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </div>
+        }
+        <div class="form-group">
+          <label class="toggle-label">
+            <input type="checkbox" [(ngModel)]="editAsapPayment" name="editAsapPayment" aria-label="Activer le paiement ASAP">
+            <span>Paiement ASAP</span>
+          </label>
+        </div>
+        <div class="form-group">
+          <label for="editNotes">Notes</label>
+          <textarea [(ngModel)]="editNotes" name="editNotes" id="editNotes" class="form-control" rows="3"
+            placeholder="Notes optionnelles..."></textarea>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary" (click)="closeEdit()" aria-label="Annuler les modifications">Annuler</button>
+          <button type="submit" class="btn btn-primary" [disabled]="!canSubmitEdit()"
+            [attr.aria-label]="editing ? 'Enregistrement en cours...' : 'Enregistrer les modifications'">
+            {{ editing ? 'Enregistrement...' : 'Enregistrer' }}
           </button>
         </div>
       </form>

@@ -1,7 +1,9 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { OrderService } from '../../services/order.service';
-import { Order } from '../../models/order.model';
+import { DisputeService } from '../../services/dispute.service';
+import { Order, OrderComment } from '../../models/order.model';
+import { Dispute } from '../../models/dispute.model';
 import { ToastService } from '../../services/toast.service';
 import { Subscription } from 'rxjs';
 
@@ -14,8 +16,18 @@ import { Subscription } from 'rxjs';
 export class ShopOrderDetailComponent implements OnInit, OnDestroy {
   order: Order | null = null;
   loading = true;
+  disputes: Dispute[] = [];
+  showDisputeForm = false;
+  disputeReason = '';
+  submittingDispute = false;
+
+  comments: OrderComment[] = [];
+  newComment = '';
+  submittingComment = false;
 
   statusSteps = ['DRAFT', 'CONFIRMED', 'PREPARING', 'READY_FOR_DELIVERY', 'DELIVERY_ACCEPTED', 'IN_DELIVERY', 'DELIVERED', 'ACCEPTED'];
+  countdown = '';
+  private countdownInterval: any;
 
   private subscriptions = new Subscription();
 
@@ -23,6 +35,7 @@ export class ShopOrderDetailComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private router: Router,
     private orderService: OrderService,
+    private disputeService: DisputeService,
     private toast: ToastService
   ) {}
 
@@ -33,13 +46,69 @@ export class ShopOrderDetailComponent implements OnInit, OnDestroy {
       ? this.orderService.getById(id)
       : this.orderService.getByReference(id);
     this.subscriptions.add(request$.subscribe({
-      next: (data: Order) => { this.order = data; this.loading = false; },
+      next: (data: Order) => {
+        this.order = data;
+        this.loading = false;
+        this.loadDisputes(data.id);
+        this.loadComments(data.id);
+        this.startCountdown();
+      },
       error: () => { this.loading = false; this.router.navigate(['/dashboard/shop/orders']); }
+    }));
+  }
+
+  loadDisputes(orderId: string): void {
+    this.subscriptions.add(this.disputeService.getByOrder(orderId).subscribe({
+      next: (data: Dispute[]) => { this.disputes = data; },
+      error: () => {}
+    }));
+  }
+
+  loadComments(orderId: string): void {
+    this.subscriptions.add(this.orderService.getComments(orderId).subscribe({
+      next: (data: OrderComment[]) => { this.comments = data; },
+      error: () => {}
+    }));
+  }
+
+  addComment(): void {
+    if (!this.order || !this.newComment.trim()) return;
+    this.submittingComment = true;
+    this.subscriptions.add(this.orderService.addComment(this.order.id, this.newComment.trim()).subscribe({
+      next: (comment: OrderComment) => {
+        this.comments = [...this.comments, comment];
+        this.newComment = '';
+        this.submittingComment = false;
+        this.toast.success('Commentaire ajouté');
+      },
+      error: (e: any) => {
+        this.submittingComment = false;
+        this.toast.error(e.error?.message || 'Erreur');
+      }
     }));
   }
 
   ngOnDestroy(): void {
     this.subscriptions.unsubscribe();
+    if (this.countdownInterval) clearInterval(this.countdownInterval);
+  }
+
+  private startCountdown(): void {
+    if (this.countdownInterval) clearInterval(this.countdownInterval);
+    if (!this.order?.estimatedArrival || this.order.status !== 'IN_DELIVERY') return;
+    this.updateCountdown();
+    this.countdownInterval = setInterval(() => this.updateCountdown(), 60000);
+  }
+
+  private updateCountdown(): void {
+    if (!this.order?.estimatedArrival) { this.countdown = ''; return; }
+    const now = new Date();
+    const eta = new Date(this.order.estimatedArrival);
+    const diff = eta.getTime() - now.getTime();
+    if (diff <= 0) { this.countdown = 'Arrivée imminente'; return; }
+    const hours = Math.floor(diff / 3600000);
+    const mins = Math.floor((diff % 3600000) / 60000);
+    this.countdown = hours > 0 ? `≈ ${hours}h ${mins}min` : `≈ ${mins} min`;
   }
 
   accept(): void {
@@ -75,6 +144,31 @@ export class ShopOrderDetailComponent implements OnInit, OnDestroy {
     }));
   }
 
+  toggleDisputeForm(): void {
+    this.showDisputeForm = !this.showDisputeForm;
+    this.disputeReason = '';
+  }
+
+  openDispute(): void {
+    if (!this.order || !this.disputeReason.trim()) return;
+    this.submittingDispute = true;
+    this.subscriptions.add(this.disputeService.create({ orderId: this.order.id, reason: this.disputeReason.trim() }).subscribe({
+      next: (data: Dispute) => {
+        this.disputes = [data, ...this.disputes];
+        this.showDisputeForm = false;
+        this.disputeReason = '';
+        this.submittingDispute = false;
+        this.toast.success('Litige ouvert');
+        this.router.navigate(['/dashboard/shop/disputes', data.id]);
+      },
+      error: (e: any) => { this.submittingDispute = false; this.toast.error(e.error?.message || 'Erreur'); }
+    }));
+  }
+
+  viewDispute(disputeId: string): void {
+    this.router.navigate(['/dashboard/shop/disputes', disputeId]);
+  }
+
   statusLabel(s: string): string {
     const map: Record<string, string> = {
       DRAFT: 'Brouillon', CONFIRMED: 'Confirmé',
@@ -108,6 +202,32 @@ export class ShopOrderDetailComponent implements OnInit, OnDestroy {
       ORDER_REJECTED: 'Rejeté', ORDER_DELIVERY_REJECTED: 'Livraison rejetée'
     };
     return map[a] || a;
+  }
+
+  printOrder(): void {
+    window.print();
+  }
+
+  downloadInvoice(): void {
+    if (!this.order) return;
+    this.orderService.downloadInvoice(this.order.id);
+  }
+
+  paymentTermsLabel(terms: string): string {
+    const map: Record<string, string> = {
+      IMMEDIATE: 'Immédiat',
+      NET_15: 'Net 15 jours',
+      NET_30: 'Net 30 jours',
+      NET_60: 'Net 60 jours'
+    };
+    return map[terms] || terms;
+  }
+
+  isOverdue(): boolean {
+    if (!this.order?.dueDate || this.order.status === 'CANCELLED' || this.order.status === 'REJECTED') {
+      return false;
+    }
+    return new Date(this.order.dueDate) < new Date();
   }
 
   isStepCompleted(stepIndex: number): boolean {

@@ -61,8 +61,8 @@ class NotificationControllerTest {
                         .with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication(
                                 auth(UUID.fromString("00000000-0000-0000-0000-000000000001"), "user", List.of("SHOP_ADMIN"), UUID.fromString("00000000-0000-0000-0000-000000000010")))))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$").isArray())
-                .andExpect(jsonPath("$.length()").value(2));
+                .andExpect(jsonPath("$.items").isArray())
+                .andExpect(jsonPath("$.totalElements").value(2));
     }
 
     @Test
@@ -75,7 +75,7 @@ class NotificationControllerTest {
                         .with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication(
                                 auth(UUID.fromString("00000000-0000-0000-0000-000000000005"), "user", List.of("SYSTEM_ADMIN"), null))))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(2));
+                .andExpect(jsonPath("$.totalElements").value(2));
     }
 
     @Test

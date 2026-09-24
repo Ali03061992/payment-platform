@@ -10,3 +10,11 @@ export interface Notification {
   relatedEntityType: string;
   relatedEntityId: string;
 }
+
+export interface NotificationPage {
+  items: Notification[];
+  totalElements: number;
+  totalPages: number;
+  currentPage: number;
+  size: number;
+}

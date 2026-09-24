@@ -55,3 +55,6 @@ sonar-reports/
 # Cypress
 cypress/screenshots/
 cypress/videos/
+
+# Uploads
+uploads/

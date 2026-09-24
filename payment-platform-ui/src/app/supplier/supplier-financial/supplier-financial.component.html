@@ -1,0 +1,95 @@
+<div class="page-header">
+  <h2>Tableau de bord financier</h2>
+</div>
+
+@if (loading) {
+  <div class="loading">
+    <div class="spinner"></div>
+    <span>Chargement...</span>
+  </div>
+}
+
+@if (report && !loading) {
+  <!-- Payment Summary Cards -->
+  <div class="stats-grid">
+    <div class="stat-card stat-confirmed">
+      <div class="stat-value">{{ report.paymentSummary.confirmedCount }}</div>
+      <div class="stat-label">Paiements confirmés</div>
+      <div class="stat-sub">{{ report.paymentSummary.confirmedTotal | number:'1.2-2' }} TND</div>
+    </div>
+    <div class="stat-card stat-pending">
+      <div class="stat-value">{{ report.paymentSummary.pendingCount }}</div>
+      <div class="stat-label">Paiements en attente</div>
+      <div class="stat-sub">{{ report.paymentSummary.pendingTotal | number:'1.2-2' }} TND</div>
+    </div>
+    <div class="stat-card stat-rejected">
+      <div class="stat-value">{{ report.paymentSummary.rejectedCount }}</div>
+      <div class="stat-label">Paiements rejetés</div>
+      <div class="stat-sub">{{ report.paymentSummary.rejectedTotal | number:'1.2-2' }} TND</div>
+    </div>
+  </div>
+
+  <!-- Monthly Revenue Chart -->
+  <div class="chart-card">
+    <h3>Chiffre d'affaires mensuel</h3>
+    @if (report.monthlyRevenue && report.monthlyRevenue.length > 0) {
+      <div class="chart-container">
+        <canvas #revenueChart></canvas>
+      </div>
+    } @else {
+      <div class="empty-chart">Aucune donnée de revenu disponible</div>
+    }
+  </div>
+
+  <!-- Order Status Pie Chart + Top Products Bar Chart -->
+  <div class="charts-row">
+    <div class="chart-card chart-half">
+      <h3>Statuts des commandes</h3>
+      @if (report.orderCountByStatus && objectKeys(report.orderCountByStatus).length > 0) {
+        <div class="chart-container">
+          <canvas #statusChart></canvas>
+        </div>
+      } @else {
+        <div class="empty-chart">Aucune donnée</div>
+      }
+    </div>
+
+    <div class="chart-card chart-half">
+      <h3>Top 10 produits vendus</h3>
+      @if (report.topProducts && report.topProducts.length > 0) {
+        <div class="chart-container chart-container-tall">
+          <canvas #productsChart></canvas>
+        </div>
+      } @else {
+        <div class="empty-chart">Aucune donnée de vente</div>
+      }
+    </div>
+  </div>
+
+  <!-- Top Products Table -->
+  @if (report.topProducts && report.topProducts.length > 0) {
+    <div class="table-card">
+      <h3>Détail des produits</h3>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Produit</th>
+              <th>Quantité vendue</th>
+              <th>Revenu total</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (p of report.topProducts; track p.productName) {
+              <tr>
+                <td><strong>{{ p.productName }}</strong></td>
+                <td>{{ p.totalQuantity }}</td>
+                <td>{{ p.totalRevenue | number:'1.2-2' }} TND</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+}

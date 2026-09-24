@@ -1,6 +1,6 @@
 <div class="page-header">
   <h2>Nouvelle commande</h2>
-  <a class="btn btn-secondary" routerLink="/dashboard/shop/orders">Retour</a>
+  <a class="btn btn-secondary" routerLink="/dashboard/shop/orders" aria-label="Retour à la liste des commandes">Retour</a>
 </div>
 
 <div class="form-card">
@@ -10,8 +10,8 @@
         <label>Fournisseur @if (loadingSuppliers) {
           <span class="text-muted">(chargement...)</span>
         }</label>
-        <select [(ngModel)]="selectedSupplierId" name="supplier" class="form-control"
-          (ngModelChange)="onSupplierChange()" required [disabled]="loadingSuppliers">
+        <select [(ngModel)]="selectedSupplierId" name="supplier" id="supplierSelect" class="form-control"
+          (ngModelChange)="onSupplierChange()" required [disabled]="loadingSuppliers" aria-required="true">
           <option [ngValue]="0">-- Sélectionner --</option>
           @for (s of suppliers; track s) {
             <option [ngValue]="s.id">{{ s.name }} ({{ s.status }})</option>
@@ -37,55 +37,93 @@
       </div>
     </div>
 
+    <div class="form-row">
+      <div class="form-group">
+        <label for="globalDiscount">Remise globale (%)</label>
+        <input type="number" [(ngModel)]="globalDiscount" name="globalDiscount" id="globalDiscount" class="form-control"
+          min="0" max="100" placeholder="0">
+      </div>
+    </div>
+
     @if (selectedSupplierId) {
       <div class="form-group">
-        <label>Rechercher un produit</label>
-        <input type="text" [(ngModel)]="searchQuery" name="search" class="form-control"
+        <label for="searchQuery">Rechercher un produit</label>
+        <input type="text" [(ngModel)]="searchQuery" name="search" id="searchQuery" class="form-control"
           placeholder="Nom ou SKU...">
       </div>
     }
 
     @if (loadingProducts) {
-      <div class="text-muted" style="padding:12px;">Chargement des produits...</div>
+      <div class="text-muted" style="padding:12px;" role="status" aria-live="polite">Chargement des produits...</div>
     }
     @if (errorProducts) {
       <div class="text-danger" style="padding:12px;">{{ errorProducts }}</div>
     }
     @if (selectedSupplierId && !loadingProducts) {
-      <div class="table-card" style="margin-bottom:24px;">
-        <h3 style="padding:16px 20px 0;">Produits disponibles ({{ filteredProducts.length }})</h3>
-        <div class="table-wrapper">
-          <table>
-            <thead>
-              <tr>
-                <th>Nom</th>
-                <th>SKU</th>
-                <th>Prix unitaire</th>
-                <th>Stock</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (p of filteredProducts; track p) {
-                <tr>
-                  <td>{{ p.name }}</td>
-                  <td>{{ p.sku }}</td>
-                  <td>{{ p.unitPrice | number:'1.2-2' }} {{ p.currency }}</td>
-                  <td>{{ p.quantity }}</td>
-                  <td>
-                    <button class="btn btn-sm btn-primary" type="button" (click)="addProduct(p)">Ajouter</button>
-                  </td>
-                </tr>
-              }
-              @if (filteredProducts.length === 0) {
-                <tr>
-                  <td colspan="5" class="empty">Aucun produit trouvé</td>
-                </tr>
-              }
-            </tbody>
-          </table>
+      @if (allProductsEmpty) {
+        <div class="empty-catalog">
+          <div class="empty-catalog-icon">&#9888;</div>
+          <h3>Aucun produit disponible</h3>
+          <p>Aucun produit n'est disponible à la commande pour ce fournisseur. Cela peut être dû à une rupture de stock totale ou à l'absence de produits dans le catalogue.</p>
+          <button class="btn btn-primary" type="button" (click)="contactSupplier()" aria-label="Contacter le fournisseur pour assistance">Contacter le fournisseur</button>
         </div>
-      </div>
+      } @else {
+        <div class="product-counter" aria-live="polite">
+          <span class="counter-available">{{ availableProductsCount }}</span> produit(s) disponible(s) sur <span class="counter-total">{{ totalProductsCount }}</span>
+        </div>
+        <div class="table-card" style="margin-bottom:24px;">
+          <h3 style="padding:16px 20px 0;">Produits</h3>
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>Image</th>
+                  <th>Nom</th>
+                  <th>SKU</th>
+                  <th>Prix unitaire</th>
+                  <th>Stock</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (p of filteredProducts; track p) {
+                  <tr [class.out-of-stock]="!hasStock(p)">
+                    <td>
+                      @if (p.imageUrl) {
+                        <img [src]="p.imageUrl" [alt]="p.name" class="product-thumb">
+                      } @else {
+                        <div class="product-placeholder">📦</div>
+                      }
+                    </td>
+                    <td>{{ p.name }}</td>
+                    <td>{{ p.sku }}</td>
+                    <td>{{ p.unitPrice | number:'1.2-2' }} {{ p.currency }}</td>
+                    <td>
+                      @if (hasStock(p)) {
+                        {{ p.quantity }}
+                      } @else {
+                        <span class="stock-badge" role="status" [attr.aria-label]="p.name + ' : rupture de stock'">Rupture de stock</span>
+                      }
+                    </td>
+                    <td>
+                      @if (hasStock(p)) {
+                        <button class="btn btn-sm btn-primary" type="button" (click)="addProduct(p)" [attr.aria-label]="'Ajouter ' + p.name + ' à la commande'">Ajouter</button>
+                      } @else {
+                        <button class="btn btn-sm btn-disabled" type="button" disabled aria-label="Produit indisponible">Indisponible</button>
+                      }
+                    </td>
+                  </tr>
+                }
+                @if (filteredProducts.length === 0) {
+                  <tr>
+                    <td colspan="6" class="empty">Aucun produit trouvé</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      }
     }
 
     @if (orderLines.length > 0) {
@@ -109,16 +147,19 @@
                   <td>{{ line.product.name }}</td>
                   <td>
                     <input type="number" [(ngModel)]="line.quantity" [name]="'qty_' + i"
-                      class="form-control" min="1" style="width:80px;" required>
+                      class="form-control" min="1" style="width:80px;" required
+                      [attr.aria-label]="'Quantité pour ' + line.product.name">
                   </td>
                   <td>{{ line.product.unitPrice | number:'1.2-2' }}</td>
                   <td>
                     <input type="number" [(ngModel)]="line.discount" [name]="'discount_' + i"
-                      class="form-control" min="0" max="100" style="width:80px;">
+                      class="form-control" min="0" max="100" style="width:80px;"
+                      [attr.aria-label]="'Remise en pourcentage pour ' + line.product.name">
                   </td>
                   <td>{{ (line.product.unitPrice * line.quantity * (1 - line.discount / 100)) | number:'1.2-2' }}</td>
                   <td>
-                    <button class="btn btn-sm btn-danger" type="button" (click)="removeLine(i)">Supprimer</button>
+                    <button class="btn btn-sm btn-danger" type="button" (click)="removeLine(i)"
+                      [attr.aria-label]="'Supprimer ' + line.product.name + ' de la commande'">Supprimer</button>
                   </td>
                 </tr>
               }
@@ -138,6 +179,12 @@
           <span>TVA (19%)</span>
           <span>{{ taxAmount | number:'1.2-2' }} {{ currency }}</span>
         </div>
+        @if (globalDiscount > 0) {
+          <div class="summary-row">
+            <span>Remise globale ({{ globalDiscount }}%)</span>
+            <span>-{{ discountAmount | number:'1.2-2' }} {{ currency }}</span>
+          </div>
+        }
         <div class="summary-row total">
           <span>Total</span>
           <span>{{ total | number:'1.2-2' }} {{ currency }}</span>
@@ -147,20 +194,31 @@
 
     <div class="form-group" style="margin-top:16px;">
       <label class="toggle-label">
-        <input type="checkbox" [(ngModel)]="asapPayment" name="asapPayment">
+        <input type="checkbox" [(ngModel)]="asapPayment" name="asapPayment" aria-label="Activer le paiement immédiat (ASAP)">
         <span>Paiement ASAP</span>
       </label>
     </div>
 
     <div class="form-group">
-      <label>Notes</label>
-      <textarea [(ngModel)]="notes" name="notes" class="form-control" rows="3"
+      <label for="paymentTerms">Conditions de paiement</label>
+      <select [(ngModel)]="paymentTerms" name="paymentTerms" id="paymentTerms" class="form-control">
+        <option value="IMMEDIATE">Immédiat</option>
+        <option value="NET_15">Net 15 jours</option>
+        <option value="NET_30">Net 30 jours</option>
+        <option value="NET_60">Net 60 jours</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="notes">Notes</label>
+      <textarea [(ngModel)]="notes" name="notes" id="notes" class="form-control" rows="3"
       placeholder="Notes optionnelles..."></textarea>
     </div>
 
     <div class="form-actions">
-      <a class="btn btn-secondary" routerLink="/dashboard/shop/orders">Annuler</a>
-      <button class="btn btn-primary" [disabled]="!canSubmit()">
+      <a class="btn btn-secondary" routerLink="/dashboard/shop/orders" aria-label="Annuler la création de commande">Annuler</a>
+      <button class="btn btn-primary" [disabled]="!canSubmit()"
+        [attr.aria-label]="creating ? 'Création en cours...' : 'Créer la commande'">
         {{ creating ? 'Création...' : 'Créer la commande' }}
       </button>
     </div>

@@ -10,8 +10,8 @@ public record Money(BigDecimal amount, String currency) {
     public Money {
         Objects.requireNonNull(amount, "Le montant est obligatoire");
         Objects.requireNonNull(currency, "La devise est obligatoire");
-        if (amount.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new DomainException("Le montant doit être supérieur à 0");
+        if (amount.compareTo(new BigDecimal("0.01")) < 0) {
+            throw new DomainException("Le montant doit être supérieur ou égal à 0.01");
         }
         if (currency.isBlank()) {
             throw new DomainException("La devise ne peut pas être vide");

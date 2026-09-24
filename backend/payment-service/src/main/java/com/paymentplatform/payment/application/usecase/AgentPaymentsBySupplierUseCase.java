@@ -9,7 +9,9 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -38,7 +40,7 @@ public class AgentPaymentsBySupplierUseCase {
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
 
             BigDecimal confirmedTotal = payments.stream()
-                    .filter(p -> "CONFIRMED".equals(p.getStatus()))
+                    .filter(p -> p.getStatus() == com.paymentplatform.payment.domain.model.PaymentStatus.CONFIRMED)
                     .map(PaymentJpaEntity::getAmount)
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
 
@@ -73,6 +75,7 @@ public class AgentPaymentsBySupplierUseCase {
                 e.getAmount(), e.getCurrency(), e.getStatus(), e.getRejectionReason(),
                 e.getCreatedBy(), batchResolver.resolveUser(e.getCreatedBy()),
                 null, null, null,
+                agentUserId, LocalDate.now(),
                 e.getVersion(), e.getCreatedAt(), e.getUpdatedAt(),
                 List.of()
         );

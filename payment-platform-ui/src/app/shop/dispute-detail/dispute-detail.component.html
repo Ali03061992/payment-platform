@@ -1,0 +1,72 @@
+@if (loading) {
+  <div class="loading">
+    <div class="spinner"></div>
+    <span>Chargement...</span>
+  </div>
+}
+
+@if (dispute && !loading) {
+  <div>
+    <div class="page-header no-print">
+      <h2>Litige #{{ dispute.id | slice:0:8 }}</h2>
+      <div class="page-header-actions">
+        <a class="btn btn-secondary" (click)="backToOrder()">Retour à la commande</a>
+      </div>
+    </div>
+    <div class="detail-grid">
+      <div class="detail-card">
+        <div class="detail-label">Statut</div>
+        <div class="detail-value">
+          <span class="payment-badge" [ngClass]="statusClass(dispute.status)">{{ statusLabel(dispute.status) }}</span>
+        </div>
+      </div>
+      <div class="detail-card">
+        <div class="detail-label">Motif</div>
+        <div class="detail-value">{{ dispute.reason }}</div>
+      </div>
+      <div class="detail-card">
+        <div class="detail-label">Créé le</div>
+        <div class="detail-value">{{ dispute.createdAt | date:'dd/MM/yyyy HH:mm:ss' }}</div>
+      </div>
+      <div class="detail-card">
+        <div class="detail-label">Dernière mise à jour</div>
+        <div class="detail-value">{{ dispute.updatedAt | date:'dd/MM/yyyy HH:mm:ss' }}</div>
+      </div>
+    </div>
+    @if (dispute.status !== 'CLOSED' && dispute.status !== 'RESOLVED') {
+      <div class="action-bar no-print">
+        <button class="btn btn-success" (click)="resolveDispute()">Résoudre</button>
+        <button class="btn btn-danger" (click)="closeDispute()">Fermer</button>
+      </div>
+    }
+    <div class="table-card" style="margin-top:24px;">
+      <h3 style="padding:16px 20px 0;">Messages</h3>
+      <div class="messages-container">
+        @if (dispute.messages.length === 0) {
+          <p class="no-messages">Aucun message pour le moment.</p>
+        }
+        @for (msg of dispute.messages; track msg) {
+          <div class="message-bubble" [ngClass]="msg.senderRole === 'SUPPLIER' ? 'supplier-msg' : 'shop-msg'">
+            <div class="message-header">
+              <strong>{{ senderLabel(msg) }}</strong>
+              <span class="message-time">{{ msg.timestamp | date:'dd/MM/yyyy HH:mm' }}</span>
+            </div>
+            <div class="message-content">{{ msg.content }}</div>
+          </div>
+        }
+      </div>
+      @if (dispute.status !== 'CLOSED' && dispute.status !== 'RESOLVED') {
+        <div class="message-input no-print">
+          <textarea
+            [(ngModel)]="newMessage"
+            placeholder="Écrire un message..."
+            rows="3"
+            [disabled]="submitting"></textarea>
+          <button class="btn btn-primary" (click)="sendMessage()" [disabled]="submitting || !newMessage.trim()">
+            {{ submitting ? 'Envoi...' : 'Envoyer' }}
+          </button>
+        </div>
+      }
+    </div>
+  </div>
+}

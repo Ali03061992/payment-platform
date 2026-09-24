@@ -1,16 +1,39 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Order, CreateOrderRequest } from '../models/order.model';
+import { Order, CreateOrderRequest, UpdateOrderRequest, OrderComment } from '../models/order.model';
+import { ToastService } from './toast.service';
+import { filenameFromDisposition, saveBlob } from '../core/file-download';
 
 @Injectable({ providedIn: 'root' })
 export class OrderService {
   private apiUrl = '/api/orders';
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private toast: ToastService) {}
+
+  downloadInvoice(id: string): void {
+    this.http.get(`${this.apiUrl}/${id}/invoice`, { observe: 'response', responseType: 'blob' }).subscribe({
+      next: (res) => {
+        if (!res.body) {
+          this.toast.error('Erreur lors du téléchargement de la facture');
+          return;
+        }
+        const filename = filenameFromDisposition(
+          res.headers.get('Content-Disposition'),
+          `facture-${id}.pdf`
+        );
+        saveBlob(res.body, filename);
+      },
+      error: () => this.toast.error('Erreur lors du téléchargement de la facture')
+    });
+  }
 
   create(data: CreateOrderRequest): Observable<Order> {
     return this.http.post<Order>(this.apiUrl, data);
+  }
+
+  update(id: string, data: UpdateOrderRequest): Observable<Order> {
+    return this.http.put<Order>(`${this.apiUrl}/${id}`, data);
   }
 
   list(): Observable<Order[]> {
@@ -31,6 +54,22 @@ export class OrderService {
 
   getById(id: string): Observable<Order> {
     return this.http.get<Order>(`${this.apiUrl}/${id}`);
+  }
+
+  search(query: string): Observable<Order[]> {
+    return new Observable<Order[]>(observer => {
+      this.http.get<any>(`${this.apiUrl}/search?q=${encodeURIComponent(query)}&size=20`).subscribe({
+        next: (res: any) => {
+          if (Array.isArray(res)) observer.next(res as Order[]);
+          else if (res && Array.isArray(res.items)) observer.next(res.items as Order[]);
+          else if (res && Array.isArray(res.content)) observer.next(res.content as Order[]);
+          else if (res && Array.isArray(res.data)) observer.next(res.data as Order[]);
+          else observer.next([]);
+          observer.complete();
+        },
+        error: (err) => observer.error(err)
+      });
+    });
   }
 
   getByReference(reference: string): Observable<Order> {
@@ -107,6 +146,28 @@ export class OrderService {
     return this.http.get<{id: string, name: string}[]>(`${this.apiUrl}/shop-agents?shopId=${shopId}`);
   }
 
+  exportCsv(filters: { status?: string; dateFrom?: string; dateTo?: string }): void {
+    let params = new URLSearchParams();
+    if (filters.status) params.set('status', filters.status);
+    if (filters.dateFrom) params.set('dateFrom', filters.dateFrom);
+    if (filters.dateTo) params.set('dateTo', filters.dateTo);
+    const qs = params.toString();
+    this.http.get(`${this.apiUrl}/export/csv${qs ? '?' + qs : ''}`, { observe: 'response', responseType: 'blob' }).subscribe({
+      next: (res) => {
+        if (!res.body) {
+          this.toast.error('Erreur lors de l\'export CSV');
+          return;
+        }
+        const filename = filenameFromDisposition(
+          res.headers.get('Content-Disposition'),
+          'commandes.csv'
+        );
+        saveBlob(res.body, filename);
+      },
+      error: () => this.toast.error('Erreur lors de l\'export CSV')
+    });
+  }
+
   myDeliveries(): Observable<Order[]> {
     return new Observable<Order[]>(observer => {
       this.http.get<any>(`${this.apiUrl}/my-deliveries`).subscribe({
@@ -121,5 +182,37 @@ export class OrderService {
         error: (err) => observer.error(err)
       });
     });
+  }
+
+  getComments(orderId: string): Observable<OrderComment[]> {
+    return this.http.get<OrderComment[]>(`${this.apiUrl}/${orderId}/comments`);
+  }
+
+  addComment(orderId: string, content: string): Observable<OrderComment> {
+    return this.http.post<OrderComment>(`${this.apiUrl}/${orderId}/comments`, { content });
+  }
+
+  getRecent(limit: number = 5): Observable<Order[]> {
+    return new Observable<Order[]>(observer => {
+      this.http.get<any>(`${this.apiUrl}/recent?limit=${limit}`).subscribe({
+        next: (res: any) => {
+          if (Array.isArray(res)) observer.next(res as Order[]);
+          else if (res && Array.isArray(res.items)) observer.next(res.items as Order[]);
+          else if (res && Array.isArray(res.content)) observer.next(res.content as Order[]);
+          else if (res && Array.isArray(res.data)) observer.next(res.data as Order[]);
+          else observer.next([]);
+          observer.complete();
+        },
+        error: (err) => observer.error(err)
+      });
+    });
+  }
+
+  reorder(orderId: string): Observable<Order> {
+    return this.http.post<Order>(`${this.apiUrl}/${orderId}/reorder`, {});
+  }
+
+  updateLocation(orderId: string, latitude: number, longitude: number, estimatedArrival?: string): Observable<Order> {
+    return this.http.post<Order>(`${this.apiUrl}/${orderId}/location`, { latitude, longitude, estimatedArrival });
   }
 }

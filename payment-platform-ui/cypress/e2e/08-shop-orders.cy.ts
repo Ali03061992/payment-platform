@@ -4,6 +4,7 @@ describe('08 - Shop: Order List', () => {
   beforeEach(() => {
     cy.loginAsShopAdmin();
     cy.visit('/dashboard/shop/orders');
+    cy.dismissOverlays();
   });
 
   it('should display order list page', () => {
@@ -17,9 +18,10 @@ describe('08 - Shop: Order List', () => {
   });
 
   it('should show order table with all columns', () => {
-    cy.get('table thead th').should('have.length', 6);
+    cy.get('table thead th', { timeout: 10000 }).should('have.length', 7);
     cy.get('table thead').should('contain', 'Référence');
     cy.get('table thead').should('contain', 'Fournisseur');
+    cy.get('table thead').should('contain', 'Livreur');
     cy.get('table thead').should('contain', 'Date');
     cy.get('table thead').should('contain', 'Total');
     cy.get('table thead').should('contain', 'Statut');

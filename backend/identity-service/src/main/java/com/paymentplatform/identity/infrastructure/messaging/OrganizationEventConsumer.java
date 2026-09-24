@@ -1,19 +1,20 @@
 package com.paymentplatform.identity.infrastructure.messaging;
 
+import java.util.UUID;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.paymentplatform.identity.application.usecase.OrganizationCascadeUseCase;
+import com.paymentplatform.shared.domain.model.RoleCode;
 import com.paymentplatform.shared.domain.event.OrganizationEvents.ShopDisabledEvent;
 import com.paymentplatform.shared.domain.event.OrganizationEvents.SupplierDisabledEvent;
-import com.paymentplatform.shared.domain.model.RoleCode;
 import com.paymentplatform.shared.infrastructure.outbox.AmqpTopology;
+import com.paymentplatform.identity.application.usecase.OrganizationCascadeUseCase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.UUID;
 
 /**
  * Consommateur des événements de désactivation d'organisations.

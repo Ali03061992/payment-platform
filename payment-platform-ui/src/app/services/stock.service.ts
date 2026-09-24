@@ -18,6 +18,11 @@ export class StockService {
     return '';
   }
 
+  getLowStockAlerts(): Observable<Product[]> {
+    const supplierId = this.getSupplierId();
+    return this.http.get<Product[]>(`${this.apiUrl}/${supplierId}/low-stock-alerts`);
+  }
+
   getProducts(status?: string): Observable<Product[]> {
     const supplierId = this.getSupplierId();
     let params = new HttpParams();
@@ -49,6 +54,13 @@ export class StockService {
   deleteProduct(id: string): Observable<Product> {
     const supplierId = this.getSupplierId();
     return this.http.patch<Product>(`${this.apiUrl}/${supplierId}/products/${id}/deactivate`, { status: 'INACTIVE' });
+  }
+
+  uploadProductImage(productId: string, file: File): Observable<Product> {
+    const supplierId = this.getSupplierId();
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.post<Product>(`${this.apiUrl}/${supplierId}/products/${productId}/image`, formData);
   }
 
   getStockMovements(productId?: string): Observable<StockMovement[]> {

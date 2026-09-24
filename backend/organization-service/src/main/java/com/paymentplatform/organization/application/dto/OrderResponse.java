@@ -2,6 +2,7 @@ package com.paymentplatform.organization.application.dto;
 
 import com.paymentplatform.organization.domain.model.Order;
 import com.paymentplatform.organization.domain.model.OrderItem;
+import com.paymentplatform.organization.domain.model.PaymentTerms;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -24,6 +25,7 @@ public record OrderResponse(
         BigDecimal subtotal,
         BigDecimal taxRate,
         BigDecimal taxAmount,
+        BigDecimal globalDiscount,
         BigDecimal total,
         String currency,
         UUID deliveryAgentId,
@@ -35,28 +37,51 @@ public record OrderResponse(
         LocalDate plannedDeliveryDate,
         LocalDate confirmedDeliveryDate,
         boolean asapPayment,
+        PaymentTerms paymentTerms,
+        LocalDate dueDate,
         String deliveryRejectionReason,
+        Instant estimatedArrival,
+        BigDecimal lastLatitude,
+        BigDecimal lastLongitude,
+        Instant lastLocationUpdate,
         String notes,
         Long version,
         Instant createdAt,
         Instant updatedAt,
-        List<OrderItemResponse> items
+        List<OrderItemResponse> items,
+        String confirmedByName,
+        String preparedByName,
+        String readyByName,
+        String assignedDeliveryByName,
+        String acceptedDeliveryByName,
+        String confirmedDeliveryByName,
+        String deliveredByName
 ) {
     public static OrderResponse from(Order order, List<OrderItem> orderItems) {
-        return from(order, orderItems, null, null, null, null, null);
+        return from(order, orderItems, null, null, null, null, null, null, null, null, null, null, null, null);
     }
 
     public static OrderResponse from(Order order, List<OrderItem> orderItems, String supplierName, String shopName) {
-        return from(order, orderItems, supplierName, shopName, null, null, null);
+        return from(order, orderItems, supplierName, shopName, null, null, null, null, null, null, null, null, null, null);
     }
 
     public static OrderResponse from(Order order, List<OrderItem> orderItems, String supplierName, String shopName,
                                      String deliveryAgentName, String receivedByName) {
-        return from(order, orderItems, supplierName, shopName, deliveryAgentName, receivedByName, null);
+        return from(order, orderItems, supplierName, shopName, deliveryAgentName, receivedByName, null,
+                null, null, null, null, null, null, null);
     }
 
     public static OrderResponse from(Order order, List<OrderItem> orderItems, String supplierName, String shopName,
                                      String deliveryAgentName, String receivedByName, String createdByName) {
+        return from(order, orderItems, supplierName, shopName, deliveryAgentName, receivedByName, createdByName,
+                null, null, null, null, null, null, null);
+    }
+
+    public static OrderResponse from(Order order, List<OrderItem> orderItems, String supplierName, String shopName,
+                                     String deliveryAgentName, String receivedByName, String createdByName,
+                                     String confirmedByName, String preparedByName, String readyByName,
+                                     String assignedDeliveryByName, String acceptedDeliveryByName,
+                                     String confirmedDeliveryByName, String deliveredByName) {
         List<OrderItemResponse> items = orderItems.stream()
                 .map(OrderItemResponse::from)
                 .toList();
@@ -75,6 +100,7 @@ public record OrderResponse(
                 order.getSubtotal(),
                 order.getTaxRate(),
                 order.getTaxAmount(),
+                order.getGlobalDiscount(),
                 order.getTotal(),
                 order.getCurrency(),
                 order.getDeliveryAgentId(),
@@ -86,12 +112,25 @@ public record OrderResponse(
                 order.getPlannedDeliveryDate(),
                 order.getConfirmedDeliveryDate(),
                 order.isAsapPayment(),
+                order.getPaymentTerms(),
+                order.getDueDate(),
                 order.getDeliveryRejectionReason(),
+                order.getEstimatedArrival(),
+                order.getLastLatitude(),
+                order.getLastLongitude(),
+                order.getLastLocationUpdate(),
                 order.getNotes(),
                 order.getVersion(),
                 order.getCreatedAt(),
                 order.getUpdatedAt(),
-                items
+                items,
+                confirmedByName,
+                preparedByName,
+                readyByName,
+                assignedDeliveryByName,
+                acceptedDeliveryByName,
+                confirmedDeliveryByName,
+                deliveredByName
         );
     }
 
@@ -104,6 +143,7 @@ public record OrderResponse(
             BigDecimal unitPrice,
             BigDecimal discount,
             BigDecimal lineTotal,
+            String productSnapshot,
             Instant createdAt
     ) {
         public static OrderItemResponse from(OrderItem item) {
@@ -116,6 +156,7 @@ public record OrderResponse(
                     item.getUnitPrice(),
                     item.getDiscount(),
                     item.getLineTotal(),
+                    item.getProductSnapshot(),
                     item.getCreatedAt()
             );
         }

@@ -1,0 +1,177 @@
+/* Component-specific styles only — global design system in styles.css */
+
+.alerts-summary {
+  margin-bottom: 16px;
+  font-size: 14px;
+  color: #8896ab;
+}
+
+.alert-count {
+  font-weight: 600;
+  color: #e53935;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: #8896ab;
+}
+
+.empty-icon {
+  font-size: 48px;
+  margin-bottom: 12px;
+}
+
+.empty-state h3 {
+  margin: 0 0 4px 0;
+  color: #2e7d32;
+  font-size: 18px;
+}
+
+.empty-state p {
+  margin: 0;
+  font-size: 14px;
+}
+
+.alerts-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.alert-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  border-left: 4px solid #ff9800;
+  transition: box-shadow 0.2s;
+}
+
+.alert-card:hover {
+  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+}
+
+.alert-card.urgency-critical {
+  border-left-color: #e53935;
+  background: #fff5f5;
+}
+
+.alert-card.urgency-high {
+  border-left-color: #ff6f00;
+  background: #fff8e1;
+}
+
+.alert-card.urgency-medium {
+  border-left-color: #ff9800;
+  background: #fffde7;
+}
+
+.alert-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.alert-product {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.alert-sku code {
+  background: #f5f7fa;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
+  flex-shrink: 0;
+}
+
+.alert-name {
+  font-weight: 600;
+  font-size: 15px;
+  color: #1a1a2e;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.urgency-badge {
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  flex-shrink: 0;
+}
+
+.urgency-badge.urgency-critical {
+  background: #fce4ec;
+  color: #c62828;
+}
+
+.urgency-badge.urgency-high {
+  background: #fff3e0;
+  color: #e65100;
+}
+
+.urgency-badge.urgency-medium {
+  background: #fff8e1;
+  color: #f57f17;
+}
+
+.alert-details {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+.detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.detail-label {
+  font-size: 11px;
+  color: #8896ab;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.detail-value {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1a1a2e;
+}
+
+.detail-value.critical-text {
+  color: #e53935;
+}
+
+.detail-value.deficit {
+  color: #e65100;
+}
+
+.loading {
+  text-align: center;
+  padding: 40px;
+  color: #8896ab;
+  font-size: 14px;
+}
+
+@media (max-width: 768px) {
+  .alert-details {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .alert-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+}

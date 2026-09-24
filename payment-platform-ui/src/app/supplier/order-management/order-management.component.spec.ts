@@ -8,6 +8,7 @@ import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { OrderManagementComponent } from './order-management.component';
 import { OrderService } from '../../services/order.service';
 import { SupplierAgentService } from '../../services/supplier-agent.service';
+import { StockService } from '../../services/stock.service';
 import { ToastService } from '../../services/toast.service';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
@@ -30,14 +31,18 @@ describe('OrderManagementComponent', () => {
   beforeEach(() => {
     queryParamsSubject = new BehaviorSubject<any>({});
     sessionStorage.setItem('user', JSON.stringify({ organizationId: '1' }));
-    const orderSpy = jasmine.createSpyObj('OrderService', ['list', 'getById', 'getByReference', 'confirm', 'prepare', 'readyForDelivery', 'assignDelivery', 'deliveryReject', 'cancel', 'listDeliveries']);
+    const orderSpy = jasmine.createSpyObj('OrderService', ['list', 'getById', 'getByReference', 'confirm', 'prepare', 'readyForDelivery', 'assignDelivery', 'deliveryReject', 'cancel', 'listDeliveries', 'update', 'downloadInvoice', 'getComments', 'addComment', 'search', 'exportCsv']);
     const agentSpy = jasmine.createSpyObj('SupplierAgentService', ['listAgents']);
+    const stockSpy = jasmine.createSpyObj('StockService', ['getProducts']);
     const toastSpy = jasmine.createSpyObj('ToastService', ['success', 'error']);
     const routerSpy = jasmine.createSpyObj('Router', ['navigate']);
     orderSpy.list.and.returnValue(of([]));
     orderSpy.listDeliveries.and.returnValue(of([]));
     orderSpy.getByReference.and.returnValue(of(mockOrder));
+    orderSpy.getComments.and.returnValue(of([]));
+    orderSpy.search.and.returnValue(of([]));
     agentSpy.listAgents.and.returnValue(of([]));
+    stockSpy.getProducts.and.returnValue(of([]));
 
     TestBed.configureTestingModule({
     declarations: [OrderManagementComponent],
@@ -46,6 +51,7 @@ describe('OrderManagementComponent', () => {
     providers: [
         { provide: OrderService, useValue: orderSpy },
         { provide: SupplierAgentService, useValue: agentSpy },
+        { provide: StockService, useValue: stockSpy },
         { provide: ToastService, useValue: toastSpy },
         { provide: Router, useValue: routerSpy },
         { provide: ActivatedRoute, useValue: { queryParams: queryParamsSubject.asObservable() } },
@@ -92,6 +98,7 @@ describe('OrderManagementComponent', () => {
     it('should auto-open detail when ref query param is present', () => {
       orderService.list.and.returnValue(of([mockOrder]));
       orderService.getByReference.and.returnValue(of(mockOrder));
+      orderService.getComments.and.returnValue(of([]));
       agentService.listAgents.and.returnValue(of([]));
       queryParamsSubject.next({ ref: 'ORD-001' });
       component.ngOnInit();
@@ -158,6 +165,7 @@ describe('OrderManagementComponent', () => {
   describe('viewDetail', () => {
     it('should load order detail', () => {
       orderService.getByReference.and.returnValue(of(mockOrder));
+      orderService.getComments.and.returnValue(of([]));
       component.viewDetail(mockOrder);
       expect(component.selectedOrder).toBe(mockOrder);
       expect(component.showDetail).toBeTrue();
@@ -344,5 +352,103 @@ describe('OrderManagementComponent', () => {
     it('should return false for CANCELLED', () => expect(component.canCancel({ status: 'CANCELLED' } as any)).toBeFalse());
     it('should return false for ACCEPTED', () => expect(component.canCancel({ status: 'ACCEPTED' } as any)).toBeFalse());
     it('should return false for REJECTED', () => expect(component.canCancel({ status: 'REJECTED' } as any)).toBeFalse());
+  });
+
+  describe('canEdit', () => {
+    it('should return true for DRAFT', () => expect(component.canEdit({ status: 'DRAFT' } as any)).toBeTrue());
+    it('should return false for CONFIRMED', () => expect(component.canEdit({ status: 'CONFIRMED' } as any)).toBeFalse());
+    it('should return false for PREPARING', () => expect(component.canEdit({ status: 'PREPARING' } as any)).toBeFalse());
+  });
+
+  describe('openEdit / closeEdit', () => {
+    it('should open edit modal with order data', () => {
+      const orderWithItems = { ...mockOrder, items: [{ productId: 'p1', productName: 'Product 1', quantity: 5, discount: 0, unitPrice: 10 }] };
+      component.openEdit(orderWithItems);
+      expect(component.showEditModal).toBeTrue();
+      expect(component.editOrderId).toBe(1);
+      expect(component.editNotes).toBe('');
+      expect(component.editOrderLines.length).toBe(1);
+      expect(component.editOrderLines[0].quantity).toBe(5);
+    });
+
+    it('should close edit modal', () => {
+      component.openEdit(mockOrder);
+      component.closeEdit();
+      expect(component.showEditModal).toBeFalse();
+      expect(component.editOrderLines.length).toBe(0);
+    });
+  });
+
+  describe('addEditProduct / removeEditLine', () => {
+    it('should add new product to edit lines', () => {
+      component.openEdit(mockOrder);
+      component.addEditProduct({ id: 'p1', name: 'Product 1', unitPrice: 10 });
+      expect(component.editOrderLines.length).toBe(1);
+      expect(component.editOrderLines[0].productId).toBe('p1');
+    });
+
+    it('should increment quantity if product already in lines', () => {
+      component.openEdit(mockOrder);
+      component.addEditProduct({ id: 'p1', name: 'Product 1', unitPrice: 10 });
+      component.addEditProduct({ id: 'p1', name: 'Product 1', unitPrice: 10 });
+      expect(component.editOrderLines.length).toBe(1);
+      expect(component.editOrderLines[0].quantity).toBe(2);
+    });
+
+    it('should remove line by index', () => {
+      component.openEdit(mockOrder);
+      component.addEditProduct({ id: 'p1', name: 'Product 1', unitPrice: 10 });
+      component.removeEditLine(0);
+      expect(component.editOrderLines.length).toBe(0);
+    });
+  });
+
+  describe('canSubmitEdit', () => {
+    it('should return false when no lines', () => {
+      component.openEdit(mockOrder);
+      component.editOrderLines = [];
+      expect(component.canSubmitEdit()).toBeFalse();
+    });
+
+    it('should return true when has lines and not editing', () => {
+      component.openEdit(mockOrder);
+      component.addEditProduct({ id: 'p1', name: 'Product 1', unitPrice: 10 });
+      expect(component.canSubmitEdit()).toBeTrue();
+    });
+
+    it('should return false when editing', () => {
+      component.openEdit(mockOrder);
+      component.addEditProduct({ id: 'p1', name: 'Product 1', unitPrice: 10 });
+      component.editing = true;
+      expect(component.canSubmitEdit()).toBeFalse();
+    });
+  });
+
+  describe('submitEdit', () => {
+    it('should submit update and close modal', () => {
+      orderService.update.and.returnValue(of(mockOrder));
+      component.openEdit(mockOrder);
+      component.addEditProduct({ id: 'p1', name: 'Product 1', unitPrice: 10 });
+      component.submitEdit();
+      expect(orderService.update).toHaveBeenCalled();
+      expect(toast.success).toHaveBeenCalledWith('Commande modifiée avec succès');
+      expect(component.showEditModal).toBeFalse();
+    });
+
+    it('should handle update error', () => {
+      orderService.update.and.returnValue(throwError(() => ({ error: { message: 'Err' } })));
+      component.openEdit(mockOrder);
+      component.addEditProduct({ id: 'p1', name: 'Product 1', unitPrice: 10 });
+      component.submitEdit();
+      expect(toast.error).toHaveBeenCalledWith('Err');
+      expect(component.editing).toBeFalse();
+    });
+
+    it('should not submit when no lines', () => {
+      component.openEdit(mockOrder);
+      component.editOrderLines = [];
+      component.submitEdit();
+      expect(orderService.update).not.toHaveBeenCalled();
+    });
   });
 });

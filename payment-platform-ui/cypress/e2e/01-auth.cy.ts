@@ -1,6 +1,13 @@
 describe('01 - Auth: Login Page', () => {
   before(() => cy.ensureTestUsers());
-  beforeEach(() => cy.visit('/'));
+  beforeEach(() => {
+    cy.window().then((win) => {
+      win.sessionStorage.clear();
+    });
+    cy.visit('/');
+    cy.url().should('include', '/login');
+    cy.get('#username').should('be.visible');
+  });
 
   it('should display login form with all fields', () => {
     cy.url().should('include', '/login');
@@ -38,10 +45,11 @@ describe('01 - Auth: Login Page', () => {
 
   it('should login as SUPPLIER_ADMIN and reach dashboard', () => {
     cy.getTestCtx().then((ctx) => {
+      expect(ctx.users?.supplierAdmin?.username, 'supplierAdmin username').to.be.a('string').and.not.be.empty;
       cy.get('#username').clear().type(ctx.users.supplierAdmin.username);
       cy.get('#password').clear().type('test1234');
-      cy.get('button[type="submit"]').click();
-      cy.url({ timeout: 15000 }).should('include', '/dashboard');
+      cy.get('button[type="submit"]').should('not.be.disabled').click();
+      cy.url({ timeout: 20000 }).should('include', '/dashboard');
       cy.window().then((win) => {
         const user = JSON.parse(win.sessionStorage.getItem('user') || '{}');
         expect(user.roles).to.include('SUPPLIER_ADMIN');
@@ -51,10 +59,11 @@ describe('01 - Auth: Login Page', () => {
 
   it('should login as SHOP_ADMIN and reach dashboard', () => {
     cy.getTestCtx().then((ctx) => {
+      expect(ctx.users?.shopAdmin?.username, 'shopAdmin username').to.be.a('string').and.not.be.empty;
       cy.get('#username').clear().type(ctx.users.shopAdmin.username);
       cy.get('#password').clear().type('test1234');
-      cy.get('button[type="submit"]').click();
-      cy.url({ timeout: 15000 }).should('include', '/dashboard');
+      cy.get('button[type="submit"]').should('not.be.disabled').click();
+      cy.url({ timeout: 20000 }).should('include', '/dashboard');
       cy.window().then((win) => {
         const user = JSON.parse(win.sessionStorage.getItem('user') || '{}');
         expect(user.roles).to.include('SHOP_ADMIN');

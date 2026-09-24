@@ -1,0 +1,74 @@
+<div class="page-header">
+  <h1>Journal d'audit</h1>
+</div>
+
+<div class="filters">
+  <input type="text" [(ngModel)]="filterUserId" placeholder="ID utilisateur" class="form-control filter-input"
+    aria-label="Filtrer par ID utilisateur">
+  <select [(ngModel)]="filterAction" (change)="applyFilter()" class="form-control filter-select"
+    aria-label="Filtrer par type d'action">
+    <option value="">Toutes les actions</option>
+    @for (action of availableActions; track action) {
+      <option [value]="action">{{ formatAction(action) }}</option>
+    }
+  </select>
+  <input type="date" [(ngModel)]="filterDateFrom" (change)="applyFilter()" class="form-control filter-input"
+    aria-label="Date de début">
+  <input type="date" [(ngModel)]="filterDateTo" (change)="applyFilter()" class="form-control filter-input"
+    aria-label="Date de fin">
+  <button class="btn btn-primary" (click)="applyFilter()">Filtrer</button>
+  <button class="btn" (click)="clearFilters()">Réinitialiser</button>
+</div>
+
+@if (loading) {
+  <div class="loading">
+    <div class="spinner"></div>
+    <span>Chargement...</span>
+  </div>
+}
+
+@if (error) {
+  <div class="error-message">{{ error }}</div>
+}
+
+@if (!loading && !error) {
+  <div class="table-card">
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Date / Heure</th>
+            <th>Utilisateur</th>
+            <th>Action</th>
+            <th>Entité</th>
+            <th>Détails</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (log of logs; track log.id) {
+            <tr>
+              <td>{{ log.timestamp | date:'dd/MM/yyyy HH:mm:ss' }}</td>
+              <td><code>{{ log.userId || '-' }}</code></td>
+              <td><span class="action-badge">{{ formatAction(log.action) }}</span></td>
+              <td><code>{{ log.entityId || '-' }}</code></td>
+              <td class="details-cell">{{ log.details || '-' }}</td>
+            </tr>
+          }
+          @if (logs.length === 0) {
+            <tr>
+              <td colspan="5" class="empty">Aucun log d'audit trouvé</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  @if (totalPages > 1) {
+    <div class="pagination">
+      <button class="btn btn-sm" (click)="prevPage()" [disabled]="currentPage === 0">← Précédent</button>
+      <span class="page-info">Page {{ currentPage + 1 }} / {{ totalPages }} ({{ totalElements }} entrées)</span>
+      <button class="btn btn-sm" (click)="nextPage()" [disabled]="currentPage >= totalPages - 1">Suivant →</button>
+    </div>
+  }
+}

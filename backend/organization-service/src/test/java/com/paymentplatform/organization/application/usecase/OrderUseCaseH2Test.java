@@ -34,6 +34,7 @@ class OrderUseCaseH2Test {
     @Autowired private CancelOrderUseCase cancelOrder;
     @Autowired private RejectOrderUseCase rejectOrder;
     @Autowired private DeliveryRejectOrderUseCase deliveryRejectOrder;
+    @Autowired private UpdateOrderUseCase updateOrder;
     @Autowired private ProductRepository products;
 
     private UUID supplierId;
@@ -62,13 +63,13 @@ class OrderUseCaseH2Test {
     }
 
     private OrderResponse createShopOrder() {
-        var request = new CreateOrderRequest(supplierId, shopId, false, "TND", "Test order",
+        var request = new CreateOrderRequest(supplierId, shopId, false, null, "TND", null, null, "Test order",
                 List.of(new OrderItemRequest(productId, 5, null)));
         return createOrder.execute(request, UUID.fromString("00000000-0000-0000-0000-000000000010"), "SHOP");
     }
 
     private OrderResponse createSupplierOrder() {
-        var request = new CreateOrderRequest(supplierId, shopId, false, "TND", "Test order",
+        var request = new CreateOrderRequest(supplierId, shopId, false, null, "TND", null, null, "Test order",
                 List.of(new OrderItemRequest(productId, 5, null)));
         return createOrder.execute(request, UUID.fromString("00000000-0000-0000-0000-000000000010"), "SUPPLIER");
     }
@@ -89,14 +90,14 @@ class OrderUseCaseH2Test {
 
     @Test
     void createOrder_emptyItems_throwsConflict() {
-        var request = new CreateOrderRequest(supplierId, shopId, false, "TND", null, List.of());
+        var request = new CreateOrderRequest(supplierId, shopId, false, null, "TND", null, null, null, List.of());
         assertThatThrownBy(() -> createOrder.execute(request, UUID.fromString("00000000-0000-0000-0000-000000000010"), "SHOP"))
                 .isInstanceOf(ConflictException.class);
     }
 
     @Test
     void createOrder_sameSupplierAndShop_throws() {
-        var request = new CreateOrderRequest(supplierId, supplierId, false, "TND", null,
+        var request = new CreateOrderRequest(supplierId, supplierId, false, null, "TND", null, null, null,
                 List.of(new OrderItemRequest(productId, 5, null)));
         assertThatThrownBy(() -> createOrder.execute(request, UUID.fromString("00000000-0000-0000-0000-000000000010"), "SHOP"))
                 .isInstanceOf(ConflictException.class);
@@ -104,7 +105,7 @@ class OrderUseCaseH2Test {
 
     @Test
     void createOrder_unknownProduct_throwsNotFound() {
-        var request = new CreateOrderRequest(supplierId, shopId, false, "TND", null,
+        var request = new CreateOrderRequest(supplierId, shopId, false, null, "TND", null, null, null,
                 List.of(new OrderItemRequest(UUID.fromString("00000000-0000-0000-0000-000000000999"), 5, null)));
         assertThatThrownBy(() -> createOrder.execute(request, UUID.fromString("00000000-0000-0000-0000-000000000010"), "SHOP"))
                 .isInstanceOf(NotFoundException.class);
@@ -112,7 +113,7 @@ class OrderUseCaseH2Test {
 
     @Test
     void createOrder_insufficientStock_throwsConflict() {
-        var request = new CreateOrderRequest(supplierId, shopId, false, "TND", null,
+        var request = new CreateOrderRequest(supplierId, shopId, false, null, "TND", null, null, null,
                 List.of(new OrderItemRequest(productId, 999, null)));
         assertThatThrownBy(() -> createOrder.execute(request, UUID.fromString("00000000-0000-0000-0000-000000000010"), "SHOP"))
                 .isInstanceOf(ConflictException.class)
@@ -164,7 +165,7 @@ class OrderUseCaseH2Test {
     @Test
     void rejectOrder_notDelivered_throwsConflict() {
         var order = createShopOrder();
-        assertThatThrownBy(() -> rejectOrder.execute(order.id(), UUID.fromString("00000000-0000-0000-0000-000000000010")))
+        assertThatThrownBy(() -> rejectOrder.execute(order.id(), UUID.fromString("00000000-0000-0000-0000-000000000010"), "Produit non conforme"))
                 .isInstanceOf(ConflictException.class);
     }
 
@@ -203,7 +204,7 @@ class OrderUseCaseH2Test {
 
     @Test
     void createOrder_withNotes_succeeds() {
-        var request = new CreateOrderRequest(supplierId, shopId, false, "TND", "Special instructions",
+        var request = new CreateOrderRequest(supplierId, shopId, false, null, "TND", null, null, "Special instructions",
                 List.of(new OrderItemRequest(productId, 3, null)));
         var response = createOrder.execute(request, UUID.fromString("00000000-0000-0000-0000-000000000010"), "SHOP");
         assertThat(response.status()).isEqualTo("DRAFT");
@@ -211,7 +212,7 @@ class OrderUseCaseH2Test {
 
     @Test
     void createOrder_withDiscount_succeeds() {
-        var request = new CreateOrderRequest(supplierId, shopId, false, "TND", null,
+        var request = new CreateOrderRequest(supplierId, shopId, false, null, "TND", null, null, null,
                 List.of(new OrderItemRequest(productId, 3, new BigDecimal("2.00"))));
         var response = createOrder.execute(request, UUID.fromString("00000000-0000-0000-0000-000000000010"), "SHOP");
         assertThat(response.items()).hasSize(1);
@@ -223,5 +224,81 @@ class OrderUseCaseH2Test {
         assertThatThrownBy(() -> acceptOrder.execute(order.id(), UUID.fromString("00000000-0000-0000-0000-000000000015")))
                 .isInstanceOf(ConflictException.class)
                 .hasMessageContaining("DELIVERED");
+    }
+
+    @Test
+    void updateOrder_draft_succeeds() {
+        var order = createShopOrder();
+        assertThat(order.status()).isEqualTo("DRAFT");
+
+        var updateRequest = new UpdateOrderRequest("Updated notes", false,
+                List.of(new OrderItemRequest(productId, 10, null)));
+        var updated = updateOrder.execute(order.id(), updateRequest, UUID.fromString("00000000-0000-0000-0000-000000000010"));
+        assertThat(updated.status()).isEqualTo("DRAFT");
+        assertThat(updated.notes()).isEqualTo("Updated notes");
+        assertThat(updated.items()).hasSize(1);
+        assertThat(updated.items().get(0).quantity()).isEqualTo(10);
+    }
+
+    @Test
+    void updateOrder_notDraft_throwsConflict() {
+        var order = createShopOrder();
+        confirmOrder.execute(order.id(), UUID.fromString("00000000-0000-0000-0000-000000000010"));
+
+        var updateRequest = new UpdateOrderRequest("Notes", false,
+                List.of(new OrderItemRequest(productId, 3, null)));
+        assertThatThrownBy(() -> updateOrder.execute(order.id(), updateRequest, UUID.fromString("00000000-0000-0000-0000-000000000010")))
+                .isInstanceOf(ConflictException.class)
+                .hasMessageContaining("BROUILLON");
+    }
+
+    @Test
+    void updateOrder_emptyItems_throwsConflict() {
+        var order = createShopOrder();
+        var updateRequest = new UpdateOrderRequest("Notes", false, List.of());
+        assertThatThrownBy(() -> updateOrder.execute(order.id(), updateRequest, UUID.fromString("00000000-0000-0000-0000-000000000010")))
+                .isInstanceOf(ConflictException.class);
+    }
+
+    @Test
+    void updateOrder_unknownProduct_throwsNotFound() {
+        var order = createShopOrder();
+        var updateRequest = new UpdateOrderRequest(null, null,
+                List.of(new OrderItemRequest(UUID.fromString("00000000-0000-0000-0000-000000000999"), 5, null)));
+        assertThatThrownBy(() -> updateOrder.execute(order.id(), updateRequest, UUID.fromString("00000000-0000-0000-0000-000000000010")))
+                .isInstanceOf(NotFoundException.class);
+    }
+
+    @Test
+    void updateOrder_insufficientStock_throwsConflict() {
+        var order = createShopOrder();
+        var updateRequest = new UpdateOrderRequest(null, null,
+                List.of(new OrderItemRequest(productId, 999, null)));
+        assertThatThrownBy(() -> updateOrder.execute(order.id(), updateRequest, UUID.fromString("00000000-0000-0000-0000-000000000010")))
+                .isInstanceOf(ConflictException.class)
+                .hasMessageContaining("Stock insuffisant");
+    }
+
+    @Test
+    void updateOrder_releasesOldReservedQty() {
+        var order = createShopOrder();
+        var product = products.findById(productId).orElseThrow();
+        int reservedBefore = product.getReservedQty();
+        assertThat(reservedBefore).isGreaterThanOrEqualTo(5);
+
+        var updateRequest = new UpdateOrderRequest(null, null,
+                List.of(new OrderItemRequest(productId, 2, null)));
+        updateOrder.execute(order.id(), updateRequest, UUID.fromString("00000000-0000-0000-0000-000000000010"));
+
+        var updatedProduct = products.findById(productId).orElseThrow();
+        assertThat(updatedProduct.getReservedQty()).isEqualTo(reservedBefore - 5 + 2);
+    }
+
+    @Test
+    void updateOrder_nonExistent_throwsNotFound() {
+        var updateRequest = new UpdateOrderRequest("Notes", false,
+                List.of(new OrderItemRequest(productId, 1, null)));
+        assertThatThrownBy(() -> updateOrder.execute(UUID.fromString("00000000-0000-0000-0000-000000099999"), updateRequest, UUID.fromString("00000000-0000-0000-0000-000000000010")))
+                .isInstanceOf(NotFoundException.class);
     }
 }

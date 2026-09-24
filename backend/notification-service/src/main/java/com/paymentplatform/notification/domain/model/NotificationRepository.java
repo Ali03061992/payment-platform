@@ -1,5 +1,7 @@
 package com.paymentplatform.notification.domain.model;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -22,6 +24,18 @@ public interface NotificationRepository extends JpaRepository<Notification, UUID
     long countByRecipientUserIdAndReadStatus(UUID recipientUserId, String readStatus);
 
     long countByRecipientOrganizationIdAndReadStatus(UUID recipientOrganizationId, String readStatus);
+
+    Page<Notification> findByRecipientUserIdOrderByCreatedAtDesc(UUID recipientUserId, Pageable pageable);
+
+    Page<Notification> findByRecipientOrganizationIdOrderByCreatedAtDesc(UUID recipientOrganizationId, Pageable pageable);
+
+    Page<Notification> findByRecipientUserIdAndTypeOrderByCreatedAtDesc(UUID recipientUserId, String type, Pageable pageable);
+
+    Page<Notification> findByRecipientOrganizationIdAndTypeOrderByCreatedAtDesc(UUID recipientOrganizationId, String type, Pageable pageable);
+
+    long countByRecipientUserIdAndType(UUID recipientUserId, String type);
+
+    long countByRecipientOrganizationIdAndType(UUID recipientOrganizationId, String type);
 
     @Modifying
     @Transactional

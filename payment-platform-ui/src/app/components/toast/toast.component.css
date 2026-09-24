@@ -15,8 +15,8 @@
   gap: 12px;
   padding: 14px 18px;
   border-radius: 10px;
-  background: #fff;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+  background: var(--bg-secondary);
+  box-shadow: var(--shadow-md);
   pointer-events: auto;
   animation: toastSlideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   min-width: 280px;
@@ -70,7 +70,7 @@
   flex: 1;
   font-size: 14px;
   font-weight: 500;
-  color: #1a1a2e;
+  color: var(--text-primary);
   line-height: 1.4;
 }
 
@@ -78,7 +78,7 @@
   background: none;
   border: none;
   font-size: 20px;
-  color: #8896ab;
+  color: var(--text-muted);
   cursor: pointer;
   padding: 4px;
   line-height: 1;
@@ -88,8 +88,8 @@
 }
 
 .toast-close:hover {
-  background: #f5f7fa;
-  color: #333;
+  background: var(--hover-bg);
+  color: var(--text-secondary);
 }
 
 /* Mobile responsive */

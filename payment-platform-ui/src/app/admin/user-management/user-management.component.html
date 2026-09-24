@@ -1,10 +1,10 @@
 <div class="page-header">
   <h1>Gestion des utilisateurs</h1>
-  <a routerLink="create" class="btn btn-primary">+ Créer un compte</a>
+  <a routerLink="create" class="btn btn-primary" aria-label="Créer un nouveau compte">+ Créer un compte</a>
 </div>
 
 <div class="filters">
-  <select [(ngModel)]="filterRole" (change)="applyFilter()" class="form-control filter-select">
+  <select [(ngModel)]="filterRole" (change)="applyFilter()" class="form-control filter-select" aria-label="Filtrer par rôle">
     <option value="">Tous les rôles</option>
     <option value="SYSTEM_ADMIN">SYSTEM_ADMIN</option>
     <option value="SUPPLIER_ADMIN">SUPPLIER_ADMIN</option>
@@ -12,7 +12,7 @@
     <option value="SHOP_ADMIN">SHOP_ADMIN</option>
     <option value="SHOP_AGENT">SHOP_AGENT</option>
   </select>
-  <select [(ngModel)]="filterStatus" (change)="applyFilter()" class="form-control filter-select">
+  <select [(ngModel)]="filterStatus" (change)="applyFilter()" class="form-control filter-select" aria-label="Filtrer par statut">
     <option value="">Tous les statuts</option>
     <option value="ACTIVE">Actif</option>
     <option value="DISABLED">Désactivé</option>
@@ -50,16 +50,17 @@
               <td>{{ user.phone || '-' }}</td>
               <td><span class="role-badge">{{ user.roles[0] }}</span></td>
               <td>
-                <span class="status-badge" [class.active]="user.status === 'ACTIVE'" [class.disabled]="user.status === 'DISABLED'">
+                <span class="status-badge" [class.active]="user.status === 'ACTIVE'" [class.disabled]="user.status === 'DISABLED'"
+                  [attr.aria-label]="'Statut de l\'utilisateur : ' + (user.status === 'ACTIVE' ? 'Actif' : 'Désactivé')" role="status">
                   {{ user.status }}
                 </span>
               </td>
               <td class="actions">
                 @if (user.status === 'ACTIVE') {
-                  <button class="btn btn-sm btn-danger" (click)="disable(user)">Désactiver</button>
+                  <button class="btn btn-sm btn-danger" (click)="disable(user)" [attr.aria-label]="'Désactiver l\'utilisateur ' + user.username">Désactiver</button>
                 }
                 @if (user.status === 'DISABLED') {
-                  <button class="btn btn-sm btn-success" (click)="activate(user)">Activer</button>
+                  <button class="btn btn-sm btn-success" (click)="activate(user)" [attr.aria-label]="'Activer l\'utilisateur ' + user.username">Activer</button>
                 }
               </td>
             </tr>

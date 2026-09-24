@@ -28,15 +28,17 @@ public class ConfirmOrderUseCase {
     private final OrderEventRepository events;
     private final ProductRepository products;
     private final OutboxEventStore outbox;
+    private final BalanceUseCase balanceUseCase;
 
     public ConfirmOrderUseCase(OrderRepository orders, OrderItemRepository orderItems,
                                OrderEventRepository events, ProductRepository products,
-                               OutboxEventStore outbox) {
+                               OutboxEventStore outbox, BalanceUseCase balanceUseCase) {
         this.orders = orders;
         this.orderItems = orderItems;
         this.events = events;
         this.products = products;
         this.outbox = outbox;
+        this.balanceUseCase = balanceUseCase;
     }
 
     @Transactional
@@ -63,6 +65,9 @@ public class ConfirmOrderUseCase {
 
         order.confirm();
         orders.save(order);
+
+        balanceUseCase.creditBalance(order.getSupplierId(), order.getShopId(),
+                order.getTotal(), order.getId(), actorUserId);
 
         events.save(OrderEvent.create(orderId, "ORDER_CONFIRMED", actorUserId, null));
         outbox.append(new OrderEvents.OrderConfirmedEvent(UUID.randomUUID(), Instant.now(),

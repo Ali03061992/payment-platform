@@ -1,0 +1,59 @@
+<div class="page-header">
+  <h2>Alertes de stock bas</h2>
+</div>
+
+@if (loading) {
+  <div class="loading">
+    <div class="spinner"></div>
+    <span>Chargement des alertes...</span>
+  </div>
+}
+
+@if (!loading) {
+  @if (alerts.length === 0) {
+    <div class="empty-state">
+      <div class="empty-icon">✅</div>
+      <h3>Aucune alerte de stock</h3>
+      <p>Tous vos produits ont un stock suffisant.</p>
+    </div>
+  } @else {
+    <div class="alerts-summary">
+      <span class="alert-count">{{ alerts.length }} produit(s) en alerte</span>
+    </div>
+    <div class="alerts-list">
+      @for (product of alerts; track product.id) {
+        <div class="alert-card" [ngClass]="'urgency-' + getUrgencyLevel(product)">
+          <div class="alert-header">
+            <div class="alert-product">
+              <span class="alert-sku"><code>{{ product.sku }}</code></span>
+              <span class="alert-name">{{ product.name }}</span>
+            </div>
+            <span class="urgency-badge" [ngClass]="'urgency-' + getUrgencyLevel(product)">
+              {{ getUrgencyLabel(product) }}
+            </span>
+          </div>
+          <div class="alert-details">
+            <div class="detail-item">
+              <span class="detail-label">Disponible</span>
+              <span class="detail-value" [class.critical-text]="getAvailableQty(product) <= 0">
+                {{ getAvailableQty(product) }} {{ product.unit }}
+              </span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Seuil min</span>
+              <span class="detail-value">{{ product.minQuantity }} {{ product.unit }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Déficit</span>
+              <span class="detail-value deficit">{{ getDeficit(product) }} {{ product.unit }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Réserve</span>
+              <span class="detail-value">{{ product.reservedQty }} {{ product.unit }}</span>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+}

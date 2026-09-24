@@ -2,6 +2,8 @@ import { Component, HostListener, OnInit, OnDestroy, ElementRef, ViewChild } fro
 import { Router } from '@angular/router';
 import { LoginService } from '../services/login.service';
 import { NotificationService } from '../services/notification.service';
+import { StockService } from '../services/stock.service';
+import { ThemeService, Theme } from '../services/theme.service';
 import { Notification } from '../models/notification.model';
 import { Subscription } from 'rxjs';
 
@@ -17,6 +19,7 @@ export class LayoutComponent implements OnInit, OnDestroy {
   isMobile = false;
   showNotifications = false;
   unreadCount = 0;
+  lowStockAlertCount = 0;
   notifications: Notification[] = [];
   private subs: Subscription[] = [];
 
@@ -36,12 +39,16 @@ export class LayoutComponent implements OnInit, OnDestroy {
     { label: 'Boutiques', icon: '🏪', route: 'admin/shops', roles: ['SYSTEM_ADMIN'] },
     { label: 'Relations F-B', icon: '🔗', route: 'admin/relations', roles: ['SYSTEM_ADMIN'] },
     { label: 'Stats organisations', icon: '📈', route: 'admin/org-stats', roles: ['SYSTEM_ADMIN'] },
+    { label: 'Journal d\'audit', icon: '📋', route: 'admin/audit-logs', roles: ['SYSTEM_ADMIN'] },
     { label: 'Categories', icon: '🏷', route: 'supplier/categories', roles: ['SUPPLIER_ADMIN'] },
     { label: 'Familles', icon: '📁', route: 'supplier/families', roles: ['SUPPLIER_ADMIN'] },
     { label: 'Produits', icon: '📋', route: 'supplier/products', roles: ['SUPPLIER_ADMIN'] },
     { label: 'Stock', icon: '📦', route: 'supplier/stock', roles: ['SUPPLIER_ADMIN', 'SUPPLIER_AGENT'] },
+    { label: 'Alertes stock', icon: '🚨', route: 'supplier/low-stock-alerts', roles: ['SUPPLIER_ADMIN'] },
     { label: 'Optimisation', icon: '🧠', route: 'supplier/optimization', roles: ['SUPPLIER_ADMIN'] },
     { label: 'Commandes', icon: '🛒', route: 'supplier/orders', roles: ['SUPPLIER_ADMIN'] },
+    { label: 'Finance', icon: '💰', route: 'supplier/financial', roles: ['SUPPLIER_ADMIN'] },
+    { label: 'Balance', icon: '⚖️', route: 'supplier/balance', roles: ['SUPPLIER_ADMIN'] },
     { label: 'Livraisons', icon: '🚚', route: 'supplier/deliveries', roles: ['SUPPLIER_AGENT'] },
     { label: 'Mes commandes', icon: '🛒', route: 'shop/orders', roles: ['SHOP_ADMIN', 'SHOP_MANAGER', 'SHOP_AGENT'] },
     { label: 'Nouvelle commande', icon: '➕', route: 'shop/orders/create', roles: ['SHOP_ADMIN', 'SHOP_MANAGER'] },
@@ -51,13 +58,16 @@ export class LayoutComponent implements OnInit, OnDestroy {
     { label: 'Scanner QR', icon: '📱', route: 'scan', roles: ['SYSTEM_ADMIN', 'SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_AGENT'] },
     { label: 'Export', icon: '📤', route: 'export', roles: ['SYSTEM_ADMIN', 'SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_AGENT'] },
     { label: 'Paiements agents', icon: '👥', route: 'supplier/agent-payments', roles: ['SUPPLIER_ADMIN', 'SUPPLIER_AGENT'] },
+    { label: 'Notifications', icon: '🔔', route: 'notifications', roles: ['SYSTEM_ADMIN', 'SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_AGENT'] },
     { label: 'Changer mot de passe', icon: '🔑', route: 'change-password', roles: ['SYSTEM_ADMIN', 'SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_AGENT'] },
   ];
 
   constructor(
     private loginService: LoginService,
     private router: Router,
-    private notificationService: NotificationService
+    private notificationService: NotificationService,
+    private stockService: StockService,
+    public themeService: ThemeService
   ) {
     this.user = this.loginService.getCurrentUser();
     this.checkMobile();
@@ -71,6 +81,12 @@ export class LayoutComponent implements OnInit, OnDestroy {
       this.notificationService.notifications$.subscribe(n => this.notifications = n),
       this.notificationService.unreadCount$.subscribe(c => this.unreadCount = c)
     );
+    if (this.user?.roles?.some(r => r === 'SUPPLIER_ADMIN' || r === 'SUPPLIER_AGENT')) {
+      this.stockService.getLowStockAlerts().subscribe({
+        next: (products) => this.lowStockAlertCount = products.length,
+        error: () => {}
+      });
+    }
   }
 
   ngOnDestroy(): void {

@@ -56,7 +56,20 @@ public class NotificationAmqpConfig {
 
     @Bean
     public Queue notificationUsersQueue() {
-        return new Queue(AmqpTopology.QUEUE_NOTIFICATION_USERS, true);
+        return QueueBuilder.durable(AmqpTopology.QUEUE_NOTIFICATION_USERS).build();
+    }
+
+    @Bean
+    public Queue notificationDisputesQueue() {
+        return QueueBuilder.durable(AmqpTopology.QUEUE_NOTIFICATION_DISPUTES)
+                .deadLetterExchange(AmqpTopology.EXCHANGE_ORGANIZATION)
+                .deadLetterRoutingKey(AmqpTopology.QUEUE_NOTIFICATION_DISPUTES + ".DLQ")
+                .build();
+    }
+
+    @Bean
+    public Queue notificationDisputesDlq() {
+        return new Queue(AmqpTopology.QUEUE_NOTIFICATION_DISPUTES + ".DLQ", true);
     }
 
     @Bean
@@ -99,5 +112,19 @@ public class NotificationAmqpConfig {
         return BindingBuilder.bind(notificationUsersQueue)
                 .to(identityExchange)
                 .with("identity.*");
+    }
+
+    @Bean
+    public Binding notificationDisputesBinding(Queue notificationDisputesQueue, TopicExchange organizationExchange) {
+        return BindingBuilder.bind(notificationDisputesQueue)
+                .to(organizationExchange)
+                .with("dispute.*");
+    }
+
+    @Bean
+    public Binding notificationDisputesDlqBinding(Queue notificationDisputesDlq, TopicExchange organizationExchange) {
+        return BindingBuilder.bind(notificationDisputesDlq)
+                .to(organizationExchange)
+                .with(AmqpTopology.QUEUE_NOTIFICATION_DISPUTES + ".DLQ");
     }
 }

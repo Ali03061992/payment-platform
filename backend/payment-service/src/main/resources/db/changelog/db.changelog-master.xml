@@ -6,5 +6,6 @@
             https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
 
     <include file="V1__schema.sql" relativeToChangelogFile="true"/>
+    <include file="V2__add_order_payment_terms.sql" relativeToChangelogFile="true"/>
 
 </databaseChangeLog>

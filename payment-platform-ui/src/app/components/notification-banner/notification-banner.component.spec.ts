@@ -2,26 +2,32 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { NotificationBannerComponent } from './notification-banner.component';
 import { NotificationService } from '../../services/notification.service';
+import { PushNotificationService } from '../../services/push-notification.service';
 
 describe('NotificationBannerComponent', () => {
   let component: NotificationBannerComponent;
   let fixture: ComponentFixture<NotificationBannerComponent>;
   let notificationService: jasmine.SpyObj<NotificationService>;
+  let pushService: jasmine.SpyObj<PushNotificationService>;
 
   beforeEach(() => {
     const notifSpy = jasmine.createSpyObj('NotificationService', ['getPermissionStatus', 'requestPermission', 'showBrowserNotification']);
     notifSpy.getPermissionStatus.and.returnValue('default');
+    const pushSpy = jasmine.createSpyObj('PushNotificationService', ['requestPermissionAndGetToken', 'listenToMessages']);
+    pushSpy.requestPermissionAndGetToken.and.returnValue(Promise.resolve('fcm-token'));
     localStorage.clear();
 
     TestBed.configureTestingModule({
       declarations: [NotificationBannerComponent],
       providers: [
-        { provide: NotificationService, useValue: notifSpy }
+        { provide: NotificationService, useValue: notifSpy },
+        { provide: PushNotificationService, useValue: pushSpy }
       ]
     });
     fixture = TestBed.createComponent(NotificationBannerComponent);
     component = fixture.componentInstance;
     notificationService = TestBed.inject(NotificationService) as jasmine.SpyObj<NotificationService>;
+    pushService = TestBed.inject(PushNotificationService) as jasmine.SpyObj<PushNotificationService>;
   });
 
   afterEach(() => {
@@ -66,6 +72,21 @@ describe('NotificationBannerComponent', () => {
       await component.acceptNotifications();
       expect(component.showBanner).toBeFalse();
       expect(localStorage.getItem('notification_choice')).toBe('accepted');
+    });
+
+    it('should register FCM token when permission granted', async () => {
+      notificationService.requestPermission.and.returnValue(Promise.resolve('granted'));
+      component.showBanner = true;
+      await component.acceptNotifications();
+      expect(pushService.requestPermissionAndGetToken).toHaveBeenCalled();
+      expect(pushService.listenToMessages).toHaveBeenCalled();
+    });
+
+    it('should not register FCM token when permission denied', async () => {
+      notificationService.requestPermission.and.returnValue(Promise.resolve('denied'));
+      component.showBanner = true;
+      await component.acceptNotifications();
+      expect(pushService.requestPermissionAndGetToken).not.toHaveBeenCalled();
     });
   });
 

@@ -10,10 +10,15 @@
     <div class="page-header">
       <h2>Paiement {{ payment.reference }}</h2>
       <div class="header-actions">
-        <button class="btn btn-secondary" (click)="toggleQR()">
+        @if (payment.status === 'CONFIRMED') {
+          <button class="btn btn-primary" (click)="downloadInvoice()" aria-label="Télécharger la facture">Télécharger facture</button>
+        }
+        <button class="btn btn-secondary" (click)="toggleQR()"
+          [attr.aria-label]="showQR ? 'Masquer le QR Code' : 'Afficher le QR Code'"
+          [attr.aria-expanded]="showQR">
           {{ showQR ? 'Masquer QR' : '📱 QR Code' }}
         </button>
-        <a class="btn btn-secondary" routerLink="/dashboard/payments">Retour</a>
+        <a class="btn btn-secondary" routerLink="/dashboard/payments" aria-label="Retour à la liste des paiements">Retour</a>
       </div>
     </div>
     <!-- QR Code Section -->
@@ -29,7 +34,7 @@
           <p class="qr-amount">{{ payment.amount | number:'1.2-2' }} {{ payment.currency }}</p>
           <div class="qr-actions">
             @if (canShare) {
-              <button class="btn btn-sm btn-primary" (click)="shareQR()">
+              <button class="btn btn-sm btn-primary" (click)="shareQR()" aria-label="Partager le QR Code">
                 📤 Partager
               </button>
             }
@@ -45,7 +50,8 @@
       <div class="detail-card">
         <div class="detail-label">Statut</div>
         <div class="detail-value">
-          <span class="payment-badge" [ngClass]="payment.status.toLowerCase()">{{ statusLabel(payment.status) }}</span>
+          <span class="payment-badge" [ngClass]="payment.status.toLowerCase()"
+            [attr.aria-label]="'Statut du paiement : ' + statusLabel(payment.status)" role="status">{{ statusLabel(payment.status) }}</span>
         </div>
       </div>
       <div class="detail-card">
@@ -94,11 +100,13 @@
     }
     @if (payment.status === 'PENDING') {
       <div class="action-bar">
-        <button class="btn btn-success" (click)="confirm()">Confirmer</button>
-        <button class="btn btn-danger" (click)="showReject = !showReject">
+        <button class="btn btn-success" (click)="confirm()" aria-label="Confirmer le paiement">Confirmer</button>
+        <button class="btn btn-danger" (click)="showReject = !showReject"
+          [attr.aria-label]="showReject ? 'Annuler le rejet' : 'Rejeter le paiement'"
+          [attr.aria-expanded]="showReject">
           {{ showReject ? 'Annuler' : 'Rejeter' }}
         </button>
-        <button class="btn btn-secondary" (click)="cancel()">Annuler le paiement</button>
+        <button class="btn btn-secondary" (click)="cancel()" aria-label="Annuler le paiement">Annuler le paiement</button>
       </div>
     }
     @if (showReject) {
@@ -106,9 +114,9 @@
         <h3 style="margin-bottom:12px;">Motif du rejet</h3>
         <div class="form-group">
           <textarea [(ngModel)]="rejectReason" class="form-control" rows="3"
-          placeholder="Décrivez le motif du rejet..." required></textarea>
+          placeholder="Décrivez le motif du rejet..." required aria-label="Motif du rejet de paiement"></textarea>
         </div>
-        <button class="btn btn-danger" [disabled]="!rejectReason.trim()" (click)="reject()">Confirmer le rejet</button>
+        <button class="btn btn-danger" [disabled]="!rejectReason.trim()" (click)="reject()" aria-label="Confirmer le rejet du paiement">Confirmer le rejet</button>
       </div>
     }
     @if (payment.events.length > 0) {

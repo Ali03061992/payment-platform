@@ -4,6 +4,7 @@ describe('04 - Admin: Supplier Management', () => {
   beforeEach(() => {
     cy.loginAsAdmin();
     cy.visit('/dashboard/admin/suppliers');
+    cy.dismissOverlays();
   });
 
   it('should display supplier management page', () => {
@@ -40,12 +41,14 @@ describe('04 - Admin: Supplier Management', () => {
   });
 
   it('should toggle supplier status', () => {
+    cy.get('table tbody tr', { timeout: 10000 }).should('have.length.gte', 1);
     cy.get('table tbody tr').first().within(() => {
-      cy.get('button.btn-sm').click();
+      cy.get('button.btn-sm').should('exist').click();
     });
     cy.wait(1000);
+    cy.dismissOverlays();
     cy.get('table tbody tr').first().within(() => {
-      cy.get('button.btn-sm').click();
+      cy.get('button.btn-sm').should('exist').click();
     });
     cy.wait(1000);
   });
@@ -61,6 +64,7 @@ describe('04 - Admin: Shop Management', () => {
   beforeEach(() => {
     cy.loginAsAdmin();
     cy.visit('/dashboard/admin/shops');
+    cy.dismissOverlays();
   });
 
   it('should display shop management page', () => {
@@ -95,6 +99,7 @@ describe('04 - Admin: Relation Management', () => {
   beforeEach(() => {
     cy.loginAsAdmin();
     cy.visit('/dashboard/admin/relations');
+    cy.dismissOverlays();
   });
 
   it('should display relation management page', () => {

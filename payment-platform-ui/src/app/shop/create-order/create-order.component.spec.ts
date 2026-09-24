@@ -80,13 +80,13 @@ describe('CreateOrderComponent (shop)', () => {
   describe('addProduct / removeLine', () => {
     it('should add product', () => {
       component.orderLines = [];
-      component.addProduct({ id: 1, unitPrice: 10 } as any);
+      component.addProduct({ id: 1, unitPrice: 10, quantity: 5 } as any);
       expect(component.orderLines.length).toBe(1);
     });
 
     it('should increment quantity for existing', () => {
       component.orderLines = [{ product: { id: 1 } as any, quantity: 1, discount: 0 }];
-      component.addProduct({ id: 1, unitPrice: 10 } as any);
+      component.addProduct({ id: 1, unitPrice: 10, quantity: 5 } as any);
       expect(component.orderLines[0].quantity).toBe(2);
     });
 

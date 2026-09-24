@@ -22,12 +22,14 @@ public class PaymentMapper {
         entity.setSupplierId(payment.supplierId());
         entity.setCurrency(payment.money().currency());
         entity.setAmount(payment.money().amount());
-        entity.setStatus(payment.status().name());
+        entity.setStatus(payment.status());
         entity.setRejectionReason(payment.rejectionReason() != null ? payment.rejectionReason().value() : null);
         entity.setCreatedBy(payment.createdBy());
         entity.setVersion(payment.version());
         entity.setCreatedAt(payment.createdAt());
         entity.setUpdatedAt(payment.updatedAt());
+        entity.setOrderId(payment.orderId());
+        entity.setDueDate(payment.dueDate());
         return entity;
     }
 
@@ -37,7 +39,7 @@ public class PaymentMapper {
                     UUID.class, PaymentReference.class, UUID.class, UUID.class,
                     Money.class, PaymentStatus.class, RejectionReason.class,
                     UUID.class, java.time.Instant.class, java.time.Instant.class,
-                    long.class, List.class);
+                    long.class, List.class, UUID.class, java.time.LocalDate.class);
             ctor.setAccessible(true);
             return ctor.newInstance(
                     entity.getId(),
@@ -45,13 +47,15 @@ public class PaymentMapper {
                     entity.getShopId(),
                     entity.getSupplierId(),
                     Money.of(entity.getAmount(), entity.getCurrency()),
-                    PaymentStatus.from(entity.getStatus()),
+                    entity.getStatus(),
                     entity.getRejectionReason() != null ? new RejectionReason(entity.getRejectionReason()) : null,
                     entity.getCreatedBy(),
                     entity.getCreatedAt(),
                     entity.getUpdatedAt(),
                     entity.getVersion() != null ? entity.getVersion() : 0L,
-                    events
+                    events,
+                    entity.getOrderId(),
+                    entity.getDueDate()
             );
         } catch (Exception e) {
             throw new RuntimeException("Erreur de mapping Payment", e);

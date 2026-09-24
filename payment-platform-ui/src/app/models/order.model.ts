@@ -13,6 +13,7 @@ export interface Order {
   subtotal: number;
   taxRate: number;
   taxAmount: number;
+  globalDiscount: number;
   total: number;
   currency: string;
   deliveryAgentId: string | null;
@@ -24,8 +25,21 @@ export interface Order {
   plannedDeliveryDate: string | null;
   confirmedDeliveryDate: string | null;
   asapPayment: boolean;
+  paymentTerms: string | null;
+  dueDate: string | null;
   deliveryRejectionReason: string | null;
+  estimatedArrival: string | null;
+  lastLatitude: number | null;
+  lastLongitude: number | null;
+  lastLocationUpdate: string | null;
   notes: string | null;
+  confirmedByName: string | null;
+  preparedByName: string | null;
+  readyByName: string | null;
+  assignedDeliveryByName: string | null;
+  acceptedDeliveryByName: string | null;
+  confirmedDeliveryByName: string | null;
+  deliveredByName: string | null;
   version: number;
   createdAt: string;
   updatedAt: string;
@@ -59,7 +73,25 @@ export interface CreateOrderRequest {
   supplierId: string;
   shopId: string;
   asapPayment: boolean;
+  paymentTerms: string;
   currency: string;
+  globalDiscount: number;
+  taxRate?: number;
   notes: string;
   items: { productId: string; quantity: number; discount: number }[];
+}
+
+export interface UpdateOrderRequest {
+  notes: string | null;
+  asapPayment: boolean;
+  items: { productId: string; quantity: number; discount: number }[];
+}
+
+export interface OrderComment {
+  id: string;
+  orderId: string;
+  authorId: string;
+  authorName: string;
+  content: string;
+  createdAt: string;
 }

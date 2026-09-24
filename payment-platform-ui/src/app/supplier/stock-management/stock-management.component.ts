@@ -130,6 +130,6 @@ export class StockManagementComponent implements OnInit {
   closeHistory(): void { this.showHistoryModal = false; this.historyProduct = null; }
 
   statusLabel(s: string): string { return ({ OK: 'En stock', LOW: 'Stock bas', OUT_OF_STOCK: 'Rupture' } as Record<string, string>)[s] || s; }
-  movementTypeLabel(t: string): string { return ({ IN: 'Entree', OUT: 'Sortie', ADJUSTMENT: 'Ajustement' } as Record<string, string>)[t] || t; }
-  movementTypeClass(t: string): string { return ({ IN: 'movement-in', OUT: 'movement-out', ADJUSTMENT: 'movement-adjust' } as Record<string, string>)[t] || ''; }
+  movementTypeLabel(t: string): string { return ({ IN: 'Entree', OUT: 'Sortie', ADJUSTMENT: 'Ajustement', RETURN: 'Retour' } as Record<string, string>)[t] || t; }
+  movementTypeClass(t: string): string { return ({ IN: 'movement-in', OUT: 'movement-out', ADJUSTMENT: 'movement-adjust', RETURN: 'movement-return' } as Record<string, string>)[t] || ''; }
 }

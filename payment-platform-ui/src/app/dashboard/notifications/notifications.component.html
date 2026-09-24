@@ -1,0 +1,123 @@
+<div class="page-header">
+  <h2>Notifications</h2>
+  @if (unreadCount > 0) {
+    <button class="btn btn-primary" (click)="markAllRead()">Tout marquer lu</button>
+  }
+</div>
+
+<div class="filters">
+  <select [(ngModel)]="filterType" class="form-control" style="max-width:200px;" (change)="onFilterChange()">
+    <option value="">Tous les types</option>
+    <option value="ORDER">Commandes</option>
+    <option value="PAYMENT">Paiements</option>
+    <option value="DELIVERY">Livraisons</option>
+  </select>
+  <span class="result-count">{{ totalElements }} résultat(s)</span>
+</div>
+
+@if (loading) {
+  <div class="loading">
+    <div class="spinner"></div>
+    <span>Chargement...</span>
+  </div>
+}
+
+@if (!loading) {
+  <!-- Desktop Table View -->
+  <div class="table-card hide-mobile">
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Statut</th>
+            <th>Type</th>
+            <th>Message</th>
+            <th>Date</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (n of notifications; track n) {
+            <tr
+              class="clickable-row"
+              [class.unread-row]="n.readStatus === 'UNREAD'"
+              (click)="navigateNotification(n)">
+              <td>
+                @if (n.readStatus === 'UNREAD') {
+                  <span class="notif-status-dot unread" aria-label="Non lu"></span>
+                } @else {
+                  <span class="notif-status-dot read" aria-label="Lu"></span>
+                }
+              </td>
+              <td>
+                <span class="type-badge" [ngClass]="typeBadgeClass(n.type)">{{ typeLabel(n.type) }}</span>
+              </td>
+              <td>
+                <span class="notif-icon-inline">{{ getNotificationIcon(n.type) }}</span>
+                <span class="notif-message-text">{{ n.message }}</span>
+              </td>
+              <td>{{ getTimeAgo(n.createdAt) }}</td>
+              <td>
+                @if (n.readStatus === 'UNREAD') {
+                  <button class="btn btn-sm btn-secondary" (click)="markAsRead(n.id, $event)">Marquer lu</button>
+                }
+              </td>
+            </tr>
+          }
+          @if (notifications.length === 0) {
+            <tr>
+              <td colspan="5" class="empty">Aucune notification</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Mobile Card View -->
+  <div class="notif-cards show-mobile">
+    @if (notifications.length === 0) {
+      <div class="empty-card">Aucune notification</div>
+    }
+    @for (n of notifications; track n) {
+      <div
+        class="notif-card"
+        [class.unread]="n.readStatus === 'UNREAD'"
+        (click)="navigateNotification(n)">
+        <div class="notif-card-header">
+          <span class="notif-icon-large">{{ getNotificationIcon(n.type) }}</span>
+          <div class="notif-card-meta">
+            <span class="type-badge" [ngClass]="typeBadgeClass(n.type)">{{ typeLabel(n.type) }}</span>
+            <span class="notif-time">{{ getTimeAgo(n.createdAt) }}</span>
+          </div>
+          @if (n.readStatus === 'UNREAD') {
+            <span class="unread-dot"></span>
+          }
+        </div>
+        <div class="notif-card-body">
+          <div class="notif-message-full">{{ n.message }}</div>
+        </div>
+        @if (n.readStatus === 'UNREAD') {
+          <div class="notif-card-actions" (click)="$event.stopPropagation()">
+            <button class="btn btn-sm btn-secondary" (click)="markAsRead(n.id, $event)">Marquer lu</button>
+          </div>
+        }
+      </div>
+    }
+  </div>
+
+  <!-- Pagination -->
+  @if (totalPages > 1) {
+    <div class="pagination">
+      <button class="btn btn-sm btn-secondary" [disabled]="currentPage === 0" (click)="prevPage()">Précédent</button>
+      @for (p of pageNumbers; track p) {
+        <button
+          class="btn btn-sm"
+          [class.btn-primary]="p === currentPage"
+          [class.btn-secondary]="p !== currentPage"
+          (click)="goToPage(p)">{{ p + 1 }}</button>
+      }
+      <button class="btn btn-sm btn-secondary" [disabled]="currentPage >= totalPages - 1" (click)="nextPage()">Suivant</button>
+    </div>
+  }
+}

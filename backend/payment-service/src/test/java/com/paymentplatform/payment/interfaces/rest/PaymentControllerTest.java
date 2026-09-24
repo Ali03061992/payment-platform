@@ -78,7 +78,7 @@ class PaymentControllerTest {
 
     @Test
     void create_validRequest_returns201() throws Exception {
-        CreatePaymentRequest request = new CreatePaymentRequest(UUID.fromString("00000000-0000-0000-0000-000000000010"), UUID.fromString("00000000-0000-0000-0000-000000000020"), new BigDecimal("150.00"), "TND");
+        CreatePaymentRequest request = new CreatePaymentRequest(UUID.fromString("00000000-0000-0000-0000-000000000010"), UUID.fromString("00000000-0000-0000-0000-000000000020"), new BigDecimal("150.00"), "TND", null, null);
 
         mockMvc.perform(post("/api/payments")
                         .with(SecurityMockMvcRequestPostProcessors.authentication(shopUser()))
@@ -160,7 +160,40 @@ class PaymentControllerTest {
 
     @Test
     void create_invalidAmount_returns400() throws Exception {
-        CreatePaymentRequest request = new CreatePaymentRequest(UUID.fromString("00000000-0000-0000-0000-000000000010"), UUID.fromString("00000000-0000-0000-0000-000000000020"), BigDecimal.ZERO, "TND");
+        CreatePaymentRequest request = new CreatePaymentRequest(UUID.fromString("00000000-0000-0000-0000-000000000010"), UUID.fromString("00000000-0000-0000-0000-000000000020"), BigDecimal.ZERO, "TND", null, null);
+
+        mockMvc.perform(post("/api/payments")
+                        .with(SecurityMockMvcRequestPostProcessors.authentication(shopUser()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void create_negativeAmount_returns400() throws Exception {
+        CreatePaymentRequest request = new CreatePaymentRequest(UUID.fromString("00000000-0000-0000-0000-000000000010"), UUID.fromString("00000000-0000-0000-0000-000000000020"), new BigDecimal("-500"), "TND", null, null);
+
+        mockMvc.perform(post("/api/payments")
+                        .with(SecurityMockMvcRequestPostProcessors.authentication(shopUser()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void create_amountBelowMinimum_returns400() throws Exception {
+        CreatePaymentRequest request = new CreatePaymentRequest(UUID.fromString("00000000-0000-0000-0000-000000000010"), UUID.fromString("00000000-0000-0000-0000-000000000020"), new BigDecimal("0.001"), "TND", null, null);
+
+        mockMvc.perform(post("/api/payments")
+                        .with(SecurityMockMvcRequestPostProcessors.authentication(shopUser()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void create_amountExceedsMaximum_returns400() throws Exception {
+        CreatePaymentRequest request = new CreatePaymentRequest(UUID.fromString("00000000-0000-0000-0000-000000000010"), UUID.fromString("00000000-0000-0000-0000-000000000020"), new BigDecimal("1000000.00"), "TND", null, null);
 
         mockMvc.perform(post("/api/payments")
                         .with(SecurityMockMvcRequestPostProcessors.authentication(shopUser()))

@@ -81,3 +81,50 @@
 .payment-badge.draft { background: #eceff1; color: #546e7a; }
 .payment-badge.rejected { background: #fce4ec; color: #c62828; }
 .payment-badge.delivery-rejected { background: #fff3e0; color: #e65100; }
+.payment-badge.open { background: #fff3e0; color: #e65100; }
+.payment-badge.in-progress { background: #e3f2fd; color: #1565c0; }
+.payment-badge.resolved { background: #e8f5e9; color: #2e7d32; }
+.payment-badge.closed { background: #eceff1; color: #546e7a; }
+
+@media print {
+  .no-print,
+  .action-bar,
+  .status-timeline {
+    display: none !important;
+  }
+
+  :host {
+    display: block;
+    padding: 0;
+    margin: 0;
+  }
+
+  .detail-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+
+  .detail-card {
+    break-inside: avoid;
+  }
+
+  .table-card {
+    break-inside: avoid;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  th, td {
+    border: 1px solid #ccc;
+    padding: 6px 10px;
+  }
+
+  .page-header {
+    border-bottom: 2px solid #0f3460;
+    padding-bottom: 8px;
+    margin-bottom: 16px;
+  }
+}

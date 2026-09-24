@@ -4,6 +4,7 @@ export interface Product {
   name: string;
   sku: string;
   description: string;
+  imageUrl: string | null;
   unitPrice: number;
   currency: string;
   quantity: number;
@@ -46,7 +47,7 @@ export interface StockMovement {
   id: string;
   productId: string;
   productName: string;
-  type: 'IN' | 'OUT' | 'ADJUSTMENT';
+  type: 'IN' | 'OUT' | 'ADJUSTMENT' | 'RETURN';
   quantity: number;
   reference: string;
   notes: string;
@@ -55,7 +56,7 @@ export interface StockMovement {
 }
 
 export interface StockMovementRequest {
-  type: 'IN' | 'OUT' | 'ADJUSTMENT';
+  type: 'IN' | 'OUT' | 'ADJUSTMENT' | 'RETURN';
   quantity: number;
   reference: string;
   notes: string;

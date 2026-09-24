@@ -32,7 +32,8 @@ public final class PaymentEvents {
     }
 
     public record PaymentConfirmedEvent(UUID eventId, Instant occurredAt, UUID paymentId, String reference,
-                                        UUID shopId, UUID supplierId, UUID confirmedBy) implements DomainEvent {
+                                        UUID shopId, UUID supplierId, UUID confirmedBy,
+                                        BigDecimal amount, String currency) implements DomainEvent {
         public static final String EVENT_TYPE = "payment.confirmed";
 
         @Override

@@ -2,9 +2,11 @@ package com.paymentplatform.payment.application.dto;
 
 import com.paymentplatform.payment.domain.model.Payment;
 import com.paymentplatform.payment.domain.model.PaymentEvent;
+import com.paymentplatform.payment.domain.model.PaymentStatus;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -17,13 +19,15 @@ public record PaymentResponse(
         String supplierName,
         BigDecimal amount,
         String currency,
-        String status,
+        PaymentStatus status,
         String rejectionReason,
         UUID createdBy,
         String createdByName,
         String confirmedByName,
         String rejectedByName,
         String cancelledByName,
+        UUID orderId,
+        LocalDate dueDate,
         long version,
         Instant createdAt,
         Instant updatedAt,
@@ -55,13 +59,15 @@ public record PaymentResponse(
                 supplierName,
                 payment.money().amount(),
                 payment.money().currency(),
-                payment.status().name(),
+                payment.status(),
                 payment.rejectionReason() != null ? payment.rejectionReason().value() : null,
                 payment.createdBy(),
                 createdByName,
                 confirmedByName,
                 rejectedByName,
                 cancelledByName,
+                payment.orderId(),
+                payment.dueDate(),
                 payment.version(),
                 payment.createdAt(),
                 payment.updatedAt(),

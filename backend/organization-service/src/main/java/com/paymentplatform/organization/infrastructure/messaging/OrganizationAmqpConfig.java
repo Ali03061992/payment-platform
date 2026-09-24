@@ -17,6 +17,11 @@ public class OrganizationAmqpConfig {
     }
 
     @Bean
+    public TopicExchange paymentExchange() {
+        return new TopicExchange(AmqpTopology.EXCHANGE_PAYMENT);
+    }
+
+    @Bean
     public Queue organizationEventsQueue() {
         return new Queue("organization.events", true);
     }
@@ -26,5 +31,17 @@ public class OrganizationAmqpConfig {
         return BindingBuilder.bind(organizationEventsQueue())
                 .to(organizationExchange)
                 .with("organization.#");
+    }
+
+    @Bean
+    public Queue organizationPaymentsQueue() {
+        return new Queue("organization.payments", true);
+    }
+
+    @Bean
+    public Binding organizationPaymentsBinding(Queue organizationPaymentsQueue, TopicExchange paymentExchange) {
+        return BindingBuilder.bind(organizationPaymentsQueue)
+                .to(paymentExchange)
+                .with("payment.confirmed");
     }
 }

@@ -3,6 +3,7 @@ package com.paymentplatform.payment.domain.repository;
 import com.paymentplatform.payment.domain.model.Payment;
 import com.paymentplatform.payment.domain.model.PaymentStatus;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -17,4 +18,7 @@ public interface PaymentRepository {
     List<Payment> findByStatus(PaymentStatus status);
     long countByStatus(PaymentStatus status);
     boolean existsByReference(String reference);
+    List<Payment> findOverdue(LocalDate today);
+    List<Payment> findOverdueBySupplier(LocalDate today, UUID supplierId);
+    List<Payment> findOverdueByShop(LocalDate today, UUID shopId);
 }

@@ -6,6 +6,7 @@ import { of, throwError } from 'rxjs';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { ShopOrderDetailComponent } from './order-detail.component';
 import { OrderService } from '../../services/order.service';
+import { DisputeService } from '../../services/dispute.service';
 import { ToastService } from '../../services/toast.service';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
@@ -25,11 +26,14 @@ describe('ShopOrderDetailComponent', () => {
   };
 
   beforeEach(() => {
-    const orderSpy = jasmine.createSpyObj('OrderService', ['getById', 'getByReference', 'accept', 'acceptAsap', 'reject', 'cancel']);
+    const orderSpy = jasmine.createSpyObj('OrderService', ['getById', 'getByReference', 'accept', 'acceptAsap', 'reject', 'cancel', 'downloadInvoice', 'getComments', 'addComment']);
+    const disputeSpy = jasmine.createSpyObj('DisputeService', ['getByOrder', 'create']);
     const toastSpy = jasmine.createSpyObj('ToastService', ['success', 'error']);
     const routerSpy = jasmine.createSpyObj('Router', ['navigate']);
     orderSpy.getById.and.returnValue(of(mockOrder));
     orderSpy.getByReference.and.returnValue(of(mockOrder));
+    orderSpy.getComments.and.returnValue(of([]));
+    disputeSpy.getByOrder.and.returnValue(of([]));
 
     TestBed.configureTestingModule({
     declarations: [ShopOrderDetailComponent],
@@ -37,6 +41,7 @@ describe('ShopOrderDetailComponent', () => {
     imports: [],
     providers: [
         { provide: OrderService, useValue: orderSpy },
+        { provide: DisputeService, useValue: disputeSpy },
         { provide: ToastService, useValue: toastSpy },
         { provide: Router, useValue: routerSpy },
         { provide: ActivatedRoute, useValue: { snapshot: { paramMap: convertToParamMap({ id: '1' }) } } },

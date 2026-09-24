@@ -7,6 +7,7 @@ import com.paymentplatform.shared.domain.exception.DomainException;
 import com.paymentplatform.shared.infrastructure.audit.AuditActions;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -26,11 +27,13 @@ public class Payment {
     private Instant updatedAt;
     private long version;
     private final List<PaymentEvent> events;
+    private UUID orderId;
+    private LocalDate dueDate;
 
     private Payment(UUID id, PaymentReference reference, UUID shopId, UUID supplierId,
                     Money money, PaymentStatus status, RejectionReason rejectionReason,
                     UUID createdBy, Instant createdAt, Instant updatedAt, long version,
-                    List<PaymentEvent> events) {
+                    List<PaymentEvent> events, UUID orderId, LocalDate dueDate) {
         this.id = id;
         this.reference = reference;
         this.shopId = shopId;
@@ -43,22 +46,32 @@ public class Payment {
         this.updatedAt = updatedAt;
         this.version = version;
         this.events = new ArrayList<>(events);
+        this.orderId = orderId;
+        this.dueDate = dueDate;
     }
 
     public static Payment create(UUID shopId, UUID supplierId, Money money, UUID createdBy) {
+        return create(shopId, supplierId, money, createdBy, null, null);
+    }
+
+    public static Payment create(UUID shopId, UUID supplierId, Money money, UUID createdBy,
+                                 UUID orderId, LocalDate dueDate) {
         if (shopId == null) throw new DomainException("L'ID de la boutique est obligatoire");
         if (supplierId == null) throw new DomainException("L'ID du fournisseur est obligatoire");
         if (shopId.equals(supplierId)) throw new DomainException("La boutique et le fournisseur doivent être différents");
         if (money == null || money.amount() == null) throw new DomainException("Le montant est obligatoire");
-        if (money.amount().compareTo(java.math.BigDecimal.ZERO) <= 0)
-            throw new DomainException("Le montant doit être supérieur à 0");
+        if (money.amount().compareTo(new java.math.BigDecimal("0.01")) < 0)
+            throw new DomainException("Le montant doit être supérieur ou égal à 0.01");
+        if (money.amount().compareTo(new java.math.BigDecimal("999999.99")) > 0)
+            throw new DomainException("Le montant ne doit pas dépasser 999999.99");
 
         Instant now = Instant.now();
         PaymentReference ref = PaymentReference.generate();
         return new Payment(null, ref, shopId, supplierId, money, PaymentStatus.PENDING,
                 null, createdBy, now, now, 0,
                 List.of(PaymentEvent.create(null, AuditActions.PAYMENT_CREATED, createdBy,
-                        "{\"reference\":\"" + ref.value() + "\"}")));
+                        "{\"reference\":\"" + ref.value() + "\"}")),
+                orderId, dueDate);
     }
 
     public Payment confirm(UUID confirmedBy) {
@@ -128,4 +141,6 @@ public class Payment {
     public Instant updatedAt() { return updatedAt; }
     public long version() { return version; }
     public List<PaymentEvent> events() { return Collections.unmodifiableList(events); }
+    public UUID orderId() { return orderId; }
+    public LocalDate dueDate() { return dueDate; }
 }

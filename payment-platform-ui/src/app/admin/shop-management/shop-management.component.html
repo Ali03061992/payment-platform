@@ -1,6 +1,8 @@
 <div class="page-header">
   <h2>Boutiques</h2>
-  <button class="btn btn-primary" (click)="showCreate = !showCreate">
+  <button class="btn btn-primary" (click)="showCreate = !showCreate"
+    [attr.aria-label]="showCreate ? 'Annuler la création' : 'Créer une nouvelle boutique'"
+    [attr.aria-expanded]="showCreate">
     {{ showCreate ? 'Annuler' : '+ Nouvelle boutique' }}
   </button>
 </div>
@@ -10,11 +12,12 @@
     <h3 style="margin-bottom: 16px;">Créer une boutique</h3>
     <form (ngSubmit)="create()">
       <div class="form-group">
-        <label>Nom de la boutique</label>
-        <input type="text" [(ngModel)]="newName" name="name" class="form-control"
-          placeholder="Ex: Boutique Sfax" required>
+        <label for="shopName">Nom de la boutique</label>
+        <input type="text" [(ngModel)]="newName" name="name" id="shopName" class="form-control"
+          placeholder="Ex: Boutique Sfax" required aria-required="true">
       </div>
-      <button class="btn btn-primary" [disabled]="creating || !newName.trim()">
+      <button class="btn btn-primary" [disabled]="creating || !newName.trim()"
+        [attr.aria-label]="creating ? 'Création en cours...' : 'Créer la boutique'">
         {{ creating ? 'Création...' : 'Créer' }}
       </button>
     </form>
@@ -45,14 +48,16 @@
             <tr>
               <td><strong>{{ s.name }}</strong></td>
               <td>
-                <span class="status-badge" [class.active]="s.status === 'ACTIVE'" [class.disabled]="s.status === 'DISABLED'">
+                <span class="status-badge" [class.active]="s.status === 'ACTIVE'" [class.disabled]="s.status === 'DISABLED'"
+                  [attr.aria-label]="'Statut de la boutique : ' + (s.status === 'ACTIVE' ? 'Actif' : 'Désactivé')" role="status">
                   {{ s.status === 'ACTIVE' ? 'Actif' : 'Désactivé' }}
                 </span>
               </td>
               <td>{{ s.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
               <td>
                 <button class="btn btn-sm" [class.btn-success]="s.status === 'DISABLED'" [class.btn-danger]="s.status === 'ACTIVE'"
-                  (click)="toggle(s)">
+                  (click)="toggle(s)"
+                  [attr.aria-label]="(s.status === 'ACTIVE' ? 'Désactiver ' : 'Activer ') + s.name">
                   {{ s.status === 'ACTIVE' ? 'Désactiver' : 'Activer' }}
                 </button>
               </td>

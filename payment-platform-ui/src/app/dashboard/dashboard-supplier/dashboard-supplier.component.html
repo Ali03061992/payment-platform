@@ -1,0 +1,114 @@
+<div class="dashboard">
+  <div class="welcome-section">
+    <h1>{{ getGreeting() }}, {{ user?.firstName }} !</h1>
+    <p>Vue d'ensemble de votre activité fournisseur.</p>
+  </div>
+
+  @if (loading) {
+    <div class="loading">Chargement...</div>
+  } @else {
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon blue">📦</div>
+        <div class="stat-info">
+          <div class="stat-value">{{ products.length }}</div>
+          <div class="stat-label">Produits</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon orange">⚠️</div>
+        <div class="stat-info">
+          <div class="stat-value">{{ lowStockCount }}</div>
+          <div class="stat-label">Stock bas</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon red">🚫</div>
+        <div class="stat-info">
+          <div class="stat-value">{{ outOfStockCount }}</div>
+          <div class="stat-label">Rupture stock</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon green">🛒</div>
+        <div class="stat-info">
+          <div class="stat-value">{{ pendingOrdersCount }}</div>
+          <div class="stat-label">Commandes en cours</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon purple">💳</div>
+        <div class="stat-info">
+          <div class="stat-value">{{ paymentStats.pending }}</div>
+          <div class="stat-label">Paiements en attente</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-cards">
+      <div class="info-card">
+        <h3>📋 Mon profil</h3>
+        <div class="info-row"><span>Nom :</span><strong>{{ user?.firstName }} {{ user?.lastName }}</strong></div>
+        <div class="info-row"><span>Email :</span><strong>{{ user?.email }}</strong></div>
+        <div class="info-row"><span>Rôle :</span><strong>{{ user?.roles?.[0] }}</strong></div>
+        <div class="info-row"><span>Statut :</span>
+          <span class="badge" [class]="user?.status === 'ACTIVE' ? 'badge-success' : 'badge-danger'">
+            {{ user?.status }}
+          </span>
+        </div>
+      </div>
+
+      <div class="info-card">
+        <h3>🛒 Commandes récentes</h3>
+        @if (recentOrders.length === 0) {
+          <p class="empty-state">Aucune commande récente</p>
+        }
+        @for (order of recentOrders; track order.id) {
+          <div class="info-row">
+            <span>{{ order.reference }}</span>
+            <span class="badge" [class]="getStatusClass(order.status)">{{ getStatusLabel(order.status) }}</span>
+          </div>
+        }
+      </div>
+
+      <div class="info-card">
+        <h3>💳 Résumé paiements</h3>
+        <div class="info-row"><span>Total :</span><strong>{{ paymentStats.total }}</strong></div>
+        <div class="info-row"><span>En attente :</span><strong class="text-orange">{{ paymentStats.pending }}</strong></div>
+        <div class="info-row"><span>Confirmés :</span><strong class="text-green">{{ paymentStats.confirmed }}</strong></div>
+      </div>
+
+      <div class="info-card">
+        <h3>⚡ Actions rapides</h3>
+        <a routerLink="supplier/stock" class="quick-action">📦 Gérer le stock</a>
+        <a routerLink="supplier/stock/create" class="quick-action">➕ Ajouter un produit</a>
+        <a routerLink="supplier/orders" class="quick-action">🛒 Voir les commandes</a>
+        <a routerLink="supplier/optimization" class="quick-action">🧠 Optimisation stock</a>
+      </div>
+
+      <div class="info-card alert-card">
+        <h3>🚨 Alertes stock</h3>
+        @if (lowStockAlerts.length === 0) {
+          <p class="empty-state">Aucune alerte de stock</p>
+        }
+        @for (product of lowStockAlerts; track product.id) {
+          <div class="alert-row" [ngClass]="'alert-' + getUrgencyLevel(product)">
+            <div class="alert-info">
+              <span class="alert-sku"><code>{{ product.sku }}</code></span>
+              <span class="alert-name">{{ product.name }}</span>
+            </div>
+            <div class="alert-qty">
+              <span class="qty-available" [class.critical]="getAvailableQty(product) <= 0">
+                {{ getAvailableQty(product) }}
+              </span>
+              <span class="qty-label">/{{ product.minQuantity }} min</span>
+            </div>
+          </div>
+        }
+        @if (lowStockAlerts.length > 0) {
+          <a routerLink="supplier/stock" class="view-all-link">Voir toutes les alertes →</a>
+        }
+      </div>
+    </div>
+  }
+</div>

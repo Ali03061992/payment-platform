@@ -1,0 +1,110 @@
+<div class="dashboard">
+  <div class="welcome-section">
+    <h1>{{ getGreeting() }}, {{ user?.firstName }} !</h1>
+    <p>Vue d'ensemble de votre boutique.</p>
+  </div>
+
+  @if (loading) {
+    <div class="loading">Chargement...</div>
+  } @else {
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon blue">🛒</div>
+        <div class="stat-info">
+          <div class="stat-value">{{ totalOrders }}</div>
+          <div class="stat-label">Total commandes</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon orange">⏳</div>
+        <div class="stat-info">
+          <div class="stat-value">{{ pendingOrdersCount }}</div>
+          <div class="stat-label">En cours</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon purple">🚚</div>
+        <div class="stat-info">
+          <div class="stat-value">{{ inTransitCount }}</div>
+          <div class="stat-label">En livraison</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon green">✅</div>
+        <div class="stat-info">
+          <div class="stat-value">{{ deliveredOrdersCount }}</div>
+          <div class="stat-label">Livrées</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon red">💳</div>
+        <div class="stat-info">
+          <div class="stat-value">{{ paymentStats.pending }}</div>
+          <div class="stat-label">Paiements en attente</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-cards">
+      <div class="info-card">
+        <h3>📋 Mon profil</h3>
+        <div class="info-row"><span>Nom :</span><strong>{{ user?.firstName }} {{ user?.lastName }}</strong></div>
+        <div class="info-row"><span>Email :</span><strong>{{ user?.email }}</strong></div>
+        <div class="info-row"><span>Rôle :</span><strong>{{ user?.roles?.[0] }}</strong></div>
+        <div class="info-row"><span>Statut :</span>
+          <span class="badge" [class]="user?.status === 'ACTIVE' ? 'badge-success' : 'badge-danger'">
+            {{ user?.status }}
+          </span>
+        </div>
+      </div>
+
+      <div class="info-card">
+        <h3>🛒 Commandes reçues</h3>
+        @if (recentOrders.length === 0) {
+          <p class="empty-state">Aucune commande récente</p>
+        }
+        @for (order of recentOrders; track order.id) {
+          <div class="recent-order-row">
+            <div class="recent-order-info">
+              <span class="recent-order-ref">{{ order.reference }}</span>
+              <span class="recent-order-date">{{ order.createdAt | date:'dd/MM/yy HH:mm' }}</span>
+              <span class="badge" [class]="getStatusClass(order.status)">{{ getStatusLabel(order.status) }}</span>
+            </div>
+            <div class="recent-order-actions">
+              <span class="recent-order-total">{{ order.total | number:'1.2-2' }} {{ order.currency }}</span>
+              @if (canReorder(order)) {
+                <button class="btn-reorder" (click)="reorder(order)" [disabled]="reorderLoading[order.id]">
+                  @if (reorderLoading[order.id]) {
+                    <span class="spinner-small"></span>
+                  } @else {
+                    🔄 Recommander
+                  }
+                </button>
+              }
+            </div>
+          </div>
+        }
+      </div>
+
+      <div class="info-card">
+        <h3>💳 Paiements récents</h3>
+        @if (recentPayments.length === 0) {
+          <p class="empty-state">Aucun paiement récent</p>
+        }
+        @for (payment of recentPayments; track payment.id) {
+          <div class="info-row">
+            <span>{{ payment.reference }} - {{ payment.amount }} {{ payment.currency }}</span>
+            <span class="badge" [class]="getPaymentStatusClass(payment.status)">{{ getPaymentStatusLabel(payment.status) }}</span>
+          </div>
+        }
+      </div>
+
+      <div class="info-card">
+        <h3>⚡ Actions rapides</h3>
+        <a routerLink="shop/orders" class="quick-action">🛒 Voir mes commandes</a>
+        <a routerLink="shop/orders/create" class="quick-action">➕ Nouvelle commande</a>
+        <a routerLink="shop/balance" class="quick-action">⚖️ Voir ma balance</a>
+      </div>
+    </div>
+  }
+</div>

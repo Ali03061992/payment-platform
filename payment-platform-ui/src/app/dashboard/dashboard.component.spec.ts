@@ -1,37 +1,32 @@
 // @ts-nocheck
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { DashboardComponent } from './dashboard.component';
 import { LoginService } from '../services/login.service';
-import { UserService } from '../services/user.service';
-import { of } from 'rxjs';
-import { User } from '../models/user.model';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('DashboardComponent', () => {
   let component: DashboardComponent;
   let fixture: ComponentFixture<DashboardComponent>;
   let loginService: jasmine.SpyObj<LoginService>;
-  let userService: jasmine.SpyObj<UserService>;
 
   beforeEach(() => {
     const loginSpy = jasmine.createSpyObj('LoginService', ['getCurrentUser', 'hasRole']);
-    const userSpy = jasmine.createSpyObj('UserService', ['list']);
 
     TestBed.configureTestingModule({
-    declarations: [DashboardComponent],
-    imports: [],
-    providers: [
+      declarations: [DashboardComponent],
+      imports: [],
+      providers: [
         { provide: LoginService, useValue: loginSpy },
-        { provide: UserService, useValue: userSpy },
         provideHttpClient(withInterceptorsFromDi()),
         provideHttpClientTesting()
-    ]
-});
+      ],
+      schemas: [NO_ERRORS_SCHEMA]
+    });
     fixture = TestBed.createComponent(DashboardComponent);
     component = fixture.componentInstance;
     loginService = TestBed.inject(LoginService) as jasmine.SpyObj<LoginService>;
-    userService = TestBed.inject(UserService) as jasmine.SpyObj<UserService>;
   });
 
   it('should create', () => {
@@ -39,28 +34,60 @@ describe('DashboardComponent', () => {
   });
 
   describe('ngOnInit', () => {
-    it('should load user', () => {
-      loginService.getCurrentUser.and.returnValue({ id: 1, username: 'admin' } as any);
-      loginService.hasRole.and.returnValue(false);
+    it('should load user and detect SYSTEM_ADMIN role', () => {
+      loginService.getCurrentUser.and.returnValue({
+        id: 1, username: 'admin', roles: ['SYSTEM_ADMIN']
+      } as any);
       component.ngOnInit();
       expect(component.user).toBeTruthy();
+      expect(component.activeRole).toBe('SYSTEM_ADMIN');
     });
 
-    it('should load stats for admin', () => {
-      loginService.getCurrentUser.and.returnValue({ id: 1, username: 'admin' } as any);
-      loginService.hasRole.and.returnValue(true);
-      const mockUsers: User[] = [
-        { id: 1, username: 'u1', email: '', firstName: '', lastName: '', phone: '', organizationId: 1, roles: ['SYSTEM_ADMIN'], status: 'ACTIVE', createdAt: '', updatedAt: '' },
-        { id: 2, username: 'u2', email: '', firstName: '', lastName: '', phone: '', organizationId: 2, roles: ['SUPPLIER_ADMIN'], status: 'DISABLED', createdAt: '', updatedAt: '' },
-        { id: 3, username: 'u3', email: '', firstName: '', lastName: '', phone: '', organizationId: 3, roles: ['SHOP_AGENT'], status: 'ACTIVE', createdAt: '', updatedAt: '' }
-      ];
-      userService.list.and.returnValue(of(mockUsers));
+    it('should detect SUPPLIER_ADMIN over other roles', () => {
+      loginService.getCurrentUser.and.returnValue({
+        id: 2, username: 'sup', roles: ['SUPPLIER_ADMIN', 'SHOP_AGENT']
+      } as any);
       component.ngOnInit();
-      expect(component.stats.totalUsers).toBe(3);
-      expect(component.stats.activeUsers).toBe(2);
-      expect(component.stats.disabledUsers).toBe(1);
-      expect(component.stats.suppliers).toBe(1);
-      expect(component.stats.shops).toBe(1);
+      expect(component.activeRole).toBe('SUPPLIER_ADMIN');
+    });
+
+    it('should detect SUPPLIER_AGENT', () => {
+      loginService.getCurrentUser.and.returnValue({
+        id: 3, username: 'agent', roles: ['SUPPLIER_AGENT']
+      } as any);
+      component.ngOnInit();
+      expect(component.activeRole).toBe('SUPPLIER_AGENT');
+    });
+
+    it('should detect SHOP_ADMIN', () => {
+      loginService.getCurrentUser.and.returnValue({
+        id: 4, username: 'shop', roles: ['SHOP_ADMIN']
+      } as any);
+      component.ngOnInit();
+      expect(component.activeRole).toBe('SHOP_ADMIN');
+    });
+
+    it('should detect SHOP_AGENT', () => {
+      loginService.getCurrentUser.and.returnValue({
+        id: 5, username: 'shopAgent', roles: ['SHOP_AGENT']
+      } as any);
+      component.ngOnInit();
+      expect(component.activeRole).toBe('SHOP_AGENT');
+    });
+
+    it('should set activeRole to null when user has no roles', () => {
+      loginService.getCurrentUser.and.returnValue({
+        id: 6, username: 'nobody', roles: []
+      } as any);
+      component.ngOnInit();
+      expect(component.activeRole).toBeNull();
+    });
+
+    it('should set user to null when getCurrentUser returns null', () => {
+      loginService.getCurrentUser.and.returnValue(null as any);
+      component.ngOnInit();
+      expect(component.user).toBeNull();
+      expect(component.activeRole).toBeNull();
     });
   });
 
@@ -74,22 +101,6 @@ describe('DashboardComponent', () => {
       const validGreetings = ['Bonjour', 'Bon après-midi', 'Bonsoir'];
       const greeting = component.getGreeting();
       expect(validGreetings).toContain(greeting);
-    });
-  });
-
-  describe('ngOnInit', () => {
-    it('should not load stats when not admin', () => {
-      loginService.getCurrentUser.and.returnValue({ id: 1, username: 'user' } as any);
-      loginService.hasRole.and.returnValue(false);
-      component.ngOnInit();
-      expect(userService.list).not.toHaveBeenCalled();
-    });
-
-    it('should set user to null when getCurrentUser returns null', () => {
-      loginService.getCurrentUser.and.returnValue(null as any);
-      loginService.hasRole.and.returnValue(false);
-      component.ngOnInit();
-      expect(component.user).toBeNull();
     });
   });
 });

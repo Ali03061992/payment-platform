@@ -61,9 +61,18 @@ public class BalanceController {
     }
 
     @PostMapping("/adjust")
-    @PreAuthorize("hasAuthority('SYSTEM_ADMIN')")
+    @PreAuthorize("hasAuthority('SYSTEM_ADMIN') or hasAuthority('SUPPLIER_ADMIN')")
     public ResponseEntity<BalanceEntry> adjustBalance(@Valid @RequestBody AdjustBalanceRequest request) {
         var current = CurrentUser.get();
+        if (!current.roles().contains("SYSTEM_ADMIN")) {
+            UUID orgId = current.organizationId();
+            if (orgId == null || !orgId.equals(request.supplierId())) {
+                return ResponseEntity.status(403).build();
+            }
+        }
+        if (request.amount().compareTo(BigDecimal.ZERO) <= 0) {
+            return ResponseEntity.badRequest().build();
+        }
         BalanceEntry entry = balanceUseCase.adjustBalance(
                 request.supplierId(), request.shopId(), request.amount(),
                 request.reason(), current.userId());

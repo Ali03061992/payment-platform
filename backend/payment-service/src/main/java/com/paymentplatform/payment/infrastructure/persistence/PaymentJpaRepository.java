@@ -13,12 +13,23 @@ public interface PaymentJpaRepository extends JpaRepository<PaymentJpaEntity, UU
     Optional<PaymentJpaEntity> findByReference(String reference);
     List<PaymentJpaEntity> findByShopIdOrderByCreatedAtDesc(UUID shopId);
     List<PaymentJpaEntity> findBySupplierIdOrderByCreatedAtDesc(UUID supplierId);
-    List<PaymentJpaEntity> findByStatusOrderByCreatedAtDesc(String status);
-    long countByStatus(String status);
+    List<PaymentJpaEntity> findByStatusOrderByCreatedAtDesc(com.paymentplatform.payment.domain.model.PaymentStatus status);
+    long countByStatus(com.paymentplatform.payment.domain.model.PaymentStatus status);
     boolean existsByReference(String reference);
 
     List<PaymentJpaEntity> findBySupplierIdAndCreatedAtBetweenOrderByCreatedAtDesc(
             UUID supplierId, Instant from, Instant to);
+
+    @Query("SELECT p FROM PaymentJpaEntity p WHERE p.status = 'PENDING' AND p.dueDate < :today")
+    List<PaymentJpaEntity> findOverduePayments(@Param("today") java.time.LocalDate today);
+
+    @Query("SELECT p FROM PaymentJpaEntity p WHERE p.status = 'PENDING' AND p.dueDate < :today AND p.supplierId = :supplierId")
+    List<PaymentJpaEntity> findOverduePaymentsBySupplier(@Param("today") java.time.LocalDate today,
+                                                          @Param("supplierId") UUID supplierId);
+
+    @Query("SELECT p FROM PaymentJpaEntity p WHERE p.status = 'PENDING' AND p.dueDate < :today AND p.shopId = :shopId")
+    List<PaymentJpaEntity> findOverduePaymentsByShop(@Param("today") java.time.LocalDate today,
+                                                      @Param("shopId") UUID shopId);
 
     @Query("SELECT p.createdBy FROM PaymentJpaEntity p WHERE p.supplierId = :supplierId " +
            "AND p.createdAt BETWEEN :from AND :to GROUP BY p.createdBy")

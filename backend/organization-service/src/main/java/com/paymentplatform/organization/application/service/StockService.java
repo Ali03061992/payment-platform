@@ -25,6 +25,13 @@ public class StockService {
         this.movements = movements;
     }
 
+    public List<ProductResponse> getLowStockAlerts(UUID supplierId) {
+        return products.findLowStockProductsBySupplierId(supplierId)
+                .stream()
+                .map(ProductResponse::from)
+                .collect(Collectors.toList());
+    }
+
     public List<ProductResponse> listProducts(UUID supplierId, String status) {
         List<Product> list = (status != null && !status.isBlank())
                 ? products.findBySupplierIdAndStatus(supplierId, status)
@@ -49,6 +56,7 @@ public class StockService {
         product.setName(request.name());
         product.setSku(request.sku());
         product.setDescription(request.description());
+        product.setImageUrl(request.imageUrl());
         product.setUnitPrice(request.unitPrice());
         product.setCurrency(request.currency());
         product.setQuantity(request.quantity());
@@ -64,6 +72,7 @@ public class StockService {
                 .orElseThrow(() -> new NotFoundException("Produit non trouvé"));
         if (request.name() != null) product.setName(request.name());
         if (request.description() != null) product.setDescription(request.description());
+        if (request.imageUrl() != null) product.setImageUrl(request.imageUrl());
         if (request.unitPrice() != null) product.setUnitPrice(request.unitPrice());
         if (request.quantity() != null) product.setQuantity(request.quantity());
         if (request.minQuantity() != null) product.setMinQuantity(request.minQuantity());

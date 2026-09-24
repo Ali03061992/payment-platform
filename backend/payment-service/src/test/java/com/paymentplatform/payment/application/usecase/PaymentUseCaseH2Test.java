@@ -2,6 +2,7 @@ package com.paymentplatform.payment.application.usecase;
 
 import com.paymentplatform.payment.application.dto.CreatePaymentRequest;
 import com.paymentplatform.payment.application.dto.RejectPaymentRequest;
+import com.paymentplatform.payment.domain.model.PaymentStatus;
 import com.paymentplatform.payment.domain.repository.PaymentRepository;
 import com.paymentplatform.payment.infrastructure.http.TestOrganizationValidationConfig;
 import com.paymentplatform.shared.domain.exception.DomainException;
@@ -36,7 +37,7 @@ class PaymentUseCaseH2Test {
 
     @Test
     void createPayment_validRequest_createsPayment() {
-        var request = new CreatePaymentRequest(UUID.fromString("00000000-0000-0000-0000-000000000001"), UUID.fromString("00000000-0000-0000-0000-000000000002"), new BigDecimal("150.50"), "TND");
+        var request = new CreatePaymentRequest(UUID.fromString("00000000-0000-0000-0000-000000000001"), UUID.fromString("00000000-0000-0000-0000-000000000002"), new BigDecimal("150.50"), "TND",null,null);
         var response = createPayment.execute(request, UUID.fromString("00000000-0000-0000-0000-000000000010"), UUID.fromString("00000000-0000-0000-0000-000000000001"));
 
         assertThat(response.id()).isNotNull();
@@ -44,16 +45,16 @@ class PaymentUseCaseH2Test {
         assertThat(response.shopId()).isEqualTo(UUID.fromString("00000000-0000-0000-0000-000000000001"));
         assertThat(response.supplierId()).isEqualTo(UUID.fromString("00000000-0000-0000-0000-000000000002"));
         assertThat(response.amount()).isEqualByComparingTo(new BigDecimal("150.50"));
-        assertThat(response.status()).isEqualTo("PENDING");
+        assertThat(response.status()).isEqualTo(PaymentStatus.PENDING);
         assertThat(response.createdBy()).isEqualTo(UUID.fromString("00000000-0000-0000-0000-000000000010"));
     }
 
     @Test
     void confirmPayment_pendingToConfirmed() {
         var created = createPayment.execute(
-                new CreatePaymentRequest(UUID.fromString("00000000-0000-0000-0000-000000000001"), UUID.fromString("00000000-0000-0000-0000-000000000002"), new BigDecimal("100"), "TND"), UUID.fromString("00000000-0000-0000-0000-000000000010"), UUID.fromString("00000000-0000-0000-0000-000000000001"));
+                new CreatePaymentRequest(UUID.fromString("00000000-0000-0000-0000-000000000001"), UUID.fromString("00000000-0000-0000-0000-000000000002"), new BigDecimal("100"), "TND",null,null), UUID.fromString("00000000-0000-0000-0000-000000000010"), UUID.fromString("00000000-0000-0000-0000-000000000001"));
         var confirmed = confirmPayment.execute(created.id(), UUID.fromString("00000000-0000-0000-0000-000000000020"), UUID.fromString("00000000-0000-0000-0000-000000000002"));
-        assertThat(confirmed.status()).isEqualTo("CONFIRMED");
+        assertThat(confirmed.status()).isEqualTo(PaymentStatus.CONFIRMED);
     }
 
     @Test
@@ -65,7 +66,7 @@ class PaymentUseCaseH2Test {
     @Test
     void confirmPayment_wrongSupplier_throwsForbidden() {
         var created = createPayment.execute(
-                new CreatePaymentRequest(UUID.fromString("00000000-0000-0000-0000-000000000001"), UUID.fromString("00000000-0000-0000-0000-000000000002"), new BigDecimal("100"), "TND"), UUID.fromString("00000000-0000-0000-0000-000000000010"), UUID.fromString("00000000-0000-0000-0000-000000000001"));
+                new CreatePaymentRequest(UUID.fromString("00000000-0000-0000-0000-000000000001"), UUID.fromString("00000000-0000-0000-0000-000000000002"), new BigDecimal("100"), "TND",null,null), UUID.fromString("00000000-0000-0000-0000-000000000010"), UUID.fromString("00000000-0000-0000-0000-000000000001"));
         assertThatThrownBy(() -> confirmPayment.execute(created.id(), UUID.fromString("00000000-0000-0000-0000-000000000020"), UUID.fromString("00000000-0000-0000-0000-000000000099")))
                 .isInstanceOf(ForbiddenException.class);
     }
@@ -73,25 +74,25 @@ class PaymentUseCaseH2Test {
     @Test
     void confirmPayment_nullOrgId_succeeds() {
         var created = createPayment.execute(
-                new CreatePaymentRequest(UUID.fromString("00000000-0000-0000-0000-000000000001"), UUID.fromString("00000000-0000-0000-0000-000000000002"), new BigDecimal("100"), "TND"), UUID.fromString("00000000-0000-0000-0000-000000000010"), UUID.fromString("00000000-0000-0000-0000-000000000001"));
+                new CreatePaymentRequest(UUID.fromString("00000000-0000-0000-0000-000000000001"), UUID.fromString("00000000-0000-0000-0000-000000000002"), new BigDecimal("100"), "TND",null,null), UUID.fromString("00000000-0000-0000-0000-000000000010"), UUID.fromString("00000000-0000-0000-0000-000000000001"));
         var confirmed = confirmPayment.execute(created.id(), UUID.fromString("00000000-0000-0000-0000-000000000020"), null);
-        assertThat(confirmed.status()).isEqualTo("CONFIRMED");
+        assertThat(confirmed.status()).isEqualTo(PaymentStatus.CONFIRMED);
     }
 
     @Test
     void rejectPayment_pendingToRejected() {
         var created = createPayment.execute(
-                new CreatePaymentRequest(UUID.fromString("00000000-0000-0000-0000-000000000001"), UUID.fromString("00000000-0000-0000-0000-000000000002"), new BigDecimal("200"), "EUR"), UUID.fromString("00000000-0000-0000-0000-000000000010"), UUID.fromString("00000000-0000-0000-0000-000000000001"));
+                new CreatePaymentRequest(UUID.fromString("00000000-0000-0000-0000-000000000001"), UUID.fromString("00000000-0000-0000-0000-000000000002"), new BigDecimal("200"), "EUR",null,null), UUID.fromString("00000000-0000-0000-0000-000000000010"), UUID.fromString("00000000-0000-0000-0000-000000000001"));
         var rejected = rejectPayment.execute(created.id(),
                 new RejectPaymentRequest("Montant incorrect"), UUID.fromString("00000000-0000-0000-0000-000000000020"), UUID.fromString("00000000-0000-0000-0000-000000000002"));
-        assertThat(rejected.status()).isEqualTo("REJECTED");
+        assertThat(rejected.status()).isEqualTo(PaymentStatus.REJECTED);
         assertThat(rejected.rejectionReason()).isEqualTo("Montant incorrect");
     }
 
     @Test
     void rejectPayment_wrongSupplier_throwsForbidden() {
         var created = createPayment.execute(
-                new CreatePaymentRequest(UUID.fromString("00000000-0000-0000-0000-000000000001"), UUID.fromString("00000000-0000-0000-0000-000000000002"), new BigDecimal("200"), "EUR"), UUID.fromString("00000000-0000-0000-0000-000000000010"), UUID.fromString("00000000-0000-0000-0000-000000000001"));
+                new CreatePaymentRequest(UUID.fromString("00000000-0000-0000-0000-000000000001"), UUID.fromString("00000000-0000-0000-0000-000000000002"), new BigDecimal("200"), "EUR",null,null), UUID.fromString("00000000-0000-0000-0000-000000000010"), UUID.fromString("00000000-0000-0000-0000-000000000001"));
         assertThatThrownBy(() -> rejectPayment.execute(created.id(),
                 new RejectPaymentRequest("reason"), UUID.fromString("00000000-0000-0000-0000-000000000020"), UUID.fromString("00000000-0000-0000-0000-000000000099")))
                 .isInstanceOf(ForbiddenException.class);
@@ -100,23 +101,23 @@ class PaymentUseCaseH2Test {
     @Test
     void cancelPayment_pendingToCancelled() {
         var created = createPayment.execute(
-                new CreatePaymentRequest(UUID.fromString("00000000-0000-0000-0000-000000000001"), UUID.fromString("00000000-0000-0000-0000-000000000002"), new BigDecimal("50"), "USD"), UUID.fromString("00000000-0000-0000-0000-000000000010"), UUID.fromString("00000000-0000-0000-0000-000000000001"));
+                new CreatePaymentRequest(UUID.fromString("00000000-0000-0000-0000-000000000001"), UUID.fromString("00000000-0000-0000-0000-000000000002"), new BigDecimal("50"), "USD",null,null), UUID.fromString("00000000-0000-0000-0000-000000000010"), UUID.fromString("00000000-0000-0000-0000-000000000001"));
         var cancelled = cancelPayment.execute(created.id(), UUID.fromString("00000000-0000-0000-0000-000000000010"), UUID.fromString("00000000-0000-0000-0000-000000000001"));
-        assertThat(cancelled.status()).isEqualTo("CANCELLED");
+        assertThat(cancelled.status()).isEqualTo(PaymentStatus.CANCELLED);
     }
 
     @Test
     void cancelPayment_bySupplier_succeeds() {
         var created = createPayment.execute(
-                new CreatePaymentRequest(UUID.fromString("00000000-0000-0000-0000-000000000001"), UUID.fromString("00000000-0000-0000-0000-000000000002"), new BigDecimal("50"), "USD"), UUID.fromString("00000000-0000-0000-0000-000000000010"), UUID.fromString("00000000-0000-0000-0000-000000000001"));
+                new CreatePaymentRequest(UUID.fromString("00000000-0000-0000-0000-000000000001"), UUID.fromString("00000000-0000-0000-0000-000000000002"), new BigDecimal("50"), "USD",null,null), UUID.fromString("00000000-0000-0000-0000-000000000010"), UUID.fromString("00000000-0000-0000-0000-000000000001"));
         var cancelled = cancelPayment.execute(created.id(), UUID.fromString("00000000-0000-0000-0000-000000000010"), UUID.fromString("00000000-0000-0000-0000-000000000002"));
-        assertThat(cancelled.status()).isEqualTo("CANCELLED");
+        assertThat(cancelled.status()).isEqualTo(PaymentStatus.CANCELLED);
     }
 
     @Test
     void cancelPayment_wrongOrg_throwsForbidden() {
         var created = createPayment.execute(
-                new CreatePaymentRequest(UUID.fromString("00000000-0000-0000-0000-000000000001"), UUID.fromString("00000000-0000-0000-0000-000000000002"), new BigDecimal("50"), "USD"), UUID.fromString("00000000-0000-0000-0000-000000000010"), UUID.fromString("00000000-0000-0000-0000-000000000001"));
+                new CreatePaymentRequest(UUID.fromString("00000000-0000-0000-0000-000000000001"), UUID.fromString("00000000-0000-0000-0000-000000000002"), new BigDecimal("50"), "USD",null,null), UUID.fromString("00000000-0000-0000-0000-000000000010"), UUID.fromString("00000000-0000-0000-0000-000000000001"));
         assertThatThrownBy(() -> cancelPayment.execute(created.id(), UUID.fromString("00000000-0000-0000-0000-000000000010"), UUID.fromString("00000000-0000-0000-0000-000000000099")))
                 .isInstanceOf(ForbiddenException.class);
     }
@@ -124,15 +125,15 @@ class PaymentUseCaseH2Test {
     @Test
     void cancelPayment_nullOrgId_succeeds() {
         var created = createPayment.execute(
-                new CreatePaymentRequest(UUID.fromString("00000000-0000-0000-0000-000000000001"), UUID.fromString("00000000-0000-0000-0000-000000000002"), new BigDecimal("50"), "USD"), UUID.fromString("00000000-0000-0000-0000-000000000010"), UUID.fromString("00000000-0000-0000-0000-000000000001"));
+                new CreatePaymentRequest(UUID.fromString("00000000-0000-0000-0000-000000000001"), UUID.fromString("00000000-0000-0000-0000-000000000002"), new BigDecimal("50"), "USD",null,null), UUID.fromString("00000000-0000-0000-0000-000000000010"), UUID.fromString("00000000-0000-0000-0000-000000000001"));
         var cancelled = cancelPayment.execute(created.id(), UUID.fromString("00000000-0000-0000-0000-000000000010"), null);
-        assertThat(cancelled.status()).isEqualTo("CANCELLED");
+        assertThat(cancelled.status()).isEqualTo(PaymentStatus.CANCELLED);
     }
 
     @Test
     void confirmAlreadyConfirmed_throwsDomainException() {
         var created = createPayment.execute(
-                new CreatePaymentRequest(UUID.fromString("00000000-0000-0000-0000-000000000001"), UUID.fromString("00000000-0000-0000-0000-000000000002"), new BigDecimal("100"), "TND"), UUID.fromString("00000000-0000-0000-0000-000000000010"), UUID.fromString("00000000-0000-0000-0000-000000000001"));
+                new CreatePaymentRequest(UUID.fromString("00000000-0000-0000-0000-000000000001"), UUID.fromString("00000000-0000-0000-0000-000000000002"), new BigDecimal("100"), "TND",null,null), UUID.fromString("00000000-0000-0000-0000-000000000010"), UUID.fromString("00000000-0000-0000-0000-000000000001"));
         confirmPayment.execute(created.id(), UUID.fromString("00000000-0000-0000-0000-000000000020"), UUID.fromString("00000000-0000-0000-0000-000000000002"));
         assertThatThrownBy(() -> confirmPayment.execute(created.id(), UUID.fromString("00000000-0000-0000-0000-000000000020"), UUID.fromString("00000000-0000-0000-0000-000000000002")))
                 .isInstanceOf(DomainException.class);
@@ -141,7 +142,7 @@ class PaymentUseCaseH2Test {
     @Test
     void getPayment_byId() {
         var created = createPayment.execute(
-                new CreatePaymentRequest(UUID.fromString("00000000-0000-0000-0000-000000000001"), UUID.fromString("00000000-0000-0000-0000-000000000002"), new BigDecimal("100"), "TND"), UUID.fromString("00000000-0000-0000-0000-000000000010"), UUID.fromString("00000000-0000-0000-0000-000000000001"));
+                new CreatePaymentRequest(UUID.fromString("00000000-0000-0000-0000-000000000001"), UUID.fromString("00000000-0000-0000-0000-000000000002"), new BigDecimal("100"), "TND",null,null), UUID.fromString("00000000-0000-0000-0000-000000000010"), UUID.fromString("00000000-0000-0000-0000-000000000001"));
         var found = getPayment.execute(created.id());
         assertThat(found.reference()).isEqualTo(created.reference());
     }
@@ -149,7 +150,7 @@ class PaymentUseCaseH2Test {
     @Test
     void getPayment_byReference() {
         var created = createPayment.execute(
-                new CreatePaymentRequest(UUID.fromString("00000000-0000-0000-0000-000000000001"), UUID.fromString("00000000-0000-0000-0000-000000000002"), new BigDecimal("100"), "TND"), UUID.fromString("00000000-0000-0000-0000-000000000010"), UUID.fromString("00000000-0000-0000-0000-000000000001"));
+                new CreatePaymentRequest(UUID.fromString("00000000-0000-0000-0000-000000000001"), UUID.fromString("00000000-0000-0000-0000-000000000002"), new BigDecimal("100"), "TND",null,null), UUID.fromString("00000000-0000-0000-0000-000000000010"), UUID.fromString("00000000-0000-0000-0000-000000000001"));
         var found = getPayment.execute(created.reference());
         assertThat(found.id()).isEqualTo(created.id());
     }
@@ -162,8 +163,8 @@ class PaymentUseCaseH2Test {
 
     @Test
     void listPayments_byShop() {
-        createPayment.execute(new CreatePaymentRequest(UUID.fromString("00000000-0000-0000-0000-000000000001"), UUID.fromString("00000000-0000-0000-0000-000000000002"), new BigDecimal("100"), "TND"), UUID.fromString("00000000-0000-0000-0000-000000000010"), UUID.fromString("00000000-0000-0000-0000-000000000001"));
-        createPayment.execute(new CreatePaymentRequest(UUID.fromString("00000000-0000-0000-0000-000000000001"), UUID.fromString("00000000-0000-0000-0000-000000000003"), new BigDecimal("200"), "TND"), UUID.fromString("00000000-0000-0000-0000-000000000010"), UUID.fromString("00000000-0000-0000-0000-000000000001"));
+        createPayment.execute(new CreatePaymentRequest(UUID.fromString("00000000-0000-0000-0000-000000000001"), UUID.fromString("00000000-0000-0000-0000-000000000002"), new BigDecimal("100"), "TND",null,null), UUID.fromString("00000000-0000-0000-0000-000000000010"), UUID.fromString("00000000-0000-0000-0000-000000000001"));
+        createPayment.execute(new CreatePaymentRequest(UUID.fromString("00000000-0000-0000-0000-000000000001"), UUID.fromString("00000000-0000-0000-0000-000000000003"), new BigDecimal("200"), "TND",null,null), UUID.fromString("00000000-0000-0000-0000-000000000010"), UUID.fromString("00000000-0000-0000-0000-000000000001"));
         var result = listPayments.execute(UUID.fromString("00000000-0000-0000-0000-000000000001"), 0, 10);
         assertThat(result.items()).hasSize(2);
         assertThat(result.totalElements()).isEqualTo(2);
@@ -171,15 +172,15 @@ class PaymentUseCaseH2Test {
 
     @Test
     void listPayments_bySupplier() {
-        createPayment.execute(new CreatePaymentRequest(UUID.fromString("00000000-0000-0000-0000-000000000001"), UUID.fromString("00000000-0000-0000-0000-000000000002"), new BigDecimal("100"), "TND"), UUID.fromString("00000000-0000-0000-0000-000000000010"), UUID.fromString("00000000-0000-0000-0000-000000000001"));
-        createPayment.execute(new CreatePaymentRequest(UUID.fromString("00000000-0000-0000-0000-000000000003"), UUID.fromString("00000000-0000-0000-0000-000000000002"), new BigDecimal("200"), "TND"), UUID.fromString("00000000-0000-0000-0000-000000000010"), UUID.fromString("00000000-0000-0000-0000-000000000002"));
+        createPayment.execute(new CreatePaymentRequest(UUID.fromString("00000000-0000-0000-0000-000000000001"), UUID.fromString("00000000-0000-0000-0000-000000000002"), new BigDecimal("100"), "TND",null,null), UUID.fromString("00000000-0000-0000-0000-000000000010"), UUID.fromString("00000000-0000-0000-0000-000000000001"));
+        createPayment.execute(new CreatePaymentRequest(UUID.fromString("00000000-0000-0000-0000-000000000003"), UUID.fromString("00000000-0000-0000-0000-000000000002"), new BigDecimal("200"), "TND",null,null), UUID.fromString("00000000-0000-0000-0000-000000000010"), UUID.fromString("00000000-0000-0000-0000-000000000002"));
         var result = listPayments.executeBySupplier(UUID.fromString("00000000-0000-0000-0000-000000000002"), 0, 10);
         assertThat(result.items()).hasSize(2);
     }
 
     @Test
     void listPayments_all() {
-        createPayment.execute(new CreatePaymentRequest(UUID.fromString("00000000-0000-0000-0000-000000000001"), UUID.fromString("00000000-0000-0000-0000-000000000002"), new BigDecimal("100"), "TND"), UUID.fromString("00000000-0000-0000-0000-000000000010"), UUID.fromString("00000000-0000-0000-0000-000000000001"));
+        createPayment.execute(new CreatePaymentRequest(UUID.fromString("00000000-0000-0000-0000-000000000001"), UUID.fromString("00000000-0000-0000-0000-000000000002"), new BigDecimal("100"), "TND",null,null), UUID.fromString("00000000-0000-0000-0000-000000000010"), UUID.fromString("00000000-0000-0000-0000-000000000001"));
         var result = listPayments.executeAll(0, 10);
         assertThat(result.items()).hasSizeGreaterThanOrEqualTo(1);
     }
@@ -187,7 +188,7 @@ class PaymentUseCaseH2Test {
     @Test
     void listPayments_pagination() {
         for (int i = 0; i < 5; i++) {
-            createPayment.execute(new CreatePaymentRequest(UUID.fromString("00000000-0000-0000-0000-000000000001"), UUID.fromString("00000000-0000-0000-0000-000000000002"), new BigDecimal("10"), "TND"), UUID.fromString("00000000-0000-0000-0000-000000000010"), UUID.fromString("00000000-0000-0000-0000-000000000001"));
+            createPayment.execute(new CreatePaymentRequest(UUID.fromString("00000000-0000-0000-0000-000000000001"), UUID.fromString("00000000-0000-0000-0000-000000000002"), new BigDecimal("10"), "TND",null,null), UUID.fromString("00000000-0000-0000-0000-000000000010"), UUID.fromString("00000000-0000-0000-0000-000000000001"));
         }
         var page0 = listPayments.execute(UUID.fromString("00000000-0000-0000-0000-000000000001"), 0, 2);
         assertThat(page0.items()).hasSize(2);

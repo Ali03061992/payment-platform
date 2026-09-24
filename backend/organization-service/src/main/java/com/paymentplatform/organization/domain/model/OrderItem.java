@@ -38,6 +38,9 @@ public class OrderItem {
     @Column(name = "line_total", nullable = false, precision = 19, scale = 4)
     private BigDecimal lineTotal;
 
+    @Column(name = "product_snapshot", columnDefinition = "JSON")
+    private String productSnapshot;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
@@ -76,5 +79,7 @@ public class OrderItem {
     public BigDecimal getDiscount() { return discount; }
     public void setDiscount(BigDecimal discount) { this.discount = discount; }
     public BigDecimal getLineTotal() { return lineTotal; }
+    public String getProductSnapshot() { return productSnapshot; }
+    public void setProductSnapshot(String productSnapshot) { this.productSnapshot = productSnapshot; }
     public Instant getCreatedAt() { return createdAt; }
 }

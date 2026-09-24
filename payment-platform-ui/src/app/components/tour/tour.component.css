@@ -1,0 +1,229 @@
+.tour-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  z-index: 9998;
+  animation: fadeIn 0.25s ease;
+  cursor: pointer;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.tour-highlight {
+  position: fixed;
+  z-index: 9999;
+  border: 3px solid #4fc3f7;
+  border-radius: 12px;
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.55);
+  pointer-events: none;
+  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.tour-tooltip {
+  position: fixed;
+  z-index: 10000;
+  background: var(--bg-secondary);
+  border-radius: 16px;
+  padding: 24px;
+  width: 360px;
+  max-width: calc(100vw - 48px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18), 0 0 0 1px var(--border-color);
+  transform: translateX(-50%);
+  animation: tooltipIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  max-height: calc(100vh - 32px);
+  overflow-y: auto;
+}
+
+.tour-tooltip.center-tooltip {
+  transform: translate(-50%, -50%);
+}
+
+@keyframes tooltipIn {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(8px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1);
+  }
+}
+
+.tour-tooltip-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.tour-step-icon {
+  font-size: 28px;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--badge-info-bg);
+  border-radius: 12px;
+}
+
+.tour-step-counter {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.tour-progress-bar {
+  height: 4px;
+  background: var(--border-color);
+  border-radius: 2px;
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+
+.tour-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #1976d2, #4fc3f7);
+  border-radius: 2px;
+  transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.tour-tooltip-title {
+  margin: 0 0 8px 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.3;
+}
+
+.tour-tooltip-description {
+  margin: 0 0 20px 0;
+  font-size: 14px;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+.tour-tooltip-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.tour-btn-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tour-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+
+.tour-btn-skip {
+  background: transparent;
+  color: var(--text-muted);
+  padding: 8px 8px;
+}
+
+.tour-btn-skip:hover {
+  color: var(--text-primary);
+}
+
+.tour-btn-prev {
+  background: var(--bg-tertiary);
+  color: var(--text-muted);
+}
+
+.tour-btn-prev:hover {
+  background: var(--border-color);
+  color: var(--text-primary);
+}
+
+.tour-btn-next {
+  background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%);
+  color: #fff;
+  padding: 8px 20px;
+}
+
+.tour-btn-next:hover {
+  background: linear-gradient(135deg, #1565c0 0%, #0d47a1 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(25, 118, 210, 0.35);
+}
+
+.tour-step-dots {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.tour-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--border-color);
+  transition: all 0.3s;
+}
+
+.tour-dot.active {
+  background: var(--accent);
+  width: 20px;
+  border-radius: 4px;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .tour-tooltip {
+    width: calc(100vw - 32px);
+    left: 16px !important;
+    transform: none;
+    bottom: 24px !important;
+    top: auto !important;
+    max-height: 60vh;
+    overflow-y: auto;
+  }
+
+  .tour-tooltip.center-tooltip {
+    transform: none;
+  }
+
+  .tour-highlight {
+    display: none;
+  }
+
+  .tour-tooltip-header {
+    margin-bottom: 8px;
+  }
+
+  .tour-step-icon {
+    width: 36px;
+    height: 36px;
+    font-size: 22px;
+  }
+
+  .tour-tooltip-title {
+    font-size: 16px;
+  }
+
+  .tour-tooltip-description {
+    font-size: 13px;
+    margin-bottom: 16px;
+  }
+}

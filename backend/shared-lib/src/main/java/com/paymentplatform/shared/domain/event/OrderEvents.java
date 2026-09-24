@@ -74,6 +74,15 @@ public final class OrderEvents {
         @Override public String aggregateId() { return String.valueOf(orderId); }
     }
 
+    public record OrderAutoCancelledEvent(UUID eventId, Instant occurredAt, UUID orderId, String reference,
+                                          UUID shopId, UUID supplierId, String reason) implements DomainEvent {
+        public static final String EVENT_TYPE = "order.auto_cancelled";
+
+        @Override public String eventType() { return EVENT_TYPE; }
+        @Override public int eventVersion() { return 1; }
+        @Override public String aggregateId() { return String.valueOf(orderId); }
+    }
+
     public record OrderRejectedEvent(UUID eventId, Instant occurredAt, UUID orderId, String reference,
                                      UUID shopId, UUID supplierId, UUID rejectedBy) implements DomainEvent {
         public static final String EVENT_TYPE = "order.rejected";
@@ -120,5 +129,16 @@ public final class OrderEvents {
         @Override public String eventType() { return EVENT_TYPE; }
         @Override public int eventVersion() { return 1; }
         @Override public String aggregateId() { return String.valueOf(productId); }
+    }
+
+    public record OrderCommentCreatedEvent(UUID eventId, Instant occurredAt, UUID orderId, String reference,
+                                            UUID shopId, UUID supplierId, UUID authorId, String authorName,
+                                            String content, UUID commentId)
+            implements DomainEvent {
+        public static final String EVENT_TYPE = "order.comment_created";
+
+        @Override public String eventType() { return EVENT_TYPE; }
+        @Override public int eventVersion() { return 1; }
+        @Override public String aggregateId() { return String.valueOf(orderId); }
     }
 }

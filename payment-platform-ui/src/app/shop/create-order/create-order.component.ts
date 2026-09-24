@@ -27,6 +27,7 @@ export class CreateOrderComponent implements OnInit {
   searchQuery = '';
   orderLines: OrderLine[] = [];
   asapPayment = false;
+  paymentTerms = 'IMMEDIATE';
   currency = 'TND';
   notes = '';
   creating = false;
@@ -35,6 +36,7 @@ export class CreateOrderComponent implements OnInit {
   loadingProducts = false;
   errorSuppliers: string | null = null;
   errorProducts: string | null = null;
+  protected globalDiscount = 0;
 
   constructor(
     private orderService: OrderService,
@@ -131,7 +133,35 @@ export class CreateOrderComponent implements OnInit {
     );
   }
 
+  hasStock(product: Product): boolean {
+    return (product.quantity - (product.reservedQty || 0)) >= 1;
+  }
+
+  get availableProductsCount(): number {
+    return this.products.filter(p => this.hasStock(p)).length;
+  }
+
+  get totalProductsCount(): number {
+    return this.products.length;
+  }
+
+  get allProductsEmpty(): boolean {
+    return this.products.length === 0 || this.availableProductsCount === 0;
+  }
+
+  get selectedSupplier(): Organization | undefined {
+    return this.suppliers.find(s => s.id === this.selectedSupplierId);
+  }
+
+  contactSupplier(): void {
+    if (this.selectedSupplier) {
+      const subject = encodeURIComponent('Demande de réapprovisionnement - ' + this.selectedSupplier.name);
+      window.location.href = 'mailto:?subject=' + subject;
+    }
+  }
+
   addProduct(product: Product): void {
+    if (!this.hasStock(product)) return;
     const existing = this.orderLines.find(l => l.product.id === product.id);
     if (existing) {
       existing.quantity++;
@@ -152,8 +182,14 @@ export class CreateOrderComponent implements OnInit {
     return this.subtotal * 0.19;
   }
 
+  readonly taxRate = 19;
+
+  get discountAmount(): number {
+    return (this.subtotal + this.taxAmount) * (this.globalDiscount / 100);
+  }
+
   get total(): number {
-    return this.subtotal + this.taxAmount;
+    return this.subtotal + this.taxAmount - this.discountAmount;
   }
 
   canSubmit(): boolean {
@@ -167,7 +203,9 @@ export class CreateOrderComponent implements OnInit {
       supplierId: this.selectedSupplierId,
       shopId: this.shopId,
       asapPayment: this.asapPayment,
+      paymentTerms: this.paymentTerms,
       currency: this.currency,
+      globalDiscount: this.globalDiscount,
       notes: this.notes,
       items: this.orderLines.map(l => ({
         productId: l.product.id,

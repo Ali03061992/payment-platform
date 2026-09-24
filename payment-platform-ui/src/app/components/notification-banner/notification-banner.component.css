@@ -78,11 +78,11 @@
 
 .banner-btn-accept {
   background: #fff;
-  color: #1976d2;
+  color: var(--accent);
 }
 
 .banner-btn-accept:hover {
-  background: #e3f2fd;
+  background: var(--accent-light);
   transform: translateY(-1px);
 }
 

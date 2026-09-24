@@ -116,6 +116,50 @@ describe('PaymentService', () => {
     });
   });
 
+  describe('downloadInvoice', () => {
+    it('should GET invoice as blob and save it', () => {
+      const blob = new Blob(['%PDF-1.4'], { type: 'application/pdf' });
+      const createSpy = spyOn(window.URL, 'createObjectURL').and.returnValue('blob:test');
+      const revokeSpy = spyOn(window.URL, 'revokeObjectURL');
+      const clickSpy = spyOn(HTMLAnchorElement.prototype, 'click');
+
+      service.downloadInvoice('abc-123');
+
+      const req = httpMock.expectOne('/api/payments/abc-123/invoice');
+      expect(req.request.method).toBe('GET');
+      expect(req.request.responseType).toBe('blob');
+      req.flush(blob, {
+        headers: { 'Content-Disposition': 'attachment; filename="facture-REF-1.pdf"' }
+      });
+
+      expect(createSpy).toHaveBeenCalled();
+      expect(clickSpy).toHaveBeenCalled();
+      expect(revokeSpy).toHaveBeenCalled();
+    });
+  });
+
+  describe('exportCsv', () => {
+    it('should GET CSV as blob and save it', () => {
+      const blob = new Blob(['ref,status'], { type: 'text/csv' });
+      const createSpy = spyOn(window.URL, 'createObjectURL').and.returnValue('blob:test');
+      const revokeSpy = spyOn(window.URL, 'revokeObjectURL');
+      const clickSpy = spyOn(HTMLAnchorElement.prototype, 'click');
+
+      service.exportCsv({ status: 'PENDING' });
+
+      const req = httpMock.expectOne('/api/payments/export/csv?status=PENDING');
+      expect(req.request.method).toBe('GET');
+      expect(req.request.responseType).toBe('blob');
+      req.flush(blob, {
+        headers: { 'Content-Disposition': 'attachment; filename="paiements.csv"' }
+      });
+
+      expect(createSpy).toHaveBeenCalled();
+      expect(clickSpy).toHaveBeenCalled();
+      expect(revokeSpy).toHaveBeenCalled();
+    });
+  });
+
   describe('getStats', () => {
     it('should GET stats', () => {
       const mock: PaymentStats = { total: 50, pending: 10, confirmed: 25, rejected: 10, cancelled: 5 };

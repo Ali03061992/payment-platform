@@ -5,6 +5,26 @@
 
 @if (!loading) {
   <div class="filters">
+    <div class="search-container">
+      <input type="text" [(ngModel)]="searchQuery" (ngModelChange)="searchSubject.next($event)"
+        class="form-control" placeholder="Rechercher par référence ou boutique..." style="max-width:300px;">
+      @if (searching) {
+        <div class="search-spinner"></div>
+      }
+      @if (showSearchDropdown && searchResults.length > 0) {
+        <div class="search-dropdown">
+          @for (r of searchResults; track r) {
+            <div class="search-dropdown-item" [routerLink]="['/dashboard/shop/orders', r.id]">
+              <div class="search-dropdown-ref">{{ r.reference }}</div>
+              <div class="search-dropdown-meta">
+                <span class="payment-badge" [ngClass]="statusClass(r.status)">{{ statusLabel(r.status) }}</span>
+                <span>{{ r.supplierName || r.supplierId }}</span>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
     <select [(ngModel)]="filterStatus" class="form-control" style="max-width:200px;">
       <option value="">Tous les statuts</option>
       <option value="DRAFT">Brouillon</option>
@@ -20,6 +40,7 @@
       <option value="DELIVERY_REJECTED">Livraison rejetée</option>
     </select>
     <span class="result-count">{{ filteredOrders.length }} résultat(s)</span>
+    <button class="btn btn-secondary" style="margin-left:auto;" (click)="exportCsv()">Exporter CSV</button>
   </div>
 }
 
@@ -87,11 +108,6 @@
 <!-- Mobile Card View -->
 @if (!loading) {
   <div class="order-cards show-mobile">
-    @if (filteredOrders.length === 0) {
-      <div class="empty-card">
-        Aucune commande trouvée
-      </div>
-    }
     @for (o of filteredOrders; track o) {
       <div class="order-card" [routerLink]="['/dashboard/shop/orders', o.id]">
         <div class="order-card-header">

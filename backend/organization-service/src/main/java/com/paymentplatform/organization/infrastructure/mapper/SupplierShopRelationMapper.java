@@ -12,5 +12,6 @@ public interface SupplierShopRelationMapper {
     @Mapping(target = "supplierId", expression = "java(relation.supplierId() != null ? relation.supplierId().value() : null)")
     @Mapping(target = "shopId", expression = "java(relation.shopId() != null ? relation.shopId().value() : null)")
     @Mapping(target = "status", expression = "java(relation.status() != null ? relation.status().name() : \"\")")
+    @Mapping(target = "createdAt", expression = "java(relation.createdAt())")
     RelationResponse toResponse(SupplierShopRelation relation);
 }

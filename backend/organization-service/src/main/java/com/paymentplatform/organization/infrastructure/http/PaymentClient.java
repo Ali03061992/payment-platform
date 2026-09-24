@@ -25,7 +25,8 @@ public class PaymentClient {
     @Value("${PAYMENT_SERVICE_PORT:8084}")
     private String paymentPort;
 
-    public void createAutoPayment(UUID shopId, UUID supplierId, String currency, UUID createdBy, BigDecimal amount) {
+    public void createAutoPayment(UUID shopId, UUID supplierId, String currency, UUID createdBy,
+                                   BigDecimal amount, UUID orderId) {
         try {
             String targetUri = "http://" + paymentUrl + ":" + paymentPort + "/api/payments";
             String json = """
@@ -33,9 +34,14 @@ public class PaymentClient {
                       "shopId": "%s",
                       "supplierId": "%s",
                       "amount": %s,
-                      "currency": "%s"
+                      "currency": "%s",
+                      "orderId": %s,
+                      "dueDate": null
                     }
-                    """.formatted(shopId, supplierId, amount != null ? amount.toPlainString() : "0", currency != null ? currency : "TND");
+                    """.formatted(shopId, supplierId,
+                    amount != null ? amount.toPlainString() : "0",
+                    currency != null ? currency : "TND",
+                    orderId != null ? "\"" + orderId + "\"" : "null");
 
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(targetUri))

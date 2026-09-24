@@ -28,6 +28,11 @@ spring:
     port: ${RABBITMQ_PORT:5672}
     username: ${RABBITMQ_USER:payment}
     password: ${RABBITMQ_PASSWORD:rabbit-password-change-me}
+  mail:
+    host: ${SMTP_HOST:localhost}
+    port: ${SMTP_PORT:1025}
+    username: ${SMTP_USER:}
+    password: ${SMTP_PASSWORD:}
 
 app:
   security:
@@ -35,6 +40,9 @@ app:
     expiration: ${JWT_EXPIRATION:30m}
   gateway:
     base-url: ${API_GATEWAY_URL:http://localhost:8081}
+  push:
+    enabled: ${PUSH_ENABLED:false}
+    credentials-path: ${FIREBASE_CREDENTIALS_PATH:}
 
 springdoc:
   swagger-ui:

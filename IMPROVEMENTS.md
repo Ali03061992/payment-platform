@@ -94,7 +94,7 @@ Créer un nouvel endpoint PUT /api/orders/{id} qui permet de modifier une comman
 
 ---
 
-### P1-03 : Facture/Reçu non générable
+### P1-03 : Facture/Reçu non générable ✅ Réalisé
 
 **Problème :** Il n'existe aucun moyen de générer ou télécharger un reçu/facture PDF pour une commande ou un paiement confirmé.
 
@@ -102,6 +102,13 @@ Créer un nouvel endpoint PUT /api/orders/{id} qui permet de modifier une comman
 ```
 Côté backend : créer un endpoint GET /api/orders/{id}/invoice qui génère un PDF avec les détails de la commande (référence, dates, articles, totaux, mentions légales). Utiliser une librairie comme OpenPDF ou iText. Côté frontend : ajouter un bouton "Télécharger facture" dans OrderDetailComponent (shop) et OrderManagementComponent (supplier) pour les statuts DELIVERED/ACCEPTED. Pour les paiements, ajouter le même bouton dans PaymentDetailComponent pour les statuts CONFIRMED. Stocker les PDF générés dans un dossier partagé ou un objet S3.
 ```
+
+**Réalisé :**
+- Backend : `GET /api/orders/{id}/invoice` (`OrderController`) et `GET /api/payments/{id}/invoice` (`PaymentController`) avec OpenPDF (`InvoicePdfService`, `PaymentInvoicePdfService`).
+- Contrôle de statut backend : 409 si la commande n'est pas DELIVERED/ACCEPTED ou le paiement non CONFIRMED.
+- Frontend : boutons « Télécharger facture » dans `OrderDetailComponent` (DELIVERED/ACCEPTED), `OrderManagementComponent` (liste + détail, DELIVERED/ACCEPTED) et `PaymentDetailComponent` (CONFIRMED).
+- Tests unitaires PDF : `InvoicePdfServiceTest`, `PaymentInvoicePdfServiceTest`.
+- Note : les PDF sont générés à la volée (pas de stockage S3 — non nécessaire pour l'usage actuel).
 
 ---
 

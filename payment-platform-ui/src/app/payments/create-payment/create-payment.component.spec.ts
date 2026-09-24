@@ -152,6 +152,22 @@ describe('CreatePaymentComponent', () => {
       expect(paymentService.create).not.toHaveBeenCalled();
     });
 
+    it('should not create when amount exceeds maximum', () => {
+      component.shopId = 1;
+      component.supplierId = 2;
+      component.amount = 1000000;
+      component.create();
+      expect(paymentService.create).not.toHaveBeenCalled();
+    });
+
+    it('should not create when amount is below minimum', () => {
+      component.shopId = 1;
+      component.supplierId = 2;
+      component.amount = 0.001;
+      component.create();
+      expect(paymentService.create).not.toHaveBeenCalled();
+    });
+
     it('should handle create error', () => {
       component.shopId = 1;
       component.supplierId = 2;

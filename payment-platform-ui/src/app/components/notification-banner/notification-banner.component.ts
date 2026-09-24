@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { NotificationService } from '../../services/notification.service';
+import { PushNotificationService } from '../../services/push-notification.service';
 
 @Component({
     selector: 'app-notification-banner',
@@ -11,7 +12,10 @@ export class NotificationBannerComponent implements OnInit {
   showBanner = false;
   permissionStatus: NotificationPermission | 'unsupported' = 'default';
 
-  constructor(private notificationService: NotificationService) {}
+  constructor(
+    private notificationService: NotificationService,
+    private pushNotificationService: PushNotificationService
+  ) {}
 
   ngOnInit(): void {
     this.checkPermission();
@@ -39,6 +43,12 @@ export class NotificationBannerComponent implements OnInit {
 
     if (result === 'granted') {
       this.notificationService.showBrowserNotification();
+      try {
+        await this.pushNotificationService.requestPermissionAndGetToken();
+        this.pushNotificationService.listenToMessages();
+      } catch {
+        // Push optionnel : ne jamais bloquer l'acceptation
+      }
     }
   }
 

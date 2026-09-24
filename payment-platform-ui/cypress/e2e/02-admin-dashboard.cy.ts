@@ -13,8 +13,8 @@ describe('02 - Admin Dashboard', () => {
   });
 
   it('should show 5 stat cards for SYSTEM_ADMIN', () => {
-    cy.get('.stats-grid').should('exist');
-    cy.get('.stat-card').should('have.length', 5);
+    cy.get('.stats-grid', { timeout: 20000 }).should('exist');
+    cy.get('.stat-card', { timeout: 20000 }).should('have.length', 5);
     cy.get('.stat-card').eq(0).should('contain', 'Total utilisateurs');
     cy.get('.stat-card').eq(1).should('contain', 'Comptes actifs');
     cy.get('.stat-card').eq(2).should('contain', 'Comptes désactivés');

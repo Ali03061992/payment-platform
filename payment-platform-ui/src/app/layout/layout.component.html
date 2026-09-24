@@ -1,14 +1,16 @@
+<a href="#main-content" class="skip-link">Aller au contenu principal</a>
 <app-notification-banner></app-notification-banner>
 <app-toast></app-toast>
+<app-tour></app-tour>
 
 <div class="layout" [class.sidebar-collapsed]="!sidebarOpen"
   (touchstart)="onTouchStart($event)"
   (touchmove)="onTouchMove($event)"
   (touchend)="onTouchEnd($event)">
   <!-- Mobile header -->
-  <div class="mobile-header">
-    <button class="mobile-menu-btn" (click)="toggleSidebar()" aria-label="Menu">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <div class="mobile-header" role="banner">
+    <button class="mobile-menu-btn" (click)="toggleSidebar()" aria-label="Ouvrir le menu de navigation">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <line x1="3" y1="12" x2="21" y2="12"></line>
         <line x1="3" y1="6" x2="21" y2="6"></line>
         <line x1="3" y1="18" x2="21" y2="18"></line>
@@ -16,8 +18,27 @@
     </button>
     <span class="mobile-title">Payment Platform</span>
     <div class="mobile-header-actions">
+      <button class="theme-toggle-mobile" (click)="themeService.toggle()" [attr.aria-label]="themeService.isDark ? 'Passer en mode clair' : 'Passer en mode sombre'" [title]="themeService.isDark ? 'Mode clair' : 'Mode sombre'">
+        @if (themeService.isDark) {
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+        } @else {
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+        }
+      </button>
       <button class="notif-bell-mobile" (click)="toggleNotifications()" aria-label="Notifications">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
           <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
         </svg>
@@ -25,8 +46,8 @@
           <span class="notif-badge">{{ unreadCount > 99 ? '99+' : unreadCount }}</span>
         }
       </button>
-      <button class="mobile-logout-btn" (click)="logout()" aria-label="Déconnexion">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <button class="mobile-logout-btn" (click)="logout()" aria-label="Se déconnecter">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
           <polyline points="16 17 21 12 16 7"></polyline>
           <line x1="21" y1="12" x2="9" y2="12"></line>
@@ -45,11 +66,11 @@
 
   <!-- Notifications panel -->
   @if (showNotifications) {
-    <div class="notif-panel" [class.mobile-fullscreen]="isMobile">
+    <div class="notif-panel" [class.mobile-fullscreen]="isMobile" role="region" aria-label="Panneau de notifications">
       <div class="notif-header">
         <h3>Notifications</h3>
-        <button class="notif-close" (click)="closeNotifications()" aria-label="Fermer">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <button class="notif-close" (click)="closeNotifications()" aria-label="Fermer les notifications">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <line x1="18" y1="6" x2="6" y2="18"></line>
             <line x1="6" y1="6" x2="18" y2="18"></line>
           </svg>
@@ -57,7 +78,7 @@
       </div>
       @if (unreadCount > 0) {
         <div class="notif-actions">
-          <button class="notif-mark-all" (click)="markAllRead()">Tout marquer lu</button>
+          <button class="notif-mark-all" (click)="markAllRead()" aria-label="Tout marquer comme lu">Tout marquer lu</button>
         </div>
       }
       <div class="notif-list">
@@ -83,7 +104,7 @@
     </div>
   }
 
-  <aside class="sidebar" [class.open]="sidebarOpen">
+  <aside class="sidebar" [class.open]="sidebarOpen" role="complementary" aria-label="Menu de navigation">
     <div class="sidebar-header">
       <div class="logo">
         <span class="logo-icon">💳</span>
@@ -100,7 +121,7 @@
       </button>
     </div>
 
-    <nav class="sidebar-nav">
+    <nav class="sidebar-nav" aria-label="Navigation principale">
       @for (item of filteredNav; track item) {
         <a
           [routerLink]="item.route"
@@ -110,6 +131,12 @@
           <span class="nav-icon">{{ item.icon }}</span>
           @if (sidebarOpen) {
             <span class="nav-label">{{ item.label }}</span>
+          }
+          @if ((item.route === 'supplier/stock' || item.route === 'supplier/low-stock-alerts') && lowStockAlertCount > 0) {
+            <span class="nav-badge">{{ lowStockAlertCount }}</span>
+          }
+          @if (item.route === 'notifications' && unreadCount > 0) {
+            <span class="nav-badge">{{ unreadCount > 99 ? '99+' : unreadCount }}</span>
           }
         </a>
       }
@@ -125,8 +152,8 @@
           </div>
         </div>
       }
-      <button class="logout-btn" (click)="logout()">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <button class="logout-btn" (click)="logout()" aria-label="Se déconnecter">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
           <polyline points="16 17 21 12 16 7"></polyline>
           <line x1="21" y1="12" x2="9" y2="12"></line>
@@ -138,15 +165,34 @@
     </div>
   </aside>
 
-  <main class="main-content">
+  <main class="main-content" id="main-content" role="main" aria-label="Contenu principal">
     <header class="top-bar hide-mobile">
       <div class="page-title">
         <h2>Bienvenue, {{ user?.firstName }}</h2>
         <span class="breadcrumb">{{ user?.roles?.[0] }}</span>
       </div>
       <div class="header-actions">
+        <button class="theme-toggle" (click)="themeService.toggle()" [attr.aria-label]="themeService.isDark ? 'Passer en mode clair' : 'Passer en mode sombre'" [title]="themeService.isDark ? 'Mode clair' : 'Mode sombre'">
+          @if (themeService.isDark) {
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="5"></circle>
+              <line x1="12" y1="1" x2="12" y2="3"></line>
+              <line x1="12" y1="21" x2="12" y2="23"></line>
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+              <line x1="1" y1="12" x2="3" y2="12"></line>
+              <line x1="21" y1="12" x2="23" y2="12"></line>
+              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+            </svg>
+          } @else {
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+            </svg>
+          }
+        </button>
         <button class="notif-bell" (click)="toggleNotifications()" aria-label="Notifications">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
             <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
           </svg>
@@ -154,7 +200,7 @@
             <span class="notif-badge">{{ unreadCount > 99 ? '99+' : unreadCount }}</span>
           }
         </button>
-        <span class="status-badge active">En ligne</span>
+        <span class="status-badge active" role="status" aria-label="Statut de connexion : en ligne">En ligne</span>
       </div>
     </header>
     <div class="content-area" (click)="closeNotifications()">

@@ -32,8 +32,14 @@ spring:
     redis:
       host: ${REDIS_HOST:localhost}
       port: ${REDIS_PORT:6379}
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 5MB
 
 app:
+  upload:
+    dir: ${UPLOAD_DIR:uploads/products}
   security:
     secret: ${JWT_SECRET:local-dev-jwt-secret-change-me-in-production-32bytes}
     expiration: ${JWT_EXPIRATION:30m}

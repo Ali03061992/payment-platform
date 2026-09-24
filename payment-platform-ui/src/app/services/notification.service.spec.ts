@@ -51,6 +51,23 @@ describe('NotificationService', () => {
       const req = httpMock.expectOne('/api/notifications');
       req.flush(null);
     });
+
+    it('should extract items when backend returns a page', () => {
+      const item = { id: '1', recipientUserId: 'u1', recipientOrganizationId: null, type: 'PAYMENT_CREATED',
+        message: 'New payment', readStatus: 'UNREAD', createdAt: '', readAt: null,
+        relatedEntityType: 'PAYMENT', relatedEntityId: '1' };
+      const page = { items: [item], totalElements: 1, totalPages: 1, currentPage: 0, size: 20 };
+      service.fetchNotifications().subscribe(data => {
+        expect(data.length).toBe(1);
+        expect(data[0].id).toBe('1');
+      });
+      const req = httpMock.expectOne('/api/notifications');
+      req.flush(page);
+
+      let latest: Notification[] = [];
+      service.notifications$.subscribe(n => latest = n);
+      expect(latest.length).toBe(1);
+    });
   });
 
   describe('fetchUnreadCount', () => {

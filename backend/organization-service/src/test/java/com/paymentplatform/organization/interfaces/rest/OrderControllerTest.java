@@ -22,6 +22,7 @@ import java.util.UUID;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -130,7 +131,7 @@ class OrderControllerTest {
     void createOrder_withoutAuth_returns401() throws Exception {
         String body = objectMapper.writeValueAsString(
                 new com.paymentplatform.organization.application.dto.CreateOrderRequest(
-                        UUID.fromString("00000000-0000-0000-0000-000000000020"), UUID.fromString("00000000-0000-0000-0000-000000000010"), false, "TND", null,
+                        UUID.fromString("00000000-0000-0000-0000-000000000020"), UUID.fromString("00000000-0000-0000-0000-000000000010"), false, null, "TND", null, null, null,
                         List.of(new com.paymentplatform.organization.application.dto.OrderItemRequest(UUID.fromString("00000000-0000-0000-0000-000000000001"), 5, null))));
 
         mockMvc.perform(post("/api/orders")
@@ -190,7 +191,7 @@ class OrderControllerTest {
     void createOrder_asShopAdmin_returns201or400() throws Exception {
         String body = objectMapper.writeValueAsString(
                 new com.paymentplatform.organization.application.dto.CreateOrderRequest(
-                        UUID.fromString("00000000-0000-0000-0000-000000000020"), UUID.fromString("00000000-0000-0000-0000-000000000010"), false, "TND", null,
+                        UUID.fromString("00000000-0000-0000-0000-000000000020"), UUID.fromString("00000000-0000-0000-0000-000000000010"), false, null, "TND", null, null, null,
                         List.of(new com.paymentplatform.organization.application.dto.OrderItemRequest(UUID.fromString("00000000-0000-0000-0000-000000000001"), 2, null))));
         // This will likely fail due to product not found, but tests 403/400 handling
         mockMvc.perform(post("/api/orders")
@@ -204,7 +205,7 @@ class OrderControllerTest {
     void createOrder_asSupplierAdmin_returnsCreatedOrError() throws Exception {
         String body = objectMapper.writeValueAsString(
                 new com.paymentplatform.organization.application.dto.CreateOrderRequest(
-                        UUID.fromString("00000000-0000-0000-0000-000000000020"), UUID.fromString("00000000-0000-0000-0000-000000000010"), false, "TND", null,
+                        UUID.fromString("00000000-0000-0000-0000-000000000020"), UUID.fromString("00000000-0000-0000-0000-000000000010"), false, null, "TND", null, null, null,
                         List.of(new com.paymentplatform.organization.application.dto.OrderItemRequest(UUID.fromString("00000000-0000-0000-0000-000000000001"), 1, null))));
         mockMvc.perform(post("/api/orders")
                         .with(SecurityMockMvcRequestPostProcessors.authentication(supplierAdmin()))
@@ -326,5 +327,45 @@ class OrderControllerTest {
     void listOrders_withoutAuth_returns401() throws Exception {
         mockMvc.perform(get("/api/orders"))
                 .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void updateOrder_withoutAuth_returns401() throws Exception {
+        String body = objectMapper.writeValueAsString(
+                new com.paymentplatform.organization.application.dto.UpdateOrderRequest(
+                        "Updated notes", false,
+                        List.of(new com.paymentplatform.organization.application.dto.OrderItemRequest(UUID.fromString("00000000-0000-0000-0000-000000000001"), 5, null))));
+
+        mockMvc.perform(put("/api/orders/00000000-0000-0000-0000-000000000001")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void updateOrder_nonExistent_returns404() throws Exception {
+        String body = objectMapper.writeValueAsString(
+                new com.paymentplatform.organization.application.dto.UpdateOrderRequest(
+                        "Updated notes", false,
+                        List.of(new com.paymentplatform.organization.application.dto.OrderItemRequest(UUID.fromString("00000000-0000-0000-0000-000000000001"), 5, null))));
+
+        mockMvc.perform(put("/api/orders/00000000-0000-0000-0000-000000099999")
+                        .with(SecurityMockMvcRequestPostProcessors.authentication(shopAdmin()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void updateOrder_asShopAdmin_returns200or4xx() throws Exception {
+        String body = objectMapper.writeValueAsString(
+                new com.paymentplatform.organization.application.dto.UpdateOrderRequest(
+                        "Updated notes", false,
+                        List.of(new com.paymentplatform.organization.application.dto.OrderItemRequest(UUID.fromString("00000000-0000-0000-0000-000000000001"), 2, null))));
+        mockMvc.perform(put("/api/orders/00000000-0000-0000-0000-000000000001")
+                        .with(SecurityMockMvcRequestPostProcessors.authentication(shopAdmin()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().is4xxClientError());
     }
 }

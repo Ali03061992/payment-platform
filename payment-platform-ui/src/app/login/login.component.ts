@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { LoginService } from '../services/login.service';
 import { NotificationService } from '../services/notification.service';
+import { PushNotificationService } from '../services/push-notification.service';
 
 @Component({
     selector: 'app-login',
@@ -17,7 +18,8 @@ export class LoginComponent {
   constructor(
     private loginService: LoginService,
     private router: Router,
-    private notificationService: NotificationService
+    private notificationService: NotificationService,
+    private pushNotificationService: PushNotificationService
   ) {}
 
   onSubmit(): void {
@@ -32,6 +34,8 @@ export class LoginComponent {
             this.loading = false;
             this.router.navigate(['/dashboard']);
             this.requestNotificationPermission();
+            this.pushNotificationService.requestPermissionAndGetToken();
+            this.pushNotificationService.listenToMessages();
           },
           error: () => {
             sessionStorage.removeItem('token');

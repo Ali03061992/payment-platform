@@ -1,13 +1,22 @@
 package com.paymentplatform.organization.interfaces.rest;
 
+import com.paymentplatform.organization.application.dto.CreateOrderCommentRequest;
 import com.paymentplatform.organization.application.dto.CreateOrderRequest;
 import com.paymentplatform.organization.application.dto.OrderResponse;
 import com.paymentplatform.organization.application.dto.PageResponse;
+import com.paymentplatform.organization.application.dto.UpdateOrderRequest;
+import com.paymentplatform.organization.application.service.InvoicePdfService;
 import com.paymentplatform.organization.application.usecase.*;
+import com.paymentplatform.organization.domain.model.OrderComment;
+import com.paymentplatform.organization.domain.model.OrderEvent;
+import com.paymentplatform.organization.domain.repository.OrderCommentRepository;
+import com.paymentplatform.organization.domain.repository.OrderEventRepository;
 import com.paymentplatform.organization.domain.repository.OrganizationRepository;
 import com.paymentplatform.organization.domain.valueobject.OrganizationId;
 import com.paymentplatform.organization.infrastructure.http.IdentityClient;
 import com.paymentplatform.organization.infrastructure.http.PaymentClient;
+import com.paymentplatform.shared.infrastructure.outbox.OutboxEventStore;
+import com.paymentplatform.shared.domain.event.OrderEvents;
 import com.paymentplatform.shared.infrastructure.security.CurrentUser;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.PageRequest;
@@ -16,8 +25,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpHeaders;
+
 import java.net.URI;
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -41,6 +56,13 @@ public class OrderController {
     private final com.paymentplatform.organization.domain.repository.OrderRepository orderRepository;
     private final com.paymentplatform.organization.domain.repository.OrderItemRepository orderItemRepository;
     private final OrganizationRepository organizationRepository;
+    private final OrderEventRepository orderEventRepository;
+    private final com.paymentplatform.organization.infrastructure.csv.OrderCsvExportService orderCsvExportService;
+    private final InvoicePdfService invoicePdfService;
+    private final ReorderUseCase reorderUseCase;
+    private final UpdateOrderUseCase updateOrderUseCase;
+    private final OrderCommentRepository orderCommentRepository;
+    private final OutboxEventStore outbox;
 
     public OrderController(CreateOrderUseCase createOrder,
                            ConfirmOrderUseCase confirmOrder,
@@ -56,7 +78,14 @@ public class OrderController {
                            IdentityClient identityClient,
                            com.paymentplatform.organization.domain.repository.OrderRepository orderRepository,
                            com.paymentplatform.organization.domain.repository.OrderItemRepository orderItemRepository,
-                           OrganizationRepository organizationRepository) {
+                           OrganizationRepository organizationRepository,
+                           OrderEventRepository orderEventRepository,
+                           com.paymentplatform.organization.infrastructure.csv.OrderCsvExportService orderCsvExportService,
+                           InvoicePdfService invoicePdfService,
+                           ReorderUseCase reorderUseCase,
+                           UpdateOrderUseCase updateOrderUseCase,
+                           OrderCommentRepository orderCommentRepository,
+                           OutboxEventStore outbox) {
         this.createOrder = createOrder;
         this.confirmOrder = confirmOrder;
         this.prepareOrder = prepareOrder;
@@ -72,6 +101,13 @@ public class OrderController {
         this.orderRepository = orderRepository;
         this.orderItemRepository = orderItemRepository;
         this.organizationRepository = organizationRepository;
+        this.orderEventRepository = orderEventRepository;
+        this.orderCsvExportService = orderCsvExportService;
+        this.invoicePdfService = invoicePdfService;
+        this.reorderUseCase = reorderUseCase;
+        this.updateOrderUseCase = updateOrderUseCase;
+        this.orderCommentRepository = orderCommentRepository;
+        this.outbox = outbox;
     }
 
     private String resolveOrgName(UUID orgId) {
@@ -81,14 +117,35 @@ public class OrderController {
                 .orElse(null);
     }
 
+    private String resolveUserName(UUID userId) {
+        return identityClient.resolveUserName(userId);
+    }
+
+    private String resolveEventActor(List<OrderEvent> events, String action) {
+        return events.stream()
+                .filter(e -> action.equals(e.getAction()))
+                .findFirst()
+                .map(e -> resolveUserName(e.getUserId()))
+                .orElse(null);
+    }
+
     private OrderResponse buildOrderResponse(com.paymentplatform.organization.domain.model.Order o) {
         var items = orderItemRepository.findByOrderId(o.getId());
+        var events = orderEventRepository.findByOrderIdOrderByTimestampDesc(o.getId());
+
         return OrderResponse.from(o, items,
                 resolveOrgName(o.getSupplierId()),
                 resolveOrgName(o.getShopId()),
                 identityClient.resolveUserName(o.getDeliveryAgentId()),
                 identityClient.resolveUserName(o.getReceivedBy()),
-                identityClient.resolveUserName(o.getCreatedBy()));
+                identityClient.resolveUserName(o.getCreatedBy()),
+                resolveEventActor(events, "ORDER_CONFIRMED"),
+                resolveEventActor(events, "ORDER_PREPARING"),
+                resolveEventActor(events, "ORDER_READY_FOR_DELIVERY"),
+                resolveEventActor(events, "ORDER_DELIVERY_ASSIGNED"),
+                resolveEventActor(events, "ORDER_DELIVERY_ACCEPTED"),
+                resolveEventActor(events, "ORDER_DELIVERY_CONFIRMED"),
+                resolveEventActor(events, "ORDER_DELIVERED"));
     }
 
     @PostMapping
@@ -98,6 +155,14 @@ public class OrderController {
         String role = current.roles().contains("SUPPLIER_ADMIN") ? "SUPPLIER" : "SHOP";
         OrderResponse response = createOrder.execute(request, current.userId(), role);
         return ResponseEntity.created(URI.create("/api/orders/" + response.id())).body(response);
+    }
+
+    @PutMapping("/{id}")
+    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SHOP_ADMIN', 'SHOP_MANAGER')")
+    public ResponseEntity<OrderResponse> updateOrder(@PathVariable UUID id, @Valid @RequestBody UpdateOrderRequest request) {
+        var current = CurrentUser.get();
+        OrderResponse response = updateOrderUseCase.execute(id, request, current.userId());
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping
@@ -172,6 +237,28 @@ public class OrderController {
         return ResponseEntity.ok(agents);
     }
 
+    @GetMapping("/recent")
+    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_MANAGER', 'SYSTEM_ADMIN')")
+    public ResponseEntity<List<OrderResponse>> recentOrders(
+            @RequestParam(defaultValue = "5") int limit) {
+        var current = CurrentUser.get();
+        var pageable = PageRequest.of(0, limit, Sort.by(Sort.Direction.DESC, "createdAt"));
+        List<com.paymentplatform.organization.domain.model.Order> orders;
+
+        if ((current.roles().contains("SUPPLIER_ADMIN") || current.roles().contains("SUPPLIER_AGENT")) && current.organizationId() != null) {
+            orders = orderRepository.findTopNBySupplierIdOrderByCreatedAtDesc(current.organizationId(), pageable);
+        } else if ((current.roles().contains("SHOP_MANAGER") || current.roles().contains("SHOP_ADMIN")) && current.organizationId() != null) {
+            orders = orderRepository.findTopNByShopIdOrderByCreatedAtDesc(current.organizationId(), pageable);
+        } else {
+            orders = orderRepository.findAll(pageable).getContent();
+        }
+
+        List<OrderResponse> responses = orders.stream()
+                .map(this::buildOrderResponse)
+                .toList();
+        return ResponseEntity.ok(responses);
+    }
+
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_MANAGER', 'SYSTEM_ADMIN')")
     public ResponseEntity<OrderResponse> getOrder(@PathVariable UUID id) {
@@ -187,6 +274,27 @@ public class OrderController {
             if (!isSupplier && !isShop && !isDeliveryAgent) return ResponseEntity.status(403).build();
         }
         return ResponseEntity.ok(buildOrderResponse(o));
+    }
+
+    @GetMapping("/search")
+    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_MANAGER', 'SYSTEM_ADMIN')")
+    public ResponseEntity<PageResponse<OrderResponse>> searchOrders(
+            @RequestParam String q,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        var current = CurrentUser.get();
+        var pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        org.springframework.data.domain.Page<com.paymentplatform.organization.domain.model.Order> orderPage;
+
+        if ((current.roles().contains("SUPPLIER_ADMIN") || current.roles().contains("SUPPLIER_AGENT")) && current.organizationId() != null) {
+            orderPage = orderRepository.searchBySupplierId(q, current.organizationId(), pageable);
+        } else if ((current.roles().contains("SHOP_MANAGER") || current.roles().contains("SHOP_ADMIN")) && current.organizationId() != null) {
+            orderPage = orderRepository.searchByShopId(q, current.organizationId(), pageable);
+        } else {
+            orderPage = orderRepository.search(q, pageable);
+        }
+
+        return ResponseEntity.ok(PageResponse.of(orderPage.map(this::buildOrderResponse)));
     }
 
     @GetMapping("/reference/{reference}")
@@ -232,6 +340,7 @@ public class OrderController {
     public ResponseEntity<OrderResponse> assignDeliveryAgent(
             @PathVariable UUID id,
             @RequestBody Map<String, Object> body) {
+        var current = CurrentUser.get();
         var order = orderRepository.findById(id);
         if (order.isEmpty()) return ResponseEntity.notFound().build();
         UUID agentId = UUID.fromString(body.get("agentId").toString());
@@ -240,6 +349,8 @@ public class OrderController {
             order.get().setPlannedDeliveryDate(LocalDate.parse(body.get("plannedDeliveryDate").toString()));
         }
         orderRepository.save(order.get());
+        orderEventRepository.save(OrderEvent.create(id, "ORDER_DELIVERY_ASSIGNED", current.userId(),
+                "Agent assigné: " + agentId));
         return ResponseEntity.ok(buildOrderResponse(order.get()));
     }
 
@@ -287,7 +398,7 @@ public class OrderController {
         OrderResponse response = acceptOrder.execute(id, current.userId());
         if (response.asapPayment()) {
             paymentClient.createAutoPayment(response.shopId(), response.supplierId(),
-                    response.currency(), current.userId(), response.total());
+                    response.currency(), current.userId(), response.total(), response.id());
         }
         return ResponseEntity.ok(response);
     }
@@ -299,11 +410,22 @@ public class OrderController {
         return ResponseEntity.ok(cancelOrder.execute(id, current.userId()));
     }
 
+    @PostMapping("/{id}/reorder")
+    @PreAuthorize("hasAnyAuthority('SHOP_ADMIN', 'SHOP_MANAGER')")
+    public ResponseEntity<OrderResponse> reorder(@PathVariable UUID id) {
+        var current = CurrentUser.get();
+        String role = "SHOP";
+        return ResponseEntity.ok(reorderUseCase.execute(id, current.userId(), role));
+    }
+
     @PostMapping("/{id}/reject")
     @PreAuthorize("hasAnyAuthority('SHOP_MANAGER', 'SHOP_ADMIN')")
-    public ResponseEntity<OrderResponse> rejectOrder(@PathVariable UUID id) {
+    public ResponseEntity<OrderResponse> rejectOrder(
+            @PathVariable UUID id,
+            @RequestBody(required = false) Map<String, String> body) {
         var current = CurrentUser.get();
-        return ResponseEntity.ok(rejectOrder.execute(id, current.userId()));
+        String returnReason = body != null ? body.get("returnReason") : null;
+        return ResponseEntity.ok(rejectOrder.execute(id, current.userId(), returnReason));
     }
 
     @PostMapping("/{id}/delivery-reject")
@@ -316,6 +438,28 @@ public class OrderController {
         return ResponseEntity.ok(deliveryRejectOrder.execute(id, current.userId(), reason));
     }
 
+    @PostMapping("/{id}/location")
+    @PreAuthorize("hasAnyAuthority('SUPPLIER_AGENT')")
+    public ResponseEntity<OrderResponse> updateLocation(
+            @PathVariable UUID id,
+            @RequestBody Map<String, Object> body) {
+        var current = CurrentUser.get();
+        var order = orderRepository.findById(id);
+        if (order.isEmpty()) return ResponseEntity.notFound().build();
+        var o = order.get();
+        if (o.getDeliveryAgentId() == null || !o.getDeliveryAgentId().equals(current.userId())) {
+            return ResponseEntity.status(403).build();
+        }
+        java.math.BigDecimal latitude = new java.math.BigDecimal(body.get("latitude").toString());
+        java.math.BigDecimal longitude = new java.math.BigDecimal(body.get("longitude").toString());
+        o.updateLocation(latitude, longitude);
+        if (body.containsKey("estimatedArrival") && body.get("estimatedArrival") != null) {
+            o.setEstimatedArrival(Instant.parse(body.get("estimatedArrival").toString()));
+        }
+        orderRepository.save(o);
+        return ResponseEntity.ok(buildOrderResponse(o));
+    }
+
     @GetMapping("/my-deliveries")
     @PreAuthorize("hasAnyAuthority('SUPPLIER_AGENT')")
     public ResponseEntity<List<OrderResponse>> myDeliveries() {
@@ -325,5 +469,139 @@ public class OrderController {
                 .map(this::buildOrderResponse)
                 .toList();
         return ResponseEntity.ok(responses);
+    }
+
+    @PostMapping("/{id}/comments")
+    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_MANAGER', 'SYSTEM_ADMIN')")
+    public ResponseEntity<OrderComment> addComment(
+            @PathVariable UUID id,
+            @Valid @RequestBody CreateOrderCommentRequest request) {
+        var current = CurrentUser.get();
+        var order = orderRepository.findById(id);
+        if (order.isEmpty()) return ResponseEntity.notFound().build();
+        var o = order.get();
+        if (!current.roles().contains("SYSTEM_ADMIN")) {
+            if (current.organizationId() == null) return ResponseEntity.status(403).build();
+            boolean isSupplier = o.getSupplierId() != null && o.getSupplierId().equals(current.organizationId());
+            boolean isShop = o.getShopId() != null && o.getShopId().equals(current.organizationId());
+            boolean isDeliveryAgent = o.getDeliveryAgentId() != null && o.getDeliveryAgentId().equals(current.userId());
+            if (!isSupplier && !isShop && !isDeliveryAgent) return ResponseEntity.status(403).build();
+        }
+        String authorName = resolveUserName(current.userId());
+        OrderComment comment = OrderComment.create(id, current.userId(), authorName, request.content());
+        OrderComment saved = orderCommentRepository.save(comment);
+
+        orderEventRepository.save(OrderEvent.create(id, "ORDER_COMMENT", current.userId(),
+                "Commentaire de " + authorName));
+
+        outbox.append(new OrderEvents.OrderCommentCreatedEvent(
+                java.util.UUID.randomUUID(), java.time.Instant.now(),
+                id, o.getReference(),
+                o.getShopId(), o.getSupplierId(),
+                current.userId(), authorName,
+                request.content(), saved.getId()),
+                String.valueOf(id));
+
+        return ResponseEntity.created(URI.create("/api/orders/" + id + "/comments/" + saved.getId()))
+                .body(saved);
+    }
+
+    @GetMapping("/{id}/comments")
+    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_MANAGER', 'SYSTEM_ADMIN')")
+    public ResponseEntity<List<OrderComment>> listComments(@PathVariable UUID id) {
+        var current = CurrentUser.get();
+        var order = orderRepository.findById(id);
+        if (order.isEmpty()) return ResponseEntity.notFound().build();
+        var o = order.get();
+        if (!current.roles().contains("SYSTEM_ADMIN")) {
+            if (current.organizationId() == null) return ResponseEntity.status(403).build();
+            boolean isSupplier = o.getSupplierId() != null && o.getSupplierId().equals(current.organizationId());
+            boolean isShop = o.getShopId() != null && o.getShopId().equals(current.organizationId());
+            boolean isDeliveryAgent = o.getDeliveryAgentId() != null && o.getDeliveryAgentId().equals(current.userId());
+            if (!isSupplier && !isShop && !isDeliveryAgent) return ResponseEntity.status(403).build();
+        }
+        List<OrderComment> comments = orderCommentRepository.findByOrderIdOrderByCreatedAtAsc(id);
+        return ResponseEntity.ok(comments);
+    }
+
+    @GetMapping("/export/csv")
+    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_MANAGER', 'SYSTEM_ADMIN')")
+    public void exportCsv(
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateFrom,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateTo,
+            HttpServletResponse response) throws Exception {
+        var current = CurrentUser.get();
+        UUID supplierId = null;
+        UUID shopId = null;
+        Instant fromInstant = null;
+        Instant toInstant = null;
+
+        if (!current.roles().contains("SYSTEM_ADMIN")) {
+            if (current.organizationId() != null) {
+                if (current.roles().contains("SUPPLIER_ADMIN") || current.roles().contains("SUPPLIER_AGENT")) {
+                    supplierId = current.organizationId();
+                } else if (current.roles().contains("SHOP_ADMIN") || current.roles().contains("SHOP_MANAGER")) {
+                    shopId = current.organizationId();
+                }
+            }
+        }
+
+        if (dateFrom != null) {
+            fromInstant = dateFrom.atStartOfDay().toInstant(ZoneOffset.UTC);
+        }
+        if (dateTo != null) {
+            toInstant = dateTo.plusDays(1).atStartOfDay().toInstant(ZoneOffset.UTC);
+        }
+
+        String csv = orderCsvExportService.generateOrdersCsv(status, fromInstant, toInstant, supplierId, shopId);
+        response.setContentType("text/csv");
+        response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"orders.csv\"");
+        response.getWriter().write(csv);
+        response.getWriter().flush();
+    }
+
+    @GetMapping("/{id}/invoice")
+    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_MANAGER', 'SYSTEM_ADMIN')")
+    public void downloadInvoice(@PathVariable UUID id, HttpServletResponse response) throws Exception {
+        var current = CurrentUser.get();
+        var order = orderRepository.findById(id);
+        if (order.isEmpty()) {
+            response.sendError(HttpServletResponse.SC_NOT_FOUND, "Commande non trouvée");
+            return;
+        }
+        var o = order.get();
+        if (!current.roles().contains("SYSTEM_ADMIN")) {
+            if (current.organizationId() == null) {
+                response.sendError(HttpServletResponse.SC_FORBIDDEN, "Accès refusé");
+                return;
+            }
+            boolean isSupplier = o.getSupplierId() != null && o.getSupplierId().equals(current.organizationId());
+            boolean isShop = o.getShopId() != null && o.getShopId().equals(current.organizationId());
+            boolean isDeliveryAgent = o.getDeliveryAgentId() != null && o.getDeliveryAgentId().equals(current.userId());
+            if (!isSupplier && !isShop && !isDeliveryAgent) {
+                response.sendError(HttpServletResponse.SC_FORBIDDEN, "Accès refusé");
+                return;
+            }
+        }
+
+        String status = o.getStatus();
+        if (!"DELIVERED".equals(status) && !"ACCEPTED".equals(status)) {
+            response.sendError(HttpServletResponse.SC_CONFLICT,
+                    "La facture est disponible uniquement pour les commandes livrées ou acceptées");
+            return;
+        }
+
+        var items = orderItemRepository.findByOrderId(id);
+        String supplierName = resolveOrgName(o.getSupplierId());
+        String shopName = resolveOrgName(o.getShopId());
+        byte[] pdf = invoicePdfService.generateInvoicePdf(o, items, supplierName, shopName);
+
+        response.setContentType("application/pdf");
+        response.setHeader(HttpHeaders.CONTENT_DISPOSITION,
+                "attachment; filename=\"facture-" + o.getReference() + ".pdf\"");
+        response.setContentLength(pdf.length);
+        response.getOutputStream().write(pdf);
+        response.getOutputStream().flush();
     }
 }

@@ -22,4 +22,7 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
 
     @Query("SELECT p FROM Product p WHERE p.status = 'ACTIVE' AND (p.quantity - p.reservedQty) <= p.minQuantity")
     List<Product> findLowStockProducts();
+
+    @Query("SELECT p FROM Product p WHERE p.supplierId = :supplierId AND p.status = 'ACTIVE' AND (p.quantity - p.reservedQty) <= p.minQuantity ORDER BY (p.quantity - p.reservedQty) ASC")
+    List<Product> findLowStockProductsBySupplierId(UUID supplierId);
 }

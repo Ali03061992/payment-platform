@@ -1,0 +1,93 @@
+<div class="dashboard">
+  <div class="welcome-section">
+    <h1>{{ getGreeting() }}, {{ user?.firstName }} !</h1>
+    <p>Vos livraisons du jour.</p>
+  </div>
+
+  @if (loading) {
+    <div class="loading">Chargement...</div>
+  } @else {
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon orange">📋</div>
+        <div class="stat-info">
+          <div class="stat-value">{{ assignedCount }}</div>
+          <div class="stat-label">Assignées</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon blue">🚚</div>
+        <div class="stat-info">
+          <div class="stat-value">{{ inProgressCount }}</div>
+          <div class="stat-label">En cours</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon green">✅</div>
+        <div class="stat-info">
+          <div class="stat-value">{{ completedTodayCount }}</div>
+          <div class="stat-label">Terminées aujourd'hui</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-cards">
+      <div class="info-card">
+        <h3>📋 Mon profil</h3>
+        <div class="info-row"><span>Nom :</span><strong>{{ user?.firstName }} {{ user?.lastName }}</strong></div>
+        <div class="info-row"><span>Email :</span><strong>{{ user?.email }}</strong></div>
+        <div class="info-row"><span>Rôle :</span><strong>Livreur</strong></div>
+        <div class="info-row"><span>Statut :</span>
+          <span class="badge" [class]="user?.status === 'ACTIVE' ? 'badge-success' : 'badge-danger'">
+            {{ user?.status }}
+          </span>
+        </div>
+      </div>
+
+      <div class="info-card">
+        <h3>📋 Livraisons assignées</h3>
+        @if (assignedOrders.length === 0) {
+          <p class="empty-state">Aucune livraison assignée</p>
+        }
+        @for (order of assignedOrders; track order.id) {
+          <div class="info-row">
+            <span>{{ order.reference }}</span>
+            <span class="badge badge-warning">{{ getStatusLabel(order.status) }}</span>
+          </div>
+        }
+      </div>
+
+      <div class="info-card">
+        <h3>🚚 Livraisons en cours</h3>
+        @if (inProgressOrders.length === 0) {
+          <p class="empty-state">Aucune livraison en cours</p>
+        }
+        @for (order of inProgressOrders; track order.id) {
+          <div class="info-row">
+            <span>{{ order.reference }}</span>
+            <span class="badge badge-info">{{ getStatusLabel(order.status) }}</span>
+          </div>
+        }
+      </div>
+
+      <div class="info-card">
+        <h3>✅ Terminées aujourd'hui</h3>
+        @if (completedToday.length === 0) {
+          <p class="empty-state">Aucune livraison terminée aujourd'hui</p>
+        }
+        @for (order of completedToday; track order.id) {
+          <div class="info-row">
+            <span>{{ order.reference }}</span>
+            <span class="badge badge-success">{{ getStatusLabel(order.status) }}</span>
+          </div>
+        }
+      </div>
+
+      <div class="info-card">
+        <h3>⚡ Actions rapides</h3>
+        <a routerLink="supplier/deliveries" class="quick-action">🚚 Gérer les livraisons</a>
+        <a routerLink="scan" class="quick-action">📱 Scanner QR code</a>
+      </div>
+    </div>
+  }
+</div>

@@ -6,8 +6,8 @@
   <form (ngSubmit)="create()">
     <div class="form-row">
       <div class="form-group">
-        <label>Boutique</label>
-        <select [(ngModel)]="shopId" name="shop" class="form-control" required>
+        <label for="shopSelect">Boutique</label>
+        <select [(ngModel)]="shopId" name="shop" id="shopSelect" class="form-control" required aria-required="true">
           <option [value]="0">-- Sélectionner --</option>
           @for (s of shops; track s) {
             <option [value]="s.id">{{ s.name }}</option>
@@ -15,8 +15,8 @@
         </select>
       </div>
       <div class="form-group">
-        <label>Fournisseur</label>
-        <select [(ngModel)]="supplierId" name="supplier" class="form-control" required>
+        <label for="supplierSelect">Fournisseur</label>
+        <select [(ngModel)]="supplierId" name="supplier" id="supplierSelect" class="form-control" required aria-required="true">
           <option [value]="0">-- Sélectionner --</option>
           @for (s of suppliers; track s) {
             <option [value]="s.id">{{ s.name }}</option>
@@ -26,13 +26,13 @@
     </div>
     <div class="form-row">
       <div class="form-group">
-        <label>Montant</label>
-        <input type="number" [(ngModel)]="amount" name="amount" class="form-control"
-          min="0.01" step="0.01" placeholder="0.00" required>
+        <label for="amountInput">Montant</label>
+        <input type="number" [(ngModel)]="amount" name="amount" id="amountInput" class="form-control"
+          min="0.01" max="999999.99" step="0.01" placeholder="0.00" required aria-required="true">
       </div>
       <div class="form-group">
-        <label>Devise</label>
-        <select [(ngModel)]="currency" name="currency" class="form-control">
+        <label for="currencySelect">Devise</label>
+        <select [(ngModel)]="currency" name="currency" id="currencySelect" class="form-control">
           <option value="TND">TND</option>
           <option value="EUR">EUR</option>
           <option value="USD">USD</option>
@@ -40,8 +40,9 @@
       </div>
     </div>
     <div class="form-actions">
-      <button class="btn btn-secondary" type="button" routerLink="/dashboard/payments">Annuler</button>
-      <button class="btn btn-primary" [disabled]="creating || !shopId || !supplierId || amount <= 0">
+      <button class="btn btn-secondary" type="button" routerLink="/dashboard/payments" aria-label="Annuler la création de paiement">Annuler</button>
+      <button class="btn btn-primary" [disabled]="creating || !shopId || !supplierId || amount < 0.01 || amount > 999999.99"
+        [attr.aria-label]="creating ? 'Création en cours...' : 'Créer le paiement'">
         {{ creating ? 'Création...' : 'Créer le paiement' }}
       </button>
     </div>

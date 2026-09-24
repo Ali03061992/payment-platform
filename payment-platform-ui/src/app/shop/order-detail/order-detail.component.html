@@ -7,9 +7,15 @@
 
 @if (order && !loading) {
   <div>
-    <div class="page-header">
+    <div class="page-header no-print">
       <h2>Commande {{ order.reference }}</h2>
-      <a class="btn btn-secondary" routerLink="/dashboard/shop/orders">Retour</a>
+      <div class="page-header-actions">
+        @if (order.status === 'DELIVERED' || order.status === 'ACCEPTED') {
+          <button class="btn btn-primary" (click)="downloadInvoice()" aria-label="Télécharger la facture">Télécharger facture</button>
+        }
+        <button class="btn btn-primary" (click)="printOrder()" aria-label="Imprimer la commande">Imprimer</button>
+        <a class="btn btn-secondary" routerLink="/dashboard/shop/orders" aria-label="Retour à la liste des commandes">Retour</a>
+      </div>
     </div>
     <div class="detail-grid">
       <div class="detail-card">
@@ -23,7 +29,8 @@
       <div class="detail-card">
         <div class="detail-label">Statut</div>
         <div class="detail-value">
-          <span class="payment-badge" [ngClass]="statusClass(order.status)">{{ statusLabel(order.status) }}</span>
+          <span class="payment-badge" [ngClass]="statusClass(order.status)"
+            [attr.aria-label]="'Statut de la commande : ' + statusLabel(order.status)" role="status">{{ statusLabel(order.status) }}</span>
         </div>
       </div>
       <div class="detail-card">
@@ -34,6 +41,18 @@
         <div class="detail-label">Paiement ASAP</div>
         <div class="detail-value">{{ order.asapPayment ? 'Oui' : 'Non' }}</div>
       </div>
+      @if (order.paymentTerms) {
+        <div class="detail-card">
+          <div class="detail-label">Conditions de paiement</div>
+          <div class="detail-value">{{ paymentTermsLabel(order.paymentTerms) }}</div>
+        </div>
+      }
+      @if (order.dueDate) {
+        <div class="detail-card">
+          <div class="detail-label">Date d'échéance</div>
+          <div class="detail-value" [style.color]="isOverdue() ? '#e53935' : '#0f3460'" [style.font-weight]="isOverdue() ? '700' : '400'">{{ order.dueDate }}</div>
+        </div>
+      }
       <div class="detail-card">
         <div class="detail-label">Créé le</div>
         <div class="detail-value">{{ order.createdAt | date:'dd/MM/yyyy HH:mm:ss' }}</div>
@@ -54,6 +73,18 @@
         <div class="detail-card">
           <div class="detail-label">Date confirmée</div>
           <div class="detail-value">{{ order.confirmedDeliveryDate }}</div>
+        </div>
+      }
+      @if (order.estimatedArrival) {
+        <div class="detail-card">
+          <div class="detail-label">Arrivée estimée</div>
+          <div class="detail-value" style="color:#e65100;font-weight:600;">{{ order.estimatedArrival | date:'dd/MM/yyyy HH:mm' }}</div>
+        </div>
+      }
+      @if (order.status === 'IN_DELIVERY' && countdown) {
+        <div class="detail-card">
+          <div class="detail-label">Temps restant</div>
+          <div class="detail-value" style="color:#2e7d32;font-weight:700;">{{ countdown }}</div>
         </div>
       }
       @if (order.deliveredAt) {
@@ -88,18 +119,46 @@
       }
     </div>
     @if (order.status === 'DELIVERED') {
-      <div class="action-bar">
-        <button class="btn btn-success" (click)="accept()">Accepter</button>
+      <div class="action-bar no-print">
+        <button class="btn btn-success" (click)="accept()" aria-label="Accepter la livraison">Accepter</button>
         @if (order.asapPayment) {
-          <button class="btn btn-primary" (click)="acceptAsap()">Accepter avec paiement ASAP</button>
+          <button class="btn btn-primary" (click)="acceptAsap()" aria-label="Accepter la livraison avec paiement immédiat">Accepter avec paiement ASAP</button>
         }
-        <button class="btn btn-danger" (click)="reject()">Rejeter</button>
+        <button class="btn btn-danger" (click)="reject()" aria-label="Rejeter la livraison">Rejeter</button>
       </div>
     }
     @if (order.status === 'DRAFT' || order.status === 'CONFIRMED' || order.status === 'PREPARING') {
-      <div class="action-bar">
-        <button class="btn btn-danger" (click)="cancel()">Annuler</button>
+      <div class="action-bar no-print">
+        <button class="btn btn-danger" (click)="cancel()" aria-label="Annuler la commande">Annuler</button>
       </div>
+    }
+    @if (order.status === 'REJECTED' || order.status === 'DELIVERY_REJECTED') {
+      <div class="action-bar no-print">
+        @if (!showDisputeForm) {
+          <button class="btn btn-warning" (click)="toggleDisputeForm()" aria-label="Ouvrir un litige pour cette commande">Ouvrir un litige</button>
+        }
+      </div>
+      @if (showDisputeForm) {
+        <div class="table-card" style="margin-top:16px;">
+          <h3 style="padding:16px 20px 0;">Ouvrir un litige</h3>
+          <div style="padding:16px 20px;">
+            <textarea
+              [(ngModel)]="disputeReason"
+              placeholder="Décrivez le motif du litige..."
+              rows="4"
+              style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-family:inherit;font-size:14px;resize:vertical;"
+              [disabled]="submittingDispute"
+              aria-label="Motif du litige"></textarea>
+            <div style="margin-top:12px;display:flex;gap:8px;">
+              <button class="btn btn-primary" (click)="openDispute()" [disabled]="submittingDispute || !disputeReason.trim()"
+                [attr.aria-label]="submittingDispute ? 'Envoi en cours...' : 'Confirmer l\'ouverture du litige'">
+                {{ submittingDispute ? 'Envoi...' : 'Confirmer' }}
+              </button>
+              <button class="btn btn-secondary" (click)="toggleDisputeForm()" [disabled]="submittingDispute" aria-label="Annuler l'ouverture du litige">Annuler</button>
+            </div>
+          </div>
+        </div>
+      }
     }
     @if (order.status !== 'CANCELLED') {
       <div class="status-timeline">
@@ -155,6 +214,12 @@
                 <td colspan="4" style="text-align:right;font-weight:600;">TVA ({{ order.taxRate }}%)</td>
                 <td><strong>{{ order.taxAmount | number:'1.2-2' }} {{ order.currency }}</strong></td>
               </tr>
+              @if (order.globalDiscount > 0) {
+                <tr>
+                  <td colspan="4" style="text-align:right;font-weight:600;">Remise globale ({{ order.globalDiscount }}%)</td>
+                  <td><strong style="color:#e53935;">-{{ (order.subtotal + order.taxAmount) * order.globalDiscount / 100 | number:'1.2-2' }} {{ order.currency }}</strong></td>
+                </tr>
+              }
               <tr>
                 <td colspan="4" style="text-align:right;font-weight:700;font-size:16px;">Total</td>
                 <td><strong style="font-size:16px;color:#0f3460;">{{ order.total | number:'1.2-2' }} {{ order.currency }}</strong></td>
@@ -180,12 +245,76 @@
               @for (e of order.events; track e) {
                 <tr>
                   <td>
-                    <span class="payment-badge" [ngClass]="statusClass(e.action.replace('ORDER_', ''))">
+                    <span class="payment-badge" [ngClass]="statusClass(e.action.replace('ORDER_', ''))"
+                      [attr.aria-label]="'Événement : ' + actionLabel(e.action)" role="status">
                       {{ actionLabel(e.action) }}
                     </span>
                   </td>
                   <td>{{ e.timestamp | date:'dd/MM/yyyy HH:mm:ss' }}</td>
                   <td>{{ e.details || '-' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    }
+    <div class="table-card" style="margin-top:24px;">
+      <h3 style="padding:16px 20px 0;">Commentaires</h3>
+      <div style="padding:16px 20px;">
+        @if (comments.length === 0) {
+          <p style="color:#8896ab;font-size:14px;">Aucun commentaire pour le moment.</p>
+        }
+        @for (c of comments; track c) {
+          <div style="border-bottom:1px solid #eee;padding:12px 0;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+              <strong style="font-size:14px;">{{ c.authorName }}</strong>
+              <small style="color:#8896ab;">{{ c.createdAt | date:'dd/MM/yyyy HH:mm' }}</small>
+            </div>
+            <p style="margin:0;font-size:14px;white-space:pre-wrap;">{{ c.content }}</p>
+          </div>
+        }
+        <div style="margin-top:12px;display:flex;gap:8px;">
+          <textarea
+            [(ngModel)]="newComment"
+            placeholder="Ajouter un commentaire..."
+            rows="2"
+            style="flex:1;padding:10px;border:1px solid #ddd;border-radius:8px;font-family:inherit;font-size:14px;resize:vertical;"
+            [disabled]="submittingComment"
+            aria-label="Ajouter un commentaire sur la commande"></textarea>
+          <button class="btn btn-primary" style="align-self:flex-end;" (click)="addComment()"
+            [disabled]="submittingComment || !newComment.trim()"
+            [attr.aria-label]="submittingComment ? 'Envoi en cours...' : 'Envoyer le commentaire'">
+            {{ submittingComment ? 'Envoi...' : 'Envoyer' }}
+          </button>
+        </div>
+      </div>
+    </div>
+    @if (disputes.length > 0) {
+      <div class="table-card" style="margin-top:24px;">
+        <h3 style="padding:16px 20px 0;">Litiges</h3>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Motif</th>
+                <th>Statut</th>
+                <th>Créé le</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (d of disputes; track d) {
+                <tr>
+                  <td>{{ d.reason }}</td>
+                  <td>
+                    <span class="payment-badge" [ngClass]="statusClass(d.status)"
+                      [attr.aria-label]="'Statut du litige : ' + statusLabel(d.status)" role="status">{{ statusLabel(d.status) }}</span>
+                  </td>
+                  <td>{{ d.createdAt | date:'dd/MM/yyyy HH:mm:ss' }}</td>
+                  <td>
+                    <button class="btn btn-sm btn-secondary" (click)="viewDispute(d.id)" [attr.aria-label]="'Voir le détail du litige de ' + d.createdAt">Voir</button>
+                  </td>
                 </tr>
               }
             </tbody>

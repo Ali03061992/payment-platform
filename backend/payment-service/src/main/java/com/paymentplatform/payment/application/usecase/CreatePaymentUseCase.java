@@ -45,7 +45,8 @@ public class CreatePaymentUseCase {
 
         Money money = Money.of(request.amount(), request.currency());
 
-        Payment payment = Payment.create(request.shopId(), request.supplierId(), money, actorUserId);
+        Payment payment = Payment.create(request.shopId(), request.supplierId(), money, actorUserId,
+                request.orderId(), request.dueDate());
 
         Payment saved = payments.save(payment);
 

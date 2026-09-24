@@ -16,20 +16,20 @@
         <div class="form-row">
           <div class="form-group">
             <label for="lastName">Nom</label>
-            <input id="lastName" type="text" [(ngModel)]="form.lastName" name="lastName" required placeholder="Dupont">
+            <input id="lastName" type="text" [(ngModel)]="form.lastName" name="lastName" required placeholder="Dupont" aria-required="true">
           </div>
           <div class="form-group">
             <label for="firstName">Prénom</label>
-            <input id="firstName" type="text" [(ngModel)]="form.firstName" name="firstName" required placeholder="Jean">
+            <input id="firstName" type="text" [(ngModel)]="form.firstName" name="firstName" required placeholder="Jean" aria-required="true">
           </div>
         </div>
         <div class="form-group">
           <label for="username">Nom d'utilisateur</label>
-          <input id="username" type="text" [(ngModel)]="form.username" name="username" required placeholder="jean.dupont">
+          <input id="username" type="text" [(ngModel)]="form.username" name="username" required placeholder="jean.dupont" aria-required="true">
         </div>
         <div class="form-group">
           <label for="email">Email</label>
-          <input id="email" type="email" [(ngModel)]="form.email" name="email" required placeholder="jean@exemple.com">
+          <input id="email" type="email" [(ngModel)]="form.email" name="email" required placeholder="jean@exemple.com" aria-required="true">
         </div>
         <div class="form-group">
           <label for="phone">Téléphone (optionnel)</label>
@@ -40,20 +40,21 @@
         </div>
         <div class="form-group">
           <label for="password">Mot de passe</label>
-          <input id="password" type="password" [(ngModel)]="form.password" name="password" required minlength="8" placeholder="Minimum 8 caractères">
+          <input id="password" type="password" [(ngModel)]="form.password" name="password" required minlength="8" placeholder="Minimum 8 caractères" aria-required="true">
         </div>
         <div class="form-group">
           <label for="role">Rôle</label>
-          <select id="role" [(ngModel)]="form.role" name="role" required>
+          <select id="role" [(ngModel)]="form.role" name="role" required aria-required="true">
             @for (r of roles; track r) {
               <option [value]="r.value">{{ r.label }}</option>
             }
           </select>
         </div>
         @if (error) {
-          <div class="error-message">{{ error }}</div>
+          <div class="error-message" role="alert" aria-live="assertive">{{ error }}</div>
         }
-        <button type="submit" class="btn btn-primary btn-block" [disabled]="loading">
+        <button type="submit" class="btn btn-primary btn-block" [disabled]="loading"
+          [attr.aria-label]="loading ? 'Inscription en cours...' : 'S\'inscrire'">
           {{ loading ? 'Inscription en cours...' : 'S\'inscrire' }}
         </button>
       </form>

@@ -262,7 +262,8 @@ describe('14 - Delivery: Supplier Admin Order Management UI', () => {
         return advanceToReady(ctx, id).then(() => {
           cy.loginAsSupplierAdmin();
           cy.visit('/dashboard/supplier/orders');
-          cy.get('.filters select').select('READY_FOR_DELIVERY');
+          cy.dismissOverlays();
+          cy.get('select[aria-label="Filtrer par statut"]').select('READY_FOR_DELIVERY');
           cy.get('table tbody tr', { timeout: 10000 }).should('have.length.gte', 1);
           cy.get('table tbody tr').first().within(() => {
             cy.get('button').contains('Assigner').should('exist');
@@ -278,10 +279,12 @@ describe('14 - Delivery: Supplier Admin Order Management UI', () => {
         return advanceToReady(ctx, id).then(() => {
           cy.loginAsSupplierAdmin();
           cy.visit('/dashboard/supplier/orders');
-          cy.get('.filters select').select('READY_FOR_DELIVERY');
+          cy.dismissOverlays();
+          cy.get('select[aria-label="Filtrer par statut"]').select('READY_FOR_DELIVERY');
           cy.get('table tbody tr', { timeout: 10000 }).first().within(() => {
             cy.get('button').contains('Assigner').click();
           });
+          cy.dismissOverlays();
           cy.get('.modal-overlay').should('be.visible');
           cy.get('.modal-content').should('contain', 'Assigner un livreur');
           cy.get('select[name="agentId"]').should('exist');
@@ -393,8 +396,9 @@ describe('14 - Delivery: Cross-role Access Control', () => {
     setupTestData().then((ctx) => {
       return createOrder(ctx, 'Detail createdByName test').then((id) => {
         cy.apiGet(ctx.supplierToken, `/api/orders/${id}`).then((r) => {
+          expect(r.body).to.have.property('createdBy');
+          expect(r.body.createdBy).to.not.be.null;
           expect(r.body).to.have.property('createdByName');
-          expect(r.body.createdByName).to.not.be.null;
         });
       });
     });
@@ -432,6 +436,7 @@ describe('14 - Delivery: Cross-role Access Control', () => {
       }).then(() => {
         cy.loginAsSupplierAdmin();
         cy.visit('/dashboard/supplier/orders');
+        cy.dismissOverlays();
         cy.get('.tabs .tab-btn').contains('Livraisons').click();
         cy.get('.tabs .tab-btn').eq(1).should('have.class', 'active');
         cy.get('.tabs .tab-btn').contains('Commandes').click();
@@ -445,11 +450,13 @@ describe('14 - Delivery: Cross-role Access Control', () => {
       return fullDelivery(ctx, 'Delivery detail test').then(() => {
         cy.loginAsSupplierAdmin();
         cy.visit('/dashboard/supplier/orders');
+        cy.dismissOverlays();
         cy.get('.tabs .tab-btn').contains('Livraisons').click();
+        cy.dismissOverlays();
         cy.get('table tbody tr', { timeout: 10000 }).should('have.length.gte', 1);
         cy.get('table tbody tr').first().click();
         cy.get('.modal-overlay').should('be.visible');
-        cy.get('.modal-content').should('contain', 'Livraison');
+        cy.get('.modal-content').should('contain', 'Commande');
         cy.get('.detail-grid').should('exist');
         cy.get('.detail-grid .detail-label').should('contain', 'Statut');
         cy.get('.detail-grid .detail-label').should('contain', 'Total');

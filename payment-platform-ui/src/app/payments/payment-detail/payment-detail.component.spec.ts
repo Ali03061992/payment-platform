@@ -20,7 +20,7 @@ describe('PaymentDetailComponent', () => {
 
   beforeEach(() => {
     const routerSpy = jasmine.createSpyObj('Router', ['navigate']);
-    const psSpy = jasmine.createSpyObj('PaymentService', ['getById', 'getByReference', 'confirm', 'reject', 'cancel']);
+    const psSpy = jasmine.createSpyObj('PaymentService', ['getById', 'getByReference', 'confirm', 'reject', 'cancel', 'downloadInvoice']);
     const toastSpy = jasmine.createSpyObj('ToastService', ['success', 'error']);
     psSpy.getById.and.returnValue(of(mockPayment));
     psSpy.getByReference.and.returnValue(of(mockPayment));

@@ -41,6 +41,9 @@ public class Product {
     @Column(name = "reserved_qty", nullable = false)
     private Integer reservedQty;
 
+    @Column(name = "image_url", length = 500)
+    private String imageUrl;
+
     @Column(name = "category_id", columnDefinition = "VARCHAR(36)")
     private UUID categoryId;
 
@@ -110,4 +113,6 @@ public class Product {
     public void setFamilyId(UUID familyId) { this.familyId = familyId; }
     public String getUnit() { return unit; }
     public void setUnit(String unit) { this.unit = unit; }
+    public String getImageUrl() { return imageUrl; }
+    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
 }

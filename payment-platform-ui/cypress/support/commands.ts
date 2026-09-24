@@ -26,7 +26,32 @@ Cypress.Commands.add('login', (username: string, password: string) => {
     cy.window().then((win) => {
       win.sessionStorage.setItem('token', token);
       win.sessionStorage.setItem('user', JSON.stringify(resp.body.user));
+      try {
+        win.localStorage.setItem('onboarding_completed', 'true');
+        win.localStorage.setItem('notification_choice', 'dismissed');
+      } catch {
+        // ignore
+      }
     });
+  });
+});
+
+Cypress.Commands.add('dismissOverlays', () => {
+  cy.window({ log: false }).then((win) => {
+    try {
+      win.localStorage.setItem('onboarding_completed', 'true');
+      win.localStorage.setItem('notification_choice', 'dismissed');
+    } catch {
+      // ignore
+    }
+  });
+  cy.get('body', { log: false }).then(($body) => {
+    if ($body.find('.tour-tooltip .tour-btn-skip').length) {
+      cy.get('.tour-tooltip .tour-btn-skip', { log: false }).first().click({ force: true });
+    }
+    if ($body.find('.notification-banner .banner-btn-dismiss').length) {
+      cy.get('.notification-banner .banner-btn-dismiss', { log: false }).first().click({ force: true });
+    }
   });
 });
 
@@ -81,13 +106,15 @@ function createOrg(token: string, name: string, type: string) {
     body: { name, type },
     failOnStatusCode: false,
   }).then((r) => {
-    if (r.status === 200 || r.status === 201) return r.body;
-    // Already exists - find it
+    if ((r.status === 200 || r.status === 201) && r.body?.id) return r.body;
+    // Already exists or transient error - find it
     return cy.request({
       method: 'GET',
       url: `${API_URL()}/api/admin/${endpoint}`,
       headers: authHeaders(token),
+      failOnStatusCode: false,
     }).then((list) => {
+      if (list.status !== 200) return null;
       const body = list.body;
       const items = Array.isArray(body) ? body
         : Array.isArray(body?.content) ? body.content
@@ -106,7 +133,7 @@ function createOrg(token: string, name: string, type: string) {
 }
 
 function ensureOrgActive(token: string, org: any, type: string) {
-  if (!org || !org.id) return cy.wrap(org);
+  if (!org?.id) return cy.wrap(null);
   if (org.status === 'ACTIVE') return cy.wrap(org);
   const endpoint = type === 'SUPPLIER' ? 'suppliers' : 'shops';
   return cy.request({
@@ -131,6 +158,7 @@ function createRelation(token: string, supplierId: string, shopId: string) {
       method: 'GET',
       url: `${API_URL()}/api/admin/supplier-shop-relations`,
       headers: authHeaders(token),
+      failOnStatusCode: false,
     }).then((list) => {
       const body = list.body;
       const items = Array.isArray(body) ? body
@@ -209,7 +237,7 @@ function buildTestContext(): Cypress.Chainable<TestContext> {
       ctx.suppliers = ctx.suppliers || {};
       ctx.suppliers.covale = c;
       Cypress.env('testCtx', ctx);
-      Cypress.env('covaleId', c.id);
+      if (c?.id) Cypress.env('covaleId', c.id);
       return createOrg(adminToken, `Pointteck E2E`, 'SUPPLIER');
     });
   }).then((pointteck) => {
@@ -217,7 +245,7 @@ function buildTestContext(): Cypress.Chainable<TestContext> {
       const ctx: any = Cypress.env('testCtx');
       ctx.suppliers.pointteck = p;
       Cypress.env('testCtx', ctx);
-      Cypress.env('pointteckId', p.id);
+      if (p?.id) Cypress.env('pointteckId', p.id);
       return createOrg(adminToken, `Abdelslam Tunis E2E`, 'SHOP');
     });
   }).then((shopAbdelslam) => {
@@ -226,7 +254,7 @@ function buildTestContext(): Cypress.Chainable<TestContext> {
       ctx.shops = ctx.shops || {};
       ctx.shops.abdelslam = s;
       Cypress.env('testCtx', ctx);
-      Cypress.env('shopAbdelslamId', s.id);
+      if (s?.id) Cypress.env('shopAbdelslamId', s.id);
       return createOrg(adminToken, `Ali Sfax E2E`, 'SHOP');
     });
   }).then((shopAli) => {
@@ -234,7 +262,7 @@ function buildTestContext(): Cypress.Chainable<TestContext> {
       const ctx: any = Cypress.env('testCtx');
       ctx.shops.ali = s;
       Cypress.env('testCtx', ctx);
-      Cypress.env('shopAliId', s.id);
+      if (s?.id) Cypress.env('shopAliId', s.id);
       return createOrg(adminToken, `Pointteck Tunis E2E`, 'SHOP');
     });
   }).then((ptTunis) => {
@@ -242,7 +270,7 @@ function buildTestContext(): Cypress.Chainable<TestContext> {
       const ctx: any = Cypress.env('testCtx');
       ctx.shops.ptTunis = s;
       Cypress.env('testCtx', ctx);
-      Cypress.env('shopPtTunisId', s.id);
+      if (s?.id) Cypress.env('shopPtTunisId', s.id);
       return createOrg(adminToken, `Pointteck Sfax E2E`, 'SHOP');
     });
   }).then((ptSfax) => {
@@ -250,51 +278,51 @@ function buildTestContext(): Cypress.Chainable<TestContext> {
       const ctx: any = Cypress.env('testCtx');
       ctx.shops.ptSfax = s;
       Cypress.env('testCtx', ctx);
-      Cypress.env('shopPtSfaxId', s.id);
+      if (s?.id) Cypress.env('shopPtSfaxId', s.id);
 
-      // Create relations
+      // Create relations (skip pairs with missing ids)
       const pairs = [
-        { sid: ctx.suppliers.covale.id, shopid: ctx.shops.abdelslam.id },
-        { sid: ctx.suppliers.covale.id, shopid: ctx.shops.ali.id },
-        { sid: ctx.suppliers.pointteck.id, shopid: ctx.shops.ptTunis.id },
-        { sid: ctx.suppliers.pointteck.id, shopid: ctx.shops.ptSfax.id },
-      ];
+        { sid: ctx.suppliers.covale?.id, shopid: ctx.shops.abdelslam?.id },
+        { sid: ctx.suppliers.covale?.id, shopid: ctx.shops.ali?.id },
+        { sid: ctx.suppliers.pointteck?.id, shopid: ctx.shops.ptTunis?.id },
+        { sid: ctx.suppliers.pointteck?.id, shopid: ctx.shops.ptSfax?.id },
+      ].filter((p) => p.sid && p.shopid);
       return cy.wrap(pairs).each((pair: any) => {
         createRelation(adminToken, pair.sid, pair.shopid);
       }).then(() => ctx);
     });
   }).then((ctx: any) => {
-    // Create users
+    // Create users (skip users whose org is missing)
     const users = [
-      { username: 'covale.admin.e2e', password: E2E_PASSWORD, firstName: 'Covale', lastName: 'Admin', email: `covale.admin.e2e@e2e.test`, role: 'SUPPLIER_ADMIN', organizationId: ctx.suppliers.covale.id },
-      { username: 'covale.agent1.e2e', password: E2E_PASSWORD, firstName: 'Agent', lastName: 'Covale1', email: `agent1.e2e@e2e.test`, role: 'SUPPLIER_AGENT', organizationId: ctx.suppliers.covale.id },
-      { username: 'pointteck.admin.e2e', password: E2E_PASSWORD, firstName: 'Pointteck', lastName: 'Admin', email: `pt.admin.e2e@e2e.test`, role: 'SUPPLIER_ADMIN', organizationId: ctx.suppliers.pointteck.id },
-      { username: 'pointteck.agent1.e2e', password: E2E_PASSWORD, firstName: 'Agent', lastName: 'Pt1', email: `pt.agent1.e2e@e2e.test`, role: 'SUPPLIER_AGENT', organizationId: ctx.suppliers.pointteck.id },
-      { username: 'abdelslam.e2e', password: E2E_PASSWORD, firstName: 'Abdelslam', lastName: 'Tunis', email: `abdelslam.e2e@e2e.test`, role: 'SHOP_ADMIN', organizationId: ctx.shops.abdelslam.id },
-      { username: 'ali.e2e', password: E2E_PASSWORD, firstName: 'Ali', lastName: 'Sfax', email: `ali.e2e@e2e.test`, role: 'SHOP_ADMIN', organizationId: ctx.shops.ali.id },
-    ];
+      { username: 'covale.admin.e2e', password: E2E_PASSWORD, firstName: 'Covale', lastName: 'Admin', email: `covale.admin.e2e@e2e.test`, role: 'SUPPLIER_ADMIN', organizationId: ctx.suppliers.covale?.id },
+      { username: 'covale.agent1.e2e', password: E2E_PASSWORD, firstName: 'Agent', lastName: 'Covale1', email: `agent1.e2e@e2e.test`, role: 'SUPPLIER_AGENT', organizationId: ctx.suppliers.covale?.id },
+      { username: 'pointteck.admin.e2e', password: E2E_PASSWORD, firstName: 'Pointteck', lastName: 'Admin', email: `pt.admin.e2e@e2e.test`, role: 'SUPPLIER_ADMIN', organizationId: ctx.suppliers.pointteck?.id },
+      { username: 'pointteck.agent1.e2e', password: E2E_PASSWORD, firstName: 'Agent', lastName: 'Pt1', email: `pt.agent1.e2e@e2e.test`, role: 'SUPPLIER_AGENT', organizationId: ctx.suppliers.pointteck?.id },
+      { username: 'abdelslam.e2e', password: E2E_PASSWORD, firstName: 'Abdelslam', lastName: 'Tunis', email: `abdelslam.e2e@e2e.test`, role: 'SHOP_ADMIN', organizationId: ctx.shops.abdelslam?.id },
+      { username: 'ali.e2e', password: E2E_PASSWORD, firstName: 'Ali', lastName: 'Sfax', email: `ali.e2e@e2e.test`, role: 'SHOP_ADMIN', organizationId: ctx.shops.ali?.id },
+    ].filter((u) => !!u.organizationId);
 
     return cy.wrap(users).each((u: any) => {
       createUser(adminToken, u).then((created: any) => {
         if (!created) return;
         const ctx: any = Cypress.env('testCtx');
         ctx.users = ctx.users || {};
-        if (u.role === 'SUPPLIER_ADMIN' && u.organizationId === ctx.suppliers.covale.id) ctx.users.supplierAdmin = created;
-        if (u.role === 'SUPPLIER_AGENT' && u.organizationId === ctx.suppliers.covale.id) ctx.users.supplierAgent1 = created;
-        if (u.role === 'SUPPLIER_ADMIN' && u.organizationId === ctx.suppliers.pointteck.id) ctx.users.pointteckAdmin = created;
-        if (u.role === 'SUPPLIER_AGENT' && u.organizationId === ctx.suppliers.pointteck.id) ctx.users.pointteckAgent1 = created;
-        if (u.role === 'SHOP_ADMIN' && u.organizationId === ctx.shops.abdelslam.id) ctx.users.shopAdmin = created;
-        if (u.role === 'SHOP_ADMIN' && u.organizationId === ctx.shops.ali.id) ctx.users.shopAli = created;
+        if (u.role === 'SUPPLIER_ADMIN' && u.organizationId === ctx.suppliers.covale?.id) ctx.users.supplierAdmin = created;
+        if (u.role === 'SUPPLIER_AGENT' && u.organizationId === ctx.suppliers.covale?.id) ctx.users.supplierAgent1 = created;
+        if (u.role === 'SUPPLIER_ADMIN' && u.organizationId === ctx.suppliers.pointteck?.id) ctx.users.pointteckAdmin = created;
+        if (u.role === 'SUPPLIER_AGENT' && u.organizationId === ctx.suppliers.pointteck?.id) ctx.users.pointteckAgent1 = created;
+        if (u.role === 'SHOP_ADMIN' && u.organizationId === ctx.shops.abdelslam?.id) ctx.users.shopAdmin = created;
+        if (u.role === 'SHOP_ADMIN' && u.organizationId === ctx.shops.ali?.id) ctx.users.shopAli = created;
         Cypress.env('testCtx', ctx);
       });
     }).then(() => {
       const ctx: any = Cypress.env('testCtx');
-      Cypress.env('covaleId', ctx.suppliers.covale.id);
-      Cypress.env('pointteckId', ctx.suppliers.pointteck.id);
-      Cypress.env('shopAbdelslamId', ctx.shops.abdelslam.id);
-      Cypress.env('shopAliId', ctx.shops.ali.id);
-      Cypress.env('shopPtTunisId', ctx.shops.ptTunis.id);
-      Cypress.env('shopPtSfaxId', ctx.shops.ptSfax.id);
+      if (ctx.suppliers?.covale?.id) Cypress.env('covaleId', ctx.suppliers.covale.id);
+      if (ctx.suppliers?.pointteck?.id) Cypress.env('pointteckId', ctx.suppliers.pointteck.id);
+      if (ctx.shops?.abdelslam?.id) Cypress.env('shopAbdelslamId', ctx.shops.abdelslam.id);
+      if (ctx.shops?.ali?.id) Cypress.env('shopAliId', ctx.shops.ali.id);
+      if (ctx.shops?.ptTunis?.id) Cypress.env('shopPtTunisId', ctx.shops.ptTunis.id);
+      if (ctx.shops?.ptSfax?.id) Cypress.env('shopPtSfaxId', ctx.shops.ptSfax.id);
       return Cypress.env('testCtx');
     });
   });
@@ -375,6 +403,7 @@ Cypress.Commands.add('uniqueName', (prefix: string) => {
 declare namespace Cypress {
   interface Chainable {
     login(username: string, password: string): Chainable<void>;
+    dismissOverlays(): Chainable<void>;
     loginAsAdmin(): Chainable<void>;
     loginAsSupplierAdmin(): Chainable<void>;
     loginAsPointteckAdmin(): Chainable<void>;

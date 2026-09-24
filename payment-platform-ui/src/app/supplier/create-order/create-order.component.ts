@@ -29,6 +29,9 @@ export class SupplierCreateOrderComponent implements OnInit, OnDestroy {
   orderLines: OrderLine[] = [];
   asapPayment = false;
   currency = 'TND';
+  paymentTerms = 'IMMEDIATE';
+  globalDiscount = 0;
+  taxRate = 19;
   notes = '';
   creating = false;
   supplierId = '';
@@ -157,11 +160,15 @@ export class SupplierCreateOrderComponent implements OnInit, OnDestroy {
   }
 
   get taxAmount(): number {
-    return this.subtotal * 0.19;
+    return this.subtotal * (this.taxRate / 100);
+  }
+
+  get discountAmount(): number {
+    return (this.subtotal + this.taxAmount) * (this.globalDiscount / 100);
   }
 
   get total(): number {
-    return this.subtotal + this.taxAmount;
+    return this.subtotal + this.taxAmount - this.discountAmount;
   }
 
   canSubmit(): boolean {
@@ -176,6 +183,9 @@ export class SupplierCreateOrderComponent implements OnInit, OnDestroy {
       shopId: this.selectedShopId,
       asapPayment: this.asapPayment,
       currency: this.currency,
+      paymentTerms: this.paymentTerms,
+      globalDiscount: this.globalDiscount,
+      taxRate: this.taxRate,
       notes: this.notes,
       items: this.orderLines.map(l => ({
         productId: l.product.id,

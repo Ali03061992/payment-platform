@@ -1,0 +1,65 @@
+@if (isActive) {
+  @if (showHighlight) {
+    <div class="tour-highlight" aria-hidden="true"
+      [style.top.px]="highlightPosition.top"
+      [style.left.px]="highlightPosition.left"
+      [style.width.px]="highlightPosition.width"
+      [style.height.px]="highlightPosition.height">
+    </div>
+  } @else {
+    <div class="tour-overlay" (click)="skipTour()" aria-hidden="true"></div>
+  }
+
+  <div
+    class="tour-tooltip"
+    [style.top.px]="tooltipPosition.top"
+    [style.left.px]="tooltipPosition.left"
+    [class.center-tooltip]="!showHighlight"
+    (click)="$event.stopPropagation()"
+    role="dialog"
+    aria-modal="true"
+    [attr.aria-labelledby]="'tour-title-' + currentStep"
+    aria-label="Guide de navigation">
+
+    <div class="tour-tooltip-header">
+      <div class="tour-step-icon" aria-hidden="true">{{ steps[currentStep].icon }}</div>
+      <div class="tour-step-counter">Étape {{ currentStep + 1 }} / {{ steps.length }}</div>
+    </div>
+
+    <div class="tour-progress-bar">
+      <div class="tour-progress-fill" [style.width.%]="progressPercent"></div>
+    </div>
+
+    <h3 class="tour-tooltip-title" [id]="'tour-title-' + currentStep">{{ steps[currentStep].title }}</h3>
+    <p class="tour-tooltip-description">{{ steps[currentStep].description }}</p>
+
+    <div class="tour-tooltip-actions">
+      <button class="tour-btn tour-btn-skip" (click)="skipTour()" aria-label="Passer le guide">Passer</button>
+      <div class="tour-btn-group">
+        @if (!isFirstStep) {
+          <button class="tour-btn tour-btn-prev" (click)="prevStep()" aria-label="Étape précédente">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+            Précédent
+          </button>
+        }
+        <button class="tour-btn tour-btn-next" (click)="nextStep()"
+          [attr.aria-label]="isLastStep ? 'Terminer le guide' : 'Étape suivante'">
+          {{ isLastStep ? 'Terminer' : 'Suivant' }}
+          @if (!isLastStep) {
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+          }
+        </button>
+      </div>
+    </div>
+
+    <div class="tour-step-dots">
+      @for (step of steps; track $index) {
+        <span class="tour-dot" [class.active]="$index === currentStep"></span>
+      }
+    </div>
+  </div>
+}

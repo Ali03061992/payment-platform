@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.paymentplatform.notification.domain.model.Notification;
 import com.paymentplatform.notification.domain.model.NotificationRepository;
+import com.paymentplatform.notification.infrastructure.email.EmailNotificationService;
+import com.paymentplatform.notification.infrastructure.push.PushNotificationService;
 import com.paymentplatform.shared.infrastructure.eventing.EventDeduplicator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,15 +24,21 @@ public class PaymentEventConsumer {
     private final EventDeduplicator deduplicator;
     private final ObjectMapper objectMapper;
     private final NotificationBroadcaster broadcaster;
+    private final EmailNotificationService emailService;
+    private final PushNotificationService pushService;
 
     public PaymentEventConsumer(NotificationRepository notifications,
                                  EventDeduplicator deduplicator,
                                  ObjectMapper objectMapper,
-                                 NotificationBroadcaster broadcaster) {
+                                 NotificationBroadcaster broadcaster,
+                                 EmailNotificationService emailService,
+                                 PushNotificationService pushService) {
         this.notifications = notifications;
         this.deduplicator = deduplicator;
         this.objectMapper = objectMapper;
         this.broadcaster = broadcaster;
+        this.emailService = emailService;
+        this.pushService = pushService;
     }
 
     @RabbitListener(queues = "notification.payments")
@@ -97,6 +105,11 @@ public class PaymentEventConsumer {
                 "Paiement " + reference + " confirm\u00e9",
                 "PAYMENT", reference
         )));
+
+        emailService.sendPaymentReceipt(null, "la boutique", reference, "", "", reference);
+
+        pushService.sendToUser(supplierId, "Paiement confirm\u00e9",
+                "Le paiement " + reference + " a \u00e9t\u00e9 confirm\u00e9", "PAYMENT_CONFIRMED", "/dashboard/payments");
     }
 
     private void handlePaymentRejected(JsonNode event) {

@@ -1,0 +1,51 @@
+/* Component-specific styles only — global design system in styles.css */
+
+.filter-input { min-width: 140px; }
+
+.action-badge {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  background: #e3f2fd;
+  color: #1565c0;
+  white-space: nowrap;
+}
+
+.details-cell {
+  max-width: 300px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.empty { text-align: center; padding: 48px; color: #8896ab; }
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 16px;
+  padding: 12px 0;
+}
+
+.page-info {
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+.error-message {
+  text-align: center;
+  padding: 24px;
+  color: #c62828;
+  background: #fce4ec;
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+@media (max-width: 768px) {
+  .filter-input { min-width: 100%; }
+  .details-cell { max-width: 120px; }
+}

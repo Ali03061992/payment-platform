@@ -14,6 +14,7 @@ export class PaymentListComponent implements OnInit, OnDestroy {
   payments: Payment[] = [];
   loading = true;
   filterStatus = '';
+  pendingAction: string | null = null;
 
   private subscriptions = new Subscription();
 
@@ -53,16 +54,24 @@ export class PaymentListComponent implements OnInit, OnDestroy {
   }
 
   confirm(id: string): void {
+    if (this.pendingAction) return;
+    this.pendingAction = id;
     this.subscriptions.add(this.paymentService.confirm(id).subscribe({
-      next: () => this.load(),
-      error: (e: any) => { this.toast.error(e.error?.message || 'Erreur'); }
+      next: () => { this.pendingAction = null; this.load(); },
+      error: (e: any) => { this.pendingAction = null; this.toast.error(e.error?.message || 'Erreur'); }
     }));
   }
 
   cancel(id: string): void {
+    if (this.pendingAction) return;
+    this.pendingAction = id;
     this.subscriptions.add(this.paymentService.cancel(id).subscribe({
-      next: () => this.load(),
-      error: (e: any) => { this.toast.error(e.error?.message || 'Erreur'); }
+      next: () => { this.pendingAction = null; this.load(); },
+      error: (e: any) => { this.pendingAction = null; this.toast.error(e.error?.message || 'Erreur'); }
     }));
+  }
+
+  exportCsv(): void {
+    this.paymentService.exportCsv({ status: this.filterStatus || undefined });
   }
 }

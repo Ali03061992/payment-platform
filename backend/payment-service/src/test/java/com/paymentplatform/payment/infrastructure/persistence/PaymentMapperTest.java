@@ -30,7 +30,7 @@ class PaymentMapperTest {
         assertThat(jpa.getSupplierId()).isEqualTo(UUID.fromString("00000000-0000-0000-0000-000000000020"));
         assertThat(jpa.getAmount()).isEqualByComparingTo(new BigDecimal("100.50"));
         assertThat(jpa.getCurrency()).isEqualTo("TND");
-        assertThat(jpa.getStatus()).isEqualTo(PaymentStatus.PENDING.name());
+        assertThat(jpa.getStatus()).isEqualTo(PaymentStatus.PENDING);
         assertThat(jpa.getCreatedBy()).isEqualTo(UUID.fromString("00000000-0000-0000-0000-000000000005"));
         assertThat(jpa.getCreatedAt()).isNotNull();
     }
@@ -46,7 +46,7 @@ class PaymentMapperTest {
         var jpa = mapper.toJpa(rejected);
 
         assertThat(jpa.getRejectionReason()).isEqualTo("Quality issue");
-        assertThat(jpa.getStatus()).isEqualTo(PaymentStatus.REJECTED.name());
+        assertThat(jpa.getStatus()).isEqualTo(PaymentStatus.REJECTED);
     }
 
     @Test
@@ -90,7 +90,7 @@ class PaymentMapperTest {
         entity.setSupplierId(UUID.fromString("00000000-0000-0000-0000-000000000020"));
         entity.setAmount(new BigDecimal("300.00"));
         entity.setCurrency("TND");
-        entity.setStatus("PENDING");
+        entity.setStatus(PaymentStatus.PENDING);
         entity.setCreatedBy(UUID.fromString("00000000-0000-0000-0000-000000000005"));
         entity.setVersion(0L);
         entity.setCreatedAt(Instant.now());
@@ -115,7 +115,7 @@ class PaymentMapperTest {
         entity.setSupplierId(UUID.fromString("00000000-0000-0000-0000-000000000020"));
         entity.setAmount(new BigDecimal("400.00"));
         entity.setCurrency("TND");
-        entity.setStatus("REJECTED");
+        entity.setStatus(PaymentStatus.REJECTED);
         entity.setRejectionReason("Quality issue");
         entity.setCreatedBy(UUID.fromString("00000000-0000-0000-0000-000000000005"));
         entity.setVersion(0L);

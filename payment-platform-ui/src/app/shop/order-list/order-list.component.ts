@@ -1,8 +1,9 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, HostListener, ElementRef } from '@angular/core';
 import { OrderService } from '../../services/order.service';
 import { Order } from '../../models/order.model';
 import { ToastService } from '../../services/toast.service';
-import { Subscription } from 'rxjs';
+import { Subscription, Subject, debounceTime, distinctUntilChanged, switchMap, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 
 @Component({
     selector: 'app-order-list',
@@ -15,11 +16,48 @@ export class OrderListComponent implements OnInit, OnDestroy {
   loading = true;
   filterStatus = '';
 
+  searchQuery = '';
+  searchResults: Order[] = [];
+  showSearchDropdown = false;
+  searching = false;
+  searchSubject = new Subject<string>();
+
   private subscriptions = new Subscription();
 
-  constructor(private orderService: OrderService, private toast: ToastService) {}
+  constructor(private orderService: OrderService, private toast: ToastService, private elRef: ElementRef) {}
 
-  ngOnInit(): void { this.load(); }
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    if (!this.elRef.nativeElement.querySelector('.search-container')?.contains(event.target)) {
+      this.showSearchDropdown = false;
+    }
+  }
+
+  ngOnInit(): void {
+    this.subscriptions.add(
+      this.searchSubject.pipe(
+        debounceTime(300),
+        distinctUntilChanged(),
+        switchMap(query => {
+          if (!query || query.trim().length < 2) {
+            this.searchResults = [];
+            this.showSearchDropdown = false;
+            this.searching = false;
+            return of([]);
+          }
+          this.searching = true;
+          return this.orderService.search(query.trim()).pipe(
+            catchError(() => { this.searching = false; return of([]); })
+          );
+        })
+      ).subscribe(results => {
+        this.searchResults = results;
+        this.showSearchDropdown = results.length > 0;
+        this.searching = false;
+      })
+    );
+    this.load();
+  }
 
   ngOnDestroy(): void {
     this.subscriptions.unsubscribe();
@@ -81,5 +119,9 @@ export class OrderListComponent implements OnInit, OnDestroy {
       next: () => this.load(),
       error: (e: any) => { this.toast.error(e.error?.message || 'Erreur'); }
     }));
+  }
+
+  exportCsv(): void {
+    this.orderService.exportCsv({ status: this.filterStatus || undefined });
   }
 }

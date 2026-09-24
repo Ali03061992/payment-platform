@@ -7,6 +7,7 @@ import com.paymentplatform.payment.domain.repository.PaymentRepository;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -92,7 +93,7 @@ public class JpaPaymentRepository implements PaymentRepository {
 
     @Override
     public List<Payment> findByStatus(PaymentStatus status) {
-        return jpaRepo.findByStatusOrderByCreatedAtDesc(status.name()).stream().map(entity -> {
+        return jpaRepo.findByStatusOrderByCreatedAtDesc(status).stream().map(entity -> {
             List<PaymentEvent> events = eventJpaRepo.findByPaymentIdOrderByTimestampAsc(entity.getId())
                     .stream().map(mapper::toEventDomain).toList();
             return mapper.fromFields(entity, events);
@@ -101,11 +102,38 @@ public class JpaPaymentRepository implements PaymentRepository {
 
     @Override
     public long countByStatus(PaymentStatus status) {
-        return jpaRepo.countByStatus(status.name());
+        return jpaRepo.countByStatus(status);
     }
 
     @Override
     public boolean existsByReference(String reference) {
         return jpaRepo.existsByReference(reference);
+    }
+
+    @Override
+    public List<Payment> findOverdue(LocalDate today) {
+        return jpaRepo.findOverduePayments(today).stream().map(entity -> {
+            List<PaymentEvent> events = eventJpaRepo.findByPaymentIdOrderByTimestampAsc(entity.getId())
+                    .stream().map(mapper::toEventDomain).toList();
+            return mapper.fromFields(entity, events);
+        }).toList();
+    }
+
+    @Override
+    public List<Payment> findOverdueBySupplier(LocalDate today, UUID supplierId) {
+        return jpaRepo.findOverduePaymentsBySupplier(today, supplierId).stream().map(entity -> {
+            List<PaymentEvent> events = eventJpaRepo.findByPaymentIdOrderByTimestampAsc(entity.getId())
+                    .stream().map(mapper::toEventDomain).toList();
+            return mapper.fromFields(entity, events);
+        }).toList();
+    }
+
+    @Override
+    public List<Payment> findOverdueByShop(LocalDate today, UUID shopId) {
+        return jpaRepo.findOverduePaymentsByShop(today, shopId).stream().map(entity -> {
+            List<PaymentEvent> events = eventJpaRepo.findByPaymentIdOrderByTimestampAsc(entity.getId())
+                    .stream().map(mapper::toEventDomain).toList();
+            return mapper.fromFields(entity, events);
+        }).toList();
     }
 }

@@ -1,0 +1,160 @@
+<div class="page-header">
+  <h2>Balance fournisseur</h2>
+</div>
+
+@if (loading) {
+  <div class="loading">
+    <div class="spinner"></div>
+    <span>Chargement...</span>
+  </div>
+}
+
+@if (!loading) {
+  <div>
+    @if (balances.length > 0) {
+      <div class="stats-grid" style="margin-bottom:24px;">
+        <div class="stat-card">
+          <div>
+            <div class="stat-value">{{ balances.length }}</div>
+            <div class="stat-label">Boutique(s)</div>
+          </div>
+        </div>
+        <div class="stat-card stat-pending">
+          <div>
+            <div class="stat-value">{{ getTotalBalance() | number:'1.2-2' }}</div>
+            <div class="stat-label">Solde total</div>
+          </div>
+        </div>
+      </div>
+    }
+
+    <div class="form-card" style="margin-bottom:24px;">
+      <h3 style="margin-top:0;">Ajouter un crédit à une boutique</h3>
+      <form (ngSubmit)="submitCredit()">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="creditShop">Boutique</label>
+            <select id="creditShop" [(ngModel)]="creditShopId" name="creditShop" class="form-control" required>
+              <option value="">-- Sélectionner --</option>
+              @for (b of balances; track b) {
+                <option [value]="b.shopId">{{ b.shopName || b.shopId }}</option>
+              }
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="creditAmount">Montant</label>
+            <input type="number" id="creditAmount" [(ngModel)]="creditAmount" name="creditAmount"
+              class="form-control" min="0.01" step="0.01" placeholder="0.00" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="creditReason">Motif</label>
+          <input type="text" id="creditReason" [(ngModel)]="creditReason" name="creditReason"
+            class="form-control" placeholder="Crédit manuel fournisseur">
+        </div>
+        <div class="form-actions">
+          <button class="btn btn-primary" type="submit" [disabled]="!canCredit()">
+            {{ submitting ? 'Envoi...' : 'Ajouter le crédit' }}
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <div class="table-card">
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Boutique</th>
+              <th>Solde actuel</th>
+              <th>Total commandes</th>
+              <th>Total paiements</th>
+              <th>Reste à payer</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (b of balances; track b) {
+              <tr class="clickable-row" (click)="viewLedger(b.supplierId, b.shopId)">
+                <td><strong>{{ b.shopName || b.shopId }}</strong></td>
+                <td [class.positive]="b.currentBalance >= 0" [class.negative]="b.currentBalance < 0">
+                  {{ b.currentBalance | number:'1.2-2' }}
+                </td>
+                <td>{{ b.totalOrders | number:'1.2-2' }}</td>
+                <td>{{ b.totalPayments | number:'1.2-2' }}</td>
+                <td [class.negative]="b.remainingDue > 0">
+                  {{ b.remainingDue | number:'1.2-2' }}
+                </td>
+                <td class="actions" (click)="$event.stopPropagation()">
+                  <button class="btn btn-sm btn-secondary" (click)="viewLedger(b.supplierId, b.shopId)">Voir le journal</button>
+                  <button class="btn btn-sm btn-primary" (click)="creditShopId = b.shopId">Créditer</button>
+                </td>
+              </tr>
+            }
+            @if (balances.length === 0) {
+              <tr>
+                <td colspan="6" class="empty">Aucune boutique liée</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    @if (selectedShopId !== null) {
+      <div class="ledger-panel">
+        <div class="ledger-header">
+          <h3>Journal des mouvements</h3>
+          <button class="btn btn-sm btn-secondary" (click)="closeLedger()">Fermer</button>
+        </div>
+        @if (loadingLedger) {
+          <div class="loading">
+            <div class="spinner"></div>
+            <span>Chargement du journal...</span>
+          </div>
+        }
+        @if (!loadingLedger) {
+          <div class="table-card">
+            <div class="table-wrapper">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Type</th>
+                    <th>Montant</th>
+                    <th>Solde après</th>
+                    <th>Référence</th>
+                    <th>Motif</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (e of ledgerEntries; track e) {
+                    <tr>
+                      <td>{{ e.createdAt | date:'dd/MM/yyyy HH:mm:ss' }}</td>
+                      <td>
+                        <span class="status-badge" [ngClass]="typeClass(e.type)">
+                          {{ typeLabel(e.type) }}
+                        </span>
+                      </td>
+                      <td [class.positive]="e.amount >= 0" [class.negative]="e.amount < 0">
+                        {{ e.amount >= 0 ? '+' : '' }}{{ e.amount | number:'1.2-2' }}
+                      </td>
+                      <td><strong>{{ e.balanceAfter | number:'1.2-2' }}</strong></td>
+                      <td>{{ e.reference || '-' }}</td>
+                      <td>{{ e.reason || '-' }}</td>
+                    </tr>
+                  }
+                  @if (ledgerEntries.length === 0) {
+                    <tr>
+                      <td colspan="6" class="empty">Aucun mouvement</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </div>
+}

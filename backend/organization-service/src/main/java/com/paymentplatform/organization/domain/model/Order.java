@@ -49,6 +49,9 @@ public class Order {
     @Column(nullable = false, precision = 19, scale = 4)
     private BigDecimal total;
 
+    @Column(name = "global_discount", nullable = false, precision = 5, scale = 2)
+    private BigDecimal globalDiscount;
+
     @Column(nullable = false, length = 3)
     private String currency;
 
@@ -73,8 +76,30 @@ public class Order {
     @Column(name = "asap_payment", nullable = false)
     private boolean asapPayment;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "payment_terms", length = 20)
+    private PaymentTerms paymentTerms;
+
+    @Column(name = "due_date")
+    private LocalDate dueDate;
+
     @Column(name = "delivery_rejection_reason", columnDefinition = "TEXT")
     private String deliveryRejectionReason;
+
+    @Column(name = "return_reason", columnDefinition = "TEXT")
+    private String returnReason;
+
+    @Column(name = "estimated_arrival")
+    private Instant estimatedArrival;
+
+    @Column(name = "last_latitude", precision = 9, scale = 6)
+    private BigDecimal lastLatitude;
+
+    @Column(name = "last_longitude", precision = 9, scale = 6)
+    private BigDecimal lastLongitude;
+
+    @Column(name = "last_location_update")
+    private Instant lastLocationUpdate;
 
     @Column(columnDefinition = "TEXT")
     private String notes;
@@ -96,8 +121,9 @@ public class Order {
         updatedAt = Instant.now();
         if (status == null) status = OrderStatus.DRAFT.name();
         if (subtotal == null) subtotal = BigDecimal.ZERO;
-        if (taxRate == null) taxRate = BigDecimal.ZERO;
+        if (taxRate == null) taxRate = new BigDecimal("19");
         if (taxAmount == null) taxAmount = BigDecimal.ZERO;
+        if (globalDiscount == null) globalDiscount = BigDecimal.ZERO;
         if (total == null) total = BigDecimal.ZERO;
         if (currency == null) currency = "TND";
     }
@@ -108,7 +134,8 @@ public class Order {
     }
 
     public static Order create(UUID supplierId, UUID shopId, UUID createdBy,
-                               String createdByRole, String source, boolean asapPayment, String currency) {
+                               String createdByRole, String source, boolean asapPayment,
+                               String currency, PaymentTerms paymentTerms) {
         if (supplierId == null || shopId == null) {
             throw new ConflictException("Le fournisseur et la boutique sont requis");
         }
@@ -125,10 +152,13 @@ public class Order {
         order.source = source;
         order.asapPayment = asapPayment;
         order.currency = currency != null ? currency : "TND";
+        order.paymentTerms = paymentTerms != null ? paymentTerms : PaymentTerms.IMMEDIATE;
+        order.dueDate = order.paymentTerms.computeDueDate(LocalDate.now());
         order.status = OrderStatus.DRAFT.name();
         order.subtotal = BigDecimal.ZERO;
-        order.taxRate = BigDecimal.ZERO;
+        order.taxRate = new BigDecimal("19");
         order.taxAmount = BigDecimal.ZERO;
+        order.globalDiscount = BigDecimal.ZERO;
         order.total = BigDecimal.ZERO;
         return order;
     }
@@ -168,6 +198,8 @@ public class Order {
             throw new ConflictException("La date de livraison confirmée est requise");
         }
         this.confirmedDeliveryDate = confirmedDate;
+        this.estimatedArrival = confirmedDate.atTime(java.time.LocalTime.of(18, 0))
+                .atZone(java.time.ZoneId.systemDefault()).toInstant();
         transitionTo(OrderStatus.IN_DELIVERY);
     }
 
@@ -199,10 +231,19 @@ public class Order {
         transitionTo(OrderStatus.DELIVERY_REJECTED);
     }
 
+    public void updateLocation(BigDecimal latitude, BigDecimal longitude) {
+        this.lastLatitude = latitude;
+        this.lastLongitude = longitude;
+        this.lastLocationUpdate = Instant.now();
+        this.updatedAt = Instant.now();
+    }
+
     public void recalculateTotals() {
         // Subtotal is expected to be set by the caller based on order items
         this.taxAmount = this.subtotal.multiply(this.taxRate).divide(new BigDecimal("100"), 4, BigDecimal.ROUND_HALF_UP);
-        this.total = this.subtotal.add(this.taxAmount);
+        BigDecimal totalBeforeDiscount = this.subtotal.add(this.taxAmount);
+        BigDecimal discountAmount = totalBeforeDiscount.multiply(this.globalDiscount).divide(new BigDecimal("100"), 4, BigDecimal.ROUND_HALF_UP);
+        this.total = totalBeforeDiscount.subtract(discountAmount);
         this.updatedAt = Instant.now();
     }
 
@@ -224,16 +265,30 @@ public class Order {
     public Instant getReceivedAt() { return receivedAt; }
     public Instant getDeliveredAt() { return deliveredAt; }
     public boolean isAsapPayment() { return asapPayment; }
+    public void setAsapPayment(boolean asapPayment) { this.asapPayment = asapPayment; }
+    public PaymentTerms getPaymentTerms() { return paymentTerms; }
+    public void setPaymentTerms(PaymentTerms paymentTerms) { this.paymentTerms = paymentTerms; }
+    public LocalDate getDueDate() { return dueDate; }
+    public void setDueDate(LocalDate dueDate) { this.dueDate = dueDate; }
     public String getDeliveryRejectionReason() { return deliveryRejectionReason; }
+    public String getReturnReason() { return returnReason; }
     public LocalDate getPlannedDeliveryDate() { return plannedDeliveryDate; }
     public LocalDate getConfirmedDeliveryDate() { return confirmedDeliveryDate; }
     public String getNotes() { return notes; }
     public Long getVersion() { return version; }
     public Instant getCreatedAt() { return createdAt; }
     public Instant getUpdatedAt() { return updatedAt; }
+    public BigDecimal getGlobalDiscount() { return globalDiscount; }
 
     public void setSubtotal(BigDecimal subtotal) { this.subtotal = subtotal; }
     public void setTaxRate(BigDecimal taxRate) { this.taxRate = taxRate; }
+    public void setGlobalDiscount(BigDecimal globalDiscount) { this.globalDiscount = globalDiscount; }
     public void setPlannedDeliveryDate(LocalDate plannedDeliveryDate) { this.plannedDeliveryDate = plannedDeliveryDate; }
     public void setNotes(String notes) { this.notes = notes; }
+    public void setReturnReason(String returnReason) { this.returnReason = returnReason; }
+    public Instant getEstimatedArrival() { return estimatedArrival; }
+    public void setEstimatedArrival(Instant estimatedArrival) { this.estimatedArrival = estimatedArrival; }
+    public BigDecimal getLastLatitude() { return lastLatitude; }
+    public BigDecimal getLastLongitude() { return lastLongitude; }
+    public Instant getLastLocationUpdate() { return lastLocationUpdate; }
 }

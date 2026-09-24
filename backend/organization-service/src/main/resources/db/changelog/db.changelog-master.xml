@@ -8,5 +8,14 @@
     <include file="V1__schema.sql" relativeToChangelogFile="true"/>
     <include file="V2__seed.sql" relativeToChangelogFile="true"/>
     <include file="V3__add_delivery_rejection_reason.sql" relativeToChangelogFile="true"/>
+    <include file="V4__add_order_item_product_snapshot.sql" relativeToChangelogFile="true"/>
+    <include file="V4__add_estimated_arrival.sql" relativeToChangelogFile="true"/>
+    <include file="V4__add_global_discount.sql" relativeToChangelogFile="true"/>
+    <include file="V5__add_product_image_url.sql" relativeToChangelogFile="true"/>
+    <include file="V5__add_order_comments.sql" relativeToChangelogFile="true"/>
+    <include file="V6__add_return_reason.sql" relativeToChangelogFile="true"/>
+    <include file="V7__add_location_tracking.sql" relativeToChangelogFile="true"/>
+    <include file="V8__add_payment_terms.sql" relativeToChangelogFile="true"/>
+    <include file="V9__add_disputes.sql" relativeToChangelogFile="true"/>
 
 </databaseChangeLog>

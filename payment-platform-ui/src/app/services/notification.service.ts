@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { BehaviorSubject, Observable, interval, Subscription } from 'rxjs';
-import { switchMap, tap } from 'rxjs/operators';
-import { Notification } from '../models/notification.model';
+import { switchMap, tap, map } from 'rxjs/operators';
+import { Notification, NotificationPage } from '../models/notification.model';
 
 @Injectable({ providedIn: 'root' })
 export class NotificationService {
@@ -96,9 +96,27 @@ export class NotificationService {
   }
 
   fetchNotifications(): Observable<Notification[]> {
-    return this.http.get<Notification[]>(this.apiUrl).pipe(
-      tap(list => this.notificationsSubject.next(list || []))
+    return this.http.get<Notification[] | NotificationPage>(this.apiUrl).pipe(
+      map(body => this.extractItems(body)),
+      tap(list => this.notificationsSubject.next(list))
     );
+  }
+
+  private extractItems(body: Notification[] | NotificationPage | null | undefined): Notification[] {
+    if (!body) return [];
+    if (Array.isArray(body)) return body;
+    if (Array.isArray((body as NotificationPage).items)) return (body as NotificationPage).items;
+    return [];
+  }
+
+  fetchNotificationsPaged(page = 0, size = 20, type?: string): Observable<NotificationPage> {
+    let params = new HttpParams()
+      .set('page', page.toString())
+      .set('size', size.toString());
+    if (type) {
+      params = params.set('type', type);
+    }
+    return this.http.get<NotificationPage>(this.apiUrl, { params });
   }
 
   fetchUnreadCount(): Observable<{ count: number }> {

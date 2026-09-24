@@ -95,15 +95,52 @@ class BalanceControllerTest {
     }
 
     @Test
-    void adjustBalance_asNonAdmin_returns403() throws Exception {
+    void adjustBalance_asOwnerSupplierAdmin_returnsOk() throws Exception {
         String body = objectMapper.writeValueAsString(
-                new com.paymentplatform.organization.interfaces.rest.BalanceController.AdjustBalanceRequest(UUID.fromString("00000000-0000-0000-0000-000000000010"), UUID.fromString("00000000-0000-0000-0000-000000000020"), new BigDecimal("50.00"), "Test"));
+                new com.paymentplatform.organization.interfaces.rest.BalanceController.AdjustBalanceRequest(UUID.fromString("00000000-0000-0000-0000-000000000010"), UUID.fromString("00000000-0000-0000-0000-000000000020"), new BigDecimal("50.00"), "Credit boutique"));
 
         mockMvc.perform(post("/api/balances/adjust")
                         .with(SecurityMockMvcRequestPostProcessors.authentication(supplierAdmin()))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void adjustBalance_asOtherSupplier_returns403() throws Exception {
+        String body = objectMapper.writeValueAsString(
+                new com.paymentplatform.organization.interfaces.rest.BalanceController.AdjustBalanceRequest(UUID.fromString("00000000-0000-0000-0000-000000000010"), UUID.fromString("00000000-0000-0000-0000-000000000020"), new BigDecimal("50.00"), "Test"));
+
+        UsernamePasswordAuthenticationToken otherSupplier = auth(UUID.fromString("00000000-0000-0000-0000-000000000003"), "other", List.of("SUPPLIER_ADMIN"), UUID.fromString("00000000-0000-0000-0000-000000000099"));
+        mockMvc.perform(post("/api/balances/adjust")
+                        .with(SecurityMockMvcRequestPostProcessors.authentication(otherSupplier))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
                 .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void adjustBalance_asShopAdmin_returns403() throws Exception {
+        String body = objectMapper.writeValueAsString(
+                new com.paymentplatform.organization.interfaces.rest.BalanceController.AdjustBalanceRequest(UUID.fromString("00000000-0000-0000-0000-000000000010"), UUID.fromString("00000000-0000-0000-0000-000000000020"), new BigDecimal("50.00"), "Test"));
+
+        UsernamePasswordAuthenticationToken shopAdmin = auth(UUID.fromString("00000000-0000-0000-0000-000000000004"), "shop.admin", List.of("SHOP_ADMIN"), UUID.fromString("00000000-0000-0000-0000-000000000020"));
+        mockMvc.perform(post("/api/balances/adjust")
+                        .with(SecurityMockMvcRequestPostProcessors.authentication(shopAdmin))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void adjustBalance_withNegativeAmount_returns400() throws Exception {
+        String body = objectMapper.writeValueAsString(
+                new com.paymentplatform.organization.interfaces.rest.BalanceController.AdjustBalanceRequest(UUID.fromString("00000000-0000-0000-0000-000000000010"), UUID.fromString("00000000-0000-0000-0000-000000000020"), new BigDecimal("-10.00"), "Test"));
+        mockMvc.perform(post("/api/balances/adjust")
+                        .with(SecurityMockMvcRequestPostProcessors.authentication(systemAdmin()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isBadRequest());
     }
 
     @Test

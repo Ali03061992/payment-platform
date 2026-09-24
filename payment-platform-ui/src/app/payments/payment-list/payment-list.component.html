@@ -1,25 +1,26 @@
 <div class="page-header">
   <h2>Paiements</h2>
-  <button class="btn btn-primary" routerLink="/dashboard/payments/create">+ Nouveau paiement</button>
+  <button class="btn btn-primary" routerLink="/dashboard/payments/create" aria-label="Créer un nouveau paiement">+ Nouveau paiement</button>
 </div>
 
 @if (!loading) {
   <div class="filters">
-    <select [(ngModel)]="filterStatus" class="form-control" style="max-width:200px;">
+    <select [(ngModel)]="filterStatus" class="form-control" style="max-width:200px;" aria-label="Filtrer par statut de paiement">
       <option value="">Tous les statuts</option>
       <option value="PENDING">En attente</option>
       <option value="CONFIRMED">Confirmé</option>
       <option value="REJECTED">Rejeté</option>
       <option value="CANCELLED">Annulé</option>
     </select>
-    <span class="result-count">{{ filteredPayments.length }} résultat(s)</span>
+    <span class="result-count" aria-live="polite">{{ filteredPayments.length }} résultat(s)</span>
+    <button class="btn btn-secondary" style="margin-left:auto;" (click)="exportCsv()" aria-label="Exporter les paiements en CSV">Exporter CSV</button>
   </div>
 }
 
 @if (loading) {
-  <div class="loading">
-    <div class="spinner"></div>
-    <span>Chargement...</span>
+  <div class="loading" role="status" aria-live="polite">
+    <div class="spinner" aria-hidden="true"></div>
+    <span>Chargement des paiements...</span>
   </div>
 }
 
@@ -50,7 +51,8 @@
               <td>{{ p.supplierName }}</td>
               <td>{{ p.amount | number:'1.2-2' }} {{ p.currency }}</td>
               <td>
-                <span class="payment-badge" [ngClass]="statusClass(p.status)">
+                <span class="payment-badge" [ngClass]="statusClass(p.status)"
+                  [attr.aria-label]="'Statut du paiement : ' + statusLabel(p.status)" role="status">
                   {{ statusLabel(p.status) }}
                 </span>
               </td>
@@ -69,14 +71,14 @@
                 }
               </td>
               <td>{{ p.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
-              <td>
+              <td class="actions" (click)="$event.stopPropagation()">
                 @if (p.status === 'PENDING') {
-                  <button class="btn btn-sm btn-success" (click)="confirm(p.id)">Confirmer</button>
+                  <button class="btn btn-sm btn-success" (click)="confirm(p.id)" [disabled]="pendingAction === p.id" [attr.aria-label]="'Confirmer le paiement ' + p.reference">Confirmer</button>
                 }
                 @if (p.status === 'PENDING') {
-                  <button class="btn btn-sm btn-danger" (click)="cancel(p.id)">Annuler</button>
+                  <button class="btn btn-sm btn-danger" (click)="cancel(p.id)" [disabled]="pendingAction === p.id" [attr.aria-label]="'Annuler le paiement ' + p.reference">Annuler</button>
                 }
-                <a class="btn btn-sm btn-secondary" [routerLink]="['/dashboard/payments', p.id]">Détail</a>
+                <a class="btn btn-sm btn-secondary" [routerLink]="['/dashboard/payments', p.id]" [attr.aria-label]="'Voir le détail du paiement ' + p.reference">Détail</a>
               </td>
             </tr>
           }
@@ -94,16 +96,12 @@
 <!-- Mobile Card View -->
 @if (!loading) {
   <div class="payment-cards show-mobile">
-    @if (filteredPayments.length === 0) {
-      <div class="empty-card">
-        Aucun paiement trouvé
-      </div>
-    }
     @for (p of filteredPayments; track p) {
       <div class="payment-card" [routerLink]="['/dashboard/payments', p.id]">
         <div class="payment-card-header">
           <span class="payment-reference">{{ p.reference }}</span>
-          <span class="payment-badge" [ngClass]="statusClass(p.status)">
+          <span class="payment-badge" [ngClass]="statusClass(p.status)"
+            [attr.aria-label]="'Statut du paiement : ' + statusLabel(p.status)" role="status">
             {{ statusLabel(p.status) }}
           </span>
         </div>
@@ -139,8 +137,8 @@
         </div>
         @if (p.status === 'PENDING') {
           <div class="payment-card-actions" (click)="$event.stopPropagation()">
-            <button class="btn btn-sm btn-success" (click)="confirm(p.id)">Confirmer</button>
-            <button class="btn btn-sm btn-danger" (click)="cancel(p.id)">Annuler</button>
+            <button class="btn btn-sm btn-success" (click)="confirm(p.id)" [disabled]="pendingAction === p.id" [attr.aria-label]="'Confirmer le paiement ' + p.reference">Confirmer</button>
+            <button class="btn btn-sm btn-danger" (click)="cancel(p.id)" [disabled]="pendingAction === p.id" [attr.aria-label]="'Annuler le paiement ' + p.reference">Annuler</button>
           </div>
         }
       </div>

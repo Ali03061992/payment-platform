@@ -1,9 +1,11 @@
 package com.paymentplatform.payment.infrastructure.persistence;
 
+import com.paymentplatform.payment.domain.model.PaymentStatus;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.UUID;
 
 @Entity
@@ -30,13 +32,20 @@ public class PaymentJpaEntity {
     private BigDecimal amount;
 
     @Column(nullable = false, length = 20)
-    private String status;
+    @Enumerated(EnumType.STRING)
+    private PaymentStatus status;
 
     @Column(name = "rejection_reason", length = 500)
     private String rejectionReason;
 
     @Column(name = "created_by", nullable = false, columnDefinition = "VARCHAR(36)")
     private UUID createdBy;
+
+    @Column(name = "order_id", columnDefinition = "VARCHAR(36)")
+    private UUID orderId;
+
+    @Column(name = "due_date")
+    private LocalDate dueDate;
 
     @Version
     private Long version;
@@ -59,8 +68,8 @@ public class PaymentJpaEntity {
     public void setCurrency(String currency) { this.currency = currency; }
     public BigDecimal getAmount() { return amount; }
     public void setAmount(BigDecimal amount) { this.amount = amount; }
-    public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
+    public PaymentStatus getStatus() { return status; }
+    public void setStatus(PaymentStatus status) { this.status = status; }
     public String getRejectionReason() { return rejectionReason; }
     public void setRejectionReason(String rejectionReason) { this.rejectionReason = rejectionReason; }
     public UUID getCreatedBy() { return createdBy; }
@@ -71,6 +80,10 @@ public class PaymentJpaEntity {
     public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
     public Instant getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(Instant updatedAt) { this.updatedAt = updatedAt; }
+    public UUID getOrderId() { return orderId; }
+    public void setOrderId(UUID orderId) { this.orderId = orderId; }
+    public LocalDate getDueDate() { return dueDate; }
+    public void setDueDate(LocalDate dueDate) { this.dueDate = dueDate; }
 
     @PrePersist
     protected void onCreate() {
