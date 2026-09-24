@@ -41,6 +41,19 @@
       }
     },
     {
+      "name": "api-financial",
+      "urls": [
+        "/api/payments/**",
+        "/api/orders/**"
+      ],
+      "cacheConfig": {
+        "strategy": "freshness",
+        "maxSize": 20,
+        "maxAge": "5m",
+        "timeout": "5s"
+      }
+    },
+    {
       "name": "api-network",
       "urls": [
         "/api/**"

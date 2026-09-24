@@ -59,7 +59,7 @@ ligne→détail paiements au clic Confirmer/Annuler.
 | M3 | Hard-delete catégories/familles (`deleteById`) sans soft-delete/audit : casse l'historique | `CatalogController.java:72,146` |
 | M4 | `SHOP_MANAGER` visible dans la nav mais refusé par `RoleGuard` (redirect silencieux vers `/dashboard`), pas de page 403/404 | `layout.component.ts:53-55` vs `app-routing.module.ts:53,95-99` |
 | M5 | Register public : un inscrit `SUPPLIER_ADMIN` n'est rattaché à **aucune** organisation (`organizationId=null`) — auto-élévation à valider métier | `RegisterUseCase.java:55-58,70-72` |
-| M6 | Cache PWA `freshness 24 h` sur `/api/**` : données financières périmées servies offline | `ngsw-config.json:43-54` |
+| M6 | PWA **corrigé** : groupe `api-financial` prioritaire (`/api/payments/**`, `/api/orders/**`, freshness 5 min max — prouvé dans `ngsw.json` généré) ; plus de cache financier > 5 min | `ngsw-config.json` |
 | M7 | Clés Firebase/VAPID `YOUR_API_KEY` en dur : push HS en prod | `environment.ts:4-12`, `environment.prod.ts:4-12` |
 
 ### 3.3 MINEUR / dette (phase 2)
@@ -99,7 +99,7 @@ ligne→détail paiements au clic Confirmer/Annuler.
 - [ ] M3 : soft-delete catalogue (`deletedAt` + filtre) + audit.
 - [ ] M4 : aligner `SHOP_MANAGER` (nav ou rôles) + pages 403/404 dédiées.
 - [ ] M5 : rattachement org obligatoire à l'inscription `SUPPLIER_ADMIN` (ou workflow de validation admin).
-- [ ] M6 : PWA `networkFirst` sans cache > 5 min sur `/api/payments/**`, `/api/orders/**`.
+- [x] M6 : PWA `networkFirst` sans cache > 5 min sur `/api/payments/**`, `/api/orders/**`.
 - [ ] M7 : clés Firebase via variables d'environnement build, jamais committées.
 
 ### Phase 2 — Qualité & finition (2 sem, en parallèle du fonctionnel)
