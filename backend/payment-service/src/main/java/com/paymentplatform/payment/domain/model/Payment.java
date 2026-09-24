@@ -54,7 +54,7 @@ public class Payment {
     }
 
 public static Payment create(UUID shopId, UUID supplierId, Money money, UUID createdBy) {
-        return create(shopId, supplierId, money, createdBy, null);
+        return create(shopId, supplierId, money, createdBy, null, null);
     }
 
     public static Payment create(UUID shopId, UUID supplierId, Money money, UUID createdBy,
