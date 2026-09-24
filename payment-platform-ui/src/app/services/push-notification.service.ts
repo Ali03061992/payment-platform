@@ -19,12 +19,24 @@ export class PushNotificationService {
     private http: HttpClient,
     private ngZone: NgZone
   ) {
+    // M7 : sans clés configurées (env), le push est désactivé proprement
+    // au lieu d'initialiser Firebase avec des placeholders.
+    if (!PushNotificationService.isConfigured()) {
+      return;
+    }
     try {
       this.firebaseApp = initializeApp(environment.firebase);
       this.messaging = getMessaging(this.firebaseApp);
     } catch (error) {
       console.error('Failed to initialize Firebase', error);
+      this.messaging = null;
     }
+  }
+
+  static isConfigured(): boolean {
+    const fb = environment.firebase;
+    return !!fb.apiKey && !!fb.projectId && !!fb.messagingSenderId && !!fb.appId
+      && !!environment.fcmVapidKey;
   }
 
   async requestPermissionAndGetToken(): Promise<string | null> {
