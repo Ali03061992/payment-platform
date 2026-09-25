@@ -231,7 +231,16 @@ public class OrderController {
                 String firstName = user.has("firstName") ? user.get("firstName").asText() : "";
                 String lastName = user.has("lastName") ? user.get("lastName").asText() : "";
                 String id = user.has("id") ? user.get("id").asText() : "";
-                agents.add(Map.of("id", id, "name", (firstName + " " + lastName).trim()));
+                // Rôles exposés pour distinguer admins/agents côté livraison.
+                StringBuilder roles = new StringBuilder();
+                if (user.has("roles") && user.get("roles").isArray()) {
+                    for (var role : user.get("roles")) {
+                        if (!roles.isEmpty()) roles.append(",");
+                        roles.append(role.asText());
+                    }
+                }
+                agents.add(Map.of("id", id, "name", (firstName + " " + lastName).trim(),
+                        "roles", roles.toString()));
             }
         }
         return ResponseEntity.ok(agents);
@@ -355,7 +364,7 @@ public class OrderController {
     }
 
     @PostMapping("/{id}/accept-delivery")
-    @PreAuthorize("hasAnyAuthority('SUPPLIER_AGENT')")
+    @PreAuthorize("hasAnyAuthority('SUPPLIER_AGENT', 'SUPPLIER_ADMIN')")
     public ResponseEntity<OrderResponse> acceptDelivery(
             @PathVariable UUID id,
             @RequestBody Map<String, Object> body) {
@@ -461,10 +470,18 @@ public class OrderController {
     }
 
     @GetMapping("/my-deliveries")
-    @PreAuthorize("hasAnyAuthority('SUPPLIER_AGENT')")
+    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SUPPLIER_AGENT')")
     public ResponseEntity<List<OrderResponse>> myDeliveries() {
         var current = CurrentUser.get();
-        var orders = orderRepository.findByDeliveryAgentId(current.userId());
+        List<com.paymentplatform.organization.domain.model.Order> orders;
+        if (current.roles().contains("SUPPLIER_ADMIN") && current.organizationId() != null) {
+            // L'admin fournisseur voit toutes les livraisons de son organisation.
+            orders = orderRepository.findBySupplierId(current.organizationId()).stream()
+                    .filter(o -> o.getDeliveryAgentId() != null)
+                    .toList();
+        } else {
+            orders = orderRepository.findByDeliveryAgentId(current.userId());
+        }
         List<OrderResponse> responses = orders.stream()
                 .map(this::buildOrderResponse)
                 .toList();

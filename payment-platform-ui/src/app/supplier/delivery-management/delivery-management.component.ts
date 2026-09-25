@@ -18,8 +18,12 @@ export class DeliveryManagementComponent implements OnInit {
   selectedOrder: Order | null = null;
   receivedBy = '';
   delivering = false;
-  shopAgents: {id: string, name: string}[] = [];
+  shopAgents: {id: string, name: string, roles?: string}[] = [];
   loadingShopAgents = false;
+
+  isShopAdmin(entry: {roles?: string}): boolean {
+    return (entry.roles || '').split(',').includes('SHOP_ADMIN');
+  }
 
   showConfirmDateModal = false;
   confirmDateOrder: Order | null = null;

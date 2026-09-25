@@ -108,4 +108,28 @@ class InternalUserControllerTest {
         mockMvc.perform(get("/api/internal/users/00000000-0000-0000-0000-000000000001"))
                 .andExpect(status().isUnauthorized());
     }
+
+    @Test
+    void listByOrganization_validToken_returnsOk() throws Exception {
+        mockMvc.perform(get("/api/internal/users")
+                        .header("X-Internal-Token", INTERNAL_TOKEN)
+                        .param("organizationId", "00000000-0000-0000-0000-000000000005"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray());
+    }
+
+    @Test
+    void listByOrganization_invalidToken_returns401() throws Exception {
+        mockMvc.perform(get("/api/internal/users")
+                        .header("X-Internal-Token", "wrong-token")
+                        .param("organizationId", "00000000-0000-0000-0000-000000000005"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void listByOrganization_missingToken_returns401() throws Exception {
+        mockMvc.perform(get("/api/internal/users")
+                        .param("organizationId", "00000000-0000-0000-0000-000000000005"))
+                .andExpect(status().isUnauthorized());
+    }
 }

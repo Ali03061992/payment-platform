@@ -128,6 +128,25 @@ class OrderControllerTest {
     }
 
     @Test
+    void myDeliveries_asSupplierAdmin_returnsOk() throws Exception {
+        // L'admin fournisseur voit les livraisons de son organisation.
+        mockMvc.perform(get("/api/orders/my-deliveries")
+                        .with(SecurityMockMvcRequestPostProcessors.authentication(supplierAdmin())))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray());
+    }
+
+    @Test
+    void acceptDelivery_asSupplierAdmin_notForbidden() throws Exception {
+        // L'admin peut accepter au nom du livreur (pas de 403 ; 404 = endpoint atteint).
+        mockMvc.perform(post("/api/orders/00000000-0000-0000-0000-000000099999/accept-delivery")
+                        .with(SecurityMockMvcRequestPostProcessors.authentication(supplierAdmin()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"accepted\":true}"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
     void createOrder_withoutAuth_returns401() throws Exception {
         String body = objectMapper.writeValueAsString(
                 new com.paymentplatform.organization.application.dto.CreateOrderRequest(

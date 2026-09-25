@@ -19,3 +19,6 @@ app:
   gateway:
     base-url: ${API_GATEWAY_URL:http://api-gateway:8081}
   internal-secret: ${INTERNAL_SECRET:dev-internal-secret-change-me}
+  identity-service:
+    url: ${IDENTITY_SERVICE_URL:identity-service}
+    port: ${IDENTITY_SERVICE_PORT:8082}

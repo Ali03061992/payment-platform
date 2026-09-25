@@ -366,12 +366,12 @@
                 <select [(ngModel)]="receivedBy" name="receivedBy" class="form-control" required>
                   <option value="">-- Sélectionner --</option>
                   @for (agent of shopAgents; track agent.id) {
-                    <option [value]="agent.id">{{ agent.name }}</option>
+                    <option [value]="agent.id">{{ agent.name }}{{ isShopAdmin(agent) ? ' (admin boutique)' : '' }}</option>
                   }
                 </select>
               } @else {
                 <div class="info-box" style="background: #fff3e0; border: 1px solid #ff9800;">
-                  Aucun agent disponible pour cette boutique. Impossible de confirmer la livraison.
+                  Aucun destinataire disponible pour cette boutique (ni agent, ni admin). Impossible de confirmer la livraison.
                 </div>
               }
             </div>

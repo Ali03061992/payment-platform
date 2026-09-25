@@ -50,4 +50,14 @@ public class InternalUserController {
         }
         return ResponseEntity.ok(query.findByIdInternal(id));
     }
+
+    @GetMapping
+    public ResponseEntity<java.util.List<UserResponse>> listByOrganization(
+            @RequestHeader(value = "X-Internal-Token", required = false) String token,
+            @RequestParam UUID organizationId) {
+        if (!guard.isValid(token)) {
+            throw new UnauthorizedException("Secret interne invalide ou manquant");
+        }
+        return ResponseEntity.ok(query.listByOrganizationInternal(organizationId));
+    }
 }

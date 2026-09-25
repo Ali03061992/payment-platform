@@ -49,7 +49,7 @@ export class LayoutComponent implements OnInit, OnDestroy {
     { label: 'Commandes', icon: '🛒', route: 'supplier/orders', roles: ['SUPPLIER_ADMIN'] },
     { label: 'Finance', icon: '💰', route: 'supplier/financial', roles: ['SUPPLIER_ADMIN'] },
     { label: 'Balance', icon: '⚖️', route: 'supplier/balance', roles: ['SUPPLIER_ADMIN'] },
-    { label: 'Livraisons', icon: '🚚', route: 'supplier/deliveries', roles: ['SUPPLIER_AGENT'] },
+    { label: 'Livraisons', icon: '🚚', route: 'supplier/deliveries', roles: ['SUPPLIER_ADMIN', 'SUPPLIER_AGENT'] },
     { label: 'Mes commandes', icon: '🛒', route: 'shop/orders', roles: ['SHOP_ADMIN', 'SHOP_AGENT'] },
     { label: 'Nouvelle commande', icon: '➕', route: 'shop/orders/create', roles: ['SHOP_ADMIN'] },
     { label: 'Balance', icon: '⚖️', route: 'shop/balance', roles: ['SHOP_ADMIN'] },

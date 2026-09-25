@@ -43,6 +43,13 @@ public class UserQueryUseCase {
         return UserResponse.from(target);
     }
 
+    @Transactional(readOnly = true)
+    public List<UserResponse> listByOrganizationInternal(UUID organizationId) {
+        return users.findByOrganizationId(OrganizationId.of(organizationId)).stream()
+                .map(UserResponse::from)
+                .toList();
+    }
+
     /** B5 : taille de page plafonnée — aucune liste exposée ne charge plus de 100 lignes. */
     public static final int MAX_PAGE_SIZE = 100;
 

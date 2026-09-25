@@ -142,8 +142,8 @@ export class OrderService {
     });
   }
 
-  getShopAgents(shopId: string): Observable<{id: string, name: string}[]> {
-    return this.http.get<{id: string, name: string}[]>(`${this.apiUrl}/shop-agents?shopId=${shopId}`);
+  getShopAgents(shopId: string): Observable<{id: string, name: string, roles?: string}[]> {
+    return this.http.get<{id: string, name: string, roles?: string}[]>(`${this.apiUrl}/shop-agents?shopId=${shopId}`);
   }
 
   exportCsv(filters: { status?: string; dateFrom?: string; dateTo?: string }): void {
