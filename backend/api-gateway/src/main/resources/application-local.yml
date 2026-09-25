@@ -2,3 +2,7 @@ app:
   security:
     secret: ${JWT_SECRET:local-dev-jwt-secret-change-me-in-production-32bytes}
     expiration: ${JWT_EXPIRATION:30m}
+  gateway:
+    # Local/E2E : la suite Cypress fait ~70 logins depuis une seule IP.
+    # La prod garde le défaut strict (10/min).
+    rate-limit-auth-per-minute: ${RATE_LIMIT_AUTH_PER_MINUTE:1000}
