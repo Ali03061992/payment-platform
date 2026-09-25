@@ -96,9 +96,9 @@ ligne→détail paiements au clic Confirmer/Annuler.
 ### Phase 1 — Robustesse & cohérence (1 sem)
 - [x] M1 : refresh-token (rotation + révocation, table ou Redis) ; front : intercepteur de refresh silencieux.
 - [x] M2 : timeouts + retry + circuit-breaker sur `OrganizationValidationClient`, parsing JSON typé, distinguer 409/503.
-- [ ] M3 : soft-delete catalogue (`deletedAt` + filtre) + audit.
-- [ ] M4 : aligner `SHOP_MANAGER` (nav ou rôles) + pages 403/404 dédiées.
-- [ ] M5 : rattachement org obligatoire à l'inscription `SUPPLIER_ADMIN` (ou workflow de validation admin).
+- [x] M3 : soft-delete catalogue (`deletedAt` + filtre) + audit.
+- [x] M4 : aligner `SHOP_MANAGER` (nav ou rôles) + pages 403/404 dédiées.
+- [x] M5 : rattachement org obligatoire à l'inscription `SUPPLIER_ADMIN` (ou workflow de validation admin).
 - [x] M6 : PWA `networkFirst` sans cache > 5 min sur `/api/payments/**`, `/api/orders/**`.
 - [x] M7 : clés Firebase via variables d'environnement build, jamais committées.
 
