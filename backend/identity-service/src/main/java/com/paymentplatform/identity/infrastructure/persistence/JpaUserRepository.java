@@ -1,5 +1,6 @@
 package com.paymentplatform.identity.infrastructure.persistence;
 
+import com.paymentplatform.identity.domain.model.AuthProvider;
 import com.paymentplatform.identity.domain.model.User;
 import com.paymentplatform.identity.domain.model.UserStatus;
 import com.paymentplatform.identity.domain.repository.UserRepository;
@@ -108,6 +109,9 @@ public class JpaUserRepository implements UserRepository {
         e.setPhone(user.phone() == null ? null : user.phone().value());
         e.setOrganizationId(user.organizationId() == null ? null : user.organizationId().value());
         e.setStatus(user.status().name());
+        e.setAuthProvider(user.authProvider() == null ? AuthProvider.LOCAL.name() : user.authProvider().name());
+        e.setProviderSubject(user.providerSubject());
+        e.setEmailVerified(user.emailVerified());
         e.setCreatedAt(user.createdAt());
         e.setUpdatedAt(user.updatedAt());
         e.setRoles(EnumSet.copyOf(user.roles()));
@@ -116,6 +120,12 @@ public class JpaUserRepository implements UserRepository {
 
     private User toDomain(UserJpaEntity e) {
         Set<RoleCode> roles = e.getRoles() == null ? EnumSet.noneOf(RoleCode.class) : e.getRoles();
+        AuthProvider provider;
+        try {
+            provider = e.getAuthProvider() == null ? AuthProvider.LOCAL : AuthProvider.from(e.getAuthProvider());
+        } catch (IllegalArgumentException ex) {
+            provider = AuthProvider.LOCAL;
+        }
         return User.reconstruct(UserId.of(e.getId()),
                 new Username(e.getUsername()),
                 new Email(e.getEmail()),
@@ -126,6 +136,9 @@ public class JpaUserRepository implements UserRepository {
                 e.getOrganizationId() == null ? null : OrganizationId.of(e.getOrganizationId()),
                 UserStatus.valueOf(e.getStatus()),
                 roles,
+                provider,
+                e.getProviderSubject(),
+                Boolean.TRUE.equals(e.getEmailVerified()),
                 e.getVersion() == null ? 0 : e.getVersion(),
                 e.getCreatedAt(),
                 e.getUpdatedAt());

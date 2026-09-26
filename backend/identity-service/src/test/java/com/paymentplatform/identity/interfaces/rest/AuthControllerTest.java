@@ -1,6 +1,13 @@
 package com.paymentplatform.identity.interfaces.rest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.JWSHeader;
+import com.nimbusds.jose.crypto.RSASSASigner;
+import com.nimbusds.jose.jwk.RSAKey;
+import com.nimbusds.jose.jwk.gen.RSAKeyGenerator;
+import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.SignedJWT;
 import com.paymentplatform.identity.application.dto.LoginRequest;
 import com.paymentplatform.identity.domain.model.User;
 import com.paymentplatform.identity.domain.repository.UserRepository;
@@ -8,10 +15,13 @@ import com.paymentplatform.identity.domain.valueobject.Email;
 import com.paymentplatform.identity.domain.valueobject.PasswordHash;
 import com.paymentplatform.identity.domain.valueobject.PhoneNumber;
 import com.paymentplatform.identity.domain.valueobject.Username;
+import com.paymentplatform.identity.infrastructure.security.OidcProperties;
+import com.paymentplatform.identity.infrastructure.security.OidcTokenVerifier;
 import com.paymentplatform.shared.domain.model.OrganizationId;
 import com.paymentplatform.shared.domain.model.RoleCode;
 import com.paymentplatform.shared.domain.model.UserId;
 import jakarta.persistence.EntityManager;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -26,6 +36,8 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
+import java.time.Instant;
+import java.util.Date;
 import java.util.UUID;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -47,13 +59,17 @@ class AuthControllerTest {
     @Autowired private UserRepository users;
     @Autowired private PasswordEncoder passwordEncoder;
     @Autowired private EntityManager em;
+    @Autowired private OidcTokenVerifier oidcVerifier;
+    @Autowired private OidcProperties oidcProperties;
+
+    private RSAKey oauthKey;
 
     private MockMvc mockMvc;
     private String testUsername;
     private String testPassword = "Test@1";
 
     @BeforeEach
-    void setUp() {
+    void setUp() throws Exception {
         mockMvc = MockMvcBuilders.webAppContextSetup(wac)
                 .apply(SecurityMockMvcConfigurers.springSecurity())
                 .build();
@@ -65,6 +81,30 @@ class AuthControllerTest {
         users.save(user);
         em.flush();
         em.clear();
+        oauthKey = new RSAKeyGenerator(2048).keyID("auth-ctrl-test-key").generate();
+        oidcVerifier.registerTestKey("google", oauthKey.toPublicJWK());
+    }
+
+    @AfterEach
+    void clearOauthKeys() {
+        oidcVerifier.clearTestKeys();
+    }
+
+    private String googleIdToken(String email, boolean verified, String subject, String audience,
+                                 Instant expiresAt) throws Exception {
+        JWTClaimsSet claims = new JWTClaimsSet.Builder()
+                .issuer("https://accounts.google.com")
+                .audience(audience)
+                .expirationTime(Date.from(expiresAt))
+                .issueTime(new Date())
+                .subject(subject)
+                .claim("email", email)
+                .claim("email_verified", verified)
+                .build();
+        SignedJWT jwt = new SignedJWT(
+                new JWSHeader.Builder(JWSAlgorithm.RS256).keyID(oauthKey.getKeyID()).build(), claims);
+        jwt.sign(new RSASSASigner(oauthKey));
+        return jwt.serialize();
     }
 
     @Test
@@ -212,5 +252,71 @@ class AuthControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void oauth_validToken_returns200WithPair() throws Exception {
+        String email = testUsername + "@example.com";
+        String idToken = googleIdToken(email, true, "oauth-ctrl-sub-1",
+                oidcProperties.googleClientId(), Instant.now().plusSeconds(300));
+        mockMvc.perform(post("/api/auth/oauth")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"provider\":\"google\",\"idToken\":\"" + idToken + "\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.accessToken").isNotEmpty())
+                .andExpect(jsonPath("$.refreshToken").isNotEmpty())
+                .andExpect(jsonPath("$.user.email").value(email));
+    }
+
+    @Test
+    void oauth_badAudience_returns401() throws Exception {
+        String idToken = googleIdToken("oauth.bad@example.com", true, "sub-bad",
+                "wrong-audience", Instant.now().plusSeconds(300));
+        mockMvc.perform(post("/api/auth/oauth")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"provider\":\"google\",\"idToken\":\"" + idToken + "\"}"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void oauth_unverifiedEmail_returns401() throws Exception {
+        String idToken = googleIdToken("oauth.unver@example.com", false, "sub-unver",
+                oidcProperties.googleClientId(), Instant.now().plusSeconds(300));
+        mockMvc.perform(post("/api/auth/oauth")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"provider\":\"google\",\"idToken\":\"" + idToken + "\"}"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void oauth_unknownEmail_returns401WithoutCreating() throws Exception {
+        String fresh = "oauth.fresh." + System.nanoTime() + "@example.com";
+        String idToken = googleIdToken(fresh, true, "sub-fresh-" + System.nanoTime(),
+                oidcProperties.googleClientId(), Instant.now().plusSeconds(300));
+        // Pas de création automatique : l'email doit pré-exister.
+        mockMvc.perform(post("/api/auth/oauth")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"provider\":\"google\",\"idToken\":\"" + idToken + "\"}"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.message").value(org.hamcrest.Matchers.containsString("Aucun compte associé")));
+    }
+
+    @Test
+    void devLogin_existingUser_returns200WithPair() throws Exception {
+        mockMvc.perform(post("/api/auth/dev-login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"username\":\"" + testUsername + "\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.accessToken").isNotEmpty())
+                .andExpect(jsonPath("$.refreshToken").isNotEmpty())
+                .andExpect(jsonPath("$.user.username").value(testUsername));
+    }
+
+    @Test
+    void devLogin_unknownUser_returns404() throws Exception {
+        mockMvc.perform(post("/api/auth/dev-login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"username\":\"ghost." + System.nanoTime() + "\"}"))
+                .andExpect(status().isNotFound());
     }
 }

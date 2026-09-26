@@ -159,6 +159,23 @@ describe('JwtInterceptor', () => {
       });
     });
 
+    it('should not attempt refresh for oauth and dev-login calls', () => {
+      for (const url of ['/api/auth/oauth', '/api/auth/dev-login']) {
+        sessionStorage.setItem('token', 't');
+        sessionStorage.setItem('refreshToken', 'r');
+        const error = new HttpErrorResponse({ status: 401, statusText: 'Unauthorized' });
+        const req = new HttpRequest('POST', url, {});
+        next.handle.and.returnValue(throwError(() => error));
+        interceptor.intercept(req, next).subscribe({
+          error: (e) => {
+            expect(e.status).toBe(401);
+          }
+        });
+      }
+      expect(loginService.refresh).not.toHaveBeenCalled();
+      expect(router.navigate).not.toHaveBeenCalled();
+    });
+
     it('should return error as-is for 403', () => {
       const error = new HttpErrorResponse({ status: 403, statusText: 'Forbidden' });
       const req = new HttpRequest('GET', '/api/test');

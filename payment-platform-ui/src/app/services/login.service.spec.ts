@@ -78,6 +78,33 @@ describe('LoginService', () => {
     });
   });
 
+  describe('oauth', () => {
+    it('should POST idToken and store the pair', () => {
+      service.oauth('GOOGLE', 'id-token-abc').subscribe(res => {
+        expect(res.accessToken).toBe('jwt-new');
+        expect(sessionStorage.getItem('token')).toBe('jwt-new');
+        expect(sessionStorage.getItem('refreshToken')).toBe('ref-new');
+      });
+      const req = httpMock.expectOne('/api/auth/oauth');
+      expect(req.request.method).toBe('POST');
+      expect(req.request.body).toEqual({ provider: 'GOOGLE', idToken: 'id-token-abc' });
+      req.flush({ accessToken: 'jwt-new', refreshToken: 'ref-new' });
+    });
+  });
+
+  describe('devLogin', () => {
+    it('should POST username without password and store the pair', () => {
+      service.devLogin('system.admin').subscribe(res => {
+        expect(res.accessToken).toBe('jwt-dev');
+        expect(sessionStorage.getItem('token')).toBe('jwt-dev');
+      });
+      const req = httpMock.expectOne('/api/auth/dev-login');
+      expect(req.request.method).toBe('POST');
+      expect(req.request.body).toEqual({ username: 'system.admin' });
+      req.flush({ accessToken: 'jwt-dev', refreshToken: 'ref-dev' });
+    });
+  });
+
   describe('getMe', () => {
     it('should GET current user', () => {
       const mockUser: User = {

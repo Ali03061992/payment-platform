@@ -16,19 +16,34 @@ public class AuthController {
     private final UserQueryUseCase users;
     private final ChangePasswordUseCase changePassword;
     private final RefreshTokenService refreshTokens;
+    private final OAuthLoginUseCase oauthLogin;
+    private final DevLoginUseCase devLogin;
 
     public AuthController(AuthUseCase auth, RegisterUseCase register, UserQueryUseCase users,
-                          ChangePasswordUseCase changePassword, RefreshTokenService refreshTokens) {
+                          ChangePasswordUseCase changePassword, RefreshTokenService refreshTokens,
+                          OAuthLoginUseCase oauthLogin, DevLoginUseCase devLogin) {
         this.auth = auth;
         this.register = register;
         this.users = users;
         this.changePassword = changePassword;
         this.refreshTokens = refreshTokens;
+        this.oauthLogin = oauthLogin;
+        this.devLogin = devLogin;
     }
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
         return ResponseEntity.ok(auth.login(request));
+    }
+
+    @PostMapping("/oauth")
+    public ResponseEntity<LoginResponse> oauth(@Valid @RequestBody OAuthLoginRequest request) {
+        return ResponseEntity.ok(oauthLogin.login(request));
+    }
+
+    @PostMapping("/dev-login")
+    public ResponseEntity<LoginResponse> devLogin(@Valid @RequestBody DevLoginRequest request) {
+        return ResponseEntity.ok(devLogin.login(request));
     }
 
     @PostMapping("/refresh")

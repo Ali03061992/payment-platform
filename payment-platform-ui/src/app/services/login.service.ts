@@ -26,6 +26,35 @@ export class LoginService {
   }
 
   /**
+   * OAuth passwordless (Google/Microsoft) : échange l'ID token contre
+   * notre paire access+refresh. Stockage identique au login password.
+   */
+  oauth(provider: 'GOOGLE' | 'MICROSOFT', idToken: string): Observable<LoginResponse> {
+    return this.http.post<LoginResponse>(`${this.apiUrl}/oauth`, { provider, idToken }).pipe(
+      tap(res => {
+        sessionStorage.setItem('token', res.accessToken);
+        if (res.refreshToken) {
+          sessionStorage.setItem('refreshToken', res.refreshToken);
+        }
+      })
+    );
+  }
+
+  /**
+   * Dev-login sans password (local/dev uniquement, jamais en prod).
+   */
+  devLogin(username: string): Observable<LoginResponse> {
+    return this.http.post<LoginResponse>(`${this.apiUrl}/dev-login`, { username }).pipe(
+      tap(res => {
+        sessionStorage.setItem('token', res.accessToken);
+        if (res.refreshToken) {
+          sessionStorage.setItem('refreshToken', res.refreshToken);
+        }
+      })
+    );
+  }
+
+  /**
    * M1 : renouvellement silencieux (rotation côté serveur : le refreshToken
    * stocké est remplacé à chaque appel réussi).
    */

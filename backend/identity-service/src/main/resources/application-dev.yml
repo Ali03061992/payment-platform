@@ -30,6 +30,8 @@ app:
   gateway:
     base-url: ${API_GATEWAY_URL:http://api-gateway:8081}
   internal-secret: ${INTERNAL_SECRET:dev-internal-secret-change-me}
+  auth:
+    dev-login-enabled: ${DEV_LOGIN_ENABLED:true}
   mail:
     from: ${MAIL_FROM:noreply@payment-platform.local}
   frontend:

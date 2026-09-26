@@ -30,6 +30,9 @@ app:
   gateway:
     base-url: ${API_GATEWAY_URL}
   internal-secret: ${INTERNAL_SECRET}
+  auth:
+    # Dev-login INTERDIT en prod (garde anti-prod en plus dans le code).
+    dev-login-enabled: false
   mail:
     from: ${MAIL_FROM:noreply@payment-platform.local}
   frontend:

@@ -53,6 +53,8 @@ public class GatewaySecurityConfig {
                         // réellement publiques restent ouvertes.
                         .requestMatchers(
                                 "/api/auth/login",
+                                "/api/auth/oauth",
+                                "/api/auth/dev-login",
                                 "/api/auth/register",
                                 "/api/auth/refresh",
                                 "/api/auth/logout",

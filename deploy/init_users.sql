@@ -1,6 +1,6 @@
 -- Insert users (without role column)
 INSERT INTO users (id, username, email, password_hash, first_name, last_name, phone, organization_id, status, version, created_at, updated_at)
-VALUES (1, 'system.admin', 'admin@system.com', '$2a$12$9TeAQ3fusKYnemCXSAtwje7Gv5QeHcgapYuVqCrt84.aSPhxagXkq', 'System', 'Admin', '+21600000000', NULL, 'ACTIVE', 0, NOW(), NOW());
+VALUES (1, 'system.admin', 'ali.ben.amor.1992@hotmail.com', '$2a$12$9TeAQ3fusKYnemCXSAtwje7Gv5QeHcgapYuVqCrt84.aSPhxagXkq', 'System', 'Admin', '+21600000000', NULL, 'ACTIVE', 0, NOW(), NOW());
 
 INSERT INTO users (id, username, email, password_hash, first_name, last_name, phone, organization_id, status, version, created_at, updated_at)
 VALUES (2, 'covale.admin', 'admin@covale.com', '$2a$12$9TeAQ3fusKYnemCXSAtwje7Gv5QeHcgapYuVqCrt84.aSPhxagXkq', 'Covale', 'Admin', '+21611111111', '20000000-0000-0000-0000-000000000001', 'ACTIVE', 0, NOW(), NOW());

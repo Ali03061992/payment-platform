@@ -40,6 +40,15 @@ public class UserJpaEntity {
     @Column(nullable = false, length = 20)
     private String status;
 
+    @Column(name = "auth_provider", nullable = false, length = 20)
+    private String authProvider = "LOCAL";
+
+    @Column(name = "provider_subject", length = 255, unique = true)
+    private String providerSubject;
+
+    @Column(name = "email_verified", nullable = false)
+    private Boolean emailVerified = false;
+
     @Version
     private Long version;
 
@@ -128,6 +137,30 @@ public class UserJpaEntity {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public String getAuthProvider() {
+        return authProvider;
+    }
+
+    public void setAuthProvider(String authProvider) {
+        this.authProvider = authProvider;
+    }
+
+    public String getProviderSubject() {
+        return providerSubject;
+    }
+
+    public void setProviderSubject(String providerSubject) {
+        this.providerSubject = providerSubject;
+    }
+
+    public Boolean getEmailVerified() {
+        return emailVerified;
+    }
+
+    public void setEmailVerified(Boolean emailVerified) {
+        this.emailVerified = emailVerified;
     }
 
     public Long getVersion() {

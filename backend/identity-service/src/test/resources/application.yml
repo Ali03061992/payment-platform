@@ -37,6 +37,12 @@ spring:
     port: 1025
 
 app:
+  auth:
+    dev-login-enabled: true
+  oauth:
+    google-client-id: test-google-client-id
+    microsoft-client-id: test-microsoft-client-id
+    microsoft-tenant-id: test-tenant-id
   security:
     secret: test-secret-key-for-jwt-signing-minimum-32-bytes-long
     expiration: 30m

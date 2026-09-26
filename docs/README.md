@@ -21,6 +21,7 @@
 | [../payment-platform-ui/CYPRESS_E2E_GUIDE.md](../payment-platform-ui/CYPRESS_E2E_GUIDE.md) | Run E2E | À jour (specs 15-19, budget 1000, 246 `it(` statiques vs 244 verts annoncés) |
 | [deployment.md](deployment.md) | Compose/CI/vars/PWA/push | À jour (`RATE_LIMIT_*`, `INTERNAL_SECRET`, `FIREBASE_*`+envsubst, `api-financial` 5m) |
 | [../deploy/LOCAL_DEV.md](../deploy/LOCAL_DEV.md) | Run local détaillé | À jour (profil `local`, `.run/`, 4200/8081-8085, restart) |
+| [OAUTH_SETUP.md](OAUTH_SETUP.md) | OAuth/passwordless + mode dev | Setup humain consoles, vars (`IS_DEV`, client IDs), mapping `dev-login-enabled`, spec 20 |
 | [ddd.md](ddd.md) | DDD court | Canonique |
 | [business-rules.md](business-rules.md) | Règles métier | Canonique (+ statuts effectifs) |
 | [events.md](events.md) | Outbox/événements | Canonique |

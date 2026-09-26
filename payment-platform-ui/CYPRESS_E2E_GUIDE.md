@@ -30,6 +30,7 @@ cypress/
 │   ├── 17-pagination-aggregates.cy.ts   # B5 : enveloppes + supplier-summary SQL (deltas)
 │   ├── 18-asap-payment.cy.ts            # ASAP : 1 seul paiement auto (asap-<orderId>)
 │   └── 19-delivery-roles.cy.ts          # Livraison : admin fournisseur livre, SHOP_ADMIN destinataire (UI+API)
+│   └── 20-oauth-devmode.cy.ts           # OAuth dev-mode (skippée hors dev, cf. § Mode dev OAuth)
 ├── fixtures/
 │   └── users.json                       # Utilisateurs de test
 ├── support/
@@ -129,6 +130,25 @@ npm run cy:run:local     # Config locale (cypress.config.local.ts, baseUrl 4200)
 npm run e2e:local        # Idem
 ```
 
+### Mode dev OAuth / passwordless (spec 20, branche `feature/oauth-passwordless`)
+
+Sans flag, la spec `20-oauth-devmode.cy.ts` est **entièrement skippée**
+(`(isDev ? describe : describe.skip)`, 0 test) : la suite 01–19 reste verte.
+Avec `--env isDev=true`, `cy.login`/`apiLogin` basculent sur
+`POST /api/auth/dev-login {username}` (sans password, stockage token/user
+identique) ; `ensureTestUsers`/`getTestCtx` sont inchangés (setup password).
+Prérequis dev : stack profil local/dev + `IS_DEV=true` front et backend
+(détails : `docs/OAUTH_SETUP.md`).
+
+```powershell
+cd payment-platform-ui
+npx cypress run --env isDev=true --spec "cypress/e2e/20-oauth-devmode.cy.ts" --browser chrome --headless
+```
+
+Contrat front (agent parallèle) : panneau dev `[data-testid="dev-login-panel"]`
+sur `/login` quand `window.__env.IS_DEV === 'true'` (STRING, cf.
+`src/assets/env.js` / `env.template.js`).
+
 ### Budget rate-limit E2E (B2)
 
 La suite fait ~70 logins depuis une seule IP : `RATE_LIMIT_AUTH_PER_MINUTE=1000`
@@ -172,6 +192,7 @@ boucler 11× `POST $GW/api/auth/login` avec le défaut prod.
 | 17-pagination-aggregates | 3 | B5 enveloppes + summary SQL |
 | 18-asap-payment | 1 | ASAP auto-paiement unique |
 | 19-delivery-roles | 1 | Livraison multi-rôles |
+| 20-oauth-devmode | 3 (0 hors dev) | Dev-login token valide, 404 inconnu, panneau dev /login — **skippée sans `--env isDev=true`** |
 | **Total statique** | **246** | **19 specs** (contexte mission : 244/244 verts en run complet) |
 
 ## Résultats attendus
