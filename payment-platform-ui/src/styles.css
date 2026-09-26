@@ -121,12 +121,13 @@ body {
   overflow-x: hidden;
 }
 
-/* Filigrane global : logo de l'application en fond, subtil, non cliquable. */
+/* Filigrane global : logo de l'application en fond plein écran (bords rognés,
+   pas de couture visible), subtil, non cliquable. */
 body::before {
   content: "";
   position: fixed;
   inset: 0;
-  background: url("assets/icon-app.png") center / min(70vmin, 560px) no-repeat;
+  background: url("assets/icon-app.png") center / cover no-repeat;
   opacity: 0.05;
   pointer-events: none;
   z-index: 0;
@@ -1130,4 +1131,41 @@ html[data-theme="dark"] body .stock-bar-wrap {
 
 html[data-theme="dark"] body .card-qty {
   background-color: var(--bg-tertiary);
+}
+
+/* Vague 2 (constat screenshots dark) : surfaces restées blanches. */
+html[data-theme="dark"] body .tabs,
+html[data-theme="dark"] body .product-row,
+html[data-theme="dark"] body .detail-section,
+html[data-theme="dark"] body .anomaly-box {
+  background-color: var(--card-bg);
+  color: var(--text-primary);
+  border-color: var(--border-light);
+}
+
+html[data-theme="dark"] body .tab,
+html[data-theme="dark"] body .tab-btn {
+  color: var(--text-muted);
+}
+
+html[data-theme="dark"] body .tab.active,
+html[data-theme="dark"] body .tab-btn.active {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+html[data-theme="dark"] body .tab:hover:not(.active),
+html[data-theme="dark"] body .tab-btn:hover:not(.active) {
+  color: var(--text-primary);
+}
+
+/* Vague 2 : textes codés en dur restés sombres sur fond sombre. */
+html[data-theme="dark"] body .kpi-value,
+html[data-theme="dark"] body .matrix-label,
+html[data-theme="dark"] body .bar-label,
+html[data-theme="dark"] body .bar-value,
+html[data-theme="dark"] body .detail-row .val,
+html[data-theme="dark"] body .card h3,
+html[data-theme="dark"] body .detail-value {
+  color: var(--text-primary);
 }
