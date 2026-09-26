@@ -17,6 +17,7 @@
 | [security.md](security.md) | JWT/RBAC/rate-limit/secrets | À jour (B1/B2/B3/M1/M5) |
 | [database.md](database.md) | Schéma MySQL | À jour (**Liquibase**, pas Flyway ; V3/B1, V6/M1, V10/M3) |
 | [testing.md](testing.md) | Pyramide tests | À jour (Cypress 19 specs, Karma — plus de Jest/Playwright) |
+| [LOCAL_BUILD_TEST_SONAR.md](LOCAL_BUILD_TEST_SONAR.md) | **Rebuild + tests + Sonar en local, pas à pas** | Procédure vérifiée (mvnw ciblé, Karma, Cypress, scan-monorepo) |
 | [../payment-platform-ui/CYPRESS_E2E_GUIDE.md](../payment-platform-ui/CYPRESS_E2E_GUIDE.md) | Run E2E | À jour (specs 15-19, budget 1000, 246 `it(` statiques vs 244 verts annoncés) |
 | [deployment.md](deployment.md) | Compose/CI/vars/PWA/push | À jour (`RATE_LIMIT_*`, `INTERNAL_SECRET`, `FIREBASE_*`+envsubst, `api-financial` 5m) |
 | [../deploy/LOCAL_DEV.md](../deploy/LOCAL_DEV.md) | Run local détaillé | À jour (profil `local`, `.run/`, 4200/8081-8085, restart) |
