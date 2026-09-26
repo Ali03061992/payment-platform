@@ -99,7 +99,8 @@ describe('18 - ASAP: order -> delivery -> auto-payment', () => {
                       // 4. À la livraison : UN paiement auto créé.
                       cy.request({ method: 'GET', url: summaryUrl, headers: authSup }).then((after) => {
                         expect(after.status).to.eq(200);
-                        expect(after.body.pendingTotal - before.body.pendingTotal).to.eq(orderTotal);
+                        // closeTo : les totaux transitent en JSON (flottants).
+                        expect(after.body.pendingTotal - before.body.pendingTotal).to.be.closeTo(orderTotal, 0.01);
                         expect(after.body.pendingCount - before.body.pendingCount).to.eq(1);
                         // 5. accept-asap ne crée PAS de doublon (idempotence).
                         cy.request({
@@ -107,7 +108,7 @@ describe('18 - ASAP: order -> delivery -> auto-payment', () => {
                           headers: authShop, body: {},
                         }).then((r) => expect(r.body.status).to.eq('ACCEPTED'));
                         cy.request({ method: 'GET', url: summaryUrl, headers: authSup }).then((final) => {
-                          expect(final.body.pendingTotal - before.body.pendingTotal).to.eq(orderTotal);
+                          expect(final.body.pendingTotal - before.body.pendingTotal).to.be.closeTo(orderTotal, 0.01);
                           expect(final.body.pendingCount - before.body.pendingCount).to.eq(1);
                         });
                       });

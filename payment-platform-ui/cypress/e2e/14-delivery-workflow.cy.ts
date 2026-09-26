@@ -325,10 +325,10 @@ describe('14 - Delivery: Agent Delivery Management UI', () => {
 describe('14 - Delivery: Cross-role Access Control', () => {
   before(() => cy.ensureTestUsers());
 
-  it('supplier admin should NOT have Livraisons nav', () => {
+  it('supplier admin SHOULD have Livraisons nav (delivers too)', () => {
     cy.loginAsSupplierAdmin();
     cy.visit('/dashboard/supplier/orders');
-    cy.get('a.nav-item[href*="deliveries"]').should('not.exist');
+    cy.get('a.nav-item[href*="deliveries"]').should('exist');
   });
 
   it('delivery agent SHOULD have Livraisons nav', () => {

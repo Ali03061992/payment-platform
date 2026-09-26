@@ -121,6 +121,17 @@ body {
   overflow-x: hidden;
 }
 
+/* Filigrane global : logo de l'application en fond, subtil, non cliquable. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: url("assets/icon-app.png") center / min(70vmin, 560px) no-repeat;
+  opacity: 0.05;
+  pointer-events: none;
+  z-index: 0;
+}
+
 a { color: inherit; text-decoration: none; }
 
 /* ===========================
@@ -1019,6 +1030,10 @@ textarea {
     background: #fff !important;
     margin: 0;
     padding: 0;
+  }
+
+  body::before {
+    display: none;
   }
 }
 
