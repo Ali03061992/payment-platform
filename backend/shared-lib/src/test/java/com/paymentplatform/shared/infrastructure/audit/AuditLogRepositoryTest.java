@@ -9,6 +9,11 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+/**
+ * Tests de AuditLogRepositoryTest.
+ * Perimetre : persistance JPA AuditLogRepository (requetes derivees).
+ * Moyens : contexte SpringBootTest, profil "test" (H2).
+ */
 
 @SpringBootTest
 @ActiveProfiles("test")

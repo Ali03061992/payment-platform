@@ -10,6 +10,11 @@ import java.time.Instant;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+/**
+ * Tests de OutboxEventRepositoryTest.
+ * Perimetre : persistance JPA OutboxEventRepository (requetes derivees).
+ * Moyens : contexte SpringBootTest, profil "test" (H2).
+ */
 
 @SpringBootTest
 @ActiveProfiles("test")

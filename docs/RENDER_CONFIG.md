@@ -1,5 +1,9 @@
 # Render Config - payment-platform (srv-dag73th42hec73eh8qkg)
 
+> Snapshot daté (déploiement `Failed`, commit `ac72e61`) — historique, pas une référence
+> de déploiement. Référence à jour : [deployment.md](deployment.md) (+ `deploy/.env.example`).
+> Index : [README.md](README.md).
+
 Service actuellement déployé : **https://payment-platform-gsnx.onrender.com**
 Commit affiché : `ac72e61` | Status : `Failed` | Branch `main` Ali03061992/payment-platform
 

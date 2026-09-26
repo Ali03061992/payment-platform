@@ -1,11 +1,9 @@
 package com.paymentplatform.identity.infrastructure.http;
 
-import java.util.UUID;
-
-import com.paymentplatform.shared.domain.exception.NotFoundException;
-import com.paymentplatform.shared.domain.exception.UnprocessableEntityException;
 import com.paymentplatform.identity.application.port.OrganizationStatus;
 import com.paymentplatform.identity.application.port.OrganizationStatusPort;
+import com.paymentplatform.shared.domain.exception.NotFoundException;
+import com.paymentplatform.shared.domain.exception.UnprocessableEntityException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,6 +15,7 @@ import org.springframework.web.client.RestClientResponseException;
 
 import java.time.Instant;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**

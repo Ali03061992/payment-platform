@@ -18,6 +18,10 @@ import java.net.URI;
 import java.time.Instant;
 import java.util.*;
 
+/**
+ * API REST du catalogue fournisseur (catégories et familles de produits).
+ * Les suppressions sont logiques (soft-delete) pour préserver l'historique.
+ */
 @RestController
 @RequestMapping("/api/supplier/catalog")
 public class CatalogController {
@@ -36,6 +40,12 @@ public class CatalogController {
 
     // --- Categories ---
 
+    /**
+     * Liste les catégories actives d'un fournisseur (périmètre vérifié).
+     *
+     * @param supplierId fournisseur concerné
+     * @return catégories non supprimées
+     */
     @GetMapping("/categories")
     @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN','SYSTEM_ADMIN')")
     public ResponseEntity<List<ProductCategory>> listCategories(@RequestParam UUID supplierId) {
@@ -46,6 +56,12 @@ public class CatalogController {
         return ResponseEntity.ok(categoryRepository.findBySupplierIdAndDeletedAtIsNull(supplierId));
     }
 
+    /**
+     * Crée une catégorie (unicité du code parmi les lignes actives).
+     *
+     * @param request fournisseur, nom et code demandés
+     * @return catégorie créée (201) ou 400 si code déjà utilisé
+     */
     @PostMapping("/categories")
     @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN','SYSTEM_ADMIN')")
     public ResponseEntity<?> createCategory(
@@ -71,6 +87,12 @@ public class CatalogController {
         return ResponseEntity.created(URI.create("/api/supplier/catalog/categories/" + saved.getId())).body(saved);
     }
 
+    /**
+     * Supprime logiquement une catégorie (soft-delete horodaté et audité).
+     *
+     * @param id identifiant de la catégorie
+     * @return 204 si supprimée, 404 si absente ou déjà supprimée
+     */
     @DeleteMapping("/categories/{id}")
     @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN','SYSTEM_ADMIN')")
     public ResponseEntity<Void> deleteCategory(@PathVariable UUID id) {
@@ -90,6 +112,13 @@ public class CatalogController {
 
     // --- Families ---
 
+    /**
+     * Liste les familles par catégorie ou par fournisseur (périmètre vérifié).
+     *
+     * @param supplierId fournisseur filtré (optionnel)
+     * @param categoryId catégorie filtrée (optionnelle)
+     * @return familles actives correspondantes
+     */
     @GetMapping("/families")
     @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN','SYSTEM_ADMIN')")
     public ResponseEntity<List<ProductFamily>> listFamilies(
@@ -108,6 +137,12 @@ public class CatalogController {
         return ResponseEntity.badRequest().build();
     }
 
+    /**
+     * Crée une famille et la rattache aux catégories actives demandées.
+     *
+     * @param request fournisseur, nom, code et catégories demandés
+     * @return famille créée (201)
+     */
     @PostMapping("/families")
     @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN','SYSTEM_ADMIN')")
     public ResponseEntity<ProductFamily> createFamily(
@@ -133,6 +168,13 @@ public class CatalogController {
         return ResponseEntity.created(URI.create("/api/supplier/catalog/families/" + saved.getId())).body(saved);
     }
 
+    /**
+     * Met à jour une famille active et ses rattachements de catégories.
+     *
+     * @param id identifiant de la famille
+     * @param request nouvelles valeurs demandées
+     * @return famille mise à jour ou 404 si absente
+     */
     @PutMapping("/families/{id}")
     @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN','SYSTEM_ADMIN')")
     public ResponseEntity<ProductFamily> updateFamily(
@@ -155,6 +197,12 @@ public class CatalogController {
         }).orElse(ResponseEntity.notFound().build());
     }
 
+    /**
+     * Supprime logiquement une famille (soft-delete horodaté et audité).
+     *
+     * @param id identifiant de la famille
+     * @return 204 si supprimée, 404 si absente ou déjà supprimée
+     */
     @DeleteMapping("/families/{id}")
     @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN','SYSTEM_ADMIN')")
     public ResponseEntity<Void> deleteFamily(@PathVariable UUID id) {

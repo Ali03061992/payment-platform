@@ -1,5 +1,9 @@
 # Audit Complet de l'Application Payment Platform
 
+> Audit historique — antérieur aux phases 0/1 (ex. § rate-limit « config permissive »,
+> rôle SHOP_MANAGER encore listé). Référence d'acceptation à jour :
+> [COMPTE_RENDU_EXPERT.md](COMPTE_RENDU_EXPERT.md) (vérifié 25/09/2026). Index : [docs/README.md](docs/README.md).
+
 ## 1. Vue d'ensemble
 
 ### Architecture

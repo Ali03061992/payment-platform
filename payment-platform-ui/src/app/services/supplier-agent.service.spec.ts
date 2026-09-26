@@ -1,4 +1,9 @@
 // @ts-nocheck
+/**
+ * Tests du service SupplierAgentService.
+ * Perimetre : instanciation et blocs listAgents, createAgent, updateAgent, activateAgent, disableAgent (voir blocs describe/it).
+ * Moyens : HttpTestingController, TestBed, client HTTP de test.
+ */
 import { TestBed } from '@angular/core/testing';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { SupplierAgentService, SupplierAgent } from './supplier-agent.service';

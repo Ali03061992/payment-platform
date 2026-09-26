@@ -31,7 +31,32 @@ COPY --from=build /app/<service>/target/*.jar app.jar
 
 ## Configuration
 
-Tout par variables d'environnement (`SPRING_DATASOURCE_URL`, `SPRING_RABBITMQ_HOST`, `JWT_SECRET`, …). Un `.env.example` documente l'ensemble ; **aucun secret dans le repository**.
+Tout par variables d'environnement (`SPRING_DATASOURCE_URL`, `SPRING_RABBITMQ_HOST`, `JWT_SECRET`, …). Un `.env.example` documente l'ensemble (`deploy/.env.example`) ; **aucun secret dans le repository**.
+
+| Variable | Défaut / sens | Preuve |
+|---|---|---|
+| `RATE_LIMIT_PER_MINUTE` | 100 (bucket général gateway) | `deploy/.env.example:32`, `docker-compose.yml:213` |
+| `RATE_LIMIT_AUTH_PER_MINUTE` | **10** en prod/compose, **1000** en local/E2E/CI | `application.yml:21`, `application-local.yml:8`, `ci.yml:399`, `.run/5_API_Gateway` |
+| `INTERNAL_SECRET` | obligatoire au boot (fail-fast, sans défaut en prod) | `InternalSecretValidator.java`, `application-prod.yml` |
+| `FIREBASE_API_KEY`, `FIREBASE_AUTH_DOMAIN`, `FIREBASE_PROJECT_ID`, `FIREBASE_STORAGE_BUCKET`, `FIREBASE_MESSAGING_SENDER_ID`, `FIREBASE_APP_ID`, `FCM_VAPID_KEY` | vides = push désactivé proprement (M7) | `deploy/.env.example:41-47` |
+
+## Push Firebase/VAPID au déploiement (M7, front)
+
+Clés **runtime uniquement**, jamais committées (`src/assets/env.js` local = vide) :
+
+```bash
+envsubst < payment-platform-ui/src/assets/env.template.js \
+  > <dist>/browser/assets/env.js
+```
+
+Le SW (`firebase-messaging-sw.js`) et `environment.ts` lisent `window.__env`
+(`FIREBASE_*`, `FCM_VAPID_KEY`) ; sans clés, le push est désactivé proprement.
+
+## PWA dataGroups (M6)
+
+`ngsw-config.json` : groupe prioritaire **`api-financial`** (`/api/payments/**`,
+`/api/orders/**`, `freshness`, `maxAge: 5m`, `timeout: 5s`) devant `api-cache`
+(`/api/auth/me`, 1h) et `api-network` (`/api/**`, 24h) — aucun cache financier > 5 min.
 
 ## CI/CD (GitHub Actions, `.github/workflows/ci.yml`)
 
@@ -46,7 +71,7 @@ jobs:
     - npm ci && npm run lint && npm test && npm run build
   e2e:
     - docker compose -f deploy/docker-compose.yml up --build -d
-    - npx playwright test
+    - npx cypress run   # avec RATE_LIMIT_AUTH_PER_MINUTE=1000 + INTERNAL_SECRET=test-internal-secret (ci.yml:399-400)
   docker-build:
     - docker buildx build chaque image (dépend de backend+frontend)
 ```

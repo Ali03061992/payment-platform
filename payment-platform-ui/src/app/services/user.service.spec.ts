@@ -1,4 +1,9 @@
 // @ts-nocheck
+/**
+ * Tests du service UserService.
+ * Perimetre : instanciation et blocs list, getById, create, activate, disable (voir blocs describe/it).
+ * Moyens : HttpTestingController, TestBed, client HTTP de test.
+ */
 import { TestBed } from '@angular/core/testing';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { UserService } from './user.service';

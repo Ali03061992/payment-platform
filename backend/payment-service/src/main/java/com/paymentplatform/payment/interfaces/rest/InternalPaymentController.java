@@ -30,6 +30,14 @@ public class InternalPaymentController {
         this.guard = guard;
     }
 
+    /**
+     * Crée un paiement automatique ASAP pour une commande livrée (appel inter-services).
+     *
+     * @param token secret interne partagé
+     * @param actorUserId identifiant de l'utilisateur à l'origine de l'action
+     * @param request requête de création validée
+     * @return paiement créé (201)
+     */
     @PostMapping("/auto")
     public ResponseEntity<PaymentResponse> auto(
             @RequestHeader(value = "X-Internal-Token", required = false) String token,

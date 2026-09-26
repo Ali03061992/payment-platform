@@ -7,6 +7,11 @@ import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
+/**
+ * Tests de PermissionCatalogTest.
+ * Perimetre : regles metier de PermissionCatalog (invariants, transitions).
+ * Moyens : JUnit pur (AssertJ).
+ */
 
 class PermissionCatalogTest {
 

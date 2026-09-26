@@ -16,6 +16,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Cas d'usage de consultation des organisations (listes, détail, compteurs
+ * par type), enrichi des relations fournisseur-boutique.
+ */
 @Service
 public class OrganizationQueryUseCase {
 
@@ -31,6 +35,11 @@ public class OrganizationQueryUseCase {
         this.relations = relations;
     }
 
+    /**
+     * Liste toutes les organisations avec leurs relations.
+     *
+     * @return organisations enrichies
+     */
     @Transactional(readOnly = true)
     public List<OrganizationResponse> listAll() {
         return organizations.findAll().stream()
@@ -38,6 +47,14 @@ public class OrganizationQueryUseCase {
                 .toList();
     }
 
+    /**
+     * Liste paginée des organisations d'un type donné.
+     *
+     * @param type type demandé (SUPPLIER/SHOP)
+     * @param page index de page
+     * @param size taille de page plafonnée à 100
+     * @return page d'organisations enrichies
+     */
     @Transactional(readOnly = true)
     public PageResponse<OrganizationResponse> listByType(String type, int page, int size) {
         OrganizationType orgType = OrganizationType.from(type);
@@ -51,6 +68,12 @@ public class OrganizationQueryUseCase {
         return new PageResponse<>(items, result.totalElements(), totalPages, safePage);
     }
 
+    /**
+     * Recherche une organisation par identifiant avec ses relations.
+     *
+     * @param id identifiant de l'organisation
+     * @return organisation enrichie
+     */
     @Transactional(readOnly = true)
     public OrganizationResponse findById(UUID id) {
         Organization org = organizations.findById(OrganizationId.of(id))
@@ -58,11 +81,21 @@ public class OrganizationQueryUseCase {
         return OrganizationResponse.from(org, getRelations(org));
     }
 
+    /**
+     * Compte les organisations de type fournisseur.
+     *
+     * @return nombre de fournisseurs
+     */
     @Transactional(readOnly = true)
     public long countSuppliers() {
         return organizations.countByType(OrganizationType.SUPPLIER);
     }
 
+    /**
+     * Compte les organisations de type boutique.
+     *
+     * @return nombre de boutiques
+     */
     @Transactional(readOnly = true)
     public long countShops() {
         return organizations.countByType(OrganizationType.SHOP);

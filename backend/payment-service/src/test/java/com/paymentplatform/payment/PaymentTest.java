@@ -13,6 +13,11 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+/**
+ * Tests de PaymentTest.
+ * Perimetre : regles metier de Payment (invariants, transitions).
+ * Moyens : JUnit pur (AssertJ).
+ */
 
 class PaymentTest {
 

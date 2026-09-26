@@ -18,6 +18,11 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+/**
+ * Tests de OrderUseCaseH2Test.
+ * Perimetre : cas d'usage/service OrderUseCase sur base H2.
+ * Moyens : contexte SpringBootTest, profil "test" (H2).
+ */
 
 @SpringBootTest
 @ActiveProfiles("test")

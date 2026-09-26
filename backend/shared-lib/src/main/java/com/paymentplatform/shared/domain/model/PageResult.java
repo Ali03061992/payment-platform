@@ -9,6 +9,12 @@ import java.util.List;
  */
 public record PageResult<T>(List<T> items, long totalElements) {
 
+    /**
+     * Construit une page vide (aucun élément, total nul).
+     *
+     * @param <T> type des éléments
+     * @return page vide
+     */
     public static <T> PageResult<T> empty() {
         return new PageResult<>(List.of(), 0);
     }

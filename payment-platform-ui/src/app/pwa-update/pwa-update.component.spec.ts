@@ -1,4 +1,9 @@
 // @ts-nocheck
+/**
+ * Tests du composant PwaUpdateComponent.
+ * Perimetre : instanciation et blocs ngOnInit, dismiss, updateApp (voir blocs describe/it).
+ * Moyens : TestBed + fixture, stubs jasmine.
+ */
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { PwaUpdateComponent } from './pwa-update.component';
 import { SwUpdate, VersionReadyEvent } from '@angular/service-worker';

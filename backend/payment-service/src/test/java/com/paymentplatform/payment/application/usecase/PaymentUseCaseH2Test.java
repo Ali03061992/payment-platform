@@ -20,6 +20,11 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+/**
+ * Tests de PaymentUseCaseH2Test.
+ * Perimetre : cas d'usage/service PaymentUseCase sur base H2.
+ * Moyens : contexte SpringBootTest, profil "test" (H2).
+ */
 
 @SpringBootTest
 @ActiveProfiles("test")

@@ -1,12 +1,19 @@
 # Stratégie de tests
 
+> État vérifié 25/09/2026 : **19 specs Cypress** (`01..19`), **246 blocs `it(` comptés
+> statiquement** (contexte mission : 244/244 verts en run complet — écart de 2 à confirmer
+> par un run, aucun `it.skip/only` trouvé) ; **61 fichiers `*.spec.ts`** côté Karma
+> (chiffre « ~880+ tests » non reproductible statiquement, à confirmer par run `ng test`).
+> Configs : `cypress.config.ts` (baseUrl `http://localhost:4200`, apiUrl `http://localhost:8081`),
+> `cypress.config.local.ts` / `.dev.ts`.
+
 ## Pyramide
 
 ```
-        E2E (Playwright)          — parcours multi-rôles, docker compose complet
-      Front (Jest/Testing lib)    — composants, services, guards, interceptors
-    Integration (Testcontainers)  — MySQL 8.4 + RabbitMQ réels, JPA, outbox, SSE, sécurité
-  Unit (JUnit5/Mockito/AssertJ)   — domain services, use cases, VOs, machine à états
+         E2E (Cypress, 19 specs)       — parcours multi-rôles, docker compose complet + specs sécu B1/B2/B3/B5/ASAP/livraison
+       Front (Karma/Jasmine)           — composants, services, guards, interceptors (61 *.spec.ts)
+     Integration (Testcontainers)  — MySQL 8.4 + RabbitMQ réels, JPA, outbox, SSE, sécurité
+   Unit (JUnit5/Mockito/AssertJ)   — domain services, use cases, VOs, machine à états
 ```
 
 **Règle** : jamais de H2 pour simuler MySQL (divergences de SQL, verrous, DECIMAL). Les tests d'intégration utilisent **Testcontainers** (`mysql:8.4`, `rabbitmq:4-management`) via le module Spring Boot `@ServiceConnection`.
@@ -55,20 +62,39 @@
 - Test de sérialisation des événements (`eventType`, `eventVersion`, payload) entre `shared-lib` et chaque consommateur.
 - Test de bout en bout : outbox → RabbitMQ → consommateur (dédup).
 
-## Frontend (Jest)
+## Frontend (Karma/Jasmine — pas Jest)
 
-- Guards de routes par rôle ; interceptor JWT (ajout token, 401 → logout) ; services (auth, payments, notifications SSE) ; composants clés (formulaire paiement, liste, notification).
+- Guards de routes par rôle (+ redirect `/403` M4) ; `JwtInterceptor` (refresh silencieux single-flight M1, 401 → login) ; services (auth, payments avec `Idempotency-Key`, notifications SSE) ; composants clés.
+- Commandes : `npm test` / `npm run test:ci` (`ChromeHeadlessCI`), coverage via `TEST_COVERAGE_GUIDE.md`.
 
-## E2E (Playwright)
+## E2E (Cypress — pas Playwright)
 
-- `docker compose up` complet, puis : login SYSTEM_ADMIN → créer fournisseur → créer boutique → lier → login shop.agent → créer paiement → login supplier.agent → confirmer → vérifier notification temps réel.
+- `docker compose up` complet **ou** run local (`deploy/e2e-local.ps1`, `run-local.ps1` :
+  backend via `.run/ALL_SERVICES` profil `local` + `ng serve` port 4200), puis :
+  login SYSTEM_ADMIN → créer fournisseur → créer boutique → lier → login shop → créer paiement → login supplier → confirmer → vérifier notification temps réel.
+- **Budget rate-limit E2E** : la suite fait ~70 logins depuis une seule IP →
+  `RATE_LIMIT_AUTH_PER_MINUTE=1000` en CI (`ci.yml`) et en local (`application-local.yml`,
+  `.run/5_API_Gateway`) ; le 429 (10/min + `Retry-After: 60`) est prouvé par
+  `RateLimitFilterTest`, pas par hammering (spec 15 vérifie les headers `X-RateLimit-*`).
+
+| Spec | Sujet | Preuve |
+|---|---|---|
+| 15-rate-limit-auth | B2 câblage headers | 2 tests |
+| 16-gateway-security | B3 deny-by-default 401 JSON | 3 tests |
+| 17-pagination-aggregates | B5 enveloppes + summary SQL (deltas) | 3 tests |
+| 18-asap-payment | ASAP → 1 seul paiement auto (`asap-<orderId>`) | 1 test |
+| 19-delivery-roles | admin fournisseur livre, SHOP_ADMIN destinataire | 1 test UI+API |
 
 ## Exécution
 
 ```bash
 ./mvnw test                       # unit + intégration (Testcontainers nécessite Docker)
-npm test                          # frontend (Jest)
-npx playwright test               # e2e
+npm test                          # frontend Karma (pas Jest)
+npx cypress run --browser chrome --headless   # e2e (pas Playwright)
+# variantes locales : npm run cy:run:local / e2e:local (cypress.config.local.ts)
 ```
 
 CI (GitHub Actions) : `compile → unit → integration → security → frontend → e2e → docker build`. Échec ⇒ pipeline rouge.
+
+> Obsolète dans les versions précédentes de ce fichier : références à **Jest** et
+> **Playwright** (le repo utilise **Karma/Jasmine** et **Cypress**) — corrigé ci-dessus.

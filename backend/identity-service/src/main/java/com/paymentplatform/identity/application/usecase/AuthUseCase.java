@@ -40,6 +40,12 @@ public class AuthUseCase {
         this.audit = audit;
     }
 
+    /**
+     * Authentifie un utilisateur et émet le couple access/refresh tokens.
+     *
+     * @param request identifiants de connexion
+     * @return tokens et profil de l'utilisateur connecté
+     */
     @Transactional
     public LoginResponse login(LoginRequest request) {
         User user = users.findByUsername(Username.of(request.username()))

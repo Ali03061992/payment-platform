@@ -1,4 +1,9 @@
 // @ts-nocheck
+/**
+ * Tests du composant AppComponent.
+ * Perimetre : instanciation et comportements decrits dans les blocs it (voir blocs describe/it).
+ * Moyens : TestBed, stubs jasmine.
+ */
 import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { NO_ERRORS_SCHEMA } from '@angular/core';

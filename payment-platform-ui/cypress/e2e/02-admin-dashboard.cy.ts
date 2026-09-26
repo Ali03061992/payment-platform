@@ -1,3 +1,6 @@
+// Parcours 02-admin-dashboard.cy.ts : 02 - Admin Dashboard (8 scenarios).
+// Prerequis : services live (gateway + microservices + UI), utilisateurs seedes via cy.ensureTestUsers(), connexion admin via cy.loginAsAdmin(), UI live.
+// Budget E2E : pas de hammering auth (le 429 est prouve cote backend), nettoyages via before/beforeEach.
 describe('02 - Admin Dashboard', () => {
   before(() => cy.ensureTestUsers());
 

@@ -1,4 +1,9 @@
 // @ts-nocheck
+/**
+ * Tests du composant ForbiddenComponent.
+ * Perimetre : cas should display 403 content; should go to dashboard when logged in; should go to login when anonymous (voir blocs describe/it).
+ * Moyens : TestBed + fixture, stubs jasmine.
+ */
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { ForbiddenComponent } from './forbidden.component';

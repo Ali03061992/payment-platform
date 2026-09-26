@@ -41,7 +41,48 @@ Implémentation : `@PreAuthorize("hasAuthority('...')")` + garde de scope (`supp
 1. utilisateur existe ;
 2. `user.status = ACTIVE` **et** `organization.status = ACTIVE` (requête au Organization Service via Gateway) ;
 3. mot de passe vérifié (BCrypt) ;
-4. JWT émis avec `organizationId` et rôles.
+4. JWT émis avec `organizationId` et rôles **+ refresh token opaque émis** (M1, TTL 7 j, hash SHA-256 seul persisté).
+5. **M5** : un compte auto-inscrit naît `DISABLED` (`RegisterUseCase.java:78-82`) — login impossible avant validation admin (`PATCH /api/users/{id}/activate`).
+
+## Idempotence paiements (B1)
+
+`Idempotency-Key` persisté (`payments.idempotency_key`, index unique `V3__add_idempotency_key.sql`),
+vérifié dans `CreatePaymentUseCase` : double POST identique = 1 seul paiement.
+Front : clé générée par payload (`PaymentService.newIdempotencyKey`), réutilisée au retry.
+Paiement auto ASAP : clé `asap-<orderId>` portée par `POST /api/internal/payments/auto`.
+
+## Rate-limit auth strict (B2)
+
+`RateLimitFilter` : bucket **10/min/IP** sur `login/register/refresh/logout`
+(`RATE_LIMIT_AUTH_PER_MINUTE`, défaut 10 en prod/compose, **1000 en local/E2E** via
+`application-local.yml` et `.run/5_API_Gateway.run.xml` pour ne pas flaker la suite) ;
+bucket général 120/min conservé. Réponse 429 : `Retry-After: 60` + `X-RateLimit-*`.
+Preuve déterministe : `RateLimitFilterTest` (11e requête → 429) ; câblage prouvé en E2E
+par les headers (`15-rate-limit-auth.cy.ts` — pas de hammering en suite, ~70 logins/IP).
+
+## Gateway deny-by-default + secret interne (B3)
+
+- Plus de `"/api/**".permitAll()` : `GatewaySecurityConfig` n'ouvre que
+  `/api/auth/login|register|refresh|logout`, `/api/auth/password-setup/**`,
+  `/actuator/health|info`, swagger ; tout le reste `.authenticated()`.
+- `JwtValidationFilter` alimente le `SecurityContext` (JWT + permissions du
+  `PermissionCatalog`) ; sans JWT → **401 JSON unifié** (`Token d'authentification manquant`),
+  prouvé en E2E (`16-gateway-security.cy.ts`).
+- `internal/**` exige **JWT (gateway) + `X-Internal-Token` (service appelé)** —
+  défense en profondeur ; manquant OU invalide → 401 unifié (`UnauthorizedException`).
+- `INTERNAL_SECRET` **fail-fast au boot** (`InternalSecretValidator.requireValid`) :
+  défauts `dev-...` en local/dev uniquement, **aucun défaut en prod**
+  (`application-prod.yml: ${INTERNAL_SECRET}` sans fallback).
+
+## Refresh tokens (M1)
+
+Table `refresh_tokens` (V6, Liquibase) : `token_hash` (SHA-256, unique), `user_id`,
+`expires_at`, `revoked`, `replaced_by`. Rotation à chaque `POST /refresh`
+(ancien marqué `replaced_by`), révocation idempotente au `POST /logout`,
+révocation totale au changement de mot de passe / désactivation
+(`ChangePasswordUseCase`, `UserStatusUseCase`). Front : refresh silencieux
+**single-flight** dans `JwtInterceptor` (`refreshInFlight` + `shareReplay(1)`,
+URLs auth exclues anti-boucle).
 
 ## Contrôles à chaque requête (chaque service)
 
@@ -53,14 +94,15 @@ Implémentation : `@PreAuthorize("hasAuthority('...')")` + garde de scope (`supp
 | 4 | permission RBAC (`@PreAuthorize`) | 403 |
 | 5 | scope ressource (`organizationId` du token vs ressource demandée) | 403 |
 
-> Note revocation : à ce stade, un utilisateur désactivé est bloqué car le service re-vérifie le statut en base à chaque requête critique. La liste de révocation (déni) est une évolution documentée.
+> Note revocation : les refresh tokens sont révoqués en base (M1) ; côté access-JWT (30 min),
+> un utilisateur désactivé est bloqué car le service re-vérifie le statut en base à chaque requête critique.
 
 ## Sécurité applicative
 
 - Validation stricte des DTO (`spring-boot-starter-validation`) : email, regex username, longueurs, montant positif.
 - Pas de secrets dans le repo : `.env.example` + variables d'environnement ; `.gitignore` exclut `.env`.
 - Headers : `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, CSP de base ; CORS limité à l'origine Angular.
-- Rate limiting : filtre Gateway (bucket par IP + par utilisateur) — 120 req/min.
+- Rate limiting : `RateLimitFilter` — 120 req/min général, **10 req/min/IP sur auth** (B2) ; assoupli à 1000 en local/E2E (`RATE_LIMIT_AUTH_PER_MINUTE`).
 - Correlation ID : `X-Correlation-Id` généré au Gateway, propagé aux services et dans les logs (MDC).
 - JSON des erreurs sans stacktrace ; logs structurés sans données sensibles (jamais de passwordHash dans les logs).
 - Audit complet de toute action d'écriture (voir business-rules.md §8).

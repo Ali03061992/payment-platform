@@ -25,6 +25,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Filtre gateway validant le JWT (header Bearer, ou token en query pour le SSE)
+ * et alimentant le contexte Spring Security avec rôles et permissions.
+ */
 @Component
 @Order(2)
 public class JwtValidationFilter extends OncePerRequestFilter {

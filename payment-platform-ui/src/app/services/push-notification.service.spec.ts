@@ -1,4 +1,9 @@
 // @ts-nocheck
+/**
+ * Tests du service PushNotificationService.
+ * Perimetre : cas should be created without configured keys (push disabled); requestPermissionAndGetToken should resolve null when unconfigured; registerToken should POST the token (voir blocs describe/it).
+ * Moyens : HttpTestingController, TestBed, client HTTP de test.
+ */
 import { TestBed } from '@angular/core/testing';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';

@@ -1,4 +1,9 @@
 // @ts-nocheck
+/**
+ * Tests du garde AuthGuard.
+ * Perimetre : instanciation et blocs canActivate (voir blocs describe/it).
+ * Moyens : TestBed, stubs jasmine.
+ */
 import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { AuthGuard } from './auth.guard';

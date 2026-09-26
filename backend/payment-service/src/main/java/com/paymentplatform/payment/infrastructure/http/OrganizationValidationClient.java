@@ -82,6 +82,11 @@ public class OrganizationValidationClient {
         this.internalSecret = InternalSecretValidator.requireValid(internalSecret, environment);
     }
 
+    /**
+     * Vérifie qu'une organisation existe, est de type boutique et active.
+     *
+     * @param shopId identifiant de la boutique
+     */
     public void validateShop(UUID shopId) {
         JsonNode status = fetchOrganizationStatus(shopId);
         if (!"SHOP".equals(status.path("type").asText())) {
@@ -90,6 +95,11 @@ public class OrganizationValidationClient {
         assertActive(status, "La boutique " + shopId + " est désactivée");
     }
 
+    /**
+     * Vérifie qu'une organisation existe, est de type fournisseur et active.
+     *
+     * @param supplierId identifiant du fournisseur
+     */
     public void validateSupplier(UUID supplierId) {
         JsonNode status = fetchOrganizationStatus(supplierId);
         if (!"SUPPLIER".equals(status.path("type").asText())) {
@@ -117,6 +127,12 @@ public class OrganizationValidationClient {
         }
     }
 
+    /**
+     * Vérifie qu'une relation active lie la boutique au fournisseur.
+     *
+     * @param shopId identifiant de la boutique
+     * @param supplierId identifiant du fournisseur
+     */
     public void validateRelation(UUID shopId, UUID supplierId) {
         String url = "http://" + organizationServiceUrl + ":" + organizationServicePort
                 + "/api/organizations/internal/relations/supplier/" + supplierId;
@@ -144,6 +160,12 @@ public class OrganizationValidationClient {
                 + " et la boutique " + shopId);
     }
 
+    /**
+     * Résout le nom d'affichage d'une organisation (mise en cache).
+     *
+     * @param organizationId identifiant de l'organisation
+     * @return nom si l'appel interne réussit, vide sinon
+     */
     @Cacheable(value = "organizations", key = "#organizationId")
     public Optional<String> getOrganizationName(UUID organizationId) {
         String url = "http://" + organizationServiceUrl + ":" + organizationServicePort
@@ -162,6 +184,12 @@ public class OrganizationValidationClient {
         return Optional.empty();
     }
 
+    /**
+     * Résout le nom d'affichage d'un utilisateur (mise en cache).
+     *
+     * @param userId identifiant de l'utilisateur
+     * @return nom si l'appel interne réussit, vide sinon
+     */
     @Cacheable(value = "users", key = "#userId")
     public Optional<String> getUserName(UUID userId) {
         String url = "http://" + identityServiceUrl + ":" + identityServicePort + "/api/internal/users/" + userId;

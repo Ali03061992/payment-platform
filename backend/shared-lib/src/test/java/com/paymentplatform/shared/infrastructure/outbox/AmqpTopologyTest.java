@@ -4,6 +4,11 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+/**
+ * Tests de AmqpTopologyTest.
+ * Perimetre : infrastructure AmqpTopology (messagerie/config/persistance).
+ * Moyens : AMQP (mocks/config).
+ */
 
 class AmqpTopologyTest {
 

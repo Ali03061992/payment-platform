@@ -13,6 +13,11 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+/**
+ * Tests de OrganizationTest.
+ * Perimetre : regles metier de Organization (invariants, transitions).
+ * Moyens : JUnit pur (AssertJ).
+ */
 
 class OrganizationTest {
 

@@ -1,11 +1,15 @@
 import { Injectable } from '@angular/core';
 import { CanActivate, ActivatedRouteSnapshot, Router } from '@angular/router';
 
+/**
+ * Garde de rôles : exige le token, l'utilisateur en session et l'un des rôles de la route, sinon /403.
+ */
 @Injectable({ providedIn: 'root' })
 export class RoleGuard implements CanActivate {
 
   constructor(private router: Router) {}
 
+  /** Autorise la route si l'utilisateur possède l'un des rôles requis. */
   canActivate(route: ActivatedRouteSnapshot): boolean {
     const token = sessionStorage.getItem('token');
     if (!token) {

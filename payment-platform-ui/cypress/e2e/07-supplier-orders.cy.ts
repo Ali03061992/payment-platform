@@ -1,3 +1,6 @@
+// Parcours 07-supplier-orders.cy.ts : 07 - Supplier: Order Management; 07 - Supplier: Create Order; 07 - Supplier: Order Detail; 07 - Supplier: Delivery Management (20 scenarios).
+// Prerequis : services live (gateway + microservices + UI), utilisateurs seedes via cy.ensureTestUsers(), connexion fournisseur via cy.loginAsSupplierAdmin(), UI live.
+// Budget E2E : pas de hammering auth (le 429 est prouve cote backend), nettoyages via before/beforeEach.
 describe('07 - Supplier: Order Management', () => {
   before(() => cy.ensureTestUsers());
 

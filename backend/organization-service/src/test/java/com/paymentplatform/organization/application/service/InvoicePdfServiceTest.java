@@ -10,6 +10,11 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+/**
+ * Tests de InvoicePdfServiceTest.
+ * Perimetre : comportement de InvoicePdfService.
+ * Moyens : JUnit pur (AssertJ).
+ */
 
 class InvoicePdfServiceTest {
 

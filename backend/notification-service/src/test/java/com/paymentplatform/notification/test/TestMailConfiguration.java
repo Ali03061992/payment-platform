@@ -5,6 +5,11 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
+/**
+ * Tests de TestMailConfiguration.
+ * Perimetre : classe d'aide pour les tests (configuration/stub, pas de test direct).
+ * Moyens : JUnit pur (AssertJ).
+ */
 
 @Configuration
 @Profile("test")

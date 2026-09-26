@@ -1,4 +1,9 @@
 // @ts-nocheck
+/**
+ * Tests du service NotificationService.
+ * Perimetre : instanciation et blocs fetchNotifications, fetchUnreadCount, markAsRead, markAllAsRead, startPolling / stopPolling (voir blocs describe/it).
+ * Moyens : HttpTestingController, TestBed, client HTTP de test.
+ */
 import { TestBed } from '@angular/core/testing';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { NotificationService } from './notification.service';

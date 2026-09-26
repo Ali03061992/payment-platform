@@ -1,4 +1,9 @@
 // @ts-nocheck
+/**
+ * Tests du composant BalanceViewComponent.
+ * Perimetre : instanciation et blocs ngOnInit, getShopId (private), load, viewLedger, closeLedger (voir blocs describe/it).
+ * Moyens : TestBed + fixture, stubs jasmine, client HTTP de test, observables RxJS mockes.
+ */
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { of, throwError } from 'rxjs';

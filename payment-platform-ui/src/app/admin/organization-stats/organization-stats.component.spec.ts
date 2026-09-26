@@ -1,4 +1,9 @@
 // @ts-nocheck
+/**
+ * Tests du composant OrganizationStatsComponent.
+ * Perimetre : cas should load stats on init; should handle load error (voir blocs describe/it).
+ * Moyens : TestBed + fixture, stubs jasmine, client HTTP de test, observables RxJS mockes.
+ */
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { NO_ERRORS_SCHEMA } from '@angular/core';

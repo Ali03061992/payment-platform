@@ -5,6 +5,10 @@ import { catchError, finalize, map, shareReplay, switchMap } from 'rxjs/operator
 import { Router } from '@angular/router';
 import { LoginService } from '../services/login.service';
 
+/**
+ * Intercepteur JWT : joint le token aux requêtes et rejoue une fois après refresh silencieux sur 401.
+ * Les URLs d'auth sont exclues pour éviter toute boucle de renouvellement.
+ */
 @Injectable()
 export class JwtInterceptor implements HttpInterceptor {
 
@@ -26,6 +30,7 @@ export class JwtInterceptor implements HttpInterceptor {
   // LoginService via Injector (lazy) pour éviter le cycle HttpClient -> intercepteurs -> LoginService.
   constructor(private router: Router, private injector: Injector) {}
 
+  /** Intercepte la requête, joint le Bearer et gère le refresh unique sur 401. */
   intercept(req: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
     const token = sessionStorage.getItem('token');
     let authReq = req;

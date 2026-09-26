@@ -9,6 +9,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
 import static org.assertj.core.api.Assertions.assertThat;
+/**
+ * Tests de NotificationAmqpConfigTest.
+ * Perimetre : infrastructure NotificationAmqpConfig (messagerie/config/persistance).
+ * Moyens : contexte SpringBootTest, profil "test" (H2), AMQP (mocks/config).
+ */
 
 @SpringBootTest
 @ActiveProfiles("test")

@@ -5,6 +5,11 @@ import org.springframework.dao.DataIntegrityViolationException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
+/**
+ * Tests de EventDeduplicatorTest.
+ * Perimetre : infrastructure EventDeduplicator (messagerie/config/persistance).
+ * Moyens : mocks Mockito.
+ */
 
 class EventDeduplicatorTest {
 

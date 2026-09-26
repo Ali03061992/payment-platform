@@ -29,6 +29,13 @@ public class InternalUserController {
         this.guard = guard;
     }
 
+    /**
+     * Crée un utilisateur interne pour le compte d'un autre microservice.
+     *
+     * @param token secret interne partagé
+     * @param request données du compte à créer
+     * @return utilisateur créé (201)
+     */
     @PostMapping
     public ResponseEntity<UserResponse> create(
             @RequestHeader(value = "X-Internal-Token", required = false) String token,
@@ -40,6 +47,13 @@ public class InternalUserController {
         return ResponseEntity.status(201).body(useCase.createInternalUser(request));
     }
 
+    /**
+     * Récupère un utilisateur par identifiant pour un appel inter-services.
+     *
+     * @param token secret interne partagé
+     * @param id identifiant de l'utilisateur
+     * @return profil de l'utilisateur
+     */
     @GetMapping("/{id}")
     public ResponseEntity<UserResponse> getById(
             @RequestHeader(value = "X-Internal-Token", required = false) String token,
@@ -51,6 +65,13 @@ public class InternalUserController {
         return ResponseEntity.ok(query.findByIdInternal(id));
     }
 
+    /**
+     * Liste les utilisateurs d'une organisation pour un appel inter-services.
+     *
+     * @param token secret interne partagé
+     * @param organizationId organisation filtrée
+     * @return utilisateurs de l'organisation
+     */
     @GetMapping
     public ResponseEntity<java.util.List<UserResponse>> listByOrganization(
             @RequestHeader(value = "X-Internal-Token", required = false) String token,

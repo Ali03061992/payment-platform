@@ -1,5 +1,9 @@
 # Plan d'Ameliorations Techniques — Payment Platform
 
+> Plan historique — obsolète comme plan d'action : SEC-01 (gateway permitAll), secrets en dur,
+> rate-limit manquant sont soldés (B2/B3). Suivi à jour : [COMPTE_RENDU_EXPERT.md](COMPTE_RENDU_EXPERT.md).
+> Index : [docs/README.md](docs/README.md).
+
 > Document genere a partir de l'analyse complete du code source et de la specification fonctionnelle.
 > Concentre uniquement sur les problemes REELS identifies dans le code, avec des correctifs CONCRETS.
 

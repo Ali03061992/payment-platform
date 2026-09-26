@@ -15,6 +15,11 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
+/**
+ * Tests de OrganizationEventConsumerTest.
+ * Perimetre : infrastructure OrganizationEventConsumer (messagerie/config/persistance).
+ * Moyens : contexte SpringBootTest, profil "test" (H2), mocks Mockito.
+ */
 
 @SpringBootTest
 @ActiveProfiles("test")

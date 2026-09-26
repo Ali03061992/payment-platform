@@ -14,6 +14,10 @@ import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.util.UUID;
 
+/**
+ * Client HTTP vers l'identity-service (endpoints internes) pour résoudre
+ * les noms d'utilisateurs et lister ceux d'une organisation.
+ */
 @Component
 public class IdentityClient {
 
@@ -35,6 +39,12 @@ public class IdentityClient {
     @Value("${app.internal-secret}")
     private String internalSecret;
 
+    /**
+     * Résout le nom complet d'un utilisateur via l'endpoint interne.
+     *
+     * @param userId identifiant de l'utilisateur
+     * @return prénom + nom, ou nul si introuvable ou en panne
+     */
     public String resolveUserName(UUID userId) {
         if (userId == null) return null;
         try {
@@ -49,6 +59,12 @@ public class IdentityClient {
         }
     }
 
+    /**
+     * Récupère la fiche brute d'un utilisateur via l'endpoint interne.
+     *
+     * @param userId identifiant de l'utilisateur
+     * @return nœud JSON de l'utilisateur, ou nul si introuvable ou en panne
+     */
     public com.fasterxml.jackson.databind.JsonNode getUserById(UUID userId) {
         if (userId == null) return null;
         try {

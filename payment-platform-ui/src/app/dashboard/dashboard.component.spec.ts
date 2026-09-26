@@ -1,4 +1,9 @@
 // @ts-nocheck
+/**
+ * Tests du composant DashboardComponent.
+ * Perimetre : instanciation et blocs ngOnInit, getGreeting (voir blocs describe/it).
+ * Moyens : TestBed + fixture, stubs jasmine, client HTTP de test.
+ */
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { NO_ERRORS_SCHEMA } from '@angular/core';

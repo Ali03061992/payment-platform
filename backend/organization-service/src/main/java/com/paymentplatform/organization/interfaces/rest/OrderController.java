@@ -1,10 +1,6 @@
 package com.paymentplatform.organization.interfaces.rest;
 
-import com.paymentplatform.organization.application.dto.CreateOrderCommentRequest;
-import com.paymentplatform.organization.application.dto.CreateOrderRequest;
-import com.paymentplatform.organization.application.dto.OrderResponse;
-import com.paymentplatform.organization.application.dto.PageResponse;
-import com.paymentplatform.organization.application.dto.UpdateOrderRequest;
+import com.paymentplatform.organization.application.dto.*;
 import com.paymentplatform.organization.application.service.InvoicePdfService;
 import com.paymentplatform.organization.application.usecase.*;
 import com.paymentplatform.organization.domain.model.OrderComment;
@@ -15,19 +11,18 @@ import com.paymentplatform.organization.domain.repository.OrganizationRepository
 import com.paymentplatform.organization.domain.valueobject.OrganizationId;
 import com.paymentplatform.organization.infrastructure.http.IdentityClient;
 import com.paymentplatform.organization.infrastructure.http.PaymentClient;
-import com.paymentplatform.shared.infrastructure.outbox.OutboxEventStore;
 import com.paymentplatform.shared.domain.event.OrderEvents;
+import com.paymentplatform.shared.infrastructure.outbox.OutboxEventStore;
 import com.paymentplatform.shared.infrastructure.security.CurrentUser;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
-import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.http.HttpHeaders;
 
 import java.net.URI;
 import java.time.Instant;
@@ -37,6 +32,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+/**
+ * API REST des commandes (cycle de vie complet, livraisons, commentaires, exports).
+ * Filtre chaque lecture/écriture par le périmètre de l'utilisateur courant.
+ */
 @RestController
 @RequestMapping("/api/orders")
 public class OrderController {
@@ -148,6 +147,12 @@ public class OrderController {
                 resolveEventActor(events, "ORDER_DELIVERED"));
     }
 
+    /**
+     * Crée une commande (le rôle fournisseur/boutique est déduit de l'acteur).
+     *
+     * @param request lignes et contrepartie demandées
+     * @return commande créée (201)
+     */
     @PostMapping
     @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SHOP_ADMIN', 'SHOP_MANAGER')")
     public ResponseEntity<OrderResponse> createOrder(@Valid @RequestBody CreateOrderRequest request) {
@@ -157,6 +162,13 @@ public class OrderController {
         return ResponseEntity.created(URI.create("/api/orders/" + response.id())).body(response);
     }
 
+    /**
+     * Met à jour une commande existante (lignes, quantités).
+     *
+     * @param id identifiant de la commande
+     * @param request nouvelles valeurs demandées
+     * @return commande mise à jour
+     */
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SHOP_ADMIN', 'SHOP_MANAGER')")
     public ResponseEntity<OrderResponse> updateOrder(@PathVariable UUID id, @Valid @RequestBody UpdateOrderRequest request) {
@@ -165,6 +177,14 @@ public class OrderController {
         return ResponseEntity.ok(response);
     }
 
+    /**
+     * Liste paginée des commandes du périmètre courant, avec filtre de statut optionnel.
+     *
+     * @param status statut filtré (optionnel)
+     * @param page index de page
+     * @param size taille de page
+     * @return page de commandes enrichies
+     */
     @GetMapping
     @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_MANAGER', 'SYSTEM_ADMIN')")
     public ResponseEntity<PageResponse<OrderResponse>> listOrders(
@@ -196,6 +216,12 @@ public class OrderController {
         return ResponseEntity.ok(PageResponse.of(orderPage.map(this::buildOrderResponse)));
     }
 
+    /**
+     * Liste les livraisons (commandes avec livreur) visibles par l'acteur.
+     *
+     * @param agentId filtre par livreur (optionnel)
+     * @return livraisons correspondantes
+     */
     @GetMapping("/deliveries")
     @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_AGENT', 'SYSTEM_ADMIN')")
     public ResponseEntity<List<OrderResponse>> listDeliveries(
@@ -221,6 +247,12 @@ public class OrderController {
         return ResponseEntity.ok(responses);
     }
 
+    /**
+     * Liste les agents d'une boutique pour le sélecteur du destinataire de livraison.
+     *
+     * @param shopId boutique concernée
+     * @return identifiants, noms et rôles des utilisateurs de la boutique
+     */
     @GetMapping("/shop-agents")
     @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_AGENT', 'SYSTEM_ADMIN')")
     public ResponseEntity<List<Map<String, String>>> getShopAgents(@RequestParam UUID shopId) {
@@ -246,6 +278,12 @@ public class OrderController {
         return ResponseEntity.ok(agents);
     }
 
+    /**
+     * Liste les commandes les plus récentes du périmètre courant.
+     *
+     * @param limit nombre maximal de commandes retournées
+     * @return commandes triées par date décroissante
+     */
     @GetMapping("/recent")
     @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_MANAGER', 'SYSTEM_ADMIN')")
     public ResponseEntity<List<OrderResponse>> recentOrders(
@@ -268,6 +306,12 @@ public class OrderController {
         return ResponseEntity.ok(responses);
     }
 
+    /**
+     * Récupère une commande par identifiant, restreinte à son périmètre.
+     *
+     * @param id identifiant de la commande
+     * @return commande ou 403/404 selon périmètre et existence
+     */
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_MANAGER', 'SYSTEM_ADMIN')")
     public ResponseEntity<OrderResponse> getOrder(@PathVariable UUID id) {
@@ -285,6 +329,14 @@ public class OrderController {
         return ResponseEntity.ok(buildOrderResponse(o));
     }
 
+    /**
+     * Recherche paginée des commandes du périmètre courant par mot-clé.
+     *
+     * @param q texte recherché (référence, produit)
+     * @param page index de page
+     * @param size taille de page
+     * @return page de commandes correspondantes
+     */
     @GetMapping("/search")
     @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_MANAGER', 'SYSTEM_ADMIN')")
     public ResponseEntity<PageResponse<OrderResponse>> searchOrders(
@@ -306,6 +358,12 @@ public class OrderController {
         return ResponseEntity.ok(PageResponse.of(orderPage.map(this::buildOrderResponse)));
     }
 
+    /**
+     * Récupère une commande par référence métier, restreinte à son périmètre.
+     *
+     * @param reference référence de la commande
+     * @return commande ou 403/404 selon périmètre et existence
+     */
     @GetMapping("/reference/{reference}")
     @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_MANAGER', 'SYSTEM_ADMIN')")
     public ResponseEntity<OrderResponse> getOrderByReference(@PathVariable String reference) {
@@ -323,6 +381,12 @@ public class OrderController {
         return ResponseEntity.ok(buildOrderResponse(o));
     }
 
+    /**
+     * Confirme une commande (action fournisseur).
+     *
+     * @param id identifiant de la commande
+     * @return commande confirmée
+     */
     @PostMapping("/{id}/confirm")
     @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN')")
     public ResponseEntity<OrderResponse> confirmOrder(@PathVariable UUID id) {
@@ -330,6 +394,12 @@ public class OrderController {
         return ResponseEntity.ok(confirmOrder.execute(id, current.userId()));
     }
 
+    /**
+     * Passe une commande en préparation (action fournisseur).
+     *
+     * @param id identifiant de la commande
+     * @return commande en préparation
+     */
     @PostMapping("/{id}/prepare")
     @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN')")
     public ResponseEntity<OrderResponse> prepareOrder(@PathVariable UUID id) {
@@ -337,6 +407,12 @@ public class OrderController {
         return ResponseEntity.ok(prepareOrder.execute(id, current.userId()));
     }
 
+    /**
+     * Marque une commande prête pour la livraison (action fournisseur).
+     *
+     * @param id identifiant de la commande
+     * @return commande prête à être livrée
+     */
     @PostMapping("/{id}/ready")
     @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN')")
     public ResponseEntity<OrderResponse> readyForDelivery(@PathVariable UUID id) {
@@ -344,6 +420,13 @@ public class OrderController {
         return ResponseEntity.ok(prepareOrder.readyForDelivery(id, current.userId()));
     }
 
+    /**
+     * Assigne un livreur à une commande, avec date de livraison prévisionnelle optionnelle.
+     *
+     * @param id identifiant de la commande
+     * @param body contient agentId et plannedDeliveryDate éventuelle
+     * @return commande mise à jour
+     */
     @PostMapping("/{id}/assign-delivery")
     @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN')")
     public ResponseEntity<OrderResponse> assignDeliveryAgent(
@@ -363,6 +446,13 @@ public class OrderController {
         return ResponseEntity.ok(buildOrderResponse(order.get()));
     }
 
+    /**
+     * Accepte ou refuse une livraison assignée (action du livreur).
+     *
+     * @param id identifiant de la commande
+     * @param body contient accepted et reason éventuel
+     * @return commande mise à jour
+     */
     @PostMapping("/{id}/accept-delivery")
     @PreAuthorize("hasAnyAuthority('SUPPLIER_AGENT', 'SUPPLIER_ADMIN')")
     public ResponseEntity<OrderResponse> acceptDelivery(
@@ -374,6 +464,13 @@ public class OrderController {
         return ResponseEntity.ok(acceptDeliveryUseCase.execute(id, accepted, reason, current.userId()));
     }
 
+    /**
+     * Confirme la date de livraison d'une commande (action du livreur).
+     *
+     * @param id identifiant de la commande
+     * @param body contient confirmedDate
+     * @return commande mise à jour
+     */
     @PostMapping("/{id}/confirm-delivery")
     @PreAuthorize("hasAnyAuthority('SUPPLIER_AGENT', 'SUPPLIER_ADMIN')")
     public ResponseEntity<OrderResponse> confirmDelivery(
@@ -384,6 +481,13 @@ public class OrderController {
         return ResponseEntity.ok(confirmDeliveryUseCase.execute(id, confirmedDate, current.userId()));
     }
 
+    /**
+     * Déclare une commande livrée à son destinataire (déclenche le paiement ASAP si requis).
+     *
+     * @param id identifiant de la commande
+     * @param body contient receivedBy (destinataire)
+     * @return commande livrée
+     */
     @PostMapping("/{id}/deliver")
     @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SUPPLIER_AGENT')")
     public ResponseEntity<OrderResponse> deliverOrder(
@@ -393,6 +497,12 @@ public class OrderController {
         return ResponseEntity.ok(deliverOrder.execute(id, body.get("receivedBy"), current.userId()));
     }
 
+    /**
+     * Accepte une commande livrée (action boutique).
+     *
+     * @param id identifiant de la commande
+     * @return commande acceptée
+     */
     @PostMapping("/{id}/accept")
     @PreAuthorize("hasAnyAuthority('SHOP_MANAGER', 'SHOP_ADMIN')")
     public ResponseEntity<OrderResponse> acceptOrder(@PathVariable UUID id) {
@@ -400,6 +510,12 @@ public class OrderController {
         return ResponseEntity.ok(acceptOrder.execute(id, current.userId()));
     }
 
+    /**
+     * Accepte une commande ASAP et déclenche son paiement automatique si requis.
+     *
+     * @param id identifiant de la commande
+     * @return commande acceptée
+     */
     @PostMapping("/{id}/accept-asap")
     @PreAuthorize("hasAnyAuthority('SHOP_MANAGER', 'SHOP_ADMIN')")
     public ResponseEntity<OrderResponse> acceptAsapOrder(@PathVariable UUID id) {
@@ -412,6 +528,12 @@ public class OrderController {
         return ResponseEntity.ok(response);
     }
 
+    /**
+     * Annule une commande (boutique ou fournisseur selon droits).
+     *
+     * @param id identifiant de la commande
+     * @return commande annulée
+     */
     @PostMapping("/{id}/cancel")
     @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SHOP_ADMIN', 'SHOP_MANAGER')")
     public ResponseEntity<OrderResponse> cancelOrder(@PathVariable UUID id) {
@@ -419,6 +541,12 @@ public class OrderController {
         return ResponseEntity.ok(cancelOrder.execute(id, current.userId()));
     }
 
+    /**
+     * Recrée une commande à l'identique à partir d'une commande existante (action boutique).
+     *
+     * @param id identifiant de la commande source
+     * @return nouvelle commande créée
+     */
     @PostMapping("/{id}/reorder")
     @PreAuthorize("hasAnyAuthority('SHOP_ADMIN', 'SHOP_MANAGER')")
     public ResponseEntity<OrderResponse> reorder(@PathVariable UUID id) {
@@ -427,6 +555,13 @@ public class OrderController {
         return ResponseEntity.ok(reorderUseCase.execute(id, current.userId(), role));
     }
 
+    /**
+     * Rejette une commande livrée avec motif de retour éventuel (action boutique).
+     *
+     * @param id identifiant de la commande
+     * @param body contient returnReason (optionnel)
+     * @return commande rejetée
+     */
     @PostMapping("/{id}/reject")
     @PreAuthorize("hasAnyAuthority('SHOP_MANAGER', 'SHOP_ADMIN')")
     public ResponseEntity<OrderResponse> rejectOrder(
@@ -437,6 +572,13 @@ public class OrderController {
         return ResponseEntity.ok(rejectOrder.execute(id, current.userId(), returnReason));
     }
 
+    /**
+     * Rejette une livraison côté fournisseur avec motif éventuel.
+     *
+     * @param id identifiant de la commande
+     * @param body contient reason (optionnel)
+     * @return commande mise à jour
+     */
     @PostMapping("/{id}/delivery-reject")
     @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SUPPLIER_AGENT')")
     public ResponseEntity<OrderResponse> deliveryRejectOrder(
@@ -447,6 +589,13 @@ public class OrderController {
         return ResponseEntity.ok(deliveryRejectOrder.execute(id, current.userId(), reason));
     }
 
+    /**
+     * Met à jour la position GPS du livreur assigné à la commande.
+     *
+     * @param id identifiant de la commande
+     * @param body contient latitude, longitude et estimatedArrival éventuelle
+     * @return commande mise à jour ou 403 si non assignée à l'acteur
+     */
     @PostMapping("/{id}/location")
     @PreAuthorize("hasAnyAuthority('SUPPLIER_AGENT')")
     public ResponseEntity<OrderResponse> updateLocation(
@@ -469,6 +618,11 @@ public class OrderController {
         return ResponseEntity.ok(buildOrderResponse(o));
     }
 
+    /**
+     * Liste les livraisons de l'acteur (admin : périmètre fournisseur, agent : assignées).
+     *
+     * @return livraisons visibles par l'acteur
+     */
     @GetMapping("/my-deliveries")
     @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SUPPLIER_AGENT')")
     public ResponseEntity<List<OrderResponse>> myDeliveries() {
@@ -488,6 +642,13 @@ public class OrderController {
         return ResponseEntity.ok(responses);
     }
 
+    /**
+     * Ajoute un commentaire à une commande et publie l'événement associé en outbox.
+     *
+     * @param id identifiant de la commande
+     * @param request contenu du commentaire
+     * @return commentaire créé (201)
+     */
     @PostMapping("/{id}/comments")
     @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_MANAGER', 'SYSTEM_ADMIN')")
     public ResponseEntity<OrderComment> addComment(
@@ -523,6 +684,12 @@ public class OrderController {
                 .body(saved);
     }
 
+    /**
+     * Liste les commentaires d'une commande, restreints à son périmètre.
+     *
+     * @param id identifiant de la commande
+     * @return commentaires triés par date croissante
+     */
     @GetMapping("/{id}/comments")
     @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_MANAGER', 'SYSTEM_ADMIN')")
     public ResponseEntity<List<OrderComment>> listComments(@PathVariable UUID id) {
@@ -541,6 +708,14 @@ public class OrderController {
         return ResponseEntity.ok(comments);
     }
 
+    /**
+     * Exporte les commandes du périmètre courant en CSV (filtres optionnels).
+     *
+     * @param status statut filtré (optionnel)
+     * @param dateFrom début de période (optionnel)
+     * @param dateTo fin de période (optionnelle)
+     * @param response réponse HTTP recevant le fichier CSV
+     */
     @GetMapping("/export/csv")
     @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_MANAGER', 'SYSTEM_ADMIN')")
     public void exportCsv(
@@ -578,6 +753,12 @@ public class OrderController {
         response.getWriter().flush();
     }
 
+    /**
+     * Télécharge la facture PDF d'une commande livrée ou acceptée, restreinte à son périmètre.
+     *
+     * @param id identifiant de la commande
+     * @param response réponse HTTP recevant le PDF
+     */
     @GetMapping("/{id}/invoice")
     @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_MANAGER', 'SYSTEM_ADMIN')")
     public void downloadInvoice(@PathVariable UUID id, HttpServletResponse response) throws Exception {

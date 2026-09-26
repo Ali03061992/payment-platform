@@ -5,6 +5,10 @@ import { OrganizationService } from '../../services/organization.service';
 import { Organization } from '../../models/organization.model';
 import { ToastService } from '../../services/toast.service';
 
+/**
+ * Formulaire de création d'un paiement boutique → fournisseur.
+ * Gère la clé d'idempotence par intention (réutilisée sur retry, régénérée si le panier change).
+ */
 @Component({
     selector: 'app-create-payment',
     templateUrl: './create-payment.component.html',
@@ -29,6 +33,7 @@ export class CreatePaymentComponent implements OnInit {
     private toast: ToastService
   ) {}
 
+  /** Pré-remplit boutique/fournisseurs selon le rôle (boutique ou admin). */
   ngOnInit(): void {
     const userJson = sessionStorage.getItem('user');
     if (userJson) {
@@ -61,6 +66,7 @@ export class CreatePaymentComponent implements OnInit {
     });
   }
 
+  /** Crée le paiement saisi (anti double-clic, idempotence par intention). */
   create(): void {
     if (this.creating) return;
     if (!this.shopId || !this.supplierId || this.amount < 0.01 || this.amount > 999999.99) return;

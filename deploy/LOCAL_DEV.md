@@ -139,6 +139,36 @@ All backend services expose health and info endpoints:
 
 ---
 
+## Développement local IDE (profil `local`, vérifié 25/09/2026)
+
+Run sans Docker complet : dépendances en conteneurs + code depuis l'IDE + front `ng serve`.
+
+```bash
+cd deploy
+docker compose -f docker-compose.dev.yml up -d     # MySQL 3307, RabbitMQ 5673/15673, Redis 6379
+docker compose -f docker-compose.dev.yml ps        # tout doit être healthy
+```
+
+Puis dans IntelliJ : configs `.run/` **profil `local`** (`-Dspring.profiles.active=local`) —
+`1_Identity_Service` (8082), `2_Organization_Service` (8083), `3_Payment_Service` (8084),
+`4_Notification_Service` (8085), `5_API_Gateway` (8081) ou `ALL_SERVICES`.
+Front : `cd payment-platform-ui && npm run start:local` → `ng serve --port 4200`
+(http://localhost:4200, apiUrl http://localhost:8081 — cf. `cypress.config.ts`,
+`deploy/run-local.ps1`, `deploy/e2e-local.ps1`).
+
+| Port | Service (local IDE) |
+|---|---|
+| 4200 | Angular `ng serve` (dev) — 8080 = nginx docker seulement |
+| 8081 | API Gateway |
+| 8082 / 8083 / 8084 / 8085 | Identity / Organization / Payment / Notification |
+
+Env local : `RATE_LIMIT_AUTH_PER_MINUTE=1000` (`application-local.yml`, `.run/5_API_Gateway`)
+pour ne pas flaker les ~70 logins E2E ; prod = 10.
+Rebuild ciblé : `./mvnw -pl backend/<service> -am package -DskipTests`
+ou `docker compose up --build -d <service>` ; restart simple : `docker compose restart <service>`.
+
+---
+
 ## Quick Start
 
 ```bash
@@ -213,6 +243,9 @@ Defined in `deploy/.env`:
 | `RABBITMQ_USER` | `payment` | RabbitMQ user |
 | `RABBITMQ_PASSWORD` | `rabbit-password-change-me` | RabbitMQ password |
 | `SPRING_PROFILES_ACTIVE` | `local` | Active Spring profile |
+| `RATE_LIMIT_AUTH_PER_MINUTE` | `10` (prod/compose) / `1000` (local/E2E/CI) | Bucket strict auth B2 (10/min/IP + `Retry-After: 60`) |
+| `INTERNAL_SECRET` | obligatoire (fail-fast B3, sans défaut en prod) | JWT gateway + `X-Internal-Token` inter-services |
+| `FIREBASE_API_KEY`, `FIREBASE_AUTH_DOMAIN`, `FIREBASE_PROJECT_ID`, `FIREBASE_STORAGE_BUCKET`, `FIREBASE_MESSAGING_SENDER_ID`, `FIREBASE_APP_ID`, `FCM_VAPID_KEY` | vides = push désactivé (M7) | Injectées via `envsubst` → `assets/env.js` (jamais committées) |
 
 ---
 

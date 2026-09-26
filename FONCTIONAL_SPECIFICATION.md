@@ -1,5 +1,10 @@
 # Specification Fonctionnelle & Axes d'Amelioration
 
+> Backlog historique — antérieur aux phases 0/1 (ex. `SHOP_MANAGER` dans les matrices,
+> refresh/révocation listés comme manquants §4.6 alors que M1 est implémenté).
+> État réel : [COMPTE_RENDU_EXPERT.md](COMPTE_RENDU_EXPERT.md) (§2-§5).
+> Index : [docs/README.md](docs/README.md).
+
 ## Payment Platform — B2B Payment Management System
 
 ---

@@ -1,3 +1,6 @@
+// Parcours 10-notifications.cy.ts : 10 - Notifications: UI; 10 - Notifications: API (13 scenarios).
+// Prerequis : services live (gateway + microservices + UI), utilisateurs seedes via cy.ensureTestUsers(), connexion admin via cy.loginAsAdmin(), API live (Cypress.env apiUrl), UI live.
+// Budget E2E : pas de hammering auth (le 429 est prouve cote backend), nettoyages via before/beforeEach.
 function isPage(body: any): boolean {
   return body && typeof body === 'object' && !Array.isArray(body) && 'items' in body;
 }

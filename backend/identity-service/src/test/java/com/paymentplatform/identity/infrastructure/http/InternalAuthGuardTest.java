@@ -6,6 +6,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
 import static org.assertj.core.api.Assertions.assertThat;
+/**
+ * Tests de InternalAuthGuardTest.
+ * Perimetre : filtre/securite InternalAuthGuard.
+ * Moyens : contexte SpringBootTest, profil "test" (H2).
+ */
 
 @SpringBootTest
 @ActiveProfiles("test")

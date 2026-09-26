@@ -1,5 +1,9 @@
 # Architecture
 
+> Complément — partiellement obsolète. Voir l'index [docs/README.md](README.md) :
+> référence détaillée [COMPLETE_ARCHITECTURE.md](COMPLETE_ARCHITECTURE.md) (avec ses propres
+> passages datés), démarrage local `deploy/LOCAL_DEV.md`, sécurité `security.md` (B1/B2/B3/M1/M5).
+
 ## Vue globale
 
 ```

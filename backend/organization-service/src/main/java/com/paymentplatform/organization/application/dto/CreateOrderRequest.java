@@ -1,11 +1,7 @@
 package com.paymentplatform.organization.application.dto;
 
 import com.paymentplatform.organization.domain.model.PaymentTerms;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.*;
 
 import java.math.BigDecimal;
 import java.util.List;

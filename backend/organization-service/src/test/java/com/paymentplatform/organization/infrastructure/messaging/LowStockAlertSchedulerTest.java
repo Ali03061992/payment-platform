@@ -14,6 +14,11 @@ import java.math.BigDecimal;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+/**
+ * Tests de LowStockAlertSchedulerTest.
+ * Perimetre : infrastructure LowStockAlertScheduler (messagerie/config/persistance).
+ * Moyens : contexte SpringBootTest, profil "test" (H2).
+ */
 
 @SpringBootTest
 @ActiveProfiles("test")

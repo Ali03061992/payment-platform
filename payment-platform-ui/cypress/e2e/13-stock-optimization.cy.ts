@@ -1,3 +1,6 @@
+// Parcours 13-stock-optimization.cy.ts : 13 - Supplier: Stock Optimization (20 scenarios).
+// Prerequis : services live (gateway + microservices + UI), utilisateurs seedes via cy.ensureTestUsers(), connexion fournisseur via cy.loginAsSupplierAdmin(), UI live.
+// Budget E2E : pas de hammering auth (le 429 est prouve cote backend), nettoyages via before/beforeEach.
 describe('13 - Supplier: Stock Optimization', () => {
   before(() => cy.ensureTestUsers());
 

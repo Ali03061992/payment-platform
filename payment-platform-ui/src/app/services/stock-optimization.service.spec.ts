@@ -1,4 +1,9 @@
 // @ts-nocheck
+/**
+ * Tests du service StockOptimizationService.
+ * Perimetre : instanciation et blocs optimize, configure, getSupplierId (voir blocs describe/it).
+ * Moyens : HttpTestingController, TestBed, client HTTP de test.
+ */
 import { TestBed } from '@angular/core/testing';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { StockOptimizationService } from './stock-optimization.service';

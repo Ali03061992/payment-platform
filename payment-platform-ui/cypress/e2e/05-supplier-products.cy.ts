@@ -1,3 +1,6 @@
+// Parcours 05-supplier-products.cy.ts : 05 - Supplier: Product Management; 05 - Supplier: Product CRUD (10 scenarios).
+// Prerequis : services live (gateway + microservices + UI), utilisateurs seedes via cy.ensureTestUsers(), connexion fournisseur via cy.loginAsSupplierAdmin(), UI live.
+// Budget E2E : pas de hammering auth (le 429 est prouve cote backend), nettoyages via before/beforeEach.
 describe('05 - Supplier: Product Management', () => {
   before(() => cy.ensureTestUsers());
 

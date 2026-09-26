@@ -1,11 +1,15 @@
 import { Injectable } from '@angular/core';
 import { CanActivate, Router } from '@angular/router';
 
+/**
+ * Garde d'authentification : exige un JWT présent et non expiré, sinon redirige vers /login.
+ */
 @Injectable({ providedIn: 'root' })
 export class AuthGuard implements CanActivate {
 
   constructor(private router: Router) {}
 
+  /** Autorise la route si un token valide est présent, sinon redirige vers /login. */
   canActivate(): boolean {
     const token = sessionStorage.getItem('token');
     if (!token) {

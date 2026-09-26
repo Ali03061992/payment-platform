@@ -4,6 +4,11 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.MDC;
 
 import static org.assertj.core.api.Assertions.assertThat;
+/**
+ * Tests de CorrelationIdTest.
+ * Perimetre : comportement de CorrelationId.
+ * Moyens : JUnit pur (AssertJ).
+ */
 
 class CorrelationIdTest {
 

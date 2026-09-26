@@ -1,3 +1,6 @@
+// Parcours 08-shop-orders.cy.ts : 08 - Shop: Order List; 08 - Shop: Create Order; 08 - Shop: Order Detail (21 scenarios).
+// Prerequis : services live (gateway + microservices + UI), utilisateurs seedes via cy.ensureTestUsers(), connexion boutique via cy.loginAsShopAdmin(), UI live.
+// Budget E2E : pas de hammering auth (le 429 est prouve cote backend), nettoyages via before/beforeEach.
 describe('08 - Shop: Order List', () => {
   before(() => cy.ensureTestUsers());
 

@@ -1,3 +1,6 @@
+// Parcours 12-api-integration.cy.ts : 12 - API: Auth; 12 - API: Admin Organizations; 12 - API: Payments; 12 - API: Orders; 12 - API: Users (28 scenarios).
+// Prerequis : services live (gateway + microservices + UI), utilisateurs seedes via cy.ensureTestUsers(), API live (Cypress.env apiUrl).
+// Budget E2E : pas de hammering auth (le 429 est prouve cote backend), nettoyages via before/beforeEach.
 function isPage(body: any): boolean {
   return body && typeof body === 'object' && !Array.isArray(body) && 'items' in body;
 }

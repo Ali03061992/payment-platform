@@ -6,12 +6,17 @@ import { AgentPaymentSummary } from '../models/agent-payment.model';
 import { ToastService } from './toast.service';
 import { filenameFromDisposition, saveBlob } from '../core/file-download';
 
+/**
+ * Service HTTP des paiements (CRUD, validation, exports CSV et facture PDF).
+ * Normalise les enveloppes paginées et porte la clé d'idempotence à la création.
+ */
 @Injectable({ providedIn: 'root' })
 export class PaymentService {
   private apiUrl = '/api/payments';
 
   constructor(private http: HttpClient, private toast: ToastService) {}
 
+  /** Liste les paiements visibles, en normalisant les enveloppes paginées. */
   list(): Observable<Payment[]> {
     return new Observable<Payment[]>(observer => {
       this.http.get<any>(this.apiUrl).subscribe({
@@ -28,20 +33,24 @@ export class PaymentService {
     });
   }
 
+  /** Récupère un paiement par identifiant. */
   getById(id: string): Observable<Payment> {
     return this.http.get<Payment>(`${this.apiUrl}/${id}`);
   }
 
+  /** Récupère un paiement par référence métier. */
   getByReference(reference: string): Observable<Payment> {
     return this.http.get<Payment>(`${this.apiUrl}/reference/${reference}`);
   }
 
+  /** Crée un paiement en joignant une clé d'idempotence (générée si absente). */
   create(data: CreatePaymentRequest, idempotencyKey?: string): Observable<Payment> {
     const key = idempotencyKey ?? PaymentService.newIdempotencyKey();
     const headers = new HttpHeaders({ 'Idempotency-Key': key });
     return this.http.post<Payment>(this.apiUrl, data, { headers });
   }
 
+  /** Génère une clé d'idempotence UUID v4 (crypto ou repli aléatoire). */
   static newIdempotencyKey(): string {
     try {
       const c = globalThis.crypto as unknown as { randomUUID?: () => string } | undefined;
@@ -54,18 +63,22 @@ export class PaymentService {
     });
   }
 
+  /** Confirme un paiement côté fournisseur. */
   confirm(id: string): Observable<Payment> {
     return this.http.post<Payment>(`${this.apiUrl}/${id}/confirm`, {});
   }
 
+  /** Rejette un paiement avec motif côté fournisseur. */
   reject(id: string, data: RejectPaymentRequest): Observable<Payment> {
     return this.http.post<Payment>(`${this.apiUrl}/${id}/reject`, data);
   }
 
+  /** Annule un paiement en attente. */
   cancel(id: string): Observable<Payment> {
     return this.http.post<Payment>(`${this.apiUrl}/${id}/cancel`, {});
   }
 
+  /** Télécharge la facture PDF d'un paiement confirmé et la sauvegarde localement. */
   downloadInvoice(id: string): void {
     this.http.get(`${this.apiUrl}/${id}/invoice`, { observe: 'response', responseType: 'blob' }).subscribe({
       next: (res) => {
@@ -83,10 +96,12 @@ export class PaymentService {
     });
   }
 
+  /** Récupère les statistiques des paiements par statut. */
   getStats(): Observable<PaymentStats> {
     return this.http.get<PaymentStats>(`${this.apiUrl}/stats`);
   }
 
+  /** Récupère la synthèse des paiements par agent sur une période. */
   getAgentSummary(supplierId: string, from: string, to: string): Observable<AgentPaymentSummary[]> {
     const params = new HttpParams()
       .set('supplierId', supplierId.toString())
@@ -95,6 +110,7 @@ export class PaymentService {
     return this.http.get<AgentPaymentSummary[]>(`${this.apiUrl}/agent-summary`, { params });
   }
 
+  /** Exporte les paiements filtrés en CSV et sauvegarde le fichier reçu. */
   exportCsv(filters: { status?: string; dateFrom?: string; dateTo?: string }): void {
     let params = new URLSearchParams();
     if (filters.status) params.set('status', filters.status);

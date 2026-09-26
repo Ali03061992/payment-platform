@@ -67,6 +67,12 @@ public class JwtService {
                 : properties.expiration().toMinutes();
     }
 
+    /**
+     * Émet un JWT HS256 pour un utilisateur authentifié (claims sub, rôles, organisation).
+     *
+     * @param user utilisateur authentifié
+     * @return token signé sérialisé
+     */
     public String issue(AuthenticatedUser user) {
         try {
             Instant now = Instant.now();
@@ -93,10 +99,21 @@ public class JwtService {
         }
     }
 
+    /**
+     * Retourne la durée de vie du JWT en secondes (dérivée des minutes configurées).
+     *
+     * @return expiration en secondes
+     */
     public long expirationSeconds() {
         return expirationMinutes * 60;
     }
 
+    /**
+     * Décode et valide un JWT, puis reconstruit l'utilisateur authentifié.
+     *
+     * @param token JWT brut (sans préfixe Bearer)
+     * @return utilisateur porté par le token
+     */
     public AuthenticatedUser parse(String token) {
         try {
             Jwt jwt = decoder.decode(token);

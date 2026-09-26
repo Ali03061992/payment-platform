@@ -13,6 +13,10 @@ import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.util.UUID;
 
+/**
+ * Client HTTP vers le payment-service pour la création idempotente
+ * des paiements automatiques ASAP (2 tentatives, échec silencieux tracé).
+ */
 @Component
 public class PaymentClient {
 

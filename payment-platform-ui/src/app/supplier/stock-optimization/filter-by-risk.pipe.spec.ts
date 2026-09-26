@@ -1,4 +1,9 @@
 // @ts-nocheck
+/**
+ * Tests du pipe FilterByRiskPipe.
+ * Perimetre : cas should create an instance; should return empty array for null input; should return empty array for undefined input (voir blocs describe/it).
+ * Moyens : TestBed.
+ */
 import { FilterByRiskPipe } from './filter-by-risk.pipe';
 import { ProductOptimization } from '../../models/stock-optimization.model';
 

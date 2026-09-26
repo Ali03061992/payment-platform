@@ -30,6 +30,11 @@ import org.springframework.web.context.WebApplicationContext;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+/**
+ * Tests de UserControllerTest.
+ * Perimetre : endpoints REST de UserController (statuts HTTP, JSON, securite).
+ * Moyens : contexte SpringBootTest, MockMvc, profil "test" (H2).
+ */
 
 @SpringBootTest
 @ActiveProfiles("test")

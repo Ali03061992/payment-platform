@@ -1,4 +1,9 @@
 // @ts-nocheck
+/**
+ * Tests du composant DeliveryManagementComponent.
+ * Perimetre : instanciation et blocs activeDeliveries, completedDeliveries, pendingAcceptance, rejectedDeliveries, acceptDelivery (voir blocs describe/it).
+ * Moyens : TestBed + fixture, stubs jasmine, client HTTP de test, observables RxJS mockes.
+ */
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ActivatedRoute } from '@angular/router';

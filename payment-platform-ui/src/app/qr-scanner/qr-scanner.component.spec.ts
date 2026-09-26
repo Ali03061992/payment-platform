@@ -1,4 +1,9 @@
 // @ts-nocheck
+/**
+ * Tests du composant QrScannerComponent.
+ * Perimetre : instanciation et blocs ngOnInit, ngOnDestroy, isCameraSupported, startCamera, extractPaymentId (voir blocs describe/it).
+ * Moyens : TestBed + fixture, stubs jasmine.
+ */
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { QrScannerComponent } from './qr-scanner.component';

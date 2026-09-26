@@ -1,12 +1,11 @@
 package com.paymentplatform.organization.infrastructure.csv;
 
 import com.paymentplatform.organization.domain.model.Order;
-import com.paymentplatform.organization.domain.model.OrderItem;
 import com.paymentplatform.organization.domain.repository.OrderItemRepository;
 import com.paymentplatform.organization.domain.repository.OrderRepository;
-import com.paymentplatform.organization.infrastructure.http.IdentityClient;
 import com.paymentplatform.organization.domain.repository.OrganizationRepository;
 import com.paymentplatform.organization.domain.valueobject.OrganizationId;
+import com.paymentplatform.organization.infrastructure.http.IdentityClient;
 import org.springframework.stereotype.Service;
 
 import java.io.StringWriter;

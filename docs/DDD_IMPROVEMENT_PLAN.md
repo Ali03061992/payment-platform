@@ -1,5 +1,10 @@
 # Plan d'Amélioration DDD - Payment Platform
 
+> Audit historique — obsolète comme plan d'action. Ne pas exécuter tel quel :
+> les constats B/M qu'il recoupe sont soldés et suivis dans
+> [../COMPTE_RENDU_EXPERT.md](../COMPTE_RENDU_EXPERT.md). Référence DDD à jour :
+> [ddd.md](ddd.md). Index : [README.md](README.md).
+
 ## Executive Summary
 
 L'analyse du code source de la plateforme de paiement révèle une architecture hexagonale globalement bien structurée avec une séparation correcte entre les couches. Cependant, des **violations critiques du DDD** subsistent, principalement :

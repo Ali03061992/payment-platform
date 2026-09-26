@@ -1,4 +1,9 @@
 // @ts-nocheck
+/**
+ * Tests du pipe StatusLabelPipe.
+ * Perimetre : instanciation et blocs transform (voir blocs describe/it).
+ * Moyens : TestBed.
+ */
 import { StatusLabelPipe } from './status-label.pipe';
 
 describe('StatusLabelPipe', () => {

@@ -20,6 +20,10 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Cas d'usage de livraison d'une commande : bascule le statut, journalise
+ * l'événement et déclenche le paiement automatique ASAP quand requis.
+ */
 @Service
 public class DeliverOrderUseCase {
 
@@ -41,6 +45,14 @@ public class DeliverOrderUseCase {
         this.paymentClient = paymentClient;
     }
 
+    /**
+     * Déclare une commande livrée et tente la création du paiement ASAP associé.
+     *
+     * @param orderId identifiant de la commande
+     * @param receivedBy destinataire ayant réceptionné (identifiant utilisateur)
+     * @param actorUserId auteur de la déclaration
+     * @return commande livrée sous forme de réponse
+     */
     @Transactional
     public OrderResponse execute(UUID orderId, UUID receivedBy, UUID actorUserId) {
         Order order = orders.findById(orderId)

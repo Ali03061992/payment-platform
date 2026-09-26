@@ -1,5 +1,8 @@
 # SonarQube / SonarCloud – Guide d'intégration
 
+> Chiffres d'en-tête datés (« 65 tests », « 54 specs », « Angular 21 » — le front est en
+> Angular 16, 61 `*.spec.ts`, 19 specs Cypress). Fond du guide valable. Index : [README.md](README.md).
+
 > **Objectif** : qualité continue **code + tests** pour backend (Java 26, Maven, 65 tests) et frontend (Angular 21, 54 specs). Coverage JaCoCo (XML) + lcov + Quality Gate bloquant en CI.
 
 ---

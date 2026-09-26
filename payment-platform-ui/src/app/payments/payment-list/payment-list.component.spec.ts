@@ -1,4 +1,9 @@
 // @ts-nocheck
+/**
+ * Tests du composant PaymentListComponent.
+ * Perimetre : cas should load payments on init; should handle load error; should filter payments by status (voir blocs describe/it).
+ * Moyens : TestBed + fixture, stubs jasmine, client HTTP de test, observables RxJS mockes.
+ */
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { NO_ERRORS_SCHEMA } from '@angular/core';

@@ -11,6 +11,11 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+/**
+ * Tests de IdentityTokenIssuerTest.
+ * Perimetre : comportement de IdentityTokenIssuer (securite/domaine).
+ * Moyens : contexte SpringBootTest, profil "test" (H2).
+ */
 
 @SpringBootTest
 @ActiveProfiles("test")

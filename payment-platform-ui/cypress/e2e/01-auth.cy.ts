@@ -1,3 +1,6 @@
+// Parcours 01-auth.cy.ts : 01 - Auth: Login Page; 01 - Auth: Register Page; 01 - Auth: Password Setup Page; 01 - Auth: Logout; 01 - Auth: Guards (21 scenarios).
+// Prerequis : services live (gateway + microservices + UI), utilisateurs seedes via cy.ensureTestUsers(), UI live.
+// Budget E2E : pas de hammering auth (le 429 est prouve cote backend), nettoyages via before/beforeEach.
 describe('01 - Auth: Login Page', () => {
   before(() => cy.ensureTestUsers());
   beforeEach(() => {

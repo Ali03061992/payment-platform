@@ -1,3 +1,6 @@
+// Parcours 11-navigation-rbac.cy.ts : 11 - Navigation: Sidebar; 11 - Navigation: Guards; 11 - Navigation: Role-based Access Control; 11 - Navigation: Supplier Sidebar Items; 11 - Navigation: Shop Sidebar Items (53 scenarios).
+// Prerequis : services live (gateway + microservices + UI), utilisateurs seedes via cy.ensureTestUsers(), connexion admin via cy.loginAsAdmin(), connexion fournisseur via cy.loginAsSupplierAdmin(), connexion boutique via cy.loginAsShopAdmin(), UI live.
+// Budget E2E : pas de hammering auth (le 429 est prouve cote backend), nettoyages via before/beforeEach.
 describe('11 - Navigation: Sidebar', () => {
   before(() => cy.ensureTestUsers());
 

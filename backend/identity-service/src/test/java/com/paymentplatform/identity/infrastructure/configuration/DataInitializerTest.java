@@ -11,6 +11,11 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+/**
+ * Tests de DataInitializerTest.
+ * Perimetre : infrastructure DataInitializer (messagerie/config/persistance).
+ * Moyens : contexte SpringBootTest, profil "test" (H2).
+ */
 
 @SpringBootTest
 @ActiveProfiles("test")

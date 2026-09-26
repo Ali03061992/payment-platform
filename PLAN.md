@@ -1,5 +1,8 @@
 # Plan: P3-02 — i18n with ngx-translate
 
+> Plan non exécuté (dette phase 2, cf. [COMPTE_RENDU_EXPERT.md](COMPTE_RENDU_EXPERT.md) §3.3 :
+> `ngx-translate` décoratif). À trancher (activer ou supprimer) avant exécution. Index : [docs/README.md](docs/README.md).
+
 ## Context
 
 The payment-platform project already has ngx-translate installed (`@ngx-translate/core@^15.0.0`, `@ngx-translate/http-loader@^8.0.0`) and an `AppTranslateModule` configured. Translation files (`fr.json`, `en.json`) exist with ~278 lines of keys each, and a `LanguageSwitcherComponent` exists. However, **the feature is incomplete**:

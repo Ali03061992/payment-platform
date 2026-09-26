@@ -1,16 +1,8 @@
 package com.paymentplatform.organization.application.usecase;
 
 import com.paymentplatform.organization.application.dto.OrderResponse;
-import com.paymentplatform.organization.domain.model.Order;
-import com.paymentplatform.organization.domain.model.OrderEvent;
-import com.paymentplatform.organization.domain.model.OrderItem;
-import com.paymentplatform.organization.domain.model.Product;
-import com.paymentplatform.organization.domain.model.StockMovement;
-import com.paymentplatform.organization.domain.repository.OrderEventRepository;
-import com.paymentplatform.organization.domain.repository.OrderItemRepository;
-import com.paymentplatform.organization.domain.repository.OrderRepository;
-import com.paymentplatform.organization.domain.repository.ProductRepository;
-import com.paymentplatform.organization.domain.repository.StockMovementRepository;
+import com.paymentplatform.organization.domain.model.*;
+import com.paymentplatform.organization.domain.repository.*;
 import com.paymentplatform.shared.domain.event.OrderEvents;
 import com.paymentplatform.shared.domain.exception.ConflictException;
 import com.paymentplatform.shared.domain.exception.NotFoundException;

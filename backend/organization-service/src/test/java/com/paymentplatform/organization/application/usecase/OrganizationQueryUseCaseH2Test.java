@@ -1,10 +1,6 @@
 package com.paymentplatform.organization.application.usecase;
 
-import java.util.UUID;
-
 import com.paymentplatform.organization.application.dto.CreateOrganizationRequest;
-import com.paymentplatform.organization.application.dto.OrganizationResponse;
-import com.paymentplatform.organization.domain.repository.OrganizationRepository;
 import com.paymentplatform.shared.domain.exception.NotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,8 +9,16 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.UUID;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+/**
+ * Tests de OrganizationQueryUseCaseH2Test.
+ * Perimetre : cas d'usage/service OrganizationQueryUseCase sur base H2.
+ * Moyens : contexte SpringBootTest, profil "test" (H2).
+ */
 
 @SpringBootTest
 @ActiveProfiles("test")

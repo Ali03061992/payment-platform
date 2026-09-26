@@ -1,4 +1,9 @@
 // @ts-nocheck
+/**
+ * Tests du intercepteur JwtInterceptor.
+ * Perimetre : instanciation et blocs intercept (voir blocs describe/it).
+ * Moyens : TestBed, stubs jasmine, observables RxJS mockes.
+ */
 import { TestBed } from '@angular/core/testing';
 import { HttpRequest, HttpHandler, HttpErrorResponse } from '@angular/common/http';
 import { Router } from '@angular/router';

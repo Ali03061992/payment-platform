@@ -11,6 +11,11 @@ import java.time.Instant;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+/**
+ * Tests de PaymentMapperTest.
+ * Perimetre : mapping/DTO PaymentMapper.
+ * Moyens : JUnit pur (AssertJ).
+ */
 
 class PaymentMapperTest {
 

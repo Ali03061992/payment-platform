@@ -1,5 +1,11 @@
 # Complete Technical Architecture — B2B Payment Platform
 
+> Référence détaillée (EN) — **passages datés signalés 25/09/2026, voir [docs/README.md](README.md)** :
+> rate-limit « 120/60 req/min (bucket4j) » (§ gateway) obsolète → B2 = 10/min/IP auth (`RateLimitFilter.java`) ;
+> `POST /api/auth/refresh` documenté sans rotation M1 ; pagination `{content,page,size}` obsolète →
+> `{items,totalElements,totalPages,number}` (B5) ; `INTERNAL_SECRET` en dur obsolète → fail-fast B3.
+> Le fond microservices/DDD/outbox reste valable.
+
 > Stack: Java 26 · Spring Boot 4.1 · Angular 16 · MySQL 8.4 · Docker · RabbitMQ 4 · JWT (HS256)
 
 ---

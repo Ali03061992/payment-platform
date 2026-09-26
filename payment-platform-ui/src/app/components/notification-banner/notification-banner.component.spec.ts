@@ -1,4 +1,9 @@
 // @ts-nocheck
+/**
+ * Tests du composant NotificationBannerComponent.
+ * Perimetre : instanciation et blocs ngOnInit, acceptNotifications, dismissNotifications (voir blocs describe/it).
+ * Moyens : TestBed + fixture, stubs jasmine.
+ */
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { NotificationBannerComponent } from './notification-banner.component';
 import { NotificationService } from '../../services/notification.service';

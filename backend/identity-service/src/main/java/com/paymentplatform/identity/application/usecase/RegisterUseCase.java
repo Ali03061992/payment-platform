@@ -56,6 +56,12 @@ public class RegisterUseCase {
         this.outbox = outbox;
     }
 
+    /**
+     * Inscrit un nouvel utilisateur (compte créé désactivé, en attente de validation).
+     *
+     * @param request données d'inscription (identifiants, rôle autorisé)
+     * @return profil de l'utilisateur créé
+     */
     @Transactional
     public UserResponse register(RegisterRequest request) {
         RoleCode role = RoleCode.from(request.role());

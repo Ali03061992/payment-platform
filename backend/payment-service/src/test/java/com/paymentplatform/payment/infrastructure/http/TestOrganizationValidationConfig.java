@@ -6,6 +6,11 @@ import org.springframework.context.annotation.Primary;
 
 import java.util.Optional;
 import java.util.UUID;
+/**
+ * Tests de TestOrganizationValidationConfig.
+ * Perimetre : classe d'aide pour les tests (configuration/stub, pas de test direct).
+ * Moyens : JUnit pur (AssertJ).
+ */
 
 @TestConfiguration
 public class TestOrganizationValidationConfig {

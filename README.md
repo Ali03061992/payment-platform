@@ -121,7 +121,8 @@ Tous les containers doivent être `healthy` avant de lancer l'application.
 
 ### 3. Lancer les services depuis l'IDE
 
-Dans IntelliJ/Eclipse, lance chaque microservice en tant que **Spring Boot Application** :
+Dans IntelliJ, configs `.run/` **profil `local`** (`-Dspring.profiles.active=local`) :
+`1_Identity_Service` → `5_API_Gateway`, ou `ALL_SERVICES` (tout d'un coup) :
 
 | Service | Main class | Port |
 |---|---|---|
@@ -132,6 +133,24 @@ Dans IntelliJ/Eclipse, lance chaque microservice en tant que **Spring Boot Appli
 | notification-service | `NotificationServiceApplication` | 8085 |
 
 > **Note :** Les services se connectent aux infrastructures Docker sur `localhost` aux ports mappés (3307, 5673, 6379, etc.).
+
+### 3b. Lancer le front en dev
+
+```bash
+cd payment-platform-ui
+npm run start:local   # ng serve --port 4200 → http://localhost:4200 (apiUrl http://localhost:8081)
+```
+
+`http://localhost:8080` = build nginx **docker uniquement** ; en dev IDE, utiliser **4200**
+(cf. `cypress.config.ts`, `deploy/run-local.ps1`).
+
+### 3c. Variables d'environnement locales utiles
+
+| Variable | Local / E2E / CI | Prod / compose |
+|---|---|---|
+| `RATE_LIMIT_AUTH_PER_MINUTE` | `1000` (ne pas flaker les ~70 logins E2E) | `10` (strict B2 + `Retry-After: 60`) |
+| `INTERNAL_SECRET` | défauts locaux non committés en prod | **obligatoire au boot** (fail-fast B3) |
+| `FIREBASE_*`, `FCM_VAPID_KEY` | vides = push désactivé proprement (M7) | injectées via `envsubst` → `assets/env.js` |
 
 ### 4. Arrêter les dépendances
 
@@ -155,7 +174,8 @@ docker compose -f docker-compose.dev.yml down
 
 | Service | URL | Description |
 |---|---|---|
-| **Angular App** | http://localhost:8080 | Frontend SPA |
+| **Angular App (docker)** | http://localhost:8080 | Frontend SPA (build nginx) |
+| **Angular App (dev IDE)** | http://localhost:4200 | `ng serve` local |
 | **Inscription** | http://localhost:8080/register | Créer un compte |
 | **Connexion** | http://localhost:8080/login | Se connecter |
 | **API Gateway** | http://localhost:8081 | Entry point API |
@@ -279,6 +299,10 @@ Invoke-RestMethod -Uri "http://localhost:9200/payments/_search?pretty" -Method P
 - **Architecture** : DDD, Clean/Hexagonal, Event-Driven, Outbox Pattern
 
 ## Documentation
+
+> Index central avec état à jour / obsolète : [docs/README.md](docs/README.md).
+> Routes front réelles (41 URLs) : [FRONTEND_ROUTES.md](FRONTEND_ROUTES.md).
+> Compte-rendu d'acceptation (B/M) : [COMPTE_RENDU_EXPERT.md](COMPTE_RENDU_EXPERT.md).
 
 | Sujet | Fichier |
 |---|---|

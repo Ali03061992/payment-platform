@@ -9,11 +9,14 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
-import static com.paymentplatform.payment.domain.model.PaymentStatus.CANCELLED;
-import static com.paymentplatform.payment.domain.model.PaymentStatus.CONFIRMED;
-import static com.paymentplatform.payment.domain.model.PaymentStatus.PENDING;
-import static com.paymentplatform.payment.domain.model.PaymentStatus.REJECTED;
+import static com.paymentplatform.payment.domain.model.PaymentStatus.*;
 import static org.assertj.core.api.Assertions.assertThat;
+
+/**
+ * Tests de PaymentInvoicePdfServiceTest.
+ * Perimetre : comportement de PaymentInvoicePdfService.
+ * Moyens : JUnit pur (AssertJ).
+ */
 
 class PaymentInvoicePdfServiceTest {
 

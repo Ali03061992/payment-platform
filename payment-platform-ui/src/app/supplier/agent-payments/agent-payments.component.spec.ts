@@ -1,4 +1,9 @@
 // @ts-nocheck
+/**
+ * Tests du composant AgentPaymentsComponent.
+ * Perimetre : instanciation et blocs computeTotals, toggleAgent, getAgentPayments, statusLabel, load (voir blocs describe/it).
+ * Moyens : TestBed + fixture, stubs jasmine, client HTTP de test, observables RxJS mockes.
+ */
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { of, throwError } from 'rxjs';

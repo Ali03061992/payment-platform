@@ -1,5 +1,10 @@
 # ANALYSE FONCTIONNELLE & DDD COMPLÈTE — PLATEFORME B2B FOURNISSEUR ↔ BOUTIQUE
 
+> Spec historique (FR) — antérieure aux phases 0/1 : le rôle `SHOP_MANAGER` (16 UC, §2.4)
+> est **purgé du front** (M4) et l'auto-inscription naît DISABLED (M5). Pour l'état réel :
+> [../COMPTE_RENDU_EXPERT.md](../COMPTE_RENDU_EXPERT.md), [../FRONTEND_ROUTES.md](../FRONTEND_ROUTES.md).
+> Index : [README.md](README.md).
+
 > Document de référence pour l'implémentation. Ne pas coder sans avoir validé cette analyse.
 
 ---

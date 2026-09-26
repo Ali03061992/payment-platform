@@ -8,6 +8,11 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
+/**
+ * Tests de CorrelationIdFilterTest.
+ * Perimetre : filtre/securite CorrelationIdFilter.
+ * Moyens : JUnit pur (AssertJ).
+ */
 
 class CorrelationIdFilterTest {
 

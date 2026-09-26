@@ -1,4 +1,9 @@
 // @ts-nocheck
+/**
+ * Tests du service CatalogService.
+ * Perimetre : instanciation et blocs listCategories, createCategory, deleteCategory, listFamilies, createFamily (voir blocs describe/it).
+ * Moyens : HttpTestingController, TestBed, client HTTP de test.
+ */
 import { TestBed } from '@angular/core/testing';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { CatalogService } from './catalog.service';

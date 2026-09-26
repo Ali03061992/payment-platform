@@ -1,3 +1,6 @@
+// Parcours 03-admin-users.cy.ts : 03 - Admin: User Management; 03 - Admin: Create User (12 scenarios).
+// Prerequis : services live (gateway + microservices + UI), utilisateurs seedes via cy.ensureTestUsers(), connexion admin via cy.loginAsAdmin(), UI live.
+// Budget E2E : pas de hammering auth (le 429 est prouve cote backend), nettoyages via before/beforeEach.
 describe('03 - Admin: User Management', () => {
   before(() => cy.ensureTestUsers());
 

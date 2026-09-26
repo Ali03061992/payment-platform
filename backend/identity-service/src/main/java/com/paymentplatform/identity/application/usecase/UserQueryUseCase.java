@@ -27,6 +27,15 @@ public class UserQueryUseCase {
         this.users = users;
     }
 
+    /**
+     * Recherche un utilisateur par identifiant en vérifiant le périmètre de l'acteur.
+     *
+     * @param actorUserId auteur de la consultation
+     * @param userId utilisateur recherché
+     * @param actorRoles rôles de l'acteur
+     * @param actorOrganizationId organisation de l'acteur
+     * @return profil de l'utilisateur
+     */
     @Transactional(readOnly = true)
     public UserResponse findById(UUID actorUserId, UUID userId, List<String> actorRoles,
                                  UUID actorOrganizationId) {
@@ -36,6 +45,12 @@ public class UserQueryUseCase {
         return UserResponse.from(target);
     }
 
+    /**
+     * Recherche un utilisateur par identifiant pour un appel interne (sans contrôle de périmètre).
+     *
+     * @param userId utilisateur recherché
+     * @return profil de l'utilisateur
+     */
     @Transactional(readOnly = true)
     public UserResponse findByIdInternal(UUID userId) {
         User target = users.findById(UserId.of(userId))
@@ -43,6 +58,12 @@ public class UserQueryUseCase {
         return UserResponse.from(target);
     }
 
+    /**
+     * Liste les utilisateurs d'une organisation pour un appel interne.
+     *
+     * @param organizationId organisation filtrée
+     * @return utilisateurs de l'organisation
+     */
     @Transactional(readOnly = true)
     public List<UserResponse> listByOrganizationInternal(UUID organizationId) {
         return users.findByOrganizationId(OrganizationId.of(organizationId)).stream()
@@ -53,6 +74,19 @@ public class UserQueryUseCase {
     /** B5 : taille de page plafonnée — aucune liste exposée ne charge plus de 100 lignes. */
     public static final int MAX_PAGE_SIZE = 100;
 
+    /**
+     * Liste paginée des utilisateurs selon le périmètre (admin global ou organisation).
+     *
+     * @param actorUserId auteur de la consultation
+     * @param actorRoles rôles de l'acteur
+     * @param actorOrganizationId organisation de l'acteur
+     * @param organizationId filtre d'organisation (admin uniquement)
+     * @param role filtre de rôle (optionnel)
+     * @param status filtre de statut (optionnel)
+     * @param page index de page
+     * @param size taille de page plafonnée à 100
+     * @return page d'utilisateurs
+     */
     @Transactional(readOnly = true)
     public PageResponse<UserResponse> list(UUID actorUserId, List<String> actorRoles, UUID actorOrganizationId,
                                            UUID organizationId, String role, String status, int page, int size) {

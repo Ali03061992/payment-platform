@@ -19,8 +19,12 @@ import java.time.ZoneOffset;
 import java.util.List;
 import java.util.UUID;
 
-import static com.paymentplatform.payment.domain.model.PaymentStatus.*;
+import static com.paymentplatform.payment.domain.model.PaymentStatus.CONFIRMED;
 
+/**
+ * API REST des paiements (création, consultation, validation, exports CSV/PDF).
+ * Applique le périmètre boutique/fournisseur à partir de l'utilisateur courant.
+ */
 @RestController
 @RequestMapping("/api/payments")
 public class PaymentController {
@@ -58,6 +62,13 @@ public class PaymentController {
         this.paymentInvoicePdfService = paymentInvoicePdfService;
     }
 
+    /**
+     * Crée un paiement pour la boutique courante (clé d'idempotence optionnelle).
+     *
+     * @param request requête de création validée
+     * @param idempotencyKey clé anti-doublon transmise en header (optionnelle)
+     * @return paiement créé (201)
+     */
     @PostMapping
     @PreAuthorize("hasAuthority('SHOP_CREATE_PAYMENTS')")
     public ResponseEntity<PaymentResponse> create(
@@ -68,6 +79,12 @@ public class PaymentController {
                 createPayment.execute(request, current.userId(), current.organizationId(), idempotencyKey));
     }
 
+    /**
+     * Récupère un paiement par identifiant, restreint à sa boutique ou son fournisseur.
+     *
+     * @param id identifiant du paiement
+     * @return paiement ou 403/404 selon périmètre et existence
+     */
     @GetMapping("/{id}")
     @PreAuthorize("hasAuthority('VIEW_PAYMENTS')")
     public ResponseEntity<PaymentResponse> getById(@PathVariable UUID id) {
@@ -83,6 +100,12 @@ public class PaymentController {
         return ResponseEntity.ok(response);
     }
 
+    /**
+     * Récupère un paiement par référence métier, restreint à son périmètre.
+     *
+     * @param reference référence du paiement
+     * @return paiement ou 403/404 selon périmètre et existence
+     */
     @GetMapping("/reference/{reference}")
     @PreAuthorize("hasAuthority('VIEW_PAYMENTS')")
     public ResponseEntity<PaymentResponse> getByReference(@PathVariable String reference) {
@@ -98,6 +121,13 @@ public class PaymentController {
         return ResponseEntity.ok(response);
     }
 
+    /**
+     * Liste paginée des paiements, filtrée par rôle (boutique, fournisseur ou admin).
+     *
+     * @param page index de page
+     * @param size taille de page
+     * @return page de paiements du périmètre courant
+     */
     @GetMapping
     @PreAuthorize("hasAuthority('VIEW_PAYMENTS')")
     public ResponseEntity<PageResponse<PaymentResponse>> list(
@@ -115,12 +145,24 @@ public class PaymentController {
         return ResponseEntity.ok(listPayments.executeAll(page, size));
     }
 
+    /**
+     * Calcule les statistiques globales des paiements par statut.
+     *
+     * @return compteurs par statut
+     */
     @GetMapping("/stats")
     @PreAuthorize("hasAuthority('VIEW_PAYMENTS')")
     public ResponseEntity<PaymentStatsResponse> stats() {
         return ResponseEntity.ok(listPayments.stats());
     }
 
+    /**
+     * Liste paginée des paiements en retard selon le rôle et l'organisation courante.
+     *
+     * @param page index de page
+     * @param size taille de page
+     * @return page de paiements échus
+     */
     @GetMapping("/overdue")
     @PreAuthorize("hasAuthority('VIEW_PAYMENTS')")
     public ResponseEntity<PageResponse<PaymentResponse>> overdue(
@@ -133,6 +175,14 @@ public class PaymentController {
                 current.userId(), current.organizationId(), role, page, size));
     }
 
+    /**
+     * Synthèse des paiements par agent livreur sur une période (périmètre fournisseur).
+     *
+     * @param supplierId fournisseur concerné
+     * @param from début de période (inclus)
+     * @param to fin de période (incluse)
+     * @return liste des totaux par agent
+     */
     @GetMapping("/agent-summary")
     @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SYSTEM_ADMIN')")
     public ResponseEntity<List<AgentPaymentSummary>> agentSummary(
@@ -151,6 +201,12 @@ public class PaymentController {
         return ResponseEntity.ok(agentPayments.execute(supplierId, fromInstant, toInstant));
     }
 
+    /**
+     * Confirme un paiement (action fournisseur).
+     *
+     * @param id identifiant du paiement
+     * @return paiement confirmé
+     */
     @PostMapping("/{id}/confirm")
     @PreAuthorize("hasAuthority('SUPPLIER_MANAGE_PAYMENTS')")
     public ResponseEntity<PaymentResponse> confirm(@PathVariable UUID id) {
@@ -158,6 +214,13 @@ public class PaymentController {
         return ResponseEntity.ok(confirmPayment.execute(id, current.userId(), current.organizationId()));
     }
 
+    /**
+     * Rejette un paiement avec motif (action fournisseur).
+     *
+     * @param id identifiant du paiement
+     * @param request motif de rejet validé
+     * @return paiement rejeté
+     */
     @PostMapping("/{id}/reject")
     @PreAuthorize("hasAuthority('SUPPLIER_MANAGE_PAYMENTS')")
     public ResponseEntity<PaymentResponse> reject(
@@ -167,6 +230,12 @@ public class PaymentController {
         return ResponseEntity.ok(rejectPayment.execute(id, request, current.userId(), current.organizationId()));
     }
 
+    /**
+     * Annule un paiement en attente (boutique ou fournisseur selon droits).
+     *
+     * @param id identifiant du paiement
+     * @return paiement annulé
+     */
     @PostMapping("/{id}/cancel")
     @PreAuthorize("hasAnyAuthority('SHOP_CANCEL_PAYMENTS', 'SUPPLIER_MANAGE_PAYMENTS')")
     public ResponseEntity<PaymentResponse> cancel(@PathVariable UUID id) {
@@ -174,6 +243,12 @@ public class PaymentController {
         return ResponseEntity.ok(cancelPayment.execute(id, current.userId(), current.organizationId()));
     }
 
+    /**
+     * Synthèse des totaux par statut pour un fournisseur (agrégats SQL).
+     *
+     * @param supplierId fournisseur concerné
+     * @return totaux et compteurs par statut
+     */
     @GetMapping("/supplier-summary")
     @PreAuthorize("hasAuthority('SUPPLIER_MANAGE_PAYMENTS')")
     public ResponseEntity<SupplierPaymentSummaryResponse> supplierSummary(
@@ -189,6 +264,13 @@ public class PaymentController {
         return ResponseEntity.ok(listPayments.summarizeBySupplier(supplierId));
     }
 
+    /**
+     * Exporte les paiements du périmètre courant en CSV sur une période fermée.
+     *
+     * @param from début de période (inclus)
+     * @param to fin de période (incluse)
+     * @param response réponse HTTP recevant le fichier CSV
+     */
     @GetMapping("/export")
     @PreAuthorize("hasAuthority('VIEW_PAYMENTS')")
     public void exportCsv(
@@ -215,6 +297,14 @@ public class PaymentController {
         response.getWriter().flush();
     }
 
+    /**
+     * Exporte les paiements en CSV avec filtres optionnels (statut, période).
+     *
+     * @param status statut filtré (optionnel)
+     * @param dateFrom début de période (optionnel)
+     * @param dateTo fin de période (optionnelle)
+     * @param response réponse HTTP recevant le fichier CSV
+     */
     @GetMapping("/export/csv")
     @PreAuthorize("hasAuthority('VIEW_PAYMENTS')")
     public void exportCsv(
@@ -278,6 +368,12 @@ public class PaymentController {
         response.getWriter().flush();
     }
 
+    /**
+     * Télécharge la facture PDF d'un paiement confirmé, restreinte à son périmètre.
+     *
+     * @param id identifiant du paiement
+     * @param httpResponse réponse HTTP recevant le PDF
+     */
     @GetMapping("/{id}/invoice")
     @PreAuthorize("hasAuthority('VIEW_PAYMENTS')")
     public void downloadInvoice(@PathVariable UUID id, HttpServletResponse httpResponse) throws Exception {

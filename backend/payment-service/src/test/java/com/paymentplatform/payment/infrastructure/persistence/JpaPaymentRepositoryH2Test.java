@@ -15,6 +15,11 @@ import java.math.BigDecimal;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+/**
+ * Tests de JpaPaymentRepositoryH2Test.
+ * Perimetre : cas d'usage/service JpaPaymentRepository sur base H2.
+ * Moyens : contexte SpringBootTest, profil "test" (H2).
+ */
 
 @SpringBootTest
 @ActiveProfiles("test")

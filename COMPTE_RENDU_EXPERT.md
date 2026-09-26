@@ -4,6 +4,10 @@
 **Périmètre :** `payment-platform-ui` (Angular 21) + `backend` (5 microservices Spring Boot + gateway)
 **Méthode :** inspection code + preuves `fichier:ligne`, exécutions réelles (Karma, Cypress, tsc)
 
+> Vérification documentation 25/09/2026 : tout est `[x]` sauf **B4 volontairement `[ ]` (skip explicite)**.
+> Lignes M3/M4/M5 du §3.2 reformulées au passé (corrigé/implémenté/purgé) pour cohérence avec le §5 ;
+> M1 pointe désormais la couverture Cypress réelle (`12-api-integration.cy.ts:52-79`).
+
 ---
 
 ## 1. VERDICT : ACCEPTÉ SOUS CONDITIONS (pas de mise en production en l'état)
@@ -54,11 +58,11 @@ ligne→détail paiements au clic Confirmer/Annuler.
 
 | # | Défaut | Preuve |
 |---|---|---|
-| M1 | Refresh-token **implémenté** : rotation + révocation en table `refresh_tokens` (hash SHA-256 seul persisté, TTL 7 j), `POST /refresh` + `/logout`, révocation au changement de mot de passe / désactivation ; front : refresh silencieux single-flight dans `JwtInterceptor` | `RefreshTokenService.java`, `V6__refresh_tokens.sql`, `jwt.interceptor.ts`, spec Cypress 12 (non exécutée, en attente validation) |
+| M1 | Refresh-token **implémenté** : rotation + révocation en table `refresh_tokens` (hash SHA-256 seul persisté, TTL 7 j), `POST /refresh` + `/logout`, révocation au changement de mot de passe / désactivation ; front : refresh silencieux single-flight dans `JwtInterceptor` | `RefreshTokenService.java`, `V6__refresh_tokens.sql`, `jwt.interceptor.ts`, couvert par `12-api-integration.cy.ts:52-79` (refresh/logout) |
 | M2 | Validation inter-services **durcie** : timeouts 2s/5s + retry 3x backoff + circuit-breaker 5 échecs/30s, parsing JSON typé, **409 métier vs 503 infra** (`ServiceUnavailableException`) | `OrganizationValidationClient.java`, `OrganizationValidationClientTest.java` (12 tests) |
-| M3 | Hard-delete catégories/familles (`deleteById`) sans soft-delete/audit : casse l'historique | `CatalogController.java:72,146` |
-| M4 | `SHOP_MANAGER` visible dans la nav mais refusé par `RoleGuard` (redirect silencieux vers `/dashboard`), pas de page 403/404 | `layout.component.ts:53-55` vs `app-routing.module.ts:53,95-99` |
-| M5 | Register public : un inscrit `SUPPLIER_ADMIN` n'est rattaché à **aucune** organisation (`organizationId=null`) — auto-élévation à valider métier | `RegisterUseCase.java:55-58,70-72` |
+| M3 | Soft-delete catalogue **implémenté** (`deletedAt` + filtre `IS NULL` + audit, V10) — l'historique survit | `CatalogController.java:82,166`, `ProductCategory.java:34-36`, `V10__catalog_soft_delete.sql`, `CatalogControllerTest.java:362-405` |
+| M4 | `SHOP_MANAGER` **purgé de la nav** (`layout.component.ts:33-62` sans SHOP_MANAGER) + pages **403/404** dédiées + `RoleGuard` → `/403` | `app-routing.module.ts:63-64,108`, `role.guard.ts:34-35`, `forbidden.component.ts:6`, specs 01/11 (`/403`, `/404`) |
+| M5 | Register public **corrigé** : tout auto-inscrit naît **DISABLED** sans organisation, validation admin via `PATCH /api/users/{id}/activate` (page « Activation comptes ») | `RegisterUseCase.java:78-82`, `01-auth.cy.ts:109`, `RegisterUseCaseH2Test.java:43` |
 | M6 | PWA **corrigé** : groupe `api-financial` prioritaire (`/api/payments/**`, `/api/orders/**`, freshness 5 min max — prouvé dans `ngsw.json` généré) ; plus de cache financier > 5 min | `ngsw-config.json` |
 | M7 | Clés Firebase/VAPID **via env runtime** (`assets/env.js` généré depuis `env.template.js`, jamais committées) ; push désactivé proprement sans clés (app + SW) | `environment.ts`, `env.template.js`, `push-notification.service.ts` |
 
@@ -91,6 +95,8 @@ ligne→détail paiements au clic Confirmer/Annuler.
 - [x] B2 : inclure `login/register` dans le rate-limit (compteur par IP, ex. 10/min) + délai progressif.
 - [x] B3 : supprimer `"/api/**".permitAll()`, auth par défaut ; `INTERNAL_SECRET` obligatoire au boot (échec si absent) ; unifier 401/403 inter-services.
 - [ ] B4 : seed réservé au profil `dev/local` (garde `spring.profiles`), mot de passe admin initial généré et affiché une seule fois au premier boot.
+  (**SKIP volontaire** — vérifié 25/09/2026 : `V4__seed_users.sql` + hash `Admin@123` identique ×10
+  toujours présents ; volontairement laissé `[ ]`, ne pas cocher sans implémenter la garde.)
 - [x] B5 : paginer `list users/orgs` (`Pageable`, max 100) ; remplacer `Integer.MAX_VALUE` par agrégats SQL (`SUM/COUNT`).
 
 ### Phase 1 — Robustesse & cohérence (1 sem)

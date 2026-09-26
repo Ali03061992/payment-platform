@@ -14,6 +14,10 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import java.time.Instant;
 import java.util.Map;
 
+/**
+ * Configuration de sécurité du gateway : chaîne stateless deny-by-default,
+ * filtres IP et JWT ordonnés avant l'authentification Spring.
+ */
 @Configuration
 @EnableWebSecurity
 public class GatewaySecurityConfig {
@@ -27,6 +31,13 @@ public class GatewaySecurityConfig {
         this.jwtValidationFilter = jwtValidationFilter;
     }
 
+    /**
+     * Construit la chaîne de sécurité stateless (CSRF désactivé, 401/403 JSON).
+     *
+     * @param http configuration HTTP à personnaliser
+     * @param objectMapper sérialiseur des réponses d'erreur
+     * @return chaîne de filtres configurée
+     */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, ObjectMapper objectMapper) throws Exception {
         http

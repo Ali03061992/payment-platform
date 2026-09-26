@@ -1,4 +1,9 @@
 // @ts-nocheck
+/**
+ * Tests du composant StockDashboardComponent.
+ * Perimetre : instanciation et blocs loadData, computeStats, getStockStatus, movementTypeLabel, movementTypeClass (voir blocs describe/it).
+ * Moyens : TestBed + fixture, stubs jasmine, client HTTP de test, observables RxJS mockes.
+ */
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { FormsModule } from '@angular/forms';

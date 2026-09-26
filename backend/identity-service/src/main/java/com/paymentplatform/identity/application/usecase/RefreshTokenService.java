@@ -57,6 +57,12 @@ public class RefreshTokenService {
     public record IssuedRefreshToken(String rawToken, RefreshToken stored, long expiresInSeconds) {
     }
 
+    /**
+     * Émet un nouveau refresh token opaque pour un utilisateur.
+     *
+     * @param userId identifiant du porteur
+     * @return paire brut + entité persistée avec durée de vie
+     */
     @Transactional
     public IssuedRefreshToken issue(UUID userId) {
         String raw = generateRawToken();
@@ -66,6 +72,12 @@ public class RefreshTokenService {
                 ChronoUnit.DAYS.getDuration().multipliedBy(ttlDays).getSeconds());
     }
 
+    /**
+     * Renouvelle les tokens par rotation : l'ancien est révoqué, un nouveau est émis.
+     *
+     * @param rawToken refresh token brut présenté par le client
+     * @return nouveau couple access/refresh tokens
+     */
     @Transactional
     public RefreshResponse refresh(String rawToken) {
         RefreshToken current = tokens.findByTokenHash(sha256(rawToken))
@@ -99,7 +111,10 @@ public class RefreshTokenService {
                 next.rawToken(), next.expiresInSeconds());
     }
 
-    /** Révocation idempotente (logout) : token inconnu => no-op. */
+    /** Révocation idempotente (logout) : token inconnu => no-op.
+     *
+     * @param rawToken refresh token brut à révoquer
+     */
     @Transactional
     public void revoke(String rawToken) {
         tokens.findByTokenHash(sha256(rawToken)).ifPresent(token -> {
@@ -110,6 +125,11 @@ public class RefreshTokenService {
         });
     }
 
+    /**
+     * Révoque tous les refresh tokens d'un utilisateur (ex. compte désactivé).
+     *
+     * @param userId identifiant de l'utilisateur
+     */
     @Transactional
     public void revokeAll(UUID userId) {
         tokens.revokeAllByUserId(userId);

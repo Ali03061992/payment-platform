@@ -1,5 +1,10 @@
 # RAPPORT DE VALIDATION - Payment Platform
 
+> Audit historique du 2026-09-07 (72/100, PASS CONDITIONNEL) — **obsolète comme verdict** :
+> les 5 critiques (gateway permitAll, INTERNAL_SECRET en dur, rate-limit absent, etc.) sont
+> soldées en phases 0/1. Référence d'acceptation à jour :
+> [COMPTE_RENDU_EXPERT.md](COMPTE_RENDU_EXPERT.md) (vérifié 25/09/2026). Index : [docs/README.md](docs/README.md).
+
 **Date** : 2026-09-07  
 **Audit format** : Revue de code complète (Backend Java/Spring Boot, Frontend Angular, Cypress E2E, Infrastructure Docker)  
 **Auditeur** : opencode QA Agent

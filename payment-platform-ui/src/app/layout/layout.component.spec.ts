@@ -1,4 +1,9 @@
 // @ts-nocheck
+/**
+ * Tests du composant LayoutComponent.
+ * Perimetre : instanciation et blocs ngOnInit, ngOnDestroy, filteredNav, toggleSidebar, onNavClick (voir blocs describe/it).
+ * Moyens : TestBed + fixture, stubs jasmine, client HTTP de test, observables RxJS mockes.
+ */
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { Router } from '@angular/router';

@@ -24,6 +24,13 @@ public final class InternalSecretValidator {
     private InternalSecretValidator() {
     }
 
+    /**
+     * Vérifie que le secret interne est défini et non laissé sur un défaut connu en prod.
+     *
+     * @param secret secret configuré
+     * @param environment environnement Spring (profil prod détecté)
+     * @return secret validé
+     */
     public static String requireValid(String secret, Environment environment) {
         if (secret == null || secret.isBlank()) {
             throw new IllegalStateException(

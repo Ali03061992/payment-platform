@@ -1,22 +1,35 @@
 # Guide d'utilisation des tests E2E Cypress
 
+> État vérifié 25/09/2026 : **19 specs** (`01-auth` → `19-delivery-roles`),
+> **246 blocs `it(` comptés statiquement** (contexte mission : 244/244 verts en run
+> complet — écart de 2 à confirmer par run ; aucun `it.skip/only`).
+> Configs : `cypress.config.ts` (baseUrl `http://localhost:4200`, apiUrl `http://localhost:8081`),
+> `cypress.config.local.ts`, `cypress.config.dev.ts`.
+
 ## Architecture des tests
 
 ```
 cypress/
 ├── e2e/
-│   ├── 01-auth.cy.ts                    # Authentification (login, register, logout, guards)
+│   ├── 01-auth.cy.ts                    # Authentification (login, register, logout, guards) — incl. M5 (compte naît DISABLED) + /404
 │   ├── 02-admin-dashboard.cy.ts         # Dashboard administrateur
-│   ├── 03-admin-users.cy.ts             # Gestion des utilisateurs
+│   ├── 03-admin-users.cy.ts             # Gestion des utilisateurs (paginée B5)
 │   ├── 04-admin-organizations.cy.ts     # Fournisseurs, boutiques, relations
 │   ├── 05-supplier-products.cy.ts       # Catalogue produits fournisseur
 │   ├── 06-supplier-stock.cy.ts          # Gestion du stock
 │   ├── 07-supplier-orders.cy.ts         # Commandes fournisseur + livraisons
 │   ├── 08-shop-orders.cy.ts             # Commandes boutique + balance
-│   ├── 09-payments.cy.ts                # Paiements (liste, création, détail, stats)
+│   ├── 09-payments.cy.ts                # Paiements (liste, création idempotente B1, détail, stats)
 │   ├── 10-notifications.cy.ts           # Notifications (UI + API)
-│   ├── 11-navigation-rbac.cy.ts         # Navigation + contrôle d'accès par rôle
-│   └── 12-api-integration.cy.ts         # Tests API complets (auth, CRUD, RBAC)
+│   ├── 11-navigation-rbac.cy.ts         # Navigation + RBAC (/403 RoleGuard)
+│   ├── 12-api-integration.cy.ts         # API complets — incl. M1 refresh/logout (l.52-79)
+│   ├── 13-stock-optimization.cy.ts      # Optimisation stock
+│   ├── 14-delivery-workflow.cy.ts       # Workflow livraison complet
+│   ├── 15-rate-limit-auth.cy.ts         # B2 : headers X-RateLimit-* (pas de hammering, cf. budget ci-dessous)
+│   ├── 16-gateway-security.cy.ts        # B3 : 401 JSON gateway (deny-by-default, internal non proxied)
+│   ├── 17-pagination-aggregates.cy.ts   # B5 : enveloppes + supplier-summary SQL (deltas)
+│   ├── 18-asap-payment.cy.ts            # ASAP : 1 seul paiement auto (asap-<orderId>)
+│   └── 19-delivery-roles.cy.ts          # Livraison : admin fournisseur livre, SHOP_ADMIN destinataire (UI+API)
 ├── fixtures/
 │   └── users.json                       # Utilisateurs de test
 ├── support/
@@ -112,7 +125,18 @@ npx cypress open
 npm run cy:run           # Tous les tests headless
 npm run cy:open          # Mode interactif
 npm run e2e              # Chrome headless
+npm run cy:run:local     # Config locale (cypress.config.local.ts, baseUrl 4200)
+npm run e2e:local        # Idem
 ```
+
+### Budget rate-limit E2E (B2)
+
+La suite fait ~70 logins depuis une seule IP : `RATE_LIMIT_AUTH_PER_MINUTE=1000`
+en CI (`.github/workflows/ci.yml`) et en local (`application-local.yml`,
+`.run/5_API_Gateway.run.xml`). Le 429 prod (10/min + `Retry-After: 60`) est prouvé
+par `RateLimitFilterTest` ; la spec 15 vérifie les headers `X-RateLimit-*`
+sans hammering (sinon suite flaky). Vérification manuelle du 429 :
+boucler 11× `POST $GW/api/auth/login` avec le défaut prod.
 
 ## Utilisateurs de test
 
@@ -127,23 +151,35 @@ npm run e2e              # Chrome headless
 
 ## Couverture des tests
 
-| Fichier | Tests | Ce qui est testé |
+| Fichier | `it(` statiques | Ce qui est testé |
 |---------|-------|------------------|
-| 01-auth | 14 | Login, register, logout, guards, mots de passe |
+| 01-auth | 14 | Login, register (M5 DISABLED), logout, guards, /404 |
 | 02-admin-dashboard | 7 | Stats, profil, actions rapides, sidebar |
-| 03-admin-users | 10 | CRUD utilisateurs, filtres, activation/désactivation |
+| 03-admin-users | 10 | CRUD utilisateurs, filtres, activation/désactivation (B5) |
 | 04-admin-organizations | 17 | Fournisseurs, boutiques, relations, stats org |
 | 05-supplier-products | 8 | Catalogue produits, création, filtres |
 | 06-supplier-stock | 10 | Gestion stock, quantités, statuts, dashboard |
-| 07-supplier-orders | 13 | Commandes, livraisons, paiements agents |
-| 08-shop-orders | 10 | Commandes boutique, création, balance |
-| 09-payments | 19 | Paiements liste, création, détail, QR, stats |
+| 07-supplier-orders | 15 | Commandes, livraisons, paiements agents |
+| 08-shop-orders | 17 | Commandes boutique, création, balance |
+| 09-payments | 23 | Paiements liste, création idempotente (B1), détail, QR, stats |
 | 10-notifications | 12 | UI notifications, API, triggering paiements |
-| 11-navigation-rbac | 29 | Navigation complète, RBAC par rôle |
-| 12-api-integration | 34 | API auth, admin, payments, orders, RBAC |
-| **Total** | **183** | **Toute l'application** |
+| 11-navigation-rbac | 30 | Navigation complète, RBAC par rôle (/403) |
+| 12-api-integration | 28 | API auth, refresh/logout (M1), admin, payments, orders, RBAC |
+| 13-stock-optimization | 19 | Optimisation stock |
+| 14-delivery-workflow | 26 | Workflow livraison complet |
+| 15-rate-limit-auth | 2 | B2 headers rate-limit |
+| 16-gateway-security | 3 | B3 401 gateway |
+| 17-pagination-aggregates | 3 | B5 enveloppes + summary SQL |
+| 18-asap-payment | 1 | ASAP auto-paiement unique |
+| 19-delivery-roles | 1 | Livraison multi-rôles |
+| **Total statique** | **246** | **19 specs** (contexte mission : 244/244 verts en run complet) |
 
 ## Résultats attendus
+
+> L'ancien tableau (12 specs / 183 tests) est obsolète : la suite compte désormais
+> **19 specs**. Le décompte statique donne 246 `it(` ; le run complet de référence
+> annonce 244/244 verts (écart de 2 à confirmer par run, p. ex. tests conditionnels
+> ou retries à 0 — `retries.runMode: 0`).
 
 ```
 Spec                           Tests  Passing  Failing  Pending  Skipped

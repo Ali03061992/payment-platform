@@ -1,4 +1,9 @@
 // @ts-nocheck
+/**
+ * Tests du composant PasswordSetupComponent.
+ * Perimetre : instanciation et blocs ngOnInit, onSubmit, goToLogin, PasswordSetupComponent (no token) (voir blocs describe/it).
+ * Moyens : HttpTestingController, TestBed + fixture, stubs jasmine, client HTTP de test.
+ */
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { Router, ActivatedRoute, convertToParamMap } from '@angular/router';

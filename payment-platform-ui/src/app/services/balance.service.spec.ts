@@ -1,4 +1,9 @@
 // @ts-nocheck
+/**
+ * Tests du service BalanceService.
+ * Perimetre : instanciation et blocs listBySupplier, listByShop, getHistory, adjust (voir blocs describe/it).
+ * Moyens : HttpTestingController, TestBed, client HTTP de test.
+ */
 import { TestBed } from '@angular/core/testing';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { BalanceService } from './balance.service';

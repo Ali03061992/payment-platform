@@ -25,6 +25,7 @@ import { LoginService } from '../../services/login.service';
 export class NotFoundComponent {
   constructor(private router: Router, private loginService: LoginService) {}
 
+  /** Retourne au tableau de bord si connecté, sinon vers le login. */
   back(): void {
     if (this.loginService.isLoggedIn()) {
       this.router.navigate(['/dashboard']);

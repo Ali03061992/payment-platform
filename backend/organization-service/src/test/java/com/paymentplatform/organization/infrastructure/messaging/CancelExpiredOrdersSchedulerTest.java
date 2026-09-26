@@ -9,6 +9,11 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.annotation.Transactional;
 
 import static org.mockito.Mockito.verify;
+/**
+ * Tests de CancelExpiredOrdersSchedulerTest.
+ * Perimetre : infrastructure CancelExpiredOrdersScheduler (messagerie/config/persistance).
+ * Moyens : contexte SpringBootTest, profil "test" (H2), mocks Mockito.
+ */
 
 @SpringBootTest
 @ActiveProfiles("test")

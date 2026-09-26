@@ -15,6 +15,11 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+/**
+ * Tests de UserTest.
+ * Perimetre : comportement de User (securite/domaine).
+ * Moyens : JUnit pur (AssertJ).
+ */
 
 class UserTest {
 

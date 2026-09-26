@@ -1,5 +1,8 @@
 # Bounded Contexts
 
+> Résumé — voir la référence exhaustive [domain-model-complete.md](domain-model-complete.md)
+> et [ddd.md](ddd.md). Index : [README.md](README.md).
+
 ## Carte des contextes
 
 ```

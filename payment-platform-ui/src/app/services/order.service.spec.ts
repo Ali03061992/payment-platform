@@ -1,4 +1,9 @@
 // @ts-nocheck
+/**
+ * Tests du service OrderService.
+ * Perimetre : instanciation et blocs downloadInvoice, exportCsv, create, list, getById (voir blocs describe/it).
+ * Moyens : HttpTestingController, TestBed, client HTTP de test.
+ */
 import { TestBed } from '@angular/core/testing';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { OrderService } from './order.service';

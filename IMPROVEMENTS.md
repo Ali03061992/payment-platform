@@ -1,5 +1,9 @@
 # Dashboard des Améliorations Fonctionnelles - Payment Platform
 
+> Backlog de prompts historique — antérieur aux phases 0/1, à ne pas exécuter tel quel
+> (plusieurs items B/M sont soldés). Suivi à jour : [COMPTE_RENDU_EXPERT.md](COMPTE_RENDU_EXPERT.md).
+> Index : [docs/README.md](docs/README.md).
+
 > Review fonctionnel expert — Chaque amélioration est formatée comme un **prompt** prêt à exécuter.
 
 ---

@@ -1,4 +1,9 @@
 // @ts-nocheck
+/**
+ * Tests du service PaymentService.
+ * Perimetre : instanciation et blocs list, getById, getByReference, create, confirm (voir blocs describe/it).
+ * Moyens : HttpTestingController, TestBed, client HTTP de test.
+ */
 import { TestBed } from '@angular/core/testing';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { PaymentService } from './payment.service';

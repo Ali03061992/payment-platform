@@ -18,6 +18,11 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
 import java.util.UUID;
 
+/**
+ * Cas d'usage de création d'un paiement (boutique → fournisseur).
+ * Valide les organisations via {@code OrganizationValidationClient}, applique
+ * l'idempotence par clé et publie l'événement de création en outbox.
+ */
 @Service
 public class CreatePaymentUseCase {
 
@@ -38,11 +43,28 @@ public class CreatePaymentUseCase {
         this.outbox = outbox;
     }
 
+    /**
+     * Crée un paiement sans clé d'idempotence explicite.
+     *
+     * @param request requête de création (boutique, fournisseur, montant)
+     * @param actorUserId auteur de l'action
+     * @param organizationId organisation porteuse de l'audit
+     * @return paiement créé sous forme de réponse
+     */
     @Transactional
     public PaymentResponse execute(CreatePaymentRequest request, UUID actorUserId, UUID organizationId) {
         return execute(request, actorUserId, organizationId, null);
     }
 
+    /**
+     * Crée un paiement ou rejoue celui déjà associé à la clé d'idempotence.
+     *
+     * @param request requête de création (boutique, fournisseur, montant)
+     * @param actorUserId auteur de l'action
+     * @param organizationId organisation porteuse de l'audit
+     * @param idempotencyKey clé anti-doublon (optionnelle)
+     * @return paiement créé ou existant sous forme de réponse
+     */
     @Transactional
     public PaymentResponse execute(CreatePaymentRequest request, UUID actorUserId, UUID organizationId,
                                    String idempotencyKey) {

@@ -1,4 +1,9 @@
 // @ts-nocheck
+/**
+ * Tests du service LoginService.
+ * Perimetre : instanciation et blocs login, refresh, getMe, logout, isLoggedIn (voir blocs describe/it).
+ * Moyens : HttpTestingController, TestBed, client HTTP de test.
+ */
 import { TestBed } from '@angular/core/testing';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { LoginService } from './login.service';

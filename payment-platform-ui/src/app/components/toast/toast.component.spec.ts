@@ -1,4 +1,9 @@
 // @ts-nocheck
+/**
+ * Tests du composant ToastComponent.
+ * Perimetre : instanciation et blocs ngOnInit, ngOnDestroy, getIcon, dismiss (voir blocs describe/it).
+ * Moyens : TestBed + fixture, stubs jasmine, client HTTP de test.
+ */
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ToastComponent } from './toast.component';

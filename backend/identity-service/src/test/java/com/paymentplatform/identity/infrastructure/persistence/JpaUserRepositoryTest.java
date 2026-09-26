@@ -20,6 +20,11 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+/**
+ * Tests de JpaUserRepositoryTest.
+ * Perimetre : persistance JPA JpaUserRepository (requetes derivees).
+ * Moyens : contexte SpringBootTest, profil "test" (H2).
+ */
 
 @SpringBootTest
 @ActiveProfiles("test")

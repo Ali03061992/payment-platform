@@ -16,6 +16,11 @@ import org.springframework.transaction.annotation.Transactional;
 import java.nio.charset.StandardCharsets;
 
 import static org.assertj.core.api.Assertions.assertThat;
+/**
+ * Tests de PaymentEventConsumerTest.
+ * Perimetre : infrastructure PaymentEventConsumer (messagerie/config/persistance).
+ * Moyens : contexte SpringBootTest, profil "test" (H2).
+ */
 
 @SpringBootTest
 @ActiveProfiles("test")

@@ -19,6 +19,11 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+/**
+ * Tests de InternalUserControllerTest.
+ * Perimetre : endpoints REST de InternalUserController (statuts HTTP, JSON, securite).
+ * Moyens : contexte SpringBootTest, MockMvc, profil "test" (H2).
+ */
 
 @SpringBootTest
 @ActiveProfiles("test")

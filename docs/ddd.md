@@ -1,5 +1,10 @@
 # DDD — Domain Model
 
+> Canonique (court, à jour). Compléments : [bounded-contexts.md](bounded-contexts.md) (résumé),
+> [business-rules.md](business-rules.md) (règles), [domain-model-complete.md](domain-model-complete.md)
+> (référence exhaustive). Historiques : [DDD_IMPROVEMENT_PLAN.md](DDD_IMPROVEMENT_PLAN.md),
+> [ANALYSE_FONCTIONNELLE_DDD.md](ANALYSE_FONCTIONNELLE_DDD.md). Index : [README.md](README.md).
+
 Chaque microservice suit une **architecture hexagonale** :
 
 ```

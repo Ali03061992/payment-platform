@@ -1,4 +1,9 @@
 // @ts-nocheck
+/**
+ * Tests du service AuditLogService.
+ * Perimetre : cas should call list with default params; should pass filter params (voir blocs describe/it).
+ * Moyens : HttpTestingController, TestBed, client HTTP de test.
+ */
 import { TestBed } from '@angular/core/testing';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { AuditLogService } from './audit-log.service';

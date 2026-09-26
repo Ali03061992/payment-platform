@@ -1,4 +1,9 @@
 // @ts-nocheck
+/**
+ * Tests du service ToastService.
+ * Perimetre : instanciation et blocs show, success, error, warning, info (voir blocs describe/it).
+ * Moyens : TestBed.
+ */
 import { TestBed } from '@angular/core/testing';
 import { ToastService, Toast } from './toast.service';
 

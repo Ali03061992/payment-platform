@@ -1,4 +1,9 @@
 // @ts-nocheck
+/**
+ * Tests du garde RoleGuard.
+ * Perimetre : instanciation et blocs canActivate (voir blocs describe/it).
+ * Moyens : TestBed, stubs jasmine.
+ */
 import { TestBed } from '@angular/core/testing';
 import { Router, ActivatedRouteSnapshot } from '@angular/router';
 import { RoleGuard } from './role.guard';

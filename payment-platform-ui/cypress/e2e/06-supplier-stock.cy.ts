@@ -1,3 +1,6 @@
+// Parcours 06-supplier-stock.cy.ts : 06 - Supplier: Stock Management; 06 - Supplier: Stock Dashboard; 06 - Supplier: Add Product to Stock (13 scenarios).
+// Prerequis : services live (gateway + microservices + UI), utilisateurs seedes via cy.ensureTestUsers(), connexion fournisseur via cy.loginAsSupplierAdmin(), UI live.
+// Budget E2E : pas de hammering auth (le 429 est prouve cote backend), nettoyages via before/beforeEach.
 describe('06 - Supplier: Stock Management', () => {
   before(() => cy.ensureTestUsers());
 

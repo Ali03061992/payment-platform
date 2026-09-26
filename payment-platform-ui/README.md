@@ -1,5 +1,9 @@
 # PaymentPlatformUi
 
+> Générique Angular CLI — pour le run local réel voir `npm run start:local` (port 4200),
+> `../deploy/LOCAL_DEV.md`, `../deploy/run-local.ps1` et [CYPRESS_E2E_GUIDE.md](CYPRESS_E2E_GUIDE.md).
+> Index docs : [../docs/README.md](../docs/README.md).
+
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 16.2.16.
 
 ## Development server

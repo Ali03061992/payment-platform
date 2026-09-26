@@ -1,10 +1,6 @@
 package com.paymentplatform.payment.application.usecase;
 
-import com.paymentplatform.payment.application.dto.PageResponse;
-import com.paymentplatform.payment.application.dto.PaymentNameResolver;
-import com.paymentplatform.payment.application.dto.PaymentResponse;
-import com.paymentplatform.payment.application.dto.PaymentStatsResponse;
-import com.paymentplatform.payment.application.dto.SupplierPaymentSummaryResponse;
+import com.paymentplatform.payment.application.dto.*;
 import com.paymentplatform.payment.domain.model.Payment;
 import com.paymentplatform.payment.domain.model.PaymentStatus;
 import com.paymentplatform.payment.domain.repository.PaymentRepository;
@@ -15,6 +11,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.util.*;
 
+/**
+ * Cas d'usage de consultation des paiements (listes paginées, synthèse
+ * par fournisseur et compteurs par statut), avec enrichissement des noms.
+ */
 @Service
 public class ListPaymentsUseCase {
 
@@ -29,18 +29,41 @@ public class ListPaymentsUseCase {
         this.orgClient = orgClient;
     }
 
+    /**
+     * Liste les paiements émis par une boutique, paginés en mémoire.
+     *
+     * @param shopId identifiant de la boutique
+     * @param page index de page (base 0)
+     * @param size taille de page
+     * @return page de paiements enrichie
+     */
     @Transactional(readOnly = true)
     public PageResponse<PaymentResponse> execute(UUID shopId, int page, int size) {
         List<Payment> allPayments = payments.findByShopId(shopId);
         return paginate(allPayments, page, size);
     }
 
+    /**
+     * Liste les paiements reçus par un fournisseur, paginés en mémoire.
+     *
+     * @param supplierId identifiant du fournisseur
+     * @param page index de page (base 0)
+     * @param size taille de page
+     * @return page de paiements enrichie
+     */
     @Transactional(readOnly = true)
     public PageResponse<PaymentResponse> executeBySupplier(UUID supplierId, int page, int size) {
         List<Payment> allPayments = payments.findBySupplierId(supplierId);
         return paginate(allPayments, page, size);
     }
 
+    /**
+     * Liste tous les paiements (usage administrateur), paginés en mémoire.
+     *
+     * @param page index de page (base 0)
+     * @param size taille de page
+     * @return page de paiements enrichie
+     */
     @Transactional(readOnly = true)
     public PageResponse<PaymentResponse> executeAll(int page, int size) {
         List<Payment> allPayments = payments.findAll();
@@ -121,6 +144,11 @@ public class ListPaymentsUseCase {
                 pendingTotal, pendingCount, rejectedTotal, rejectedCount);
     }
 
+    /**
+     * Calcule les compteurs de paiements par statut via requêtes de comptage.
+     *
+     * @return statistiques globales (total + détail par statut)
+     */
     @Transactional(readOnly = true)
     public PaymentStatsResponse stats() {
         return new PaymentStatsResponse(

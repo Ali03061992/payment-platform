@@ -1,5 +1,9 @@
 # Complete Domain Model — B2B Payment Platform
 
+> Référence exhaustive (EN) — antérieure aux phases 0/1 : la compléter par
+> [../COMPTE_RENDU_EXPERT.md](../COMPTE_RENDU_EXPERT.md) (B1 idempotence, M3 soft-delete,
+> M5 DISABLED, M4 purge SHOP_MANAGER). Index : [README.md](README.md).
+
 > Reference: `docs/domain-model-complete.md`
 > Covers: Organisation → Catalogue → Stock → Commande → Préparation → Livraison → Réception → Dette/Ledger → Paiement → Rapprochement
 

@@ -1,3 +1,6 @@
+// Parcours 04-admin-organizations.cy.ts : 04 - Admin: Supplier Management; 04 - Admin: Shop Management; 04 - Admin: Relation Management; 04 - Admin: Organization Stats (21 scenarios).
+// Prerequis : services live (gateway + microservices + UI), utilisateurs seedes via cy.ensureTestUsers(), connexion admin via cy.loginAsAdmin(), UI live.
+// Budget E2E : pas de hammering auth (le 429 est prouve cote backend), nettoyages via before/beforeEach.
 describe('04 - Admin: Supplier Management', () => {
   before(() => cy.ensureTestUsers());
 

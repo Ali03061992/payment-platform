@@ -1,5 +1,8 @@
 # TEST_COVERAGE_GUIDE.md
 
+> Complément coverage (JaCoCo + Karma) de [testing.md](testing.md) (canonique, à jour 25/09/2026).
+> Index : [README.md](README.md).
+
 Guide de lancement des tests avec rapport de coverage (JaCoCo + Karma/Jasmine).
 
 ---

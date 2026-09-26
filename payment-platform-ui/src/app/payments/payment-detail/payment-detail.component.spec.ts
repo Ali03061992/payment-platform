@@ -1,4 +1,9 @@
 // @ts-nocheck
+/**
+ * Tests du composant PaymentDetailComponent.
+ * Perimetre : instanciation et blocs ngOnInit, ngOnDestroy, confirm, reject, cancel (voir blocs describe/it).
+ * Moyens : TestBed + fixture, stubs jasmine, client HTTP de test, observables RxJS mockes.
+ */
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { Router, ActivatedRoute, convertToParamMap } from '@angular/router';

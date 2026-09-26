@@ -4,6 +4,10 @@ import { OrderService } from '../../services/order.service';
 import { Order } from '../../models/order.model';
 import { ToastService } from '../../services/toast.service';
 
+/**
+ * Écran livreur/admin des livraisons (acceptation, confirmation de date, livraison, rejet).
+ * Charge les livraisons visibles et pilote les modales d'action.
+ */
 @Component({
     selector: 'app-delivery-management',
     templateUrl: './delivery-management.component.html',
@@ -21,6 +25,7 @@ export class DeliveryManagementComponent implements OnInit {
   shopAgents: {id: string, name: string, roles?: string}[] = [];
   loadingShopAgents = false;
 
+  /** Indique si une entrée d'agent porte le rôle boutique admin. */
   isShopAdmin(entry: {roles?: string}): boolean {
     return (entry.roles || '').split(',').includes('SHOP_ADMIN');
   }
@@ -46,6 +51,7 @@ export class DeliveryManagementComponent implements OnInit {
     private toast: ToastService
   ) {}
 
+  /** Initialise la surbrillance éventuelle puis charge les livraisons. */
   ngOnInit(): void {
     this.route.queryParams.subscribe(params => {
       this.highlightedOrderId = params['orderId'] || null;
@@ -53,6 +59,7 @@ export class DeliveryManagementComponent implements OnInit {
     this.loadDeliveries();
   }
 
+  /** Charge les livraisons de l'acteur et surligne la commande ciblée si demandée. */
   loadDeliveries(): void {
     this.loading = true;
     this.orderService.myDeliveries().subscribe({
@@ -96,6 +103,7 @@ export class DeliveryManagementComponent implements OnInit {
     return this.deliveries.filter(d => d.status === 'DELIVERY_REJECTED');
   }
 
+  /** Accepte la livraison d'une commande prête. */
   acceptDelivery(order: Order): void {
     this.orderService.acceptDelivery(order.id, true).subscribe({
       next: () => {
@@ -108,18 +116,21 @@ export class DeliveryManagementComponent implements OnInit {
     });
   }
 
+  /** Ouvre la modale de rejet pour une commande. */
   openRejectModal(order: Order): void {
     this.rejectOrder = order;
     this.rejectReason = '';
     this.showRejectModal = true;
   }
 
+  /** Ferme la modale de rejet et réinitialise sa saisie. */
   closeRejectModal(): void {
     this.showRejectModal = false;
     this.rejectOrder = null;
     this.rejectReason = '';
   }
 
+  /** Soumet le rejet de la livraison sélectionnée avec motif éventuel. */
   submitReject(): void {
     if (!this.rejectOrder) return;
     this.rejecting = true;
@@ -137,17 +148,20 @@ export class DeliveryManagementComponent implements OnInit {
     });
   }
 
+  /** Ouvre la modale de confirmation de date pour une commande. */
   openConfirmDate(order: Order): void {
     this.confirmDateOrder = order;
     this.confirmedDate = order.plannedDeliveryDate || '';
     this.showConfirmDateModal = true;
   }
 
+  /** Ferme la modale de confirmation de date. */
   closeConfirmDate(): void {
     this.showConfirmDateModal = false;
     this.confirmDateOrder = null;
   }
 
+  /** Soumet la date de livraison confirmée pour la commande sélectionnée. */
   submitConfirmDate(): void {
     if (!this.confirmDateOrder || !this.confirmedDate) return;
     this.confirming = true;
@@ -165,6 +179,7 @@ export class DeliveryManagementComponent implements OnInit {
     });
   }
 
+  /** Ouvre la modale de livraison et charge les agents de la boutique destinataire. */
   openDeliver(order: Order): void {
     this.selectedOrder = order;
     this.receivedBy = '';
@@ -181,11 +196,13 @@ export class DeliveryManagementComponent implements OnInit {
     }
   }
 
+  /** Ferme la modale de livraison. */
   closeDeliver(): void {
     this.showDeliverModal = false;
     this.selectedOrder = null;
   }
 
+  /** Confirme la livraison auprès du destinataire sélectionné. */
   confirmDeliver(): void {
     if (!this.selectedOrder || !this.receivedBy) return;
     this.delivering = true;
@@ -203,6 +220,7 @@ export class DeliveryManagementComponent implements OnInit {
     });
   }
 
+  /** Traduit un statut de livraison en libellé français d'affichage. */
   statusLabel(s: string): string {
     const map: Record<string, string> = {
       READY_FOR_DELIVERY: 'En attente d\'acceptation',
@@ -215,6 +233,7 @@ export class DeliveryManagementComponent implements OnInit {
     return map[s] || s;
   }
 
+  /** Traduit un statut de livraison en classe CSS de badge. */
   statusClass(s: string): string {
     const map: Record<string, string> = {
       READY_FOR_DELIVERY: 'pending',
@@ -227,11 +246,13 @@ export class DeliveryManagementComponent implements OnInit {
     return map[s] || '';
   }
 
+  /** Ouvre le panneau de détail d'une commande. */
   openDetail(order: Order): void {
     this.selectedDetailOrder = order;
     this.showDetail = true;
   }
 
+  /** Ferme le panneau de détail d'une commande. */
   closeDetail(): void {
     this.showDetail = false;
     this.selectedDetailOrder = null;

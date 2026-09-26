@@ -10,6 +10,11 @@ import java.time.Instant;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+/**
+ * Tests de JpaOutboxEventStoreTest.
+ * Perimetre : infrastructure JpaOutboxEventStore (messagerie/config/persistance).
+ * Moyens : contexte SpringBootTest, profil "test" (H2).
+ */
 
 @SpringBootTest
 @ActiveProfiles("test")

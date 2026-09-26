@@ -1,3 +1,6 @@
+// Parcours 09-payments.cy.ts : 09 - Payments: List; 09 - Payments: Create; 09 - Payments: Detail; 09 - Payments: Stats; 09 - Payments: Cancel Flow (27 scenarios).
+// Prerequis : services live (gateway + microservices + UI), utilisateurs seedes via cy.ensureTestUsers(), connexion admin via cy.loginAsAdmin(), API live (Cypress.env apiUrl), UI live.
+// Budget E2E : pas de hammering auth (le 429 est prouve cote backend), nettoyages via before/beforeEach.
 function isPage(body: any): boolean {
   return body && typeof body === 'object' && !Array.isArray(body) && 'items' in body;
 }

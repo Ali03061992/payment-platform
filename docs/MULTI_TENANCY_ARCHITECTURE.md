@@ -1,5 +1,9 @@
 # Architecture Multi-Tenancy — Base de Données
 
+> Complément : décrit l'isolation par `organizationId` (row-level). Schéma réel à jour :
+> [database.md](database.md) (Liquibase V3/V6/V10, `refresh_tokens`, `deleted_at`).
+> Index : [README.md](README.md).
+
 ## 1. Vue d'ensemble
 
 La plateforme de paiement utilise une architecture **multi-tenant par données (shared database, row-level isolation)**. Toutes les données de tous les clients (fournisseurs et boutiques) coexistent dans les mêmes bases de données MySQL, séparées par microservice. L'isolation est garantie par des colonnes de clé de tenant dans chaque table et par la couche applicative.

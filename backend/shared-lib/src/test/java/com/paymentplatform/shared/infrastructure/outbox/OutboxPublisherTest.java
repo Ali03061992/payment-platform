@@ -3,6 +3,11 @@ package com.paymentplatform.shared.infrastructure.outbox;
 import org.junit.jupiter.api.Test;
 
 import static org.mockito.Mockito.*;
+/**
+ * Tests de OutboxPublisherTest.
+ * Perimetre : infrastructure OutboxPublisher (messagerie/config/persistance).
+ * Moyens : mocks Mockito, AMQP (mocks/config).
+ */
 
 class OutboxPublisherTest {
 

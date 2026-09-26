@@ -17,6 +17,11 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+/**
+ * Tests de JwtServiceTest.
+ * Perimetre : comportement de JwtService (securite/domaine).
+ * Moyens : JUnit pur (AssertJ).
+ */
 
 class JwtServiceTest {
 

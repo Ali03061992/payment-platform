@@ -1,3 +1,6 @@
+// Parcours 14-delivery-workflow.cy.ts : 14 - Delivery: Full API Lifecycle; 14 - Delivery: Supplier Admin Order Management UI; 14 - Delivery: Agent Delivery Management UI; 14 - Delivery: Cross-role Access Control (40 scenarios).
+// Prerequis : services live (gateway + microservices + UI), utilisateurs seedes via cy.ensureTestUsers(), connexion fournisseur via cy.loginAsSupplierAdmin(), connexion boutique via cy.loginAsShopAdmin(), API live (Cypress.env apiUrl), UI live.
+// Budget E2E : pas de hammering auth (le 429 est prouve cote backend), nettoyages via before/beforeEach.
 const API = () => Cypress.env('apiUrl') || 'http://localhost:8081';
 const hdr = (t: string) => ({ Authorization: `Bearer ${t}` });
 
