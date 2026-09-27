@@ -3,6 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { DisputeService } from '../../services/dispute.service';
 import { Dispute } from '../../models/dispute.model';
 import { ToastService } from '../../services/toast.service';
+import { ConfirmDialogService } from '../../components/confirm-dialog/confirm-dialog.service';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -23,7 +24,8 @@ export class DisputeDetailComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private router: Router,
     private disputeService: DisputeService,
-    private toast: ToastService
+    private toast: ToastService,
+    private confirmDialog: ConfirmDialogService
   ) {}
 
   ngOnInit(): void {
@@ -54,19 +56,32 @@ export class DisputeDetailComponent implements OnInit, OnDestroy {
 
   resolveDispute(): void {
     if (!this.dispute) return;
-    if (!confirm('Marquer ce litige comme résolu ?')) return;
-    this.subscriptions.add(this.disputeService.resolve(this.dispute.id, 'RESOLVED').subscribe({
-      next: (data: Dispute) => { this.dispute = data; this.toast.success('Litige résolu'); },
-      error: (e: any) => { this.toast.error(e.error?.message || 'Erreur'); }
+    const id = this.dispute.id;
+    this.subscriptions.add(this.confirmDialog.confirm({
+      title: 'Marquer comme résolu',
+      message: 'Marquer ce litige comme résolu ?',
+    }).subscribe(ok => {
+      if (!ok) return;
+      this.subscriptions.add(this.disputeService.resolve(id, 'RESOLVED').subscribe({
+        next: (data: Dispute) => { this.dispute = data; this.toast.success('Litige résolu'); },
+        error: (e: any) => { this.toast.error(e.error?.message || 'Erreur'); }
+      }));
     }));
   }
 
   closeDispute(): void {
     if (!this.dispute) return;
-    if (!confirm('Fermer ce litige ?')) return;
-    this.subscriptions.add(this.disputeService.resolve(this.dispute.id, 'CLOSED').subscribe({
-      next: (data: Dispute) => { this.dispute = data; this.toast.success('Litige fermé'); },
-      error: (e: any) => { this.toast.error(e.error?.message || 'Erreur'); }
+    const id = this.dispute.id;
+    this.subscriptions.add(this.confirmDialog.confirm({
+      title: 'Fermer le litige',
+      message: 'Fermer ce litige ?',
+      danger: true,
+    }).subscribe(ok => {
+      if (!ok) return;
+      this.subscriptions.add(this.disputeService.resolve(id, 'CLOSED').subscribe({
+        next: (data: Dispute) => { this.dispute = data; this.toast.success('Litige fermé'); },
+        error: (e: any) => { this.toast.error(e.error?.message || 'Erreur'); }
+      }));
     }));
   }
 

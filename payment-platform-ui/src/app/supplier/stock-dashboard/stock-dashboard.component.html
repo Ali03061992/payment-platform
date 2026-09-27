@@ -70,7 +70,7 @@
                   <button class="btn btn-sm btn-success" (click)="openMovement(p, 'IN')" title="Entrée">+</button>
                   <button class="btn btn-sm btn-danger" (click)="openMovement(p, 'OUT')" title="Sortie">-</button>
                   <button class="btn btn-sm btn-warning" (click)="openMovement(p, 'ADJUSTMENT')" title="Ajuster">~</button>
-                  <button class="btn btn-sm btn-secondary" (click)="openHistory(p)" title="Historique">📋</button>
+                  <button class="btn btn-sm btn-secondary" (click)="openHistory(p)" title="Historique" aria-label="Historique"><app-icon name="clock" [size]="16"></app-icon></button>
                 </td>
               </tr>
             }

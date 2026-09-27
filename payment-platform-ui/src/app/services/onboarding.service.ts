@@ -55,30 +55,30 @@ export class OnboardingService {
       {
         title: 'Bienvenue sur Payment Platform',
         description: 'Cette plateforme vous permet de gérer les utilisateurs, fournisseurs, boutiques et paiements.',
-        icon: '👋',
+        icon: 'sparkles',
       },
       {
         title: 'Tableau de bord',
         description: 'Consultez les statistiques globales : nombre d\'utilisateurs, comptes actifs et fournisseurs enregistrés.',
-        icon: '📊',
+        icon: 'dashboard',
         targetSelector: '.stats-grid',
       },
       {
         title: 'Gestion des utilisateurs',
         description: 'Créez, activez ou désactivez les comptes utilisateurs depuis le menu latéral.',
-        icon: '👥',
+        icon: 'users',
         targetSelector: 'nav.sidebar-nav',
       },
       {
         title: 'Fournisseurs & Boutiques',
         description: 'Gérez les relations fournisseur-boutique et suivez les statistiques d\'organisations.',
-        icon: '🏭',
+        icon: 'factory',
         targetSelector: 'nav.sidebar-nav',
       },
       {
         title: 'Paiements & QR Scanner',
         description: 'Suivez tous les paiements et scannez les QR codes directement depuis l\'application.',
-        icon: '💳',
+        icon: 'card',
         targetSelector: 'nav.sidebar-nav',
       },
     ];
@@ -89,30 +89,30 @@ export class OnboardingService {
       {
         title: 'Bienvenue sur Payment Platform',
         description: 'En tant que fournisseur, vous pouvez gérer votre stock, produits et suivre vos commandes.',
-        icon: '👋',
+        icon: 'sparkles',
       },
       {
         title: 'Gestion du stock',
         description: 'Ajoutez et gérez vos produits, catégories et familles depuis le menu latéral.',
-        icon: '📦',
+        icon: 'box',
         targetSelector: 'nav.sidebar-nav',
       },
       {
         title: 'Optimisation',
         description: 'Utilisez l\'intelligence artificielle pour optimiser votre gestion de stock.',
-        icon: '🧠',
+        icon: 'cpu',
         targetSelector: 'nav.sidebar-nav',
       },
       {
         title: 'Commandes & Livraisons',
         description: 'Suivez les commandes passées par les boutiques et gérez vos livraisons.',
-        icon: '🛒',
+        icon: 'cart',
         targetSelector: 'nav.sidebar-nav',
       },
       {
         title: 'Paiements',
         description: 'Consultez l\'historique des paiements et les paiements de vos agents.',
-        icon: '💳',
+        icon: 'card',
         targetSelector: 'nav.sidebar-nav',
       },
     ];
@@ -123,30 +123,30 @@ export class OnboardingService {
       {
         title: 'Bienvenue sur Payment Platform',
         description: 'En tant que boutique, vous pouvez passer des commandes et suivre vos paiements.',
-        icon: '👋',
+        icon: 'sparkles',
       },
       {
         title: 'Mes commandes',
         description: 'Consultez et créez de nouvelles commandes auprès de vos fournisseurs.',
-        icon: '🛒',
+        icon: 'cart',
         targetSelector: 'nav.sidebar-nav',
       },
       {
         title: 'Balance',
         description: 'Suivez votre solde et l\'historique de vos transactions.',
-        icon: '⚖️',
+        icon: 'scale',
         targetSelector: 'nav.sidebar-nav',
       },
       {
         title: 'Paiements',
         description: 'Consultez vos paiements et génerez des exports.',
-        icon: '💳',
+        icon: 'card',
         targetSelector: 'nav.sidebar-nav',
       },
       {
         title: 'Scanner QR',
         description: 'Scanpez les QR codes pour effectuer des paiements rapidement.',
-        icon: '📱',
+        icon: 'scan',
         targetSelector: 'nav.sidebar-nav',
       },
     ];
@@ -157,18 +157,18 @@ export class OnboardingService {
       {
         title: 'Bienvenue sur Payment Platform',
         description: 'Explorez les fonctionnalités disponibles pour votre rôle.',
-        icon: '👋',
+        icon: 'sparkles',
       },
       {
         title: 'Paiements',
         description: 'Consultez et gérez vos paiements depuis le menu latéral.',
-        icon: '💳',
+        icon: 'card',
         targetSelector: 'nav.sidebar-nav',
       },
       {
         title: 'Scanner QR',
         description: 'Utilisez le scanner QR pour effectuer des paiements.',
-        icon: '📱',
+        icon: 'scan',
         targetSelector: 'nav.sidebar-nav',
       },
     ];

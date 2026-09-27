@@ -2,6 +2,7 @@ package com.paymentplatform.organization.application.usecase;
 
 import com.paymentplatform.organization.application.dto.*;
 import com.paymentplatform.organization.domain.model.Product;
+import com.paymentplatform.organization.domain.repository.OrderRepository;
 import com.paymentplatform.organization.domain.repository.ProductRepository;
 import com.paymentplatform.shared.domain.exception.ConflictException;
 import com.paymentplatform.shared.domain.exception.NotFoundException;
@@ -35,12 +36,16 @@ class OrderUseCaseH2Test {
     @Autowired private ConfirmOrderUseCase confirmOrder;
     @Autowired private PrepareOrderUseCase prepareOrder;
     @Autowired private DeliverOrderUseCase deliverOrder;
+    @Autowired private AcceptDeliveryUseCase acceptDelivery;
+    @Autowired private ConfirmDeliveryUseCase confirmDelivery;
+    @Autowired private AutoAcceptDeliveriesUseCase autoAcceptDeliveries;
     @Autowired private AcceptOrderUseCase acceptOrder;
     @Autowired private CancelOrderUseCase cancelOrder;
     @Autowired private RejectOrderUseCase rejectOrder;
     @Autowired private DeliveryRejectOrderUseCase deliveryRejectOrder;
     @Autowired private UpdateOrderUseCase updateOrder;
     @Autowired private ProductRepository products;
+    @Autowired private OrderRepository orderRepository;
 
     private UUID supplierId;
     private UUID shopId;
@@ -175,20 +180,106 @@ class OrderUseCaseH2Test {
     }
 
     @Test
-    void deliveryReject_fromInDelivery_succeeds() {
+    void deliveryReject_fromReadyForDelivery_cancelsOrderAndReleasesStock() {
         var order = createShopOrder();
-        confirmOrder.execute(order.id(), UUID.fromString("00000000-0000-0000-0000-000000000010"));
-        prepareOrder.execute(order.id(), UUID.fromString("00000000-0000-0000-0000-000000000010"));
-        prepareOrder.readyForDelivery(order.id(), UUID.fromString("00000000-0000-0000-0000-000000000010"));
+        var actor = UUID.fromString("00000000-0000-0000-0000-000000000010");
+        confirmOrder.execute(order.id(), actor);
+        prepareOrder.execute(order.id(), actor);
+        prepareOrder.readyForDelivery(order.id(), actor);
 
-        // Manually set to IN_DELIVERY
-        // In the real flow, this would be done by a delivery agent
-        // For testing, we need to simulate the state
-        // Actually, let's go through the proper flow
-        // The readyForDelivery sets status to READY_FOR_DELIVERY
-        // Then someone needs to assign and set IN_DELIVERY
-        // Since we can't easily set IN_DELIVERY without going through proper flow,
-        // let's test the error case
+        var rejected = deliveryRejectOrder.execute(order.id(), actor, "Client injoignable");
+
+        assertThat(rejected.status()).isEqualTo("CANCELLED");
+        assertThat(rejected.deliveryRejectionReason()).isEqualTo("Client injoignable");
+        Product product = products.findById(productId).orElseThrow();
+        assertThat(product.getReservedQty()).isEqualTo(0);
+    }
+
+    @Test
+    void acceptDelivery_rejected_cancelsOrder() {
+        var order = createShopOrder();
+        var actor = UUID.fromString("00000000-0000-0000-0000-000000000010");
+        confirmOrder.execute(order.id(), actor);
+        prepareOrder.execute(order.id(), actor);
+        prepareOrder.readyForDelivery(order.id(), actor);
+
+        var rejected = acceptDelivery.execute(order.id(), false, "Véhicule en panne", actor);
+
+        assertThat(rejected.status()).isEqualTo("CANCELLED");
+        assertThat(rejected.deliveryRejectionReason()).isEqualTo("Véhicule en panne");
+    }
+
+    @Test
+    void fullDeliveryFlow_deliver_setsDelivered() {
+        var order = createShopOrder();
+        var actor = UUID.fromString("00000000-0000-0000-0000-000000000010");
+        var agent = UUID.fromString("00000000-0000-0000-0000-000000000004");
+        confirmOrder.execute(order.id(), actor);
+        prepareOrder.execute(order.id(), actor);
+        prepareOrder.readyForDelivery(order.id(), actor);
+        var entity = orderRepository.findById(order.id()).orElseThrow();
+        entity.assignDeliveryAgent(agent);
+        orderRepository.save(entity);
+        acceptDelivery.execute(order.id(), true, null, actor);
+        confirmDelivery.execute(order.id(), java.time.LocalDate.now().plusDays(1), actor);
+
+        var delivered = deliverOrder.execute(order.id(), actor, actor);
+
+        assertThat(delivered.status()).isEqualTo("DELIVERED");
+    }
+
+    @Test
+    void autoAccept_staleDelivered_acceptsOrder() throws Exception {
+        var order = createShopOrder();
+        var actor = UUID.fromString("00000000-0000-0000-0000-000000000010");
+        var agent = UUID.fromString("00000000-0000-0000-0000-000000000004");
+        confirmOrder.execute(order.id(), actor);
+        prepareOrder.execute(order.id(), actor);
+        prepareOrder.readyForDelivery(order.id(), actor);
+        var entity = orderRepository.findById(order.id()).orElseThrow();
+        entity.assignDeliveryAgent(agent);
+        orderRepository.save(entity);
+        acceptDelivery.execute(order.id(), true, null, actor);
+        confirmDelivery.execute(order.id(), java.time.LocalDate.now().plusDays(1), actor);
+        deliverOrder.execute(order.id(), actor, actor);
+
+        backdateDeliveredAt(order.id(), 16);
+
+        int accepted = autoAcceptDeliveries.execute();
+
+        assertThat(accepted).isEqualTo(1);
+        var acceptedOrder = orderRepository.findById(order.id()).orElseThrow();
+        assertThat(acceptedOrder.getStatus()).isEqualTo("ACCEPTED");
+    }
+
+    @Test
+    void autoAccept_recentDelivered_keepsDelivered() {
+        var order = createShopOrder();
+        var actor = UUID.fromString("00000000-0000-0000-0000-000000000010");
+        var agent = UUID.fromString("00000000-0000-0000-0000-000000000004");
+        confirmOrder.execute(order.id(), actor);
+        prepareOrder.execute(order.id(), actor);
+        prepareOrder.readyForDelivery(order.id(), actor);
+        var entity = orderRepository.findById(order.id()).orElseThrow();
+        entity.assignDeliveryAgent(agent);
+        orderRepository.save(entity);
+        acceptDelivery.execute(order.id(), true, null, actor);
+        confirmDelivery.execute(order.id(), java.time.LocalDate.now().plusDays(1), actor);
+        deliverOrder.execute(order.id(), actor, actor);
+
+        int accepted = autoAcceptDeliveries.execute();
+
+        assertThat(accepted).isEqualTo(0);
+        var stillDelivered = orderRepository.findById(order.id()).orElseThrow();
+        assertThat(stillDelivered.getStatus()).isEqualTo("DELIVERED");
+    }
+
+    private void backdateDeliveredAt(UUID orderId, long minutesAgo) throws Exception {
+        var entity = orderRepository.findById(orderId).orElseThrow();
+        var field = com.paymentplatform.organization.domain.model.Order.class.getDeclaredField("deliveredAt");
+        field.setAccessible(true);
+        field.set(entity, java.time.Instant.now().minus(minutesAgo, java.time.temporal.ChronoUnit.MINUTES));
+        orderRepository.saveAndFlush(entity);
     }
 
     @Test

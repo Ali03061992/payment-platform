@@ -12,6 +12,8 @@ import { of, throwError, Subject } from 'rxjs';
 import { DeliveryManagementComponent } from './delivery-management.component';
 import { OrderService } from '../../services/order.service';
 import { ToastService } from '../../services/toast.service';
+import { LoginService } from '../../services/login.service';
+import { ConfirmDialogService } from '../../components/confirm-dialog/confirm-dialog.service';
 import { Order } from '../../models/order.model';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
@@ -20,6 +22,8 @@ describe('DeliveryManagementComponent', () => {
   let fixture: ComponentFixture<DeliveryManagementComponent>;
   let orderService: jasmine.SpyObj<OrderService>;
   let toast: jasmine.SpyObj<ToastService>;
+  let loginService: jasmine.SpyObj<LoginService>;
+  let confirmDialog: jasmine.SpyObj<ConfirmDialogService>;
 
   const mockOrder: Order = {
     id: '1', reference: 'ORD-001', supplierId: '1', shopId: '2', supplierName: null, shopName: null,
@@ -31,8 +35,11 @@ describe('DeliveryManagementComponent', () => {
   };
 
   beforeEach(() => {
-    const orderSpy = jasmine.createSpyObj('OrderService', ['myDeliveries', 'deliver', 'confirmDelivery', 'acceptDelivery', 'getShopAgents']);
+    const orderSpy = jasmine.createSpyObj('OrderService', ['myDeliveries', 'deliver', 'confirmDelivery', 'acceptDelivery', 'getShopAgents', 'accept', 'reject']);
     const toastSpy = jasmine.createSpyObj('ToastService', ['success', 'error']);
+    const loginSpy = jasmine.createSpyObj('LoginService', ['getCurrentUser']);
+    const confirmSpy = jasmine.createSpyObj('ConfirmDialogService', ['confirm']);
+    confirmSpy.confirm.and.returnValue(of(true));
     orderSpy.myDeliveries.and.returnValue(of([]));
     orderSpy.getShopAgents.and.returnValue(of([]));
 
@@ -42,6 +49,8 @@ describe('DeliveryManagementComponent', () => {
     providers: [
         { provide: OrderService, useValue: orderSpy },
         { provide: ToastService, useValue: toastSpy },
+        { provide: LoginService, useValue: loginSpy },
+        { provide: ConfirmDialogService, useValue: confirmSpy },
         { provide: ActivatedRoute, useValue: { queryParams: of({}) } },
         provideHttpClient(withInterceptorsFromDi()),
         provideHttpClientTesting()
@@ -51,6 +60,8 @@ describe('DeliveryManagementComponent', () => {
     component = fixture.componentInstance;
     orderService = TestBed.inject(OrderService) as jasmine.SpyObj<OrderService>;
     toast = TestBed.inject(ToastService) as jasmine.SpyObj<ToastService>;
+    loginService = TestBed.inject(LoginService) as jasmine.SpyObj<LoginService>;
+    confirmDialog = TestBed.inject(ConfirmDialogService) as jasmine.SpyObj<ConfirmDialogService>;
   });
 
   it('should create', () => {
@@ -133,6 +144,61 @@ describe('DeliveryManagementComponent', () => {
       component.receivedBy = '3';
       component.confirmDeliver();
       expect(toast.error).toHaveBeenCalled();
+    });
+  });
+
+  describe('pendingReception', () => {
+    it('should filter DELIVERED orders', () => {
+      component.deliveries = [mockOrder, { ...mockOrder, id: '2', status: 'DELIVERED' }];
+      expect(component.pendingReception.length).toBe(1);
+    });
+  });
+
+  describe('isShopUser', () => {
+    it('should return true for SHOP_ADMIN', () => {
+      loginService.getCurrentUser.and.returnValue({ roles: ['SHOP_ADMIN'] } as any);
+      expect(component.isShopUser()).toBeTrue();
+    });
+
+    it('should return true for SHOP_AGENT', () => {
+      loginService.getCurrentUser.and.returnValue({ roles: ['SHOP_AGENT'] } as any);
+      expect(component.isShopUser()).toBeTrue();
+    });
+
+    it('should return false for supplier roles', () => {
+      loginService.getCurrentUser.and.returnValue({ roles: ['SUPPLIER_AGENT'] } as any);
+      expect(component.isShopUser()).toBeFalse();
+    });
+  });
+
+  describe('acceptReception', () => {
+    it('should accept reception', () => {
+      orderService.accept.and.returnValue(of({ ...mockOrder, status: 'ACCEPTED' }));
+      component.acceptReception(mockOrder);
+      expect(orderService.accept).toHaveBeenCalledWith('1');
+      expect(toast.success).toHaveBeenCalledWith('Réception acceptée');
+    });
+
+    it('should handle error', () => {
+      orderService.accept.and.returnValue(throwError(() => ({ error: { message: 'Fail' } })));
+      component.acceptReception(mockOrder);
+      expect(toast.error).toHaveBeenCalledWith('Fail');
+    });
+  });
+
+  describe('rejectReception', () => {
+    it('should reject on confirm', () => {
+      confirmDialog.confirm.and.returnValue(of(true));
+      orderService.reject.and.returnValue(of({ ...mockOrder, status: 'REJECTED' }));
+      component.rejectReception(mockOrder);
+      expect(orderService.reject).toHaveBeenCalledWith('1');
+      expect(toast.success).toHaveBeenCalledWith('Réception rejetée');
+    });
+
+    it('should not reject when not confirmed', () => {
+      confirmDialog.confirm.and.returnValue(of(false));
+      component.rejectReception(mockOrder);
+      expect(orderService.reject).not.toHaveBeenCalled();
     });
   });
 

@@ -8,7 +8,7 @@
   <!-- HTTPS Warning -->
   @if (!isSecureContext) {
     <div class="https-warning">
-      <div class="warning-icon">🔒</div>
+        <div class="warning-icon"><app-icon name="lock" [size]="28"></app-icon></div>
       <div class="warning-text">
         <strong>HTTPS requis pour la caméra</strong>
         <p>La caméra fonctionne uniquement sur HTTPS ou localhost.</p>
@@ -22,7 +22,7 @@
   <!-- Camera Error -->
   @if (cameraError && isSecureContext) {
     <div class="camera-error">
-      <span class="error-icon">⚠️</span>
+        <span class="error-icon"><app-icon name="alert" [size]="20"></app-icon></span>
       <span>{{ cameraError }}</span>
     </div>
   }
@@ -45,7 +45,7 @@
         }
         @if (!cameraActive) {
           <div class="camera-placeholder" (click)="startCamera()">
-            <span class="camera-icon">📷</span>
+            <span class="camera-icon"><app-icon name="camera" [size]="40"></app-icon></span>
             <span>Appuyez pour activer la caméra</span>
           </div>
         }

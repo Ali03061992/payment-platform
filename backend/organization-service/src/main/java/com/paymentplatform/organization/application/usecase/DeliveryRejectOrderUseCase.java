@@ -4,6 +4,7 @@ import com.paymentplatform.organization.application.dto.OrderResponse;
 import com.paymentplatform.organization.domain.model.Order;
 import com.paymentplatform.organization.domain.model.OrderEvent;
 import com.paymentplatform.organization.domain.model.OrderItem;
+import com.paymentplatform.organization.domain.model.Product;
 import com.paymentplatform.organization.domain.repository.OrderEventRepository;
 import com.paymentplatform.organization.domain.repository.OrderItemRepository;
 import com.paymentplatform.organization.domain.repository.OrderRepository;
@@ -38,6 +39,11 @@ public class DeliveryRejectOrderUseCase {
         this.outbox = outbox;
     }
 
+    /**
+     * Rejette une livraison : la commande d'origine est annulée (montant dû
+     * soldé, aucun paiement créé), le stock réservé est restitué et le motif
+     * est conservé pour audit.
+     */
     @Transactional
     public OrderResponse execute(UUID orderId, UUID actorUserId, String reason) {
         Order order = orders.findById(orderId)
@@ -48,16 +54,25 @@ public class DeliveryRejectOrderUseCase {
             throw new ConflictException("La commande doit être en statut READY_FOR_DELIVERY ou IN_DELIVERY pour rejeter la livraison");
         }
 
-        order.deliveryReject(reason);
+        List<OrderItem> items = orderItems.findByOrderId(orderId);
+        for (OrderItem item : items) {
+            Product product = products.findByIdForUpdate(item.getProductId())
+                    .orElseThrow(() -> new NotFoundException("Produit non trouvé : " + item.getProductId()));
+            product.setReservedQty(Math.max(0, product.getReservedQty() - item.getQuantity()));
+            products.save(product);
+        }
+
+        if (reason != null && !reason.isBlank()) {
+            order.deliveryReject(reason);
+        }
+        order.cancel();
         orders.save(order);
 
-        List<OrderItem> items = orderItems.findByOrderId(orderId);
-
-        events.save(OrderEvent.create(orderId, "ORDER_DELIVERY_REJECTED", actorUserId,
-                reason != null ? reason : "Livraison rejetée"));
-        outbox.append(new OrderEvents.OrderDeliveryRejectedEvent(UUID.randomUUID(), Instant.now(),
+        events.save(OrderEvent.create(orderId, "ORDER_CANCELLED", actorUserId,
+                reason != null ? reason : "Livraison rejetée : commande annulée"));
+        outbox.append(new OrderEvents.OrderCancelledEvent(UUID.randomUUID(), Instant.now(),
                 orderId, order.getReference(),
-                order.getShopId(), order.getSupplierId(), actorUserId, reason),
+                order.getShopId(), order.getSupplierId(), actorUserId),
                 String.valueOf(orderId));
 
         return OrderResponse.from(order, items);

@@ -38,7 +38,7 @@
 <!-- Error -->
 @if (error && !loading) {
   <div class="error-state">
-    <div class="error-icon">⚠️</div>
+    <div class="error-icon"><app-icon name="alert" [size]="32"></app-icon></div>
     <p>{{ error }}</p>
     <button class="btn btn-primary" (click)="loadOptimization()">Reessayer</button>
   </div>
@@ -49,37 +49,37 @@
     <!-- Overview KPIs -->
     <div class="kpi-grid">
       <div class="kpi-card">
-        <div class="kpi-icon" style="background:#e3f2fd">📦</div>
+        <div class="kpi-icon" style="background:#e3f2fd"><app-icon name="box" [size]="24"></app-icon></div>
         <div class="kpi-value">{{ data.products.length }}</div>
         <div class="kpi-label">Produits analyses</div>
       </div>
       <div class="kpi-card">
-        <div class="kpi-icon" style="background:#fff3e0">💰</div>
+        <div class="kpi-icon" style="background:#fff3e0"><app-icon name="wallet" [size]="24"></app-icon></div>
         <div class="kpi-value">{{ data.totalStockValue | number:'1.0-0' }}</div>
         <div class="kpi-label">Valeur stock</div>
       </div>
       <div class="kpi-card">
-        <div class="kpi-icon" style="background:#fce4ec">🔒</div>
+        <div class="kpi-icon" style="background:#fce4ec"><app-icon name="lock" [size]="24"></app-icon></div>
         <div class="kpi-value">{{ data.totalSafetyStockValue | number:'1.0-0' }}</div>
         <div class="kpi-label">Stock securite</div>
       </div>
       @if (data.productsToOrder > 0) {
         <div class="kpi-card">
-          <div class="kpi-icon" style="background:#fce4ec">🛒</div>
+          <div class="kpi-icon" style="background:#fce4ec"><app-icon name="cart" [size]="24"></app-icon></div>
           <div class="kpi-value">{{ data.productsToOrder }}</div>
           <div class="kpi-label">A commander</div>
         </div>
       }
       @if (data.productsAtRisk > 0) {
         <div class="kpi-card">
-          <div class="kpi-icon" style="background:#fce4ec">⚠️</div>
+          <div class="kpi-icon" style="background:#fce4ec"><app-icon name="alert" [size]="24"></app-icon></div>
           <div class="kpi-value">{{ data.productsAtRisk }}</div>
           <div class="kpi-label">Rupture</div>
         </div>
       }
       @if (data.productsOverstocked > 0) {
         <div class="kpi-card">
-          <div class="kpi-icon" style="background:#fff3e0">📈</div>
+          <div class="kpi-icon" style="background:#fff3e0"><app-icon name="chart" [size]="24"></app-icon></div>
           <div class="kpi-value">{{ data.productsOverstocked }}</div>
           <div class="kpi-label">Surstock</div>
         </div>

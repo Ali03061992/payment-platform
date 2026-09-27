@@ -80,6 +80,9 @@ public interface OrderRepository extends JpaRepository<Order, UUID> {
     @Query("SELECT o FROM Order o WHERE o.status = :status AND o.createdAt < :cutoff")
     List<Order> findByStatusAndCreatedAtBefore(@Param("status") String status, @Param("cutoff") Instant cutoff);
 
+    @Query("SELECT o FROM Order o WHERE o.status = :status AND o.deliveredAt < :cutoff")
+    List<Order> findByStatusAndDeliveredAtBefore(@Param("status") String status, @Param("cutoff") Instant cutoff);
+
     @Query(value = "SELECT DATE_FORMAT(o.created_at, '%Y-%m-01') AS month, " +
             "COUNT(*) AS order_count, " +
             "COALESCE(SUM(o.total), 0) AS revenue " +

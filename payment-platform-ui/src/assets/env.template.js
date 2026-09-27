@@ -12,9 +12,6 @@
  *   FCM_VAPID_KEY
  *
  * Voir deploy/.env.example.
- *
- * OAuth/passwordless : IS_DEV (STRING 'true' en local/dev, vide = prod sure
- * par defaut via envsubst). Voir deploy/.env.example et docs/OAUTH_SETUP.md.
  */
 (function (window) {
   window.__env = window.__env || {};
@@ -25,8 +22,4 @@
   window.__env.FIREBASE_MESSAGING_SENDER_ID = '${FIREBASE_MESSAGING_SENDER_ID}';
   window.__env.FIREBASE_APP_ID = '${FIREBASE_APP_ID}';
   window.__env.FCM_VAPID_KEY = '${FCM_VAPID_KEY}';
-  // OAuth/passwordless : STRING 'true' en local/dev, VIDE (= prod sure) par
-  // defaut via envsubst. Vide = panneau dev masque + dev-login inactif.
-  // Ne jamais mettre 'true' en prod. Voir docs/OAUTH_SETUP.md.
-  window.__env.IS_DEV = '${IS_DEV}';
 })(typeof window !== 'undefined' ? window : this);

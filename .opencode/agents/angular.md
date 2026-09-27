@@ -45,4 +45,5 @@ You are an expert Angular developer working on the Payment Platform project.
 4. API calls use `/api/` prefix (proxied to backend)
 5. Run `npx ng test --watch=false --browsers=ChromeHeadlessCI` from `payment-platform-ui/` to verify changes
 6. Never add comments unless explicitly asked
-7. Never use emojis in code (only in UI templates where already used)
+7. Never use emojis anywhere (code or UI). Icons go through `<app-icon name="...">`
+   (`src/app/components/icon/icon.component.ts`) — see the css-specialist agent

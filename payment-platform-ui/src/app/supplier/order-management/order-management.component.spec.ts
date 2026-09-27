@@ -15,6 +15,7 @@ import { OrderService } from '../../services/order.service';
 import { SupplierAgentService } from '../../services/supplier-agent.service';
 import { StockService } from '../../services/stock.service';
 import { ToastService } from '../../services/toast.service';
+import { ConfirmDialogService } from '../../components/confirm-dialog/confirm-dialog.service';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('OrderManagementComponent', () => {
@@ -23,6 +24,7 @@ describe('OrderManagementComponent', () => {
   let orderService: jasmine.SpyObj<OrderService>;
   let agentService: jasmine.SpyObj<SupplierAgentService>;
   let toast: jasmine.SpyObj<ToastService>;
+  let confirmDialog: jasmine.SpyObj<ConfirmDialogService>;
   let queryParamsSubject: Subject<any>;
 
   const mockOrder = {
@@ -40,6 +42,8 @@ describe('OrderManagementComponent', () => {
     const agentSpy = jasmine.createSpyObj('SupplierAgentService', ['listAgents']);
     const stockSpy = jasmine.createSpyObj('StockService', ['getProducts']);
     const toastSpy = jasmine.createSpyObj('ToastService', ['success', 'error']);
+    const confirmSpy = jasmine.createSpyObj('ConfirmDialogService', ['confirm']);
+    confirmSpy.confirm.and.returnValue(of(true));
     const routerSpy = jasmine.createSpyObj('Router', ['navigate']);
     orderSpy.list.and.returnValue(of([]));
     orderSpy.listDeliveries.and.returnValue(of([]));
@@ -58,6 +62,7 @@ describe('OrderManagementComponent', () => {
         { provide: SupplierAgentService, useValue: agentSpy },
         { provide: StockService, useValue: stockSpy },
         { provide: ToastService, useValue: toastSpy },
+        { provide: ConfirmDialogService, useValue: confirmSpy },
         { provide: Router, useValue: routerSpy },
         { provide: ActivatedRoute, useValue: { queryParams: queryParamsSubject.asObservable() } },
         provideHttpClient(withInterceptorsFromDi()),
@@ -69,6 +74,7 @@ describe('OrderManagementComponent', () => {
     orderService = TestBed.inject(OrderService) as jasmine.SpyObj<OrderService>;
     agentService = TestBed.inject(SupplierAgentService) as jasmine.SpyObj<SupplierAgentService>;
     toast = TestBed.inject(ToastService) as jasmine.SpyObj<ToastService>;
+    confirmDialog = TestBed.inject(ConfirmDialogService) as jasmine.SpyObj<ConfirmDialogService>;
   });
 
   it('should create', () => {
@@ -280,20 +286,20 @@ describe('OrderManagementComponent', () => {
 
   describe('cancel', () => {
     it('should cancel order on confirm', () => {
-      spyOn(window, 'confirm').and.returnValue(true);
+      confirmDialog.confirm.and.returnValue(of(true));
       orderService.cancel.and.returnValue(of(mockOrder));
       component.cancel(mockOrder);
       expect(toast.success).toHaveBeenCalledWith('Commande annulée');
     });
 
     it('should not cancel when not confirmed', () => {
-      spyOn(window, 'confirm').and.returnValue(false);
+      confirmDialog.confirm.and.returnValue(of(false));
       component.cancel(mockOrder);
       expect(orderService.cancel).not.toHaveBeenCalled();
     });
 
     it('should handle cancel error', () => {
-      spyOn(window, 'confirm').and.returnValue(true);
+      confirmDialog.confirm.and.returnValue(of(true));
       orderService.cancel.and.returnValue(throwError(() => ({ error: { message: 'Err' } })));
       component.cancel(mockOrder);
       expect(toast.error).toHaveBeenCalledWith('Err');
@@ -302,20 +308,20 @@ describe('OrderManagementComponent', () => {
 
   describe('deliveryReject', () => {
     it('should reject delivery on confirm', () => {
-      spyOn(window, 'confirm').and.returnValue(true);
+      confirmDialog.confirm.and.returnValue(of(true));
       orderService.deliveryReject.and.returnValue(of(mockOrder));
       component.deliveryReject(mockOrder);
-      expect(toast.success).toHaveBeenCalledWith('Livraison rejetée');
+      expect(toast.success).toHaveBeenCalledWith('Livraison rejetée, commande annulée');
     });
 
     it('should not reject when not confirmed', () => {
-      spyOn(window, 'confirm').and.returnValue(false);
+      confirmDialog.confirm.and.returnValue(of(false));
       component.deliveryReject(mockOrder);
       expect(orderService.deliveryReject).not.toHaveBeenCalled();
     });
 
     it('should handle deliveryReject error', () => {
-      spyOn(window, 'confirm').and.returnValue(true);
+      confirmDialog.confirm.and.returnValue(of(true));
       orderService.deliveryReject.and.returnValue(throwError(() => ({ error: { message: 'Err' } })));
       component.deliveryReject(mockOrder);
       expect(toast.error).toHaveBeenCalledWith('Err');

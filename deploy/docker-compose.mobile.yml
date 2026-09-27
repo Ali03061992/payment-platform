@@ -1,0 +1,16 @@
+# Test mobile seul (backend lance en direct sur l'hote :8081).
+# Par defaut : same-origin (API_BASE_URL vide -> baseUrl relative -> nginx
+# proxy /api vers la gateway). Aucun CORS, aucun changement backend.
+# Pour appeler la gateway en direct (necessite CORS cote backend),
+# lancer avec : API_BASE_URL=http://localhost:8081 docker compose ...
+services:
+  mobile-web:
+    build:
+      context: ../payment-platform-mobile
+      dockerfile: Dockerfile
+      args:
+        API_BASE_URL: ${API_BASE_URL:-}
+    ports:
+      - "8087:80"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"

@@ -9,35 +9,35 @@
   } @else {
     <div class="stats-grid">
       <div class="stat-card">
-        <div class="stat-icon blue">🛒</div>
+        <div class="stat-icon blue"><app-icon name="cart" [size]="26"></app-icon></div>
         <div class="stat-info">
           <div class="stat-value">{{ totalOrders }}</div>
           <div class="stat-label">Total commandes</div>
         </div>
       </div>
       <div class="stat-card">
-        <div class="stat-icon orange">⏳</div>
+        <div class="stat-icon orange"><app-icon name="clock" [size]="26"></app-icon></div>
         <div class="stat-info">
           <div class="stat-value">{{ pendingOrdersCount }}</div>
           <div class="stat-label">En cours</div>
         </div>
       </div>
       <div class="stat-card">
-        <div class="stat-icon purple">🚚</div>
+        <div class="stat-icon purple"><app-icon name="truck" [size]="26"></app-icon></div>
         <div class="stat-info">
           <div class="stat-value">{{ inTransitCount }}</div>
           <div class="stat-label">En livraison</div>
         </div>
       </div>
       <div class="stat-card">
-        <div class="stat-icon green">✅</div>
+        <div class="stat-icon green"><app-icon name="check-circle" [size]="26"></app-icon></div>
         <div class="stat-info">
           <div class="stat-value">{{ deliveredOrdersCount }}</div>
           <div class="stat-label">Livrées</div>
         </div>
       </div>
       <div class="stat-card">
-        <div class="stat-icon red">💳</div>
+        <div class="stat-icon red"><app-icon name="card" [size]="26"></app-icon></div>
         <div class="stat-info">
           <div class="stat-value">{{ paymentStats.pending }}</div>
           <div class="stat-label">Paiements en attente</div>
@@ -47,7 +47,7 @@
 
     <div class="info-cards">
       <div class="info-card">
-        <h3>📋 Mon profil</h3>
+        <h3><app-icon name="list" [size]="18"></app-icon> Mon profil</h3>
         <div class="info-row"><span>Nom :</span><strong>{{ user?.firstName }} {{ user?.lastName }}</strong></div>
         <div class="info-row"><span>Email :</span><strong>{{ user?.email }}</strong></div>
         <div class="info-row"><span>Rôle :</span><strong>{{ user?.roles?.[0] }}</strong></div>
@@ -59,7 +59,7 @@
       </div>
 
       <div class="info-card">
-        <h3>🛒 Commandes reçues</h3>
+        <h3><app-icon name="cart" [size]="18"></app-icon> Commandes reçues</h3>
         @if (recentOrders.length === 0) {
           <p class="empty-state">Aucune commande récente</p>
         }
@@ -77,7 +77,7 @@
                   @if (reorderLoading[order.id]) {
                     <span class="spinner-small"></span>
                   } @else {
-                    🔄 Recommander
+                    <app-icon name="refresh" [size]="16"></app-icon> Recommander
                   }
                 </button>
               }
@@ -87,7 +87,7 @@
       </div>
 
       <div class="info-card">
-        <h3>💳 Paiements récents</h3>
+        <h3><app-icon name="card" [size]="18"></app-icon> Paiements récents</h3>
         @if (recentPayments.length === 0) {
           <p class="empty-state">Aucun paiement récent</p>
         }
@@ -100,10 +100,10 @@
       </div>
 
       <div class="info-card">
-        <h3>⚡ Actions rapides</h3>
-        <a routerLink="shop/orders" class="quick-action">🛒 Voir mes commandes</a>
-        <a routerLink="shop/orders/create" class="quick-action">➕ Nouvelle commande</a>
-        <a routerLink="shop/balance" class="quick-action">⚖️ Voir ma balance</a>
+        <h3><app-icon name="zap" [size]="18"></app-icon> Actions rapides</h3>
+        <a routerLink="shop/orders" class="quick-action"><app-icon name="cart" [size]="18"></app-icon> Voir mes commandes</a>
+        <a routerLink="shop/orders/create" class="quick-action"><app-icon name="plus" [size]="18"></app-icon> Nouvelle commande</a>
+        <a routerLink="shop/balance" class="quick-action"><app-icon name="scale" [size]="18"></app-icon> Voir ma balance</a>
       </div>
     </div>
   }

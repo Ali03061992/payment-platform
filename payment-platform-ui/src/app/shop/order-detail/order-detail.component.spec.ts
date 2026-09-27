@@ -13,6 +13,7 @@ import { ShopOrderDetailComponent } from './order-detail.component';
 import { OrderService } from '../../services/order.service';
 import { DisputeService } from '../../services/dispute.service';
 import { ToastService } from '../../services/toast.service';
+import { ConfirmDialogService } from '../../components/confirm-dialog/confirm-dialog.service';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('ShopOrderDetailComponent', () => {
@@ -20,6 +21,7 @@ describe('ShopOrderDetailComponent', () => {
   let fixture: ComponentFixture<ShopOrderDetailComponent>;
   let orderService: jasmine.SpyObj<OrderService>;
   let toast: jasmine.SpyObj<ToastService>;
+  let confirmDialog: jasmine.SpyObj<ConfirmDialogService>;
   let router: jasmine.SpyObj<Router>;
 
   const mockOrder = {
@@ -34,6 +36,8 @@ describe('ShopOrderDetailComponent', () => {
     const orderSpy = jasmine.createSpyObj('OrderService', ['getById', 'getByReference', 'accept', 'acceptAsap', 'reject', 'cancel', 'downloadInvoice', 'getComments', 'addComment']);
     const disputeSpy = jasmine.createSpyObj('DisputeService', ['getByOrder', 'create']);
     const toastSpy = jasmine.createSpyObj('ToastService', ['success', 'error']);
+    const confirmSpy = jasmine.createSpyObj('ConfirmDialogService', ['confirm']);
+    confirmSpy.confirm.and.returnValue(of(true));
     const routerSpy = jasmine.createSpyObj('Router', ['navigate']);
     orderSpy.getById.and.returnValue(of(mockOrder));
     orderSpy.getByReference.and.returnValue(of(mockOrder));
@@ -48,6 +52,7 @@ describe('ShopOrderDetailComponent', () => {
         { provide: OrderService, useValue: orderSpy },
         { provide: DisputeService, useValue: disputeSpy },
         { provide: ToastService, useValue: toastSpy },
+        { provide: ConfirmDialogService, useValue: confirmSpy },
         { provide: Router, useValue: routerSpy },
         { provide: ActivatedRoute, useValue: { snapshot: { paramMap: convertToParamMap({ id: '1' }) } } },
         provideHttpClient(withInterceptorsFromDi()),
@@ -58,6 +63,7 @@ describe('ShopOrderDetailComponent', () => {
     component = fixture.componentInstance;
     orderService = TestBed.inject(OrderService) as jasmine.SpyObj<OrderService>;
     toast = TestBed.inject(ToastService) as jasmine.SpyObj<ToastService>;
+    confirmDialog = TestBed.inject(ConfirmDialogService) as jasmine.SpyObj<ConfirmDialogService>;
     router = TestBed.inject(Router) as jasmine.SpyObj<Router>;
   });
 
@@ -140,7 +146,7 @@ describe('ShopOrderDetailComponent', () => {
 
   describe('reject', () => {
     it('should reject on confirm', () => {
-      spyOn(window, 'confirm').and.returnValue(true);
+      confirmDialog.confirm.and.returnValue(of(true));
       orderService.reject.and.returnValue(of({ ...mockOrder, status: 'REJECTED' }));
       component.order = mockOrder;
       component.reject();
@@ -148,7 +154,7 @@ describe('ShopOrderDetailComponent', () => {
     });
 
     it('should not reject when not confirmed', () => {
-      spyOn(window, 'confirm').and.returnValue(false);
+      confirmDialog.confirm.and.returnValue(of(false));
       component.order = mockOrder;
       component.reject();
       expect(orderService.reject).not.toHaveBeenCalled();
@@ -161,7 +167,7 @@ describe('ShopOrderDetailComponent', () => {
     });
 
     it('should handle reject error', () => {
-      spyOn(window, 'confirm').and.returnValue(true);
+      confirmDialog.confirm.and.returnValue(of(true));
       orderService.reject.and.returnValue(throwError(() => ({ error: { message: 'Fail' } })));
       component.order = mockOrder;
       component.reject();

@@ -12,6 +12,7 @@ import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { OrderListComponent } from './order-list.component';
 import { OrderService } from '../../services/order.service';
 import { ToastService } from '../../services/toast.service';
+import { ConfirmDialogService } from '../../components/confirm-dialog/confirm-dialog.service';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('OrderListComponent', () => {
@@ -19,6 +20,7 @@ describe('OrderListComponent', () => {
   let fixture: ComponentFixture<OrderListComponent>;
   let orderService: jasmine.SpyObj<OrderService>;
   let toast: jasmine.SpyObj<ToastService>;
+  let confirmDialog: jasmine.SpyObj<ConfirmDialogService>;
 
   const mockOrder = {
     id: 1, reference: 'ORD-001', supplierId: 1, shopId: 2, createdBy: 3, createdByName: null, createdByRole: 'SHOP_ADMIN',
@@ -31,6 +33,8 @@ describe('OrderListComponent', () => {
   beforeEach(() => {
     const orderSpy = jasmine.createSpyObj('OrderService', ['list', 'accept', 'reject', 'cancel']);
     const toastSpy = jasmine.createSpyObj('ToastService', ['success', 'error']);
+    const confirmSpy = jasmine.createSpyObj('ConfirmDialogService', ['confirm']);
+    confirmSpy.confirm.and.returnValue(of(true));
     orderSpy.list.and.returnValue(of([]));
 
     TestBed.configureTestingModule({
@@ -40,6 +44,7 @@ describe('OrderListComponent', () => {
     providers: [
         { provide: OrderService, useValue: orderSpy },
         { provide: ToastService, useValue: toastSpy },
+        { provide: ConfirmDialogService, useValue: confirmSpy },
         provideHttpClient(withInterceptorsFromDi()),
         provideHttpClientTesting()
     ]
@@ -48,6 +53,7 @@ describe('OrderListComponent', () => {
     component = fixture.componentInstance;
     orderService = TestBed.inject(OrderService) as jasmine.SpyObj<OrderService>;
     toast = TestBed.inject(ToastService) as jasmine.SpyObj<ToastService>;
+    confirmDialog = TestBed.inject(ConfirmDialogService) as jasmine.SpyObj<ConfirmDialogService>;
   });
 
   it('should create', () => {
@@ -153,27 +159,27 @@ describe('OrderListComponent', () => {
 
   describe('reject', () => {
     it('should reject order on confirm', () => {
-      spyOn(window, 'confirm').and.returnValue(true);
+      confirmDialog.confirm.and.returnValue(of(true));
       orderService.reject.and.returnValue(of(mockOrder));
       component.reject(1);
       expect(orderService.reject).toHaveBeenCalledWith(1);
     });
 
     it('should not reject when not confirmed', () => {
-      spyOn(window, 'confirm').and.returnValue(false);
+      confirmDialog.confirm.and.returnValue(of(false));
       component.reject(1);
       expect(orderService.reject).not.toHaveBeenCalled();
     });
 
     it('should handle reject error with message', () => {
-      spyOn(window, 'confirm').and.returnValue(true);
+      confirmDialog.confirm.and.returnValue(of(true));
       orderService.reject.and.returnValue(throwError(() => ({ error: { message: 'Fail' } })));
       component.reject(1);
       expect(toast.error).toHaveBeenCalledWith('Fail');
     });
 
     it('should handle reject error without message', () => {
-      spyOn(window, 'confirm').and.returnValue(true);
+      confirmDialog.confirm.and.returnValue(of(true));
       orderService.reject.and.returnValue(throwError(() => ({})));
       component.reject(1);
       expect(toast.error).toHaveBeenCalledWith('Erreur');

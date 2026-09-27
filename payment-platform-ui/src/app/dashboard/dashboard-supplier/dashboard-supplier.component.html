@@ -9,35 +9,35 @@
   } @else {
     <div class="stats-grid">
       <div class="stat-card">
-        <div class="stat-icon blue">📦</div>
+        <div class="stat-icon blue"><app-icon name="box" [size]="26"></app-icon></div>
         <div class="stat-info">
           <div class="stat-value">{{ products.length }}</div>
           <div class="stat-label">Produits</div>
         </div>
       </div>
       <div class="stat-card">
-        <div class="stat-icon orange">⚠️</div>
+        <div class="stat-icon orange"><app-icon name="alert" [size]="26"></app-icon></div>
         <div class="stat-info">
           <div class="stat-value">{{ lowStockCount }}</div>
           <div class="stat-label">Stock bas</div>
         </div>
       </div>
       <div class="stat-card">
-        <div class="stat-icon red">🚫</div>
+        <div class="stat-icon red"><app-icon name="ban" [size]="26"></app-icon></div>
         <div class="stat-info">
           <div class="stat-value">{{ outOfStockCount }}</div>
           <div class="stat-label">Rupture stock</div>
         </div>
       </div>
       <div class="stat-card">
-        <div class="stat-icon green">🛒</div>
+        <div class="stat-icon green"><app-icon name="cart" [size]="26"></app-icon></div>
         <div class="stat-info">
           <div class="stat-value">{{ pendingOrdersCount }}</div>
           <div class="stat-label">Commandes en cours</div>
         </div>
       </div>
       <div class="stat-card">
-        <div class="stat-icon purple">💳</div>
+        <div class="stat-icon purple"><app-icon name="card" [size]="26"></app-icon></div>
         <div class="stat-info">
           <div class="stat-value">{{ paymentStats.pending }}</div>
           <div class="stat-label">Paiements en attente</div>
@@ -47,7 +47,7 @@
 
     <div class="info-cards">
       <div class="info-card">
-        <h3>📋 Mon profil</h3>
+        <h3><app-icon name="list" [size]="18"></app-icon> Mon profil</h3>
         <div class="info-row"><span>Nom :</span><strong>{{ user?.firstName }} {{ user?.lastName }}</strong></div>
         <div class="info-row"><span>Email :</span><strong>{{ user?.email }}</strong></div>
         <div class="info-row"><span>Rôle :</span><strong>{{ user?.roles?.[0] }}</strong></div>
@@ -59,7 +59,7 @@
       </div>
 
       <div class="info-card">
-        <h3>🛒 Commandes récentes</h3>
+        <h3><app-icon name="cart" [size]="18"></app-icon> Commandes récentes</h3>
         @if (recentOrders.length === 0) {
           <p class="empty-state">Aucune commande récente</p>
         }
@@ -72,22 +72,22 @@
       </div>
 
       <div class="info-card">
-        <h3>💳 Résumé paiements</h3>
+        <h3><app-icon name="card" [size]="18"></app-icon> Résumé paiements</h3>
         <div class="info-row"><span>Total :</span><strong>{{ paymentStats.total }}</strong></div>
         <div class="info-row"><span>En attente :</span><strong class="text-orange">{{ paymentStats.pending }}</strong></div>
         <div class="info-row"><span>Confirmés :</span><strong class="text-green">{{ paymentStats.confirmed }}</strong></div>
       </div>
 
       <div class="info-card">
-        <h3>⚡ Actions rapides</h3>
-        <a routerLink="supplier/stock" class="quick-action">📦 Gérer le stock</a>
-        <a routerLink="supplier/stock/create" class="quick-action">➕ Ajouter un produit</a>
-        <a routerLink="supplier/orders" class="quick-action">🛒 Voir les commandes</a>
-        <a routerLink="supplier/optimization" class="quick-action">🧠 Optimisation stock</a>
+        <h3><app-icon name="zap" [size]="18"></app-icon> Actions rapides</h3>
+        <a routerLink="supplier/stock" class="quick-action"><app-icon name="box" [size]="18"></app-icon> Gérer le stock</a>
+        <a routerLink="supplier/stock/create" class="quick-action"><app-icon name="plus" [size]="18"></app-icon> Ajouter un produit</a>
+        <a routerLink="supplier/orders" class="quick-action"><app-icon name="cart" [size]="18"></app-icon> Voir les commandes</a>
+        <a routerLink="supplier/optimization" class="quick-action"><app-icon name="cpu" [size]="18"></app-icon> Optimisation stock</a>
       </div>
 
       <div class="info-card alert-card">
-        <h3>🚨 Alertes stock</h3>
+        <h3><app-icon name="alert" [size]="18"></app-icon> Alertes stock</h3>
         @if (lowStockAlerts.length === 0) {
           <p class="empty-state">Aucune alerte de stock</p>
         }

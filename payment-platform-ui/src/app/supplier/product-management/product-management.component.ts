@@ -4,6 +4,7 @@ import { CatalogService } from '../../services/catalog.service';
 import { Product } from '../../models/stock.model';
 import { ProductFamily, ProductCategory } from '../../models/catalog.model';
 import { ToastService } from '../../services/toast.service';
+import { ConfirmDialogService } from '../../components/confirm-dialog/confirm-dialog.service';
 
 @Component({
     selector: 'app-product-management',
@@ -30,7 +31,8 @@ export class ProductManagementComponent implements OnInit {
   constructor(
     private stockService: StockService,
     private catalogService: CatalogService,
-    private toast: ToastService
+    private toast: ToastService,
+    private confirmDialog: ConfirmDialogService
   ) {}
 
   ngOnInit(): void { this.loadData(); }
@@ -120,10 +122,16 @@ export class ProductManagementComponent implements OnInit {
   }
 
   deleteProduct(p: Product): void {
-    if (!confirm(`Supprimer "${p.name}" ?`)) return;
-    this.stockService.deleteProduct(p.id).subscribe({
-      next: () => { this.toast.success('Produit supprime'); this.loadData(); },
-      error: (err) => this.toast.error(err.error?.message || 'Erreur')
+    this.confirmDialog.confirm({
+      title: 'Supprimer le produit',
+      message: `Supprimer "${p.name}" ?`,
+      danger: true,
+    }).subscribe(ok => {
+      if (!ok) return;
+      this.stockService.deleteProduct(p.id).subscribe({
+        next: () => { this.toast.success('Produit supprime'); this.loadData(); },
+        error: (err) => this.toast.error(err.error?.message || 'Erreur')
+      });
     });
   }
 

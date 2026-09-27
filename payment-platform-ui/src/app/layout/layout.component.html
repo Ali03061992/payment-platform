@@ -2,6 +2,7 @@
 <app-notification-banner></app-notification-banner>
 <app-toast></app-toast>
 <app-tour></app-tour>
+<app-confirm-dialog></app-confirm-dialog>
 
 <div class="layout" [class.sidebar-collapsed]="!sidebarOpen"
   (touchstart)="onTouchStart($event)"
@@ -84,7 +85,7 @@
       <div class="notif-list">
         @if (notifications.length === 0) {
           <div class="notif-empty">
-            <div class="notif-empty-icon">🔔</div>
+            <div class="notif-empty-icon"><app-icon name="bell" [size]="32"></app-icon></div>
             <div class="notif-empty-text">Aucune notification</div>
           </div>
         }
@@ -93,7 +94,7 @@
             class="notif-item"
             [class.unread]="n.readStatus === 'UNREAD'"
             (click)="navigateNotification(n)">
-            <span class="notif-icon">{{ getNotificationIcon(n.type) }}</span>
+            <span class="notif-icon"><app-icon [name]="getNotificationIcon(n.type)" [size]="20"></app-icon></span>
             <div class="notif-content">
               <div class="notif-message">{{ n.message }}</div>
               <div class="notif-time">{{ getTimeAgo(n.createdAt) }}</div>
@@ -128,7 +129,7 @@
           routerLinkActive="active"
           class="nav-item"
           (click)="onNavClick()">
-          <span class="nav-icon">{{ item.icon }}</span>
+          <span class="nav-icon"><app-icon [name]="item.icon" [size]="20"></app-icon></span>
           @if (sidebarOpen) {
             <span class="nav-label">{{ item.label }}</span>
           }

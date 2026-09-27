@@ -11,25 +11,13 @@ function uid() {
   return `e2e_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
 }
 
-// ── Dev-mode login (feature/oauth-passwordless) ───────────────────────
-// Si Cypress.env('isDev') vaut true/'true' (CLI : --env isDev=true),
-// cy.login/apiLogin utilisent POST /api/auth/dev-login {username} (sans
-// password — backend actif seulement si flag + profil non-prod) et stockent
-// token/user EXACTEMENT comme le flux password. Sinon flux password inchangé.
-// ensureTestUsers/getTestCtx sont inchangés (setup via POST /api/users admin).
-function isDevLoginMode(): boolean {
-  const v = Cypress.env('isDev') as unknown;
-  return v === true || String(v).toLowerCase() === 'true';
-}
-
 // ── Login commands ──────────────────────────────────────────────────
 
 Cypress.Commands.add('login', (username: string, password: string) => {
-  const dev = isDevLoginMode();
   cy.request({
     method: 'POST',
-    url: dev ? `${API_URL()}/api/auth/dev-login` : `${API_URL()}/api/auth/login`,
-    body: dev ? { username } : { username, password },
+    url: `${API_URL()}/api/auth/login`,
+    body: { username, password },
     failOnStatusCode: false,
   }).then((resp) => {
     expect(resp.status).to.eq(200, `Login failed for ${username}: ${resp.status}`);
@@ -368,13 +356,6 @@ Cypress.Commands.add('createPayment', (shopId: string, supplierId: string, amoun
 // ── API helpers for tests ───────────────────────────────────────────
 
 Cypress.Commands.add('apiLogin', (username: string, password?: string) => {
-  if (isDevLoginMode()) {
-    return cy.request({
-      method: 'POST',
-      url: `${API_URL()}/api/auth/dev-login`,
-      body: { username },
-    }).then((r) => r.body.accessToken as string);
-  }
   const effectivePassword = password || (username === 'system.admin' ? ADMIN_PASSWORD : E2E_PASSWORD);
   return cy.request({
     method: 'POST',

@@ -51,7 +51,7 @@
         </div>
       }
       <div class="info-box">
-        <span class="info-icon">🔑</span>
+        <span class="info-icon"><app-icon name="key" [size]="20"></app-icon></span>
         <span>Mot de passe par défaut : <strong>test1234</strong></span>
       </div>
       <button type="submit" class="btn btn-primary btn-block" [disabled]="loading || (requiresOrganization && !form.organizationId)">
@@ -63,7 +63,7 @@
 
 @if (success) {
   <div class="success-card">
-    <div class="success-icon">✅</div>
+    <div class="success-icon"><app-icon name="check-circle" [size]="40"></app-icon></div>
     <h2>Compte créé avec succès !</h2>
     <p>L'utilisateur <strong>{{ form.username }}</strong> a été créé avec le mot de passe <strong>test1234</strong>.</p>
     <div class="success-actions">

@@ -1,5 +1,5 @@
 <div class="page-header">
-  <h1>🔑 Activation / Désactivation des comptes</h1>
+  <h1><app-icon name="key" [size]="26"></app-icon> Activation / Désactivation des comptes</h1>
 </div>
 
 <div class="search-bar">
@@ -33,21 +33,21 @@
           </span>
         </div>
         <div class="card-details">
-          <div class="detail-row">📧 {{ user.email }}</div>
-          <div class="detail-row">🏷️ {{ user.roles[0] }}</div>
+          <div class="detail-row"><app-icon name="mail" [size]="16"></app-icon> {{ user.email }}</div>
+          <div class="detail-row"><app-icon name="tag" [size]="16"></app-icon> {{ user.roles[0] }}</div>
           @if (user.phone) {
-            <div class="detail-row">📱 {{ user.phone }}</div>
+            <div class="detail-row"><app-icon name="phone" [size]="16"></app-icon> {{ user.phone }}</div>
           }
         </div>
         <div class="card-actions">
           @if (user.status === 'ACTIVE') {
             <button class="btn btn-danger btn-sm" (click)="disable(user)">
-              🚫 Désactiver
+              <app-icon name="ban" [size]="16"></app-icon> Désactiver
             </button>
           }
           @if (user.status === 'DISABLED') {
             <button class="btn btn-success btn-sm" (click)="activate(user)">
-              ✅ Activer
+              <app-icon name="check" [size]="16"></app-icon> Activer
             </button>
           }
         </div>

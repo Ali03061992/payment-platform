@@ -21,8 +21,6 @@ export class JwtInterceptor implements HttpInterceptor {
     '/api/auth/register',
     '/api/auth/refresh',
     '/api/auth/logout',
-    '/api/auth/oauth',
-    '/api/auth/dev-login',
     '/api/auth/password-setup',
   ];
 

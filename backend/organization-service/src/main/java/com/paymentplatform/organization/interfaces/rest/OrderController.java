@@ -482,7 +482,8 @@ public class OrderController {
     }
 
     /**
-     * Déclare une commande livrée à son destinataire (déclenche le paiement ASAP si requis).
+     * Déclare une commande livrée à son destinataire (réception confirmée :
+     * crée automatiquement le paiement, idempotent par commande).
      *
      * @param id identifiant de la commande
      * @param body contient receivedBy (destinataire)
@@ -504,7 +505,7 @@ public class OrderController {
      * @return commande acceptée
      */
     @PostMapping("/{id}/accept")
-    @PreAuthorize("hasAnyAuthority('SHOP_MANAGER', 'SHOP_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('SHOP_MANAGER', 'SHOP_ADMIN', 'SHOP_AGENT')")
     public ResponseEntity<OrderResponse> acceptOrder(@PathVariable UUID id) {
         var current = CurrentUser.get();
         return ResponseEntity.ok(acceptOrder.execute(id, current.userId()));
@@ -563,7 +564,7 @@ public class OrderController {
      * @return commande rejetée
      */
     @PostMapping("/{id}/reject")
-    @PreAuthorize("hasAnyAuthority('SHOP_MANAGER', 'SHOP_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('SHOP_MANAGER', 'SHOP_ADMIN', 'SHOP_AGENT')")
     public ResponseEntity<OrderResponse> rejectOrder(
             @PathVariable UUID id,
             @RequestBody(required = false) Map<String, String> body) {
@@ -619,18 +620,25 @@ public class OrderController {
     }
 
     /**
-     * Liste les livraisons de l'acteur (admin : périmètre fournisseur, agent : assignées).
+     * Liste les livraisons de l'acteur : admin fournisseur (périmètre
+     * fournisseur), admin boutique (toutes les livraisons de sa boutique),
+     * agent (livraisons qui lui sont assignées).
      *
      * @return livraisons visibles par l'acteur
      */
     @GetMapping("/my-deliveries")
-    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SUPPLIER_AGENT')")
+    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_AGENT')")
     public ResponseEntity<List<OrderResponse>> myDeliveries() {
         var current = CurrentUser.get();
         List<com.paymentplatform.organization.domain.model.Order> orders;
         if (current.roles().contains("SUPPLIER_ADMIN") && current.organizationId() != null) {
             // L'admin fournisseur voit toutes les livraisons de son organisation.
             orders = orderRepository.findBySupplierId(current.organizationId()).stream()
+                    .filter(o -> o.getDeliveryAgentId() != null)
+                    .toList();
+        } else if (current.roles().contains("SHOP_ADMIN") && current.organizationId() != null) {
+            // L'admin boutique voit toutes les livraisons de sa boutique.
+            orders = orderRepository.findByShopId(current.organizationId()).stream()
                     .filter(o -> o.getDeliveryAgentId() != null)
                     .toList();
         } else {

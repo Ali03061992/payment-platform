@@ -22,7 +22,7 @@
     aria-label="Guide de navigation">
 
     <div class="tour-tooltip-header">
-      <div class="tour-step-icon" aria-hidden="true">{{ steps[currentStep].icon }}</div>
+      <div class="tour-step-icon" aria-hidden="true"><app-icon [name]="steps[currentStep].icon" [size]="24"></app-icon></div>
       <div class="tour-step-counter">Étape {{ currentStep + 1 }} / {{ steps.length }}</div>
     </div>
 

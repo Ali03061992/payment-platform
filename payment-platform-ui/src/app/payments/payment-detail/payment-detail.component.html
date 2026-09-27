@@ -16,7 +16,11 @@
         <button class="btn btn-secondary" (click)="toggleQR()"
           [attr.aria-label]="showQR ? 'Masquer le QR Code' : 'Afficher le QR Code'"
           [attr.aria-expanded]="showQR">
-          {{ showQR ? 'Masquer QR' : '📱 QR Code' }}
+          @if (showQR) {
+            Masquer QR
+          } @else {
+            <span class="btn-icon-text"><app-icon name="scan" [size]="18"></app-icon> QR Code</span>
+          }
         </button>
         <a class="btn btn-secondary" routerLink="/dashboard/payments" aria-label="Retour à la liste des paiements">Retour</a>
       </div>
@@ -35,7 +39,7 @@
           <div class="qr-actions">
             @if (canShare) {
               <button class="btn btn-sm btn-primary" (click)="shareQR()" aria-label="Partager le QR Code">
-                📤 Partager
+                <span class="btn-icon-text"><app-icon name="share" [size]="16"></app-icon> Partager</span>
               </button>
             }
           </div>

@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CatalogService } from '../../services/catalog.service';
 import { ProductFamily, ProductCategory } from '../../models/catalog.model';
 import { ToastService } from '../../services/toast.service';
+import { ConfirmDialogService } from '../../components/confirm-dialog/confirm-dialog.service';
 
 @Component({
     selector: 'app-family-management',
@@ -18,7 +19,7 @@ export class FamilyManagementComponent implements OnInit {
   editingFamily: ProductFamily | null = null;
   form = { name: '', code: '', categoryIds: [] as string[] };
 
-  constructor(private catalogService: CatalogService, private toast: ToastService) {}
+  constructor(private catalogService: CatalogService, private toast: ToastService, private confirmDialog: ConfirmDialogService) {}
 
   ngOnInit(): void { this.loadData(); }
 
@@ -96,10 +97,16 @@ export class FamilyManagementComponent implements OnInit {
   }
 
   deleteFamily(fam: ProductFamily): void {
-    if (!confirm(`Supprimer la famille "${fam.name}" ?`)) return;
-    this.catalogService.deleteFamily(fam.id).subscribe({
-      next: () => { this.toast.success('Famille supprimee'); this.loadFamilies(); },
-      error: (err) => this.toast.error(err.error?.message || 'Erreur')
+    this.confirmDialog.confirm({
+      title: 'Supprimer la famille',
+      message: `Supprimer la famille "${fam.name}" ?`,
+      danger: true,
+    }).subscribe(ok => {
+      if (!ok) return;
+      this.catalogService.deleteFamily(fam.id).subscribe({
+        next: () => { this.toast.success('Famille supprimee'); this.loadFamilies(); },
+        error: (err) => this.toast.error(err.error?.message || 'Erreur')
+      });
     });
   }
 }

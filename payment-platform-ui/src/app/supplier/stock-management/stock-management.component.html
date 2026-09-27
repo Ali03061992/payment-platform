@@ -37,7 +37,7 @@
     }
     @if (products.length === 0) {
       <div class="empty-state">
-        <div class="empty-icon">📦</div>
+        <div class="empty-icon"><app-icon name="box" [size]="40"></app-icon></div>
         <h3>Aucun produit en stock</h3>
         <p>Ajoutez des produits depuis le catalogue, puis gerez les quantites ici.</p>
       </div>
@@ -78,7 +78,7 @@
                   <td class="actions">
                     <button class="btn btn-sm btn-success" (click)="openMovement(p, 'IN')">+</button>
                     <button class="btn btn-sm btn-warning" (click)="openMovement(p, 'ADJUSTMENT')">~</button>
-                    <button class="btn btn-sm btn-secondary" (click)="openHistory(p)">📋</button>
+                    <button class="btn btn-sm btn-secondary" (click)="openHistory(p)" title="Historique" aria-label="Historique"><app-icon name="clock" [size]="16"></app-icon></button>
                   </td>
                 </tr>
               }

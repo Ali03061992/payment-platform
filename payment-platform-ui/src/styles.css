@@ -1169,3 +1169,61 @@ html[data-theme="dark"] body .card h3,
 html[data-theme="dark"] body .detail-value {
   color: var(--text-primary);
 }
+
+/* ===========================
+   ICONES SVG (app-icon) — jamais d'emoji dans l'UI
+   =========================== */
+
+app-icon {
+  display: inline-flex;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+
+app-icon svg {
+  display: block;
+}
+
+.btn-icon-text {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nav-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stat-icon.blue { color: var(--badge-info-text); }
+.stat-icon.green { color: var(--badge-confirmed-text); }
+.stat-icon.red { color: var(--badge-rejected-text); }
+.stat-icon.orange { color: var(--badge-pending-text); }
+.stat-icon.purple { color: var(--badge-cancelled-text); }
+
+.info-card h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.info-card a.quick-action {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.notif-empty-icon {
+  display: flex;
+  justify-content: center;
+  color: var(--text-muted);
+}
+
+.success-icon { color: var(--badge-confirmed-text); }
+.error-icon { color: var(--badge-rejected-text); }
+.empty-icon,
+.camera-icon,
+.product-placeholder { color: var(--text-muted); }
+
+.tour-step-icon { color: var(--accent); }

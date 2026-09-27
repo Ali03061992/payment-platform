@@ -5,6 +5,7 @@ import { SupplierAgentService } from '../../services/supplier-agent.service';
 import { StockService } from '../../services/stock.service';
 import { Order, OrderComment } from '../../models/order.model';
 import { ToastService } from '../../services/toast.service';
+import { ConfirmDialogService } from '../../components/confirm-dialog/confirm-dialog.service';
 import { Subscription, Subject, debounceTime, distinctUntilChanged, switchMap, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 
@@ -63,6 +64,7 @@ export class OrderManagementComponent implements OnInit, OnDestroy {
     private router: Router,
     private route: ActivatedRoute,
     private toast: ToastService,
+    private confirmDialog: ConfirmDialogService,
     private elRef: ElementRef
   ) {}
 
@@ -346,18 +348,30 @@ export class OrderManagementComponent implements OnInit, OnDestroy {
   }
 
   deliveryReject(order: Order): void {
-    if (!confirm('Rejeter la livraison de cette commande ?')) return;
-    this.subscriptions.add(this.orderService.deliveryReject(order.id).subscribe({
-      next: () => { this.toast.success('Livraison rejetée'); this.loadOrders(); },
-      error: (err: any) => { this.toast.error(err.error?.message || 'Erreur'); }
+    this.subscriptions.add(this.confirmDialog.confirm({
+      title: 'Rejeter la livraison',
+      message: `Rejeter la livraison de ${order.reference} ? La commande sera annulée et aucun paiement ne sera créé.`,
+      danger: true,
+    }).subscribe(ok => {
+      if (!ok) return;
+      this.subscriptions.add(this.orderService.deliveryReject(order.id).subscribe({
+        next: () => { this.toast.success('Livraison rejetée, commande annulée'); this.loadOrders(); },
+        error: (err: any) => { this.toast.error(err.error?.message || 'Erreur'); }
+      }));
     }));
   }
 
   cancel(order: Order): void {
-    if (!confirm('Annuler cette commande ?')) return;
-    this.subscriptions.add(this.orderService.cancel(order.id).subscribe({
-      next: () => { this.toast.success('Commande annulée'); this.loadOrders(); },
-      error: (err: any) => { this.toast.error(err.error?.message || 'Erreur'); }
+    this.subscriptions.add(this.confirmDialog.confirm({
+      title: 'Annuler la commande',
+      message: `Annuler la commande ${order.reference} ?`,
+      danger: true,
+    }).subscribe(ok => {
+      if (!ok) return;
+      this.subscriptions.add(this.orderService.cancel(order.id).subscribe({
+        next: () => { this.toast.success('Commande annulée'); this.loadOrders(); },
+        error: (err: any) => { this.toast.error(err.error?.message || 'Erreur'); }
+      }));
     }));
   }
 

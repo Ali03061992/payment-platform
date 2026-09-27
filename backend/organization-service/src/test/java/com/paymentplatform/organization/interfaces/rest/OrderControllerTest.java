@@ -69,6 +69,10 @@ class OrderControllerTest {
         return auth(UUID.fromString("00000000-0000-0000-0000-000000000004"), "delivery.agent", List.of("SUPPLIER_AGENT"), null);
     }
 
+    private UsernamePasswordAuthenticationToken shopAgent() {
+        return auth(UUID.fromString("00000000-0000-0000-0000-000000000005"), "shop.agent", List.of("SHOP_AGENT"), UUID.fromString("00000000-0000-0000-0000-000000000010"));
+    }
+
     @Test
     void listOrders_asShopAdmin_returnsOk() throws Exception {
         mockMvc.perform(get("/api/orders")
@@ -138,6 +142,40 @@ class OrderControllerTest {
                         .with(SecurityMockMvcRequestPostProcessors.authentication(supplierAdmin())))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray());
+    }
+
+    @Test
+    void myDeliveries_asShopAdmin_returnsOk() throws Exception {
+        // L'admin boutique voit les livraisons de sa boutique.
+        mockMvc.perform(get("/api/orders/my-deliveries")
+                        .with(SecurityMockMvcRequestPostProcessors.authentication(shopAdmin())))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray());
+    }
+
+    @Test
+    void myDeliveries_asShopAgent_returnsOk() throws Exception {
+        // L'agent boutique voit les livraisons qui lui sont assignées.
+        mockMvc.perform(get("/api/orders/my-deliveries")
+                        .with(SecurityMockMvcRequestPostProcessors.authentication(shopAgent())))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray());
+    }
+
+    @Test
+    void accept_asShopAgent_notForbidden() throws Exception {
+        mockMvc.perform(post("/api/orders/00000000-0000-0000-0000-000000099999/accept")
+                        .with(SecurityMockMvcRequestPostProcessors.authentication(shopAgent())))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void reject_asShopAgent_notForbidden() throws Exception {
+        mockMvc.perform(post("/api/orders/00000000-0000-0000-0000-000000099999/reject")
+                        .with(SecurityMockMvcRequestPostProcessors.authentication(shopAgent()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isNotFound());
     }
 
     @Test

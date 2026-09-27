@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CatalogService } from '../../services/catalog.service';
 import { ProductCategory } from '../../models/catalog.model';
 import { ToastService } from '../../services/toast.service';
+import { ConfirmDialogService } from '../../components/confirm-dialog/confirm-dialog.service';
 
 @Component({
     selector: 'app-category-management',
@@ -16,7 +17,7 @@ export class CategoryManagementComponent implements OnInit {
   saving = false;
   form = { name: '', code: '' };
 
-  constructor(private catalogService: CatalogService, private toast: ToastService) {}
+  constructor(private catalogService: CatalogService, private toast: ToastService, private confirmDialog: ConfirmDialogService) {}
 
   ngOnInit(): void { this.loadCategories(); }
 
@@ -53,10 +54,16 @@ export class CategoryManagementComponent implements OnInit {
   }
 
   deleteCategory(cat: ProductCategory): void {
-    if (!confirm(`Supprimer la categorie "${cat.name}" ?`)) return;
-    this.catalogService.deleteCategory(cat.id).subscribe({
-      next: () => { this.toast.success('Categorie supprimee'); this.loadCategories(); },
-      error: (err) => this.toast.error(err.error?.message || 'Erreur')
+    this.confirmDialog.confirm({
+      title: 'Supprimer la catégorie',
+      message: `Supprimer la categorie "${cat.name}" ?`,
+      danger: true,
+    }).subscribe(ok => {
+      if (!ok) return;
+      this.catalogService.deleteCategory(cat.id).subscribe({
+        next: () => { this.toast.success('Categorie supprimee'); this.loadCategories(); },
+        error: (err) => this.toast.error(err.error?.message || 'Erreur')
+      });
     });
   }
 }

@@ -12,7 +12,7 @@
 @if (!loading) {
   @if (alerts.length === 0) {
     <div class="empty-state">
-      <div class="empty-icon">✅</div>
+      <div class="empty-icon"><app-icon name="check-circle" [size]="40"></app-icon></div>
       <h3>Aucune alerte de stock</h3>
       <p>Tous vos produits ont un stock suffisant.</p>
     </div>

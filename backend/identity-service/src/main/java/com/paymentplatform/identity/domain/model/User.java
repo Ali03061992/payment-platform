@@ -32,17 +32,13 @@ public class User {
     private final OrganizationId organizationId;
     private UserStatus status;
     private final Set<RoleCode> roles;
-    private AuthProvider authProvider;
-    private String providerSubject;
-    private boolean emailVerified;
     private long version;
     private Instant createdAt;
     private Instant updatedAt;
 
     private User(UserId id, Username username, Email email, PasswordHash password, String firstName,
                  String lastName, PhoneNumber phone, OrganizationId organizationId, UserStatus status,
-                 Set<RoleCode> roles, AuthProvider authProvider, String providerSubject,
-                 boolean emailVerified, long version, Instant createdAt, Instant updatedAt) {
+                 Set<RoleCode> roles, long version, Instant createdAt, Instant updatedAt) {
         this.id = id;
         this.username = username;
         this.email = email;
@@ -53,9 +49,6 @@ public class User {
         this.organizationId = organizationId;
         this.status = status;
         this.roles = roles;
-        this.authProvider = authProvider == null ? AuthProvider.LOCAL : authProvider;
-        this.providerSubject = providerSubject;
-        this.emailVerified = emailVerified;
         this.version = version;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
@@ -70,7 +63,7 @@ public class User {
         Set<RoleCode> roles = EnumSet.of(role);
         Instant now = Instant.now();
         return new User(id, username, email, password, firstName.trim(), lastName.trim(), phone,
-                organizationId, UserStatus.ACTIVE, roles, AuthProvider.LOCAL, null, false, 0, now, now);
+                organizationId, UserStatus.ACTIVE, roles, 0, now, now);
     }
 
     public static User reconstruct(UserId id, Username username, Email email, PasswordHash password,
@@ -78,16 +71,7 @@ public class User {
                                     OrganizationId organizationId, UserStatus status, Set<RoleCode> roles,
                                     long version, Instant createdAt, Instant updatedAt) {
         return new User(id, username, email, password, firstName, lastName, phone, organizationId, status,
-                roles, AuthProvider.LOCAL, null, false, version, createdAt, updatedAt);
-    }
-
-    public static User reconstruct(UserId id, Username username, Email email, PasswordHash password,
-                                    String firstName, String lastName, PhoneNumber phone,
-                                    OrganizationId organizationId, UserStatus status, Set<RoleCode> roles,
-                                    AuthProvider authProvider, String providerSubject, boolean emailVerified,
-                                    long version, Instant createdAt, Instant updatedAt) {
-        return new User(id, username, email, password, firstName, lastName, phone, organizationId, status,
-                roles, authProvider, providerSubject, emailVerified, version, createdAt, updatedAt);
+                roles, version, createdAt, updatedAt);
     }
 
     public UserId id() {
@@ -128,32 +112,6 @@ public class User {
 
     public Set<RoleCode> roles() {
         return roles.isEmpty() ? Set.of() : EnumSet.copyOf(roles);
-    }
-
-    public AuthProvider authProvider() {
-        return authProvider;
-    }
-
-    public String providerSubject() {
-        return providerSubject;
-    }
-
-    public boolean emailVerified() {
-        return emailVerified;
-    }
-
-    /** Liaison OAuth : mémorise provider + subject + vérification email. */
-    public void linkOAuth(AuthProvider provider, String subject, boolean verified) {
-        if (provider == null || provider == AuthProvider.LOCAL) {
-            throw new DomainException("Fournisseur OAuth invalide");
-        }
-        if (subject == null || subject.isBlank()) {
-            throw new DomainException("Subject OAuth manquant");
-        }
-        this.authProvider = provider;
-        this.providerSubject = subject;
-        this.emailVerified = verified;
-        this.updatedAt = Instant.now();
     }
 
     public long version() {

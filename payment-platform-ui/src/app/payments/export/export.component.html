@@ -25,7 +25,7 @@
     <div class="actions">
       <button class="btn btn-primary" (click)="exportCsv()" [disabled]="loading">
         @if (!loading) {
-          <span>📥 Télécharger CSV</span>
+          <span class="btn-icon-text"><app-icon name="download" [size]="18"></app-icon> Télécharger CSV</span>
         }
         @if (loading) {
           <span>Export en cours...</span>

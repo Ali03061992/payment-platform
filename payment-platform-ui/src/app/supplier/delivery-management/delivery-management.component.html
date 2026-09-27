@@ -97,6 +97,47 @@
         </div>
       </div>
     }
+    @if (isShopUser() && pendingReception.length > 0) {
+      <div class="section-header" style="margin-top: 32px;">
+        <h3>En attente de réception</h3>
+        <span class="result-count">{{ pendingReception.length }} livraison(s)</span>
+      </div>
+      <div class="table-card">
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Référence</th>
+                <th>Fournisseur</th>
+                <th>Total</th>
+                <th>Livré le</th>
+                <th>Statut</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (d of pendingReception; track d.id) {
+                <tr id="delivery-{{ d.id }}" class="clickable-row" (click)="openDetail(d)">
+                  <td><strong>{{ d.reference }}</strong></td>
+                  <td>{{ d.supplierName || d.supplierId }}</td>
+                  <td>{{ d.total | number:'1.2-2' }} {{ d.currency }}</td>
+                  <td>{{ d.deliveredAt | date:'dd/MM/yyyy HH:mm' }}</td>
+                  <td>
+                    <span class="payment-badge" [ngClass]="statusClass(d.status)">
+                      {{ statusLabel(d.status) }}
+                    </span>
+                  </td>
+                  <td class="actions">
+                    <button class="btn btn-sm btn-success" (click)="acceptReception(d); $event.stopPropagation()" [attr.aria-label]="'Accepter la réception ' + d.reference">Accepter</button>
+                    <button class="btn btn-sm btn-danger" (click)="rejectReception(d); $event.stopPropagation()" [attr.aria-label]="'Rejeter la réception ' + d.reference">Rejeter</button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    }
     @if (completedDeliveries.length > 0) {
       <div class="section-header" style="margin-top: 32px;">
         <h3>Livraisons terminées</h3>

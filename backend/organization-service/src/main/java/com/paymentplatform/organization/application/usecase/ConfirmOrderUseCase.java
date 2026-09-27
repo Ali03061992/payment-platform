@@ -50,6 +50,8 @@ public class ConfirmOrderUseCase {
             throw new ConflictException("La commande doit être en statut DRAFT pour être confirmée");
         }
 
+        // Le stock est réservé une seule fois, à la création de la commande :
+        // ici on vérifie seulement la disponibilité restante.
         List<OrderItem> items = orderItems.findByOrderId(orderId);
         for (OrderItem item : items) {
             Product product = products.findByIdForUpdate(item.getProductId())
@@ -59,8 +61,6 @@ public class ConfirmOrderUseCase {
                 throw new ConflictException("Stock insuffisant pour le produit " + product.getName()
                         + " (disponible: " + availableQty + ", demandé: " + item.getQuantity() + ")");
             }
-            product.setReservedQty(product.getReservedQty() + item.getQuantity());
-            products.save(product);
         }
 
         order.confirm();

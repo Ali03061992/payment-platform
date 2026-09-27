@@ -30,41 +30,5 @@
     <p class="register-link">
       Pas encore de compte ? <a routerLink="/register">S'inscrire</a>
     </p>
-
-    @if (googleReady || microsoftReady) {
-      <div class="oauth-divider"><span>ou continuer avec</span></div>
-      @if (oauthError) {
-        <div class="error-message" role="alert">{{ oauthError }}</div>
-      }
-      <div class="oauth-buttons">
-        @if (googleReady) {
-          <button type="button" class="btn btn-secondary btn-block" (click)="loginWithGoogle()"
-            [disabled]="oauthLoading !== ''" aria-label="Continuer avec Google">
-            {{ oauthLoading === 'GOOGLE' ? 'Google…' : 'Continuer avec Google' }}
-          </button>
-        }
-        @if (microsoftReady) {
-          <button type="button" class="btn btn-secondary btn-block" (click)="loginWithMicrosoft()"
-            [disabled]="oauthLoading !== ''" aria-label="Continuer avec Microsoft">
-            {{ oauthLoading === 'MICROSOFT' ? 'Microsoft…' : 'Continuer avec Microsoft' }}
-          </button>
-        }
-      </div>
-    }
-
-    @if (isDev()) {
-      <div class="dev-login-panel" data-testid="dev-login-panel">
-        <h3>Accès dev (sans mot de passe)</h3>
-        <div class="form-group">
-          <label for="devUsername">Nom d'utilisateur</label>
-          <input id="devUsername" type="text" [(ngModel)]="devUsername" name="devUsername"
-            placeholder="system.admin" autocomplete="username">
-        </div>
-        <button type="button" class="btn btn-secondary btn-block" (click)="devLogin()"
-          [disabled]="devLoading || !devUsername.trim()">
-          {{ devLoading ? 'Connexion…' : 'Se connecter (dev)' }}
-        </button>
-      </div>
-    }
   </div>
 </div>

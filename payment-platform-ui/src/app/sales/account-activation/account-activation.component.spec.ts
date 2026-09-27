@@ -9,6 +9,7 @@ import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { FormsModule } from '@angular/forms';
 import { of, throwError } from 'rxjs';
 import { AccountActivationComponent } from './account-activation.component';
+import { AppIconComponent } from '../../components/icon/icon.component';
 import { UserService } from '../../services/user.service';
 import { ToastService } from '../../services/toast.service';
 import { User } from '../../models/user.model';
@@ -31,7 +32,7 @@ describe('AccountActivationComponent', () => {
     userSpy.list.and.returnValue(of(mockUsers));
 
     TestBed.configureTestingModule({
-    declarations: [AccountActivationComponent],
+    declarations: [AccountActivationComponent, AppIconComponent],
     imports: [FormsModule],
     providers: [
         { provide: UserService, useValue: userSpy },

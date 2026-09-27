@@ -99,7 +99,7 @@
 <!-- Success State -->
 @if (success) {
   <div class="success-card">
-    <div class="success-icon">✅</div>
+    <div class="success-icon"><app-icon name="check-circle" [size]="40"></app-icon></div>
     <h2>Produit créé avec succès !</h2>
     <p class="success-text">{{ form.name }} a été ajouté au stock.</p>
     <div class="success-actions">

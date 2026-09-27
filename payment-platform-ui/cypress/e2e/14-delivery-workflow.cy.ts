@@ -167,7 +167,7 @@ describe('14 - Delivery: Full API Lifecycle', () => {
     });
   });
 
-  it('should reject delivery from IN_DELIVERY', () => {
+  it('should cancel order on delivery reject from IN_DELIVERY (no payment)', () => {
     cy.wrap(null).then(() => {
       return setupTestData().then((ctx) => {
         return createOrder(ctx, 'Reject delivery').then((id) => {
@@ -181,7 +181,18 @@ describe('14 - Delivery: Full API Lifecycle', () => {
             cy.apiPost(ctx.agentToken, `/api/orders/${id}/confirm-delivery`, { confirmedDate: '2026-09-14' })
           ).then(() =>
             cy.apiPost(ctx.supplierToken, `/api/orders/${id}/delivery-reject`, { reason: 'Vehicle broken' })
-          ).then((r) => expect(r.body.status).to.eq('DELIVERY_REJECTED'));
+          ).then((r) => {
+            expect(r.body.status).to.eq('CANCELLED');
+            expect(r.body.deliveryRejectionReason).to.eq('Vehicle broken');
+          }).then(() =>
+            cy.apiGet(ctx.supplierToken, '/api/payments')
+          ).then((r) => {
+            const body = r.body;
+            const items = Array.isArray(body) ? body
+              : Array.isArray(body?.items) ? body.items
+              : Array.isArray(body?.content) ? body.content : [];
+            expect(items.filter((p: any) => p.orderId === id)).to.have.length(0);
+          });
         });
       });
     });
@@ -227,7 +238,7 @@ describe('14 - Delivery: Full API Lifecycle', () => {
     });
   });
 
-  it('should reject delivery from READY_FOR_DELIVERY with motif', () => {
+  it('should cancel order on delivery refuse from READY_FOR_DELIVERY with motif', () => {
     cy.wrap(null).then(() => {
       return setupTestData().then((ctx) => {
         return createOrder(ctx, 'Reject at ready').then((id) => {
@@ -238,7 +249,7 @@ describe('14 - Delivery: Full API Lifecycle', () => {
           ).then(() =>
             cy.apiPost(ctx.agentToken, `/api/orders/${id}/accept-delivery`, { accepted: false, reason: 'Vehicle unavailable' })
           ).then((r) => {
-            expect(r.body.status).to.eq('DELIVERY_REJECTED');
+            expect(r.body.status).to.eq('CANCELLED');
             expect(r.body.deliveryRejectionReason).to.eq('Vehicle unavailable');
           });
         });

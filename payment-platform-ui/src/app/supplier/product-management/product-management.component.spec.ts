@@ -13,6 +13,7 @@ import { ProductManagementComponent } from './product-management.component';
 import { StockService } from '../../services/stock.service';
 import { CatalogService } from '../../services/catalog.service';
 import { ToastService } from '../../services/toast.service';
+import { ConfirmDialogService } from '../../components/confirm-dialog/confirm-dialog.service';
 import { Product } from '../../models/stock.model';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
@@ -22,6 +23,7 @@ describe('ProductManagementComponent', () => {
   let stockService: jasmine.SpyObj<StockService>;
   let catalogService: jasmine.SpyObj<CatalogService>;
   let toast: jasmine.SpyObj<ToastService>;
+  let confirmDialog: jasmine.SpyObj<ConfirmDialogService>;
 
   const mockProduct = {
     id: 1, supplierId: 1, name: 'Product A', sku: 'SKU-001', description: 'desc',
@@ -34,6 +36,8 @@ describe('ProductManagementComponent', () => {
     const stockSpy = jasmine.createSpyObj('StockService', ['getProducts', 'createProduct', 'updateProduct', 'deleteProduct']);
     const catalogSpy = jasmine.createSpyObj('CatalogService', ['listCategories', 'listFamilies']);
     const toastSpy = jasmine.createSpyObj('ToastService', ['success', 'error']);
+    const confirmSpy = jasmine.createSpyObj('ConfirmDialogService', ['confirm']);
+    confirmSpy.confirm.and.returnValue(of(true));
     stockSpy.getProducts.and.returnValue(of([]));
     catalogSpy.listCategories.and.returnValue(of([]));
     catalogSpy.listFamilies.and.returnValue(of([]));
@@ -46,6 +50,7 @@ describe('ProductManagementComponent', () => {
         { provide: StockService, useValue: stockSpy },
         { provide: CatalogService, useValue: catalogSpy },
         { provide: ToastService, useValue: toastSpy },
+        { provide: ConfirmDialogService, useValue: confirmSpy },
         provideHttpClient(withInterceptorsFromDi()),
         provideHttpClientTesting()
     ]
@@ -55,6 +60,7 @@ describe('ProductManagementComponent', () => {
     stockService = TestBed.inject(StockService) as jasmine.SpyObj<StockService>;
     catalogService = TestBed.inject(CatalogService) as jasmine.SpyObj<CatalogService>;
     toast = TestBed.inject(ToastService) as jasmine.SpyObj<ToastService>;
+    confirmDialog = TestBed.inject(ConfirmDialogService) as jasmine.SpyObj<ConfirmDialogService>;
   });
 
   afterEach(() => sessionStorage.clear());
@@ -321,7 +327,7 @@ describe('ProductManagementComponent', () => {
 
   describe('deleteProduct', () => {
     it('should delete on confirm', () => {
-      spyOn(window, 'confirm').and.returnValue(true);
+      confirmDialog.confirm.and.returnValue(of(true));
       stockService.deleteProduct.and.returnValue(of({} as any));
       component.deleteProduct({ id: 1, name: 'P' } as any);
       expect(stockService.deleteProduct).toHaveBeenCalledWith(1);
@@ -329,13 +335,13 @@ describe('ProductManagementComponent', () => {
     });
 
     it('should not delete when not confirmed', () => {
-      spyOn(window, 'confirm').and.returnValue(false);
+      confirmDialog.confirm.and.returnValue(of(false));
       component.deleteProduct({ id: 1, name: 'P' } as any);
       expect(stockService.deleteProduct).not.toHaveBeenCalled();
     });
 
     it('should handle delete error', () => {
-      spyOn(window, 'confirm').and.returnValue(true);
+      confirmDialog.confirm.and.returnValue(of(true));
       stockService.deleteProduct.and.returnValue(throwError(() => ({ error: { message: 'Err' } })));
       component.deleteProduct({ id: 1, name: 'P' } as any);
       expect(toast.error).toHaveBeenCalledWith('Err');

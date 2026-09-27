@@ -92,7 +92,7 @@
                       @if (p.imageUrl) {
                         <img [src]="p.imageUrl" [alt]="p.name" class="product-thumb">
                       } @else {
-                        <div class="product-placeholder">📦</div>
+                        <div class="product-placeholder"><app-icon name="box" [size]="28"></app-icon></div>
                       }
                     </td>
                     <td>{{ p.name }}</td>

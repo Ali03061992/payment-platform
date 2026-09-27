@@ -5,6 +5,7 @@ import { DisputeService } from '../../services/dispute.service';
 import { Order, OrderComment } from '../../models/order.model';
 import { Dispute } from '../../models/dispute.model';
 import { ToastService } from '../../services/toast.service';
+import { ConfirmDialogService } from '../../components/confirm-dialog/confirm-dialog.service';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -36,7 +37,8 @@ export class ShopOrderDetailComponent implements OnInit, OnDestroy {
     private router: Router,
     private orderService: OrderService,
     private disputeService: DisputeService,
-    private toast: ToastService
+    private toast: ToastService,
+    private confirmDialog: ConfirmDialogService
   ) {}
 
   ngOnInit(): void {
@@ -129,10 +131,17 @@ export class ShopOrderDetailComponent implements OnInit, OnDestroy {
 
   reject(): void {
     if (!this.order) return;
-    if (!confirm('Rejeter cette commande ?')) return;
-    this.subscriptions.add(this.orderService.reject(this.order.id).subscribe({
-      next: (data: Order) => { this.order = data; this.toast.success('Commande rejetée'); },
-      error: (e: any) => { this.toast.error(e.error?.message || 'Erreur'); }
+    const id = this.order.id;
+    this.subscriptions.add(this.confirmDialog.confirm({
+      title: 'Rejeter cette commande',
+      message: 'Rejeter cette commande ? Elle sera marquée comme rejetée.',
+      danger: true,
+    }).subscribe(ok => {
+      if (!ok) return;
+      this.subscriptions.add(this.orderService.reject(id).subscribe({
+        next: (data: Order) => { this.order = data; this.toast.success('Commande rejetée'); },
+        error: (e: any) => { this.toast.error(e.error?.message || 'Erreur'); }
+      }));
     }));
   }
 

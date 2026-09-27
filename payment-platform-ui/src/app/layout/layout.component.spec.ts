@@ -250,11 +250,11 @@ describe('LayoutComponent', () => {
 
   describe('getNotificationIcon', () => {
     it('should return correct icons', () => {
-      expect(component.getNotificationIcon('PAYMENT_CREATED')).toBe('💸');
-      expect(component.getNotificationIcon('PAYMENT_CONFIRMED')).toBe('✅');
-      expect(component.getNotificationIcon('PAYMENT_REJECTED')).toBe('❌');
-      expect(component.getNotificationIcon('PAYMENT_CANCELLED')).toBe('🚫');
-      expect(component.getNotificationIcon('UNKNOWN')).toBe('🔔');
+      expect(component.getNotificationIcon('PAYMENT_CREATED')).toBe('cash');
+      expect(component.getNotificationIcon('PAYMENT_CONFIRMED')).toBe('check-circle');
+      expect(component.getNotificationIcon('PAYMENT_REJECTED')).toBe('x-circle');
+      expect(component.getNotificationIcon('PAYMENT_CANCELLED')).toBe('ban');
+      expect(component.getNotificationIcon('UNKNOWN')).toBe('bell');
     });
   });
 
@@ -271,9 +271,30 @@ describe('LayoutComponent', () => {
       expect(component.showNotifications).toBeFalse();
     });
 
+    it('should navigate shop admin to shop order detail for ORDER entity (no 403)', () => {
+      component.user = { ...component.user, roles: ['SHOP_ADMIN'] };
+      component.navigateNotification({ relatedEntityType: 'ORDER', relatedEntityId: 'ORD-123' } as any);
+      expect(router.navigate).toHaveBeenCalledWith(['/dashboard/shop/orders', 'ORD-123']);
+      expect(component.showNotifications).toBeFalse();
+    });
+
     it('should navigate to supplier deliveries with orderId for DELIVERY entity', () => {
       component.navigateNotification({ relatedEntityType: 'DELIVERY', relatedEntityId: 'DEL-456' } as any);
       expect(router.navigate).toHaveBeenCalledWith(['/dashboard/supplier/deliveries'], { queryParams: { orderId: 'DEL-456' } });
+      expect(component.showNotifications).toBeFalse();
+    });
+
+    it('should navigate shop admin to shop deliveries for DELIVERY entity (no 403)', () => {
+      component.user = { ...component.user, roles: ['SHOP_ADMIN'] };
+      component.navigateNotification({ relatedEntityType: 'DELIVERY', relatedEntityId: 'DEL-456' } as any);
+      expect(router.navigate).toHaveBeenCalledWith(['/dashboard/shop/deliveries'], { queryParams: { orderId: 'DEL-456' } });
+      expect(component.showNotifications).toBeFalse();
+    });
+
+    it('should navigate shop agent to shop deliveries for DELIVERY entity', () => {
+      component.user = { ...component.user, roles: ['SHOP_AGENT'] };
+      component.navigateNotification({ relatedEntityType: 'DELIVERY', relatedEntityId: 'DEL-456' } as any);
+      expect(router.navigate).toHaveBeenCalledWith(['/dashboard/shop/deliveries'], { queryParams: { orderId: 'DEL-456' } });
       expect(component.showNotifications).toBeFalse();
     });
 

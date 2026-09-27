@@ -53,7 +53,7 @@
                 <span class="type-badge" [ngClass]="typeBadgeClass(n.type)">{{ typeLabel(n.type) }}</span>
               </td>
               <td>
-                <span class="notif-icon-inline">{{ getNotificationIcon(n.type) }}</span>
+                <span class="notif-icon-inline"><app-icon [name]="getNotificationIcon(n.type)" [size]="18"></app-icon></span>
                 <span class="notif-message-text">{{ n.message }}</span>
               </td>
               <td>{{ getTimeAgo(n.createdAt) }}</td>
@@ -85,7 +85,7 @@
         [class.unread]="n.readStatus === 'UNREAD'"
         (click)="navigateNotification(n)">
         <div class="notif-card-header">
-          <span class="notif-icon-large">{{ getNotificationIcon(n.type) }}</span>
+          <span class="notif-icon-large"><app-icon [name]="getNotificationIcon(n.type)" [size]="28"></app-icon></span>
           <div class="notif-card-meta">
             <span class="type-badge" [ngClass]="typeBadgeClass(n.type)">{{ typeLabel(n.type) }}</span>
             <span class="notif-time">{{ getTimeAgo(n.createdAt) }}</span>

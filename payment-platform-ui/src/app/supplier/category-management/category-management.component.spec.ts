@@ -11,6 +11,7 @@ import { of, throwError } from 'rxjs';
 import { CategoryManagementComponent } from './category-management.component';
 import { CatalogService } from '../../services/catalog.service';
 import { ToastService } from '../../services/toast.service';
+import { ConfirmDialogService } from '../../components/confirm-dialog/confirm-dialog.service';
 import { ProductCategory } from '../../models/catalog.model';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
@@ -19,11 +20,14 @@ describe('CategoryManagementComponent', () => {
   let fixture: ComponentFixture<CategoryManagementComponent>;
   let catalogService: jasmine.SpyObj<CatalogService>;
   let toast: jasmine.SpyObj<ToastService>;
+  let confirmDialog: jasmine.SpyObj<ConfirmDialogService>;
 
   beforeEach(() => {
     sessionStorage.setItem('user', JSON.stringify({ organizationId: 1 }));
     const catalogSpy = jasmine.createSpyObj('CatalogService', ['listCategories', 'createCategory', 'deleteCategory']);
     const toastSpy = jasmine.createSpyObj('ToastService', ['success', 'error']);
+    const confirmSpy = jasmine.createSpyObj('ConfirmDialogService', ['confirm']);
+    confirmSpy.confirm.and.returnValue(of(true));
     catalogSpy.listCategories.and.returnValue(of([]));
 
     TestBed.configureTestingModule({
@@ -32,6 +36,7 @@ describe('CategoryManagementComponent', () => {
     providers: [
         { provide: CatalogService, useValue: catalogSpy },
         { provide: ToastService, useValue: toastSpy },
+        { provide: ConfirmDialogService, useValue: confirmSpy },
         provideHttpClient(withInterceptorsFromDi()),
         provideHttpClientTesting()
     ]
@@ -40,6 +45,7 @@ describe('CategoryManagementComponent', () => {
     component = fixture.componentInstance;
     catalogService = TestBed.inject(CatalogService) as jasmine.SpyObj<CatalogService>;
     toast = TestBed.inject(ToastService) as jasmine.SpyObj<ToastService>;
+    confirmDialog = TestBed.inject(ConfirmDialogService) as jasmine.SpyObj<ConfirmDialogService>;
   });
 
   afterEach(() => {
@@ -83,27 +89,27 @@ describe('CategoryManagementComponent', () => {
 
   describe('deleteCategory', () => {
     it('should delete on confirm', () => {
-      spyOn(window, 'confirm').and.returnValue(true);
+      confirmDialog.confirm.and.returnValue(of(true));
       catalogService.deleteCategory.and.returnValue(of(undefined as any));
       component.deleteCategory({ id: 1, name: 'Cat' } as ProductCategory);
       expect(catalogService.deleteCategory).toHaveBeenCalledWith(1);
     });
 
     it('should not delete when not confirmed', () => {
-      spyOn(window, 'confirm').and.returnValue(false);
+      confirmDialog.confirm.and.returnValue(of(false));
       component.deleteCategory({ id: 1, name: 'Cat' } as ProductCategory);
       expect(catalogService.deleteCategory).not.toHaveBeenCalled();
     });
 
     it('should handle delete error', () => {
-      spyOn(window, 'confirm').and.returnValue(true);
+      confirmDialog.confirm.and.returnValue(of(true));
       catalogService.deleteCategory.and.returnValue(throwError(() => ({ error: { message: 'Delete failed' } })));
       component.deleteCategory({ id: 1, name: 'Cat' } as ProductCategory);
       expect(toast.error).toHaveBeenCalledWith('Delete failed');
     });
 
     it('should handle delete error without message', () => {
-      spyOn(window, 'confirm').and.returnValue(true);
+      confirmDialog.confirm.and.returnValue(of(true));
       catalogService.deleteCategory.and.returnValue(throwError(() => ({ error: {} })));
       component.deleteCategory({ id: 1, name: 'Cat' } as ProductCategory);
       expect(toast.error).toHaveBeenCalledWith('Erreur');

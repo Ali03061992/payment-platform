@@ -4,9 +4,11 @@ import com.paymentplatform.organization.application.dto.OrderResponse;
 import com.paymentplatform.organization.domain.model.Order;
 import com.paymentplatform.organization.domain.model.OrderEvent;
 import com.paymentplatform.organization.domain.model.OrderItem;
+import com.paymentplatform.organization.domain.model.Product;
 import com.paymentplatform.organization.domain.repository.OrderEventRepository;
 import com.paymentplatform.organization.domain.repository.OrderItemRepository;
 import com.paymentplatform.organization.domain.repository.OrderRepository;
+import com.paymentplatform.organization.domain.repository.ProductRepository;
 import com.paymentplatform.shared.domain.event.OrderEvents;
 import com.paymentplatform.shared.domain.exception.ConflictException;
 import com.paymentplatform.shared.domain.exception.NotFoundException;
@@ -24,13 +26,16 @@ public class AcceptDeliveryUseCase {
     private final OrderRepository orders;
     private final OrderItemRepository orderItems;
     private final OrderEventRepository events;
+    private final ProductRepository products;
     private final OutboxEventStore outbox;
 
     public AcceptDeliveryUseCase(OrderRepository orders, OrderItemRepository orderItems,
-                                 OrderEventRepository events, OutboxEventStore outbox) {
+                                 OrderEventRepository events, ProductRepository products,
+                                 OutboxEventStore outbox) {
         this.orders = orders;
         this.orderItems = orderItems;
         this.events = events;
+        this.products = products;
         this.outbox = outbox;
     }
 
@@ -43,6 +48,7 @@ public class AcceptDeliveryUseCase {
             throw new ConflictException("La commande doit être en statut READY_FOR_DELIVERY pour accepter ou rejeter la livraison");
         }
 
+        List<OrderItem> items = orderItems.findByOrderId(orderId);
         if (accepted) {
             order.acceptDelivery();
             events.save(OrderEvent.create(orderId, "ORDER_DELIVERY_ACCEPTED", actorUserId, null));
@@ -51,17 +57,25 @@ public class AcceptDeliveryUseCase {
                     order.getShopId(), order.getSupplierId(), actorUserId),
                     String.valueOf(orderId));
         } else {
-            order.deliveryReject(reason);
-            events.save(OrderEvent.create(orderId, "ORDER_DELIVERY_REJECTED", actorUserId,
-                    reason != null ? reason : "Livraison rejetée par le livreur"));
-            outbox.append(new OrderEvents.OrderDeliveryRejectedEvent(UUID.randomUUID(), Instant.now(),
+            for (OrderItem item : items) {
+                Product product = products.findByIdForUpdate(item.getProductId())
+                        .orElseThrow(() -> new NotFoundException("Produit non trouvé : " + item.getProductId()));
+                product.setReservedQty(Math.max(0, product.getReservedQty() - item.getQuantity()));
+                products.save(product);
+            }
+            if (reason != null && !reason.isBlank()) {
+                order.deliveryReject(reason);
+            }
+            order.cancel();
+            events.save(OrderEvent.create(orderId, "ORDER_CANCELLED", actorUserId,
+                    reason != null ? reason : "Livraison refusée par le livreur : commande annulée"));
+            outbox.append(new OrderEvents.OrderCancelledEvent(UUID.randomUUID(), Instant.now(),
                     orderId, order.getReference(),
-                    order.getShopId(), order.getSupplierId(), actorUserId, reason),
+                    order.getShopId(), order.getSupplierId(), actorUserId),
                     String.valueOf(orderId));
         }
 
         orders.save(order);
-        List<OrderItem> items = orderItems.findByOrderId(orderId);
         return OrderResponse.from(order, items);
     }
 }

@@ -13,7 +13,7 @@ import java.util.UUID;
 
 /**
  * Endpoint interne (secret partagé) pour la création de paiements par les
- * autres microservices — ex. paiement auto des commandes ASAP à la livraison.
+ * autres microservices — ex. paiement auto à réception de commande confirmée.
  * Le header {@code X-Internal-Token} est obligatoire (401 unifié, cf. B3) et
  * {@code X-Actor-User-Id} désigne l'utilisateur à l'origine de l'action.
  */
@@ -31,7 +31,8 @@ public class InternalPaymentController {
     }
 
     /**
-     * Crée un paiement automatique ASAP pour une commande livrée (appel inter-services).
+     * Crée un paiement automatique pour une commande à réception confirmée
+     * (appel inter-services).
      *
      * @param token secret interne partagé
      * @param actorUserId identifiant de l'utilisateur à l'origine de l'action

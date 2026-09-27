@@ -129,18 +129,18 @@ export class NotificationsComponent implements OnInit, OnDestroy {
 
   getNotificationIcon(type: string): string {
     switch (type) {
-      case 'PAYMENT_CREATED': return '💸';
-      case 'PAYMENT_CONFIRMED': return '✅';
-      case 'PAYMENT_REJECTED': return '❌';
-      case 'PAYMENT_CANCELLED': return '🚫';
-      case 'ORDER_CREATED': return '🛒';
-      case 'ORDER_CONFIRMED': return '✅';
-      case 'ORDER_SHIPPED': return '🚚';
-      case 'ORDER_DELIVERED': return '📦';
-      case 'DELIVERY_STARTED': return '🚚';
-      case 'DELIVERY_COMPLETED': return '📦';
-      case 'STOCK_LOW': return '🚨';
-      default: return '🔔';
+      case 'PAYMENT_CREATED': return 'cash';
+      case 'PAYMENT_CONFIRMED': return 'check-circle';
+      case 'PAYMENT_REJECTED': return 'x-circle';
+      case 'PAYMENT_CANCELLED': return 'ban';
+      case 'ORDER_CREATED': return 'cart';
+      case 'ORDER_CONFIRMED': return 'check-circle';
+      case 'ORDER_SHIPPED': return 'truck';
+      case 'ORDER_DELIVERED': return 'box';
+      case 'DELIVERY_STARTED': return 'truck';
+      case 'DELIVERY_COMPLETED': return 'box';
+      case 'STOCK_LOW': return 'alert';
+      default: return 'bell';
     }
   }
 

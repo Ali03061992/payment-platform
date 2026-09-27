@@ -2,6 +2,7 @@ import { Component, OnInit, OnDestroy, HostListener, ElementRef } from '@angular
 import { OrderService } from '../../services/order.service';
 import { Order } from '../../models/order.model';
 import { ToastService } from '../../services/toast.service';
+import { ConfirmDialogService } from '../../components/confirm-dialog/confirm-dialog.service';
 import { Subscription, Subject, debounceTime, distinctUntilChanged, switchMap, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 
@@ -24,7 +25,7 @@ export class OrderListComponent implements OnInit, OnDestroy {
 
   private subscriptions = new Subscription();
 
-  constructor(private orderService: OrderService, private toast: ToastService, private elRef: ElementRef) {}
+  constructor(private orderService: OrderService, private toast: ToastService, private confirmDialog: ConfirmDialogService, private elRef: ElementRef) {}
 
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent): void {
@@ -107,10 +108,16 @@ export class OrderListComponent implements OnInit, OnDestroy {
   }
 
   reject(id: string): void {
-    if (!confirm('Rejeter cette commande ?')) return;
-    this.subscriptions.add(this.orderService.reject(id).subscribe({
-      next: () => this.load(),
-      error: (e: any) => { this.toast.error(e.error?.message || 'Erreur'); }
+    this.subscriptions.add(this.confirmDialog.confirm({
+      title: 'Rejeter cette commande',
+      message: 'Rejeter cette commande ? Elle sera marquée comme rejetée.',
+      danger: true,
+    }).subscribe(ok => {
+      if (!ok) return;
+      this.subscriptions.add(this.orderService.reject(id).subscribe({
+        next: () => this.load(),
+        error: (e: any) => { this.toast.error(e.error?.message || 'Erreur'); }
+      }));
     }));
   }
 

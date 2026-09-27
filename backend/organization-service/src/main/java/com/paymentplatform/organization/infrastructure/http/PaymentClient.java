@@ -15,7 +15,8 @@ import java.util.UUID;
 
 /**
  * Client HTTP vers le payment-service pour la création idempotente
- * des paiements automatiques ASAP (2 tentatives, échec silencieux tracé).
+ * des paiements automatiques à réception confirmée (2 tentatives,
+ * échec silencieux tracé).
  */
 @Component
 public class PaymentClient {
@@ -36,7 +37,7 @@ public class PaymentClient {
     private String internalSecret;
 
     /**
-     * Crée le paiement auto d'une commande ASAP via l'endpoint interne
+     * Crée le paiement auto d'une commande livrée via l'endpoint interne
      * {@code POST /api/internal/payments/auto} (authentifié par
      * X-Internal-Token — l'ancien appel anonyme recevait 401).
      * L'idempotence est portée par la commande (clé {@code asap-<orderId>},

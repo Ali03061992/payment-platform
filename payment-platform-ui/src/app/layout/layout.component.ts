@@ -31,35 +31,36 @@ export class LayoutComponent implements OnInit, OnDestroy {
   private swipeThreshold = 80;
 
   navItems: { label: string; icon: string; route: string; roles: string[] }[] = [
-    { label: 'Tableau de bord', icon: '📊', route: '/dashboard', roles: ['SYSTEM_ADMIN', 'SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_AGENT'] },
-    { label: 'Gestion des utilisateurs', icon: '👥', route: 'admin/users', roles: ['SYSTEM_ADMIN'] },
-    { label: 'Créer un compte', icon: '➕', route: 'admin/users/create', roles: ['SYSTEM_ADMIN'] },
-    { label: 'Activation comptes', icon: '🔑', route: 'sales/accounts', roles: ['SYSTEM_ADMIN'] },
-    { label: 'Fournisseurs', icon: '🏭', route: 'admin/suppliers', roles: ['SYSTEM_ADMIN'] },
-    { label: 'Boutiques', icon: '🏪', route: 'admin/shops', roles: ['SYSTEM_ADMIN'] },
-    { label: 'Relations F-B', icon: '🔗', route: 'admin/relations', roles: ['SYSTEM_ADMIN'] },
-    { label: 'Stats organisations', icon: '📈', route: 'admin/org-stats', roles: ['SYSTEM_ADMIN'] },
-    { label: 'Journal d\'audit', icon: '📋', route: 'admin/audit-logs', roles: ['SYSTEM_ADMIN'] },
-    { label: 'Categories', icon: '🏷', route: 'supplier/categories', roles: ['SUPPLIER_ADMIN'] },
-    { label: 'Familles', icon: '📁', route: 'supplier/families', roles: ['SUPPLIER_ADMIN'] },
-    { label: 'Produits', icon: '📋', route: 'supplier/products', roles: ['SUPPLIER_ADMIN'] },
-    { label: 'Stock', icon: '📦', route: 'supplier/stock', roles: ['SUPPLIER_ADMIN', 'SUPPLIER_AGENT'] },
-    { label: 'Alertes stock', icon: '🚨', route: 'supplier/low-stock-alerts', roles: ['SUPPLIER_ADMIN'] },
-    { label: 'Optimisation', icon: '🧠', route: 'supplier/optimization', roles: ['SUPPLIER_ADMIN'] },
-    { label: 'Commandes', icon: '🛒', route: 'supplier/orders', roles: ['SUPPLIER_ADMIN'] },
-    { label: 'Finance', icon: '💰', route: 'supplier/financial', roles: ['SUPPLIER_ADMIN'] },
-    { label: 'Balance', icon: '⚖️', route: 'supplier/balance', roles: ['SUPPLIER_ADMIN'] },
-    { label: 'Livraisons', icon: '🚚', route: 'supplier/deliveries', roles: ['SUPPLIER_ADMIN', 'SUPPLIER_AGENT'] },
-    { label: 'Mes commandes', icon: '🛒', route: 'shop/orders', roles: ['SHOP_ADMIN', 'SHOP_AGENT'] },
-    { label: 'Nouvelle commande', icon: '➕', route: 'shop/orders/create', roles: ['SHOP_ADMIN'] },
-    { label: 'Balance', icon: '⚖️', route: 'shop/balance', roles: ['SHOP_ADMIN'] },
-    { label: 'Paiements', icon: '💳', route: 'payments', roles: ['SYSTEM_ADMIN', 'SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_AGENT'] },
-    { label: 'Stats paiements', icon: '📈', route: 'payments/stats', roles: ['SYSTEM_ADMIN', 'SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_AGENT'] },
-    { label: 'Scanner QR', icon: '📱', route: 'scan', roles: ['SYSTEM_ADMIN', 'SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_AGENT'] },
-    { label: 'Export', icon: '📤', route: 'export', roles: ['SYSTEM_ADMIN', 'SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_AGENT'] },
-    { label: 'Paiements agents', icon: '👥', route: 'supplier/agent-payments', roles: ['SUPPLIER_ADMIN', 'SUPPLIER_AGENT'] },
-    { label: 'Notifications', icon: '🔔', route: 'notifications', roles: ['SYSTEM_ADMIN', 'SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_AGENT'] },
-    { label: 'Changer mot de passe', icon: '🔑', route: 'change-password', roles: ['SYSTEM_ADMIN', 'SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_AGENT'] },
+    { label: 'Tableau de bord', icon: 'dashboard', route: '/dashboard', roles: ['SYSTEM_ADMIN', 'SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_AGENT'] },
+    { label: 'Gestion des utilisateurs', icon: 'users', route: 'admin/users', roles: ['SYSTEM_ADMIN'] },
+    { label: 'Créer un compte', icon: 'user-plus', route: 'admin/users/create', roles: ['SYSTEM_ADMIN'] },
+    { label: 'Activation comptes', icon: 'key', route: 'sales/accounts', roles: ['SYSTEM_ADMIN'] },
+    { label: 'Fournisseurs', icon: 'factory', route: 'admin/suppliers', roles: ['SYSTEM_ADMIN'] },
+    { label: 'Boutiques', icon: 'store', route: 'admin/shops', roles: ['SYSTEM_ADMIN'] },
+    { label: 'Relations F-B', icon: 'link', route: 'admin/relations', roles: ['SYSTEM_ADMIN'] },
+    { label: 'Stats organisations', icon: 'chart', route: 'admin/org-stats', roles: ['SYSTEM_ADMIN'] },
+    { label: 'Journal d\'audit', icon: 'list', route: 'admin/audit-logs', roles: ['SYSTEM_ADMIN'] },
+    { label: 'Categories', icon: 'tag', route: 'supplier/categories', roles: ['SUPPLIER_ADMIN'] },
+    { label: 'Familles', icon: 'folder', route: 'supplier/families', roles: ['SUPPLIER_ADMIN'] },
+    { label: 'Produits', icon: 'list', route: 'supplier/products', roles: ['SUPPLIER_ADMIN'] },
+    { label: 'Stock', icon: 'box', route: 'supplier/stock', roles: ['SUPPLIER_ADMIN', 'SUPPLIER_AGENT'] },
+    { label: 'Alertes stock', icon: 'alert', route: 'supplier/low-stock-alerts', roles: ['SUPPLIER_ADMIN'] },
+    { label: 'Optimisation', icon: 'cpu', route: 'supplier/optimization', roles: ['SUPPLIER_ADMIN'] },
+    { label: 'Commandes', icon: 'cart', route: 'supplier/orders', roles: ['SUPPLIER_ADMIN'] },
+    { label: 'Finance', icon: 'wallet', route: 'supplier/financial', roles: ['SUPPLIER_ADMIN'] },
+    { label: 'Balance', icon: 'scale', route: 'supplier/balance', roles: ['SUPPLIER_ADMIN'] },
+    { label: 'Livraisons', icon: 'truck', route: 'supplier/deliveries', roles: ['SUPPLIER_ADMIN', 'SUPPLIER_AGENT'] },
+    { label: 'Mes commandes', icon: 'cart', route: 'shop/orders', roles: ['SHOP_ADMIN', 'SHOP_AGENT'] },
+    { label: 'Livraisons', icon: 'truck', route: 'shop/deliveries', roles: ['SHOP_ADMIN', 'SHOP_AGENT'] },
+    { label: 'Nouvelle commande', icon: 'plus', route: 'shop/orders/create', roles: ['SHOP_ADMIN'] },
+    { label: 'Balance', icon: 'scale', route: 'shop/balance', roles: ['SHOP_ADMIN'] },
+    { label: 'Paiements', icon: 'card', route: 'payments', roles: ['SYSTEM_ADMIN', 'SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_AGENT'] },
+    { label: 'Stats paiements', icon: 'chart', route: 'payments/stats', roles: ['SYSTEM_ADMIN', 'SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_AGENT'] },
+    { label: 'Scanner QR', icon: 'scan', route: 'scan', roles: ['SYSTEM_ADMIN', 'SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_AGENT'] },
+    { label: 'Export', icon: 'upload', route: 'export', roles: ['SYSTEM_ADMIN', 'SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_AGENT'] },
+    { label: 'Paiements agents', icon: 'users', route: 'supplier/agent-payments', roles: ['SUPPLIER_ADMIN', 'SUPPLIER_AGENT'] },
+    { label: 'Notifications', icon: 'bell', route: 'notifications', roles: ['SYSTEM_ADMIN', 'SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_AGENT'] },
+    { label: 'Changer mot de passe', icon: 'lock', route: 'change-password', roles: ['SYSTEM_ADMIN', 'SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_AGENT'] },
   ];
 
   constructor(
@@ -108,6 +109,12 @@ export class LayoutComponent implements OnInit, OnDestroy {
 
   get filteredNav() {
     return this.navItems.filter(item => item.roles.some(r => this.user?.roles?.includes(r)));
+  }
+
+  /** Indique si l'utilisateur connecté est un profil boutique. */
+  isShopUser(): boolean {
+    const roles = this.user?.roles || [];
+    return roles.includes('SHOP_ADMIN') || roles.includes('SHOP_AGENT');
   }
 
   toggleSidebar(): void {
@@ -179,11 +186,11 @@ export class LayoutComponent implements OnInit, OnDestroy {
 
   getNotificationIcon(type: string): string {
     switch (type) {
-      case 'PAYMENT_CREATED': return '💸';
-      case 'PAYMENT_CONFIRMED': return '✅';
-      case 'PAYMENT_REJECTED': return '❌';
-      case 'PAYMENT_CANCELLED': return '🚫';
-      default: return '🔔';
+      case 'PAYMENT_CREATED': return 'cash';
+      case 'PAYMENT_CONFIRMED': return 'check-circle';
+      case 'PAYMENT_REJECTED': return 'x-circle';
+      case 'PAYMENT_CANCELLED': return 'ban';
+      default: return 'bell';
     }
   }
 
@@ -191,9 +198,16 @@ export class LayoutComponent implements OnInit, OnDestroy {
     if (notif.relatedEntityType === 'PAYMENT' && notif.relatedEntityId) {
       this.router.navigate(['/dashboard/payments', notif.relatedEntityId]);
     } else if (notif.relatedEntityType === 'ORDER' && notif.relatedEntityId) {
-      this.router.navigate(['/dashboard/supplier/orders'], { queryParams: { ref: notif.relatedEntityId } });
+      // Boutique : détail commande boutique (la liste fournisseur rendrait 403).
+      if (this.isShopUser()) {
+        this.router.navigate(['/dashboard/shop/orders', notif.relatedEntityId]);
+      } else {
+        this.router.navigate(['/dashboard/supplier/orders'], { queryParams: { ref: notif.relatedEntityId } });
+      }
     } else if (notif.relatedEntityType === 'DELIVERY' && notif.relatedEntityId) {
-      this.router.navigate(['/dashboard/supplier/deliveries'], { queryParams: { orderId: notif.relatedEntityId } });
+      // Boutique : page livraisons boutique (la page fournisseur rendrait 403).
+      const target = this.isShopUser() ? '/dashboard/shop/deliveries' : '/dashboard/supplier/deliveries';
+      this.router.navigate([target], { queryParams: { orderId: notif.relatedEntityId } });
     } else if (notif.relatedEntityType === 'SHOP_ORDER' && notif.relatedEntityId) {
       this.router.navigate(['/dashboard/shop/orders', notif.relatedEntityId]);
     }

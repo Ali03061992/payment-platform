@@ -58,6 +58,8 @@ import { NotFoundComponent } from './errors/not-found/not-found.component';
 import { NotificationBannerComponent } from './components/notification-banner/notification-banner.component';
 import { ToastComponent } from './components/toast/toast.component';
 import { TourComponent } from './components/tour/tour.component';
+import { AppIconComponent } from './components/icon/icon.component';
+import { ConfirmDialogComponent } from './components/confirm-dialog/confirm-dialog.component';
 import { StatusLabelPipe } from './pipes/status-label.pipe';
 
 import { JwtInterceptor } from './core/jwt.interceptor';
@@ -118,6 +120,8 @@ import { LanguageSwitcherComponent } from './i18n/language-switcher.component';
         NotFoundComponent,
         ToastComponent,
         TourComponent,
+        AppIconComponent,
+        ConfirmDialogComponent,
         StatusLabelPipe
     ],
     bootstrap: [AppComponent], imports: [BrowserModule,

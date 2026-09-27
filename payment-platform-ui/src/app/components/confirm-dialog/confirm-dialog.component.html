@@ -1,0 +1,22 @@
+@if (visible) {
+  <div class="confirm-overlay" (click)="choose(false)" role="presentation" data-testid="confirm-overlay">
+    <div class="confirm-dialog" role="dialog" aria-modal="true" [attr.aria-label]="title"
+      (click)="$event.stopPropagation()" data-testid="confirm-dialog">
+      <div class="confirm-icon" [class.danger]="danger" aria-hidden="true">
+        <app-icon [name]="danger ? 'alert' : 'info'" [size]="28"></app-icon>
+      </div>
+      <h3 class="confirm-title">{{ title }}</h3>
+      <p class="confirm-message">{{ message }}</p>
+      <div class="confirm-actions">
+        <button type="button" class="btn btn-secondary" (click)="choose(false)"
+          [attr.aria-label]="cancelLabel" data-testid="confirm-cancel">
+          {{ cancelLabel }}
+        </button>
+        <button type="button" class="btn" [class.btn-danger]="danger" [class.btn-primary]="!danger"
+          (click)="choose(true)" [attr.aria-label]="confirmLabel" data-testid="confirm-ok">
+          {{ confirmLabel }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

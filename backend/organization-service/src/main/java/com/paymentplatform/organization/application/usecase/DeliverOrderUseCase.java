@@ -22,7 +22,9 @@ import java.util.UUID;
 
 /**
  * Cas d'usage de livraison d'une commande : bascule le statut, journalise
- * l'événement et déclenche le paiement automatique ASAP quand requis.
+ * l'événement et crée le paiement automatiquement dès réception confirmée
+ * (agent ou boutique). Idempotent par commande : un seul paiement, jamais
+ * de doublon, jamais sur commande annulée/rejetée.
  */
 @Service
 public class DeliverOrderUseCase {
@@ -46,7 +48,7 @@ public class DeliverOrderUseCase {
     }
 
     /**
-     * Déclare une commande livrée et tente la création du paiement ASAP associé.
+     * Déclare une commande livrée (réception confirmée) et crée son paiement.
      *
      * @param orderId identifiant de la commande
      * @param receivedBy destinataire ayant réceptionné (identifiant utilisateur)
@@ -69,14 +71,12 @@ public class DeliverOrderUseCase {
                 actorUserId, receivedBy),
                 String.valueOf(orderId));
 
-        if (order.isAsapPayment()) {
-            try {
-                paymentClient.createAutoPayment(order.getShopId(), order.getSupplierId(),
-                        order.getCurrency(), actorUserId, order.getTotal(), orderId);
-                log.info("Auto-payment ASAP créé pour la commande {} lors de la livraison", order.getReference());
-            } catch (Exception e) {
-                log.error("Erreur lors de la création du paiement ASAP pour la commande {}", order.getReference(), e);
-            }
+        try {
+            paymentClient.createAutoPayment(order.getShopId(), order.getSupplierId(),
+                    order.getCurrency(), actorUserId, order.getTotal(), orderId);
+            log.info("Paiement auto créé pour la commande {} lors de la réception confirmée", order.getReference());
+        } catch (Exception e) {
+            log.error("Erreur lors de la création du paiement auto pour la commande {}", order.getReference(), e);
         }
 
         List<OrderItem> items = orderItems.findByOrderId(orderId);

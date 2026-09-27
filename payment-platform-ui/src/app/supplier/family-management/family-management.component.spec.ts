@@ -12,6 +12,7 @@ import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { FamilyManagementComponent } from './family-management.component';
 import { CatalogService } from '../../services/catalog.service';
 import { ToastService } from '../../services/toast.service';
+import { ConfirmDialogService } from '../../components/confirm-dialog/confirm-dialog.service';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('FamilyManagementComponent', () => {
@@ -19,11 +20,14 @@ describe('FamilyManagementComponent', () => {
   let fixture: ComponentFixture<FamilyManagementComponent>;
   let catalogService: jasmine.SpyObj<CatalogService>;
   let toast: jasmine.SpyObj<ToastService>;
+  let confirmDialog: jasmine.SpyObj<ConfirmDialogService>;
 
   beforeEach(() => {
     sessionStorage.setItem('user', JSON.stringify({ organizationId: 1 }));
     const catalogSpy = jasmine.createSpyObj('CatalogService', ['listCategories', 'listFamilies', 'createFamily', 'updateFamily', 'deleteFamily']);
     const toastSpy = jasmine.createSpyObj('ToastService', ['success', 'error']);
+    const confirmSpy = jasmine.createSpyObj('ConfirmDialogService', ['confirm']);
+    confirmSpy.confirm.and.returnValue(of(true));
     catalogSpy.listCategories.and.returnValue(of([]));
     catalogSpy.listFamilies.and.returnValue(of([]));
 
@@ -34,6 +38,7 @@ describe('FamilyManagementComponent', () => {
     providers: [
         { provide: CatalogService, useValue: catalogSpy },
         { provide: ToastService, useValue: toastSpy },
+        { provide: ConfirmDialogService, useValue: confirmSpy },
         provideHttpClient(withInterceptorsFromDi()),
         provideHttpClientTesting()
     ]
@@ -42,6 +47,7 @@ describe('FamilyManagementComponent', () => {
     component = fixture.componentInstance;
     catalogService = TestBed.inject(CatalogService) as jasmine.SpyObj<CatalogService>;
     toast = TestBed.inject(ToastService) as jasmine.SpyObj<ToastService>;
+    confirmDialog = TestBed.inject(ConfirmDialogService) as jasmine.SpyObj<ConfirmDialogService>;
   });
 
   afterEach(() => sessionStorage.clear());
@@ -213,7 +219,7 @@ describe('FamilyManagementComponent', () => {
 
   describe('deleteFamily', () => {
     it('should delete on confirm', () => {
-      spyOn(window, 'confirm').and.returnValue(true);
+      confirmDialog.confirm.and.returnValue(of(true));
       catalogService.deleteFamily.and.returnValue(of(undefined as any));
       component.deleteFamily({ id: 1, name: 'Fam' } as any);
       expect(catalogService.deleteFamily).toHaveBeenCalledWith(1);
@@ -221,13 +227,13 @@ describe('FamilyManagementComponent', () => {
     });
 
     it('should not delete when not confirmed', () => {
-      spyOn(window, 'confirm').and.returnValue(false);
+      confirmDialog.confirm.and.returnValue(of(false));
       component.deleteFamily({ id: 1, name: 'Fam' } as any);
       expect(catalogService.deleteFamily).not.toHaveBeenCalled();
     });
 
     it('should handle delete error', () => {
-      spyOn(window, 'confirm').and.returnValue(true);
+      confirmDialog.confirm.and.returnValue(of(true));
       catalogService.deleteFamily.and.returnValue(throwError(() => ({ error: { message: 'Err' } })));
       component.deleteFamily({ id: 1, name: 'Fam' } as any);
       expect(toast.error).toHaveBeenCalledWith('Err');

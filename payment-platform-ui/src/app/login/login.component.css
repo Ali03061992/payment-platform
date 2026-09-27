@@ -145,9 +145,3 @@
     font-size: 16px;
   }
 }
-
-.oauth-divider { display: flex; align-items: center; gap: 12px; margin: 20px 0 12px; color: var(--text-muted); font-size: 13px; }
-.oauth-divider::before, .oauth-divider::after { content: ''; flex: 1; border-top: 1px solid var(--border-color); }
-.oauth-buttons { display: flex; flex-direction: column; gap: 8px; margin-bottom: 8px; }
-.dev-login-panel { margin-top: 16px; padding: 12px; border: 1px dashed var(--border-color); border-radius: 8px; }
-.dev-login-panel h3 { font-size: 14px; margin: 0 0 8px; color: var(--text-muted); }

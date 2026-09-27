@@ -3,6 +3,8 @@ import { ActivatedRoute } from '@angular/router';
 import { OrderService } from '../../services/order.service';
 import { Order } from '../../models/order.model';
 import { ToastService } from '../../services/toast.service';
+import { LoginService } from '../../services/login.service';
+import { ConfirmDialogService } from '../../components/confirm-dialog/confirm-dialog.service';
 
 /**
  * Écran livreur/admin des livraisons (acceptation, confirmation de date, livraison, rejet).
@@ -48,8 +50,16 @@ export class DeliveryManagementComponent implements OnInit {
   constructor(
     private orderService: OrderService,
     private route: ActivatedRoute,
-    private toast: ToastService
+    private toast: ToastService,
+    private loginService: LoginService,
+    private confirmDialog: ConfirmDialogService
   ) {}
+
+  /** Indique si l'utilisateur connecté est un profil boutique (accès réceptions). */
+  isShopUser(): boolean {
+    const roles = this.loginService.getCurrentUser()?.roles || [];
+    return roles.includes('SHOP_ADMIN') || roles.includes('SHOP_AGENT');
+  }
 
   /** Initialise la surbrillance éventuelle puis charge les livraisons. */
   ngOnInit(): void {
@@ -100,7 +110,45 @@ export class DeliveryManagementComponent implements OnInit {
   }
 
   get rejectedDeliveries(): Order[] {
-    return this.deliveries.filter(d => d.status === 'DELIVERY_REJECTED');
+    return this.deliveries.filter(d => d.status === 'DELIVERY_REJECTED' || d.status === 'CANCELLED');
+  }
+
+  /** Livraisons en attente de réception boutique (acceptation sous 15 min sinon auto). */
+  get pendingReception(): Order[] {
+    return this.deliveries.filter(d => d.status === 'DELIVERED');
+  }
+
+  /** Accepte la réception d'une commande livrée (profil boutique). */
+  acceptReception(order: Order): void {
+    this.orderService.accept(order.id).subscribe({
+      next: () => {
+        this.toast.success('Réception acceptée');
+        this.loadDeliveries();
+      },
+      error: (err: any) => {
+        this.toast.error(err.error?.message || 'Erreur');
+      }
+    });
+  }
+
+  /** Rejette la réception via popup (profil boutique). */
+  rejectReception(order: Order): void {
+    this.confirmDialog.confirm({
+      title: 'Rejeter la réception',
+      message: `Rejeter la réception de ${order.reference} ?`,
+      danger: true,
+    }).subscribe(ok => {
+      if (!ok) return;
+      this.orderService.reject(order.id).subscribe({
+        next: () => {
+          this.toast.success('Réception rejetée');
+          this.loadDeliveries();
+        },
+        error: (err: any) => {
+          this.toast.error(err.error?.message || 'Erreur');
+        }
+      });
+    });
   }
 
   /** Accepte la livraison d'une commande prête. */
@@ -136,7 +184,7 @@ export class DeliveryManagementComponent implements OnInit {
     this.rejecting = true;
     this.orderService.acceptDelivery(this.rejectOrder.id, false, this.rejectReason).subscribe({
       next: () => {
-        this.toast.success('Livraison rejetée');
+        this.toast.success('Livraison rejetée, commande annulée');
         this.closeRejectModal();
         this.rejecting = false;
         this.loadDeliveries();
@@ -208,7 +256,7 @@ export class DeliveryManagementComponent implements OnInit {
     this.delivering = true;
     this.orderService.deliver(this.selectedOrder.id, this.receivedBy).subscribe({
       next: () => {
-        this.toast.success('Livraison confirmée avec succès');
+        this.toast.success('Livraison confirmée, paiement créé');
         this.closeDeliver();
         this.delivering = false;
         this.loadDeliveries();
@@ -228,7 +276,8 @@ export class DeliveryManagementComponent implements OnInit {
       IN_DELIVERY: 'En livraison',
       DELIVERED: 'Livré',
       ACCEPTED: 'Accepté par la boutique',
-      DELIVERY_REJECTED: 'Rejetée'
+      DELIVERY_REJECTED: 'Rejetée',
+      CANCELLED: 'Annulée'
     };
     return map[s] || s;
   }
@@ -241,7 +290,8 @@ export class DeliveryManagementComponent implements OnInit {
       IN_DELIVERY: 'in-delivery',
       DELIVERED: 'delivered',
       ACCEPTED: 'accepted',
-      DELIVERY_REJECTED: 'rejected'
+      DELIVERY_REJECTED: 'rejected',
+      CANCELLED: 'cancelled'
     };
     return map[s] || '';
   }
