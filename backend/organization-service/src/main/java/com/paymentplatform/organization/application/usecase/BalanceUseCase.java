@@ -107,8 +107,10 @@ public class BalanceUseCase {
     }
 
     private BigDecimal getCurrentBalance(UUID supplierId, UUID shopId) {
-        return balanceRepository.findFirstBySupplierIdAndShopIdOrderByCreatedAtDesc(supplierId, shopId)
-                .map(BalanceEntry::getBalanceAfter)
-                .orElse(BigDecimal.ZERO);
+        // Somme du ledger plutôt que dernière écriture par createdAt : immunise
+        // contre les ex-aequo d'horodatage (écritures rapides dans la même
+        // milliseconde) qui rendaient la lecture du « dernier » non déterministe.
+        BigDecimal somme = balanceRepository.sumBalance(supplierId, shopId);
+        return somme != null ? somme : BigDecimal.ZERO;
     }
 }

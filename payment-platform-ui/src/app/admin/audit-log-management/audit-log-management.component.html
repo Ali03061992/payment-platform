@@ -64,11 +64,8 @@
     </div>
   </div>
 
-  @if (totalPages > 1) {
-    <div class="pagination">
-      <button class="btn btn-sm" (click)="prevPage()" [disabled]="currentPage === 0">← Précédent</button>
-      <span class="page-info">Page {{ currentPage + 1 }} / {{ totalPages }} ({{ totalElements }} entrées)</span>
-      <button class="btn btn-sm" (click)="nextPage()" [disabled]="currentPage >= totalPages - 1">Suivant →</button>
-    </div>
+  @if (totalElements > 0) {
+    <app-pagination [page]="currentPage" [size]="pageSize" [totalElements]="totalElements"
+      (pageChange)="onPageChange($event)" (sizeChange)="onSizeChange($event)"></app-pagination>
   }
 }

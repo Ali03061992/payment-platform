@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Payment, PaymentStats, CreatePaymentRequest, RejectPaymentRequest } from '../models/payment.model';
+import { Payment, PaymentStats, CreatePaymentRequest, RejectPaymentRequest, PaymentPage } from '../models/payment.model';
 import { AgentPaymentSummary } from '../models/agent-payment.model';
 import { ToastService } from './toast.service';
 import { filenameFromDisposition, saveBlob } from '../core/file-download';
@@ -17,9 +17,10 @@ export class PaymentService {
   constructor(private http: HttpClient, private toast: ToastService) {}
 
   /** Liste les paiements visibles, en normalisant les enveloppes paginées. */
-  list(): Observable<Payment[]> {
+  list(page = 0, size = 50): Observable<Payment[]> {
+    const params = new HttpParams().set('page', page).set('size', size);
     return new Observable<Payment[]>(observer => {
-      this.http.get<any>(this.apiUrl).subscribe({
+      this.http.get<any>(this.apiUrl, { params }).subscribe({
         next: (res: any) => {
           if (Array.isArray(res)) observer.next(res as Payment[]);
           else if (res && Array.isArray(res.items)) observer.next(res.items as Payment[]);
@@ -31,6 +32,12 @@ export class PaymentService {
         error: (err) => observer.error(err)
       });
     });
+  }
+
+  /** Page de paiements (lazy loading) : ne charge que la page demandée. */
+  listPaged(page = 0, size = 20): Observable<PaymentPage> {
+    const params = new HttpParams().set('page', page).set('size', size);
+    return this.http.get<PaymentPage>(this.apiUrl, { params });
   }
 
   /** Récupère un paiement par identifiant. */

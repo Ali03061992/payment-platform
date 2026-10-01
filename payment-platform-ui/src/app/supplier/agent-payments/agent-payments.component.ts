@@ -3,6 +3,7 @@ import { PaymentService } from '../../services/payment.service';
 import { LoginService } from '../../services/login.service';
 import { AgentPaymentSummary, Payment } from '../../models/agent-payment.model';
 import { ToastService } from '../../services/toast.service';
+import { paginateItems, sortItems, toggleSortState, ariaSortFor, sortIndicatorFor, SortState } from '../../models/page.model';
 
 @Component({
     selector: 'app-agent-payments',
@@ -24,6 +25,9 @@ export class AgentPaymentsComponent implements OnInit {
   totalPayments = 0;
 
   statusFilter = '';
+  currentPage = 0;
+  pageSize = 10;
+  sort: SortState = { field: null, direction: 'asc' };
 
   constructor(
     private paymentService: PaymentService,

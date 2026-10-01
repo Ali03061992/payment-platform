@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -345,13 +347,12 @@ class AppScaffold extends ConsumerWidget {
         ),
       ),
       body: child,
-      extendBody: true,
       bottomNavigationBar: _FloatingNav(tabs: tabs, unread: unread),
     );
   }
 }
 
-/// Barre de navigation flottante signature.
+/// Barre de navigation en verre dépoli (frosted glass).
 class _FloatingNav extends StatelessWidget {
   final List<Map<String, Object>> tabs;
   final int unread;
@@ -368,27 +369,38 @@ class _FloatingNav extends StatelessWidget {
     }
     return SafeArea(
       child: Container(
-        margin: const EdgeInsets.fromLTRB(18, 0, 18, 14),
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+        margin: const EdgeInsets.fromLTRB(20, 0, 20, 16),
         decoration: BoxDecoration(
-          color: Ds.ink,
-          borderRadius: BorderRadius.circular(26),
-          boxShadow: [
-            BoxShadow(color: Ds.ink.withValues(alpha: 0.4), blurRadius: 22, offset: const Offset(0, 8)),
+          borderRadius: BorderRadius.circular(28),
+          boxShadow: const [
+            BoxShadow(
+                color: Color.fromRGBO(16, 24, 40, 0.12),
+                blurRadius: 24,
+                offset: Offset(0, 8)),
           ],
         ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            for (var i = 0; i < tabs.length; i++)
-              _NavItem(
-                icon: tabs[i]['icon'] as IconData,
-                label: tabs[i]['label'] as String,
-                selected: i == current,
-                badge: tabs[i]['path'] == '/notifications' ? unread : 0,
-                onTap: () => context.go(tabs[i]['path'] as String),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(28),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+              color: Colors.white.withValues(alpha: 0.82),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  for (var i = 0; i < tabs.length; i++)
+                    _NavItem(
+                      icon: tabs[i]['icon'] as IconData,
+                      label: tabs[i]['label'] as String,
+                      selected: i == current,
+                      badge: tabs[i]['path'] == '/notifications' ? unread : 0,
+                      onTap: () => context.go(tabs[i]['path'] as String),
+                    ),
+                ],
               ),
-          ],
+            ),
+          ),
         ),
       ),
     );
@@ -415,9 +427,9 @@ class _NavItem extends StatelessWidget {
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 220),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 7),
         decoration: BoxDecoration(
-          color: selected ? Ds.pop : Colors.transparent,
+          color: selected ? Ds.accent : Colors.transparent,
           borderRadius: BorderRadius.circular(18),
         ),
         child: Column(
@@ -427,11 +439,12 @@ class _NavItem extends StatelessWidget {
               isLabelVisible: badge > 0,
               label: Text('$badge'),
               backgroundColor: Ds.dangerText,
-              child: Icon(icon, color: Colors.white, size: 22),
+              child: Icon(icon,
+                  color: selected ? Colors.white : Ds.muted, size: 22),
             ),
             Text(label,
                 style: TextStyle(
-                    color: selected ? Ds.ink : Colors.white70,
+                    color: selected ? Colors.white : Ds.muted,
                     fontSize: 10.5,
                     fontWeight: FontWeight.w700)),
           ],

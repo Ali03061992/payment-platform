@@ -26,6 +26,17 @@ class _PaymentsListScreenState extends ConsumerState<PaymentsListScreen> {
   }
 
   @override
+  void didUpdateWidget(PaymentsListScreen old) {
+    super.didUpdateWidget(old);
+    if (old.initialStatus != widget.initialStatus) {
+      setState(() {
+        _status = widget.initialStatus;
+        _page = 0;
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final canCreate = ref.watch(authProvider).roles.any((r) => r == 'SHOP_ADMIN' || r == 'SHOP_AGENT');
     return Scaffold(
@@ -43,6 +54,7 @@ class _PaymentsListScreenState extends ConsumerState<PaymentsListScreen> {
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
             child: DropdownButtonFormField<String?>(
+              key: ValueKey(_status),
               initialValue: _status,
               decoration: dsInput('Statut'),
               items: const [
@@ -92,28 +104,32 @@ class _PaymentsListScreenState extends ConsumerState<PaymentsListScreen> {
                                       child: Column(
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
-                                          Text('${p['reference'] ?? '—'}',
-                                              style: const TextStyle(
-                                                  fontWeight: FontWeight.w700, fontSize: 14)),
+                                          Text('${p['reference'] ?? '—'}', style: Tx.title(size: 14)),
                                           Text(
                                               '${p['shopName'] ?? ''} → ${p['supplierName'] ?? ''}',
                                               maxLines: 1,
                                               overflow: TextOverflow.ellipsis,
-                                              style: const TextStyle(color: Ds.muted, fontSize: 12)),
+                                              style: Tx.small(size: 12)),
                                           Text(fmtDate(p['createdAt']?.toString()),
-                                              style: const TextStyle(color: Ds.muted, fontSize: 11)),
+                                              style: Tx.caption()),
                                         ],
                                       ),
                                     ),
-                                    Column(
-                                      crossAxisAlignment: CrossAxisAlignment.end,
-                                      children: [
-                                        Text(fmtAmount(p['amount'], '${p['currency'] ?? ''}'),
-                                            style: const TextStyle(
-                                                fontWeight: FontWeight.w800, fontSize: 14)),
-                                        const SizedBox(height: 4),
-                                        StatusBadge('${p['status'] ?? ''}'),
-                                      ],
+                                    Flexible(
+                                      flex: 0,
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.end,
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Text(fmtAmount(p['amount'], '${p['currency'] ?? ''}'),
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                              textAlign: TextAlign.end,
+                                              style: Tx.amount(size: 14)),
+                                          const SizedBox(height: 4),
+                                          StatusBadge('${p['status'] ?? ''}'),
+                                        ],
+                                      ),
                                     ),
                                   ],
                                 ),

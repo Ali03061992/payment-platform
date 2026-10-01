@@ -49,7 +49,7 @@
             </tr>
           </thead>
           <tbody>
-            @for (p of products; track p) {
+            @for (p of pagedProducts; track p) {
               <tr [class.low-stock]="getStockStatus(p) === 'LOW'" [class.out-of-stock]="getStockStatus(p) === 'OUT_OF_STOCK'">
                 <td><code>{{ p.sku }}</code></td>
                 <td><strong>{{ p.name }}</strong></td>
@@ -83,6 +83,10 @@
         </table>
       </div>
     </div>
+    @if (products.length > 0) {
+      <app-pagination [page]="currentPage" [size]="pageSize" [totalElements]="products.length"
+        (pageChange)="onPageChange($event)" (sizeChange)="onSizeChange($event)"></app-pagination>
+    }
   </div>
 }
 
@@ -153,7 +157,7 @@
               </tr>
             </thead>
             <tbody>
-              @for (m of historyMovements; track m) {
+              @for (m of pagedHistory; track m) {
                 <tr>
                   <td>{{ m.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
                   <td>
@@ -174,6 +178,10 @@
             </tbody>
           </table>
         </div>
+        @if (historyMovements.length > 0) {
+          <app-pagination [page]="historyPage" [size]="historySize" [totalElements]="historyMovements.length"
+            (pageChange)="onHistoryPageChange($event)" (sizeChange)="onHistorySizeChange($event)"></app-pagination>
+        }
       }
     </div>
   </div>

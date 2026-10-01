@@ -60,6 +60,7 @@ import { ToastComponent } from './components/toast/toast.component';
 import { TourComponent } from './components/tour/tour.component';
 import { AppIconComponent } from './components/icon/icon.component';
 import { ConfirmDialogComponent } from './components/confirm-dialog/confirm-dialog.component';
+import { PaginationComponent } from './components/pagination/pagination.component';
 import { StatusLabelPipe } from './pipes/status-label.pipe';
 
 import { JwtInterceptor } from './core/jwt.interceptor';
@@ -122,6 +123,7 @@ import { LanguageSwitcherComponent } from './i18n/language-switcher.component';
         TourComponent,
         AppIconComponent,
         ConfirmDialogComponent,
+        PaginationComponent,
         StatusLabelPipe
     ],
     bootstrap: [AppComponent], imports: [BrowserModule,

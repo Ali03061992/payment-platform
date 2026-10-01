@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { OrganizationService } from '../../services/organization.service';
 import { Organization } from '../../models/organization.model';
+import { PageResponse } from '../../models/page.model';
 import { ToastService } from '../../services/toast.service';
 
 @Component({
@@ -15,16 +16,37 @@ export class ShopManagementComponent implements OnInit {
   showCreate = false;
   newName = '';
   creating = false;
+  currentPage = 0;
+  pageSize = 20;
+  totalElements = 0;
+  totalPages = 0;
   constructor(private orgService: OrganizationService, private toast: ToastService) {}
 
   ngOnInit(): void { this.load(); }
 
   load(): void {
     this.loading = true;
-    this.orgService.listShops().subscribe({
-      next: (data: Organization[]) => { this.shops = data; this.loading = false; },
+    this.orgService.listShopsPaged(this.currentPage, this.pageSize).subscribe({
+      next: (page: PageResponse<Organization>) => {
+        this.shops = page.items || [];
+        this.totalElements = page.totalElements ?? this.shops.length;
+        this.totalPages = page.totalPages ?? 1;
+        this.currentPage = page.number ?? this.currentPage;
+        this.loading = false;
+      },
       error: () => { this.loading = false; }
     });
+  }
+
+  onPageChange(page: number): void {
+    this.currentPage = page;
+    this.load();
+  }
+
+  onSizeChange(size: number): void {
+    this.pageSize = size;
+    this.currentPage = 0;
+    this.load();
   }
 
   create(): void {

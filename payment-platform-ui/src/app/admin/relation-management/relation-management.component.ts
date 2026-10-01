@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { OrganizationService } from '../../services/organization.service';
 import { Organization, SupplierShopRelation } from '../../models/organization.model';
+import { paginateItems } from '../../models/page.model';
 import { ToastService } from '../../services/toast.service';
 
 @Component({
@@ -18,6 +19,8 @@ export class RelationManagementComponent implements OnInit {
   selectedSupplierId = '';
   selectedShopId = '';
   creating = false;
+  currentPage = 0;
+  pageSize = 20;
 
   constructor(private orgService: OrganizationService, private toast: ToastService) {}
 
@@ -26,10 +29,23 @@ export class RelationManagementComponent implements OnInit {
   load(): void {
     this.loading = true;
     this.orgService.listRelations().subscribe({
-      next: (data: SupplierShopRelation[]) => { this.relations = data; this.loading = false; }
+      next: (data: SupplierShopRelation[]) => { this.relations = data; this.currentPage = 0; this.loading = false; }
     });
     this.orgService.listSuppliers().subscribe({ next: (d: Organization[]) => this.suppliers = d });
     this.orgService.listShops().subscribe({ next: (d: Organization[]) => this.shops = d });
+  }
+
+  get pagedRelations(): SupplierShopRelation[] {
+    return paginateItems(this.relations, this.currentPage, this.pageSize);
+  }
+
+  onPageChange(page: number): void {
+    this.currentPage = page;
+  }
+
+  onSizeChange(size: number): void {
+    this.pageSize = size;
+    this.currentPage = 0;
   }
 
   create(): void {

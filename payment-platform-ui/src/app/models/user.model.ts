@@ -32,3 +32,11 @@ export interface RegisterRequest {
   phone: string;
   role: string;
 }
+
+/** Page d'utilisateurs telle que retournée par GET /api/users (page/size + filtres). */
+export interface UserPage {
+  items: User[];
+  totalElements: number;
+  totalPages: number;
+  number: number;
+}

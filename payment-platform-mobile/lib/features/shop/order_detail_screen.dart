@@ -105,20 +105,16 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
                           children: [
                             Expanded(
                               child: Text('${o['reference'] ?? '—'}',
-                                  style: const TextStyle(
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.w600,
-                                      color: Colors.white70)),
+                                  style: Tx.body(color: Colors.white70, size: 15)),
                             ),
                             StatusBadge(status),
                           ],
                         ),
                         const SizedBox(height: 6),
                         Text(fmtAmount(o['total'], '${o['currency'] ?? ''}'),
-                            style: const TextStyle(
-                                fontSize: 34, fontWeight: FontWeight.w800, color: Colors.white)),
+                            style: Tx.heroAmount()),
                         Text('${o['supplierName'] ?? ''} → ${o['shopName'] ?? ''}',
-                            style: const TextStyle(color: Colors.white70, fontSize: 13)),
+                            style: Tx.body(color: Colors.white70, size: 13)),
                       ],
                     ),
                   ),

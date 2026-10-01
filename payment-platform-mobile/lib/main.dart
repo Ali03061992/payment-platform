@@ -6,6 +6,8 @@ import 'app.dart';
 import 'core/auth/auth_provider.dart';
 import 'core/notifications/fcm_service.dart';
 import 'core/notifications/notification_providers.dart';
+import 'core/notifications/notif_pop.dart';
+import 'core/notifications/notify_signal.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -37,6 +39,12 @@ class _BootstrapState extends ConsumerState<_Bootstrap> {
           if (route == '__refresh__') {
             ref.read(unreadCountProvider.notifier).refresh();
           }
+        },
+        onPush: (title, body, route) {
+          // Signal instantané : son + vibration + bannière + compteur.
+          NotifySignal.bam();
+          notifPopBus.pop(NotifPop(title: title, body: body, route: route));
+          ref.read(unreadCountProvider.notifier).refresh();
         },
       );
       await _fcm!.init();

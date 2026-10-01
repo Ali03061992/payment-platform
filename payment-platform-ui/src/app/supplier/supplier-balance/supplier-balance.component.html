@@ -65,16 +65,16 @@
         <table>
           <thead>
             <tr>
-              <th>Boutique</th>
-              <th>Solde actuel</th>
-              <th>Total commandes</th>
-              <th>Total paiements</th>
-              <th>Reste à payer</th>
+              <th class="sortable-th" (click)="onSort('shopName')" (keydown.enter)="onSort('shopName')" (keydown.space)="onSort('shopName'); $event.preventDefault()" tabindex="0" [attr.aria-sort]="ariaSort('shopName')" title="Trier par boutique">Boutique <span class="sort-indicator" aria-hidden="true">{{ sortIndicator('shopName') }}</span></th>
+              <th class="sortable-th" (click)="onSort('currentBalance')" (keydown.enter)="onSort('currentBalance')" (keydown.space)="onSort('currentBalance'); $event.preventDefault()" tabindex="0" [attr.aria-sort]="ariaSort('currentBalance')" title="Trier par solde">Solde actuel <span class="sort-indicator" aria-hidden="true">{{ sortIndicator('currentBalance') }}</span></th>
+              <th class="sortable-th" (click)="onSort('totalOrders')" (keydown.enter)="onSort('totalOrders')" (keydown.space)="onSort('totalOrders'); $event.preventDefault()" tabindex="0" [attr.aria-sort]="ariaSort('totalOrders')" title="Trier par commandes">Total commandes <span class="sort-indicator" aria-hidden="true">{{ sortIndicator('totalOrders') }}</span></th>
+              <th class="sortable-th" (click)="onSort('totalPayments')" (keydown.enter)="onSort('totalPayments')" (keydown.space)="onSort('totalPayments'); $event.preventDefault()" tabindex="0" [attr.aria-sort]="ariaSort('totalPayments')" title="Trier par paiements">Total paiements <span class="sort-indicator" aria-hidden="true">{{ sortIndicator('totalPayments') }}</span></th>
+              <th class="sortable-th" (click)="onSort('remainingDue')" (keydown.enter)="onSort('remainingDue')" (keydown.space)="onSort('remainingDue'); $event.preventDefault()" tabindex="0" [attr.aria-sort]="ariaSort('remainingDue')" title="Trier par reste à payer">Reste à payer <span class="sort-indicator" aria-hidden="true">{{ sortIndicator('remainingDue') }}</span></th>
               <th>Actions</th>
             </tr>
           </thead>
           <tbody>
-            @for (b of balances; track b) {
+            @for (b of pagedBalances; track b) {
               <tr class="clickable-row" (click)="viewLedger(b.supplierId, b.shopId)">
                 <td><strong>{{ b.shopName || b.shopId }}</strong></td>
                 <td [class.positive]="b.currentBalance >= 0" [class.negative]="b.currentBalance < 0">
@@ -100,6 +100,10 @@
         </table>
       </div>
     </div>
+    @if (!loading && balances.length > 0) {
+      <app-pagination [page]="currentPage" [size]="pageSize" [totalElements]="balances.length"
+        (pageChange)="onPageChange($event)" (sizeChange)="onSizeChange($event)"></app-pagination>
+    }
 
     @if (selectedShopId !== null) {
       <div class="ledger-panel">
@@ -119,16 +123,16 @@
               <table>
                 <thead>
                   <tr>
-                    <th>Date</th>
-                    <th>Type</th>
-                    <th>Montant</th>
-                    <th>Solde après</th>
+                    <th class="sortable-th" (click)="onLedgerSort('createdAt')" (keydown.enter)="onLedgerSort('createdAt')" (keydown.space)="onLedgerSort('createdAt'); $event.preventDefault()" tabindex="0" [attr.aria-sort]="ledgerAriaSort('createdAt')" title="Trier par date">Date <span class="sort-indicator" aria-hidden="true">{{ ledgerSortIndicator('createdAt') }}</span></th>
+                    <th class="sortable-th" (click)="onLedgerSort('type')" (keydown.enter)="onLedgerSort('type')" (keydown.space)="onLedgerSort('type'); $event.preventDefault()" tabindex="0" [attr.aria-sort]="ledgerAriaSort('type')" title="Trier par type">Type <span class="sort-indicator" aria-hidden="true">{{ ledgerSortIndicator('type') }}</span></th>
+                    <th class="sortable-th" (click)="onLedgerSort('amount')" (keydown.enter)="onLedgerSort('amount')" (keydown.space)="onLedgerSort('amount'); $event.preventDefault()" tabindex="0" [attr.aria-sort]="ledgerAriaSort('amount')" title="Trier par montant">Montant <span class="sort-indicator" aria-hidden="true">{{ ledgerSortIndicator('amount') }}</span></th>
+                    <th class="sortable-th" (click)="onLedgerSort('balanceAfter')" (keydown.enter)="onLedgerSort('balanceAfter')" (keydown.space)="onLedgerSort('balanceAfter'); $event.preventDefault()" tabindex="0" [attr.aria-sort]="ledgerAriaSort('balanceAfter')" title="Trier par solde">Solde après <span class="sort-indicator" aria-hidden="true">{{ ledgerSortIndicator('balanceAfter') }}</span></th>
                     <th>Référence</th>
                     <th>Motif</th>
                   </tr>
                 </thead>
                 <tbody>
-                  @for (e of ledgerEntries; track e) {
+                  @for (e of pagedLedger; track e) {
                     <tr>
                       <td>{{ e.createdAt | date:'dd/MM/yyyy HH:mm:ss' }}</td>
                       <td>
@@ -153,6 +157,10 @@
               </table>
             </div>
           </div>
+          @if (!loadingLedger && ledgerEntries.length > 0) {
+            <app-pagination [page]="ledgerPage" [size]="ledgerSize" [totalElements]="ledgerEntries.length"
+              (pageChange)="onLedgerPage($event)" (sizeChange)="onLedgerSize($event)"></app-pagination>
+          }
         }
       </div>
     }

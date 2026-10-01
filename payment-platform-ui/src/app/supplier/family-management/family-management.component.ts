@@ -3,6 +3,7 @@ import { CatalogService } from '../../services/catalog.service';
 import { ProductFamily, ProductCategory } from '../../models/catalog.model';
 import { ToastService } from '../../services/toast.service';
 import { ConfirmDialogService } from '../../components/confirm-dialog/confirm-dialog.service';
+import { paginateItems, sortItems, toggleSortState, ariaSortFor, sortIndicatorFor, SortState } from '../../models/page.model';
 
 @Component({
     selector: 'app-family-management',
@@ -18,6 +19,9 @@ export class FamilyManagementComponent implements OnInit {
   saving = false;
   editingFamily: ProductFamily | null = null;
   form = { name: '', code: '', categoryIds: [] as string[] };
+  currentPage = 0;
+  pageSize = 10;
+  sort: SortState = { field: null, direction: 'asc' };
 
   constructor(private catalogService: CatalogService, private toast: ToastService, private confirmDialog: ConfirmDialogService) {}
 
@@ -38,9 +42,40 @@ export class FamilyManagementComponent implements OnInit {
 
   loadFamilies(): void {
     this.catalogService.listFamilies(this.supplierId).subscribe({
-      next: (f) => { this.families = f; this.loading = false; },
+      next: (f) => { this.families = f; this.currentPage = 0; this.loading = false; },
       error: () => { this.families = []; this.loading = false; }
     });
+  }
+
+  /** Tri côté client sur la page chargée (backend sans tri serveur). */
+  onSort(field: string): void {
+    this.sort = toggleSortState(this.sort, field);
+    this.currentPage = 0;
+  }
+
+  ariaSort(field: string): 'ascending' | 'descending' | 'none' {
+    return ariaSortFor(field, this.sort);
+  }
+
+  sortIndicator(field: string): string {
+    return sortIndicatorFor(field, this.sort);
+  }
+
+  get sortedFamilies(): ProductFamily[] {
+    return sortItems(this.families, this.sort.field, this.sort.direction);
+  }
+
+  get pagedFamilies(): ProductFamily[] {
+    return paginateItems(this.sortedFamilies, this.currentPage, this.pageSize);
+  }
+
+  onPageChange(page: number): void {
+    this.currentPage = page;
+  }
+
+  onSizeChange(size: number): void {
+    this.pageSize = size;
+    this.currentPage = 0;
   }
 
   getCategoryNames(family: ProductFamily): string {

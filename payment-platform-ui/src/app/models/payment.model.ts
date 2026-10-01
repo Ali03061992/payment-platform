@@ -46,3 +46,11 @@ export interface CreatePaymentRequest {
 export interface RejectPaymentRequest {
   rejectionReason: string;
 }
+
+/** Page de paiements telle que retournée par GET /api/payments (page/size). */
+export interface PaymentPage {
+  items: Payment[];
+  totalElements: number;
+  totalPages: number;
+  number: number;
+}

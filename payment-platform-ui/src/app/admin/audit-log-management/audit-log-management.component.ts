@@ -89,6 +89,17 @@ export class AuditLogManagementComponent implements OnInit {
     }
   }
 
+  onPageChange(page: number): void {
+    this.currentPage = page;
+    this.loadLogs();
+  }
+
+  onSizeChange(size: number): void {
+    this.pageSize = size;
+    this.currentPage = 0;
+    this.loadLogs();
+  }
+
   formatAction(action: string): string {
     return action.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
   }

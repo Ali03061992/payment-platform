@@ -44,12 +44,19 @@
   --badge-rejected-text: #c62828;
   --badge-cancelled-bg: #f3e5f5;
   --badge-cancelled-text: #7b1fa2;
-  --table-header-bg: #f5f7fa;
+  --table-header-bg: #9FCBED;
   --quick-action-bg: #f5f7fa;
   --quick-action-hover-bg: #e3f2fd;
   --spinner-border: #e0e0e0;
-  --spinner-top: #0f3460;
+  --spinner-top: #0284c7;
   --amount-color: #0f3460;
+  /* Bleu ciel : actions / info (sobre, décliné clair/sombre via [data-theme]). */
+  --sky: #38bdf0;
+  --sky-dark: #0284c7;
+  --sky-hover: #0369a1;
+  --sky-soft: rgba(56, 189, 240, 0.12);
+  --sky-border: rgba(2, 132, 199, 0.35);
+  --sky-text: #0369a1;
 }
 
 /* ===========================
@@ -97,12 +104,19 @@
   --badge-rejected-text: #ef5350;
   --badge-cancelled-bg: #2a1a3a;
   --badge-cancelled-text: #ce93d8;
-  --table-header-bg: #222238;
+  --table-header-bg: #0c4a6e;
   --quick-action-bg: #222238;
   --quick-action-hover-bg: #1a2a3a;
   --spinner-border: #333;
-  --spinner-top: #4fc3f7;
+  --spinner-top: #38bdf0;
   --amount-color: #4fc3f7;
+  /* Bleu ciel en thème sombre : même teinte, texte éclairci pour le contraste. */
+  --sky: #38bdf0;
+  --sky-dark: #0284c7;
+  --sky-hover: #0369a1;
+  --sky-soft: rgba(56, 189, 240, 0.16);
+  --sky-border: rgba(56, 189, 240, 0.4);
+  --sky-text: #7dd3fc;
 }
 
 /* ===========================
@@ -157,13 +171,13 @@ a { color: inherit; text-decoration: none; }
 
 .skip-link:focus {
   top: 0;
-  outline: 3px solid #4fc3f7;
+  outline: 3px solid var(--sky);
   outline-offset: 2px;
 }
 
 /* Focus-visible for all interactive elements */
 *:focus-visible {
-  outline: 3px solid #4fc3f7;
+  outline: 3px solid var(--sky);
   outline-offset: 2px;
 }
 
@@ -281,8 +295,8 @@ label {
 
 .form-control:focus {
   outline: none;
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(15, 52, 96, 0.1);
+  border-color: var(--sky-dark);
+  box-shadow: 0 0 0 3px var(--sky-soft);
 }
 
 .form-control:disabled {
@@ -343,8 +357,8 @@ textarea.form-control {
   transform: none;
 }
 
-.btn-primary { background: var(--accent); color: #fff; }
-.btn-primary:hover:not(:disabled) { background: var(--accent-hover); box-shadow: 0 2px 8px rgba(15,52,96,0.25); }
+.btn-primary { background: var(--sky-dark); color: #fff; }
+.btn-primary:hover:not(:disabled) { background: var(--sky-hover); box-shadow: 0 2px 8px rgba(2,132,199,0.35); }
 
 .btn-success { background: #2e7d32; color: #fff; }
 .btn-success:hover:not(:disabled) { background: #1b5e20; box-shadow: 0 2px 8px rgba(46,125,50,0.25); }
@@ -395,7 +409,7 @@ th {
   text-transform: uppercase;
   color: var(--text-muted);
   font-weight: 600;
-  border-bottom: 2px solid var(--border-color);
+  border-bottom: 2px solid var(--sky-border);
   white-space: nowrap;
 }
 
@@ -415,10 +429,15 @@ tr:hover { background: var(--hover-bg); }
 }
 
 .empty-link {
-  color: var(--accent);
+  color: var(--sky-text);
   font-weight: 600;
   margin-top: 8px;
   display: inline-block;
+}
+
+.table-card a:not(.btn),
+.form-card a:not(.btn) {
+  color: var(--sky-text);
 }
 
 .empty-link:hover { text-decoration: underline; }
@@ -455,13 +474,20 @@ tr:hover { background: var(--hover-bg); }
 .payment-badge.cancelled { background: var(--badge-cancelled-bg); color: var(--badge-cancelled-text); }
 
 .role-badge {
-  background: var(--badge-info-bg);
-  color: var(--badge-info-text);
+  background: var(--sky-soft);
+  color: var(--sky-text);
   padding: 4px 10px;
   border-radius: 12px;
   font-size: 12px;
   font-weight: 600;
   white-space: nowrap;
+  border: 1px solid var(--sky-border);
+}
+
+.badge-info {
+  background: var(--sky-soft);
+  color: var(--sky-text);
+  border: 1px solid var(--sky-border);
 }
 
 /* ===========================
@@ -535,8 +561,92 @@ tr:hover { background: var(--hover-bg); }
 }
 
 /* ===========================
-   STATS
-   =========================== */
+    PAGINATION HOMOGÈNE (lazy loading)
+    =========================== */
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+  padding: 12px 16px;
+  background: var(--card-bg);
+  border-radius: 12px;
+  box-shadow: var(--shadow-sm);
+}
+
+.pagination .page-num {
+  min-width: 36px;
+}
+
+.pagination .page-num.active {
+  background: var(--sky-dark);
+  color: #fff;
+  border-color: var(--sky-dark);
+}
+
+.pagination-info {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin: 0 8px;
+  white-space: nowrap;
+}
+
+.pagination-size {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-left: 8px;
+}
+
+.pagination-size select {
+  width: auto;
+  min-width: 72px;
+  padding: 6px 30px 6px 10px;
+  font-size: 13px;
+}
+
+@media (max-width: 768px) {
+  .pagination {
+    gap: 6px;
+    padding: 10px 8px;
+  }
+  .pagination-info {
+    width: 100%;
+    text-align: center;
+    order: 10;
+  }
+}
+
+/* ===========================
+    MODALES DE DÉTAIL AGRANDIES (confirm-dialog exclu : autres classes)
+    =========================== */
+
+body .modal-overlay .modal-content {
+  width: min(1200px, 96vw);
+  max-width: min(1200px, 96vw);
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+@media (max-width: 768px) {
+  body .modal-overlay .modal-content {
+    width: 100vw;
+    max-width: 100vw;
+    min-height: 100dvh;
+    max-height: 100dvh;
+    border-radius: 0;
+    margin: 0;
+  }
+}
+
+/* ===========================
+    STATS
+    =========================== */
 
 .stats-grid {
   display: grid;
@@ -1227,3 +1337,120 @@ app-icon svg {
 .product-placeholder { color: var(--text-muted); }
 
 .tour-step-icon { color: var(--accent); }
+
+/* ===========================
+   VOLETS 3+5+6+7+8 — THÈMES + TABLES + MODALES + ACTIONS (additif)
+   =========================== */
+
+/* Volet 3 : en-têtes #9FCBED (opaque) en clair, bleu profond en sombre. */
+:root,
+[data-theme="light"] {
+  --table-header-bg: #9FCBED;
+  --table-header-text: #0f3460;
+  --table-border: #c9d6e3;
+}
+[data-theme="dark"] {
+  --table-header-bg: #0c4a6e;
+  --table-header-text: #e0f2fe;
+  --table-border: #33506b;
+}
+
+/* Volet 8 : bordures visibles + contenu centré (gauche via .text-left). */
+table { border: 1px solid var(--table-border); }
+th {
+  background: var(--table-header-bg);
+  color: var(--table-header-text);
+  text-align: center;
+  border-bottom: 2px solid var(--sky-border);
+}
+td {
+  text-align: center;
+  border-bottom: 1px solid var(--table-border);
+}
+th.text-left, td.text-left { text-align: left; }
+
+/* Filet sombre : réaligne les th codés en dur sur le bleu profond. */
+html[data-theme="dark"] body th {
+  background-color: var(--table-header-bg);
+  color: var(--table-header-text);
+  border-bottom-color: var(--sky-border);
+}
+html[data-theme="dark"] body td { border-bottom-color: var(--table-border); }
+
+/* Volet 2 : colonnes triables (classes NOUVELLES, E2E inchangées). */
+.sortable-th {
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.sortable-th:hover { filter: brightness(0.96); }
+.sortable-th:focus-visible { outline: 3px solid var(--sky); outline-offset: -3px; }
+.sort-indicator {
+  display: inline-block;
+  margin-left: 6px;
+  font-size: 11px;
+  color: var(--sky-text);
+  min-width: 14px;
+}
+html[data-theme="dark"] body .sort-indicator { color: var(--sky-text); }
+th.sortable-th { color: var(--table-header-text); }
+
+/* Volet 5 : modales de détail agrandies SANS scrollbar visible
+   (.confirm-overlay/.confirm-dialog exclus : autres classes). */
+body .modal-overlay .modal-content {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+body .modal-overlay .modal-content::-webkit-scrollbar { display: none; }
+body .modal-overlay .modal-content .table-wrapper { overflow-x: auto; }
+
+/* Volet 6 : bleu ciel sobre (liens, focus, pagination active, spinners). */
+a:not(.btn):hover { color: var(--sky-dark); }
+html[data-theme="dark"] body a:not(.btn):hover { color: var(--sky-text); }
+.pagination .page-num.active {
+  background: linear-gradient(180deg, var(--sky) 0%, var(--sky-dark) 100%);
+  border-color: var(--sky-dark);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(2, 132, 199, 0.35);
+}
+
+/* Volet 7 : actions chic (pill soft sky + hover lift, sémantique gardée).
+   Additif : ne renomme rien, surcharge douce des .btn existants en tableau. */
+td .btn, .actions .btn {
+  border-radius: 999px;
+  box-shadow: 0 1px 3px rgba(2, 132, 199, 0.18);
+}
+td .btn:hover:not(:disabled), .actions .btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(2, 132, 199, 0.28);
+}
+td .btn:focus-visible, .actions .btn:focus-visible {
+  outline: 3px solid var(--sky);
+  outline-offset: 2px;
+}
+td .btn-sm, .actions .btn-sm {
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+td .btn-secondary, .actions .btn-secondary {
+  background: var(--sky-soft);
+  color: var(--sky-text);
+  border: 1px solid var(--sky-border);
+}
+td .btn-secondary:hover:not(:disabled), .actions .btn-secondary:hover:not(:disabled) {
+  background: var(--sky-soft);
+}
+td .btn-success, .actions .btn-success {
+  background: linear-gradient(180deg, #43a047 0%, #2e7d32 100%);
+}
+td .btn-danger, .actions .btn-danger {
+  background: linear-gradient(180deg, #e53935 0%, #c62828 100%);
+}
+td .btn-primary, .actions .btn-primary {
+  background: linear-gradient(180deg, var(--sky) 0%, var(--sky-dark) 100%);
+}
+@media (prefers-reduced-motion: reduce) {
+  td .btn:hover:not(:disabled), .actions .btn:hover:not(:disabled) { transform: none; }
+}

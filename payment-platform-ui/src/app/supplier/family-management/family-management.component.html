@@ -51,15 +51,15 @@
       <table>
         <thead>
           <tr>
-            <th>Nom</th>
-            <th>Code</th>
+            <th class="sortable-th" (click)="onSort('name')" (keydown.enter)="onSort('name')" (keydown.space)="onSort('name'); $event.preventDefault()" tabindex="0" [attr.aria-sort]="ariaSort('name')" title="Trier par nom">Nom <span class="sort-indicator" aria-hidden="true">{{ sortIndicator('name') }}</span></th>
+            <th class="sortable-th" (click)="onSort('code')" (keydown.enter)="onSort('code')" (keydown.space)="onSort('code'); $event.preventDefault()" tabindex="0" [attr.aria-sort]="ariaSort('code')" title="Trier par code">Code <span class="sort-indicator" aria-hidden="true">{{ sortIndicator('code') }}</span></th>
             <th>Categories</th>
-            <th>Statut</th>
+            <th class="sortable-th" (click)="onSort('status')" (keydown.enter)="onSort('status')" (keydown.space)="onSort('status'); $event.preventDefault()" tabindex="0" [attr.aria-sort]="ariaSort('status')" title="Trier par statut">Statut <span class="sort-indicator" aria-hidden="true">{{ sortIndicator('status') }}</span></th>
             <th>Actions</th>
           </tr>
         </thead>
         <tbody>
-          @for (fam of families; track fam) {
+          @for (fam of pagedFamilies; track fam) {
             <tr>
               <td><strong>{{ fam.name }}</strong></td>
               <td><code>{{ fam.code }}</code></td>
@@ -80,4 +80,8 @@
       </table>
     </div>
   </div>
+  @if (!loading && families.length > 0) {
+    <app-pagination [page]="currentPage" [size]="pageSize" [totalElements]="families.length"
+      (pageChange)="onPageChange($event)" (sizeChange)="onSizeChange($event)"></app-pagination>
+  }
 }

@@ -166,7 +166,14 @@ public class StockController {
             return ResponseEntity.status(403).build();
         }
         ProductResponse product = stockService.getProduct(supplierId, productId);
-        String imageUrl = fileStorageService.storeFile(file, supplierId, productId);
+        String imageUrl;
+        try {
+            imageUrl = fileStorageService.storeFile(file.getInputStream(), file.getOriginalFilename(),
+                    file.getContentType(), file.getSize(), supplierId, productId);
+        } catch (java.io.IOException e) {
+            throw new com.paymentplatform.shared.domain.exception.ConflictException(
+                    "Erreur lors de la lecture du fichier : " + e.getMessage());
+        }
         ProductUpdateRequest updateRequest = new ProductUpdateRequest(null, null, imageUrl, null, null, null, null);
         ProductResponse updated = stockService.updateProduct(supplierId, productId, updateRequest);
         return ResponseEntity.ok(updated);

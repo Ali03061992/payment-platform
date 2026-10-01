@@ -18,13 +18,13 @@
 .payment-badge.rejected { background: #fce4ec; color: #c62828; }
 .payment-badge.delivery-rejected { background: #fff3e0; color: #e65100; }
 
-/* Mobile card view */
+/* Mobile card view : cachée sur desktop (ne doit jamais doubler le tableau). */
 .show-mobile {
   display: none;
 }
 
 .order-cards {
-  display: flex;
+  display: none;
   flex-direction: column;
   gap: 12px;
 }
@@ -107,7 +107,8 @@
 }
 
 @media (max-width: 768px) {
-  .show-mobile {
+  .show-mobile,
+  .order-cards.show-mobile {
     display: flex;
   }
 

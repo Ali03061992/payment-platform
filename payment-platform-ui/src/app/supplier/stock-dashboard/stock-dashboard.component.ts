@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { StockService } from '../../services/stock.service';
 import { Product, StockMovement } from '../../models/stock.model';
+import { paginateItems } from '../../models/page.model';
 import { ToastService } from '../../services/toast.service';
 
 @Component({
@@ -19,6 +20,10 @@ export class StockDashboardComponent implements OnInit {
   totalValue = 0;
   lowStock = 0;
   outOfStock = 0;
+  currentPage = 0;
+  pageSize = 20;
+  historyPage = 0;
+  historySize = 10;
 
   showMovementModal = false;
   selectedProduct: Product | null = null;
@@ -44,11 +49,38 @@ export class StockDashboardComponent implements OnInit {
     this.stockService.getProducts().subscribe({
       next: (data: Product[]) => {
         this.products = data;
+        this.currentPage = 0;
         this.computeStats();
         this.loading = false;
       },
       error: (err: any) => { this.toast.error(err.error?.message || 'Erreur de chargement'); this.loading = false; }
     });
+  }
+
+  get pagedProducts(): Product[] {
+    return paginateItems(this.products, this.currentPage, this.pageSize);
+  }
+
+  get pagedHistory(): StockMovement[] {
+    return paginateItems(this.historyMovements, this.historyPage, this.historySize);
+  }
+
+  onPageChange(page: number): void {
+    this.currentPage = page;
+  }
+
+  onSizeChange(size: number): void {
+    this.pageSize = size;
+    this.currentPage = 0;
+  }
+
+  onHistoryPageChange(page: number): void {
+    this.historyPage = page;
+  }
+
+  onHistorySizeChange(size: number): void {
+    this.historySize = size;
+    this.historyPage = 0;
   }
 
   computeStats(): void {
@@ -96,6 +128,7 @@ export class StockDashboardComponent implements OnInit {
     this.historyProduct = product;
     this.loadingHistory = true;
     this.showHistoryModal = true;
+    this.historyPage = 0;
     this.stockService.getStockMovements(product.id).subscribe({
       next: (data) => { this.historyMovements = data; this.loadingHistory = false; },
       error: () => { this.historyMovements = []; this.loadingHistory = false; }

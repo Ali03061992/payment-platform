@@ -59,7 +59,7 @@
               </tr>
             </thead>
             <tbody>
-              @for (p of filteredProducts; track p) {
+              @for (p of pagedProducts; track p) {
                 <tr [class.row-low]="getStockStatus(p)==='LOW'" [class.row-out]="getStockStatus(p)==='OUT_OF_STOCK'">
                   <td><strong>{{ p.name }}</strong></td>
                   <td><code>{{ p.sku }}</code></td>
@@ -90,7 +90,7 @@
     <!-- Mobile Cards -->
     @if (filteredProducts.length > 0) {
       <div class="product-cards show-mobile">
-        @for (p of filteredProducts; track p) {
+        @for (p of pagedProducts; track p) {
           <div class="product-card" [class.card-low]="getStockStatus(p)==='LOW'" [class.card-out]="getStockStatus(p)==='OUT_OF_STOCK'">
             <div class="card-header">
               <div><span class="card-name">{{ p.name }}</span><span class="card-sku">{{ p.sku }}</span></div>
@@ -112,6 +112,10 @@
           </div>
         }
       </div>
+    }
+    @if (filteredProducts.length > 0) {
+      <app-pagination [page]="currentPage" [size]="pageSize" [totalElements]="filteredProducts.length"
+        (pageChange)="onPageChange($event)" (sizeChange)="onSizeChange($event)"></app-pagination>
     }
     <!-- Recent Movements -->
     @if (recentMovements.length > 0) {
@@ -192,7 +196,7 @@
         <table class="mini-table">
           <thead><tr><th>Date</th><th>Type</th><th>Qte</th><th>Ref</th><th></th></tr></thead>
           <tbody>
-            @for (m of historyMovements; track m) {
+            @for (m of pagedHistory; track m) {
               <tr>
                 <td>{{ m.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
                 <td><span class="badge" [ngClass]="movementTypeClass(m.type)">{{ movementTypeLabel(m.type) }}</span></td>
@@ -206,6 +210,10 @@
             }
           </tbody>
         </table>
+        @if (historyMovements.length > 0) {
+          <app-pagination [page]="historyPage" [size]="historySize" [totalElements]="historyMovements.length"
+            (pageChange)="onHistoryPageChange($event)" (sizeChange)="onHistorySizeChange($event)"></app-pagination>
+        }
       }
     </div>
   </div>

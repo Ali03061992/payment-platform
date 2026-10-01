@@ -6,7 +6,7 @@ import '../../core/api/api_helpers.dart';
 import '../../core/auth/auth_provider.dart';
 import '../../shared/widgets/ui.dart';
 
-/// Statistiques paiements (desktop payment-stats.component).
+/// Statistiques paiements avec donut interactif (desktop payment-stats.component).
 class PaymentStatsScreen extends ConsumerWidget {
   const PaymentStatsScreen({super.key});
 
@@ -26,7 +26,10 @@ class PaymentStatsScreen extends ConsumerWidget {
           child: FutureBuilder(
             future: _load(ref, isSupplier, orgId),
             builder: (ctx, snap) {
-              if (snap.connectionState == ConnectionState.waiting) return const LoadingView();
+              if (snap.connectionState == ConnectionState.waiting) {
+                return const SizedBox(
+                    height: 300, child: Center(child: CircularProgressIndicator(color: Ds.accent)));
+              }
               if (snap.hasError) {
                 return ErrorView(
                     message: apiErrorMessage(snap.error!),
@@ -35,40 +38,52 @@ class PaymentStatsScreen extends ConsumerWidget {
               final d = snap.data!;
               final stats = asMap(d['stats']);
               final summary = asMap(d['summary']);
+              final total = ((stats['total'] as num?) ?? 0).toDouble();
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Row(
-                    children: [
-                      Expanded(child: StatCard(label: 'Total', value: '${stats['total'] ?? 0}', icon: Icons.payments, color: Ds.accent)),
-                      const SizedBox(width: 12),
-                      Expanded(child: StatCard(label: 'En attente', value: '${stats['pending'] ?? 0}', icon: Icons.hourglass_empty, color: Ds.warningText, onTap: () => context.push('/payments?status=PENDING'))),
-                    ],
+                  DsCard(
+                    child: DonutChart(
+                      centerValue: '${stats['total'] ?? 0}',
+                      centerLabel: 'paiements',
+                      slices: [
+                        DonutSlice('En attente',
+                            ((stats['pending'] as num?) ?? 0).toDouble(), Ds.warningText),
+                        DonutSlice('Confirmés',
+                            ((stats['confirmed'] as num?) ?? 0).toDouble(), Ds.teal),
+                        DonutSlice('Rejetés',
+                            ((stats['rejected'] as num?) ?? 0).toDouble(), Ds.dangerText),
+                        DonutSlice('Annulés',
+                            ((stats['cancelled'] as num?) ?? 0).toDouble(), Ds.muted),
+                      ],
+                    ),
                   ),
                   const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      Expanded(child: StatCard(label: 'Confirmés', value: '${stats['confirmed'] ?? 0}', icon: Icons.check_circle, color: Ds.successText)),
-                      const SizedBox(width: 12),
-                      Expanded(child: StatCard(label: 'Rejetés', value: '${stats['rejected'] ?? 0}', icon: Icons.cancel, color: Ds.dangerText)),
-                    ],
-                  ),
-                  if (isSupplier && summary.isNotEmpty) ...[
-                    const SizedBox(height: 16),
-                    const Text('Synthèse fournisseur',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Ds.ink)),
-                    const SizedBox(height: 8),
-                    DsCard(
-                      child: Column(
-                        children: [
-                          InfoRow('En attente (montant)', fmtAmount(summary['pendingTotal'])),
-                          InfoRow('En attente (nombre)', '${summary['pendingCount'] ?? 0}'),
-                          InfoRow('Confirmé (montant)', fmtAmount(summary['confirmedTotal'])),
-                          InfoRow('Confirmé (nombre)', '${summary['confirmedCount'] ?? 0}'),
-                        ],
-                      ),
+                  DsCard(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Montants', style: Tx.title()),
+                        const SizedBox(height: 10),
+                        DsBarChart([
+                          DonutSlice('Att.',
+                              ((summary['pendingTotal'] as num?) ?? (total > 0 ? (stats['pending'] as num?) ?? 0 : 0)).toDouble(),
+                              Ds.warningText),
+                          DonutSlice('Conf.',
+                              ((summary['confirmedTotal'] as num?) ?? (total > 0 ? (stats['confirmed'] as num?) ?? 0 : 0)).toDouble(),
+                              Ds.teal),
+                        ]),
+                      ],
                     ),
-                    const SizedBox(height: 12),
+                  ),
+                  const SizedBox(height: 12),
+                  OutlinedButton.icon(
+                    onPressed: () => context.push('/payments?status=PENDING'),
+                    icon: const Icon(Icons.hourglass_empty),
+                    label: const Text('Voir les paiements en attente'),
+                  ),
+                  if (isSupplier) ...[
+                    const SizedBox(height: 8),
                     FilledButton.icon(
                       onPressed: () => context.push('/supplier/agent-payments'),
                       icon: const Icon(Icons.group),

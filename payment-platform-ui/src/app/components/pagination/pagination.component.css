@@ -1,0 +1,2 @@
+/* Styles structurels du paginateur ; les couleurs vivent dans src/styles.css (.pagination). */
+.pagination-size select { width: auto; min-width: 72px; padding: 6px 30px 6px 10px; font-size: 13px; }

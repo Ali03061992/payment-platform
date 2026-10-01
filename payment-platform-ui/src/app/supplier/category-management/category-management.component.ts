@@ -3,6 +3,7 @@ import { CatalogService } from '../../services/catalog.service';
 import { ProductCategory } from '../../models/catalog.model';
 import { ToastService } from '../../services/toast.service';
 import { ConfirmDialogService } from '../../components/confirm-dialog/confirm-dialog.service';
+import { paginateItems, sortItems, toggleSortState, ariaSortFor, sortIndicatorFor, SortState } from '../../models/page.model';
 
 @Component({
     selector: 'app-category-management',
@@ -16,6 +17,9 @@ export class CategoryManagementComponent implements OnInit {
   showForm = false;
   saving = false;
   form = { name: '', code: '' };
+  currentPage = 0;
+  pageSize = 10;
+  sort: SortState = { field: null, direction: 'asc' };
 
   constructor(private catalogService: CatalogService, private toast: ToastService, private confirmDialog: ConfirmDialogService) {}
 
@@ -29,9 +33,40 @@ export class CategoryManagementComponent implements OnInit {
   loadCategories(): void {
     this.loading = true;
     this.catalogService.listCategories(this.supplierId).subscribe({
-      next: (data) => { this.categories = data; this.loading = false; },
+      next: (data) => { this.categories = data; this.currentPage = 0; this.loading = false; },
       error: () => { this.categories = []; this.loading = false; }
     });
+  }
+
+  /** Tri côté client sur la page chargée (backend sans tri serveur). */
+  onSort(field: string): void {
+    this.sort = toggleSortState(this.sort, field);
+    this.currentPage = 0;
+  }
+
+  ariaSort(field: string): 'ascending' | 'descending' | 'none' {
+    return ariaSortFor(field, this.sort);
+  }
+
+  sortIndicator(field: string): string {
+    return sortIndicatorFor(field, this.sort);
+  }
+
+  get sortedCategories(): ProductCategory[] {
+    return sortItems(this.categories, this.sort.field, this.sort.direction);
+  }
+
+  get pagedCategories(): ProductCategory[] {
+    return paginateItems(this.sortedCategories, this.currentPage, this.pageSize);
+  }
+
+  onPageChange(page: number): void {
+    this.currentPage = page;
+  }
+
+  onSizeChange(size: number): void {
+    this.pageSize = size;
+    this.currentPage = 0;
   }
 
   openCreate(): void {

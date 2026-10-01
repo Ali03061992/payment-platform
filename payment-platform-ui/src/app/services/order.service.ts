@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Order, CreateOrderRequest, UpdateOrderRequest, OrderComment } from '../models/order.model';
+import { Order, CreateOrderRequest, UpdateOrderRequest, OrderComment, OrderPage } from '../models/order.model';
 import { ToastService } from './toast.service';
 import { filenameFromDisposition, saveBlob } from '../core/file-download';
 
@@ -44,9 +44,11 @@ export class OrderService {
   }
 
   /** Liste les commandes visibles, en normalisant les enveloppes paginées. */
-  list(): Observable<Order[]> {
+  list(page = 0, size = 50, status?: string): Observable<Order[]> {
+    let params = new HttpParams().set('page', page).set('size', size);
+    if (status) params = params.set('status', status);
     return new Observable<Order[]>(observer => {
-      this.http.get<any>(this.apiUrl).subscribe({
+      this.http.get<any>(this.apiUrl, { params }).subscribe({
         next: (res: any) => {
           if (Array.isArray(res)) observer.next(res as Order[]);
           else if (res && Array.isArray(res.items)) observer.next(res.items as Order[]);
@@ -58,6 +60,13 @@ export class OrderService {
         error: (err) => observer.error(err)
       });
     });
+  }
+
+  /** Page de commandes (lazy loading) : ne charge que la page demandée. */
+  listPaged(page = 0, size = 20, status?: string): Observable<OrderPage> {
+    let params = new HttpParams().set('page', page).set('size', size);
+    if (status) params = params.set('status', status);
+    return this.http.get<OrderPage>(this.apiUrl, { params });
   }
 
   /** Récupère une commande par identifiant. */

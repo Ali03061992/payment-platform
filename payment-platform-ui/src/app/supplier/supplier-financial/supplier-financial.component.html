@@ -9,6 +9,13 @@
   </div>
 }
 
+@if (loadError && !loading) {
+  <div class="error-card">
+    <p>{{ loadError }}</p>
+    <button class="btn btn-primary" (click)="loadReport()">Réessayer</button>
+  </div>
+}
+
 @if (report && !loading) {
   <!-- Payment Summary Cards -->
   <div class="stats-grid">
@@ -34,7 +41,7 @@
     <h3>Chiffre d'affaires mensuel</h3>
     @if (report.monthlyRevenue && report.monthlyRevenue.length > 0) {
       <div class="chart-container">
-        <canvas #revenueChart></canvas>
+        <div #revenueChart class="echart"></div>
       </div>
     } @else {
       <div class="empty-chart">Aucune donnée de revenu disponible</div>
@@ -47,7 +54,7 @@
       <h3>Statuts des commandes</h3>
       @if (report.orderCountByStatus && objectKeys(report.orderCountByStatus).length > 0) {
         <div class="chart-container">
-          <canvas #statusChart></canvas>
+          <div #statusChart class="echart"></div>
         </div>
       } @else {
         <div class="empty-chart">Aucune donnée</div>
@@ -58,7 +65,7 @@
       <h3>Top 10 produits vendus</h3>
       @if (report.topProducts && report.topProducts.length > 0) {
         <div class="chart-container chart-container-tall">
-          <canvas #productsChart></canvas>
+          <div #productsChart class="echart"></div>
         </div>
       } @else {
         <div class="empty-chart">Aucune donnée de vente</div>

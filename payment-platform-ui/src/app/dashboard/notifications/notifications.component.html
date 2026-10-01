@@ -107,17 +107,8 @@
   </div>
 
   <!-- Pagination -->
-  @if (totalPages > 1) {
-    <div class="pagination">
-      <button class="btn btn-sm btn-secondary" [disabled]="currentPage === 0" (click)="prevPage()">Précédent</button>
-      @for (p of pageNumbers; track p) {
-        <button
-          class="btn btn-sm"
-          [class.btn-primary]="p === currentPage"
-          [class.btn-secondary]="p !== currentPage"
-          (click)="goToPage(p)">{{ p + 1 }}</button>
-      }
-      <button class="btn btn-sm btn-secondary" [disabled]="currentPage >= totalPages - 1" (click)="nextPage()">Suivant</button>
-    </div>
+  @if (totalElements > 0) {
+    <app-pagination [page]="currentPage" [size]="pageSize" [totalElements]="totalElements"
+      (pageChange)="onPageChange($event)" (sizeChange)="onSizeChange($event)"></app-pagination>
   }
 }

@@ -68,6 +68,17 @@ export class NotificationsComponent implements OnInit, OnDestroy {
     this.load();
   }
 
+  onPageChange(page: number): void {
+    this.currentPage = page;
+    this.load();
+  }
+
+  onSizeChange(size: number): void {
+    this.pageSize = size;
+    this.currentPage = 0;
+    this.load();
+  }
+
   nextPage(): void {
     if (this.currentPage < this.totalPages - 1) {
       this.currentPage++;

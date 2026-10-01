@@ -109,7 +109,7 @@ class _PaymentCreateScreenState extends ConsumerState<PaymentCreateScreen> {
                             for (final r in _relations)
                               DropdownMenuItem(
                                 value: r['supplierId']?.toString(),
-                                child: Text('${r['supplierName'] ?? r['supplierId']}'),
+                                child: Text('${r['supplierName'] ?? 'Fournisseur'}'),
                               ),
                           ],
                           onChanged: (v) => setState(() => _supplierId = v),

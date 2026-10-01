@@ -63,15 +63,12 @@ class _SupplierOrdersScreenState extends ConsumerState<SupplierOrdersScreen> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text('${o['reference'] ?? '—'}',
-                                        style: const TextStyle(
-                                            fontWeight: FontWeight.w700, fontSize: 14)),
+                                    Text('${o['reference'] ?? '—'}', style: Tx.title(size: 14)),
                                     Text('${o['shopName'] ?? ''}',
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
-                                        style: const TextStyle(color: Ds.muted, fontSize: 12)),
-                                    Text(fmtDate(o['createdAt']?.toString()),
-                                        style: const TextStyle(color: Ds.muted, fontSize: 11)),
+                                        style: Tx.small(size: 12)),
+                                    Text(fmtDate(o['createdAt']?.toString()), style: Tx.caption()),
                                   ],
                                 ),
                               ),
@@ -79,8 +76,7 @@ class _SupplierOrdersScreenState extends ConsumerState<SupplierOrdersScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.end,
                                 children: [
                                   Text(fmtAmount(o['total'], '${o['currency'] ?? ''}'),
-                                      style: const TextStyle(
-                                          fontWeight: FontWeight.w800, fontSize: 14)),
+                                      style: Tx.amount(size: 14)),
                                   const SizedBox(height: 4),
                                   StatusBadge('${o['status'] ?? ''}'),
                                 ],

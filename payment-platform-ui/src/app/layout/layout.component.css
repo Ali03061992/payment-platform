@@ -102,40 +102,43 @@
 }
 
 .toggle-btn {
-  background: none;
-  border: none;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
   color: #fff;
-  font-size: 20px;
+  width: 32px;
+  height: 32px;
   cursor: pointer;
-  padding: 8px;
-  border-radius: 8px;
-  transition: background 0.2s;
+  padding: 0;
+  border-radius: 50%;
+  transition: background 0.2s, transform 0.3s ease, border-color 0.2s;
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
 .toggle-btn:hover {
-  background: rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.16);
+  border-color: rgba(255,255,255,0.25);
 }
 
-.toggle-arrows {
-  font-size: 18px;
-  font-weight: 700;
-  letter-spacing: -2px;
-  line-height: 1;
+.toggle-btn svg {
+  display: block;
 }
 
 .sidebar-nav {
   flex: 2;
   padding: 16px 0;
   overflow-y: auto;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(255,255,255,0.2) transparent;
+  /* Barre de défilement invisible (défilement conservé : molette + tactile). */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
 .sidebar-nav::-webkit-scrollbar {
-  width: 4px;
+  display: none;
+  width: 0;
+  height: 0;
 }
 
 .sidebar-nav::-webkit-scrollbar-track {
@@ -143,8 +146,7 @@
 }
 
 .sidebar-nav::-webkit-scrollbar-thumb {
-  background: rgba(255,255,255,0.2);
-  border-radius: 2px;
+  background: transparent;
 }
 
 .nav-item {

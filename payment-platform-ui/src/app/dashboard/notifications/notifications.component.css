@@ -167,6 +167,11 @@
   flex: 1;
 }
 
+/* Cartes mobiles : cachées sur desktop (ne doivent jamais doubler le tableau). */
+.notif-cards {
+  display: none;
+}
+
 .empty-card {
   text-align: center;
   padding: 32px;
@@ -176,8 +181,11 @@
 }
 
 @media (max-width: 768px) {
-  .show-mobile {
+  .show-mobile,
+  .notif-cards.show-mobile {
     display: flex;
+    flex-direction: column;
+    gap: 12px;
   }
 
   .hide-mobile {

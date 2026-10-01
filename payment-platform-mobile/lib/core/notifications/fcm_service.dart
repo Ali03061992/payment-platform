@@ -10,9 +10,10 @@ class FcmService {
   final NotificationApi api;
   final FlutterLocalNotificationsPlugin local = FlutterLocalNotificationsPlugin();
   final void Function(String route)? onDeepLink;
+  final void Function(String title, String body, String route)? onPush;
   String? _token;
 
-  FcmService({required this.api, this.onDeepLink});
+  FcmService({required this.api, this.onDeepLink, this.onPush});
 
   String? get token => _token;
 
@@ -55,17 +56,29 @@ class FcmService {
   Future<void> _onForeground(RemoteMessage msg) async {
     final data = msg.data;
     final route = mapBackendUrlToMobileRoute(data['url'], tag: data['tag']);
+    final title = msg.notification?.title ?? 'Payment Platform';
+    final body = msg.notification?.body ?? '';
     await local.show(
       msg.hashCode,
-      msg.notification?.title ?? 'Payment Platform',
-      msg.notification?.body ?? '',
+      title,
+      body,
       const NotificationDetails(
-        android: AndroidNotificationDetails('payment_high', 'Paiements',
-            importance: Importance.max, priority: Priority.high, tag: 'payment-notification'),
-        iOS: DarwinNotificationDetails(presentAlert: true, presentBadge: true, presentSound: true),
+        android: AndroidNotificationDetails(
+          'payment_high',
+          'Paiements',
+          importance: Importance.max,
+          priority: Priority.high,
+          tag: 'payment-notification',
+          playSound: true,
+          enableVibration: true,
+          enableLights: true,
+        ),
+        iOS: DarwinNotificationDetails(
+            presentAlert: true, presentBadge: true, presentSound: true),
       ),
       payload: route,
     );
+    onPush?.call(title, body, route);
     onDeepLink?.call('__refresh__');
   }
 

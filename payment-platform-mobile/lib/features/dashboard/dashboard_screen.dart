@@ -7,8 +7,8 @@ import '../../core/api/providers.dart';
 import '../../core/api/api_helpers.dart';
 import '../../shared/widgets/ui.dart';
 
-/// Tableau de bord signature : header gradient avec avatar + cloche,
-/// stats visuelles, tuiles d'action, activité récente.
+/// Tableau de bord épuré : grand titre, chiffres clés,
+/// donut de répartition, actions douces, activité récente.
 class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});
 
@@ -20,6 +20,11 @@ class DashboardScreen extends ConsumerWidget {
     final unread = ref.watch(unreadCountProvider);
     final isSupplier = roles.any((r) => r.startsWith('SUPPLIER'));
     final isAdmin = roles.any((r) => r.endsWith('_ADMIN'));
+    final now = DateTime.now();
+    const months = [
+      'janvier', 'février', 'mars', 'avril', 'mai', 'juin',
+      'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'
+    ];
 
     return Scaffold(
       backgroundColor: Ds.pageBg,
@@ -29,86 +34,59 @@ class DashboardScreen extends ConsumerWidget {
           physics: const AlwaysScrollableScrollPhysics(),
           slivers: [
             SliverToBoxAdapter(
-              child: Container(
+              child: Padding(
                 padding: EdgeInsets.only(
-                  top: MediaQuery.of(context).padding.top + 12,
+                  top: MediaQuery.of(context).padding.top + 8,
                   left: 20,
                   right: 20,
-                  bottom: 26,
                 ),
-                decoration: const BoxDecoration(
-                  gradient: Ds.headerGradient,
-                  borderRadius: BorderRadius.only(
-                    bottomLeft: Radius.circular(30),
-                    bottomRight: Radius.circular(30),
-                  ),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                child: Row(
                   children: [
-                    Row(
-                      children: [
-                        Container(
-                          width: 48,
-                          height: 48,
-                          decoration: BoxDecoration(
-                            gradient: Ds.goldGradient,
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          child: Center(
-                            child: Text(
-                              username.isNotEmpty ? username[0].toUpperCase() : '?',
-                              style: const TextStyle(
-                                  color: Colors.white, fontSize: 22, fontWeight: FontWeight.w800),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text('Bonjour,',
-                                  style: TextStyle(color: Colors.white70, fontSize: 13)),
-                              Text(username,
-                                  style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 19,
-                                      fontWeight: FontWeight.w800)),
-                              Text(roles.join(' • '),
-                                  style: const TextStyle(color: Colors.white54, fontSize: 11)),
-                            ],
-                          ),
-                        ),
-                        InkWell(
-                          borderRadius: BorderRadius.circular(14),
-                          onTap: () => context.push('/notifications'),
-                          child: Container(
-                            padding: const EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.14),
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                            child: Badge(
-                              isLabelVisible: unread > 0,
-                              label: Text('$unread'),
-                              child: const Icon(Icons.notifications_outlined,
-                                  color: Colors.white),
-                            ),
-                          ),
-                        ),
-                      ],
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('${now.day} ${months[now.month - 1]} ${now.year}',
+                              style: Tx.small(size: 12.5)),
+                          const SizedBox(height: 2),
+                          Text('Bonjour, $username', style: Tx.h1(size: 24)),
+                        ],
+                      ),
                     ),
-                    const SizedBox(height: 18),
-                    _StatsBlock(isSupplier: isSupplier),
+                    InkWell(
+                      borderRadius: BorderRadius.circular(16),
+                      onTap: () => context.push('/notifications'),
+                      child: Container(
+                        padding: const EdgeInsets.all(11),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: const [
+                            BoxShadow(
+                                color: Color.fromRGBO(16, 24, 40, 0.06),
+                                blurRadius: 12,
+                                offset: Offset(0, 3)),
+                          ],
+                        ),
+                        child: Badge(
+                          isLabelVisible: unread > 0,
+                          label: Text('$unread'),
+                          backgroundColor: Ds.dangerText,
+                          child: const Icon(Icons.notifications_outlined,
+                              color: Ds.deepText),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),
             ),
             SliverPadding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
+              padding: const EdgeInsets.fromLTRB(16, 14, 16, 110),
               sliver: SliverList(
                 delegate: SliverChildListDelegate([
+                  _OverviewCard(isSupplier: isSupplier),
+                  const SizedBox(height: 18),
                   const SectionHeader('Actions rapides'),
                   const SizedBox(height: 10),
                   GridView.count(
@@ -117,41 +95,41 @@ class DashboardScreen extends ConsumerWidget {
                     physics: const NeverScrollableScrollPhysics(),
                     mainAxisSpacing: 10,
                     crossAxisSpacing: 10,
-                    childAspectRatio: 0.86,
+                    childAspectRatio: 0.88,
                     children: [
                       if (!isSupplier) ...[
                         QuickTile(
-                            icon: Icons.add_shopping_cart,
+                            icon: Icons.add_shopping_cart_rounded,
                             label: 'Commander',
-                            gradient: const [Color(0xFF1E5AA8), Color(0xFF0F3460)],
+                            tint: Ds.accent,
                             onTap: () => context.push('/shop/orders/create')),
                         QuickTile(
                             icon: Icons.payments_rounded,
                             label: 'Payer',
-                            gradient: const [Color(0xFFF0A22E), Color(0xFFD97B1A)],
+                            tint: Ds.teal,
                             onTap: () => context.push('/payments/create')),
                       ],
                       if (isSupplier && isAdmin) ...[
                         QuickTile(
                             icon: Icons.add_box_rounded,
                             label: 'Commander',
-                            gradient: const [Color(0xFF1E5AA8), Color(0xFF0F3460)],
+                            tint: Ds.accent,
                             onTap: () => context.push('/supplier/orders/create')),
                         QuickTile(
-                            icon: Icons.inventory_rounded,
+                            icon: Icons.inventory_2_rounded,
                             label: 'Produit',
-                            gradient: const [Color(0xFF0E9F8A), Color(0xFF0B7A6A)],
+                            tint: Ds.teal,
                             onTap: () => context.push('/supplier/stock/create')),
                       ],
                       QuickTile(
                           icon: Icons.qr_code_scanner_rounded,
                           label: 'Scanner',
-                          gradient: const [Color(0xFF7C3AED), Color(0xFF5B21B6)],
+                          tint: const Color(0xFF7C3AED),
                           onTap: () => context.push('/scan')),
                       QuickTile(
                           icon: Icons.file_download_rounded,
                           label: 'Export',
-                          gradient: const [Color(0xFF0E9F8A), Color(0xFF0B7A6A)],
+                          tint: Ds.infoText,
                           onTap: () => context.push('/export')),
                     ],
                   ),
@@ -174,77 +152,68 @@ class DashboardScreen extends ConsumerWidget {
 
 final _dashKey = FutureProvider((_) async => true);
 
-class _StatsBlock extends ConsumerWidget {
+/// Carte chiffres clés + donut de répartition.
+class _OverviewCard extends ConsumerWidget {
   final bool isSupplier;
-  const _StatsBlock({required this.isSupplier});
+  const _OverviewCard({required this.isSupplier});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     ref.watch(_dashKey);
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(22),
-        boxShadow: [
-          BoxShadow(color: Colors.black.withValues(alpha: 0.18), blurRadius: 24, offset: const Offset(0, 10)),
-        ],
-      ),
+    return DsCard(
       child: FutureBuilder(
         future: isSupplier ? _supplierStats(ref) : _shopStats(ref),
         builder: (ctx, snap) {
           if (snap.connectionState == ConnectionState.waiting) {
             return const Padding(
-              padding: EdgeInsets.all(16),
+              padding: EdgeInsets.symmetric(vertical: 40),
               child: Center(child: CircularProgressIndicator(color: Ds.accent)),
             );
           }
           if (snap.hasError) {
             return InkWell(
               onTap: () => ref.invalidate(_dashKey),
-              child: Padding(
-                padding: const EdgeInsets.all(8),
+              child: const Padding(
+                padding: EdgeInsets.all(12),
                 child: Text('Toucher pour recharger',
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(color: Ds.muted)),
+                    textAlign: TextAlign.center, style: TextStyle(color: Ds.muted)),
               ),
             );
           }
-          final s = snap.data!;
-          final bars = s['bars'] as List<double>;
+          final d = snap.data!;
+          final slices = d['slices'] as List<DonutSlice>;
           return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
                 children: [
                   Expanded(
-                    child: _MiniStat(
-                        label: s['l1'] as String,
-                        value: s['v1'] as String,
-                        color: s['c1'] as Color,
-                        onTap: () => context.push(s['r1'] as String)),
+                    child: _Headline(
+                        label: d['l1'] as String,
+                        value: d['v1'] as String,
+                        route: d['r1'] as String),
                   ),
-                  const SizedBox(width: 12),
+                  Container(width: 1, height: 44, color: const Color(0xFFEAECF0)),
                   Expanded(
-                    child: _MiniStat(
-                        label: s['l2'] as String,
-                        value: s['v2'] as String,
-                        color: s['c2'] as Color,
-                        onTap: () => context.push(s['r2'] as String)),
+                    child: _Headline(
+                        label: d['l2'] as String,
+                        value: d['v2'] as String,
+                        route: d['r2'] as String),
+                  ),
+                  Container(width: 1, height: 44, color: const Color(0xFFEAECF0)),
+                  Expanded(
+                    child: _Headline(
+                        label: d['l3'] as String,
+                        value: d['v3'] as String,
+                        route: d['r3'] as String),
                   ),
                 ],
               ),
-              const SizedBox(height: 12),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Expanded(child: MiniBars(bars)),
-                  const SizedBox(width: 12),
-                  _MiniStat(
-                      label: s['l3'] as String,
-                      value: s['v3'] as String,
-                      color: s['c3'] as Color,
-                      onTap: () => context.push(s['r3'] as String)),
-                ],
+              const Divider(height: 28),
+              DonutChart(
+                slices: slices,
+                centerValue: d['total'] as String,
+                centerLabel: d['totalLabel'] as String,
               ),
             ],
           );
@@ -257,10 +226,11 @@ class _StatsBlock extends ConsumerWidget {
     final api = ref.read(supplierApiProvider);
     if (api == null) {
       return {
-        'l1': 'En attente', 'v1': '0', 'c1': Ds.warningText, 'r1': '/payments',
-        'l2': 'Commandes', 'v2': '0', 'c2': Ds.infoText, 'r2': '/supplier/orders',
-        'l3': 'Stock bas', 'v3': '0', 'c3': Ds.dangerText, 'r3': '/supplier/low-stock-alerts',
-        'bars': [0.0],
+        'l1': 'En attente', 'v1': '0', 'r1': '/payments',
+        'l2': 'Commandes', 'v2': '0', 'r2': '/supplier/orders',
+        'l3': 'Stock bas', 'v3': '0', 'r3': '/supplier/low-stock-alerts',
+        'total': '0', 'totalLabel': 'commandes',
+        'slices': const [DonutSlice('Vide', 1, Color(0xFFEAECF0))],
       };
     }
     final results = await Future.wait([
@@ -269,22 +239,25 @@ class _StatsBlock extends ConsumerWidget {
       api.lowStockAlerts(),
     ]);
     final summary = asMap(results[0]);
-    final pending = ((summary['pendingTotal'] as num?) ?? 0).toDouble();
-    final confirmed = ((summary['confirmedTotal'] as num?) ?? 0).toDouble();
+    final pending = ((summary['pendingCount'] as num?) ?? 0).toDouble();
+    final confirmed = ((summary['confirmedCount'] as num?) ?? 0).toDouble();
+    final orders = (results[1] as dynamic).totalElements ?? 0;
     return {
-      'l1': 'Paiements en attente',
-      'v1': '${summary['pendingCount'] ?? 0}',
-      'c1': Ds.warningText,
+      'l1': 'En attente',
+      'v1': '$pending'.replaceAll('.0', ''),
       'r1': '/payments?status=PENDING',
       'l2': 'Commandes',
-      'v2': '${(results[1] as dynamic).totalElements ?? 0}',
-      'c2': Ds.infoText,
+      'v2': '$orders',
       'r2': '/supplier/orders',
       'l3': 'Stock bas',
       'v3': '${(results[2] as List).length}',
-      'c3': Ds.dangerText,
       'r3': '/supplier/low-stock-alerts',
-      'bars': [pending, confirmed],
+      'total': '$orders',
+      'totalLabel': 'commandes',
+      'slices': [
+        DonutSlice('En attente', pending, Ds.warningText),
+        DonutSlice('Confirmés', confirmed, Ds.teal),
+      ],
     };
   }
 
@@ -309,54 +282,51 @@ class _StatsBlock extends ConsumerWidget {
     final cancelled = ((stats['cancelled'] as num?) ?? 0).toDouble();
     return {
       'l1': 'En attente',
-      'v1': '${stats['pending'] ?? 0}',
-      'c1': Ds.warningText,
+      'v1': '$pending'.replaceAll('.0', ''),
       'r1': '/payments?status=PENDING',
       'l2': 'Commandes',
       'v2': '${orders.totalElements}',
-      'c2': Ds.infoText,
       'r2': '/shop/orders',
       'l3': 'Reste dû',
       'v3': fmtAmount(due),
-      'c3': Ds.dangerText,
       'r3': '/shop/balance',
-      'bars': [pending, confirmed, rejected, cancelled],
+      'total': '${orders.totalElements}',
+      'totalLabel': 'commandes',
+      'slices': [
+        DonutSlice('En attente', pending, Ds.warningText),
+        DonutSlice('Confirmés', confirmed, Ds.teal),
+        DonutSlice('Rejetés', rejected, Ds.dangerText),
+        DonutSlice('Annulés', cancelled, Ds.muted),
+      ],
     };
   }
 }
 
-class _MiniStat extends StatelessWidget {
+class _Headline extends StatelessWidget {
   final String label;
   final String value;
-  final Color color;
-  final VoidCallback onTap;
-  const _MiniStat({required this.label, required this.value, required this.color, required this.onTap});
+  final String route;
+  const _Headline({required this.label, required this.value, required this.route});
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      borderRadius: BorderRadius.circular(14),
-      onTap: onTap,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(width: 8, height: 8,
-                  decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
-              const SizedBox(width: 6),
-              Expanded(
-                child: Text(label,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontSize: 11.5, color: Ds.muted, fontWeight: FontWeight.w600)),
-              ),
-            ],
-          ),
-          const SizedBox(height: 2),
-          Text(value,
-              style: const TextStyle(fontSize: 19, fontWeight: FontWeight.w800, color: Ds.deepText)),
-        ],
+      borderRadius: BorderRadius.circular(12),
+      onTap: () => context.push(route),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 6),
+        child: Column(
+          children: [
+            Text(value,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: Tx.amount()),
+            Text(label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: Tx.caption()),
+          ],
+        ),
       ),
     );
   }
@@ -373,14 +343,18 @@ class _RecentOrders extends ConsumerWidget {
       future: ref.read(shopApiProvider).recentOrders(4),
       builder: (ctx, snap) {
         if (snap.connectionState == ConnectionState.waiting) {
-          return const SizedBox(height: 120, child: Center(child: CircularProgressIndicator(color: Ds.accent)));
+          return const SizedBox(
+              height: 100,
+              child: Center(child: CircularProgressIndicator(color: Ds.accent)));
         }
         if (snap.hasError) {
           return DsCard(
             child: Row(
               children: [
-                const Expanded(child: Text('Activité indisponible', style: TextStyle(color: Ds.muted))),
-                TextButton(onPressed: () => ref.invalidate(_dashKey), child: const Text('Réessayer')),
+                const Expanded(
+                    child: Text('Activité indisponible', style: TextStyle(color: Ds.muted))),
+                TextButton(
+                    onPressed: () => ref.invalidate(_dashKey), child: const Text('Réessayer')),
               ],
             ),
           );
@@ -405,11 +379,10 @@ class _RecentOrders extends ConsumerWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('${o['reference'] ?? '—'}',
-                                style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14)),
+                            Text('${o['reference'] ?? '—'}', style: Tx.title(size: 14)),
                             Text(
                                 '${isSupplier ? (o['shopName'] ?? '') : (o['supplierName'] ?? '')} • ${fmtDate(o['createdAt']?.toString())}',
-                                style: const TextStyle(color: Ds.muted, fontSize: 12)),
+                                style: Tx.small(size: 12)),
                           ],
                         ),
                       ),
@@ -417,7 +390,7 @@ class _RecentOrders extends ConsumerWidget {
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
                           Text(fmtAmount(o['total'], '${o['currency'] ?? ''}'),
-                              style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14)),
+                              style: Tx.amount(size: 14)),
                           const SizedBox(height: 4),
                           StatusBadge('${o['status'] ?? ''}'),
                         ],

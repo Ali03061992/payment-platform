@@ -56,7 +56,27 @@ class _SupplierFinancialScreenState extends ConsumerState<SupplierFinancialScree
                   ],
                 ),
                 const SizedBox(height: 12),
-                const Text('Par statut',
+                DsCard(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text('Montants par statut',
+                          style: TextStyle(
+                              fontSize: 15, fontWeight: FontWeight.w700, color: Ds.deepText)),
+                      const SizedBox(height: 10),
+                      DsBarChart([
+                        for (final s in byStatus)
+                          DonutSlice(
+                            '${(s as Map)['status'] ?? ''}'.replaceAll('_', '\n'),
+                            (((s as Map)['total'] as num?) ?? 0).toDouble(),
+                            StatusBadge.colorsFor('${(s as Map)['status'] ?? ''}').$2,
+                          ),
+                      ]),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 12),
+                const Text('Détail par statut',
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Ds.ink)),
                 const SizedBox(height: 8),
                 if (byStatus.isEmpty)

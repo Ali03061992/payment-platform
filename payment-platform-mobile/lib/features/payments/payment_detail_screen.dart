@@ -85,22 +85,16 @@ class _PaymentDetailScreenState extends ConsumerState<PaymentDetailScreen> {
                           children: [
                             Expanded(
                               child: Text('${p['reference'] ?? '—'}',
-                                  style: const TextStyle(
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.w600,
-                                      color: Colors.white70)),
+                                  style: Tx.body(color: Colors.white70, size: 15)),
                             ),
                             StatusBadge(status),
                           ],
                         ),
                         const SizedBox(height: 6),
                         Text(fmtAmount(p['amount'], '${p['currency'] ?? ''}'),
-                            style: const TextStyle(
-                                fontSize: 34,
-                                fontWeight: FontWeight.w800,
-                                color: Colors.white)),
+                            style: Tx.heroAmount()),
                         Text('${p['shopName'] ?? ''} → ${p['supplierName'] ?? ''}',
-                            style: const TextStyle(color: Colors.white70, fontSize: 13)),
+                            style: Tx.body(color: Colors.white70, size: 13)),
                       ],
                     ),
                   ),

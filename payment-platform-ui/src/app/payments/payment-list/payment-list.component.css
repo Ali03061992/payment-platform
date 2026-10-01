@@ -7,13 +7,72 @@
 
 .actions { white-space: nowrap; }
 
-/* Mobile card view */
+/* Bouton + / − des lignes extensibles */
+.expand-btn {
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border-radius: 50%;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--sky-soft, rgba(56, 189, 240, 0.12));
+  border: 1px solid var(--sky, #38bdf0);
+  color: var(--sky-dark, #0284c7);
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+}
+
+.expand-btn:hover {
+  background: var(--sky, #38bdf0);
+  color: #fff;
+}
+
+/* Ligne de détail inline, juste sous la ligne dépliée */
+.expand-row > td {
+  padding: 0;
+  border-top: none;
+  background: transparent;
+}
+
+.expand-panel {
+  margin: 2px 0 10px;
+  padding: 16px 20px;
+  background: var(--sky-soft, rgba(56, 189, 240, 0.08));
+  border-left: 4px solid var(--sky, #38bdf0);
+  border-radius: 0 12px 12px 0;
+}
+
+.expand-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 10px 24px;
+  margin-bottom: 12px;
+}
+
+.expand-label {
+  display: block;
+  font-size: 12px;
+  color: var(--text-muted, #8896ab);
+  margin-bottom: 2px;
+}
+
+.expand-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* Mobile card view : cachée sur desktop (ne doit jamais doubler le tableau). */
 .show-mobile {
   display: none;
 }
 
 .payment-cards {
-  display: flex;
+  display: none;
   flex-direction: column;
   gap: 12px;
 }
@@ -96,7 +155,8 @@
 }
 
 @media (max-width: 768px) {
-  .show-mobile {
+  .show-mobile,
+  .payment-cards.show-mobile {
     display: flex;
   }
 

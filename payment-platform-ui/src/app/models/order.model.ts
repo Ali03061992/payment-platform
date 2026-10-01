@@ -95,3 +95,11 @@ export interface OrderComment {
   content: string;
   createdAt: string;
 }
+
+/** Page de commandes telle que retournée par GET /api/orders (page/size, status). */
+export interface OrderPage {
+  items: Order[];
+  totalElements: number;
+  totalPages: number;
+  number: number;
+}

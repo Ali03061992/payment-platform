@@ -3,7 +3,8 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { OrderService } from '../../services/order.service';
 import { SupplierAgentService } from '../../services/supplier-agent.service';
 import { StockService } from '../../services/stock.service';
-import { Order, OrderComment } from '../../models/order.model';
+import { Order, OrderComment, OrderPage } from '../../models/order.model';
+import { paginateItems } from '../../models/page.model';
 import { ToastService } from '../../services/toast.service';
 import { ConfirmDialogService } from '../../components/confirm-dialog/confirm-dialog.service';
 import { Subscription, Subject, debounceTime, distinctUntilChanged, switchMap, of } from 'rxjs';
@@ -23,6 +24,12 @@ export class OrderManagementComponent implements OnInit, OnDestroy {
   filterShopId = '';
   activeTab: 'orders' | 'deliveries' = 'orders';
   filterAgentId = '';
+  currentPage = 0;
+  pageSize = 20;
+  totalElements = 0;
+  totalPages = 0;
+  deliveriesPage = 0;
+  deliveriesSize = 20;
 
   showDetail = false;
   selectedOrder: Order | null = null;
@@ -117,9 +124,14 @@ export class OrderManagementComponent implements OnInit, OnDestroy {
 
   loadOrders(): void {
     this.loading = true;
-    this.subscriptions.add(this.orderService.list().subscribe({
-      next: (data: Order[]) => {
-        this.orders = data;
+    this.subscriptions.add(this.orderService.listPaged(
+      this.currentPage, this.pageSize, this.filterStatus || undefined
+    ).subscribe({
+      next: (page: OrderPage) => {
+        this.orders = page.items || [];
+        this.totalElements = page.totalElements ?? this.orders.length;
+        this.totalPages = page.totalPages ?? 1;
+        this.currentPage = page.number ?? this.currentPage;
         this.loading = false;
         if (this.pendingRef) {
           const ref = this.pendingRef;
@@ -127,6 +139,12 @@ export class OrderManagementComponent implements OnInit, OnDestroy {
           const order = this.orders.find(o => o.reference === ref || o.id === ref);
           if (order) {
             this.viewDetail(order);
+          } else {
+            // La commande ciblée n'est pas dans la page chargée : appel ciblé par référence.
+            this.subscriptions.add(this.orderService.getByReference(ref).subscribe({
+              next: (o) => this.viewDetail(o),
+              error: () => {}
+            }));
           }
         }
       },
@@ -168,6 +186,8 @@ export class OrderManagementComponent implements OnInit, OnDestroy {
     this.filterStatus = '';
     this.filterShopId = '';
     this.filterAgentId = '';
+    this.currentPage = 0;
+    this.deliveriesPage = 0;
     if (tab === 'deliveries') {
       this.loadDeliveries();
     } else {
@@ -175,7 +195,45 @@ export class OrderManagementComponent implements OnInit, OnDestroy {
     }
   }
 
+  onOrdersFilterChange(): void {
+    this.currentPage = 0;
+    if (this.activeTab === 'orders') this.loadOrders();
+  }
+
+  onDeliveriesFilterChange(): void {
+    this.deliveriesPage = 0;
+  }
+
+  onPageChange(page: number): void {
+    this.currentPage = page;
+    this.loadOrders();
+  }
+
+  onSizeChange(size: number): void {
+    this.pageSize = size;
+    this.currentPage = 0;
+    this.loadOrders();
+  }
+
+  onDeliveriesPageChange(page: number): void {
+    this.deliveriesPage = page;
+  }
+
+  onDeliveriesSizeChange(size: number): void {
+    this.deliveriesSize = size;
+    this.deliveriesPage = 0;
+  }
+
+  get pagedDeliveries(): Order[] {
+    return paginateItems(this.filteredDeliveries, this.deliveriesPage, this.deliveriesSize);
+  }
+
+  get deliveriesTotal(): number {
+    return this.filteredDeliveries.length;
+  }
+
   onAgentFilterChange(): void {
+    this.deliveriesPage = 0;
     if (this.filterAgentId) {
       this.loadDeliveries(this.filterAgentId);
     } else {

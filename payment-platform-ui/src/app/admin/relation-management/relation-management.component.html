@@ -57,7 +57,7 @@
           </tr>
         </thead>
         <tbody>
-          @for (r of relations; track r) {
+          @for (r of pagedRelations; track r) {
             <tr>
               <td>{{ getSupplierName(r.supplierId) }}</td>
               <td>{{ getShopName(r.shopId) }}</td>
@@ -85,4 +85,9 @@
       </table>
     </div>
   </div>
+}
+
+@if (!loading) {
+  <app-pagination [page]="currentPage" [size]="pageSize" [totalElements]="relations.length"
+    (pageChange)="onPageChange($event)" (sizeChange)="onSizeChange($event)"></app-pagination>
 }

@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { OrderService } from '../../services/order.service';
 import { Order } from '../../models/order.model';
+import { paginateItems } from '../../models/page.model';
 import { ToastService } from '../../services/toast.service';
 import { LoginService } from '../../services/login.service';
 import { ConfirmDialogService } from '../../components/confirm-dialog/confirm-dialog.service';
@@ -46,6 +47,11 @@ export class DeliveryManagementComponent implements OnInit {
 
   showDetail = false;
   selectedDetailOrder: Order | null = null;
+  loadingDetail = false;
+
+  /** Pagination par section (endpoints livraisons non paginés côté serveur). */
+  sectionPages: { [key: string]: number } = {};
+  sectionSize = 10;
 
   constructor(
     private orderService: OrderService,
@@ -75,6 +81,7 @@ export class DeliveryManagementComponent implements OnInit {
     this.orderService.myDeliveries().subscribe({
       next: (data: Order[]) => {
         this.deliveries = data;
+        this.sectionPages = {};
         this.loading = false;
         if (this.highlightedOrderId) {
           const id = this.highlightedOrderId;
@@ -296,15 +303,35 @@ export class DeliveryManagementComponent implements OnInit {
     return map[s] || '';
   }
 
-  /** Ouvre le panneau de détail d'une commande. */
+  /** Ouvre le panneau de détail d'une commande (appel ciblé par id). */
   openDetail(order: Order): void {
-    this.selectedDetailOrder = order;
+    this.selectedDetailOrder = null;
+    this.loadingDetail = true;
     this.showDetail = true;
+    this.orderService.getById(order.id).subscribe({
+      next: (data: Order) => { this.selectedDetailOrder = data; this.loadingDetail = false; },
+      error: () => { this.selectedDetailOrder = order; this.loadingDetail = false; }
+    });
   }
 
   /** Ferme le panneau de détail d'une commande. */
   closeDetail(): void {
     this.showDetail = false;
     this.selectedDetailOrder = null;
+    this.loadingDetail = false;
+  }
+
+  /** Page d'une section de livraisons (pagination côté client). */
+  paged(list: Order[], key: string): Order[] {
+    return paginateItems(list, this.sectionPages[key] || 0, this.sectionSize);
+  }
+
+  onSectionPage(key: string, page: number): void {
+    this.sectionPages[key] = page;
+  }
+
+  onSectionSize(size: number): void {
+    this.sectionSize = size;
+    this.sectionPages = {};
   }
 }

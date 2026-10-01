@@ -35,6 +35,7 @@
     <testcontainers.version>2.0.5</testcontainers.version>
     <lombok.version>1.18.48</lombok.version>
     <mapstruct.version>1.6.3</mapstruct.version>
+    <archunit.version>1.4.2</archunit.version>
     <maven.compiler.release>26</maven.compiler.release>
     <!-- JaCoCo / Sonar versions -->
     <jacoco.version>0.8.15</jacoco.version>
@@ -104,6 +105,11 @@
         <artifactId>mapstruct</artifactId>
         <version>${mapstruct.version}</version>
       </dependency>
+      <dependency>
+        <groupId>com.tngtech.archunit</groupId>
+        <artifactId>archunit-junit5</artifactId>
+        <version>${archunit.version}</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 
@@ -123,6 +129,7 @@
             <excludes>
               <exclude>**/*IT.java</exclude>
               <exclude>**/*H2Test.java</exclude>
+              <exclude>**/*H2Tests.java</exclude>
             </excludes>
           </configuration>
         </plugin>
@@ -135,6 +142,7 @@
             <includes>
               <include>**/*IT.java</include>
               <include>**/*H2Test.java</include>
+              <include>**/*H2Tests.java</include>
             </includes>
           </configuration>
           <executions>

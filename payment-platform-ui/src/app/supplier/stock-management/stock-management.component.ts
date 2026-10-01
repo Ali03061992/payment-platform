@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { StockService } from '../../services/stock.service';
 import { Product, StockMovement } from '../../models/stock.model';
+import { paginateItems } from '../../models/page.model';
 import { ToastService } from '../../services/toast.service';
 
 @Component({
@@ -17,6 +18,10 @@ export class StockManagementComponent implements OnInit {
   searchTerm = '';
   filterStatus = '';
   sortBy = 'lowStock';
+  currentPage = 0;
+  pageSize = 20;
+  historyPage = 0;
+  historySize = 10;
 
   stats = { total: 0, totalQty: 0, totalValue: 0, lowStock: 0, outOfStock: 0 };
 
@@ -40,7 +45,7 @@ export class StockManagementComponent implements OnInit {
   loadData(): void {
     this.loading = true;
     this.stockService.getProducts().subscribe({
-      next: (p) => { this.products = p; this.applyFilters(); this.loadMovements(); this.loading = false; },
+      next: (p) => { this.products = p; this.currentPage = 0; this.applyFilters(); this.loadMovements(); this.loading = false; },
       error: () => { this.products = []; this.filteredProducts = []; this.loading = false; }
     });
   }
@@ -53,6 +58,7 @@ export class StockManagementComponent implements OnInit {
   }
 
   applyFilters(): void {
+    this.currentPage = 0;
     let result = [...this.products];
     if (this.searchTerm.trim()) {
       const t = this.searchTerm.toLowerCase();
@@ -74,6 +80,32 @@ export class StockManagementComponent implements OnInit {
     });
     this.filteredProducts = result;
     this.computeStats();
+  }
+
+  get pagedProducts(): Product[] {
+    return paginateItems(this.filteredProducts, this.currentPage, this.pageSize);
+  }
+
+  get pagedHistory(): StockMovement[] {
+    return paginateItems(this.historyMovements, this.historyPage, this.historySize);
+  }
+
+  onPageChange(page: number): void {
+    this.currentPage = page;
+  }
+
+  onSizeChange(size: number): void {
+    this.pageSize = size;
+    this.currentPage = 0;
+  }
+
+  onHistoryPageChange(page: number): void {
+    this.historyPage = page;
+  }
+
+  onHistorySizeChange(size: number): void {
+    this.historySize = size;
+    this.historyPage = 0;
   }
 
   computeStats(): void {
@@ -121,6 +153,7 @@ export class StockManagementComponent implements OnInit {
     this.historyProduct = p;
     this.loadingHistory = true;
     this.showHistoryModal = true;
+    this.historyPage = 0;
     this.stockService.getStockMovements(p.id).subscribe({
       next: (d) => { this.historyMovements = d; this.loadingHistory = false; },
       error: () => { this.historyMovements = []; this.loadingHistory = false; }

@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { UserService } from '../../services/user.service';
-import { User } from '../../models/user.model';
+import { User, UserPage } from '../../models/user.model';
 import { ToastService } from '../../services/toast.service';
 
 @Component({
@@ -15,6 +15,10 @@ export class UserManagementComponent implements OnInit {
   error = '';
   filterRole = '';
   filterStatus = '';
+  currentPage = 0;
+  pageSize = 20;
+  totalElements = 0;
+  totalPages = 0;
 
   constructor(private userService: UserService, private toast: ToastService) {}
 
@@ -24,8 +28,17 @@ export class UserManagementComponent implements OnInit {
 
   loadUsers(): void {
     this.loading = true;
-    this.userService.list(undefined, this.filterRole || undefined, this.filterStatus || undefined).subscribe({
-      next: (users) => { this.users = users; this.loading = false; },
+    this.userService.listPaged(
+      undefined, this.filterRole || undefined, this.filterStatus || undefined,
+      this.currentPage, this.pageSize
+    ).subscribe({
+      next: (page: UserPage) => {
+        this.users = page.items || [];
+        this.totalElements = page.totalElements ?? this.users.length;
+        this.totalPages = page.totalPages ?? 1;
+        this.currentPage = page.number ?? this.currentPage;
+        this.loading = false;
+      },
       error: (err) => { this.error = err.error?.message || 'Erreur de chargement'; this.loading = false; }
     });
   }
@@ -51,6 +64,18 @@ export class UserManagementComponent implements OnInit {
   }
 
   applyFilter(): void {
+    this.currentPage = 0;
+    this.loadUsers();
+  }
+
+  onPageChange(page: number): void {
+    this.currentPage = page;
+    this.loadUsers();
+  }
+
+  onSizeChange(size: number): void {
+    this.pageSize = size;
+    this.currentPage = 0;
     this.loadUsers();
   }
 }

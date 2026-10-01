@@ -94,13 +94,13 @@
 
 @if (!loading) {
   <div class="filter-bar">
-    <select [(ngModel)]="filterCategory" class="form-control filter-select" (change)="filterFamily = ''">
+    <select [(ngModel)]="filterCategory" class="form-control filter-select" (change)="filterFamily = ''; onFilterChange()">
       <option value="">Toutes les categories</option>
       @for (c of categories; track c) {
         <option [value]="c.id">{{ c.name }}</option>
       }
     </select>
-    <select [(ngModel)]="filterFamily" class="form-control filter-select">
+    <select [(ngModel)]="filterFamily" class="form-control filter-select" (change)="onFilterChange()">
       <option value="">Toutes les familles</option>
       @for (f of families; track f) {
         <option [value]="f.id">{{ f.name }}</option>
@@ -127,7 +127,7 @@
           </tr>
         </thead>
         <tbody>
-          @for (p of filteredProducts; track p) {
+          @for (p of pagedProducts; track p) {
             <tr>
               <td><code>{{ p.sku }}</code></td>
               <td><strong>{{ p.name }}</strong>@if (p.description) {
@@ -160,4 +160,9 @@
     </table>
   </div>
 </div>
+}
+
+@if (!loading) {
+  <app-pagination [page]="currentPage" [size]="pageSize" [totalElements]="filteredProducts.length"
+    (pageChange)="onPageChange($event)" (sizeChange)="onSizeChange($event)"></app-pagination>
 }

@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy, HostListener, ElementRef } from '@angular/core';
 import { OrderService } from '../../services/order.service';
-import { Order } from '../../models/order.model';
+import { Order, OrderPage } from '../../models/order.model';
 import { ToastService } from '../../services/toast.service';
 import { ConfirmDialogService } from '../../components/confirm-dialog/confirm-dialog.service';
 import { Subscription, Subject, debounceTime, distinctUntilChanged, switchMap, of } from 'rxjs';
@@ -16,6 +16,10 @@ export class OrderListComponent implements OnInit, OnDestroy {
   orders: Order[] = [];
   loading = true;
   filterStatus = '';
+  currentPage = 0;
+  pageSize = 20;
+  totalElements = 0;
+  totalPages = 0;
 
   searchQuery = '';
   searchResults: Order[] = [];
@@ -66,10 +70,34 @@ export class OrderListComponent implements OnInit, OnDestroy {
 
   load(): void {
     this.loading = true;
-    this.subscriptions.add(this.orderService.list().subscribe({
-      next: (data: Order[]) => { this.orders = data; this.loading = false; },
+    this.subscriptions.add(this.orderService.listPaged(
+      this.currentPage, this.pageSize, this.filterStatus || undefined
+    ).subscribe({
+      next: (page: OrderPage) => {
+        this.orders = page.items || [];
+        this.totalElements = page.totalElements ?? this.orders.length;
+        this.totalPages = page.totalPages ?? 1;
+        this.currentPage = page.number ?? this.currentPage;
+        this.loading = false;
+      },
       error: (err: any) => { this.toast.error(err.error?.message || 'Erreur'); this.loading = false; }
     }));
+  }
+
+  onFilterChange(): void {
+    this.currentPage = 0;
+    this.load();
+  }
+
+  onPageChange(page: number): void {
+    this.currentPage = page;
+    this.load();
+  }
+
+  onSizeChange(size: number): void {
+    this.pageSize = size;
+    this.currentPage = 0;
+    this.load();
   }
 
   get filteredOrders(): Order[] {

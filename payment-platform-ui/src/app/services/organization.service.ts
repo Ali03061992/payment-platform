@@ -3,6 +3,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { Organization, OrganizationStats, SupplierShopRelation, CreateRelationRequest } from '../models/organization.model';
+import { PageResponse } from '../models/page.model';
 
 /**
  * Service HTTP des organisations (fournisseurs, boutiques, relations, statistiques).
@@ -29,11 +30,23 @@ export class OrganizationService {
       .pipe(map(OrganizationService.unwrap<Organization>));
   }
 
+  /** Page de fournisseurs (lazy loading) : ne charge que la page demandée. */
+  listSuppliersPaged(page = 0, size = 20): Observable<PageResponse<Organization>> {
+    const params = new HttpParams().set('page', page).set('size', size);
+    return this.http.get<PageResponse<Organization>>(`${this.apiUrl}/suppliers`, { params });
+  }
+
   /** Liste paginée des boutiques. */
   listShops(page = 0, size = 100): Observable<Organization[]> {
     const params = new HttpParams().set('page', page).set('size', size);
     return this.http.get<Organization[] | { items: Organization[] }>(`${this.apiUrl}/shops`, { params })
       .pipe(map(OrganizationService.unwrap<Organization>));
+  }
+
+  /** Page de boutiques (lazy loading) : ne charge que la page demandée. */
+  listShopsPaged(page = 0, size = 20): Observable<PageResponse<Organization>> {
+    const params = new HttpParams().set('page', page).set('size', size);
+    return this.http.get<PageResponse<Organization>>(`${this.apiUrl}/shops`, { params });
   }
 
   /** Récupère une organisation par identifiant. */

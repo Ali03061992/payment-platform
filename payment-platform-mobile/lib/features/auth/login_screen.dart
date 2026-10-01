@@ -44,7 +44,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         decoration: const BoxDecoration(gradient: Ds.headerGradient),
         child: Stack(
           children: [
-            // Halos décoratifs.
+            // Halos décoratifs subtils.
             Positioned(
               top: -70,
               right: -70,
@@ -53,7 +53,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 height: 220,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: Ds.pop.withValues(alpha: 0.22),
+                  color: Colors.white.withValues(alpha: 0.06),
                 ),
               ),
             ),
@@ -65,7 +65,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 height: 260,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: Ds.teal.withValues(alpha: 0.25),
+                  color: Colors.white.withValues(alpha: 0.05),
                 ),
               ),
             ),
@@ -78,32 +78,31 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       _rise(
                         0,
                         Container(
-                          width: 84,
-                          height: 84,
+                          width: 76,
+                          height: 76,
                           decoration: BoxDecoration(
-                            gradient: Ds.goldGradient,
-                            borderRadius: BorderRadius.circular(26),
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(24),
                             boxShadow: [
                               BoxShadow(
-                                  color: Ds.pop.withValues(alpha: 0.5),
-                                  blurRadius: 30,
-                                  offset: const Offset(0, 10)),
+                                  color: Colors.black.withValues(alpha: 0.25),
+                                  blurRadius: 24,
+                                  offset: const Offset(0, 8)),
                             ],
                           ),
-                          child: const Icon(Icons.payments_rounded, color: Colors.white, size: 44),
+                          child: const Icon(Icons.payments_rounded,
+                              color: Ds.accent, size: 40),
                         ),
                       ),
                       const SizedBox(height: 18),
                       _rise(
                         1,
-                        const Text('Payment Platform',
-                            style: TextStyle(
-                                fontSize: 26, fontWeight: FontWeight.w800, color: Colors.white)),
+                        Text('Payment Platform', style: Tx.h1(color: Colors.white, size: 26)),
                       ),
                       _rise(
                         2,
-                        const Text('Fournisseurs & boutiques, en mouvement',
-                            style: TextStyle(fontSize: 13.5, color: Colors.white70)),
+                        Text('Fournisseurs & boutiques, en mouvement',
+                            style: Tx.body(color: Colors.white70, size: 13.5)),
                       ),
                       const SizedBox(height: 28),
                       _rise(
@@ -124,14 +123,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
-                              const Text('Connexion',
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                      fontSize: 22, fontWeight: FontWeight.w800, color: Ds.deepText)),
+                              Text('Connexion',
+                                  textAlign: TextAlign.center, style: Tx.h1()),
                               const SizedBox(height: 4),
-                              const Text('Accédez à votre espace',
+                              Text('Accédez à votre espace',
                                   textAlign: TextAlign.center,
-                                  style: TextStyle(fontSize: 13, color: Ds.muted)),
+                                  style: Tx.small(size: 13)),
                               const SizedBox(height: 20),
                               TextField(
                                 controller: _user,
@@ -158,9 +155,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                           color: Ds.dangerText, size: 18),
                                       const SizedBox(width: 8),
                                       Expanded(
-                                        child: Text(_error!,
-                                            style: const TextStyle(
-                                                fontSize: 13, color: Ds.dangerText)),
+                                        child: Text(_error!, style: Tx.body(color: Ds.dangerText, size: 13)),
                                       ),
                                     ],
                                   ),
@@ -171,7 +166,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                 height: 54,
                                 decoration: BoxDecoration(
                                   gradient: const LinearGradient(
-                                    colors: [Color(0xFF0F3460), Color(0xFF1E5AA8)],
+                                    colors: [Color(0xFF0EA5E9), Color(0xFF0284C7)],
                                     begin: Alignment.topLeft,
                                     end: Alignment.bottomRight,
                                   ),
@@ -198,23 +193,19 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                           child: CircularProgressIndicator(
                                               color: Colors.white, strokeWidth: 2.5),
                                         )
-                                      : const Text('Se connecter',
-                                          style: TextStyle(fontSize: 16, color: Colors.white)),
+                                      : Text('Se connecter', style: Tx.btn(size: 16)),
                                 ),
                               ),
                               const SizedBox(height: 14),
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  const Text('Pas encore de compte ? ',
-                                      style: TextStyle(fontSize: 13.5, color: Ds.muted)),
+                                  Text('Pas encore de compte ? ',
+                                      style: Tx.small(size: 13.5)),
                                   GestureDetector(
                                     onTap: () => context.go('/register'),
-                                    child: const Text('S’inscrire',
-                                        style: TextStyle(
-                                            fontSize: 13.5,
-                                            color: Ds.accent,
-                                            fontWeight: FontWeight.w700)),
+                                    child: Text('S’inscrire',
+                                        style: Tx.body(color: Ds.accent, size: 13.5)),
                                   ),
                                 ],
                               ),

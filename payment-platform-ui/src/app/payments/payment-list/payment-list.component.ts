@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { PaymentService } from '../../services/payment.service';
-import { Payment } from '../../models/payment.model';
+import { Payment, PaymentPage } from '../../models/payment.model';
 import { ToastService } from '../../services/toast.service';
 import { Subscription } from 'rxjs';
 
@@ -15,6 +15,12 @@ export class PaymentListComponent implements OnInit, OnDestroy {
   loading = true;
   filterStatus = '';
   pendingAction: string | null = null;
+  currentPage = 0;
+  pageSize = 20;
+  totalElements = 0;
+  totalPages = 0;
+  /** Lignes dépliées (détail inline) : vide à l'initialisation, rien n'est affiché. */
+  expandedIds = new Set<string>();
 
   private subscriptions = new Subscription();
 
@@ -28,10 +34,45 @@ export class PaymentListComponent implements OnInit, OnDestroy {
 
   load(): void {
     this.loading = true;
-    this.subscriptions.add(this.paymentService.list().subscribe({
-      next: (data: Payment[]) => { this.payments = data; this.loading = false; },
+    this.subscriptions.add(this.paymentService.listPaged(this.currentPage, this.pageSize).subscribe({
+      next: (page: PaymentPage) => {
+        this.payments = page.items || [];
+        this.totalElements = page.totalElements ?? this.payments.length;
+        this.totalPages = page.totalPages ?? 1;
+        this.currentPage = page.number ?? this.currentPage;
+        this.expandedIds.clear();
+        this.loading = false;
+      },
       error: (err: any) => { this.toast.error(err.error?.message || 'Erreur'); this.loading = false; }
     }));
+  }
+
+  onPageChange(page: number): void {
+    this.currentPage = page;
+    this.load();
+  }
+
+  onSizeChange(size: number): void {
+    this.pageSize = size;
+    this.currentPage = 0;
+    this.load();
+  }
+
+  onFilterChange(): void {
+    this.currentPage = 0;
+  }
+
+  isExpanded(p: Payment): boolean {
+    return this.expandedIds.has(p.id);
+  }
+
+  toggleExpand(p: Payment, event?: Event): void {
+    event?.stopPropagation();
+    if (this.expandedIds.has(p.id)) {
+      this.expandedIds.delete(p.id);
+    } else {
+      this.expandedIds.add(p.id);
+    }
   }
 
   get filteredPayments(): Payment[] {

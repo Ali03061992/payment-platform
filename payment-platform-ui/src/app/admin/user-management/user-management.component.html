@@ -75,3 +75,8 @@
     </div>
   </div>
 }
+
+@if (!loading && !error) {
+  <app-pagination [page]="currentPage" [size]="pageSize" [totalElements]="totalElements"
+    (pageChange)="onPageChange($event)" (sizeChange)="onSizeChange($event)"></app-pagination>
+}

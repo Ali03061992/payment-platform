@@ -56,6 +56,11 @@
   height: 300px;
 }
 
+.chart-container .echart {
+  width: 100%;
+  height: 100%;
+}
+
 .chart-container-tall {
   height: 350px;
 }
@@ -67,6 +72,26 @@
   height: 200px;
   color: #8896ab;
   font-size: 14px;
+}
+
+.error-card {
+  background: #fff;
+  border-radius: 12px;
+  border-left: 4px solid #ef5350;
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  color: #5a6577;
+  font-size: 14px;
+}
+
+.error-card p {
+  margin: 0;
 }
 
 .charts-row {

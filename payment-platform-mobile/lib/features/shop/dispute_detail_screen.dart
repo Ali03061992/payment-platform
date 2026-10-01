@@ -16,6 +16,7 @@ class DisputeDetailScreen extends ConsumerStatefulWidget {
 class _DisputeDetailScreenState extends ConsumerState<DisputeDetailScreen> {
   Future<Map<String, dynamic>>? _future;
   final _msg = TextEditingController();
+  String _orderRef = '';
 
   @override
   void initState() {
@@ -30,8 +31,23 @@ class _DisputeDetailScreenState extends ConsumerState<DisputeDetailScreen> {
   }
 
   void _load() => setState(() {
-        _future = ref.read(shopApiProvider).dispute(widget.id);
+        _future = _loadFull();
       });
+
+  /// Charge le litige puis résout la référence commande (jamais d'ID brut).
+  Future<Map<String, dynamic>> _loadFull() async {
+    final d = await ref.read(shopApiProvider).dispute(widget.id);
+    final orderId = d['orderId']?.toString() ?? '';
+    if ((d['orderReference'] == null || '${d['orderReference']}'.isEmpty) && orderId.isNotEmpty) {
+      try {
+        final o = await ref.read(shopApiProvider).order(orderId);
+        _orderRef = '${o['reference'] ?? ''}';
+      } catch (_) {}
+    } else {
+      _orderRef = '${d['orderReference'] ?? ''}';
+    }
+    return d;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -65,7 +81,7 @@ class _DisputeDetailScreenState extends ConsumerState<DisputeDetailScreen> {
                         ],
                       ),
                       const SizedBox(height: 8),
-                      InfoRow('Commande', '${d['orderReference'] ?? d['orderId'] ?? '—'}'),
+                      InfoRow('Commande', _orderRef.isEmpty ? '—' : _orderRef),
                       InfoRow('Motif', '${d['reason'] ?? '—'}'),
                       InfoRow('Créé le', fmtDate(d['createdAt']?.toString())),
                     ],

@@ -38,7 +38,7 @@
         </div>
       }
     </div>
-    <select [(ngModel)]="filterStatus" class="form-control" style="max-width:200px;" aria-label="Filtrer par statut">
+    <select [(ngModel)]="filterStatus" (change)="onOrdersFilterChange()" class="form-control" style="max-width:200px;" aria-label="Filtrer par statut">
       <option value="">Tous les statuts</option>
       <option value="DRAFT">Brouillon</option>
       <option value="CONFIRMED">Confirmé</option>
@@ -52,13 +52,13 @@
       <option value="REJECTED">Rejeté</option>
       <option value="DELIVERY_REJECTED">Livraison rejetée</option>
     </select>
-    <select [(ngModel)]="filterShopId" class="form-control" style="max-width:200px;" aria-label="Filtrer par boutique">
+    <select [(ngModel)]="filterShopId" (change)="onOrdersFilterChange()" class="form-control" style="max-width:200px;" aria-label="Filtrer par boutique">
       <option value="">Toutes les boutiques</option>
       @for (s of shops; track s.id) {
         <option [value]="s.id">{{ s.name }}</option>
       }
     </select>
-    <span class="result-count" aria-live="polite">{{ filteredOrders.length }} résultat(s)</span>
+    <span class="result-count" aria-live="polite">{{ totalElements }} résultat(s)</span>
     <button class="btn btn-secondary" style="margin-left:auto;" (click)="exportCsv()" aria-label="Exporter les commandes en CSV">Exporter CSV</button>
   </div>
 }
@@ -127,6 +127,10 @@
       </table>
     </div>
   </div>
+  @if (!loading && activeTab === 'orders') {
+    <app-pagination [page]="currentPage" [size]="pageSize" [totalElements]="totalElements"
+      (pageChange)="onPageChange($event)" (sizeChange)="onSizeChange($event)"></app-pagination>
+  }
 }
 
 @if (!loading && activeTab === 'deliveries') {
@@ -158,7 +162,7 @@
         <option [value]="a.id">{{ a.firstName }} {{ a.lastName }}</option>
       }
     </select>
-    <select [(ngModel)]="filterStatus" class="form-control" style="max-width:200px;" aria-label="Filtrer par statut de livraison">
+    <select [(ngModel)]="filterStatus" (change)="onDeliveriesFilterChange()" class="form-control" style="max-width:200px;" aria-label="Filtrer par statut de livraison">
       <option value="">Tous les statuts</option>
       <option value="READY_FOR_DELIVERY">En attente d'acceptation</option>
       <option value="DELIVERY_ACCEPTED">Acceptée</option>
@@ -167,13 +171,13 @@
       <option value="ACCEPTED">Accepté</option>
       <option value="DELIVERY_REJECTED">Rejetée</option>
     </select>
-    <select [(ngModel)]="filterShopId" class="form-control" style="max-width:200px;" aria-label="Filtrer par boutique">
+    <select [(ngModel)]="filterShopId" (change)="onDeliveriesFilterChange()" class="form-control" style="max-width:200px;" aria-label="Filtrer par boutique">
       <option value="">Toutes les boutiques</option>
       @for (s of shops; track s.id) {
         <option [value]="s.id">{{ s.name }}</option>
       }
     </select>
-    <span class="result-count" aria-live="polite">{{ filteredDeliveries.length }} résultat(s)</span>
+    <span class="result-count" aria-live="polite">{{ deliveriesTotal }} résultat(s)</span>
   </div>
   <div class="table-card">
     <div class="table-wrapper">
@@ -190,7 +194,7 @@
           </tr>
         </thead>
         <tbody>
-          @for (o of filteredDeliveries; track o) {
+          @for (o of pagedDeliveries; track o) {
             <tr class="clickable-row" (click)="viewDetail(o)">
               <td><strong>{{ o.reference }}</strong></td>
               <td>{{ o.shopName || o.shopId }}</td>
@@ -208,7 +212,7 @@
               </td>
             </tr>
           }
-          @if (filteredDeliveries.length === 0) {
+          @if (deliveriesTotal === 0) {
             <tr>
               <td colspan="7" class="empty">Aucune livraison trouvée</td>
             </tr>
@@ -217,6 +221,10 @@
       </table>
     </div>
   </div>
+  @if (!loading && activeTab === 'deliveries') {
+    <app-pagination [page]="deliveriesPage" [size]="deliveriesSize" [totalElements]="deliveriesTotal"
+      (pageChange)="onDeliveriesPageChange($event)" (sizeChange)="onDeliveriesSizeChange($event)"></app-pagination>
+  }
 }
 
 <!-- Détail commande -->

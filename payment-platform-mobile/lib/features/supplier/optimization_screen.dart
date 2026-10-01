@@ -79,7 +79,7 @@ class _OptimizationScreenState extends ConsumerState<OptimizationScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('${(r as Map)['productName'] ?? (r as Map)['productId'] ?? ''}',
+                            Text('${(r as Map)['productName'] ?? 'Produit'}',
                                 style: const TextStyle(fontWeight: FontWeight.w600)),
                             Text(
                                 'Action ${(r as Map)['action'] ?? '—'} • Qté ${(r as Map)['quantity'] ?? (r as Map)['recommendedQuantity'] ?? '—'}',

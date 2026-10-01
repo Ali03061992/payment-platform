@@ -72,9 +72,10 @@ describe('17 - B5: Supplier summary via SQL aggregates', () => {
                   expect(rc.status).to.eq(200);
                   cy.request({ method: 'GET', url: summaryUrl, headers: authSup }).then((after) => {
                     expect(after.status).to.eq(200);
-                    expect(after.body.confirmedTotal - before.body.confirmedTotal).to.eq(100);
+                    // closeTo : les totaux transitent en JSON (flottants).
+                    expect(after.body.confirmedTotal - before.body.confirmedTotal).to.be.closeTo(100, 0.01);
                     expect(after.body.confirmedCount - before.body.confirmedCount).to.eq(1);
-                    expect(after.body.pendingTotal - before.body.pendingTotal).to.eq(50);
+                    expect(after.body.pendingTotal - before.body.pendingTotal).to.be.closeTo(50, 0.01);
                     expect(after.body.pendingCount - before.body.pendingCount).to.eq(1);
                   });
                 });

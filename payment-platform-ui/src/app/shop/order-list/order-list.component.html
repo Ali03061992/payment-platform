@@ -25,7 +25,7 @@
         </div>
       }
     </div>
-    <select [(ngModel)]="filterStatus" class="form-control" style="max-width:200px;">
+    <select [(ngModel)]="filterStatus" (change)="onFilterChange()" class="form-control" style="max-width:200px;">
       <option value="">Tous les statuts</option>
       <option value="DRAFT">Brouillon</option>
       <option value="CONFIRMED">Confirmé</option>
@@ -39,7 +39,7 @@
       <option value="REJECTED">Rejeté</option>
       <option value="DELIVERY_REJECTED">Livraison rejetée</option>
     </select>
-    <span class="result-count">{{ filteredOrders.length }} résultat(s)</span>
+    <span class="result-count">{{ totalElements }} résultat(s)</span>
     <button class="btn btn-secondary" style="margin-left:auto;" (click)="exportCsv()">Exporter CSV</button>
   </div>
 }
@@ -148,4 +148,9 @@
       </div>
     }
   </div>
+}
+
+@if (!loading) {
+  <app-pagination [page]="currentPage" [size]="pageSize" [totalElements]="totalElements"
+    (pageChange)="onPageChange($event)" (sizeChange)="onSizeChange($event)"></app-pagination>
 }

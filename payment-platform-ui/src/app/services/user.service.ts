@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { User } from '../models/user.model';
+import { User, UserPage } from '../models/user.model';
 
 /**
  * Service HTTP des utilisateurs (liste filtrée, détail, activation, création).
@@ -29,6 +29,15 @@ export class UserService {
         return [];
       })
     );
+  }
+
+  /** Page d'utilisateurs (lazy loading) avec filtres serveur + totaux. */
+  listPaged(organizationId?: string, role?: string, status?: string, page = 0, size = 20): Observable<UserPage> {
+    let params = new HttpParams().set('page', page).set('size', size);
+    if (organizationId) params = params.set('organizationId', organizationId.toString());
+    if (role) params = params.set('role', role);
+    if (status) params = params.set('statusFilter', status);
+    return this.http.get<UserPage>(this.apiUrl, { params });
   }
 
   /** Récupère un utilisateur par identifiant. */

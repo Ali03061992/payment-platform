@@ -73,3 +73,8 @@
     </div>
   </div>
 }
+
+@if (!loading) {
+  <app-pagination [page]="currentPage" [size]="pageSize" [totalElements]="totalElements"
+    (pageChange)="onPageChange($event)" (sizeChange)="onSizeChange($event)"></app-pagination>
+}

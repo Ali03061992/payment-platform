@@ -62,7 +62,7 @@ code { background: var(--bg-tertiary); color: var(--text-primary); padding: 3px 
 .actions .btn + .btn { margin-left: 4px; }
 
 /* Mobile Cards */
-.product-cards { display: flex; flex-direction: column; gap: 12px; }
+.product-cards { display: none; flex-direction: column; gap: 12px; }
 .product-card { background: var(--card-bg); border-radius: 12px; padding: 16px; box-shadow: var(--shadow-sm); border: 1px solid var(--border-light); border-left: 4px solid #2e7d32; }
 .product-card.card-low { border-left-color: #e65100; }
 .product-card.card-out { border-left-color: #c62828; }
@@ -121,6 +121,15 @@ label { display: block; margin-bottom: 6px; font-weight: 600; font-size: 13px; c
 .btn-sm { padding: 6px 12px; font-size: 12px; }
 
 @media (max-width: 768px) {
+  .hide-mobile {
+    display: none;
+  }
+
+  .show-mobile,
+  .product-cards.show-mobile {
+    display: flex;
+  }
+
   .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
   .stat-card { padding: 12px 8px; }
   .stat-val { font-size: 18px; }

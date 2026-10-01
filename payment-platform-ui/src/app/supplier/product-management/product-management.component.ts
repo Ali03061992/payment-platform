@@ -3,6 +3,7 @@ import { StockService } from '../../services/stock.service';
 import { CatalogService } from '../../services/catalog.service';
 import { Product } from '../../models/stock.model';
 import { ProductFamily, ProductCategory } from '../../models/catalog.model';
+import { paginateItems } from '../../models/page.model';
 import { ToastService } from '../../services/toast.service';
 import { ConfirmDialogService } from '../../components/confirm-dialog/confirm-dialog.service';
 
@@ -22,6 +23,8 @@ export class ProductManagementComponent implements OnInit {
   showForm = false;
   editingProduct: Product | null = null;
   saving = false;
+  currentPage = 0;
+  pageSize = 20;
 
   form = {
     name: '', sku: '', description: '', unitPrice: 0, currency: 'TND',
@@ -45,7 +48,7 @@ export class ProductManagementComponent implements OnInit {
   loadData(): void {
     this.loading = true;
     this.stockService.getProducts().subscribe({
-      next: (p) => { this.products = p; this.loading = false; },
+      next: (p) => { this.products = p; this.currentPage = 0; this.loading = false; },
       error: () => { this.products = []; this.loading = false; }
     });
     const sid = this.supplierId;
@@ -59,6 +62,23 @@ export class ProductManagementComponent implements OnInit {
       if (this.filterFamily && p.familyId !== this.filterFamily) return false;
       return true;
     });
+  }
+
+  get pagedProducts(): Product[] {
+    return paginateItems(this.filteredProducts, this.currentPage, this.pageSize);
+  }
+
+  onFilterChange(): void {
+    this.currentPage = 0;
+  }
+
+  onPageChange(page: number): void {
+    this.currentPage = page;
+  }
+
+  onSizeChange(size: number): void {
+    this.pageSize = size;
+    this.currentPage = 0;
   }
 
   getCategoryName(id: string | null): string { return this.categories.find(c => c.id === id)?.name || '-'; }

@@ -12,6 +12,26 @@ function uid() {
 }
 
 // ── Login commands ──────────────────────────────────────────────────
+// NOTE: avec testIsolation:true, le sessionStorage posé via cy.window() AVANT
+// le premier cy.visit() est perdu (origine blank != origine app). Donc cy.login
+// injecte la session via onBeforeLoad sur un visit léger ; les cy.visit()
+// suivants du même test conservent le storage (même origine, même test).
+
+function injectSession(win: Window, auth: { token: string; refreshToken?: string; user?: any }) {
+  win.sessionStorage.setItem('token', auth.token);
+  if (auth.refreshToken) {
+    win.sessionStorage.setItem('refreshToken', auth.refreshToken);
+  }
+  if (auth.user) {
+    win.sessionStorage.setItem('user', JSON.stringify(auth.user));
+  }
+  try {
+    win.localStorage.setItem('onboarding_completed', 'true');
+    win.localStorage.setItem('notification_choice', 'dismissed');
+  } catch {
+    // ignore
+  }
+}
 
 Cypress.Commands.add('login', (username: string, password: string) => {
   cy.request({
@@ -20,18 +40,31 @@ Cypress.Commands.add('login', (username: string, password: string) => {
     body: { username, password },
     failOnStatusCode: false,
   }).then((resp) => {
-    expect(resp.status).to.eq(200, `Login failed for ${username}: ${resp.status}`);
+    expect(resp.status).to.eq(200, `Login failed for ${username}: ${resp.status} ${JSON.stringify(resp.body)}`);
     expect(resp.body).to.have.property('accessToken');
-    const token = resp.body.accessToken;
-    cy.window().then((win) => {
-      win.sessionStorage.setItem('token', token);
-      win.sessionStorage.setItem('user', JSON.stringify(resp.body.user));
-      try {
-        win.localStorage.setItem('onboarding_completed', 'true');
-        win.localStorage.setItem('notification_choice', 'dismissed');
-      } catch {
-        // ignore
-      }
+    const auth = {
+      token: resp.body.accessToken as string,
+      refreshToken: resp.body.refreshToken as string | undefined,
+      user: resp.body.user,
+    };
+    // Si le backend ne renvoie pas le user (contrat LoginResponse minimal),
+    // on le récupère via /me comme le fait LoginComponent.
+    const withUser = auth.user
+      ? cy.wrap(auth)
+      : cy.request({
+        method: 'GET',
+        url: `${API_URL()}/api/auth/me`,
+        headers: authHeaders(auth.token),
+      }).then((me) => ({ ...auth, user: me.body }));
+    withUser.then((a) => {
+      cy.visit('/login', {
+        log: false,
+        onBeforeLoad: (win) => injectSession(win, a),
+      });
+      // La session doit survivre au chargement (garde anti-redirect /login).
+      cy.window({ log: false }).then((win) => {
+        expect(win.sessionStorage.getItem('token'), 'token injected').to.not.be.null;
+      });
     });
   });
 });
@@ -45,6 +78,7 @@ Cypress.Commands.add('dismissOverlays', () => {
       // ignore
     }
   });
+  // Sur une page blank (avant le premier visit) il n'y a rien à fermer.
   cy.get('body', { log: false }).then(($body) => {
     if ($body.find('.tour-tooltip .tour-btn-skip').length) {
       cy.get('.tour-tooltip .tour-btn-skip', { log: false }).first().click({ force: true });
@@ -53,6 +87,23 @@ Cypress.Commands.add('dismissOverlays', () => {
       cy.get('.notification-banner .banner-btn-dismiss', { log: false }).first().click({ force: true });
     }
   });
+});
+
+// Ouvre la sidebar si elle est repliée (sidebarOpen=false par défaut dans
+// LayoutComponent : .nav-label/.user-info ne sont rendus que si ouverte).
+Cypress.Commands.add('ensureSidebarOpen', () => {
+  cy.get('aside.sidebar', { log: false }).then(($aside) => {
+    if (!$aside.hasClass('open')) {
+      cy.get('.toggle-btn', { log: false }).first().click({ force: true });
+    }
+  });
+  cy.get('aside.sidebar.open', { log: false }).should('exist');
+});
+
+// Attend la fin des chargements (spinner .loading + skeleton) avant d'asserter
+// les tableaux. Évite les faux-échecs quand l'API est lente.
+Cypress.Commands.add('waitForPageLoad', () => {
+  cy.get('.loading', { log: false }).should('not.exist');
 });
 
 Cypress.Commands.add('loginAsAdmin', () => {
@@ -419,5 +470,7 @@ declare namespace Cypress {
     apiPost(token: string, path: string, body: any): Chainable<any>;
     apiPatch(token: string, path: string, body?: any): Chainable<any>;
     uniqueName(prefix: string): Chainable<string>;
+    ensureSidebarOpen(): Chainable<void>;
+    waitForPageLoad(): Chainable<void>;
   }
 }
