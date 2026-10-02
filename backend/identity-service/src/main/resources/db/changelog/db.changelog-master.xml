@@ -11,5 +11,6 @@
     <include file="V4__seed_users.sql" relativeToChangelogFile="true"/>
     <include file="V5__fix_seed_password.sql" relativeToChangelogFile="true"/>
     <include file="V6__refresh_tokens.sql" relativeToChangelogFile="true"/>
+    <include file="V7__password_reset_tokens.sql" relativeToChangelogFile="true"/>
 
 </databaseChangeLog>

@@ -130,6 +130,7 @@ public class JwtValidationFilter extends OncePerRequestFilter {
                 || path.startsWith("/api/auth/refresh")
                 || path.startsWith("/api/auth/logout")
                 || path.startsWith("/api/auth/password-setup/")
+                || path.startsWith("/api/auth/password-reset/")
                 || path.startsWith("/actuator/")
                 || path.startsWith("/swagger-ui")
                 || path.startsWith("/v3/api-docs");

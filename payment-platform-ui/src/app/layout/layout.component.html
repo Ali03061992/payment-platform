@@ -106,6 +106,21 @@
   }
 
   <aside class="sidebar" [class.open]="sidebarOpen" role="complementary" aria-label="Menu de navigation">
+    <svg class="sidebar-decor" viewBox="0 0 260 600" preserveAspectRatio="xMidYMax slice" aria-hidden="true" focusable="false">
+      <path d="M-40,480 C60,440 90,520 190,470 C240,445 260,470 300,455 L300,640 L-40,640 Z" fill="rgba(255,255,255,0.06)"/>
+      <path d="M-60,520 C50,485 120,545 210,505 C250,488 270,505 310,495 L310,640 L-60,640 Z" fill="rgba(255,255,255,0.05)"/>
+      <g fill="rgba(110,231,183,0.10)">
+        <ellipse cx="225" cy="120" rx="34" ry="14" transform="rotate(-32 225 120)"/>
+        <ellipse cx="245" cy="150" rx="26" ry="11" transform="rotate(-32 245 150)"/>
+        <ellipse cx="30" cy="330" rx="28" ry="12" transform="rotate(28 30 330)"/>
+      </g>
+      <g fill="rgba(125,211,252,0.12)">
+        <circle cx="40" cy="90" r="3"/>
+        <circle cx="200" cy="250" r="2.5"/>
+        <circle cx="90" cy="420" r="2"/>
+        <circle cx="230" cy="380" r="3"/>
+      </g>
+    </svg>
     <div class="sidebar-header">
       <div class="logo">
         <img src="assets/icon-app.png" class="logo-img" alt="Payment Platform">
@@ -113,34 +128,50 @@
           <span class="logo-text">Payment Platform</span>
         }
       </div>
-      <button class="toggle-btn hide-mobile" (click)="toggleSidebar()"
-        [attr.aria-label]="sidebarOpen ? 'Réduire le menu de navigation' : 'Agrandir le menu de navigation'"
-        [attr.title]="sidebarOpen ? 'Réduire' : 'Agrandir'">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <polyline points="11 17 6 12 11 7"></polyline>
-          <polyline points="18 17 13 12 18 7"></polyline>
-        </svg>
+      <button class="toggle-btn hide-mobile" (click)="toggleSidebar()" aria-label="Toggle menu">
+        @if (sidebarOpen) {
+          <span class="toggle-arrows">&laquo;</span>
+        } @else {
+          <span class="toggle-arrows">&raquo;</span>
+        }
       </button>
     </div>
 
     <nav class="sidebar-nav" aria-label="Navigation principale">
-      @for (item of filteredNav; track item) {
-        <a
-          [routerLink]="item.route"
-          routerLinkActive="active"
-          class="nav-item"
-          (click)="onNavClick()">
-          <span class="nav-icon"><app-icon [name]="item.icon" [size]="20"></app-icon></span>
-          @if (sidebarOpen) {
-            <span class="nav-label">{{ item.label }}</span>
+      @for (group of groupedNav; track group.label) {
+        <div class="nav-group" [class.collapsed]="!isGroupOpen(group.label)">
+          @if (sidebarOpen && group.items.length > 1) {
+            <button class="nav-group-header" (click)="toggleGroup(group.label)"
+              [attr.aria-expanded]="isGroupOpen(group.label)" [attr.aria-label]="'Section ' + group.label">
+              <span class="nav-group-title">{{ group.label }}</span>
+              <svg class="nav-group-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+            </button>
           }
-          @if ((item.route === 'supplier/stock' || item.route === 'supplier/low-stock-alerts') && lowStockAlertCount > 0) {
-            <span class="nav-badge">{{ lowStockAlertCount }}</span>
-          }
-          @if (item.route === 'notifications' && unreadCount > 0) {
-            <span class="nav-badge">{{ unreadCount > 99 ? '99+' : unreadCount }}</span>
-          }
-        </a>
+          <div class="nav-group-items">
+            <div class="nav-group-items-inner">
+            @for (item of group.items; track item) {
+              <a
+                [routerLink]="item.route"
+                routerLinkActive="active"
+                class="nav-item"
+                (click)="onNavClick()">
+                <span class="nav-icon"><app-icon [name]="item.icon" [size]="20"></app-icon></span>
+                @if (sidebarOpen) {
+                  <span class="nav-label">{{ item.label }}</span>
+                }
+                @if ((item.route === 'supplier/stock' || item.route === 'supplier/low-stock-alerts') && lowStockAlertCount > 0) {
+                  <span class="nav-badge">{{ lowStockAlertCount }}</span>
+                }
+                @if (item.route === 'notifications' && unreadCount > 0) {
+                  <span class="nav-badge">{{ unreadCount > 99 ? '99+' : unreadCount }}</span>
+                }
+              </a>
+            }
+            </div>
+          </div>
+        </div>
       }
     </nav>
 

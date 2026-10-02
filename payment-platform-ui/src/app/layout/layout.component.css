@@ -58,7 +58,11 @@
 
 .sidebar {
   width: 260px;
-  background: var(--sidebar-bg);
+  /* Ciel × nature : halo lumineux haut-droite, émeraude organique bas-gauche, océan profond. */
+  background:
+    radial-gradient(130% 55% at 110% -5%, rgba(186, 230, 253, 0.45) 0%, transparent 55%),
+    radial-gradient(120% 55% at -10% 102%, rgba(52, 211, 153, 0.32) 0%, transparent 55%),
+    linear-gradient(180deg, #0284c7 0%, #0369a1 55%, #0c4a6e 100%);
   color: #fff;
   display: flex;
   flex-direction: column;
@@ -68,6 +72,28 @@
   left: 0;
   bottom: 0;
   z-index: 1000;
+}
+
+[data-theme="dark"] .sidebar {
+  background:
+    radial-gradient(130% 55% at 110% -5%, rgba(56, 189, 240, 0.22) 0%, transparent 55%),
+    radial-gradient(120% 55% at -10% 102%, rgba(16, 185, 129, 0.18) 0%, transparent 55%),
+    linear-gradient(180deg, #0c4a6e 0%, #082f49 60%, #020617 100%);
+}
+
+/* Filigrane décoratif (vagues + feuilles + lucioles), jamais interactif. */
+.sidebar-decor {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.sidebar-header,
+.sidebar-nav,
+.sidebar-footer {
+  position: relative;
 }
 
 .sidebar-header {
@@ -102,28 +128,28 @@
 }
 
 .toggle-btn {
-  background: rgba(255,255,255,0.08);
-  border: 1px solid rgba(255,255,255,0.12);
+  background: none;
+  border: none;
   color: #fff;
-  width: 32px;
-  height: 32px;
+  font-size: 20px;
   cursor: pointer;
-  padding: 0;
-  border-radius: 50%;
-  transition: background 0.2s, transform 0.3s ease, border-color 0.2s;
+  padding: 8px;
+  border-radius: 8px;
+  transition: background 0.2s;
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
 }
 
 .toggle-btn:hover {
-  background: rgba(255,255,255,0.16);
-  border-color: rgba(255,255,255,0.25);
+  background: rgba(255,255,255,0.1);
 }
 
-.toggle-btn svg {
-  display: block;
+.toggle-arrows {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -2px;
+  line-height: 1;
 }
 
 .sidebar-nav {
@@ -153,23 +179,78 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px 20px;
-  color: rgba(255,255,255,0.7);
+  padding: 11px 20px;
+  margin: 1px 12px 1px 0;
+  border-radius: 0 999px 999px 0;
+  color: rgba(255,255,255,0.75);
   text-decoration: none;
   font-size: 14px;
-  transition: all 0.2s;
+  transition: background 0.2s, color 0.2s, box-shadow 0.2s;
   border-left: 3px solid transparent;
 }
 
 .nav-item:hover {
-  background: rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.12);
   color: #fff;
 }
 
 .nav-item.active {
-  background: rgba(255,255,255,0.12);
+  background: linear-gradient(90deg, rgba(255,255,255,0.28), rgba(255,255,255,0.14));
+  backdrop-filter: blur(6px);
   color: #fff;
-  border-left-color: #4fc3f7;
+  font-weight: 600;
+  border-left-color: #bae6fd;
+  box-shadow: 0 4px 14px rgba(2, 132, 199, 0.35), inset 0 1px 0 rgba(255,255,255,0.35);
+}
+
+/* Sous-menus (groupes repliables) */
+.nav-group {
+  margin-bottom: 2px;
+}
+
+.nav-group-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 12px 20px 6px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.55);
+  transition: color 0.2s;
+}
+
+.nav-group-header:hover {
+  color: #fff;
+}
+
+.nav-group-chevron {
+  transition: transform 0.25s ease;
+  flex-shrink: 0;
+}
+
+.nav-group.collapsed .nav-group-chevron {
+  transform: rotate(-90deg);
+}
+
+.nav-group-items {
+  display: grid;
+  grid-template-rows: 1fr;
+  transition: grid-template-rows 0.28s ease;
+}
+
+.nav-group-items-inner {
+  overflow: hidden;
+  min-height: 0;
+}
+
+.nav-group.collapsed .nav-group-items {
+  grid-template-rows: 0fr;
 }
 
 .nav-icon {
@@ -213,6 +294,11 @@
   align-items: center;
   gap: 10px;
   margin-bottom: 12px;
+  background: rgba(255,255,255,0.10);
+  border: 1px solid rgba(255,255,255,0.14);
+  border-radius: 12px;
+  padding: 8px 10px;
+  backdrop-filter: blur(6px);
 }
 
 .user-avatar {
@@ -364,6 +450,23 @@
 
   .sidebar-collapsed .sidebar .toggle-btn {
     transform: rotate(180deg);
+  }
+
+  /* Rail 72px : pas d'en-têtes de groupe, tous les items visibles (icônes seules). */
+  .sidebar-collapsed .nav-group-header {
+    display: none;
+  }
+
+  .sidebar-collapsed .nav-group.collapsed .nav-group-items {
+    grid-template-rows: 1fr;
+  }
+
+  .sidebar-collapsed .nav-item {
+    margin-right: 0;
+    border-radius: 12px;
+    justify-content: center;
+    padding-left: 0;
+    padding-right: 0;
   }
 
   .sidebar-collapsed .main-content {

@@ -28,8 +28,7 @@ public class EmailService {
     }
 
     @Async
-    public void sendPasswordSetupEmail(String to, String firstName, String token) {
-        String link = frontendUrl + "/setup-password?token=" + token;
+    public void sendPasswordSetupEmail(String to, String firstName, String token) {        String link = frontendUrl + "/setup-password?token=" + token;
         String subject = "Payment Platform - Configuration de votre mot de passe";
         String htmlBody = buildPasswordSetupHtml(firstName, link);
 
@@ -42,6 +41,26 @@ public class EmailService {
             helper.setText(htmlBody, true);
             mailSender.send(message);
             log.info("Email de configuration mot de passe envoyé à {}", to);
+        } catch (MessagingException e) {
+            log.error("Erreur lors de l'envoi de l'email à {}: {}", to, e.getMessage());
+        }
+    }
+
+    @Async
+    public void sendPasswordResetEmail(String to, String firstName, String token) {
+        String link = frontendUrl + "/reset-password?token=" + token;
+        String subject = "Payment Platform - Réinitialisation de votre mot de passe";
+        String htmlBody = buildPasswordResetHtml(firstName, link);
+
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+            helper.setFrom(fromAddress);
+            helper.setTo(to);
+            helper.setSubject(subject);
+            helper.setText(htmlBody, true);
+            mailSender.send(message);
+            log.info("Email de réinitialisation mot de passe envoyé à {}", to);
         } catch (MessagingException e) {
             log.error("Erreur lors de l'envoi de l'email à {}: {}", to, e.getMessage());
         }
@@ -79,6 +98,48 @@ public class EmailService {
                                 <strong>⚠️ Ce lien expire dans 24 heures.</strong>
                             </div>
                             <p>Si vous n'avez pas demandé la création de ce compte, veuillez ignorer cet email.</p>
+                        </div>
+                        <div class="footer">
+                            <p>© 2026 Payment Platform. Tous droits réservés.</p>
+                        </div>
+                    </div>
+                </body>
+                </html>
+                """.formatted(firstName, link);
+    }
+
+    private String buildPasswordResetHtml(String firstName, String link) {
+        return """
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset="UTF-8">
+                    <style>
+                        body { font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 20px; }
+                        .container { max-width: 600px; margin: 0 auto; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+                        .header { background: linear-gradient(135deg, #0f3460 0%%, #0284c7 100%%); padding: 30px; text-align: center; }
+                        .header h1 { color: white; margin: 0; font-size: 24px; }
+                        .content { padding: 30px; color: #333; line-height: 1.6; }
+                        .button { display: inline-block; background: linear-gradient(135deg, #0f3460 0%%, #0284c7 100%%); color: white; text-decoration: none; padding: 14px 32px; border-radius: 6px; font-weight: bold; margin: 20px 0; }
+                        .footer { background: #f8f9fa; padding: 20px; text-align: center; color: #666; font-size: 12px; }
+                        .warning { background: #fff3cd; border: 1px solid #ffc107; border-radius: 4px; padding: 12px; margin: 15px 0; color: #856404; }
+                    </style>
+                </head>
+                <body>
+                    <div class="container">
+                        <div class="header">
+                            <h1>Payment Platform</h1>
+                        </div>
+                        <div class="content">
+                            <h2>Bonjour %s,</h2>
+                            <p>Vous avez demandé la réinitialisation de votre mot de passe. Cliquez sur le bouton ci-dessous pour en définir un nouveau :</p>
+                            <p style="text-align: center;">
+                                <a href="%s" class="button">Réinitialiser mon mot de passe</a>
+                            </p>
+                            <div class="warning">
+                                <strong>⚠️ Ce lien expire dans 30 minutes et n'est utilisable qu'une seule fois.</strong>
+                            </div>
+                            <p>Si vous n'êtes pas à l'origine de cette demande, veuillez ignorer cet email.</p>
                         </div>
                         <div class="footer">
                             <p>© 2026 Payment Platform. Tous droits réservés.</p>

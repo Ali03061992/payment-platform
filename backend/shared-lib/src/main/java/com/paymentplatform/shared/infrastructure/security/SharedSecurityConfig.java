@@ -40,6 +40,7 @@ public class SharedSecurityConfig {
                         .requestMatchers("/api/auth/login", "/api/auth/register", "/api/auth/refresh",
                                 "/api/auth/logout",
                                 "/api/auth/password-setup/**",
+                                "/api/auth/password-reset/**",
                                 "/api/organizations/internal/**",
                                 "/api/internal/**",
                                 "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html", "/actuator/health").permitAll()
