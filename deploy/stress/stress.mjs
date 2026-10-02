@@ -36,15 +36,22 @@ const bucketOf = (ms) => {
 const bucketMs = (b) => Math.pow(10, b / 20);
 
 function newStats() {
-  return { count: 0, ok: 0, fail: 0, throttled: 0, buckets: new Array(BUCKETS).fill(0), errors: new Map() };
+  return { count: 0, ok: 0, fail: 0, throttled: 0, buckets: new Array(BUCKETS).fill(0), errors: new Map(), samples: new Map() };
 }
-function record(stats, ms, ok, errKey, throttled) {
+function record(stats, ms, ok, errKey, throttled, sample) {
   stats.count++;
   if (ok) stats.ok++;
   else stats.fail++;
   if (throttled) stats.throttled++;
-  stats.buckets[bucketOf(ms)]++;
-  if (errKey) stats.errors.set(errKey, (stats.errors.get(errKey) || 0) + 1);
+  // Les 429 (rate-limit) ne polluent pas les latences : bucket seulement sinon.
+  if (!throttled) stats.buckets[bucketOf(ms)]++;
+  if (errKey) {
+    stats.errors.set(errKey, (stats.errors.get(errKey) || 0) + 1);
+    if (!throttled && sample) {
+      const arr = stats.samples.get(errKey) || [];
+      if (arr.length < 3) { arr.push(String(sample).slice(0, 300)); stats.samples.set(errKey, arr); }
+    }
+  }
 }
 function percentile(stats, p) {
   const target = Math.ceil((stats.count * p) / 100);
@@ -66,10 +73,11 @@ function summarize(stats, secs) {
     p95ms: percentile(stats, 95),
     p99ms: percentile(stats, 99),
     errors: Object.fromEntries(stats.errors),
+    samples: Object.fromEntries(stats.samples),
   };
 }
 
-async function req(method, path, token, body, stats, label) {
+async function req(method, path, token, body, stats, label, extraHeaders) {
   const t0 = Date.now();
   const ctrl = new AbortController();
   const to = setTimeout(() => ctrl.abort(), REQ_TIMEOUT);
@@ -79,6 +87,7 @@ async function req(method, path, token, body, stats, label) {
       headers: {
         'Content-Type': 'application/json',
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...(extraHeaders || {}),
       },
       body: body ? JSON.stringify(body) : undefined,
       signal: ctrl.signal,
@@ -91,7 +100,8 @@ async function req(method, path, token, body, stats, label) {
     let parsed = null;
     try { parsed = await res.json(); } catch { /* corps vide */ }
     const ok = res.status >= 200 && res.status < 300;
-    record(stats, ms, ok, ok ? null : `${label}:${res.status}`);
+    record(stats, ms, ok, ok ? null : `${label}:${res.status}`, false,
+      ok ? null : JSON.stringify(parsed));
     return { status: res.status, body: parsed };
   } catch (e) {
     const ms = Date.now() - t0;
@@ -115,23 +125,24 @@ async function login(username, password, stats) {
   return null;
 }
 
-// Contexte partagé (org ids, produit) résolu une fois au démarrage.
-const shared = { shopId: null, supplierId: null, productId: null, agentId: null };
+// Contexte résolu via /me (orgs réelles des comptes, relation garantie par le seed).
+const shared = { shopId: null, supplierId: null, productId: null };
 
 async function boot(stats) {
-  const admin = await login('system.admin', '@PAssword012345', stats);
-  if (!admin) throw new Error('login system.admin impossible');
-  const H = (t) => ({ Authorization: `Bearer ${t}` });
-  const get = async (p) => (await (await fetch(`${BASE}${p}`, { headers: H(admin) })).json());
-  const sup = await get('/api/admin/suppliers?size=50');
-  const shops = await get('/api/admin/shops?size=50');
-  const items = (b) => (Array.isArray(b) ? b : b?.items || []);
-  shared.supplierId = items(sup).find((s) => s.name?.includes('Covale'))?.id || items(sup)[0]?.id;
-  shared.shopId = items(shops).find((s) => s.name?.includes('Ali'))?.id || items(shops)[0]?.id;
-  const products = await get(`/api/suppliers/${shared.supplierId}/products`);
+  const shopTok = await login(SHOP_USER, SHOP_PASS, stats);
+  const supTok = await login(SUPPLIER_USER, SUPPLIER_PASS, stats);
+  if (!shopTok || !supTok) throw new Error('login shop/supplier impossible');
+  const me = async (t) => (await (await fetch(`${BASE}/api/auth/me`,
+    { headers: { Authorization: `Bearer ${t}` } })).json());
+  const shopMe = await me(shopTok);
+  const supMe = await me(supTok);
+  shared.shopId = shopMe.organizationId;
+  shared.supplierId = supMe.organizationId;
+  const products = await (await fetch(`${BASE}/api/suppliers/${shared.supplierId}/products`,
+    { headers: { Authorization: `Bearer ${supTok}` } })).json();
   const list = Array.isArray(products) ? products : products?.items || [];
   shared.productId = list.find((p) => (p.quantity - (p.reservedQty || 0)) >= 5)?.id || list[0]?.id || null;
-  if (!shared.shopId || !shared.supplierId) throw new Error('contexte seed introuvable');
+  if (!shared.shopId || !shared.supplierId) throw new Error('orgs introuvables via /me');
   console.log(`[boot] shop=${shared.shopId} supplier=${shared.supplierId} product=${shared.productId}`);
 }
 
@@ -148,11 +159,12 @@ async function vuLoop(id, stageCtl, stats) {
     const roll = Math.random();
     try {
       if (roll < 0.30) {
-        // Création paiement (boutique).
+        // Création paiement (boutique) : clé d'idempotence unique par requête.
+        const idem = `${Date.now()}-${id}-${rand(1e9)}`;
         const r = await req('POST', '/api/payments', shopTok, {
           shopId: shared.shopId, supplierId: shared.supplierId,
-          amount: 10 + rand(990) + 0.99, currency: 'TND', notes: 'STRESS',
-        }, stats, 'pay.create');
+          amount: +(10 + Math.random() * 990).toFixed(2), currency: 'TND', notes: 'STRESS',
+        }, stats, 'pay.create', { 'Idempotency-Key': idem });
         if (r.status === 201 || r.status === 200) {
           if (r.body?.id) { myPayments.push(r.body.id); if (myPayments.length > 50) myPayments.shift(); }
         } else if (r.status === 401) {
@@ -167,6 +179,7 @@ async function vuLoop(id, stageCtl, stats) {
         if (pid) {
           const r = await req('POST', `/api/payments/${pid}/confirm`, supTok, {}, stats, 'pay.confirm');
           if (r.status === 401) supTok = await login(SUPPLIER_USER, SUPPLIER_PASS, stats);
+          else if (r.status === 200) myPayments.splice(myPayments.indexOf(pid), 1);
         } else {
           await req('GET', `/api/payments/supplier-summary?supplierId=${shared.supplierId}`, supTok, null, stats, 'pay.summary');
         }
@@ -175,7 +188,7 @@ async function vuLoop(id, stageCtl, stats) {
         if (shared.productId) {
           const r = await req('POST', '/api/orders', shopTok, {
             supplierId: shared.supplierId, shopId: shared.shopId, asapPayment: false,
-            currency: 'TND', notes: 'STRESS',
+            currency: 'TND', notes: `STRESS-${Date.now()}-${rand(1e9)}`,
             items: [{ productId: shared.productId, quantity: 1 + rand(3), discount: 0 }],
           }, stats, 'order.create');
           if ((r.status === 200 || r.status === 201) && r.body?.id) {
@@ -248,7 +261,10 @@ async function main() {
 
 function renderHtml(r) {
   const rows = r.stages.map((s) => `<tr><td>${s.vus}</td><td>${s.requests}</td><td>${s.rps}</td><td>${s.p50ms}</td><td>${s.p95ms}</td><td>${s.p99ms}</td><td>${s.fail}</td><td>${s.throttled429}</td></tr>`).join('');
-  const errs = r.stages.flatMap((s) => Object.entries(s.errors).map(([k, v]) => `<tr><td>${s.vus}</td><td>${k}</td><td>${v}</td></tr>`)).join('') || '<tr><td colspan="3">Aucune erreur</td></tr>';
+  const errs = r.stages.flatMap((s) => Object.entries(s.errors).map(([k, v]) => {
+    const sample = (s.samples?.[k] || []).join(' | ');
+    return `<tr><td>${s.vus}</td><td>${k}</td><td>${v}</td><td>${sample}</td></tr>`;
+  })).join('') || '<tr><td colspan="4">Aucune erreur</td></tr>';
   return `<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Rapport stress ${r.startedAt}</title><style>
 body{font-family:Segoe UI,Arial,sans-serif;background:#f0f9ff;color:#0c4a6e;margin:0;padding:24px}
 h1{color:#0369a1}h2{color:#0284c7;margin-top:32px}.card{background:#fff;border-radius:12px;padding:20px;box-shadow:0 2px 8px rgba(2,132,199,.12);margin-bottom:20px;overflow-x:auto}
@@ -256,7 +272,7 @@ table{width:100%;border-collapse:collapse}th{background:#9FCBED;color:#0c4a6e;pa
 .meta{color:#475569}</style></head><body><h1>Test de charge — Payment Platform</h1>
 <p class="meta">Base ${r.base} · début ${r.startedAt} · fin ${r.finishedAt}</p>
 <div class="card"><h2>Par palier (utilisateurs connectés)</h2><table><tr><th>VUs</th><th>Requêtes</th><th>req/s</th><th>p50 ms</th><th>p95 ms</th><th>p99 ms</th><th>Échecs</th><th>429</th></tr>${rows}</table></div>
-<div class="card"><h2>Erreurs par palier</h2><table><tr><th>VUs</th><th>Clé</th><th>Nombre</th></tr>${errs}</table></div>
+<div class="card"><h2>Erreurs par palier (avec exemples de corps de réponse)</h2><table><tr><th>VUs</th><th>Clé</th><th>Nombre</th><th>Exemples</th></tr>${errs}</table></div>
 </body></html>`;
 }
 
