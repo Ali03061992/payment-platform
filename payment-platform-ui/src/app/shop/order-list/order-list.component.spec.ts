@@ -31,11 +31,12 @@ describe('OrderListComponent', () => {
   };
 
   beforeEach(() => {
-    const orderSpy = jasmine.createSpyObj('OrderService', ['list', 'accept', 'reject', 'cancel']);
+    const orderSpy = jasmine.createSpyObj('OrderService',
+      ['listPaged', 'accept', 'reject', 'cancel']);
     const toastSpy = jasmine.createSpyObj('ToastService', ['success', 'error']);
     const confirmSpy = jasmine.createSpyObj('ConfirmDialogService', ['confirm']);
     confirmSpy.confirm.and.returnValue(of(true));
-    orderSpy.list.and.returnValue(of([]));
+    orderSpy.listPaged.and.returnValue(of({ items: [], totalElements: 0, totalPages: 1, number: 0 }));
 
     TestBed.configureTestingModule({
     declarations: [OrderListComponent],
@@ -62,21 +63,23 @@ describe('OrderListComponent', () => {
 
   describe('ngOnInit', () => {
     it('should load orders', () => {
-      orderService.list.and.returnValue(of([mockOrder]));
+      orderService.listPaged.and.returnValue(of({
+        items: [mockOrder], totalElements: 1, totalPages: 1, number: 0
+      } as any));
       component.ngOnInit();
       expect(component.orders.length).toBe(1);
       expect(component.loading).toBeFalse();
     });
 
     it('should handle load error', () => {
-      orderService.list.and.returnValue(throwError(() => ({ error: { message: 'Err' } })));
+      orderService.listPaged.and.returnValue(throwError(() => ({ error: { message: 'Err' } })));
       component.ngOnInit();
       expect(toast.error).toHaveBeenCalledWith('Err');
       expect(component.loading).toBeFalse();
     });
 
     it('should handle load error without message', () => {
-      orderService.list.and.returnValue(throwError(() => ({})));
+      orderService.listPaged.and.returnValue(throwError(() => ({})));
       component.ngOnInit();
       expect(toast.error).toHaveBeenCalledWith('Erreur');
     });

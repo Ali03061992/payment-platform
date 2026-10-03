@@ -13,6 +13,7 @@ import com.paymentplatform.shared.domain.model.RoleCode;
 import com.paymentplatform.shared.domain.model.UserId;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
@@ -67,6 +68,20 @@ public class UserQueryUseCase {
     @Transactional(readOnly = true)
     public List<UserResponse> listByOrganizationInternal(UUID organizationId) {
         return users.findByOrganizationId(OrganizationId.of(organizationId)).stream()
+                .map(UserResponse::from)
+                .toList();
+    }
+
+    /**
+     * Liste les utilisateurs ayant un rôle donné, pour un appel interne
+     * (ex. notification des SYSTEM_ADMIN lors d'une réclamation).
+     *
+     * @param role code de rôle (ex. SYSTEM_ADMIN)
+     * @return utilisateurs correspondants
+     */
+    @Transactional(readOnly = true)
+    public List<UserResponse> listByRoleInternal(String role) {
+        return users.findByRole(RoleCode.from(role)).stream()
                 .map(UserResponse::from)
                 .toList();
     }

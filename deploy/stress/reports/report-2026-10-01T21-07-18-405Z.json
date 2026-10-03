@@ -1,0 +1,57 @@
+{
+  "base": "http://localhost:8081",
+  "startedAt": "2026-10-01T21:06:33.623Z",
+  "stages": [
+    {
+      "vus": 10,
+      "secs": 20,
+      "requests": 494,
+      "ok": 476,
+      "fail": 18,
+      "throttled429": 0,
+      "rps": 24.7,
+      "p50ms": 178,
+      "p95ms": 794,
+      "p99ms": 1585,
+      "errors": {
+        "order.create:409": 6,
+        "pay.confirm:400": 12
+      }
+    },
+    {
+      "vus": 20,
+      "secs": 20,
+      "requests": 4749,
+      "ok": 48,
+      "fail": 4701,
+      "throttled429": 4701,
+      "rps": 237.4,
+      "p50ms": 0,
+      "p95ms": 0,
+      "p99ms": 0,
+      "errors": {
+        "pay.summary:429": 568,
+        "pay.create:429": 1420,
+        "pay.list:429": 1181,
+        "delivery.mine:429": 484,
+        "order.create:429": 550,
+        "notif.count:429": 245,
+        "balance.shop:429": 222,
+        "pay.confirm:429": 24,
+        "order.get:429": 7
+      }
+    }
+  ],
+  "boot": {
+    "requests": 2,
+    "ok": 2,
+    "fail": 0,
+    "throttled429": 0,
+    "rps": 0,
+    "p50ms": 355,
+    "p95ms": 501,
+    "p99ms": 501,
+    "errors": {}
+  },
+  "finishedAt": "2026-10-01T21:07:18.401Z"
+}

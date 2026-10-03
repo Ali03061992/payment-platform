@@ -1,0 +1,9 @@
+<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Rapport stress 2026-10-01T21:08:25.970Z</title><style>
+body{font-family:Segoe UI,Arial,sans-serif;background:#f0f9ff;color:#0c4a6e;margin:0;padding:24px}
+h1{color:#0369a1}h2{color:#0284c7;margin-top:32px}.card{background:#fff;border-radius:12px;padding:20px;box-shadow:0 2px 8px rgba(2,132,199,.12);margin-bottom:20px;overflow-x:auto}
+table{width:100%;border-collapse:collapse}th{background:#9FCBED;color:#0c4a6e;padding:10px}td{border:1px solid #bae6fd;padding:8px 10px;text-align:center}
+.meta{color:#475569}</style></head><body><h1>Test de charge — Payment Platform</h1>
+<p class="meta">Base http://localhost:8081 · début 2026-10-01T21:08:25.970Z · fin 2026-10-01T21:08:53.922Z</p>
+<div class="card"><h2>Par palier (utilisateurs connectés)</h2><table><tr><th>VUs</th><th>Requêtes</th><th>req/s</th><th>p50 ms</th><th>p95 ms</th><th>p99 ms</th><th>Échecs</th><th>429</th></tr><tr><td>10</td><td>535</td><td>21.4</td><td>158</td><td>1122</td><td>1122</td><td>6</td><td>0</td></tr></table></div>
+<div class="card"><h2>Erreurs par palier (avec exemples de corps de réponse)</h2><table><tr><th>VUs</th><th>Clé</th><th>Nombre</th><th>Exemples</th></tr><tr><td>10</td><td>order.create:409</td><td>6</td><td>{"timestamp":"2026-10-01T21:08:31.030675Z","status":409,"error":"CONFLICT","message":"La ressource a été modifiée par une autre requête (conflit de concurrence)","path":"/api/orders"} | {"timestamp":"2026-10-01T21:08:31.795288900Z","status":409,"error":"CONFLICT","message":"La ressource a été modifiée par une autre requête (conflit de concurrence)","path":"/api/orders"} | {"timestamp":"2026-10-01T21:08:37.005776900Z","status":409,"error":"CONFLICT","message":"La ressource a été modifiée par une autre requête (conflit de concurrence)","path":"/api/orders"}</td></tr></table></div>
+</body></html>

@@ -1,0 +1,41 @@
+{
+  "base": "http://localhost:8081",
+  "startedAt": "2026-10-01T21:08:25.970Z",
+  "stages": [
+    {
+      "vus": 10,
+      "secs": 25,
+      "requests": 535,
+      "ok": 529,
+      "fail": 6,
+      "throttled429": 0,
+      "rps": 21.4,
+      "p50ms": 158,
+      "p95ms": 1122,
+      "p99ms": 1122,
+      "errors": {
+        "order.create:409": 6
+      },
+      "samples": {
+        "order.create:409": [
+          "{\"timestamp\":\"2026-10-01T21:08:31.030675Z\",\"status\":409,\"error\":\"CONFLICT\",\"message\":\"La ressource a été modifiée par une autre requête (conflit de concurrence)\",\"path\":\"/api/orders\"}",
+          "{\"timestamp\":\"2026-10-01T21:08:31.795288900Z\",\"status\":409,\"error\":\"CONFLICT\",\"message\":\"La ressource a été modifiée par une autre requête (conflit de concurrence)\",\"path\":\"/api/orders\"}",
+          "{\"timestamp\":\"2026-10-01T21:08:37.005776900Z\",\"status\":409,\"error\":\"CONFLICT\",\"message\":\"La ressource a été modifiée par une autre requête (conflit de concurrence)\",\"path\":\"/api/orders\"}"
+        ]
+      }
+    }
+  ],
+  "boot": {
+    "requests": 2,
+    "ok": 2,
+    "fail": 0,
+    "throttled429": 0,
+    "rps": 0,
+    "p50ms": 562,
+    "p95ms": 708,
+    "p99ms": 708,
+    "errors": {},
+    "samples": {}
+  },
+  "finishedAt": "2026-10-01T21:08:53.922Z"
+}

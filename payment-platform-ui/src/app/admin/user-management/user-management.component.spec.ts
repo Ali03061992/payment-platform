@@ -21,9 +21,9 @@ describe('UserManagementComponent', () => {
   let toast: jasmine.SpyObj<ToastService>;
 
   beforeEach(() => {
-    const userSpy = jasmine.createSpyObj('UserService', ['list', 'activate', 'disable']);
+    const userSpy = jasmine.createSpyObj('UserService', ['listPaged', 'activate', 'disable']);
     const toastSpy = jasmine.createSpyObj('ToastService', ['success', 'error']);
-    userSpy.list.and.returnValue(of([]));
+    userSpy.listPaged.and.returnValue(of({ items: [], totalElements: 0, totalPages: 1, number: 0 }));
 
     TestBed.configureTestingModule({
     declarations: [UserManagementComponent],
@@ -55,14 +55,16 @@ describe('UserManagementComponent', () => {
       const mockUsers: User[] = [
         { id: 1, username: 'u1', email: 'a@b.com', firstName: 'A', lastName: 'B', phone: '123', organizationId: 1, roles: ['SYSTEM_ADMIN'], status: 'ACTIVE', createdAt: '', updatedAt: '' }
       ];
-      userService.list.and.returnValue(of(mockUsers));
+      userService.listPaged.and.returnValue(of({
+        items: mockUsers, totalElements: mockUsers.length, totalPages: 1, number: 0
+      } as any));
       component.loadUsers();
       expect(component.users.length).toBe(1);
       expect(component.loading).toBeFalse();
     });
 
     it('should handle error', () => {
-      userService.list.and.returnValue(throwError(() => ({ error: { message: 'Load failed' } })));
+      userService.listPaged.and.returnValue(throwError(() => ({ error: { message: 'Load failed' } })));
       component.loadUsers();
       expect(component.error).toBe('Load failed');
       expect(component.loading).toBeFalse();
@@ -106,7 +108,7 @@ describe('UserManagementComponent', () => {
   describe('applyFilter', () => {
     it('should reload users', () => {
       component.applyFilter();
-      expect(userService.list).toHaveBeenCalled();
+      expect(userService.listPaged).toHaveBeenCalled();
     });
   });
 });

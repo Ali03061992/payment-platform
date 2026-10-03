@@ -19,6 +19,9 @@ public interface UserJpaRepository extends JpaRepository<UserJpaEntity, UUID> {
 
     List<UserJpaEntity> findByOrganizationId(UUID organizationId);
 
+    @Query("SELECT DISTINCT u FROM UserJpaEntity u JOIN u.roles r WHERE r = :role")
+    List<UserJpaEntity> findByRole(@Param("role") RoleCode role);
+
     boolean existsByUsername(String username);
 
     boolean existsByEmail(String email);

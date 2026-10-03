@@ -45,6 +45,8 @@ import { OrderListComponent } from './shop/order-list/order-list.component';
 import { CreateOrderComponent } from './shop/create-order/create-order.component';
 import { ShopOrderDetailComponent } from './shop/order-detail/order-detail.component';
 import { DisputeDetailComponent } from './shop/dispute-detail/dispute-detail.component';
+import { DisputeListComponent } from './shop/dispute-list/dispute-list.component';
+import { ChatbotComponent } from './components/chatbot/chatbot.component';
 import { BalanceViewComponent } from './shop/balance-view/balance-view.component';
 import { PwaUpdateComponent } from './pwa-update/pwa-update.component';
 import { QrScannerComponent } from './qr-scanner/qr-scanner.component';
@@ -110,6 +112,8 @@ import { LanguageSwitcherComponent } from './i18n/language-switcher.component';
         CreateOrderComponent,
         ShopOrderDetailComponent,
         DisputeDetailComponent,
+        DisputeListComponent,
+        ChatbotComponent,
         BalanceViewComponent,
         PwaUpdateComponent,
         QrScannerComponent,

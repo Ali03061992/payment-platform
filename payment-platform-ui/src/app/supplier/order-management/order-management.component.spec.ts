@@ -38,14 +38,17 @@ describe('OrderManagementComponent', () => {
   beforeEach(() => {
     queryParamsSubject = new BehaviorSubject<any>({});
     sessionStorage.setItem('user', JSON.stringify({ organizationId: '1' }));
-    const orderSpy = jasmine.createSpyObj('OrderService', ['list', 'getById', 'getByReference', 'confirm', 'prepare', 'readyForDelivery', 'assignDelivery', 'deliveryReject', 'cancel', 'listDeliveries', 'update', 'downloadInvoice', 'getComments', 'addComment', 'search', 'exportCsv']);
+    const orderSpy = jasmine.createSpyObj('OrderService',
+      ['list', 'listPaged', 'getById', 'getByReference', 'confirm', 'prepare', 'readyForDelivery',
+       'assignDelivery', 'deliveryReject', 'cancel', 'listDeliveries', 'update', 'downloadInvoice', 'getComments',
+       'addComment', 'search', 'exportCsv']);
     const agentSpy = jasmine.createSpyObj('SupplierAgentService', ['listAgents']);
     const stockSpy = jasmine.createSpyObj('StockService', ['getProducts']);
     const toastSpy = jasmine.createSpyObj('ToastService', ['success', 'error']);
     const confirmSpy = jasmine.createSpyObj('ConfirmDialogService', ['confirm']);
     confirmSpy.confirm.and.returnValue(of(true));
     const routerSpy = jasmine.createSpyObj('Router', ['navigate']);
-    orderSpy.list.and.returnValue(of([]));
+    orderSpy.listPaged.and.returnValue(of({ items: [], totalElements: 0, totalPages: 1, number: 0 }));
     orderSpy.listDeliveries.and.returnValue(of([]));
     orderSpy.getByReference.and.returnValue(of(mockOrder));
     orderSpy.getComments.and.returnValue(of([]));
@@ -83,7 +86,9 @@ describe('OrderManagementComponent', () => {
 
   describe('ngOnInit', () => {
     it('should load orders and agents', () => {
-      orderService.list.and.returnValue(of([mockOrder]));
+      orderService.listPaged.and.returnValue(of({
+        items: [mockOrder], totalElements: 1, totalPages: 1, number: 0
+      } as any));
       agentService.listAgents.and.returnValue(of([
         { id: '1', firstName: 'A', lastName: 'B' },
         { id: '2', firstName: 'C', lastName: 'D' }
@@ -94,7 +99,7 @@ describe('OrderManagementComponent', () => {
     });
 
     it('should handle load orders error', () => {
-      orderService.list.and.returnValue(throwError(() => ({ error: { message: 'Err' } })));
+      orderService.listPaged.and.returnValue(throwError(() => ({ error: { message: 'Err' } })));
       component.ngOnInit();
       expect(toast.error).toHaveBeenCalledWith('Err');
       expect(component.loading).toBeFalse();
@@ -107,7 +112,9 @@ describe('OrderManagementComponent', () => {
     });
 
     it('should auto-open detail when ref query param is present', () => {
-      orderService.list.and.returnValue(of([mockOrder]));
+      orderService.listPaged.and.returnValue(of({
+        items: [mockOrder], totalElements: 1, totalPages: 1, number: 0
+      } as any));
       orderService.getByReference.and.returnValue(of(mockOrder));
       orderService.getComments.and.returnValue(of([]));
       agentService.listAgents.and.returnValue(of([]));

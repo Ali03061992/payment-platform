@@ -26,9 +26,11 @@ describe('PaymentListComponent', () => {
   ];
 
   beforeEach(() => {
-    const psSpy = jasmine.createSpyObj('PaymentService', ['list', 'confirm', 'cancel']);
+    const psSpy = jasmine.createSpyObj('PaymentService', ['listPaged', 'confirm', 'cancel']);
     const toastSpy = jasmine.createSpyObj('ToastService', ['success', 'error']);
-    psSpy.list.and.returnValue(of(mockPayments));
+    psSpy.listPaged.and.returnValue(of({
+      items: mockPayments, totalElements: mockPayments.length, totalPages: 1, number: 0
+    } as any));
     psSpy.confirm.and.returnValue(of({} as any));
     psSpy.cancel.and.returnValue(of({} as any));
 
@@ -60,7 +62,7 @@ describe('PaymentListComponent', () => {
   });
 
   it('should handle load error', () => {
-    paymentService.list.and.returnValue(throwError(() => ({ error: { message: 'Err' } })));
+    paymentService.listPaged.and.returnValue(throwError(() => ({ error: { message: 'Err' } })));
     component.load();
     expect(toast.error).toHaveBeenCalledWith('Err');
     expect(component.loading).toBeFalse();
@@ -121,5 +123,23 @@ describe('PaymentListComponent', () => {
   it('should unsubscribe on destroy', () => {
     component.ngOnInit();
     expect(() => component.ngOnDestroy()).not.toThrow();
+  });
+
+  it('should start with no expanded row', () => {
+    expect(component.isExpanded({ id: 'x' } as any)).toBeFalse();
+  });
+
+  it('should toggle row expansion', () => {
+    const row = { id: 'x' } as any;
+    component.toggleExpand(row);
+    expect(component.isExpanded(row)).toBeTrue();
+    component.toggleExpand(row);
+    expect(component.isExpanded(row)).toBeFalse();
+  });
+
+  it('should clear expansions on reload', () => {
+    component.toggleExpand({ id: 'x' } as any);
+    component.load();
+    expect(component.isExpanded({ id: 'x' } as any)).toBeFalse();
   });
 });

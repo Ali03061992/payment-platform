@@ -1,0 +1,83 @@
+<div class="page-header">
+  <h2>{{ title }}</h2>
+</div>
+
+@if (loading) {
+  <div class="loading">
+    <div class="spinner"></div>
+    <span>Chargement...</span>
+  </div>
+}
+
+@if (!loading) {
+  <div class="filters">
+    <select [(ngModel)]="filterStatus" class="form-control filter-select" aria-label="Filtrer par statut">
+      <option value="">Tous les statuts</option>
+      <option value="OPEN">Ouvert</option>
+      <option value="IN_PROGRESS">En cours</option>
+      <option value="RESOLVED">Résolu</option>
+      <option value="CLOSED">Fermé</option>
+    </select>
+    <span class="result-count" aria-live="polite">{{ filtered.length }} résultat(s)</span>
+  </div>
+
+  <div class="table-card hide-mobile">
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Référence litige</th>
+            <th>Commande</th>
+            <th>Motif</th>
+            <th>Statut</th>
+            <th>Créé le</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (d of filtered; track d.id) {
+            <tr class="clickable-row" (click)="openDispute(d.id)">
+              <td><strong>{{ d.id | slice:0:8 }}</strong></td>
+              <td>{{ d.orderId | slice:0:8 }}</td>
+              <td>{{ d.reason }}</td>
+              <td><span class="payment-badge" [ngClass]="statusClass(d.status)">{{ statusLabel(d.status) }}</span></td>
+              <td>{{ d.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
+              <td class="actions" (click)="$event.stopPropagation()">
+                <button class="btn btn-sm btn-secondary" (click)="openDispute(d.id)" [attr.aria-label]="'Voir la réclamation ' + d.id">Voir</button>
+              </td>
+            </tr>
+          }
+          @if (filtered.length === 0) {
+            <tr>
+              <td colspan="6" style="text-align:center;color:#8896ab;padding:32px;">Aucune réclamation</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="dispute-cards show-mobile">
+    @for (d of filtered; track d.id) {
+      <div class="dispute-card" (click)="openDispute(d.id)">
+        <div class="dispute-card-header">
+          <span class="dispute-reference">{{ d.id | slice:0:8 }}</span>
+          <span class="payment-badge" [ngClass]="statusClass(d.status)">{{ statusLabel(d.status) }}</span>
+        </div>
+        <div class="dispute-card-body">
+          <div class="dispute-row">
+            <span class="dispute-label">Motif</span>
+            <span class="dispute-value">{{ d.reason }}</span>
+          </div>
+          <div class="dispute-row">
+            <span class="dispute-label">Créé le</span>
+            <span class="dispute-value">{{ d.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
+          </div>
+        </div>
+      </div>
+    }
+    @if (filtered.length === 0) {
+      <div class="empty-card">Aucune réclamation</div>
+    }
+  </div>
+}

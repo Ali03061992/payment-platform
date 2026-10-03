@@ -1,0 +1,239 @@
+{
+  "base": "http://localhost:8081",
+  "startedAt": "2026-10-01T21:17:23.983Z",
+  "stages": [
+    {
+      "vus": 10,
+      "secs": 60,
+      "requests": 479,
+      "ok": 417,
+      "fail": 62,
+      "throttled429": 0,
+      "rps": 8,
+      "p50ms": 178,
+      "p95ms": 4467,
+      "p99ms": 6310,
+      "errors": {
+        "order.create:409": 62
+      },
+      "samples": {
+        "order.create:409": [
+          "{\"timestamp\":\"2026-10-01T21:17:25.725975400Z\",\"status\":409,\"error\":\"CONFLICT\",\"message\":\"Stock insuffisant pour le produit Produit E2E Delivery 1790888347603 (disponible: 0, demandé: 1)\",\"path\":\"/api/orders\"}",
+          "{\"timestamp\":\"2026-10-01T21:17:31.393871800Z\",\"status\":409,\"error\":\"CONFLICT\",\"message\":\"Stock insuffisant pour le produit Produit E2E Delivery 1790888347603 (disponible: 0, demandé: 2)\",\"path\":\"/api/orders\"}",
+          "{\"timestamp\":\"2026-10-01T21:17:32.525955700Z\",\"status\":409,\"error\":\"CONFLICT\",\"message\":\"Stock insuffisant pour le produit Produit E2E Delivery 1790888347603 (disponible: 0, demandé: 1)\",\"path\":\"/api/orders\"}"
+        ]
+      }
+    },
+    {
+      "vus": 20,
+      "secs": 60,
+      "requests": 434,
+      "ok": 397,
+      "fail": 37,
+      "throttled429": 0,
+      "rps": 7.2,
+      "p50ms": 1585,
+      "p95ms": 7079,
+      "p99ms": 7943,
+      "errors": {
+        "order.create:409": 37
+      },
+      "samples": {
+        "order.create:409": [
+          "{\"timestamp\":\"2026-10-01T21:18:35.494715Z\",\"status\":409,\"error\":\"CONFLICT\",\"message\":\"Stock insuffisant pour le produit Produit E2E Delivery 1790888347603 (disponible: 0, demandé: 2)\",\"path\":\"/api/orders\"}",
+          "{\"timestamp\":\"2026-10-01T21:18:36.522082900Z\",\"status\":409,\"error\":\"CONFLICT\",\"message\":\"Stock insuffisant pour le produit Produit E2E Delivery 1790888347603 (disponible: 0, demandé: 2)\",\"path\":\"/api/orders\"}",
+          "{\"timestamp\":\"2026-10-01T21:18:41.107741700Z\",\"status\":409,\"error\":\"CONFLICT\",\"message\":\"Stock insuffisant pour le produit Produit E2E Delivery 1790888347603 (disponible: 0, demandé: 1)\",\"path\":\"/api/orders\"}"
+        ]
+      }
+    },
+    {
+      "vus": 40,
+      "secs": 60,
+      "requests": 602,
+      "ok": 523,
+      "fail": 79,
+      "throttled429": 0,
+      "rps": 10,
+      "p50ms": 3162,
+      "p95ms": 8913,
+      "p99ms": 10000,
+      "errors": {
+        "order.create:409": 79
+      },
+      "samples": {
+        "order.create:409": [
+          "{\"timestamp\":\"2026-10-01T21:19:40.827196300Z\",\"status\":409,\"error\":\"CONFLICT\",\"message\":\"Stock insuffisant pour le produit Produit E2E Delivery 1790888347603 (disponible: 0, demandé: 3)\",\"path\":\"/api/orders\"}",
+          "{\"timestamp\":\"2026-10-01T21:19:40.922371700Z\",\"status\":409,\"error\":\"CONFLICT\",\"message\":\"Stock insuffisant pour le produit Produit E2E Delivery 1790888347603 (disponible: 0, demandé: 1)\",\"path\":\"/api/orders\"}",
+          "{\"timestamp\":\"2026-10-01T21:19:41.398694800Z\",\"status\":409,\"error\":\"CONFLICT\",\"message\":\"Stock insuffisant pour le produit Produit E2E Delivery 1790888347603 (disponible: 0, demandé: 2)\",\"path\":\"/api/orders\"}"
+        ]
+      }
+    },
+    {
+      "vus": 80,
+      "secs": 60,
+      "requests": 606,
+      "ok": 415,
+      "fail": 191,
+      "throttled429": 0,
+      "rps": 10.1,
+      "p50ms": 6310,
+      "p95ms": 14125,
+      "p99ms": 14125,
+      "errors": {
+        "order.create:409": 62,
+        "pay.list:TIMEOUT": 70,
+        "pay.create:TIMEOUT": 44,
+        "pay.confirm:TIMEOUT": 12,
+        "pay.summary:TIMEOUT": 3
+      },
+      "samples": {
+        "order.create:409": [
+          "{\"timestamp\":\"2026-10-01T21:20:52.174413400Z\",\"status\":409,\"error\":\"CONFLICT\",\"message\":\"Stock insuffisant pour le produit Produit E2E Delivery 1790888347603 (disponible: 0, demandé: 3)\",\"path\":\"/api/orders\"}",
+          "{\"timestamp\":\"2026-10-01T21:20:52.548285500Z\",\"status\":409,\"error\":\"CONFLICT\",\"message\":\"Stock insuffisant pour le produit Produit E2E Delivery 1790888347603 (disponible: 0, demandé: 3)\",\"path\":\"/api/orders\"}",
+          "{\"timestamp\":\"2026-10-01T21:20:52.649336800Z\",\"status\":409,\"error\":\"CONFLICT\",\"message\":\"Stock insuffisant pour le produit Produit E2E Delivery 1790888347603 (disponible: 0, demandé: 1)\",\"path\":\"/api/orders\"}"
+        ]
+      }
+    },
+    {
+      "vus": 160,
+      "secs": 60,
+      "requests": 739,
+      "ok": 312,
+      "fail": 427,
+      "throttled429": 0,
+      "rps": 12.3,
+      "p50ms": 14125,
+      "p95ms": 14125,
+      "p99ms": 14125,
+      "errors": {
+        "login:TIMEOUT": 406,
+        "order.create:409": 11,
+        "delivery.mine:TIMEOUT": 10
+      },
+      "samples": {
+        "order.create:409": [
+          "{\"timestamp\":\"2026-10-01T21:22:22.262132900Z\",\"status\":409,\"error\":\"CONFLICT\",\"message\":\"Stock insuffisant pour le produit Produit E2E Delivery 1790888347603 (disponible: 0, demandé: 1)\",\"path\":\"/api/orders\"}",
+          "{\"timestamp\":\"2026-10-01T21:22:30.264650Z\",\"status\":409,\"error\":\"CONFLICT\",\"message\":\"Stock insuffisant pour le produit Produit E2E Delivery 1790888347603 (disponible: 0, demandé: 2)\",\"path\":\"/api/orders\"}",
+          "{\"timestamp\":\"2026-10-01T21:22:35.844680300Z\",\"status\":409,\"error\":\"CONFLICT\",\"message\":\"Stock insuffisant pour le produit Produit E2E Delivery 1790888347603 (disponible: 0, demandé: 1)\",\"path\":\"/api/orders\"}"
+        ]
+      }
+    },
+    {
+      "vus": 320,
+      "secs": 60,
+      "requests": 1281,
+      "ok": 120,
+      "fail": 1161,
+      "throttled429": 0,
+      "rps": 21.3,
+      "p50ms": 14125,
+      "p95ms": 14125,
+      "p99ms": 14125,
+      "errors": {
+        "login:TIMEOUT": 1159,
+        "order.create:409": 1,
+        "pay.create:TIMEOUT": 1
+      },
+      "samples": {
+        "order.create:409": [
+          "{\"timestamp\":\"2026-10-01T21:23:32.155075100Z\",\"status\":409,\"error\":\"CONFLICT\",\"message\":\"Stock insuffisant pour le produit Produit E2E Delivery 1790888347603 (disponible: 0, demandé: 3)\",\"path\":\"/api/orders\"}"
+        ]
+      }
+    },
+    {
+      "vus": 640,
+      "secs": 60,
+      "requests": 2560,
+      "ok": 0,
+      "fail": 2560,
+      "throttled429": 0,
+      "rps": 42.6,
+      "p50ms": 14125,
+      "p95ms": 14125,
+      "p99ms": 14125,
+      "errors": {
+        "login:TIMEOUT": 2560
+      },
+      "samples": {}
+    },
+    {
+      "vus": 1280,
+      "secs": 60.4,
+      "requests": 9026,
+      "ok": 0,
+      "fail": 9026,
+      "throttled429": 0,
+      "rps": 149.3,
+      "p50ms": 6310,
+      "p95ms": 14125,
+      "p99ms": 15849,
+      "errors": {
+        "login:NET": 7990,
+        "login:TIMEOUT": 1036
+      },
+      "samples": {}
+    },
+    {
+      "vus": 2560,
+      "secs": 64.9,
+      "requests": 7680,
+      "ok": 0,
+      "fail": 7680,
+      "throttled429": 0,
+      "rps": 118.4,
+      "p50ms": 19953,
+      "p95ms": 25119,
+      "p99ms": 25119,
+      "errors": {
+        "login:TIMEOUT": 7680
+      },
+      "samples": {}
+    },
+    {
+      "vus": 5120,
+      "secs": 64.4,
+      "requests": 20360,
+      "ok": 0,
+      "fail": 20360,
+      "throttled429": 0,
+      "rps": 316,
+      "p50ms": 19953,
+      "p95ms": 31623,
+      "p99ms": 31623,
+      "errors": {
+        "login:TIMEOUT": 20360
+      },
+      "samples": {}
+    },
+    {
+      "vus": 10000,
+      "secs": 66.9,
+      "requests": 62780,
+      "ok": 0,
+      "fail": 62780,
+      "throttled429": 0,
+      "rps": 938.8,
+      "p50ms": 19953,
+      "p95ms": 125893,
+      "p99ms": 141254,
+      "errors": {
+        "login:TIMEOUT": 58769,
+        "login:NET": 4011
+      },
+      "samples": {}
+    }
+  ],
+  "boot": {
+    "requests": 2,
+    "ok": 2,
+    "fail": 0,
+    "throttled429": 0,
+    "rps": 0,
+    "p50ms": 501,
+    "p95ms": 1000,
+    "p99ms": 1000,
+    "errors": {},
+    "samples": {}
+  },
+  "finishedAt": "2026-10-01T21:41:55.017Z"
+}

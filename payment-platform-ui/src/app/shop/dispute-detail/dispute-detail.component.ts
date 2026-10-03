@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DisputeService } from '../../services/dispute.service';
+import { LoginService } from '../../services/login.service';
 import { Dispute } from '../../models/dispute.model';
 import { ToastService } from '../../services/toast.service';
 import { ConfirmDialogService } from '../../components/confirm-dialog/confirm-dialog.service';
@@ -25,7 +26,8 @@ export class DisputeDetailComponent implements OnInit, OnDestroy {
     private router: Router,
     private disputeService: DisputeService,
     private toast: ToastService,
-    private confirmDialog: ConfirmDialogService
+    private confirmDialog: ConfirmDialogService,
+    private loginService: LoginService
   ) {}
 
   ngOnInit(): void {
@@ -106,6 +108,15 @@ export class DisputeDetailComponent implements OnInit, OnDestroy {
   }
 
   backToOrder(): void {
+    const roles = this.loginService.getCurrentUser()?.roles || [];
+    if (roles.includes('SYSTEM_ADMIN')) {
+      this.router.navigate(['/dashboard/admin/disputes']);
+      return;
+    }
+    if (roles.includes('SUPPLIER_ADMIN') || roles.includes('SUPPLIER_AGENT')) {
+      this.router.navigate(['/dashboard/supplier/orders']);
+      return;
+    }
     if (this.dispute) {
       this.router.navigate(['/dashboard/shop/orders', this.dispute.orderId]);
     } else {

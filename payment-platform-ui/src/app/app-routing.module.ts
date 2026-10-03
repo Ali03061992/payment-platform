@@ -40,6 +40,7 @@ import { OrderListComponent } from './shop/order-list/order-list.component';
 import { CreateOrderComponent } from './shop/create-order/create-order.component';
 import { ShopOrderDetailComponent } from './shop/order-detail/order-detail.component';
 import { DisputeDetailComponent } from './shop/dispute-detail/dispute-detail.component';
+import { DisputeListComponent } from './shop/dispute-list/dispute-list.component';
 import { BalanceViewComponent } from './shop/balance-view/balance-view.component';
 import { QrScannerComponent } from './qr-scanner/qr-scanner.component';
 import { AgentPaymentsComponent } from './supplier/agent-payments/agent-payments.component';
@@ -104,7 +105,10 @@ const routes: Routes = [
       { path: 'shop/orders', component: OrderListComponent, canActivate: [RoleGuard], data: { roles: shopRoles } },
       { path: 'shop/orders/create', component: CreateOrderComponent, canActivate: [RoleGuard], data: { roles: shopRoles } },
       { path: 'shop/orders/:id', component: ShopOrderDetailComponent, canActivate: [RoleGuard], data: { roles: shopRoles } },
+      { path: 'shop/disputes', component: DisputeListComponent, canActivate: [RoleGuard], data: { roles: shopRoles } },
       { path: 'shop/disputes/:id', component: DisputeDetailComponent, canActivate: [RoleGuard], data: { roles: shopRoles } },
+      { path: 'admin/disputes', component: DisputeListComponent, canActivate: [RoleGuard], data: { roles: adminRoles, scope: 'all' } },
+      { path: 'admin/disputes/:id', component: DisputeDetailComponent, canActivate: [RoleGuard], data: { roles: adminRoles } },
       { path: 'shop/balance', component: BalanceViewComponent, canActivate: [RoleGuard], data: { roles: shopRoles } },
       { path: 'notifications', component: NotificationsComponent, canActivate: [RoleGuard], data: { roles: allRoles } },
       { path: 'change-password', component: ChangePasswordComponent }

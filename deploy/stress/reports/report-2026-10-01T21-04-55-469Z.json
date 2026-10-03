@@ -1,0 +1,63 @@
+{
+  "base": "http://localhost:8081",
+  "startedAt": "2026-10-01T21:04:11.238Z",
+  "stages": [
+    {
+      "vus": 10,
+      "secs": 20,
+      "requests": 1994,
+      "ok": 253,
+      "fail": 1741,
+      "throttled429": 1477,
+      "rps": 99.7,
+      "p50ms": 11,
+      "p95ms": 89,
+      "p99ms": 562,
+      "errors": {
+        "pay.create:409": 132,
+        "pay.summary:403": 67,
+        "order.create:409": 65,
+        "pay.create:429": 448,
+        "notif.count:429": 71,
+        "pay.summary:429": 189,
+        "delivery.mine:429": 150,
+        "order.create:429": 182,
+        "pay.list:429": 371,
+        "balance.shop:429": 66
+      }
+    },
+    {
+      "vus": 20,
+      "secs": 20,
+      "requests": 5195,
+      "ok": 40,
+      "fail": 5155,
+      "throttled429": 5155,
+      "rps": 259.7,
+      "p50ms": 6,
+      "p95ms": 20,
+      "p99ms": 32,
+      "errors": {
+        "notif.count:429": 259,
+        "pay.list:429": 1284,
+        "pay.create:429": 1507,
+        "pay.summary:429": 707,
+        "balance.shop:429": 256,
+        "order.create:429": 653,
+        "delivery.mine:429": 489
+      }
+    }
+  ],
+  "boot": {
+    "requests": 1,
+    "ok": 1,
+    "fail": 0,
+    "throttled429": 0,
+    "rps": 0,
+    "p50ms": 447,
+    "p95ms": 447,
+    "p99ms": 447,
+    "errors": {}
+  },
+  "finishedAt": "2026-10-01T21:04:55.463Z"
+}

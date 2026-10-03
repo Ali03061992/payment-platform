@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.paymentplatform.notification.domain.model.Notification;
 import com.paymentplatform.notification.domain.model.NotificationRepository;
+import com.paymentplatform.notification.infrastructure.http.IdentityAdminClient;
 import com.paymentplatform.shared.infrastructure.eventing.EventDeduplicator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,15 +23,18 @@ public class DisputeEventConsumer {
     private final EventDeduplicator deduplicator;
     private final ObjectMapper objectMapper;
     private final NotificationBroadcaster broadcaster;
+    private final IdentityAdminClient adminClient;
 
     public DisputeEventConsumer(NotificationRepository notifications,
                                  EventDeduplicator deduplicator,
                                  ObjectMapper objectMapper,
-                                 NotificationBroadcaster broadcaster) {
+                                 NotificationBroadcaster broadcaster,
+                                 IdentityAdminClient adminClient) {
         this.notifications = notifications;
         this.deduplicator = deduplicator;
         this.objectMapper = objectMapper;
         this.broadcaster = broadcaster;
+        this.adminClient = adminClient;
     }
 
     @RabbitListener(queues = "notification.disputes")
@@ -74,6 +78,10 @@ public class DisputeEventConsumer {
                 "Litige ouvert pour la commande " + reference,
                 "DISPUTE", event.get("disputeId").asText()
         )));
+
+        notifyAdmins("DISPUTE_CREATED",
+                "Nouvelle réclamation (commande " + reference + ") : " + reason,
+                event.get("disputeId").asText());
     }
 
     private void handleDisputeMessageAdded(JsonNode event) {
@@ -101,6 +109,10 @@ public class DisputeEventConsumer {
                     "DISPUTE", event.get("disputeId").asText()
             )));
         }
+
+        notifyAdmins("DISPUTE_MESSAGE",
+                senderLabel + " a ajouté un message à une réclamation",
+                event.get("disputeId").asText());
     }
 
     private void handleDisputeResolved(JsonNode event) {
@@ -120,8 +132,22 @@ public class DisputeEventConsumer {
         )));
     }
 
-    private void handleDisputeClosed(JsonNode event) {
-        UUID shopId = UUID.fromString(event.get("shopId").asText());
+    /**
+     * Notifie tous les SYSTEM_ADMIN (adressage direct par userId : ils n'ont
+     * pas d'organisation). Échec silencieux : ne bloque jamais le flux boutique.
+     */
+    private void notifyAdmins(String type, String message, String disputeId) {
+        try {
+            for (UUID adminId : adminClient.systemAdminIds()) {
+                broadcaster.broadcastNotification(notifications.save(
+                        new Notification(adminId, null, type, message, "DISPUTE", disputeId)));
+            }
+        } catch (Exception e) {
+            log.error("Notification des admins impossible", e);
+        }
+    }
+
+    private void handleDisputeClosed(JsonNode event) {        UUID shopId = UUID.fromString(event.get("shopId").asText());
         UUID supplierId = UUID.fromString(event.get("supplierId").asText());
 
         broadcaster.broadcastNotification(notifications.save(new Notification(null, shopId,

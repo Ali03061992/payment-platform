@@ -25,6 +25,12 @@ public interface UserRepository {
     List<User> findByOrganizationIdAndRole(OrganizationId organizationId, RoleCode role);
 
     /**
+     * Recherche globale par rôle (ex. SYSTEM_ADMIN pour les notifications
+     * administratives). Filtrée en base via user_roles, sans chargement complet.
+     */
+    List<User> findByRole(RoleCode role);
+
+    /**
      * B5 : remplace {@code findAll()} pour les listes exposées — recherche
      * filtrée et paginée en base (page 0-based, taille déjà bornée par l'appelant).
      * Paramètres de filtre nullables.

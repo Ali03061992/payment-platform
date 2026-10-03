@@ -81,4 +81,22 @@ public class InternalUserController {
         }
         return ResponseEntity.ok(query.listByOrganizationInternal(organizationId));
     }
+
+    /**
+     * Liste les utilisateurs ayant un rôle donné, pour un appel inter-services
+     * (ex. notification des SYSTEM_ADMIN lors d'une réclamation).
+     *
+     * @param token secret interne partagé
+     * @param role code de rôle (ex. SYSTEM_ADMIN)
+     * @return utilisateurs correspondants
+     */
+    @GetMapping("/by-role")
+    public ResponseEntity<java.util.List<UserResponse>> listByRole(
+            @RequestHeader(value = "X-Internal-Token", required = false) String token,
+            @RequestParam String role) {
+        if (!guard.isValid(token)) {
+            throw new UnauthorizedException("Secret interne invalide ou manquant");
+        }
+        return ResponseEntity.ok(query.listByRoleInternal(role));
+    }
 }

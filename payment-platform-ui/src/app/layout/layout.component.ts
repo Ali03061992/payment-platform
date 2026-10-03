@@ -53,6 +53,7 @@ export class LayoutComponent implements OnInit, OnDestroy {
     { label: 'Relations F-B', icon: 'link', route: 'admin/relations', roles: ['SYSTEM_ADMIN'], group: 'Administration' },
     { label: 'Stats organisations', icon: 'chart', route: 'admin/org-stats', roles: ['SYSTEM_ADMIN'], group: 'Administration' },
     { label: 'Journal d\'audit', icon: 'list', route: 'admin/audit-logs', roles: ['SYSTEM_ADMIN'], group: 'Administration' },
+    { label: 'Réclamations', icon: 'alert', route: 'admin/disputes', roles: ['SYSTEM_ADMIN'], group: 'Administration' },
     { label: 'Categories', icon: 'tag', route: 'supplier/categories', roles: ['SUPPLIER_ADMIN'], group: 'Catalogue' },
     { label: 'Familles', icon: 'folder', route: 'supplier/families', roles: ['SUPPLIER_ADMIN'], group: 'Catalogue' },
     { label: 'Produits', icon: 'list', route: 'supplier/products', roles: ['SUPPLIER_ADMIN'], group: 'Catalogue' },
@@ -67,6 +68,7 @@ export class LayoutComponent implements OnInit, OnDestroy {
     { label: 'Livraisons', icon: 'truck', route: 'shop/deliveries', roles: ['SHOP_ADMIN', 'SHOP_AGENT'], group: 'Boutique' },
     { label: 'Nouvelle commande', icon: 'plus', route: 'shop/orders/create', roles: ['SHOP_ADMIN'], group: 'Boutique' },
     { label: 'Balance', icon: 'scale', route: 'shop/balance', roles: ['SHOP_ADMIN'], group: 'Boutique' },
+    { label: 'Réclamations', icon: 'alert', route: 'shop/disputes', roles: ['SHOP_ADMIN', 'SHOP_AGENT'], group: 'Boutique' },
     { label: 'Paiements', icon: 'card', route: 'payments', roles: ['SYSTEM_ADMIN', 'SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_AGENT'], group: 'Paiements' },
     { label: 'Stats paiements', icon: 'chart', route: 'payments/stats', roles: ['SYSTEM_ADMIN', 'SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_AGENT'], group: 'Paiements' },
     { label: 'Scanner QR', icon: 'scan', route: 'scan', roles: ['SYSTEM_ADMIN', 'SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_AGENT'], group: 'Outils' },
@@ -262,6 +264,16 @@ export class LayoutComponent implements OnInit, OnDestroy {
       this.router.navigate([target], { queryParams: { orderId: notif.relatedEntityId } });
     } else if (notif.relatedEntityType === 'SHOP_ORDER' && notif.relatedEntityId) {
       this.router.navigate(['/dashboard/shop/orders', notif.relatedEntityId]);
+    } else if (notif.relatedEntityType === 'DISPUTE' && notif.relatedEntityId) {
+      // Réclamation : détail admin pour SYSTEM_ADMIN, détail boutique pour les
+      // boutiques, liste commandes pour les fournisseurs (pas de page dédiée).
+      if (this.user?.roles?.includes('SYSTEM_ADMIN')) {
+        this.router.navigate(['/dashboard/admin/disputes', notif.relatedEntityId]);
+      } else if (this.isShopUser()) {
+        this.router.navigate(['/dashboard/shop/disputes', notif.relatedEntityId]);
+      } else {
+        this.router.navigate(['/dashboard/supplier/orders']);
+      }
     }
     this.showNotifications = false;
   }

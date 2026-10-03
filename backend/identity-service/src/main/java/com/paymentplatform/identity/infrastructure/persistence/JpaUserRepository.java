@@ -65,6 +65,12 @@ public class JpaUserRepository implements UserRepository {
 
     @Override
     @Transactional(readOnly = true)
+    public List<User> findByRole(RoleCode role) {
+        return jpa.findByRole(role).stream().map(this::toDomain).toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public boolean existsByUsername(Username username) {
         return jpa.existsByUsername(username.value());
     }
