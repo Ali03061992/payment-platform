@@ -14,6 +14,7 @@ import { OrderService } from '../../services/order.service';
 import { ToastService } from '../../services/toast.service';
 import { ConfirmDialogService } from '../../components/confirm-dialog/confirm-dialog.service';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { TranslateStubPipe, translateServiceProvider } from '../../testing/translate-stubs';
 
 describe('OrderListComponent', () => {
   let component: OrderListComponent;
@@ -39,10 +40,11 @@ describe('OrderListComponent', () => {
     orderSpy.listPaged.and.returnValue(of({ items: [], totalElements: 0, totalPages: 1, number: 0 }));
 
     TestBed.configureTestingModule({
-    declarations: [OrderListComponent],
+    declarations: [OrderListComponent, TranslateStubPipe],
     schemas: [NO_ERRORS_SCHEMA],
     imports: [FormsModule],
     providers: [
+        translateServiceProvider(),
         { provide: OrderService, useValue: orderSpy },
         { provide: ToastService, useValue: toastSpy },
         { provide: ConfirmDialogService, useValue: confirmSpy },
@@ -81,7 +83,7 @@ describe('OrderListComponent', () => {
     it('should handle load error without message', () => {
       orderService.listPaged.and.returnValue(throwError(() => ({})));
       component.ngOnInit();
-      expect(toast.error).toHaveBeenCalledWith('Erreur');
+      expect(toast.error).toHaveBeenCalledWith('ORDERS.ERROR');
     });
   });
 
@@ -156,7 +158,7 @@ describe('OrderListComponent', () => {
     it('should handle accept error without message', () => {
       orderService.accept.and.returnValue(throwError(() => ({})));
       component.accept(1);
-      expect(toast.error).toHaveBeenCalledWith('Erreur');
+      expect(toast.error).toHaveBeenCalledWith('ORDERS.ERROR');
     });
   });
 
@@ -185,7 +187,7 @@ describe('OrderListComponent', () => {
       confirmDialog.confirm.and.returnValue(of(true));
       orderService.reject.and.returnValue(throwError(() => ({})));
       component.reject(1);
-      expect(toast.error).toHaveBeenCalledWith('Erreur');
+      expect(toast.error).toHaveBeenCalledWith('ORDERS.ERROR');
     });
   });
 
@@ -205,7 +207,7 @@ describe('OrderListComponent', () => {
     it('should handle cancel error without message', () => {
       orderService.cancel.and.returnValue(throwError(() => ({})));
       component.cancel(1);
-      expect(toast.error).toHaveBeenCalledWith('Erreur');
+      expect(toast.error).toHaveBeenCalledWith('ORDERS.ERROR');
     });
   });
 });

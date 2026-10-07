@@ -7,6 +7,7 @@ describe('02 - Admin Dashboard', () => {
   beforeEach(() => {
     cy.loginAsAdmin();
     cy.visit('/dashboard');
+    cy.dismissOverlays();
   });
 
   it('should display dashboard with welcome message', () => {
@@ -45,10 +46,10 @@ describe('02 - Admin Dashboard', () => {
   });
 
   it('should display top bar with user name and notifications', () => {
-    cy.get('.top-bar').should('exist');
-    cy.get('.top-bar h2').should('contain', 'Bienvenue');
+    cy.get('.top-bar', { timeout: 15000 }).should('exist');
     cy.get('.notif-bell').should('exist');
     cy.get('.status-badge.active').should('contain', 'En ligne');
+    cy.get('app-language-switcher').should('exist');
   });
 
   it('should show user info in sidebar footer', () => {

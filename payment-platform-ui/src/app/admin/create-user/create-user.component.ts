@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { TranslateService } from '@ngx-translate/core';
 import { UserService } from '../../services/user.service';
 import { OrganizationService } from '../../services/organization.service';
 import { Organization } from '../../models/organization.model';
@@ -23,11 +24,11 @@ export class CreateUserComponent implements OnInit {
   };
 
   roles = [
-    { value: 'SYSTEM_ADMIN', label: 'Administrateur système' },
-    { value: 'SUPPLIER_ADMIN', label: 'Administrateur fournisseur' },
-    { value: 'SUPPLIER_AGENT', label: 'Agent fournisseur' },
-    { value: 'SHOP_ADMIN', label: 'Administrateur boutique' },
-    { value: 'SHOP_AGENT', label: 'Agent boutique' }
+    { value: 'SYSTEM_ADMIN', label: 'AUTH.ROLE_SYSTEM_ADMIN' },
+    { value: 'SUPPLIER_ADMIN', label: 'AUTH.ROLE_SUPPLIER_ADMIN' },
+    { value: 'SUPPLIER_AGENT', label: 'AUTH.ROLE_SUPPLIER_AGENT' },
+    { value: 'SHOP_ADMIN', label: 'AUTH.ROLE_SHOP_ADMIN' },
+    { value: 'SHOP_AGENT', label: 'AUTH.ROLE_SHOP_AGENT' }
   ];
 
   suppliers: Organization[] = [];
@@ -40,7 +41,8 @@ export class CreateUserComponent implements OnInit {
     private userService: UserService,
     private organizationService: OrganizationService,
     private router: Router,
-    private toast: ToastService
+    private toast: ToastService,
+    private translate: TranslateService
   ) {}
 
   ngOnInit(): void {
@@ -60,7 +62,7 @@ export class CreateUserComponent implements OnInit {
 
   get organizationLabel(): string {
     const isSupplier = this.form.role.startsWith('SUPPLIER');
-    return isSupplier ? 'Fournisseur' : 'Boutique';
+    return this.translate.instant(isSupplier ? 'ORGS.SUPPLIER' : 'ORGS.SHOP');
   }
 
   get availableOrgs(): Organization[] {
@@ -82,8 +84,8 @@ export class CreateUserComponent implements OnInit {
       payload.organizationId = this.form.organizationId;
     }
     this.userService.create(payload).subscribe({
-      next: () => { this.success = true; this.loading = false; this.toast.success('Compte créé avec succès'); },
-      error: (err) => { this.toast.error(err.error?.message || "Erreur lors de la création"); this.loading = false; }
+      next: () => { this.success = true; this.loading = false; this.toast.success(this.translate.instant('USERS.CREATED_TOAST')); },
+      error: (err) => { this.toast.error(err.error?.message || this.translate.instant('USERS.CREATE_ERROR')); this.loading = false; }
     });
   }
 

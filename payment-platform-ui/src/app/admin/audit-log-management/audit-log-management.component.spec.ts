@@ -12,6 +12,7 @@ import { AuditLogManagementComponent } from './audit-log-management.component';
 import { AuditLogService } from '../../services/audit-log.service';
 import { AuditLogPage } from '../../models/audit-log.model';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { TranslateStubPipe, translateServiceProvider } from '../../testing/translate-stubs';
 
 describe('AuditLogManagementComponent', () => {
   let component: AuditLogManagementComponent;
@@ -34,9 +35,10 @@ describe('AuditLogManagementComponent', () => {
     spy.list.and.callFake((params: any) => of({ ...mockPage, number: params?.page ?? 0 }));
 
     TestBed.configureTestingModule({
-    declarations: [AuditLogManagementComponent],
+    declarations: [AuditLogManagementComponent, TranslateStubPipe],
     imports: [FormsModule],
     providers: [
+        translateServiceProvider(),
         { provide: AuditLogService, useValue: spy },
         provideHttpClient(withInterceptorsFromDi()),
         provideHttpClientTesting()

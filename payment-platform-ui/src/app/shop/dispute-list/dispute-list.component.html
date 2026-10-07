@@ -1,24 +1,24 @@
 <div class="page-header">
-  <h2>{{ title }}</h2>
+  <h2>{{ title | translate }}</h2>
 </div>
 
 @if (loading) {
   <div class="loading">
     <div class="spinner"></div>
-    <span>Chargement...</span>
+    <span>{{ 'DISPUTES.LOADING' | translate }}</span>
   </div>
 }
 
 @if (!loading) {
   <div class="filters">
-    <select [(ngModel)]="filterStatus" class="form-control filter-select" aria-label="Filtrer par statut">
-      <option value="">Tous les statuts</option>
-      <option value="OPEN">Ouvert</option>
-      <option value="IN_PROGRESS">En cours</option>
-      <option value="RESOLVED">Résolu</option>
-      <option value="CLOSED">Fermé</option>
+    <select [(ngModel)]="filterStatus" class="form-control filter-select" [attr.aria-label]="'DISPUTES.FILTER_ARIA' | translate">
+      <option value="">{{ 'DISPUTES.ALL_STATUSES' | translate }}</option>
+      <option value="OPEN">{{ 'STATUS.OPEN' | translate }}</option>
+      <option value="IN_PROGRESS">{{ 'STATUS.IN_PROGRESS' | translate }}</option>
+      <option value="RESOLVED">{{ 'STATUS.RESOLVED' | translate }}</option>
+      <option value="CLOSED">{{ 'STATUS.CLOSED' | translate }}</option>
     </select>
-    <span class="result-count" aria-live="polite">{{ filtered.length }} résultat(s)</span>
+    <span class="result-count" aria-live="polite">{{ 'DISPUTES.RESULT_COUNT' | translate:{count: filtered.length} }}</span>
   </div>
 
   <div class="table-card hide-mobile">
@@ -26,12 +26,12 @@
       <table>
         <thead>
           <tr>
-            <th>Référence litige</th>
-            <th>Commande</th>
-            <th>Motif</th>
-            <th>Statut</th>
-            <th>Créé le</th>
-            <th>Actions</th>
+            <th>{{ 'DISPUTES.COL_REF' | translate }}</th>
+            <th class="sortable-th" (click)="onSort('orderId')" (keydown.enter)="onSort('orderId')" tabindex="0" [attr.aria-sort]="ariaSort('orderId')">{{ 'DISPUTES.COL_ORDER' | translate }} <span class="sort-indicator" aria-hidden="true">{{ sortIndicator('orderId') }}</span></th>
+            <th class="sortable-th" (click)="onSort('reason')" (keydown.enter)="onSort('reason')" tabindex="0" [attr.aria-sort]="ariaSort('reason')">{{ 'DISPUTES.COL_REASON' | translate }} <span class="sort-indicator" aria-hidden="true">{{ sortIndicator('reason') }}</span></th>
+            <th class="sortable-th" (click)="onSort('status')" (keydown.enter)="onSort('status')" tabindex="0" [attr.aria-sort]="ariaSort('status')">{{ 'DISPUTES.COL_STATUS' | translate }} <span class="sort-indicator" aria-hidden="true">{{ sortIndicator('status') }}</span></th>
+            <th class="sortable-th" (click)="onSort('createdAt')" (keydown.enter)="onSort('createdAt')" tabindex="0" [attr.aria-sort]="ariaSort('createdAt')">{{ 'DISPUTES.COL_CREATED' | translate }} <span class="sort-indicator" aria-hidden="true">{{ sortIndicator('createdAt') }}</span></th>
+            <th>{{ 'DISPUTES.COL_ACTIONS' | translate }}</th>
           </tr>
         </thead>
         <tbody>
@@ -40,16 +40,16 @@
               <td><strong>{{ d.id | slice:0:8 }}</strong></td>
               <td>{{ d.orderId | slice:0:8 }}</td>
               <td>{{ d.reason }}</td>
-              <td><span class="payment-badge" [ngClass]="statusClass(d.status)">{{ statusLabel(d.status) }}</span></td>
+              <td><span class="payment-badge" [ngClass]="statusClass(d.status)">{{ d.status | statusLabel }}</span></td>
               <td>{{ d.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
               <td class="actions" (click)="$event.stopPropagation()">
-                <button class="btn btn-sm btn-secondary" (click)="openDispute(d.id)" [attr.aria-label]="'Voir la réclamation ' + d.id">Voir</button>
+                <button class="btn btn-sm btn-secondary" (click)="openDispute(d.id)" [attr.aria-label]="('DISPUTES.VIEW_ARIA' | translate:{id: d.id})">{{ 'DISPUTES.VIEW' | translate }}</button>
               </td>
             </tr>
           }
           @if (filtered.length === 0) {
             <tr>
-              <td colspan="6" style="text-align:center;color:#8896ab;padding:32px;">Aucune réclamation</td>
+              <td colspan="6" style="text-align:center;color:#8896ab;padding:32px;">{{ 'DISPUTES.NO_DISPUTES' | translate }}</td>
             </tr>
           }
         </tbody>
@@ -62,22 +62,22 @@
       <div class="dispute-card" (click)="openDispute(d.id)">
         <div class="dispute-card-header">
           <span class="dispute-reference">{{ d.id | slice:0:8 }}</span>
-          <span class="payment-badge" [ngClass]="statusClass(d.status)">{{ statusLabel(d.status) }}</span>
+          <span class="payment-badge" [ngClass]="statusClass(d.status)">{{ d.status | statusLabel }}</span>
         </div>
         <div class="dispute-card-body">
           <div class="dispute-row">
-            <span class="dispute-label">Motif</span>
+            <span class="dispute-label">{{ 'DISPUTES.COL_REASON' | translate }}</span>
             <span class="dispute-value">{{ d.reason }}</span>
           </div>
           <div class="dispute-row">
-            <span class="dispute-label">Créé le</span>
+            <span class="dispute-label">{{ 'DISPUTES.COL_CREATED' | translate }}</span>
             <span class="dispute-value">{{ d.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
           </div>
         </div>
       </div>
     }
     @if (filtered.length === 0) {
-      <div class="empty-card">Aucune réclamation</div>
+      <div class="empty-card">{{ 'DISPUTES.NO_DISPUTES' | translate }}</div>
     }
   </div>
 }

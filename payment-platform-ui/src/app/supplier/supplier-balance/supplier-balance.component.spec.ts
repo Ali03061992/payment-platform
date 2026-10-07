@@ -1,9 +1,4 @@
 // @ts-nocheck
-/**
- * Tests du composant SupplierBalanceComponent.
- * Perimetre : cas should load balances on init; should not credit when invalid; should credit valid shop (voir blocs describe/it).
- * Moyens : TestBed + fixture, stubs jasmine, client HTTP de test, observables RxJS mockes.
- */
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { FormsModule } from '@angular/forms';
@@ -14,6 +9,7 @@ import { BalanceService } from '../../services/balance.service';
 import { LoginService } from '../../services/login.service';
 import { ToastService } from '../../services/toast.service';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { TranslateStubPipe, translateServiceProvider } from '../../testing/translate-stubs';
 
 describe('SupplierBalanceComponent', () => {
   let component: SupplierBalanceComponent;
@@ -29,10 +25,11 @@ describe('SupplierBalanceComponent', () => {
     balanceSpy.getHistory.and.returnValue(of([]));
 
     TestBed.configureTestingModule({
-      declarations: [SupplierBalanceComponent],
+      declarations: [SupplierBalanceComponent, TranslateStubPipe],
       schemas: [NO_ERRORS_SCHEMA],
       imports: [FormsModule],
       providers: [
+        translateServiceProvider(),
         { provide: BalanceService, useValue: balanceSpy },
         { provide: LoginService, useValue: loginSpy },
         { provide: ToastService, useValue: toastSpy },
@@ -70,7 +67,7 @@ describe('SupplierBalanceComponent', () => {
     expect(component.canCredit()).toBeTrue();
     component.submitCredit();
     expect(balanceService.adjust).toHaveBeenCalled();
-    expect(toast.success).toHaveBeenCalled();
+    expect(toast.success).toHaveBeenCalledWith('FINANCE.CREDIT_ADDED');
   });
 
   it('should handle credit error', () => {
@@ -80,5 +77,14 @@ describe('SupplierBalanceComponent', () => {
     component.creditAmount = 100;
     component.submitCredit();
     expect(toast.error).toHaveBeenCalledWith('Err');
+  });
+
+  it('should use key on credit error without message', () => {
+    balanceService.adjust.and.returnValue(throwError(() => ({})));
+    component.supplierId = 'sup-1';
+    component.creditShopId = 'shop-1';
+    component.creditAmount = 100;
+    component.submitCredit();
+    expect(toast.error).toHaveBeenCalledWith('FINANCE.CREDIT_ERROR');
   });
 });

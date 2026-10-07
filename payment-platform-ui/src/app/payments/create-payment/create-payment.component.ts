@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { TranslateService } from '@ngx-translate/core';
 import { PaymentService } from '../../services/payment.service';
 import { OrganizationService } from '../../services/organization.service';
 import { Organization } from '../../models/organization.model';
@@ -30,7 +31,8 @@ export class CreatePaymentComponent implements OnInit {
     private paymentService: PaymentService,
     private orgService: OrganizationService,
     private router: Router,
-    private toast: ToastService
+    private toast: ToastService,
+    private translate: TranslateService
   ) {}
 
   /** Pré-remplit boutique/fournisseurs selon le rôle (boutique ou admin). */
@@ -85,8 +87,8 @@ export class CreatePaymentComponent implements OnInit {
         this.lastPayloadFingerprint = null;
         this.router.navigate(['/dashboard/payments', payment.id]);
       },
-      error: (err: any) => {
-        this.toast.error(err.error?.message || 'Erreur lors de la création');
+      error: (err: { error?: { message?: string }; status?: number; statusText?: string; message?: string }) => {
+        this.toast.error(err.error?.message || this.translate.instant('PAYMENT_CREATE.CREATE_ERROR'));
         this.creating = false;
       }
     });

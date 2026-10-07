@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { TranslateService } from '@ngx-translate/core';
 import { BalanceService } from '../../services/balance.service';
 import { BalanceSummary, BalanceEntry } from '../../models/balance.model';
 import { ToastService } from '../../services/toast.service';
@@ -25,7 +26,7 @@ export class BalanceViewComponent implements OnInit {
   ledgerSize = 10;
   ledgerSort: SortState = { field: null, direction: 'asc' };
 
-  constructor(private balanceService: BalanceService, private toast: ToastService) {}
+  constructor(private balanceService: BalanceService, private toast: ToastService, private translate: TranslateService) {}
 
   ngOnInit(): void { this.load(); }
 
@@ -43,7 +44,7 @@ export class BalanceViewComponent implements OnInit {
     const shopId = this.getShopId();
     this.balanceService.listByShop(shopId).subscribe({
       next: (data: BalanceSummary[]) => { this.balances = data; this.currentPage = 0; this.loading = false; },
-      error: (err: any) => { this.toast.error(err.error?.message || 'Erreur'); this.loading = false; }
+      error: (err: { error?: { message?: string }; status?: number; statusText?: string; message?: string }) => { this.toast.error(err.error?.message || this.translate.instant('SHOP_BALANCE.ERROR')); this.loading = false; }
     });
   }
 
@@ -115,7 +116,7 @@ export class BalanceViewComponent implements OnInit {
     this.ledgerPage = 0;
     this.balanceService.getHistory(supplierId, shopId).subscribe({
       next: (data: BalanceEntry[]) => { this.ledgerEntries = data; this.loadingLedger = false; },
-      error: (err: any) => { this.toast.error(err.error?.message || 'Erreur'); this.loadingLedger = false; }
+      error: (err: { error?: { message?: string }; status?: number; statusText?: string; message?: string }) => { this.toast.error(err.error?.message || this.translate.instant('SHOP_BALANCE.ERROR')); this.loadingLedger = false; }
     });
   }
 
@@ -127,9 +128,9 @@ export class BalanceViewComponent implements OnInit {
 
   typeLabel(t: string): string {
     const map: Record<string, string> = {
-      ORDER: 'Commande', PAYMENT: 'Paiement', ADJUSTMENT: 'Ajustement'
+      ORDER: 'SHOP_BALANCE.TYPE_ORDER', PAYMENT: 'SHOP_BALANCE.TYPE_PAYMENT', ADJUSTMENT: 'SHOP_BALANCE.TYPE_ADJUSTMENT'
     };
-    return map[t] || t;
+    return this.translate.instant(map[t] || t);
   }
 
   typeClass(t: string): string {

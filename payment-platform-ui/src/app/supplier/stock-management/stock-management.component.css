@@ -113,7 +113,7 @@ label { display: block; margin-bottom: 6px; font-weight: 600; font-size: 13px; c
 @keyframes spin { to { transform: rotate(360deg); } }
 
 .btn { padding: 10px 16px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.15s; }
-.btn-primary { background: var(--accent); color: #fff; } .btn-primary:hover { filter: brightness(0.9); } .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-primary { background: var(--sky-dark); color: #fff; } .btn-primary:hover { background: var(--sky-hover); } .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
 .btn-secondary { background: var(--border-color); color: var(--text-primary); } .btn-secondary:hover { filter: brightness(0.92); }
 .btn-success { background: #2e7d32; color: #fff; } .btn-success:hover { background: #1b5e20; }
 .btn-warning { background: #e65100; color: #fff; } .btn-warning:hover { background: #bf360c; }

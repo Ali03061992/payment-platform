@@ -7,6 +7,8 @@ import { User } from '../../models/user.model';
 import { Product } from '../../models/stock.model';
 import { Order } from '../../models/order.model';
 import { PaymentStats } from '../../models/payment.model';
+import { statusLabelFr } from '../../pipes/status-label.pipe';
+import { TranslateService } from '@ngx-translate/core';
 
 @Component({
     selector: 'app-dashboard-supplier',
@@ -29,7 +31,8 @@ export class DashboardSupplierComponent implements OnInit {
     private loginService: LoginService,
     private stockService: StockService,
     private orderService: OrderService,
-    private paymentService: PaymentService
+    private paymentService: PaymentService,
+    private translate: TranslateService
   ) {}
 
   ngOnInit(): void {
@@ -85,21 +88,13 @@ export class DashboardSupplierComponent implements OnInit {
 
   getGreeting(): string {
     const hour = new Date().getHours();
-    if (hour < 12) return 'Bonjour';
-    if (hour < 18) return 'Bon après-midi';
-    return 'Bonsoir';
+    if (hour < 12) return this.translate.instant('DASHBOARD.MORNING');
+    if (hour < 18) return this.translate.instant('DASHBOARD.AFTERNOON');
+    return this.translate.instant('DASHBOARD.EVENING');
   }
 
   getStatusLabel(status: string): string {
-    const labels: Record<string, string> = {
-      'PENDING': 'En attente',
-      'CONFIRMED': 'Confirmée',
-      'PREPARING': 'En préparation',
-      'READY': 'Prête',
-      'DELIVERED': 'Livrée',
-      'CANCELLED': 'Annulée'
-    };
-    return labels[status] || status;
+    return statusLabelFr(status);
   }
 
   getStatusClass(status: string): string {

@@ -39,8 +39,10 @@ public class ListPaymentsUseCase {
      */
     @Transactional(readOnly = true)
     public PageResponse<PaymentResponse> execute(UUID shopId, int page, int size) {
+        int safePage = Math.max(0, page);
+        int safeSize = Math.min(Math.max(1, size), 100);
         List<Payment> allPayments = payments.findByShopId(shopId);
-        return paginate(allPayments, page, size);
+        return paginate(allPayments, safePage, safeSize);
     }
 
     /**
@@ -53,8 +55,10 @@ public class ListPaymentsUseCase {
      */
     @Transactional(readOnly = true)
     public PageResponse<PaymentResponse> executeBySupplier(UUID supplierId, int page, int size) {
+        int safePage = Math.max(0, page);
+        int safeSize = Math.min(Math.max(1, size), 100);
         List<Payment> allPayments = payments.findBySupplierId(supplierId);
-        return paginate(allPayments, page, size);
+        return paginate(allPayments, safePage, safeSize);
     }
 
     /**
@@ -66,18 +70,22 @@ public class ListPaymentsUseCase {
      */
     @Transactional(readOnly = true)
     public PageResponse<PaymentResponse> executeAll(int page, int size) {
+        int safePage = Math.max(0, page);
+        int safeSize = Math.min(Math.max(1, size), 100);
         List<Payment> allPayments = payments.findAll();
-        return paginate(allPayments, page, size);
+        return paginate(allPayments, safePage, safeSize);
     }
 
     private PageResponse<PaymentResponse> paginate(List<Payment> allPayments, int page, int size) {
-        int start = Math.min(page * size, allPayments.size());
-        int end = Math.min(start + size, allPayments.size());
+        int safeSize = Math.min(Math.max(1, size), 100);
+        int safePage = Math.max(0, page);
+        int start = Math.min(safePage * safeSize, allPayments.size());
+        int end = Math.min(start + safeSize, allPayments.size());
         List<Payment> pageItems = allPayments.subList(start, end);
 
         List<PaymentResponse> responses = buildResponses(pageItems);
-        int totalPages = (int) Math.ceil((double) allPayments.size() / size);
-        return new PageResponse<>(responses, allPayments.size(), totalPages, page);
+        int totalPages = safeSize > 0 ? (int) Math.ceil((double) allPayments.size() / safeSize) : 0;
+        return new PageResponse<>(responses, allPayments.size(), totalPages, safePage);
     }
 
     private List<PaymentResponse> buildResponses(List<Payment> domainPayments) {

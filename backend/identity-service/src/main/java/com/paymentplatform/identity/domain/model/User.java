@@ -22,6 +22,11 @@ import java.util.Set;
  */
 public class User {
 
+    public static final String DEFAULT_PREFERRED_LANG = "fr";
+    public static final String DEFAULT_ACCENT_COLOR1 = "#0284c7";
+    public static final String DEFAULT_ACCENT_COLOR2 = "#e63946";
+    private static final String HEX_COLOR_PATTERN = "^#[0-9a-fA-F]{6}$";
+
     private final UserId id;
     private final Username username;
     private Email email;
@@ -32,13 +37,18 @@ public class User {
     private final OrganizationId organizationId;
     private UserStatus status;
     private final Set<RoleCode> roles;
+    private String preferredLang;
+    private String accentColor1;
+    private String accentColor2;
+    private boolean tourSeen;
     private long version;
     private Instant createdAt;
     private Instant updatedAt;
 
     private User(UserId id, Username username, Email email, PasswordHash password, String firstName,
                  String lastName, PhoneNumber phone, OrganizationId organizationId, UserStatus status,
-                 Set<RoleCode> roles, long version, Instant createdAt, Instant updatedAt) {
+                 Set<RoleCode> roles, String preferredLang, String accentColor1, String accentColor2,
+                 boolean tourSeen, long version, Instant createdAt, Instant updatedAt) {
         this.id = id;
         this.username = username;
         this.email = email;
@@ -49,6 +59,10 @@ public class User {
         this.organizationId = organizationId;
         this.status = status;
         this.roles = roles;
+        this.preferredLang = preferredLang;
+        this.accentColor1 = accentColor1;
+        this.accentColor2 = accentColor2;
+        this.tourSeen = tourSeen;
         this.version = version;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
@@ -63,7 +77,8 @@ public class User {
         Set<RoleCode> roles = EnumSet.of(role);
         Instant now = Instant.now();
         return new User(id, username, email, password, firstName.trim(), lastName.trim(), phone,
-                organizationId, UserStatus.ACTIVE, roles, 0, now, now);
+                organizationId, UserStatus.ACTIVE, roles, DEFAULT_PREFERRED_LANG, DEFAULT_ACCENT_COLOR1,
+                DEFAULT_ACCENT_COLOR2, false, 0, now, now);
     }
 
     public static User reconstruct(UserId id, Username username, Email email, PasswordHash password,
@@ -71,7 +86,18 @@ public class User {
                                     OrganizationId organizationId, UserStatus status, Set<RoleCode> roles,
                                     long version, Instant createdAt, Instant updatedAt) {
         return new User(id, username, email, password, firstName, lastName, phone, organizationId, status,
-                roles, version, createdAt, updatedAt);
+                roles, DEFAULT_PREFERRED_LANG, DEFAULT_ACCENT_COLOR1, DEFAULT_ACCENT_COLOR2, false,
+                version, createdAt, updatedAt);
+    }
+
+    public static User reconstruct(UserId id, Username username, Email email, PasswordHash password,
+                                    String firstName, String lastName, PhoneNumber phone,
+                                    OrganizationId organizationId, UserStatus status, Set<RoleCode> roles,
+                                    String preferredLang, String accentColor1, String accentColor2,
+                                    boolean tourSeen, long version, Instant createdAt, Instant updatedAt) {
+        return new User(id, username, email, password, firstName, lastName, phone, organizationId, status,
+                roles, normalizeLang(preferredLang), normalizeColor(accentColor1, "accentColor1"),
+                normalizeColor(accentColor2, "accentColor2"), tourSeen, version, createdAt, updatedAt);
     }
 
     public UserId id() {
@@ -112,6 +138,22 @@ public class User {
 
     public Set<RoleCode> roles() {
         return roles.isEmpty() ? Set.of() : EnumSet.copyOf(roles);
+    }
+
+    public String preferredLang() {
+        return preferredLang;
+    }
+
+    public String accentColor1() {
+        return accentColor1;
+    }
+
+    public String accentColor2() {
+        return accentColor2;
+    }
+
+    public boolean tourSeen() {
+        return tourSeen;
     }
 
     public long version() {
@@ -183,6 +225,35 @@ public class User {
         }
         this.roles.add(role);
         this.updatedAt = Instant.now();
+    }
+
+    public void updatePreferences(String preferredLang, String accentColor1, String accentColor2) {
+        this.preferredLang = normalizeLang(preferredLang);
+        this.accentColor1 = normalizeColor(accentColor1, "accentColor1");
+        this.accentColor2 = normalizeColor(accentColor2, "accentColor2");
+        this.updatedAt = Instant.now();
+    }
+
+    public void markTourSeen() {
+        if (tourSeen) {
+            return;
+        }
+        this.tourSeen = true;
+        this.updatedAt = Instant.now();
+    }
+
+    private static String normalizeLang(String lang) {
+        if (lang == null || (!lang.equals("fr") && !lang.equals("en"))) {
+            throw new DomainException("Langue préférée invalide : fr ou en attendu");
+        }
+        return lang;
+    }
+
+    private static String normalizeColor(String color, String field) {
+        if (color == null || !color.matches(HEX_COLOR_PATTERN)) {
+            throw new DomainException("Couleur invalide pour " + field + " : hexadécimal #RRGGBB attendu");
+        }
+        return color;
     }
 
     /** Vérification que l'utilisateur peut agir pour cette organisation. */

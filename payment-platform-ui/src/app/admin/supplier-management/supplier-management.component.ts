@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
+import { TranslateService } from '@ngx-translate/core';
 import { OrganizationService } from '../../services/organization.service';
 import { Organization } from '../../models/organization.model';
-import { PageResponse } from '../../models/page.model';
+import { PageResponse, sortItems, toggleSortState, ariaSortFor, sortIndicatorFor, SortState } from '../../models/page.model';
 import { ToastService } from '../../services/toast.service';
 
 @Component({
@@ -17,11 +18,12 @@ export class SupplierManagementComponent implements OnInit {
   newName = '';
   creating = false;
   currentPage = 0;
-  pageSize = 20;
+  pageSize = 10;
   totalElements = 0;
   totalPages = 0;
+  sort: SortState = { field: null, direction: 'asc' };
 
-  constructor(private orgService: OrganizationService, private toast: ToastService) {}
+  constructor(private orgService: OrganizationService, private toast: ToastService, private translate: TranslateService) {}
 
   ngOnInit(): void { this.load(); }
 
@@ -50,19 +52,35 @@ export class SupplierManagementComponent implements OnInit {
     this.load();
   }
 
+  onSort(field: string): void {
+    this.sort = toggleSortState(this.sort, field);
+  }
+
+  ariaSort(field: string): 'ascending' | 'descending' | 'none' {
+    return ariaSortFor(field, this.sort);
+  }
+
+  sortIndicator(field: string): string {
+    return sortIndicatorFor(field, this.sort);
+  }
+
+  get sortedSuppliers(): Organization[] {
+    return sortItems(this.suppliers, this.sort.field, this.sort.direction);
+  }
+
   create(): void {
     if (!this.newName.trim()) return;
     this.creating = true;
     this.orgService.createSupplier(this.newName.trim()).subscribe({
       next: () => {
-        this.toast.success('Fournisseur créé avec succès');
+        this.toast.success(this.translate.instant('ORGS.SUPPLIER_CREATED'));
         this.newName = '';
         this.showCreate = false;
         this.creating = false;
         this.load();
       },
-      error: (err: any) => {
-        this.toast.error(err.error?.message || 'Erreur lors de la création');
+      error: (err: { error?: { message?: string }; status?: number; statusText?: string; message?: string }) => {
+        this.toast.error(err.error?.message || this.translate.instant('ORGS.CREATE_ERROR'));
         this.creating = false;
       }
     });

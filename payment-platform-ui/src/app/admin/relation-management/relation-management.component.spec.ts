@@ -12,6 +12,7 @@ import { RelationManagementComponent } from './relation-management.component';
 import { OrganizationService } from '../../services/organization.service';
 import { ToastService } from '../../services/toast.service';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { TranslateStubPipe, translateServiceProvider } from '../../testing/translate-stubs';
 
 describe('RelationManagementComponent', () => {
   let component: RelationManagementComponent;
@@ -29,10 +30,11 @@ describe('RelationManagementComponent', () => {
     orgSpy.deactivateRelation.and.returnValue(of(undefined));
 
     TestBed.configureTestingModule({
-    declarations: [RelationManagementComponent],
+    declarations: [RelationManagementComponent, TranslateStubPipe],
     schemas: [NO_ERRORS_SCHEMA],
     imports: [],
     providers: [
+        translateServiceProvider(),
         { provide: OrganizationService, useValue: orgSpy },
         { provide: ToastService, useValue: toastSpy },
         provideHttpClient(withInterceptorsFromDi()),
@@ -94,7 +96,7 @@ describe('RelationManagementComponent', () => {
     component.selectedShopId = 2;
     orgService.createRelation.and.returnValue(throwError(() => ({})));
     component.create();
-    expect(toast.error).toHaveBeenCalledWith('Erreur lors de la création');
+    expect(toast.error).toHaveBeenCalledWith('ORGS.CREATE_ERROR');
   });
 
   it('should deactivate relation', () => {

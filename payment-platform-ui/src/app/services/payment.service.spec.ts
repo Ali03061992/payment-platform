@@ -9,6 +9,7 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { PaymentService } from './payment.service';
 import { Payment, PaymentStats } from '../models/payment.model';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { translateServiceProvider } from '../testing/translate-stubs';
 
 describe('PaymentService', () => {
   let service: PaymentService;
@@ -17,7 +18,7 @@ describe('PaymentService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
     imports: [],
-    providers: [PaymentService, provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()]
+    providers: [PaymentService, translateServiceProvider(), provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()]
 });
     service = TestBed.inject(PaymentService);
     httpMock = TestBed.inject(HttpTestingController);
@@ -40,7 +41,7 @@ describe('PaymentService', () => {
         expect(data.length).toBe(1);
         expect(data[0].reference).toBe('PAY-001');
       });
-      const req = httpMock.expectOne('/api/payments');
+      const req = httpMock.expectOne(r => r.url === '/api/payments');
       expect(req.request.method).toBe('GET');
       req.flush(mock);
     });
@@ -76,7 +77,7 @@ describe('PaymentService', () => {
       service.create({ shopId: 1, supplierId: 2, amount: 100, currency: 'TND' }).subscribe(data => {
         expect(data.amount).toBe(100);
       });
-      const req = httpMock.expectOne('/api/payments');
+      const req = httpMock.expectOne(r => r.url === '/api/payments');
       expect(req.request.method).toBe('POST');
       expect(req.request.body).toEqual({ shopId: 1, supplierId: 2, amount: 100, currency: 'TND' });
       req.flush(mock);
@@ -85,7 +86,7 @@ describe('PaymentService', () => {
     it('should send an Idempotency-Key header (generated when absent)', () => {
       const mock: Payment = { id: 1, reference: 'PAY-001', shopId: 1, shopName: 'Shop', supplierId: 2, supplierName: 'Sup', amount: 100, currency: 'TND', status: 'PENDING', rejectionReason: '', createdBy: 1, createdByName: '', confirmedByName: '', rejectedByName: '', cancelledByName: '', version: 1, createdAt: '', updatedAt: '', events: [] };
       service.create({ shopId: 1, supplierId: 2, amount: 100, currency: 'TND' }).subscribe();
-      const req = httpMock.expectOne('/api/payments');
+      const req = httpMock.expectOne(r => r.url === '/api/payments');
       expect(req.request.headers.get('Idempotency-Key')).toBeTruthy();
       req.flush(mock);
     });
@@ -93,7 +94,7 @@ describe('PaymentService', () => {
     it('should reuse the provided Idempotency-Key on retry', () => {
       const mock: Payment = { id: 1, reference: 'PAY-001', shopId: 1, shopName: 'Shop', supplierId: 2, supplierName: 'Sup', amount: 100, currency: 'TND', status: 'PENDING', rejectionReason: '', createdBy: 1, createdByName: '', confirmedByName: '', rejectedByName: '', cancelledByName: '', version: 1, createdAt: '', updatedAt: '', events: [] };
       service.create({ shopId: 1, supplierId: 2, amount: 100, currency: 'TND' }, 'key-123').subscribe();
-      const req = httpMock.expectOne('/api/payments');
+      const req = httpMock.expectOne(r => r.url === '/api/payments');
       expect(req.request.headers.get('Idempotency-Key')).toBe('key-123');
       req.flush(mock);
     });
@@ -219,7 +220,7 @@ describe('PaymentService', () => {
         expect(data.length).toBe(1);
         expect(data[0].reference).toBe('PAY-002');
       });
-      const req = httpMock.expectOne('/api/payments');
+      const req = httpMock.expectOne(r => r.url === '/api/payments');
       req.flush({ items: mock });
     });
 
@@ -228,7 +229,7 @@ describe('PaymentService', () => {
       service.list().subscribe(data => {
         expect(data.length).toBe(1);
       });
-      const req = httpMock.expectOne('/api/payments');
+      const req = httpMock.expectOne(r => r.url === '/api/payments');
       req.flush({ content: mock });
     });
 
@@ -237,7 +238,7 @@ describe('PaymentService', () => {
       service.list().subscribe(data => {
         expect(data.length).toBe(1);
       });
-      const req = httpMock.expectOne('/api/payments');
+      const req = httpMock.expectOne(r => r.url === '/api/payments');
       req.flush({ data: mock });
     });
 
@@ -245,7 +246,7 @@ describe('PaymentService', () => {
       service.list().subscribe(data => {
         expect(data).toEqual([]);
       });
-      const req = httpMock.expectOne('/api/payments');
+      const req = httpMock.expectOne(r => r.url === '/api/payments');
       req.flush({});
     });
 
@@ -253,7 +254,7 @@ describe('PaymentService', () => {
       service.list().subscribe(data => {
         expect(data).toEqual([]);
       });
-      const req = httpMock.expectOne('/api/payments');
+      const req = httpMock.expectOne(r => r.url === '/api/payments');
       req.flush(null);
     });
 
@@ -263,7 +264,7 @@ describe('PaymentService', () => {
         next: () => fail('should not succeed'),
         error: () => errorCaught = true
       });
-      const req = httpMock.expectOne('/api/payments');
+      const req = httpMock.expectOne(r => r.url === '/api/payments');
       req.flush('error', { status: 500, statusText: 'Server Error' });
       expect(errorCaught).toBeTrue();
     });
@@ -272,7 +273,7 @@ describe('PaymentService', () => {
       service.list().subscribe(data => {
         expect(data).toEqual([]);
       });
-      const req = httpMock.expectOne('/api/payments');
+      const req = httpMock.expectOne(r => r.url === '/api/payments');
       req.flush([]);
     });
   });

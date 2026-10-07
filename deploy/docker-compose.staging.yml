@@ -1,0 +1,140 @@
+services:
+  mysql:
+    image: mysql:8.4
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    volumes:
+      - mysql-staging-data:/var/lib/mysql
+      - ./mysql-init:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - payment-net
+
+  rabbitmq:
+    image: rabbitmq:4-management
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - payment-net
+
+  redis:
+    image: redis:7-alpine
+    networks:
+      - payment-net
+
+  identity-service:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+      args:
+        SERVICE_NAME: identity-service
+    environment:
+      SPRING_PROFILES_ACTIVE: staging
+      MYSQL_HOST: mysql
+      MYSQL_PORT: 3306
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      RABBITMQ_HOST: rabbitmq
+      JWT_SECRET: ${JWT_SECRET}
+      INTERNAL_SECRET: ${INTERNAL_SECRET}
+      LIQUIBASE_CONTEXTS: seed,dev,local,test,staging
+    depends_on:
+      mysql:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - payment-net
+
+  organization-service:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+      args:
+        SERVICE_NAME: organization-service
+    environment:
+      SPRING_PROFILES_ACTIVE: staging
+      MYSQL_HOST: mysql
+      INTERNAL_SECRET: ${INTERNAL_SECRET}
+      JWT_SECRET: ${JWT_SECRET}
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - payment-net
+
+  payment-service:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+      args:
+        SERVICE_NAME: payment-service
+    environment:
+      SPRING_PROFILES_ACTIVE: staging
+      MYSQL_HOST: mysql
+      INTERNAL_SECRET: ${INTERNAL_SECRET}
+      JWT_SECRET: ${JWT_SECRET}
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - payment-net
+
+  notification-service:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+      args:
+        SERVICE_NAME: notification-service
+    environment:
+      SPRING_PROFILES_ACTIVE: staging
+      MYSQL_HOST: mysql
+      INTERNAL_SECRET: ${INTERNAL_SECRET}
+      JWT_SECRET: ${JWT_SECRET}
+    depends_on:
+      mysql:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - payment-net
+
+  api-gateway:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+      args:
+        SERVICE_NAME: api-gateway
+    environment:
+      SPRING_PROFILES_ACTIVE: staging
+      JWT_SECRET: ${JWT_SECRET}
+      INTERNAL_SECRET: ${INTERNAL_SECRET}
+      RATE_LIMIT_AUTH_PER_MINUTE: 10
+    ports:
+      - "8081:8081"
+    depends_on:
+      - identity-service
+      - organization-service
+      - payment-service
+      - notification-service
+    networks:
+      - payment-net
+
+volumes:
+  mysql-staging-data:
+
+networks:
+  payment-net:
+    driver: bridge

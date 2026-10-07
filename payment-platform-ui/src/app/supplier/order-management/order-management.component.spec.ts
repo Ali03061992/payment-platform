@@ -17,6 +17,7 @@ import { StockService } from '../../services/stock.service';
 import { ToastService } from '../../services/toast.service';
 import { ConfirmDialogService } from '../../components/confirm-dialog/confirm-dialog.service';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { TranslateStubPipe, translateServiceProvider } from '../../testing/translate-stubs';
 
 describe('OrderManagementComponent', () => {
   let component: OrderManagementComponent;
@@ -57,10 +58,11 @@ describe('OrderManagementComponent', () => {
     stockSpy.getProducts.and.returnValue(of([]));
 
     TestBed.configureTestingModule({
-    declarations: [OrderManagementComponent],
+    declarations: [OrderManagementComponent, TranslateStubPipe],
     schemas: [NO_ERRORS_SCHEMA],
     imports: [FormsModule],
     providers: [
+        translateServiceProvider(),
         { provide: OrderService, useValue: orderSpy },
         { provide: SupplierAgentService, useValue: agentSpy },
         { provide: StockService, useValue: stockSpy },
@@ -210,7 +212,7 @@ describe('OrderManagementComponent', () => {
     it('should confirm order', () => {
       orderService.confirm.and.returnValue(of(mockOrder));
       component.confirm(mockOrder);
-      expect(toast.success).toHaveBeenCalledWith('Commande confirmée');
+      expect(toast.success).toHaveBeenCalledWith('SUPPLIER_ORDERS.ORDER_CONFIRMED');
     });
 
     it('should handle confirm error with message', () => {
@@ -222,7 +224,7 @@ describe('OrderManagementComponent', () => {
     it('should handle confirm error without message', () => {
       orderService.confirm.and.returnValue(throwError(() => ({})));
       component.confirm(mockOrder);
-      expect(toast.error).toHaveBeenCalledWith('Erreur');
+      expect(toast.error).toHaveBeenCalledWith('PAYMENTS.ERROR');
     });
   });
 
@@ -230,7 +232,7 @@ describe('OrderManagementComponent', () => {
     it('should prepare order', () => {
       orderService.prepare.and.returnValue(of(mockOrder));
       component.prepare(mockOrder);
-      expect(toast.success).toHaveBeenCalledWith('Commande mise en préparation');
+      expect(toast.success).toHaveBeenCalledWith('SUPPLIER_ORDERS.ORDER_PREPARING');
     });
 
     it('should handle prepare error', () => {
@@ -244,7 +246,7 @@ describe('OrderManagementComponent', () => {
     it('should mark ready', () => {
       orderService.readyForDelivery.and.returnValue(of(mockOrder));
       component.ready(mockOrder);
-      expect(toast.success).toHaveBeenCalledWith('Commande prête pour livraison');
+      expect(toast.success).toHaveBeenCalledWith('SUPPLIER_ORDERS.ORDER_READY');
     });
 
     it('should handle ready error', () => {
@@ -296,7 +298,7 @@ describe('OrderManagementComponent', () => {
       confirmDialog.confirm.and.returnValue(of(true));
       orderService.cancel.and.returnValue(of(mockOrder));
       component.cancel(mockOrder);
-      expect(toast.success).toHaveBeenCalledWith('Commande annulée');
+      expect(toast.success).toHaveBeenCalledWith('SUPPLIER_ORDERS.ORDER_CANCELLED');
     });
 
     it('should not cancel when not confirmed', () => {
@@ -318,7 +320,7 @@ describe('OrderManagementComponent', () => {
       confirmDialog.confirm.and.returnValue(of(true));
       orderService.deliveryReject.and.returnValue(of(mockOrder));
       component.deliveryReject(mockOrder);
-      expect(toast.success).toHaveBeenCalledWith('Livraison rejetée, commande annulée');
+      expect(toast.success).toHaveBeenCalledWith('SUPPLIER_ORDERS.DELIVERY_REJECTED_SUCCESS');
     });
 
     it('should not reject when not confirmed', () => {
@@ -449,7 +451,7 @@ describe('OrderManagementComponent', () => {
       component.addEditProduct({ id: 'p1', name: 'Product 1', unitPrice: 10 });
       component.submitEdit();
       expect(orderService.update).toHaveBeenCalled();
-      expect(toast.success).toHaveBeenCalledWith('Commande modifiée avec succès');
+      expect(toast.success).toHaveBeenCalledWith('SUPPLIER_ORDERS.ORDER_UPDATED');
       expect(component.showEditModal).toBeFalse();
     });
 

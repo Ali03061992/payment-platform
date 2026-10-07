@@ -13,6 +13,7 @@ import { AddProductComponent } from './add-product.component';
 import { StockService } from '../../services/stock.service';
 import { ToastService } from '../../services/toast.service';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { TranslateStubPipe, translateServiceProvider } from '../../testing/translate-stubs';
 
 describe('AddProductComponent', () => {
   let component: AddProductComponent;
@@ -27,9 +28,10 @@ describe('AddProductComponent', () => {
     const routerSpy = jasmine.createSpyObj('Router', ['navigate']);
 
     TestBed.configureTestingModule({
-    declarations: [AddProductComponent],
+    declarations: [AddProductComponent, TranslateStubPipe],
     imports: [FormsModule],
     providers: [
+        translateServiceProvider(),
         { provide: StockService, useValue: stockSpy },
         { provide: ToastService, useValue: toastSpy },
         { provide: Router, useValue: routerSpy },
@@ -135,7 +137,7 @@ describe('AddProductComponent', () => {
       stockService.createProduct.and.returnValue(throwError(() => ({ error: {} })));
       component.form = { name: 'Product', sku: 'SKU-1', description: '', unitPrice: 10, currency: 'TND', quantity: 0, minQuantity: 0 };
       component.onSubmit();
-      expect(toast.error).toHaveBeenCalledWith('Erreur lors de la création');
+      expect(toast.error).toHaveBeenCalledWith('CATALOG.CREATE_ERROR');
     });
   });
 

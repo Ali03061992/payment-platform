@@ -39,6 +39,49 @@ class UserTest {
     }
 
     @Test
+    void create_appliesDefaultPreferences() {
+        User user = sample();
+        assertThat(user.preferredLang()).isEqualTo("fr");
+        assertThat(user.accentColor1()).isEqualTo("#0284c7");
+        assertThat(user.accentColor2()).isEqualTo("#e63946");
+        assertThat(user.tourSeen()).isFalse();
+    }
+
+    @Test
+    void updatePreferences_validValues_applies() {
+        User user = sample();
+        user.updatePreferences("en", "#ff0000", "#00ff00");
+        assertThat(user.preferredLang()).isEqualTo("en");
+        assertThat(user.accentColor1()).isEqualTo("#ff0000");
+        assertThat(user.accentColor2()).isEqualTo("#00ff00");
+    }
+
+    @Test
+    void updatePreferences_invalidLang_throwsDomainException() {
+        User user = sample();
+        assertThatThrownBy(() -> user.updatePreferences("de", "#ff0000", "#00ff00"))
+                .isInstanceOf(DomainException.class);
+    }
+
+    @Test
+    void updatePreferences_invalidColor_throwsDomainException() {
+        User user = sample();
+        assertThatThrownBy(() -> user.updatePreferences("fr", "red", "#00ff00"))
+                .isInstanceOf(DomainException.class);
+        assertThatThrownBy(() -> user.updatePreferences("fr", "#ff0000", "#00ff0"))
+                .isInstanceOf(DomainException.class);
+    }
+
+    @Test
+    void markTourSeen_setsFlagIdempotently() {
+        User user = sample();
+        user.markTourSeen();
+        assertThat(user.tourSeen()).isTrue();
+        user.markTourSeen();
+        assertThat(user.tourSeen()).isTrue();
+    }
+
+    @Test
     void disable_thenActivate_isIdempotent() {
         User user = sample();
         user.disable();

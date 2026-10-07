@@ -1,18 +1,18 @@
 <div class="page-header">
-  <h2>Nouvelle commande</h2>
-  <a class="btn btn-secondary" routerLink="/dashboard/shop/orders" aria-label="Retour à la liste des commandes">Retour</a>
+  <h2>{{ 'ORDER_CREATE.TITLE' | translate }}</h2>
+  <a class="btn btn-secondary" routerLink="/dashboard/shop/orders" [attr.aria-label]="'ORDER_CREATE.BACK_ARIA' | translate">{{ 'ORDER_CREATE.BACK' | translate }}</a>
 </div>
 
 <div class="form-card">
   <form (ngSubmit)="submit()">
     <div class="form-row">
       <div class="form-group">
-        <label>Fournisseur @if (loadingSuppliers) {
-          <span class="text-muted">(chargement...)</span>
+        <label>{{ 'ORDERS.SUPPLIER' | translate }} @if (loadingSuppliers) {
+          <span class="text-muted">({{ 'ORDERS.LOADING' | translate }})</span>
         }</label>
         <select [(ngModel)]="selectedSupplierId" name="supplier" id="supplierSelect" class="form-control"
           (ngModelChange)="onSupplierChange()" required [disabled]="loadingSuppliers" aria-required="true">
-          <option [ngValue]="0">-- Sélectionner --</option>
+          <option [ngValue]="0">{{ 'ORDER_CREATE.SELECT' | translate }}</option>
           @for (s of suppliers; track s) {
             <option [ngValue]="s.id">{{ s.name }} ({{ s.status }})</option>
           }
@@ -21,14 +21,14 @@
           <small class="text-danger">{{ errorSuppliers }}</small>
         }
         @if (!loadingSuppliers && !errorSuppliers && suppliers.length === 0) {
-          <small class="text-muted">Aucun fournisseur lié à votre boutique. Contactez un administrateur pour créer une relation fournisseur-boutique.</small>
+          <small class="text-muted">{{ 'ORDER_CREATE.NO_SUPPLIERS_HINT' | translate }}</small>
         }
         @if (suppliers.length > 0) {
-          <small class="text-muted">{{ suppliers.length }} fournisseur(s) disponible(s)</small>
+          <small class="text-muted">{{ 'ORDER_CREATE.SUPPLIERS_AVAILABLE' | translate:{count: suppliers.length} }}</small>
         }
       </div>
       <div class="form-group">
-        <label>Devise</label>
+        <label>{{ 'ORDER_CREATE.CURRENCY' | translate }}</label>
         <select [(ngModel)]="currency" name="currency" class="form-control">
           <option value="TND">TND</option>
           <option value="EUR">EUR</option>
@@ -39,7 +39,7 @@
 
     <div class="form-row">
       <div class="form-group">
-        <label for="globalDiscount">Remise globale (%)</label>
+        <label for="globalDiscount">{{ 'ORDER_CREATE.GLOBAL_DISCOUNT' | translate }}</label>
         <input type="number" [(ngModel)]="globalDiscount" name="globalDiscount" id="globalDiscount" class="form-control"
           min="0" max="100" placeholder="0">
       </div>
@@ -47,14 +47,14 @@
 
     @if (selectedSupplierId) {
       <div class="form-group">
-        <label for="searchQuery">Rechercher un produit</label>
+        <label for="searchQuery">{{ 'ORDER_CREATE.SEARCH_LABEL' | translate }}</label>
         <input type="text" [(ngModel)]="searchQuery" name="search" id="searchQuery" class="form-control"
-          placeholder="Nom ou SKU...">
+          [placeholder]="'ORDER_CREATE.SEARCH_PLACEHOLDER' | translate">
       </div>
     }
 
     @if (loadingProducts) {
-      <div class="text-muted" style="padding:12px;" role="status" aria-live="polite">Chargement des produits...</div>
+      <div class="text-muted" style="padding:12px;" role="status" aria-live="polite">{{ 'ORDER_CREATE.LOADING_PRODUCTS' | translate }}</div>
     }
     @if (errorProducts) {
       <div class="text-danger" style="padding:12px;">{{ errorProducts }}</div>
@@ -63,26 +63,26 @@
       @if (allProductsEmpty) {
         <div class="empty-catalog">
           <div class="empty-catalog-icon">&#9888;</div>
-          <h3>Aucun produit disponible</h3>
-          <p>Aucun produit n'est disponible à la commande pour ce fournisseur. Cela peut être dû à une rupture de stock totale ou à l'absence de produits dans le catalogue.</p>
-          <button class="btn btn-primary" type="button" (click)="contactSupplier()" aria-label="Contacter le fournisseur pour assistance">Contacter le fournisseur</button>
+          <h3>{{ 'ORDER_CREATE.EMPTY_TITLE' | translate }}</h3>
+          <p>{{ 'ORDER_CREATE.EMPTY_MSG' | translate }}</p>
+          <button class="btn btn-primary" type="button" (click)="contactSupplier()" [attr.aria-label]="'ORDER_CREATE.CONTACT_SUPPLIER_ARIA' | translate">{{ 'ORDER_CREATE.CONTACT_SUPPLIER' | translate }}</button>
         </div>
       } @else {
         <div class="product-counter" aria-live="polite">
-          <span class="counter-available">{{ availableProductsCount }}</span> produit(s) disponible(s) sur <span class="counter-total">{{ totalProductsCount }}</span>
+          <span class="counter-available">{{ availableProductsCount }}</span> {{ 'ORDER_CREATE.PRODUCTS_AVAILABLE_ON' | translate }} <span class="counter-total">{{ totalProductsCount }}</span>
         </div>
         <div class="table-card" style="margin-bottom:24px;">
-          <h3 style="padding:16px 20px 0;">Produits</h3>
+          <h3 style="padding:16px 20px 0;">{{ 'ORDER_CREATE.PRODUCTS' | translate }}</h3>
           <div class="table-wrapper">
             <table>
               <thead>
                 <tr>
-                  <th>Image</th>
-                  <th>Nom</th>
-                  <th>SKU</th>
-                  <th>Prix unitaire</th>
-                  <th>Stock</th>
-                  <th>Action</th>
+                  <th>{{ 'ORDER_CREATE.COL_IMAGE' | translate }}</th>
+                  <th>{{ 'ORDER_CREATE.COL_NAME' | translate }}</th>
+                  <th>{{ 'ORDER_CREATE.COL_SKU' | translate }}</th>
+                  <th>{{ 'ORDER_CREATE.COL_PRICE' | translate }}</th>
+                  <th>{{ 'ORDER_CREATE.COL_STOCK' | translate }}</th>
+                  <th>{{ 'ORDER_CREATE.COL_ACTION' | translate }}</th>
                 </tr>
               </thead>
               <tbody>
@@ -102,21 +102,21 @@
                       @if (hasStock(p)) {
                         {{ p.quantity }}
                       } @else {
-                        <span class="stock-badge" role="status" [attr.aria-label]="p.name + ' : rupture de stock'">Rupture de stock</span>
+                        <span class="stock-badge" role="status" [attr.aria-label]="p.name + ' : ' + ('ORDER_CREATE.OUT_OF_STOCK' | translate)">{{ 'ORDER_CREATE.OUT_OF_STOCK' | translate }}</span>
                       }
                     </td>
                     <td>
                       @if (hasStock(p)) {
-                        <button class="btn btn-sm btn-primary" type="button" (click)="addProduct(p)" [attr.aria-label]="'Ajouter ' + p.name + ' à la commande'">Ajouter</button>
+                        <button class="btn btn-sm btn-primary" type="button" (click)="addProduct(p)" [attr.aria-label]="('ORDER_CREATE.ADD_ARIA' | translate:{name: p.name})">{{ 'ORDER_CREATE.ADD' | translate }}</button>
                       } @else {
-                        <button class="btn btn-sm btn-disabled" type="button" disabled aria-label="Produit indisponible">Indisponible</button>
+                        <button class="btn btn-sm btn-disabled" type="button" disabled [attr.aria-label]="'ORDER_CREATE.UNAVAILABLE_ARIA' | translate">{{ 'ORDER_CREATE.UNAVAILABLE' | translate }}</button>
                       }
                     </td>
                   </tr>
                 }
                 @if (filteredProducts.length === 0) {
                   <tr>
-                    <td colspan="6" class="empty">Aucun produit trouvé</td>
+                    <td colspan="6" class="empty">{{ 'ORDER_CREATE.NO_PRODUCTS' | translate }}</td>
                   </tr>
                 }
               </tbody>
@@ -128,16 +128,16 @@
 
     @if (orderLines.length > 0) {
       <div class="table-card" style="margin-bottom:24px;">
-        <h3 style="padding:16px 20px 0;">Lignes de commande</h3>
+        <h3 style="padding:16px 20px 0;">{{ 'ORDER_CREATE.ORDER_LINES' | translate }}</h3>
         <div class="table-wrapper">
           <table>
             <thead>
               <tr>
-                <th>Produit</th>
-                <th>Quantité</th>
-                <th>Prix unitaire</th>
-                <th>Remise %</th>
-                <th>Total</th>
+                <th>{{ 'ORDER_CREATE.COL_PRODUCT' | translate }}</th>
+                <th>{{ 'ORDER_CREATE.COL_QTY' | translate }}</th>
+                <th>{{ 'ORDER_CREATE.COL_UNIT_PRICE' | translate }}</th>
+                <th>{{ 'ORDER_CREATE.COL_DISCOUNT' | translate }}</th>
+                <th>{{ 'ORDER_CREATE.COL_TOTAL' | translate }}</th>
                 <th></th>
               </tr>
             </thead>
@@ -148,18 +148,18 @@
                   <td>
                     <input type="number" [(ngModel)]="line.quantity" [name]="'qty_' + i"
                       class="form-control" min="1" style="width:80px;" required
-                      [attr.aria-label]="'Quantité pour ' + line.product.name">
+                      [attr.aria-label]="('ORDER_CREATE.QTY_ARIA' | translate:{name: line.product.name})">
                   </td>
                   <td>{{ line.product.unitPrice | number:'1.2-2' }}</td>
                   <td>
                     <input type="number" [(ngModel)]="line.discount" [name]="'discount_' + i"
                       class="form-control" min="0" max="100" style="width:80px;"
-                      [attr.aria-label]="'Remise en pourcentage pour ' + line.product.name">
+                      [attr.aria-label]="('ORDER_CREATE.DISCOUNT_ARIA' | translate:{name: line.product.name})">
                   </td>
                   <td>{{ (line.product.unitPrice * line.quantity * (1 - line.discount / 100)) | number:'1.2-2' }}</td>
                   <td>
                     <button class="btn btn-sm btn-danger" type="button" (click)="removeLine(i)"
-                      [attr.aria-label]="'Supprimer ' + line.product.name + ' de la commande'">Supprimer</button>
+                      [attr.aria-label]="('ORDER_CREATE.REMOVE_ARIA' | translate:{name: line.product.name})">{{ 'ORDER_CREATE.REMOVE' | translate }}</button>
                   </td>
                 </tr>
               }
@@ -172,21 +172,21 @@
     @if (orderLines.length > 0) {
       <div class="order-summary">
         <div class="summary-row">
-          <span>Sous-total</span>
+          <span>{{ 'ORDER_CREATE.SUBTOTAL' | translate }}</span>
           <span>{{ subtotal | number:'1.2-2' }} {{ currency }}</span>
         </div>
         <div class="summary-row">
-          <span>TVA (19%)</span>
+          <span>{{ 'ORDER_CREATE.VAT' | translate:{rate: taxRate} }}</span>
           <span>{{ taxAmount | number:'1.2-2' }} {{ currency }}</span>
         </div>
         @if (globalDiscount > 0) {
           <div class="summary-row">
-            <span>Remise globale ({{ globalDiscount }}%)</span>
+            <span>{{ 'ORDER_CREATE.GLOBAL_DISCOUNT_LINE' | translate:{discount: globalDiscount} }}</span>
             <span>-{{ discountAmount | number:'1.2-2' }} {{ currency }}</span>
           </div>
         }
         <div class="summary-row total">
-          <span>Total</span>
+          <span>{{ 'ORDERS.TOTAL' | translate }}</span>
           <span>{{ total | number:'1.2-2' }} {{ currency }}</span>
         </div>
       </div>
@@ -194,32 +194,32 @@
 
     <div class="form-group" style="margin-top:16px;">
       <label class="toggle-label">
-        <input type="checkbox" [(ngModel)]="asapPayment" name="asapPayment" aria-label="Activer le paiement immédiat (ASAP)">
-        <span>Paiement ASAP</span>
+        <input type="checkbox" [(ngModel)]="asapPayment" name="asapPayment" [attr.aria-label]="'ORDER_CREATE.ASAP_ARIA' | translate">
+        <span>{{ 'ORDER_CREATE.ASAP' | translate }}</span>
       </label>
     </div>
 
     <div class="form-group">
-      <label for="paymentTerms">Conditions de paiement</label>
+      <label for="paymentTerms">{{ 'ORDER_CREATE.PAYMENT_TERMS' | translate }}</label>
       <select [(ngModel)]="paymentTerms" name="paymentTerms" id="paymentTerms" class="form-control">
-        <option value="IMMEDIATE">Immédiat</option>
-        <option value="NET_15">Net 15 jours</option>
-        <option value="NET_30">Net 30 jours</option>
-        <option value="NET_60">Net 60 jours</option>
+        <option value="IMMEDIATE">{{ 'ORDER_CREATE.PAY_IMMEDIATE' | translate }}</option>
+        <option value="NET_15">{{ 'ORDER_CREATE.PAY_NET_15' | translate }}</option>
+        <option value="NET_30">{{ 'ORDER_CREATE.PAY_NET_30' | translate }}</option>
+        <option value="NET_60">{{ 'ORDER_CREATE.PAY_NET_60' | translate }}</option>
       </select>
     </div>
 
     <div class="form-group">
-      <label for="notes">Notes</label>
+      <label for="notes">{{ 'ORDER_CREATE.NOTES' | translate }}</label>
       <textarea [(ngModel)]="notes" name="notes" id="notes" class="form-control" rows="3"
-      placeholder="Notes optionnelles..."></textarea>
+      [placeholder]="'ORDER_CREATE.NOTES_PLACEHOLDER' | translate"></textarea>
     </div>
 
     <div class="form-actions">
-      <a class="btn btn-secondary" routerLink="/dashboard/shop/orders" aria-label="Annuler la création de commande">Annuler</a>
+      <a class="btn btn-secondary" routerLink="/dashboard/shop/orders" [attr.aria-label]="'ORDER_CREATE.CANCEL_ARIA' | translate">{{ 'ORDERS.CANCEL_BTN' | translate }}</a>
       <button class="btn btn-primary" [disabled]="!canSubmit()"
-        [attr.aria-label]="creating ? 'Création en cours...' : 'Créer la commande'">
-        {{ creating ? 'Création...' : 'Créer la commande' }}
+        [attr.aria-label]="creating ? ('ORDER_CREATE.CREATING_ARIA' | translate) : ('ORDER_CREATE.CREATE_ARIA' | translate)">
+        {{ creating ? ('ORDER_CREATE.CREATING' | translate) : ('ORDER_CREATE.CREATE' | translate) }}
       </button>
     </div>
   </form>

@@ -33,10 +33,12 @@ public class StockService {
     }
 
     public List<ProductResponse> listProducts(UUID supplierId, String status) {
-        List<Product> list = (status != null && !status.isBlank())
-                ? products.findBySupplierIdAndStatus(supplierId, status)
-                : products.findBySupplierId(supplierId);
-        return list.stream().map(ProductResponse::from).collect(Collectors.toList());
+        if (status != null && !status.isBlank()) {
+            return products.findBySupplierIdAndStatus(supplierId, status)
+                    .stream().map(ProductResponse::from).collect(Collectors.toList());
+        }
+        return products.findBySupplierIdAndStatus(supplierId, "ACTIVE")
+                .stream().map(ProductResponse::from).collect(Collectors.toList());
     }
 
     public ProductResponse getProduct(UUID supplierId, UUID productId) {

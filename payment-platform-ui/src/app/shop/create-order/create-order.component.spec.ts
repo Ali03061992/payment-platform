@@ -15,6 +15,7 @@ import { OrganizationService } from '../../services/organization.service';
 import { StockService } from '../../services/stock.service';
 import { ToastService } from '../../services/toast.service';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { TranslateStubPipe, translateServiceProvider } from '../../testing/translate-stubs';
 
 describe('CreateOrderComponent (shop)', () => {
   let component: CreateOrderComponent;
@@ -39,9 +40,10 @@ describe('CreateOrderComponent (shop)', () => {
     stockSpy.getProductsBySupplier.and.returnValue(of([]));
 
     TestBed.configureTestingModule({
-    declarations: [CreateOrderComponent],
+    declarations: [CreateOrderComponent, TranslateStubPipe],
     imports: [FormsModule],
     providers: [
+        translateServiceProvider(),
         { provide: OrderService, useValue: orderSpy },
         { provide: OrganizationService, useValue: orgSpy },
         { provide: StockService, useValue: stockSpy },
@@ -256,7 +258,7 @@ describe('CreateOrderComponent (shop)', () => {
       component.selectedSupplierId = 1;
       component.orderLines = [{ product: { id: 1, unitPrice: 10 } as any, quantity: 1, discount: 0 }];
       component.submit();
-      expect(toast.error).toHaveBeenCalledWith('Erreur lors de la création');
+      expect(toast.error).toHaveBeenCalledWith('ORDER_CREATE.CREATE_ERROR');
       expect(component.creating).toBeFalse();
     });
   });

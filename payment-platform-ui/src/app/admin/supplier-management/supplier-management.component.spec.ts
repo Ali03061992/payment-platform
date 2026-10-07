@@ -12,6 +12,7 @@ import { SupplierManagementComponent } from './supplier-management.component';
 import { OrganizationService } from '../../services/organization.service';
 import { ToastService } from '../../services/toast.service';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { TranslateStubPipe, translateServiceProvider } from '../../testing/translate-stubs';
 
 describe('SupplierManagementComponent', () => {
   let component: SupplierManagementComponent;
@@ -20,18 +21,20 @@ describe('SupplierManagementComponent', () => {
   let toast: jasmine.SpyObj<ToastService>;
 
   beforeEach(() => {
-    const orgSpy = jasmine.createSpyObj('OrganizationService', ['listSuppliers', 'createSupplier', 'activate', 'disable']);
+    const orgSpy = jasmine.createSpyObj('OrganizationService', ['listSuppliers', 'listSuppliersPaged', 'createSupplier', 'activate', 'disable']);
     const toastSpy = jasmine.createSpyObj('ToastService', ['success', 'error']);
     orgSpy.listSuppliers.and.returnValue(of([]));
+    orgSpy.listSuppliersPaged.and.returnValue(of({ items: [], totalElements: 0, totalPages: 1, number: 0 } as any));
     orgSpy.createSupplier.and.returnValue(of({ id: 1, name: 'Sup1' } as any));
     orgSpy.activate.and.returnValue(of({} as any));
     orgSpy.disable.and.returnValue(of({} as any));
 
     TestBed.configureTestingModule({
-    declarations: [SupplierManagementComponent],
+    declarations: [SupplierManagementComponent, TranslateStubPipe],
     schemas: [NO_ERRORS_SCHEMA],
     imports: [],
     providers: [
+        translateServiceProvider(),
         { provide: OrganizationService, useValue: orgSpy },
         { provide: ToastService, useValue: toastSpy },
         provideHttpClient(withInterceptorsFromDi()),
@@ -49,14 +52,14 @@ describe('SupplierManagementComponent', () => {
   });
 
   it('should load suppliers on init', () => {
-    orgService.listSuppliers.and.returnValue(of([{ id: 1, name: 'S1', status: 'ACTIVE' } as any]));
+    orgService.listSuppliersPaged.and.returnValue(of({ items: [{ id: 1, name: 'S1', status: 'ACTIVE' }], totalElements: 1, totalPages: 1, number: 0 } as any));
     component.ngOnInit();
     expect(component.suppliers.length).toBe(1);
     expect(component.loading).toBeFalse();
   });
 
   it('should handle load error', () => {
-    orgService.listSuppliers.and.returnValue(throwError(() => new Error('fail')));
+    orgService.listSuppliersPaged.and.returnValue(throwError(() => new Error('fail')));
     component.load();
     expect(component.loading).toBeFalse();
   });
@@ -94,7 +97,7 @@ describe('SupplierManagementComponent', () => {
     component.newName = 'Supplier';
     orgService.createSupplier.and.returnValue(throwError(() => ({})));
     component.create();
-    expect(toast.error).toHaveBeenCalledWith('Erreur lors de la création');
+    expect(toast.error).toHaveBeenCalledWith('ORGS.CREATE_ERROR');
   });
 
   it('should disable active supplier', () => {

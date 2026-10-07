@@ -40,6 +40,18 @@ public class UserJpaEntity {
     @Column(nullable = false, length = 20)
     private String status;
 
+    @Column(name = "preferred_lang", nullable = false, length = 5)
+    private String preferredLang = "fr";
+
+    @Column(name = "accent_color1", nullable = false, length = 7)
+    private String accentColor1 = "#0284c7";
+
+    @Column(name = "accent_color2", nullable = false, length = 7)
+    private String accentColor2 = "#e63946";
+
+    @Column(name = "tour_seen", nullable = false)
+    private boolean tourSeen = false;
+
     @Version
     private Long version;
 
@@ -128,6 +140,38 @@ public class UserJpaEntity {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public String getPreferredLang() {
+        return preferredLang;
+    }
+
+    public void setPreferredLang(String preferredLang) {
+        this.preferredLang = preferredLang;
+    }
+
+    public String getAccentColor1() {
+        return accentColor1;
+    }
+
+    public void setAccentColor1(String accentColor1) {
+        this.accentColor1 = accentColor1;
+    }
+
+    public String getAccentColor2() {
+        return accentColor2;
+    }
+
+    public void setAccentColor2(String accentColor2) {
+        this.accentColor2 = accentColor2;
+    }
+
+    public boolean isTourSeen() {
+        return tourSeen;
+    }
+
+    public void setTourSeen(boolean tourSeen) {
+        this.tourSeen = tourSeen;
     }
 
     public Long getVersion() {

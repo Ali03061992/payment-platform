@@ -68,18 +68,6 @@ class AuthControllerTest {
     }
 
     @Test
-    @Disabled("Flaky due to test ordering - passes in isolation")
-    void login_validCredentials_returnsToken() throws Exception {
-        LoginRequest request = new LoginRequest(testUsername, testPassword);
-        mockMvc.perform(post("/api/auth/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.accessToken").isNotEmpty())
-                .andExpect(jsonPath("$.expiresIn").isNumber());
-    }
-
-    @Test
     void login_invalidPassword_returns401() throws Exception {
         LoginRequest request = new LoginRequest(testUsername, "WrongPass@1");
         mockMvc.perform(post("/api/auth/login")

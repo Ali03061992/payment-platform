@@ -1,10 +1,13 @@
 import { Component, OnInit, OnDestroy, HostListener, ElementRef } from '@angular/core';
+import { TranslateService } from '@ngx-translate/core';
 import { OrderService } from '../../services/order.service';
 import { Order, OrderPage } from '../../models/order.model';
 import { ToastService } from '../../services/toast.service';
 import { ConfirmDialogService } from '../../components/confirm-dialog/confirm-dialog.service';
 import { Subscription, Subject, debounceTime, distinctUntilChanged, switchMap, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
+import { statusLabelFr } from '../../pipes/status-label.pipe';
+import { sortItems, toggleSortState, ariaSortFor, sortIndicatorFor, SortState } from '../../models/page.model';
 
 @Component({
     selector: 'app-order-list',
@@ -17,9 +20,10 @@ export class OrderListComponent implements OnInit, OnDestroy {
   loading = true;
   filterStatus = '';
   currentPage = 0;
-  pageSize = 20;
+  pageSize = 10;
   totalElements = 0;
   totalPages = 0;
+  sort: SortState = { field: null, direction: 'asc' };
 
   searchQuery = '';
   searchResults: Order[] = [];
@@ -29,7 +33,7 @@ export class OrderListComponent implements OnInit, OnDestroy {
 
   private subscriptions = new Subscription();
 
-  constructor(private orderService: OrderService, private toast: ToastService, private confirmDialog: ConfirmDialogService, private elRef: ElementRef) {}
+  constructor(private orderService: OrderService, private toast: ToastService, private confirmDialog: ConfirmDialogService, private elRef: ElementRef, private translate: TranslateService) {}
 
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent): void {
@@ -80,7 +84,7 @@ export class OrderListComponent implements OnInit, OnDestroy {
         this.currentPage = page.number ?? this.currentPage;
         this.loading = false;
       },
-      error: (err: any) => { this.toast.error(err.error?.message || 'Erreur'); this.loading = false; }
+      error: (err: { error?: { message?: string }; status?: number; statusText?: string; message?: string }) => { this.toast.error(err.error?.message || this.translate.instant('ORDERS.ERROR')); this.loading = false; }
     }));
   }
 
@@ -101,19 +105,24 @@ export class OrderListComponent implements OnInit, OnDestroy {
   }
 
   get filteredOrders(): Order[] {
-    if (!this.filterStatus) return this.orders;
-    return this.orders.filter(o => o.status === this.filterStatus);
+    const base = !this.filterStatus ? this.orders : this.orders.filter(o => o.status === this.filterStatus);
+    return sortItems(base, this.sort.field, this.sort.direction);
+  }
+
+  onSort(field: string): void {
+    this.sort = toggleSortState(this.sort, field);
+  }
+
+  ariaSort(field: string): 'ascending' | 'descending' | 'none' {
+    return ariaSortFor(field, this.sort);
+  }
+
+  sortIndicator(field: string): string {
+    return sortIndicatorFor(field, this.sort);
   }
 
   statusLabel(s: string): string {
-    const map: Record<string, string> = {
-      DRAFT: 'Brouillon', CONFIRMED: 'Confirmé',
-      PREPARING: 'En préparation', READY_FOR_DELIVERY: 'Prêt pour livraison',
-      DELIVERY_ACCEPTED: 'Livraison acceptée',
-      IN_DELIVERY: 'En livraison', DELIVERED: 'Livré', ACCEPTED: 'Accepté',
-      CANCELLED: 'Annulé', REJECTED: 'Rejeté', DELIVERY_REJECTED: 'Livraison rejetée'
-    };
-    return map[s] || s;
+    return statusLabelFr(s);
   }
 
   statusClass(s: string): string {
@@ -131,20 +140,20 @@ export class OrderListComponent implements OnInit, OnDestroy {
   accept(id: string): void {
     this.subscriptions.add(this.orderService.accept(id).subscribe({
       next: () => this.load(),
-      error: (e: any) => { this.toast.error(e.error?.message || 'Erreur'); }
+      error: (e: any) => { this.toast.error(e.error?.message || this.translate.instant('ORDERS.ERROR')); }
     }));
   }
 
   reject(id: string): void {
     this.subscriptions.add(this.confirmDialog.confirm({
-      title: 'Rejeter cette commande',
-      message: 'Rejeter cette commande ? Elle sera marquée comme rejetée.',
+      title: this.translate.instant('ORDERS.REJECT_ORDER_TITLE'),
+      message: this.translate.instant('ORDERS.REJECT_ORDER_MSG'),
       danger: true,
     }).subscribe(ok => {
       if (!ok) return;
       this.subscriptions.add(this.orderService.reject(id).subscribe({
         next: () => this.load(),
-        error: (e: any) => { this.toast.error(e.error?.message || 'Erreur'); }
+        error: (e: any) => { this.toast.error(e.error?.message || this.translate.instant('ORDERS.ERROR')); }
       }));
     }));
   }
@@ -152,7 +161,7 @@ export class OrderListComponent implements OnInit, OnDestroy {
   cancel(id: string): void {
     this.subscriptions.add(this.orderService.cancel(id).subscribe({
       next: () => this.load(),
-      error: (e: any) => { this.toast.error(e.error?.message || 'Erreur'); }
+      error: (e: any) => { this.toast.error(e.error?.message || this.translate.instant('ORDERS.ERROR')); }
     }));
   }
 

@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { TranslateService } from '@ngx-translate/core';
 import { BalanceService } from '../../services/balance.service';
 import { BalanceSummary, BalanceEntry } from '../../models/balance.model';
 import { ToastService } from '../../services/toast.service';
@@ -34,7 +35,8 @@ export class SupplierBalanceComponent implements OnInit {
   constructor(
     private balanceService: BalanceService,
     private loginService: LoginService,
-    private toast: ToastService
+    private toast: ToastService,
+    private translate: TranslateService
   ) {}
 
   ngOnInit(): void {
@@ -51,7 +53,7 @@ export class SupplierBalanceComponent implements OnInit {
     this.loading = true;
     this.balanceService.listBySupplier(this.supplierId).subscribe({
       next: (data: BalanceSummary[]) => { this.balances = data; this.currentPage = 0; this.loading = false; },
-      error: (err: any) => { this.toast.error(err.error?.message || 'Erreur'); this.loading = false; }
+      error: (err: { error?: { message?: string }; status?: number; statusText?: string; message?: string }) => { this.toast.error(err.error?.message || this.translate.instant('PAYMENTS.ERROR')); this.loading = false; }
     });
   }
 
@@ -122,7 +124,7 @@ export class SupplierBalanceComponent implements OnInit {
     this.ledgerPage = 0;
     this.balanceService.getHistory(supplierId, shopId).subscribe({
       next: (data: BalanceEntry[]) => { this.ledgerEntries = data; this.loadingLedger = false; },
-      error: (err: any) => { this.toast.error(err.error?.message || 'Erreur'); this.loadingLedger = false; }
+      error: (err: { error?: { message?: string }; status?: number; statusText?: string; message?: string }) => { this.toast.error(err.error?.message || this.translate.instant('PAYMENTS.ERROR')); this.loadingLedger = false; }
     });
   }
 
@@ -142,18 +144,18 @@ export class SupplierBalanceComponent implements OnInit {
       supplierId: this.supplierId,
       shopId: this.creditShopId,
       amount: this.creditAmount!,
-      reason: this.creditReason || 'Crédit manuel fournisseur'
+      reason: this.creditReason || this.translate.instant('FINANCE.CREDIT_DEFAULT')
     }).subscribe({
       next: () => {
-        this.toast.success('Crédit ajouté avec succès');
+        this.toast.success(this.translate.instant('FINANCE.CREDIT_ADDED'));
         this.creditShopId = '';
         this.creditAmount = null;
         this.creditReason = '';
         this.submitting = false;
         this.load();
       },
-      error: (err: any) => {
-        this.toast.error(err.error?.message || 'Erreur lors du crédit');
+      error: (err: { error?: { message?: string }; status?: number; statusText?: string; message?: string }) => {
+        this.toast.error(err.error?.message || this.translate.instant('FINANCE.CREDIT_ERROR'));
         this.submitting = false;
       }
     });
@@ -161,8 +163,8 @@ export class SupplierBalanceComponent implements OnInit {
 
   typeLabel(t: string): string {
     const map: Record<string, string> = {
-      ORDER_CREDIT: 'Commande', PAYMENT_DEBIT: 'Paiement', ADJUSTMENT: 'Ajustement', REFUND: 'Remboursement',
-      ORDER: 'Commande', PAYMENT: 'Paiement'
+      ORDER_CREDIT: this.translate.instant('FINANCE.TYPE_ORDER'), PAYMENT_DEBIT: this.translate.instant('FINANCE.TYPE_PAYMENT'), ADJUSTMENT: this.translate.instant('FINANCE.TYPE_ADJUSTMENT'), REFUND: this.translate.instant('FINANCE.TYPE_REFUND'),
+      ORDER: this.translate.instant('FINANCE.TYPE_ORDER'), PAYMENT: this.translate.instant('FINANCE.TYPE_PAYMENT')
     };
     return map[t] || t;
   }

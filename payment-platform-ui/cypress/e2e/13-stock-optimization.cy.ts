@@ -25,7 +25,7 @@ describe('13 - Supplier: Stock Optimization', () => {
     cy.get('.config-panel').should('not.exist');
     cy.get('.page-header .header-actions button').contains('Parametres').click();
     cy.get('.config-panel').should('be.visible');
-    cy.get('.config-panel h3').should('contain', 'Parametres');
+    cy.get('.config-panel h3').should('contain', 'Paramètres');
     cy.get('.config-group input').should('have.length', 3);
   });
 
@@ -126,8 +126,8 @@ describe('13 - Supplier: Stock Optimization', () => {
       cy.get('.product-row').first().click();
       cy.get('.product-detail').should('be.visible');
       cy.get('.detail-section h4').should('contain', 'Classification');
-      cy.get('.detail-section h4').should('contain', 'Prevision');
-      cy.get('.detail-section h4').should('contain', 'Stock de securite');
+      cy.get('.detail-section h4').should('contain', 'Prévision');
+      cy.get('.detail-section h4').should('contain', 'Stock de sécurité');
     });
   });
 

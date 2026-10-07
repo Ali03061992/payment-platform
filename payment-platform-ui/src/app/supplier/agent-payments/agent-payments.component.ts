@@ -1,9 +1,11 @@
 import { Component, OnInit } from '@angular/core';
+import { TranslateService } from '@ngx-translate/core';
 import { PaymentService } from '../../services/payment.service';
 import { LoginService } from '../../services/login.service';
 import { AgentPaymentSummary, Payment } from '../../models/agent-payment.model';
 import { ToastService } from '../../services/toast.service';
 import { paginateItems, sortItems, toggleSortState, ariaSortFor, sortIndicatorFor, SortState } from '../../models/page.model';
+import { statusLabelFr } from '../../pipes/status-label.pipe';
 
 @Component({
     selector: 'app-agent-payments',
@@ -32,7 +34,8 @@ export class AgentPaymentsComponent implements OnInit {
   constructor(
     private paymentService: PaymentService,
     private loginService: LoginService,
-    private toast: ToastService
+    private toast: ToastService,
+    private translate: TranslateService
   ) {}
 
   ngOnInit(): void {
@@ -59,7 +62,7 @@ export class AgentPaymentsComponent implements OnInit {
         this.loading = false;
       },
       error: () => {
-        this.toast.error('Erreur lors du chargement');
+        this.toast.error(this.translate.instant('AGENT_PAYMENTS.LOAD_ERROR'));
         this.loading = false;
       }
     });
@@ -80,12 +83,36 @@ export class AgentPaymentsComponent implements OnInit {
     if (this.statusFilter) {
       payments = payments.filter((p: Payment) => p.status === this.statusFilter);
     }
-    return payments;
+    return sortItems(payments, this.sort.field, this.sort.direction);
+  }
+
+  onSort(field: string): void {
+    this.sort = toggleSortState(this.sort, field);
+  }
+
+  ariaSort(field: string): 'ascending' | 'descending' | 'none' {
+    return ariaSortFor(field, this.sort);
+  }
+
+  sortIndicator(field: string): string {
+    return sortIndicatorFor(field, this.sort);
+  }
+
+  get sortedSummaries(): AgentPaymentSummary[] {
+    return sortItems(this.summaries, this.sort.field, this.sort.direction);
+  }
+
+  onPageChange(page: number): void {
+    this.currentPage = page;
+  }
+
+  onSizeChange(size: number): void {
+    this.pageSize = size;
+    this.currentPage = 0;
   }
 
   statusLabel(s: string): string {
-    const map: Record<string, string> = { PENDING: 'En attente', CONFIRMED: 'Confirmé', REJECTED: 'Rejeté', CANCELLED: 'Annulé' };
-    return map[s] || s;
+    return statusLabelFr(s);
   }
 
   private formatDate(d: Date): string {

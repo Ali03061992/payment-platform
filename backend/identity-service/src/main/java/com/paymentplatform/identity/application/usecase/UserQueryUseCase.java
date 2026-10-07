@@ -68,6 +68,7 @@ public class UserQueryUseCase {
     @Transactional(readOnly = true)
     public List<UserResponse> listByOrganizationInternal(UUID organizationId) {
         return users.findByOrganizationId(OrganizationId.of(organizationId)).stream()
+                .filter(u -> u.isActive())
                 .map(UserResponse::from)
                 .toList();
     }

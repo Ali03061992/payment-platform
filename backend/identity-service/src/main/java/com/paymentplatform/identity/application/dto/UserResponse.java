@@ -8,6 +8,7 @@ import java.util.UUID;
 
 public record UserResponse(UUID id, String username, String email, String firstName, String lastName,
                            String phone, UUID organizationId, List<String> roles, String status,
+                           String preferredLang, String accentColor1, String accentColor2, boolean tourSeen,
                            Instant createdAt, Instant updatedAt) {
 
     public static UserResponse from(User user) {
@@ -21,6 +22,10 @@ public record UserResponse(UUID id, String username, String email, String firstN
                 user.organizationId() == null ? null : user.organizationId().value(),
                 user.roles().stream().map(Enum::name).sorted().toList(),
                 user.status().name(),
+                user.preferredLang(),
+                user.accentColor1(),
+                user.accentColor2(),
+                user.tourSeen(),
                 user.createdAt(),
                 user.updatedAt());
     }

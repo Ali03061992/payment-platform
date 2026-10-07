@@ -1,45 +1,45 @@
 <div class="page-header">
-  <h1>Catalogue produits</h1>
-  <button class="btn btn-primary" (click)="openCreate()">+ Nouveau produit</button>
+  <h1>{{ 'CATALOG.TITLE' | translate }}</h1>
+  <button class="btn btn-primary" (click)="openCreate()">{{ 'CATALOG.NEW_PRODUCT' | translate }}</button>
 </div>
 
 @if (showForm) {
   <div class="form-card">
-    <h3>{{ editingProduct ? 'Modifier le produit' : 'Creer un produit' }}</h3>
+    <h3>{{ editingProduct ? ('CATALOG.EDIT_PRODUCT' | translate) : ('CATALOG.CREATE_PRODUCT' | translate) }}</h3>
     <form (ngSubmit)="save()">
       <div class="form-section">
-        <h4>Informations produit</h4>
+        <h4>{{ 'CATALOG.SECTION_INFO' | translate }}</h4>
         <div class="form-row">
           <div class="form-group">
-            <label>Nom <span class="required">*</span></label>
-            <input type="text" [(ngModel)]="form.name" name="name" class="form-control" placeholder="Ex: T-shirt Premium" required>
+            <label>{{ 'CATALOG.FIELD_NAME' | translate }} <span class="required">*</span></label>
+            <input type="text" [(ngModel)]="form.name" name="name" class="form-control" [placeholder]="'CATALOG.NAME_PLACEHOLDER' | translate" required>
           </div>
           <div class="form-group">
-            <label>SKU <span class="required">*</span></label>
-            <input type="text" [(ngModel)]="form.sku" name="sku" class="form-control" placeholder="Ex: TS-001" [disabled]="!!editingProduct" required>
+            <label>{{ 'CATALOG.FIELD_SKU' | translate }} <span class="required">*</span></label>
+            <input type="text" [(ngModel)]="form.sku" name="sku" class="form-control" [placeholder]="'CATALOG.SKU_PLACEHOLDER' | translate" [disabled]="!!editingProduct" required>
           </div>
         </div>
         <div class="form-group">
-          <label>Description</label>
-          <input type="text" [(ngModel)]="form.description" name="description" class="form-control" placeholder="Description optionnelle">
+          <label>{{ 'CATALOG.FIELD_DESC' | translate }}</label>
+          <input type="text" [(ngModel)]="form.description" name="description" class="form-control" [placeholder]="'CATALOG.DESC_PLACEHOLDER' | translate">
         </div>
       </div>
       <div class="form-section">
-        <h4>Classification</h4>
+        <h4>{{ 'CATALOG.SECTION_CLASSIF' | translate }}</h4>
         <div class="form-row">
           <div class="form-group">
-            <label>Categorie</label>
+            <label>{{ 'CATALOG.FIELD_CATEGORY' | translate }}</label>
             <select [(ngModel)]="form.categoryId" name="categoryId" class="form-control" (change)="onCategoryChange()">
-              <option [ngValue]="0">-- Aucune --</option>
+              <option [ngValue]="0">{{ 'CATALOG.NO_SELECTION' | translate }}</option>
               @for (c of categories; track c) {
                 <option [ngValue]="c.id">{{ c.name }}</option>
               }
             </select>
           </div>
           <div class="form-group">
-            <label>Famille</label>
+            <label>{{ 'CATALOG.FIELD_FAMILY' | translate }}</label>
             <select [(ngModel)]="form.familyId" name="familyId" class="form-control">
-              <option [ngValue]="0">-- Aucune --</option>
+              <option [ngValue]="0">{{ 'CATALOG.NO_SELECTION' | translate }}</option>
               @for (f of getFamiliesForCategory(); track f) {
                 <option [ngValue]="f.id">{{ f.name }}</option>
               }
@@ -48,40 +48,40 @@
         </div>
       </div>
       <div class="form-section">
-        <h4>Prix et unite</h4>
+        <h4>{{ 'CATALOG.SECTION_PRICE_UNIT' | translate }}</h4>
         <div class="form-row">
           <div class="form-group">
-            <label>Prix unitaire <span class="required">*</span></label>
+            <label>{{ 'CATALOG.FIELD_PRICE' | translate }} <span class="required">*</span></label>
             <input type="number" [(ngModel)]="form.unitPrice" name="unitPrice" class="form-control" min="0" step="0.01" required>
           </div>
           <div class="form-group">
-            <label>Devise</label>
+            <label>{{ 'CATALOG.FIELD_CURRENCY' | translate }}</label>
             <select [(ngModel)]="form.currency" name="currency" class="form-control">
-              <option value="TND">TND - Dinar tunisien</option>
-              <option value="EUR">EUR - Euro</option>
-              <option value="USD">USD - Dollar</option>
+              <option value="TND">{{ 'CATALOG.CURRENCY_TND' | translate }}</option>
+              <option value="EUR">{{ 'CATALOG.CURRENCY_EUR' | translate }}</option>
+              <option value="USD">{{ 'CATALOG.CURRENCY_USD' | translate }}</option>
             </select>
           </div>
           <div class="form-group">
-            <label>Unite</label>
+            <label>{{ 'CATALOG.FIELD_UNIT' | translate }}</label>
             <select [(ngModel)]="form.unit" name="unit" class="form-control">
-              <option value="unite">Unite</option>
-              <option value="kg">Kilogramme</option>
-              <option value="m">Metre</option>
-              <option value="l">Litre</option>
-              <option value="carton">Carton</option>
+              <option value="unite">{{ 'CATALOG.UNIT_PIECE' | translate }}</option>
+              <option value="kg">{{ 'CATALOG.UNIT_KG' | translate }}</option>
+              <option value="m">{{ 'CATALOG.UNIT_M' | translate }}</option>
+              <option value="l">{{ 'CATALOG.UNIT_L' | translate }}</option>
+              <option value="carton">{{ 'CATALOG.UNIT_CARTON' | translate }}</option>
             </select>
           </div>
           <div class="form-group">
-            <label>Seuil min</label>
+            <label>{{ 'CATALOG.FIELD_MIN' | translate }}</label>
             <input type="number" [(ngModel)]="form.minQuantity" name="minQuantity" class="form-control" min="0">
           </div>
         </div>
       </div>
       <div class="form-actions">
-        <button type="button" class="btn btn-secondary" (click)="showForm = false">Annuler</button>
+        <button type="button" class="btn btn-secondary" (click)="showForm = false">{{ 'CATALOG.BTN_CANCEL' | translate }}</button>
         <button type="submit" class="btn btn-primary" [disabled]="saving || !form.name || !form.sku">
-          {{ saving ? 'Enregistrement...' : (editingProduct ? 'Mettre a jour' : 'Creer') }}
+          {{ saving ? ('CATALOG.BTN_SAVING' | translate) : (editingProduct ? ('CATALOG.BTN_UPDATE' | translate) : ('CATALOG.BTN_CREATE' | translate)) }}
         </button>
       </div>
     </form>
@@ -95,18 +95,18 @@
 @if (!loading) {
   <div class="filter-bar">
     <select [(ngModel)]="filterCategory" class="form-control filter-select" (change)="filterFamily = ''; onFilterChange()">
-      <option value="">Toutes les categories</option>
+      <option value="">{{ 'CATALOG.FILTER_ALL_CATEGORIES' | translate }}</option>
       @for (c of categories; track c) {
         <option [value]="c.id">{{ c.name }}</option>
       }
     </select>
     <select [(ngModel)]="filterFamily" class="form-control filter-select" (change)="onFilterChange()">
-      <option value="">Toutes les familles</option>
+      <option value="">{{ 'CATALOG.FILTER_ALL_FAMILIES' | translate }}</option>
       @for (f of families; track f) {
         <option [value]="f.id">{{ f.name }}</option>
       }
     </select>
-    <span class="result-count">{{ filteredProducts.length }} resultat(s)</span>
+    <span class="result-count">{{ filteredProducts.length }} {{ 'CATALOG.RESULT_SUFFIX' | translate }}</span>
   </div>
 }
 
@@ -116,14 +116,14 @@
       <table>
         <thead>
           <tr>
-            <th>SKU</th>
-            <th>Nom</th>
-            <th>Categorie</th>
-            <th>Famille</th>
-            <th>Prix</th>
-            <th>Unite</th>
-            <th>Statut</th>
-            <th>Actions</th>
+            <th class="sortable-th" (click)="onSort('sku')" (keydown.enter)="onSort('sku')" tabindex="0" [attr.aria-sort]="ariaSort('sku')">{{ 'CATALOG.COL_SKU' | translate }} <span class="sort-indicator" aria-hidden="true">{{ sortIndicator('sku') }}</span></th>
+            <th class="sortable-th" (click)="onSort('name')" (keydown.enter)="onSort('name')" tabindex="0" [attr.aria-sort]="ariaSort('name')">{{ 'CATALOG.COL_NAME' | translate }} <span class="sort-indicator" aria-hidden="true">{{ sortIndicator('name') }}</span></th>
+            <th>{{ 'CATALOG.COL_CATEGORY' | translate }}</th>
+            <th>{{ 'CATALOG.COL_FAMILY' | translate }}</th>
+            <th class="sortable-th" (click)="onSort('unitPrice')" (keydown.enter)="onSort('unitPrice')" tabindex="0" [attr.aria-sort]="ariaSort('unitPrice')">{{ 'CATALOG.COL_PRICE' | translate }} <span class="sort-indicator" aria-hidden="true">{{ sortIndicator('unitPrice') }}</span></th>
+            <th>{{ 'CATALOG.COL_UNIT' | translate }}</th>
+            <th class="sortable-th" (click)="onSort('status')" (keydown.enter)="onSort('status')" tabindex="0" [attr.aria-sort]="ariaSort('status')">{{ 'CATALOG.COL_STATUS' | translate }} <span class="sort-indicator" aria-hidden="true">{{ sortIndicator('status') }}</span></th>
+            <th>{{ 'CATALOG.COL_ACTIONS' | translate }}</th>
           </tr>
         </thead>
         <tbody>
@@ -139,21 +139,21 @@
             <td>{{ p.unit }}</td>
             <td>
               <span class="badge" [class.badge-active]="p.status === 'ACTIVE'" [class.badge-inactive]="p.status !== 'ACTIVE'">
-                {{ statusLabel(p.status) }}
+                {{ p.status | statusLabel }}
               </span>
             </td>
             <td class="actions">
-              <button class="btn btn-sm btn-secondary" (click)="openEdit(p)">Modifier</button>
+              <button class="btn btn-sm btn-secondary" (click)="openEdit(p)">{{ 'CATALOG.BTN_EDIT' | translate }}</button>
               <button class="btn btn-sm" [class.btn-warning]="p.status === 'ACTIVE'" [class.btn-success]="p.status !== 'ACTIVE'" (click)="toggleStatus(p)">
-                {{ p.status === 'ACTIVE' ? 'Desactiver' : 'Activer' }}
+                {{ p.status === 'ACTIVE' ? ('CATALOG.BTN_DEACTIVATE' | translate) : ('CATALOG.BTN_ACTIVATE' | translate) }}
               </button>
-              <button class="btn btn-sm btn-danger" (click)="deleteProduct(p)">Supprimer</button>
+              <button class="btn btn-sm btn-danger" (click)="deleteProduct(p)">{{ 'CATALOG.BTN_DELETE' | translate }}</button>
             </td>
           </tr>
         }
         @if (filteredProducts.length === 0) {
           <tr>
-            <td colspan="8" class="empty">Aucun produit</td>
+            <td colspan="8" class="empty">{{ 'CATALOG.EMPTY_PRODUCTS' | translate }}</td>
           </tr>
         }
       </tbody>

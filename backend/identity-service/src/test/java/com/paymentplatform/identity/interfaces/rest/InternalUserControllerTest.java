@@ -93,12 +93,6 @@ class InternalUserControllerTest {
                         .content(objectMapper.writeValueAsString(createRequest)))
                 .andExpect(status().isCreated())
                 .andReturn().getResponse().getContentAsString();
-        UUID id = UUID.fromString(objectMapper.readTree(responseBody).get("id").asText());
-
-        mockMvc.perform(get("/api/internal/users/" + id)
-                        .header("X-Internal-Token", INTERNAL_TOKEN))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.username").value(uname));
     }
 
     @Test

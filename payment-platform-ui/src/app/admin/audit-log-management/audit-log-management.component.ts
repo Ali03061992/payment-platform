@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
+import { TranslateService } from '@ngx-translate/core';
 import { AuditLogService } from '../../services/audit-log.service';
 import { AuditLogEntry, AuditLogPage } from '../../models/audit-log.model';
+import { sortItems, toggleSortState, ariaSortFor, sortIndicatorFor, SortState } from '../../models/page.model';
 
 @Component({
     selector: 'app-audit-log-management',
@@ -13,9 +15,10 @@ export class AuditLogManagementComponent implements OnInit {
   loading = true;
   error = '';
   currentPage = 0;
-  pageSize = 50;
+  pageSize = 10;
   totalElements = 0;
   totalPages = 0;
+  sort: SortState = { field: null, direction: 'asc' };
 
   filterUserId = '';
   filterAction = '';
@@ -30,7 +33,7 @@ export class AuditLogManagementComponent implements OnInit {
     'USER_LOGIN', 'USER_PASSWORD_CHANGE'
   ];
 
-  constructor(private auditLogService: AuditLogService) {}
+  constructor(private auditLogService: AuditLogService, private translate: TranslateService) {}
 
   ngOnInit(): void {
     this.loadLogs();
@@ -54,8 +57,8 @@ export class AuditLogManagementComponent implements OnInit {
         this.currentPage = page.number;
         this.loading = false;
       },
-      error: (err: any) => {
-        this.error = err.error?.message || 'Erreur de chargement';
+      error: (err: { error?: { message?: string }; status?: number; statusText?: string; message?: string }) => {
+        this.error = err.error?.message || this.translate.instant('AUDIT.LOAD_ERROR');
         this.loading = false;
       }
     });
@@ -98,6 +101,22 @@ export class AuditLogManagementComponent implements OnInit {
     this.pageSize = size;
     this.currentPage = 0;
     this.loadLogs();
+  }
+
+  onSort(field: string): void {
+    this.sort = toggleSortState(this.sort, field);
+  }
+
+  ariaSort(field: string): 'ascending' | 'descending' | 'none' {
+    return ariaSortFor(field, this.sort);
+  }
+
+  sortIndicator(field: string): string {
+    return sortIndicatorFor(field, this.sort);
+  }
+
+  get sortedLogs(): AuditLogEntry[] {
+    return sortItems(this.logs, this.sort.field, this.sort.direction);
   }
 
   formatAction(action: string): string {

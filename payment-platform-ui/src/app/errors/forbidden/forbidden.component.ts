@@ -10,9 +10,9 @@ import { LoginService } from '../../services/login.service';
     template: `
         <div class="error-page">
             <h1>403</h1>
-            <h2>Accès refusé</h2>
-            <p>Votre rôle ne permet pas d'accéder à cette page.</p>
-            <button type="button" (click)="back()">Retour au tableau de bord</button>
+            <h2>{{ 'ERRORS.FORBIDDEN_TITLE' | translate }}</h2>
+            <p>{{ 'ERRORS.FORBIDDEN_MSG' | translate }}</p>
+            <button type="button" (click)="back()">{{ 'ERRORS.FORBIDDEN_BACK' | translate }}</button>
         </div>
     `,
     styles: [`

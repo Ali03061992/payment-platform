@@ -134,15 +134,23 @@ public class PaymentController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "50") int size) {
         var current = CurrentUser.get();
-        if (current.organizationId() != null) {
-            String role = current.roles().getFirst();
-            if (role.contains("SHOP")) {
-                return ResponseEntity.ok(listPayments.execute(current.organizationId(), page, size));
-            } else if (role.contains("SUPPLIER")) {
-                return ResponseEntity.ok(listPayments.executeBySupplier(current.organizationId(), page, size));
+        int safePage = Math.max(0, page);
+        int safeSize = Math.min(Math.max(1, size), 100);
+        if (current.organizationId() != null && current.roles() != null) {
+            boolean isShop = current.roles().stream().anyMatch(r -> r.contains("SHOP"));
+            boolean isSupplier = current.roles().stream().anyMatch(r -> r.contains("SUPPLIER"));
+            if (isShop && !isSupplier) {
+                return ResponseEntity.ok(listPayments.execute(current.organizationId(), safePage, safeSize));
+            } else if (isSupplier && !isShop) {
+                return ResponseEntity.ok(listPayments.executeBySupplier(current.organizationId(), safePage, safeSize));
+            } else if (isShop || isSupplier) {
+                if (isSupplier) {
+                    return ResponseEntity.ok(listPayments.executeBySupplier(current.organizationId(), safePage, safeSize));
+                }
+                return ResponseEntity.ok(listPayments.execute(current.organizationId(), safePage, safeSize));
             }
         }
-        return ResponseEntity.ok(listPayments.executeAll(page, size));
+        return ResponseEntity.ok(listPayments.executeAll(safePage, safeSize));
     }
 
     /**
@@ -169,10 +177,12 @@ public class PaymentController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "50") int size) {
         var current = CurrentUser.get();
+        int safePage = Math.max(0, page);
+        int safeSize = Math.min(Math.max(1, size), 100);
         String role = current.roles() != null && !current.roles().isEmpty()
-                ? current.roles().getFirst() : null;
+                ? String.join(",", current.roles()) : null;
         return ResponseEntity.ok(overduePayments.execute(
-                current.userId(), current.organizationId(), role, page, size));
+                current.userId(), current.organizationId(), role, safePage, safeSize));
     }
 
     /**
@@ -280,12 +290,16 @@ public class PaymentController {
         var current = CurrentUser.get();
         UUID supplierId = null;
         UUID shopId = null;
-        if (!current.roles().contains("SYSTEM_ADMIN")) {
-            String role = current.roles().getFirst();
-            if (role.contains("SHOP")) {
+        if (current.roles() != null && current.roles().contains("SYSTEM_ADMIN")) {
+        } else if (current.organizationId() != null && current.roles() != null) {
+            boolean isShop = current.roles().stream().anyMatch(r -> r.contains("SHOP"));
+            boolean isSupplier = current.roles().stream().anyMatch(r -> r.contains("SUPPLIER"));
+            if (isShop && !isSupplier) {
                 shopId = current.organizationId();
-            } else if (role.contains("SUPPLIER")) {
+            } else if (isSupplier) {
                 supplierId = current.organizationId();
+            } else if (isShop) {
+                shopId = current.organizationId();
             }
         }
         Instant fromInstant = from.atStartOfDay().toInstant(ZoneOffset.UTC);
@@ -318,12 +332,16 @@ public class PaymentController {
         Instant fromInstant = null;
         Instant toInstant = null;
 
-        if (!current.roles().contains("SYSTEM_ADMIN")) {
-            String role = current.roles().getFirst();
-            if (role.contains("SHOP")) {
+        if (current.roles() == null || current.roles().contains("SYSTEM_ADMIN")) {
+        } else if (current.organizationId() != null) {
+            boolean isShop = current.roles().stream().anyMatch(r -> r.contains("SHOP"));
+            boolean isSupplier = current.roles().stream().anyMatch(r -> r.contains("SUPPLIER"));
+            if (isShop && !isSupplier) {
                 shopId = current.organizationId();
-            } else if (role.contains("SUPPLIER")) {
+            } else if (isSupplier) {
                 supplierId = current.organizationId();
+            } else if (isShop) {
+                shopId = current.organizationId();
             }
         }
 

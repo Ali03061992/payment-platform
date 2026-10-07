@@ -72,13 +72,13 @@ public class InternalUserCreationUseCase {
 
         User user = User.create(new UserId(null), username, email, hash, request.firstName(), request.lastName(),
                 PhoneNumber.of(request.phone()), orgId == null ? null : OrganizationId.of(orgId), role);
-        users.save(user);
+        User userInDb = users.save(user);
 
         audit.record(null, orgId, AuditActions.USER_CREATED, user.id().value(),
                 "{\"username\":\"" + user.username().value() + "\",\"role\":\"" + role + "\",\"by\":\"internal\"}");
         outbox.append(new UserCreatedEvent(UUID.randomUUID(), Instant.now(), user.id().value(), orgId,
                 List.of(role.name())), String.valueOf(user.id().value()));
 
-        return UserResponse.from(user);
+        return UserResponse.from(userInDb);
     }
 }

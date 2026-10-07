@@ -14,6 +14,7 @@ import { UserService } from '../../services/user.service';
 import { OrganizationService } from '../../services/organization.service';
 import { ToastService } from '../../services/toast.service';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { TranslateStubPipe, translateServiceProvider } from '../../testing/translate-stubs';
 
 describe('CreateUserComponent', () => {
   let component: CreateUserComponent;
@@ -32,9 +33,10 @@ describe('CreateUserComponent', () => {
     orgSpy.listShops.and.returnValue(of([]));
 
     TestBed.configureTestingModule({
-    declarations: [CreateUserComponent],
+    declarations: [CreateUserComponent, TranslateStubPipe],
     imports: [FormsModule],
     providers: [
+        translateServiceProvider(),
         { provide: UserService, useValue: userSpy },
         { provide: OrganizationService, useValue: orgSpy },
         { provide: ToastService, useValue: toastSpy },
@@ -79,12 +81,12 @@ describe('CreateUserComponent', () => {
   describe('organizationLabel', () => {
     it('should return Fournisseur for SUPPLIER roles', () => {
       component.form.role = 'SUPPLIER_ADMIN';
-      expect(component.organizationLabel).toBe('Fournisseur');
+      expect(component.organizationLabel).toBe('ORGS.SUPPLIER');
     });
 
     it('should return Boutique for SHOP roles', () => {
       component.form.role = 'SHOP_ADMIN';
-      expect(component.organizationLabel).toBe('Boutique');
+      expect(component.organizationLabel).toBe('ORGS.SHOP');
     });
   });
 
@@ -119,7 +121,7 @@ describe('CreateUserComponent', () => {
     it('should default error message on failure', () => {
       userService.create.and.returnValue(throwError(() => ({ error: {} })));
       component.onSubmit();
-      expect(toast.error).toHaveBeenCalledWith("Erreur lors de la création");
+      expect(toast.error).toHaveBeenCalledWith('USERS.CREATE_ERROR');
     });
   });
 });

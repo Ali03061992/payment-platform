@@ -5,6 +5,7 @@ import { DisputeService } from '../../services/dispute.service';
 import { LoginService } from '../../services/login.service';
 import { OrderService } from '../../services/order.service';
 import { PaymentService } from '../../services/payment.service';
+import { TranslateService } from '@ngx-translate/core';
 
 export interface ChatLink { label: string; route: string; }
 export interface ChatMessage {
@@ -42,16 +43,17 @@ export class ChatbotService {
     private orders: OrderService,
     private disputes: DisputeService,
     private payments: PaymentService,
-    private loginService: LoginService
+    private loginService: LoginService,
+    private translate: TranslateService
   ) {}
 
   start(): void {
     if (this.started) return;
     this.started = true;
     this.say(
-      `Bonjour ${this.firstName()} ! Je suis l'assistant de la plateforme. Je peux suivre une commande, vous aider à déposer une réclamation ou vous guider vers la bonne page.`,
+      this.translate.instant('CHATBOT.HELLO', { name: this.firstName() }),
       undefined,
-      ['Suivre une commande', 'Déposer une réclamation', 'Aide paiements', 'Aide livraisons']
+      [this.translate.instant('CHATBOT.OPT_TRACK'), this.translate.instant('CHATBOT.OPT_COMPLAINT'), this.translate.instant('CHATBOT.OPT_PAY'), this.translate.instant('CHATBOT.OPT_DELIVERY')]
     );
   }
 
@@ -60,8 +62,8 @@ export class ChatbotService {
     this.pendingOrderId = null;
     this.pendingOrderRef = null;
     this.pendingReason = null;
-    this.say('Que puis-je faire pour vous ?',
-      undefined, ['Suivre une commande', 'Déposer une réclamation', 'Aide paiements', 'Aide livraisons']);
+    this.say(this.translate.instant('CHATBOT.WHAT_ELSE'),
+      undefined, [this.translate.instant('CHATBOT.OPT_TRACK'), this.translate.instant('CHATBOT.OPT_COMPLAINT'), this.translate.instant('CHATBOT.OPT_PAY'), this.translate.instant('CHATBOT.OPT_DELIVERY')]);
   }
 
   send(text: string): void {
@@ -88,74 +90,75 @@ export class ChatbotService {
   // ── Intentions ──────────────────────────────────────────────
 
   private handleIntent(norm: string, raw: string): void {
-    if (/(bonjour|salut|hello|coucou|bonsoir)/.test(norm)) {
-      this.say(`Bonjour ${this.firstName()} !`, undefined,
-        ['Suivre une commande', 'Déposer une réclamation', 'Aide paiements', 'Aide livraisons']);
+    if (/(bonjour|salut|hello|coucou|bonsoir|good morning|good afternoon|evening|مرحبا|صباح|مساء|سلام)/.test(norm)) {
+      this.say(this.translate.instant('CHATBOT.HELLO_SHORT', { name: this.firstName() }), undefined,
+        [this.translate.instant('CHATBOT.OPT_TRACK'), this.translate.instant('CHATBOT.OPT_COMPLAINT'), this.translate.instant('CHATBOT.OPT_PAY'), this.translate.instant('CHATBOT.OPT_DELIVERY')]);
       return;
     }
-    if (/(commande|suivi|suivre|statut.*commande|ou en est)/.test(norm)) {
+    if (/(commande|suivi|suivre|statut.*commande|ou en est|order|tracking|track|طلب|تتبع|فين)/.test(norm)) {
       this.state = 'awaitOrderRef';
-      this.say('Quelle est la référence de la commande ? (ex. ORD-AB12CD34). Vous pouvez aussi taper « récentes » pour voir vos dernières commandes.');
+      this.say(this.translate.instant('CHATBOT.ASK_ORDER_REF'));
       return;
     }
-    if (/(reclamation|litige|probleme|plainte|sav|retour)/.test(norm)) {
+    if (/(reclamation|litige|probleme|plainte|sav|retour|dispute|complaint|شكوى|نزاع|مشكل)/.test(norm)) {
       this.startComplaint();
       return;
     }
-    if (/(paiement|payer|facture|balance|solde)/.test(norm)) {
+    if (/(paiement|payer|facture|balance|solde|payment|pay|invoice|خلاص|دفع|مدفوع|فاتورة|رصيد)/.test(norm)) {
       this.state = 'awaitPendingChoice';
       this.say(
-        'Côté paiements : « En attente » = à traiter, « Confirmé » = validé, « Rejeté/Annulé » = clôturé sans suite. Voulez-vous voir vos paiements en attente ?',
+        this.translate.instant('CHATBOT.PAY_HELP'),
         this.isShop()
-          ? [{ label: 'Voir ma balance', route: '/dashboard/shop/balance' }]
-          : [{ label: 'Voir les paiements', route: '/dashboard/payments' }],
-        ['Oui, montrer', 'Non merci']
+          ? [{ label: this.translate.instant('CHATBOT.LINK_BALANCE'), route: '/dashboard/shop/balance' }]
+          : [{ label: this.translate.instant('CHATBOT.LINK_PAYMENTS'), route: '/dashboard/payments' }],
+        [this.translate.instant('CHATBOT.OPT_YES_SHOW'), this.translate.instant('CHATBOT.OPT_NO_THANKS')]
       );
       return;
     }
-    if (/(livraison|livreur|colis|recu|reception)/.test(norm)) {
+    if (/(livraison|livreur|colis|recu|reception|delivery|driver|package|received|توصيل|تسليم|استلام)/.test(norm)) {
       this.say(
-        'Une livraison passe par : assignation → acceptation → confirmation → réception. La réception confirmée crée automatiquement le paiement.',
+        this.translate.instant('CHATBOT.DELIVERY_HELP'),
         this.isShop()
-          ? [{ label: 'Voir mes livraisons', route: '/dashboard/shop/deliveries' }]
-          : [{ label: 'Voir les livraisons', route: '/dashboard/supplier/deliveries' }],
-        ['Suivre une commande', 'Déposer une réclamation']
+          ? [{ label: this.translate.instant('CHATBOT.LINK_MY_DELIVERIES'), route: '/dashboard/shop/deliveries' }]
+          : [{ label: this.translate.instant('CHATBOT.LINK_DELIVERIES'), route: '/dashboard/supplier/deliveries' }],
+        [this.translate.instant('CHATBOT.OPT_TRACK'), this.translate.instant('CHATBOT.OPT_COMPLAINT')]
       );
       return;
     }
-    if (/(merci)/.test(norm)) {
-      this.say('Avec plaisir ! Autre chose ?',
-        undefined, ['Suivre une commande', 'Déposer une réclamation']);
+    if (/(merci|thanks|thank you|شكرا)/.test(norm)) {
+      this.say(this.translate.instant('CHATBOT.PLEASURE'),
+        undefined, [this.translate.instant('CHATBOT.OPT_TRACK'), this.translate.instant('CHATBOT.OPT_COMPLAINT')]);
       return;
     }
-    if (/(humain|conseiller|contact|telephone|email|aide)/.test(norm)) {
-      this.say("Pour un cas particulier, décrivez-le dans une réclamation : l'équipe concernée vous répondra dans le fil du litige.",
-        undefined, ['Déposer une réclamation']);
+    if (/(humain|conseiller|contact|telephone|email|aide|human|agent|help|بشري|مستشار|اتصال|مساعدة)/.test(norm)) {
+      this.say(this.translate.instant('CHATBOT.HUMAN'),
+        undefined, [this.translate.instant('CHATBOT.OPT_COMPLAINT')]);
       return;
     }
-    this.say(`Je n'ai pas bien compris « ${raw} ». Voici ce que je sais faire :`,
-      undefined, ['Suivre une commande', 'Déposer une réclamation', 'Aide paiements', 'Aide livraisons']);
+    this.say(this.translate.instant('CHATBOT.NOT_UNDERSTOOD', { raw }),
+      undefined, [this.translate.instant('CHATBOT.OPT_TRACK'), this.translate.instant('CHATBOT.OPT_COMPLAINT'), this.translate.instant('CHATBOT.OPT_PAY'), this.translate.instant('CHATBOT.OPT_DELIVERY')]);
   }
 
   // ── Suivi commande ──────────────────────────────────────────
 
   private handleOrderRef(ref: string): void {
-    if (/recentes?/.test(ref.toLowerCase())) {
+    const normRef = ref.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    if (/recentes?/.test(normRef)) {
       this.orders.getRecent(5).subscribe({
         next: (list) => {
           if (!list.length) {
             this.state = 'idle';
-            this.say("Aucune commande récente trouvée. Donnez-moi une référence (ex. ORD-AB12CD34).");
+            this.say(this.translate.instant('CHATBOT.NO_RECENT'));
             return;
           }
           this.state = 'awaitOrderRef';
-          this.say('Voici vos dernières commandes : choisissez-en une (tapez sa référence).',
+          this.say(this.translate.instant('CHATBOT.RECENT_LIST'),
             list.map((o: any) => ({ label: `${o.reference} — ${this.orderStatusLabel(o.status)}`, route: '' })),
             list.map((o: any) => o.reference));
         },
         error: () => {
           this.state = 'idle';
-          this.say("Impossible de charger les commandes. Réessayez plus tard.");
+          this.say(this.translate.instant('CHATBOT.LOAD_ERROR'));
         }
       });
       return;
@@ -170,12 +173,12 @@ export class ChatbotService {
         const detailRoute = this.isShop()
           ? `/dashboard/shop/orders/${o.id}`
           : `/dashboard/supplier/orders`;
-        this.say(`Commande ${o.reference} : ${this.orderStatusLabel(o.status)} — total ${Number(o.total).toFixed(2)} ${o.currency || 'TND'}.`,
-          [{ label: 'Voir le détail', route: detailRoute }],
-          ['Suivre une commande', 'Déposer une réclamation']);
+        this.say(this.translate.instant('CHATBOT.ORDER_FOUND', { ref: o.reference, status: this.orderStatusLabel(o.status), total: Number(o.total).toFixed(2), currency: o.currency || 'TND' }),
+          [{ label: this.translate.instant('CHATBOT.LINK_DETAIL'), route: detailRoute }],
+          [this.translate.instant('CHATBOT.OPT_TRACK'), this.translate.instant('CHATBOT.OPT_COMPLAINT')]);
       },
       error: () => {
-        this.say(`Commande « ${ref} » introuvable. Vérifiez la référence ou tapez « récentes ».`);
+        this.say(this.translate.instant('CHATBOT.ORDER_NOT_FOUND', { ref }));
       }
     });
   }
@@ -183,7 +186,7 @@ export class ChatbotService {
   // ── Paiements en attente (lookup réel) ────────────────────────
 
   private handlePendingChoice(norm: string): void {
-    if (!/^(oui|montrer|ok|oui,)/.test(norm)) {
+    if (!/^(oui|montrer|ok|yes|show|نعم)/.test(norm)) {
       this.reset();
       return;
     }
@@ -193,22 +196,22 @@ export class ChatbotService {
         const pending = arr.filter((p) => p.status === 'PENDING');
         this.state = 'idle';
         if (!pending.length) {
-          this.say('Bonne nouvelle : aucun paiement en attente sur les 50 derniers.',
-            [{ label: 'Voir les paiements', route: '/dashboard/payments' }],
-            ['Suivre une commande', 'Déposer une réclamation']);
+          this.say(this.translate.instant('CHATBOT.NO_PENDING'),
+            [{ label: this.translate.instant('CHATBOT.LINK_PAYMENTS'), route: '/dashboard/payments' }],
+            [this.translate.instant('CHATBOT.OPT_TRACK'), this.translate.instant('CHATBOT.OPT_COMPLAINT')]);
           return;
         }
         const total = pending.reduce((s, p) => s + Number(p.amount || 0), 0);
         const refs = pending.slice(0, 3).map((p) => p.reference).join(', ');
-        this.say(`${pending.length} paiement(s) en attente — total ${total.toFixed(2)} TND${refs ? ` (ex. ${refs})` : ''}.`,
-          [{ label: 'Voir les paiements', route: '/dashboard/payments' }],
-          ['Suivre une commande', 'Déposer une réclamation']);
+        this.say(this.translate.instant('CHATBOT.PENDING_SOME', { n: pending.length, total: total.toFixed(2), refs: refs ? ` (${this.translate.instant('CHATBOT.EXAMPLE_PREFIX')} ${refs})` : '' }),
+          [{ label: this.translate.instant('CHATBOT.LINK_PAYMENTS'), route: '/dashboard/payments' }],
+          [this.translate.instant('CHATBOT.OPT_TRACK'), this.translate.instant('CHATBOT.OPT_COMPLAINT')]);
       },
       error: () => {
         this.state = 'idle';
-        this.say('Impossible de charger les paiements pour le moment.',
-          [{ label: 'Voir les paiements', route: '/dashboard/payments' }],
-          ['Suivre une commande', 'Déposer une réclamation']);
+        this.say(this.translate.instant('CHATBOT.PAYMENTS_ERROR'),
+          [{ label: this.translate.instant('CHATBOT.LINK_PAYMENTS'), route: '/dashboard/payments' }],
+          [this.translate.instant('CHATBOT.OPT_TRACK'), this.translate.instant('CHATBOT.OPT_COMPLAINT')]);
       }
     });
   }
@@ -217,7 +220,7 @@ export class ChatbotService {
 
   private startComplaint(): void {
     this.state = 'awaitComplaintOrder';
-    this.say('Décrivez le problème en précisant la référence (ex. « colis cassé ORD-A1B2C3 ») : je crée la réclamation directement. Sinon, donnez juste la référence ou tapez « récentes ».');
+    this.say(this.translate.instant('CHATBOT.COMPLAINT_START'));
   }
 
   /** Création directe : référence + motif dans le même message, zéro question. */
@@ -231,7 +234,7 @@ export class ChatbotService {
         this.createDisputeNow(o.id, o.reference, reason.length > 300 ? reason.slice(0, 300) : reason);
       },
       error: () => {
-        this.say(`Commande « ${m[0]} » introuvable. Vérifiez la référence ou tapez « récentes ».`);
+        this.say(this.translate.instant('CHATBOT.ORDER_NOT_FOUND', { ref: m[0] }));
       }
     });
     return true;
@@ -245,13 +248,13 @@ export class ChatbotService {
         const detailRoute = this.isShop()
           ? `/dashboard/shop/disputes/${d.id}`
           : `/dashboard/shop/orders`;
-        this.say(`Réclamation enregistrée pour ${ref} : « ${reason} ». L'équipe concernée vous répondra dans le fil du litige.`,
-          [{ label: 'Voir la réclamation', route: detailRoute }],
-          ['Suivre une commande', 'Déposer une réclamation']);
+        this.say(this.translate.instant('CHATBOT.DISPUTE_CREATED', { ref, reason }),
+          [{ label: this.translate.instant('CHATBOT.LINK_DISPUTE'), route: detailRoute }],
+          [this.translate.instant('CHATBOT.OPT_TRACK'), this.translate.instant('CHATBOT.OPT_COMPLAINT')]);
       },
       error: (e: any) => {
         this.state = 'idle';
-        this.say(`Échec de l'enregistrement (${e.error?.message || 'erreur'}). Réessayez ou passez par la page commande.`);
+        this.say(this.translate.instant('CHATBOT.DISPUTE_FAILED', { err: e.error?.message || this.translate.instant('CHATBOT.GENERIC_ERROR') }));
       }
     });
   }
@@ -259,19 +262,19 @@ export class ChatbotService {
   private handleComplaintOrder(ref: string): void {
     // Message complet (référence + motif) => création immédiate, sans autre question.
     if (this.tryDirectComplaint(ref)) return;
-    if (/recentes?/.test(ref.toLowerCase())) {
+    if (/recentes?/.test(ref.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, ''))) {
       this.orders.getRecent(5).subscribe({
         next: (list) => {
           if (!list.length) {
             this.state = 'idle';
-            this.say("Aucune commande récente. Donnez-moi une référence pour continuer.");
+            this.say(this.translate.instant('CHATBOT.NO_RECENT_SHORT'));
             return;
           }
-          this.say('Choisissez la commande concernée :', undefined, list.map((o: any) => o.reference));
+          this.say(this.translate.instant('CHATBOT.CHOOSE_ORDER'), undefined, list.map((o: any) => o.reference));
         },
         error: () => {
           this.state = 'idle';
-          this.say("Impossible de charger les commandes. Réessayez plus tard.");
+          this.say(this.translate.instant('CHATBOT.LOAD_ERROR'));
         }
       });
       return;
@@ -281,28 +284,28 @@ export class ChatbotService {
         this.pendingOrderId = o.id;
         this.pendingOrderRef = o.reference;
         this.state = 'awaitComplaintReasonText';
-        this.say(`C'est noté pour ${o.reference}. Quel est le motif ?`,
-          undefined, ['Retard de livraison', 'Produit endommagé', 'Quantité incorrecte', 'Problème de montant', 'Autre (décrire)']);
+        this.say(this.translate.instant('CHATBOT.ASK_REASON', { ref: o.reference }),
+          undefined, [this.translate.instant('CHATBOT.REASON_LATE'), this.translate.instant('CHATBOT.REASON_DAMAGED'), this.translate.instant('CHATBOT.REASON_QTY'), this.translate.instant('CHATBOT.REASON_AMOUNT'), this.translate.instant('CHATBOT.REASON_OTHER')]);
       },
       error: () => {
-        this.say(`Commande « ${ref} » introuvable. Réessayez ou tapez « récentes ».`);
+        this.say(this.translate.instant('CHATBOT.ORDER_NOT_FOUND_RETRY', { ref }));
       }
     });
   }
 
   private handleComplaintReasonText(text: string): void {
-    if (/^autre/.test(text.toLowerCase())) {
-      this.say('Décrivez le problème en une phrase :');
+    if (/^(autre|other|أخرى|اخرى)/.test(text.toLowerCase())) {
+      this.say(this.translate.instant('CHATBOT.DESCRIBE_ONE_SENTENCE'));
       return;
     }
     this.pendingReason = text;
     this.state = 'awaitComplaintConfirm';
-    this.say(`Je vais ouvrir une réclamation pour ${this.pendingOrderRef} — motif : « ${text} ». Confirmer ?`,
-      undefined, ['Oui, confirmer', 'Annuler']);
+    this.say(this.translate.instant('CHATBOT.CONFIRM_COMPLAINT', { ref: this.pendingOrderRef, reason: text }),
+      undefined, [this.translate.instant('CHATBOT.OPT_YES_CONFIRM'), this.translate.instant('CHATBOT.OPT_CANCEL')]);
   }
 
   private handleComplaintConfirm(norm: string): void {
-    if (/^(oui|confirmer|ok|valider)/.test(norm)) {
+    if (/^(oui|confirmer|ok|valider|yes|confirm|نعم)/.test(norm)) {
       if (!this.pendingOrderId || !this.pendingReason) {
         this.reset();
         return;
@@ -349,12 +352,15 @@ export class ChatbotService {
   }
 
   private orderStatusLabel(s: string): string {
-    const map: Record<string, string> = {
-      DRAFT: 'brouillon', CONFIRMED: 'confirmée', PREPARING: 'en préparation',
-      READY_FOR_DELIVERY: 'prête pour livraison', DELIVERY_ACCEPTED: 'livraison acceptée',
-      IN_DELIVERY: 'en livraison', DELIVERED: 'livrée', ACCEPTED: 'acceptée',
-      CANCELLED: 'annulée', REJECTED: 'rejetée',
-    };
-    return map[s] || s;
+    const key = 'STATUS.' + s;
+    const v = this.translate.instant(key);
+    return v && v !== key ? v : (this.STATUS_FALLBACK[s] || s);
   }
+
+  private readonly STATUS_FALLBACK: Record<string, string> = {
+    DRAFT: 'brouillon', CONFIRMED: 'confirmée', PREPARING: 'en préparation',
+    READY_FOR_DELIVERY: 'prête pour livraison', DELIVERY_ACCEPTED: 'livraison acceptée',
+    IN_DELIVERY: 'en livraison', DELIVERED: 'livrée', ACCEPTED: 'acceptée',
+    CANCELLED: 'annulée', REJECTED: 'rejetée',
+  };
 }

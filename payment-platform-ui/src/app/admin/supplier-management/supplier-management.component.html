@@ -1,24 +1,24 @@
 <div class="page-header">
-  <h2>Fournisseurs</h2>
+  <h2>{{ 'NAV.SUPPLIERS' | translate }}</h2>
   <button class="btn btn-primary" (click)="showCreate = !showCreate"
-    [attr.aria-label]="showCreate ? 'Annuler la création' : 'Créer un nouveau fournisseur'"
+    [attr.aria-label]="showCreate ? ('ORGS.CANCEL_CREATE_ARIA' | translate) : ('ORGS.CREATE_SUPPLIER_ARIA' | translate)"
     [attr.aria-expanded]="showCreate">
-    {{ showCreate ? 'Annuler' : '+ Nouveau fournisseur' }}
+    {{ showCreate ? ('COMMON.CANCEL' | translate) : ('ORGS.NEW_SUPPLIER' | translate) }}
   </button>
 </div>
 
 @if (showCreate) {
   <div class="form-card" style="margin-bottom: 24px;">
-    <h3 style="margin-bottom: 16px;">Créer un fournisseur</h3>
+    <h3 style="margin-bottom: 16px;">{{ 'ORGS.CREATE_SUPPLIER_TITLE' | translate }}</h3>
     <form (ngSubmit)="create()">
       <div class="form-group">
-        <label for="supplierName">Nom du fournisseur</label>
+        <label for="supplierName">{{ 'ORGS.SUPPLIER_NAME' | translate }}</label>
         <input type="text" [(ngModel)]="newName" name="name" id="supplierName" class="form-control"
-          placeholder="Ex: Fournisseur ABC" required aria-required="true">
+          [placeholder]="'ORGS.SUPPLIER_PLACEHOLDER' | translate" required aria-required="true">
       </div>
       <button class="btn btn-primary" [disabled]="creating || !newName.trim()"
-        [attr.aria-label]="creating ? 'Création en cours...' : 'Créer le fournisseur'">
-        {{ creating ? 'Création...' : 'Créer' }}
+        [attr.aria-label]="creating ? ('COMMON.CREATING' | translate) : ('ORGS.CREATE_SUPPLIER_ARIA' | translate)">
+        {{ creating ? ('COMMON.CREATING' | translate) : ('COMMON.CREATE' | translate) }}
       </button>
     </form>
   </div>
@@ -27,7 +27,7 @@
 @if (loading) {
   <div class="loading">
     <div class="spinner"></div>
-    <span>Chargement...</span>
+    <span>{{ 'COMMON.LOADING' | translate }}</span>
   </div>
 }
 
@@ -37,35 +37,35 @@
       <table>
         <thead>
           <tr>
-            <th>Nom</th>
-            <th>Statut</th>
-            <th>Créé le</th>
-            <th>Actions</th>
+            <th class="sortable-th" (click)="onSort('name')" (keydown.enter)="onSort('name')" tabindex="0" [attr.aria-sort]="ariaSort('name')">{{ 'ORGS.NAME' | translate }} <span class="sort-indicator" aria-hidden="true">{{ sortIndicator('name') }}</span></th>
+            <th class="sortable-th" (click)="onSort('status')" (keydown.enter)="onSort('status')" tabindex="0" [attr.aria-sort]="ariaSort('status')">{{ 'DASHBOARD.STATUS' | translate }} <span class="sort-indicator" aria-hidden="true">{{ sortIndicator('status') }}</span></th>
+            <th class="sortable-th" (click)="onSort('createdAt')" (keydown.enter)="onSort('createdAt')" tabindex="0" [attr.aria-sort]="ariaSort('createdAt')">{{ 'ORGS.CREATED_AT' | translate }} <span class="sort-indicator" aria-hidden="true">{{ sortIndicator('createdAt') }}</span></th>
+            <th>{{ 'USERS.ACTIONS' | translate }}</th>
           </tr>
         </thead>
         <tbody>
-          @for (s of suppliers; track s) {
+          @for (s of sortedSuppliers; track s) {
             <tr>
               <td><strong>{{ s.name }}</strong></td>
               <td>
                 <span class="status-badge" [class.active]="s.status === 'ACTIVE'" [class.disabled]="s.status === 'DISABLED'"
-                  [attr.aria-label]="'Statut du fournisseur : ' + (s.status === 'ACTIVE' ? 'Actif' : 'Désactivé')" role="status">
-                  {{ s.status === 'ACTIVE' ? 'Actif' : 'Désactivé' }}
+                  [attr.aria-label]="('ORGS.SUPPLIER_STATUS_ARIA' | translate) + (s.status === 'ACTIVE' ? ('STATUS.ACTIVE' | translate) : ('USERS.STATUS_DISABLED' | translate))" role="status">
+                  {{ s.status === 'ACTIVE' ? ('STATUS.ACTIVE' | translate) : ('USERS.STATUS_DISABLED' | translate) }}
                 </span>
               </td>
               <td>{{ s.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
               <td>
                 <button class="btn btn-sm" [class.btn-success]="s.status === 'DISABLED'" [class.btn-danger]="s.status === 'ACTIVE'"
                   (click)="toggle(s)"
-                  [attr.aria-label]="(s.status === 'ACTIVE' ? 'Désactiver ' : 'Activer ') + s.name">
-                  {{ s.status === 'ACTIVE' ? 'Désactiver' : 'Activer' }}
+                  [attr.aria-label]="(s.status === 'ACTIVE' ? ('USERS.DEACTIVATE' | translate) : ('USERS.ACTIVATE' | translate)) + ' ' + s.name">
+                  {{ s.status === 'ACTIVE' ? ('USERS.DEACTIVATE' | translate) : ('USERS.ACTIVATE' | translate) }}
                 </button>
               </td>
             </tr>
           }
           @if (suppliers.length === 0) {
             <tr>
-              <td colspan="4" style="text-align:center;color:#8896ab;padding:32px;">Aucun fournisseur trouvé</td>
+              <td colspan="4" style="text-align:center;color:#8896ab;padding:32px;">{{ 'ORGS.NO_SUPPLIER' | translate }}</td>
             </tr>
           }
         </tbody>

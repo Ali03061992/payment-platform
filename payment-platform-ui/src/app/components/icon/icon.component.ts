@@ -46,19 +46,32 @@ const ICON_PATHS: Record<string, string> = {
 };
 
 /**
- * Icône SVG réaliste (style stroke 24px, couleur héritée).
- * Remplace tous les emojis de l'UI : `<app-icon name="users" [size]="20"></app-icon>`.
+ * Icone SVG realiste dessinee main (fini matiere, pas plat IA).
+ * Variantes : `variant="realistic"` (defaut, halo + ombre + profondeur)
+ * ou `variant="flat"` (trait sobre). `tone` teinte le trait en degrade
+ * signature : sky (bleu ciel), rouge, noir, auto (currentColor).
+ * Usage : `<app-icon name="users" [size]="20" tone="sky"></app-icon>`.
  */
 @Component({
     selector: 'app-icon',
-    template: `<svg [attr.width]="size" [attr.height]="size" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false" [innerHTML]="safePath"></svg>`,
+    template: `<svg [attr.width]="size" [attr.height]="size" viewBox="0 0 24 24" fill="none" [attr.stroke]="svgStroke" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><defs><linearGradient id="pp-sky-grad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7dd3fc"/><stop offset="0.55" stop-color="#38bdf0"/><stop offset="1" stop-color="#0284c7"/></linearGradient><linearGradient id="pp-rouge-grad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fca5a5"/><stop offset="0.55" stop-color="#e63946"/><stop offset="1" stop-color="#7f1d1d"/></linearGradient><linearGradient id="pp-noir-grad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#64748b"/><stop offset="0.6" stop-color="#1a1a2e"/><stop offset="1" stop-color="#0a0a0f"/></linearGradient></defs><g [innerHTML]="safePath"></g></svg>`,
+    host: { '[class.icon-realistic]': 'variant === "realistic"' },
     standalone: false
 })
 export class AppIconComponent {
   @Input() name = 'dashboard';
   @Input() size = 20;
+  @Input() variant: 'realistic' | 'flat' = 'realistic';
+  @Input() tone: 'auto' | 'sky' | 'rouge' | 'noir' = 'auto';
 
   constructor(private sanitizer: DomSanitizer) {}
+
+  get svgStroke(): string {
+    if (this.tone === 'sky') return 'url(#pp-sky-grad)';
+    if (this.tone === 'rouge') return 'url(#pp-rouge-grad)';
+    if (this.tone === 'noir') return 'url(#pp-noir-grad)';
+    return 'currentColor';
+  }
 
   get safePath(): SafeHtml {
     return this.sanitizer.bypassSecurityTrustHtml(ICON_PATHS[this.name] ?? ICON_PATHS['dashboard']);

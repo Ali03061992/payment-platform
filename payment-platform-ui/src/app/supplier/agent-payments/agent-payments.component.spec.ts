@@ -13,6 +13,7 @@ import { LoginService } from '../../services/login.service';
 import { ToastService } from '../../services/toast.service';
 import { AgentPaymentSummary } from '../../models/agent-payment.model';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { TranslateStubPipe, translateServiceProvider } from '../../testing/translate-stubs';
 
 describe('AgentPaymentsComponent', () => {
   let component: AgentPaymentsComponent;
@@ -34,9 +35,10 @@ describe('AgentPaymentsComponent', () => {
     paymentSpy.getAgentSummary.and.returnValue(of([mockSummary]));
 
     TestBed.configureTestingModule({
-    declarations: [AgentPaymentsComponent],
+    declarations: [AgentPaymentsComponent, TranslateStubPipe],
     imports: [],
     providers: [
+        translateServiceProvider(),
         { provide: PaymentService, useValue: paymentSpy },
         { provide: LoginService, useValue: loginSpy },
         { provide: ToastService, useValue: toastSpy },
@@ -141,7 +143,7 @@ describe('AgentPaymentsComponent', () => {
       component.fromDate = '2024-01-01';
       component.toDate = '2024-01-31';
       component.load();
-      expect(toast.error).toHaveBeenCalled();
+      expect(toast.error).toHaveBeenCalledWith('AGENT_PAYMENTS.LOAD_ERROR');
       expect(component.loading).toBeFalse();
     });
   });

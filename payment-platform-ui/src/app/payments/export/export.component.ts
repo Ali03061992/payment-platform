@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
+import { TranslateService } from '@ngx-translate/core';
 
 @Component({
     selector: 'app-export',
@@ -13,7 +14,7 @@ export class ExportComponent {
   loading = false;
   error = '';
 
-  constructor(private http: HttpClient) {
+  constructor(private http: HttpClient, private translate: TranslateService) {
     const today = new Date();
     const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
     this.to = this.formatDate(today);
@@ -26,7 +27,7 @@ export class ExportComponent {
 
   exportCsv(): void {
     if (!this.from || !this.to) {
-      this.error = 'Veuillez sélectionner les dates.';
+      this.error = this.translate.instant('PAYMENT_EXPORT.SELECT_DATES');
       return;
     }
     this.loading = true;
@@ -52,7 +53,7 @@ export class ExportComponent {
         this.loading = false;
       },
       error: (err) => {
-        this.error = 'Erreur lors de l\'export.';
+        this.error = this.translate.instant('PAYMENT_EXPORT.ERROR');
         this.loading = false;
       }
     });

@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { TranslateService } from '@ngx-translate/core';
 import { OrderService } from '../../services/order.service';
 import { OrganizationService } from '../../services/organization.service';
 import { StockService } from '../../services/stock.service';
@@ -43,7 +44,8 @@ export class CreateOrderComponent implements OnInit {
     private orgService: OrganizationService,
     private stockService: StockService,
     private router: Router,
-    private toast: ToastService
+    private toast: ToastService,
+    private translate: TranslateService
   ) {}
 
   ngOnInit(): void {
@@ -57,7 +59,7 @@ export class CreateOrderComponent implements OnInit {
     const shopId = this.shopId;
     if (!shopId) {
       this.loadingSuppliers = false;
-      this.errorSuppliers = 'Boutique non identifiée';
+      this.errorSuppliers = this.translate.instant('ORDER_CREATE.SHOP_NOT_IDENTIFIED');
       return;
     }
     this.orgService.listRelationsByShop(shopId).subscribe({
@@ -76,16 +78,16 @@ export class CreateOrderComponent implements OnInit {
           },
           error: () => {
             this.loadingSuppliers = false;
-            this.errorSuppliers = 'Impossible de charger les fournisseurs';
+            this.errorSuppliers = this.translate.instant('ORDER_CREATE.LOAD_SUPPLIERS_ERROR');
           }
         });
       },
       error: (err) => {
         this.loadingSuppliers = false;
         if (err?.status === 403) {
-          this.errorSuppliers = 'Permission insuffisante pour voir les relations (contactez admin)';
+          this.errorSuppliers = this.translate.instant('ORDER_CREATE.RELATIONS_FORBIDDEN');
         } else {
-          this.errorSuppliers = 'Impossible de charger les relations';
+          this.errorSuppliers = this.translate.instant('ORDER_CREATE.LOAD_RELATIONS_ERROR');
         }
       }
     });
@@ -118,7 +120,7 @@ export class CreateOrderComponent implements OnInit {
         this.loadingProducts = false;
       },
       error: () => {
-        this.errorProducts = 'Impossible de charger les produits';
+        this.errorProducts = this.translate.instant('ORDER_CREATE.LOAD_PRODUCTS_ERROR');
         this.loadingProducts = false;
         this.products = [];
       }
@@ -155,7 +157,7 @@ export class CreateOrderComponent implements OnInit {
 
   contactSupplier(): void {
     if (this.selectedSupplier) {
-      const subject = encodeURIComponent('Demande de réapprovisionnement - ' + this.selectedSupplier.name);
+      const subject = encodeURIComponent(this.translate.instant('ORDER_CREATE.RESTOCK_SUBJECT', { name: this.selectedSupplier.name }));
       window.location.href = 'mailto:?subject=' + subject;
     }
   }
@@ -215,8 +217,8 @@ export class CreateOrderComponent implements OnInit {
     };
     this.orderService.create(request).subscribe({
       next: () => this.router.navigate(['/dashboard/shop/orders']),
-      error: (err: any) => {
-        this.toast.error(err.error?.message || 'Erreur lors de la création');
+      error: (err: { error?: { message?: string }; status?: number; statusText?: string; message?: string }) => {
+        this.toast.error(err.error?.message || this.translate.instant('ORDER_CREATE.CREATE_ERROR'));
         this.creating = false;
       }
     });

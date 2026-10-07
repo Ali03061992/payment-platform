@@ -1,26 +1,26 @@
 <div class="page-header">
-  <h2>Paiements</h2>
-  <button class="btn btn-primary" routerLink="/dashboard/payments/create" aria-label="Créer un nouveau paiement">+ Nouveau paiement</button>
+  <h2>{{ 'PAYMENTS.TITLE' | translate }}</h2>
+  <button class="btn btn-primary" routerLink="/dashboard/payments/create" [attr.aria-label]="'PAYMENTS.NEW_PAYMENT' | translate">{{ 'PAYMENTS.NEW_PAYMENT' | translate }}</button>
 </div>
 
 @if (!loading) {
   <div class="filters">
-    <select [(ngModel)]="filterStatus" (change)="onFilterChange()" class="form-control" style="max-width:200px;" aria-label="Filtrer par statut de paiement">
-      <option value="">Tous les statuts</option>
-      <option value="PENDING">En attente</option>
-      <option value="CONFIRMED">Confirmé</option>
-      <option value="REJECTED">Rejeté</option>
-      <option value="CANCELLED">Annulé</option>
+    <select [(ngModel)]="filterStatus" (change)="onFilterChange()" class="form-control" style="max-width:200px;" [attr.aria-label]="'PAYMENTS.FILTER_STATUS_ARIA' | translate">
+      <option value="">{{ 'PAYMENTS.ALL_STATUSES' | translate }}</option>
+      <option value="PENDING">{{ 'PAYMENTS.PENDING' | translate }}</option>
+      <option value="CONFIRMED">{{ 'PAYMENTS.CONFIRMED' | translate }}</option>
+      <option value="REJECTED">{{ 'PAYMENTS.REJECTED' | translate }}</option>
+      <option value="CANCELLED">{{ 'PAYMENTS.CANCELLED' | translate }}</option>
     </select>
-    <span class="result-count" aria-live="polite">{{ totalElements }} résultat(s)</span>
-    <button class="btn btn-secondary" style="margin-left:auto;" (click)="exportCsv()" aria-label="Exporter les paiements en CSV">Exporter CSV</button>
+    <span class="result-count" aria-live="polite">{{ 'PAYMENTS.RESULT_COUNT' | translate:{count: totalElements} }}</span>
+    <button class="btn btn-secondary" style="margin-left:auto;" (click)="exportCsv()" [attr.aria-label]="'PAYMENTS.EXPORT_CSV_ARIA' | translate">{{ 'PAYMENTS.EXPORT_CSV' | translate }}</button>
   </div>
 }
 
 @if (loading) {
   <div class="loading" role="status" aria-live="polite">
     <div class="spinner" aria-hidden="true"></div>
-    <span>Chargement des paiements...</span>
+    <span>{{ 'PAYMENTS.LOADING' | translate }}</span>
   </div>
 }
 
@@ -31,15 +31,15 @@
       <table>
         <thead>
           <tr>
-            <th>Référence</th>
-            <th>Boutique</th>
-            <th>Créé par</th>
-            <th>Fournisseur</th>
-            <th>Montant</th>
-            <th>Statut</th>
-            <th>Traité par</th>
-            <th>Créé le</th>
-            <th>Actions</th>
+            <th class="sortable-th" (click)="onSort('reference')" (keydown.enter)="onSort('reference')" tabindex="0" [attr.aria-sort]="ariaSort('reference')">{{ 'PAYMENTS.REFERENCE' | translate }} <span class="sort-indicator" aria-hidden="true">{{ sortIndicator('reference') }}</span></th>
+            <th class="sortable-th" (click)="onSort('shopName')" (keydown.enter)="onSort('shopName')" tabindex="0" [attr.aria-sort]="ariaSort('shopName')">{{ 'PAYMENTS.SHOP' | translate }} <span class="sort-indicator" aria-hidden="true">{{ sortIndicator('shopName') }}</span></th>
+            <th class="sortable-th" (click)="onSort('createdByName')" (keydown.enter)="onSort('createdByName')" tabindex="0" [attr.aria-sort]="ariaSort('createdByName')">{{ 'PAYMENTS.CREATED_BY' | translate }} <span class="sort-indicator" aria-hidden="true">{{ sortIndicator('createdByName') }}</span></th>
+            <th class="sortable-th" (click)="onSort('supplierName')" (keydown.enter)="onSort('supplierName')" tabindex="0" [attr.aria-sort]="ariaSort('supplierName')">{{ 'PAYMENTS.SUPPLIER' | translate }} <span class="sort-indicator" aria-hidden="true">{{ sortIndicator('supplierName') }}</span></th>
+            <th class="sortable-th" (click)="onSort('amount')" (keydown.enter)="onSort('amount')" tabindex="0" [attr.aria-sort]="ariaSort('amount')">{{ 'PAYMENTS.AMOUNT' | translate }} <span class="sort-indicator" aria-hidden="true">{{ sortIndicator('amount') }}</span></th>
+            <th class="sortable-th" (click)="onSort('status')" (keydown.enter)="onSort('status')" tabindex="0" [attr.aria-sort]="ariaSort('status')">{{ 'PAYMENTS.STATUS' | translate }} <span class="sort-indicator" aria-hidden="true">{{ sortIndicator('status') }}</span></th>
+            <th>{{ 'PAYMENTS.PROCESSED_BY' | translate }}</th>
+            <th class="sortable-th" (click)="onSort('createdAt')" (keydown.enter)="onSort('createdAt')" tabindex="0" [attr.aria-sort]="ariaSort('createdAt')">{{ 'PAYMENTS.CREATED_AT' | translate }} <span class="sort-indicator" aria-hidden="true">{{ sortIndicator('createdAt') }}</span></th>
+            <th>{{ 'PAYMENTS.ACTIONS' | translate }}</th>
           </tr>
         </thead>
         <tbody>
@@ -52,8 +52,8 @@
               <td>{{ p.amount | number:'1.2-2' }} {{ p.currency }}</td>
               <td>
                 <span class="payment-badge" [ngClass]="statusClass(p.status)"
-                  [attr.aria-label]="'Statut du paiement : ' + statusLabel(p.status)" role="status">
-                  {{ statusLabel(p.status) }}
+                  [attr.aria-label]="('PAYMENTS.STATUS_ARIA' | translate:{status: (p.status | statusLabel)})" role="status">
+                  {{ p.status | statusLabel }}
                 </span>
               </td>
               <td>
@@ -74,15 +74,15 @@
               <td class="actions" (click)="$event.stopPropagation()">
                 <button class="btn btn-sm expand-btn" (click)="toggleExpand(p, $event)"
                   [attr.aria-expanded]="isExpanded(p)"
-                  [attr.aria-label]="(isExpanded(p) ? 'Masquer le détail du paiement ' : 'Afficher le détail du paiement ') + p.reference"
-                  [attr.title]="isExpanded(p) ? 'Masquer le détail' : 'Afficher le détail'">{{ isExpanded(p) ? '−' : '+' }}</button>
+                  [attr.aria-label]="(isExpanded(p) ? ('PAYMENTS.HIDE_DETAIL_ARIA' | translate:{ref: p.reference}) : ('PAYMENTS.SHOW_DETAIL_ARIA' | translate:{ref: p.reference}))"
+                  [attr.title]="isExpanded(p) ? ('PAYMENTS.HIDE_DETAIL_TITLE' | translate) : ('PAYMENTS.SHOW_DETAIL_TITLE' | translate)">{{ isExpanded(p) ? '−' : '+' }}</button>
                 @if (p.status === 'PENDING') {
-                  <button class="btn btn-sm btn-success" (click)="confirm(p.id)" [disabled]="pendingAction === p.id" [attr.aria-label]="'Confirmer le paiement ' + p.reference">Confirmer</button>
+                  <button class="btn btn-sm btn-success" (click)="confirm(p.id)" [disabled]="pendingAction === p.id" [attr.aria-label]="('PAYMENTS.CONFIRM_ARIA' | translate:{ref: p.reference})">{{ 'PAYMENTS.CONFIRM_BTN' | translate }}</button>
                 }
                 @if (p.status === 'PENDING') {
-                  <button class="btn btn-sm btn-danger" (click)="cancel(p.id)" [disabled]="pendingAction === p.id" [attr.aria-label]="'Annuler le paiement ' + p.reference">Annuler</button>
+                  <button class="btn btn-sm btn-danger" (click)="cancel(p.id)" [disabled]="pendingAction === p.id" [attr.aria-label]="('PAYMENTS.CANCEL_ARIA' | translate:{ref: p.reference})">{{ 'PAYMENTS.CANCEL_BTN' | translate }}</button>
                 }
-                <a class="btn btn-sm btn-secondary" [routerLink]="['/dashboard/payments', p.id]" [attr.aria-label]="'Voir le détail du paiement ' + p.reference">Détail</a>
+                <a class="btn btn-sm btn-secondary" [routerLink]="['/dashboard/payments', p.id]" [attr.aria-label]="('PAYMENTS.DETAIL_ARIA' | translate:{ref: p.reference})">{{ 'PAYMENTS.DETAIL' | translate }}</a>
               </td>
             </tr>
             @if (isExpanded(p)) {
@@ -90,21 +90,21 @@
                 <td colspan="9">
                   <div class="expand-panel">
                     <div class="expand-grid">
-                      <div><span class="expand-label">Référence</span><strong>{{ p.reference }}</strong></div>
-                      <div><span class="expand-label">Montant</span><strong>{{ p.amount | number:'1.2-2' }} {{ p.currency }}</strong></div>
-                      <div><span class="expand-label">Statut</span><span class="payment-badge" [ngClass]="statusClass(p.status)">{{ statusLabel(p.status) }}</span></div>
-                      <div><span class="expand-label">Boutique</span><span>{{ p.shopName }}</span></div>
-                      <div><span class="expand-label">Fournisseur</span><span>{{ p.supplierName }}</span></div>
-                      <div><span class="expand-label">Créé par</span><span>{{ p.createdByName }}</span></div>
-                      <div><span class="expand-label">Traité par</span><span>{{ p.confirmedByName || p.rejectedByName || p.cancelledByName || '-' }}</span></div>
-                      <div><span class="expand-label">Créé le</span><span>{{ p.createdAt | date:'dd/MM/yyyy HH:mm' }}</span></div>
+                      <div><span class="expand-label">{{ 'PAYMENTS.REFERENCE' | translate }}</span><strong>{{ p.reference }}</strong></div>
+                      <div><span class="expand-label">{{ 'PAYMENTS.AMOUNT' | translate }}</span><strong>{{ p.amount | number:'1.2-2' }} {{ p.currency }}</strong></div>
+                      <div><span class="expand-label">{{ 'PAYMENTS.STATUS' | translate }}</span><span class="payment-badge" [ngClass]="statusClass(p.status)">{{ p.status | statusLabel }}</span></div>
+                      <div><span class="expand-label">{{ 'PAYMENTS.SHOP' | translate }}</span><span>{{ p.shopName }}</span></div>
+                      <div><span class="expand-label">{{ 'PAYMENTS.SUPPLIER' | translate }}</span><span>{{ p.supplierName }}</span></div>
+                      <div><span class="expand-label">{{ 'PAYMENTS.CREATED_BY' | translate }}</span><span>{{ p.createdByName }}</span></div>
+                      <div><span class="expand-label">{{ 'PAYMENTS.PROCESSED_BY' | translate }}</span><span>{{ p.confirmedByName || p.rejectedByName || p.cancelledByName || '-' }}</span></div>
+                      <div><span class="expand-label">{{ 'PAYMENTS.CREATED_AT' | translate }}</span><span>{{ p.createdAt | date:'dd/MM/yyyy HH:mm' }}</span></div>
                     </div>
                     <div class="expand-actions">
                       @if (p.status === 'PENDING') {
-                        <button class="btn btn-sm btn-success" (click)="confirm(p.id)" [disabled]="pendingAction === p.id" [attr.aria-label]="'Confirmer le paiement ' + p.reference">Confirmer</button>
-                        <button class="btn btn-sm btn-danger" (click)="cancel(p.id)" [disabled]="pendingAction === p.id" [attr.aria-label]="'Annuler le paiement ' + p.reference">Annuler</button>
+                        <button class="btn btn-sm btn-success" (click)="confirm(p.id)" [disabled]="pendingAction === p.id" [attr.aria-label]="('PAYMENTS.CONFIRM_ARIA' | translate:{ref: p.reference})">{{ 'PAYMENTS.CONFIRM_BTN' | translate }}</button>
+                        <button class="btn btn-sm btn-danger" (click)="cancel(p.id)" [disabled]="pendingAction === p.id" [attr.aria-label]="('PAYMENTS.CANCEL_ARIA' | translate:{ref: p.reference})">{{ 'PAYMENTS.CANCEL_BTN' | translate }}</button>
                       }
-                      <a class="btn btn-sm btn-secondary" [routerLink]="['/dashboard/payments', p.id]" [attr.aria-label]="'Voir le détail complet du paiement ' + p.reference">Détail complet</a>
+                      <a class="btn btn-sm btn-secondary" [routerLink]="['/dashboard/payments', p.id]" [attr.aria-label]="('PAYMENTS.FULL_DETAIL_ARIA' | translate:{ref: p.reference})">{{ 'PAYMENTS.FULL_DETAIL' | translate }}</a>
                     </div>
                   </div>
                 </td>
@@ -113,7 +113,7 @@
           }
           @if (filteredPayments.length === 0) {
             <tr>
-              <td colspan="9" style="text-align:center;color:#8896ab;padding:32px;">Aucun paiement trouvé</td>
+              <td colspan="9" style="text-align:center;color:#8896ab;padding:32px;">{{ 'PAYMENTS.NO_PAYMENTS' | translate }}</td>
             </tr>
           }
         </tbody>
@@ -130,56 +130,56 @@
         <div class="payment-card-header">
           <button class="btn btn-sm expand-btn" (click)="toggleExpand(p, $event)"
             [attr.aria-expanded]="isExpanded(p)"
-            [attr.aria-label]="(isExpanded(p) ? 'Masquer le détail du paiement ' : 'Afficher le détail du paiement ') + p.reference">{{ isExpanded(p) ? '−' : '+' }}</button>
+            [attr.aria-label]="(isExpanded(p) ? ('PAYMENTS.HIDE_DETAIL_ARIA' | translate:{ref: p.reference}) : ('PAYMENTS.SHOW_DETAIL_ARIA' | translate:{ref: p.reference}))">{{ isExpanded(p) ? '−' : '+' }}</button>
           <span class="payment-reference">{{ p.reference }}</span>
           <span class="payment-badge" [ngClass]="statusClass(p.status)"
-            [attr.aria-label]="'Statut du paiement : ' + statusLabel(p.status)" role="status">
-            {{ statusLabel(p.status) }}
+            [attr.aria-label]="('PAYMENTS.STATUS_ARIA' | translate:{status: (p.status | statusLabel)})" role="status">
+            {{ p.status | statusLabel }}
           </span>
         </div>
         <div class="payment-card-body">
           <div class="payment-row">
-            <span class="payment-label">Montant</span>
+            <span class="payment-label">{{ 'PAYMENTS.AMOUNT' | translate }}</span>
             <span class="payment-amount">{{ p.amount | number:'1.2-2' }} {{ p.currency }}</span>
           </div>
           <div class="payment-row">
-            <span class="payment-label">Boutique</span>
+            <span class="payment-label">{{ 'PAYMENTS.SHOP' | translate }}</span>
             <span class="payment-value">{{ p.shopName }}</span>
           </div>
           <div class="payment-row">
-            <span class="payment-label">Fournisseur</span>
+            <span class="payment-label">{{ 'PAYMENTS.SUPPLIER' | translate }}</span>
             <span class="payment-value">{{ p.supplierName }}</span>
           </div>
           <div class="payment-row">
-            <span class="payment-label">Créé par</span>
+            <span class="payment-label">{{ 'PAYMENTS.CREATED_BY' | translate }}</span>
             <span class="payment-value">{{ p.createdByName }}</span>
           </div>
           @if (p.status !== 'PENDING') {
             <div class="payment-row">
-              <span class="payment-label">Traité par</span>
+              <span class="payment-label">{{ 'PAYMENTS.PROCESSED_BY' | translate }}</span>
               <span class="payment-value">
                 {{ p.confirmedByName || p.rejectedByName || p.cancelledByName }}
               </span>
             </div>
           }
           <div class="payment-row">
-            <span class="payment-label">Créé le</span>
+            <span class="payment-label">{{ 'PAYMENTS.CREATED_AT' | translate }}</span>
             <span class="payment-value">{{ p.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
           </div>
           @if (isExpanded(p)) {
             <div class="payment-row">
-              <span class="payment-label">Référence</span>
+              <span class="payment-label">{{ 'PAYMENTS.REFERENCE' | translate }}</span>
               <span class="payment-value">{{ p.reference }}</span>
             </div>
             <div class="payment-row">
-              <a class="btn btn-sm btn-secondary" [routerLink]="['/dashboard/payments', p.id]" [attr.aria-label]="'Voir le détail complet du paiement ' + p.reference">Détail complet</a>
+              <a class="btn btn-sm btn-secondary" [routerLink]="['/dashboard/payments', p.id]" [attr.aria-label]="('PAYMENTS.FULL_DETAIL_ARIA' | translate:{ref: p.reference})">{{ 'PAYMENTS.FULL_DETAIL' | translate }}</a>
             </div>
           }
         </div>
         @if (p.status === 'PENDING') {
           <div class="payment-card-actions" (click)="$event.stopPropagation()">
-            <button class="btn btn-sm btn-success" (click)="confirm(p.id)" [disabled]="pendingAction === p.id" [attr.aria-label]="'Confirmer le paiement ' + p.reference">Confirmer</button>
-            <button class="btn btn-sm btn-danger" (click)="cancel(p.id)" [disabled]="pendingAction === p.id" [attr.aria-label]="'Annuler le paiement ' + p.reference">Annuler</button>
+            <button class="btn btn-sm btn-success" (click)="confirm(p.id)" [disabled]="pendingAction === p.id" [attr.aria-label]="('PAYMENTS.CONFIRM_ARIA' | translate:{ref: p.reference})">{{ 'PAYMENTS.CONFIRM_BTN' | translate }}</button>
+            <button class="btn btn-sm btn-danger" (click)="cancel(p.id)" [disabled]="pendingAction === p.id" [attr.aria-label]="('PAYMENTS.CANCEL_ARIA' | translate:{ref: p.reference})">{{ 'PAYMENTS.CANCEL_BTN' | translate }}</button>
           </div>
         }
       </div>

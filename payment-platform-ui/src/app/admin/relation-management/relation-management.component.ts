@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
+import { TranslateService } from '@ngx-translate/core';
 import { OrganizationService } from '../../services/organization.service';
 import { Organization, SupplierShopRelation } from '../../models/organization.model';
-import { paginateItems } from '../../models/page.model';
+import { paginateItems, sortItems, toggleSortState, ariaSortFor, sortIndicatorFor, SortState } from '../../models/page.model';
 import { ToastService } from '../../services/toast.service';
 
 @Component({
@@ -20,9 +21,10 @@ export class RelationManagementComponent implements OnInit {
   selectedShopId = '';
   creating = false;
   currentPage = 0;
-  pageSize = 20;
+  pageSize = 10;
+  sort: SortState = { field: null, direction: 'asc' };
 
-  constructor(private orgService: OrganizationService, private toast: ToastService) {}
+  constructor(private orgService: OrganizationService, private toast: ToastService, private translate: TranslateService) {}
 
   ngOnInit(): void { this.load(); }
 
@@ -36,7 +38,24 @@ export class RelationManagementComponent implements OnInit {
   }
 
   get pagedRelations(): SupplierShopRelation[] {
-    return paginateItems(this.relations, this.currentPage, this.pageSize);
+    return paginateItems(this.sortedRelations, this.currentPage, this.pageSize);
+  }
+
+  get sortedRelations(): SupplierShopRelation[] {
+    return sortItems(this.relations, this.sort.field, this.sort.direction);
+  }
+
+  onSort(field: string): void {
+    this.sort = toggleSortState(this.sort, field);
+    this.currentPage = 0;
+  }
+
+  ariaSort(field: string): 'ascending' | 'descending' | 'none' {
+    return ariaSortFor(field, this.sort);
+  }
+
+  sortIndicator(field: string): string {
+    return sortIndicatorFor(field, this.sort);
   }
 
   onPageChange(page: number): void {
@@ -53,13 +72,13 @@ export class RelationManagementComponent implements OnInit {
     this.creating = true;
     this.orgService.createRelation({ supplierId: this.selectedSupplierId, shopId: this.selectedShopId }).subscribe({
       next: () => {
-        this.toast.success('Relation créée avec succès');
+        this.toast.success(this.translate.instant('ORGS.RELATION_CREATED'));
         this.showCreate = false;
         this.creating = false;
         this.load();
       },
-      error: (err: any) => {
-        this.toast.error(err.error?.message || 'Erreur lors de la création');
+      error: (err: { error?: { message?: string }; status?: number; statusText?: string; message?: string }) => {
+        this.toast.error(err.error?.message || this.translate.instant('ORGS.CREATE_ERROR'));
         this.creating = false;
       }
     });

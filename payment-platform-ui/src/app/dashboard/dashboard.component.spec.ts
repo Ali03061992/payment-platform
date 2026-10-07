@@ -10,6 +10,7 @@ import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { DashboardComponent } from './dashboard.component';
 import { LoginService } from '../services/login.service';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { TranslateStubPipe, translateServiceProvider } from '../testing/translate-stubs';
 
 describe('DashboardComponent', () => {
   let component: DashboardComponent;
@@ -20,9 +21,10 @@ describe('DashboardComponent', () => {
     const loginSpy = jasmine.createSpyObj('LoginService', ['getCurrentUser', 'hasRole']);
 
     TestBed.configureTestingModule({
-      declarations: [DashboardComponent],
+      declarations: [DashboardComponent, TranslateStubPipe],
       imports: [],
       providers: [
+        translateServiceProvider(),
         { provide: LoginService, useValue: loginSpy },
         provideHttpClient(withInterceptorsFromDi()),
         provideHttpClientTesting()
@@ -103,7 +105,7 @@ describe('DashboardComponent', () => {
     });
 
     it('should return one of the known greetings', () => {
-      const validGreetings = ['Bonjour', 'Bon après-midi', 'Bonsoir'];
+      const validGreetings = ['DASHBOARD.MORNING', 'DASHBOARD.AFTERNOON', 'DASHBOARD.EVENING'];
       const greeting = component.getGreeting();
       expect(validGreetings).toContain(greeting);
     });

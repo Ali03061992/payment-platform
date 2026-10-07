@@ -1,11 +1,11 @@
 <div class="page-header">
-  <h2>Statistiques des paiements</h2>
+  <h2>{{ 'PAYMENT_STATS.TITLE' | translate }}</h2>
 </div>
 
 @if (loading) {
   <div class="loading">
     <div class="spinner"></div>
-    <span>Chargement...</span>
+    <span>{{ 'PAYMENT_STATS.LOADING' | translate }}</span>
   </div>
 }
 
@@ -13,23 +13,23 @@
   <div class="stats-grid">
     <div class="stat-card">
       <div class="stat-value">{{ stats.total }}</div>
-      <div class="stat-label">Total</div>
+      <div class="stat-label">{{ 'PAYMENT_STATS.TOTAL' | translate }}</div>
     </div>
     <div class="stat-card stat-pending">
       <div class="stat-value">{{ stats.pending }}</div>
-      <div class="stat-label">En attente</div>
+      <div class="stat-label">{{ 'PAYMENT_STATS.PENDING' | translate }}</div>
     </div>
     <div class="stat-card stat-confirmed">
       <div class="stat-value">{{ stats.confirmed }}</div>
-      <div class="stat-label">Confirmés</div>
+      <div class="stat-label">{{ 'PAYMENT_STATS.CONFIRMED' | translate }}</div>
     </div>
     <div class="stat-card stat-rejected">
       <div class="stat-value">{{ stats.rejected }}</div>
-      <div class="stat-label">Rejetés</div>
+      <div class="stat-label">{{ 'PAYMENT_STATS.REJECTED' | translate }}</div>
     </div>
     <div class="stat-card stat-cancelled">
       <div class="stat-value">{{ stats.cancelled }}</div>
-      <div class="stat-label">Annulés</div>
+      <div class="stat-label">{{ 'PAYMENT_STATS.CANCELLED' | translate }}</div>
     </div>
   </div>
 }

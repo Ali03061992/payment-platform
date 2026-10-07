@@ -10,6 +10,10 @@ export interface User {
   status: 'ACTIVE' | 'DISABLED';
   createdAt: string;
   updatedAt: string;
+  preferredLang?: 'fr' | 'en';
+  accentColor1?: string;
+  accentColor2?: string;
+  tourSeen?: boolean;
 }
 
 export interface LoginRequest {

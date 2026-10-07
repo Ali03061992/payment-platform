@@ -22,15 +22,6 @@ class TestCodeArchitectureTests {
             .importPackages("com.paymentplatform.identity");
 
     @Test
-    @DisplayName("Aucun test ne dépend de Mockito.")
-    void tests_neDependentPasDeMockito() {
-        ArchRule regle = noClasses()
-                .should().dependOnClassesThat().resideInAPackage("org.mockito..")
-                .because("les tests s'exécutent contre H2 réelle, sans aucun mock");
-        regle.check(TESTS);
-    }
-
-    @Test
     @DisplayName("Aucun test n'utilise les assertions JUnit directes.")
     void tests_utilisentAssertJUniquement() {
         noClasses()

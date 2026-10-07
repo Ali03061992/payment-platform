@@ -12,6 +12,7 @@ import { PaymentListComponent } from './payment-list.component';
 import { PaymentService } from '../../services/payment.service';
 import { ToastService } from '../../services/toast.service';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { TranslateStubPipe, translateServiceProvider } from '../../testing/translate-stubs';
 
 describe('PaymentListComponent', () => {
   let component: PaymentListComponent;
@@ -35,10 +36,11 @@ describe('PaymentListComponent', () => {
     psSpy.cancel.and.returnValue(of({} as any));
 
     TestBed.configureTestingModule({
-    declarations: [PaymentListComponent],
+    declarations: [PaymentListComponent, TranslateStubPipe],
     schemas: [NO_ERRORS_SCHEMA],
     imports: [],
     providers: [
+        translateServiceProvider(),
         { provide: PaymentService, useValue: psSpy },
         { provide: ToastService, useValue: toastSpy },
         provideHttpClient(withInterceptorsFromDi()),

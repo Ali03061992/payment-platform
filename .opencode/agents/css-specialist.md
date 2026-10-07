@@ -1,7 +1,6 @@
 ---
 description: Spécialiste CSS/UI du Payment Platform. Icônes SVG réalistes (zéro emoji), style professionnel, responsive mobile + desktop, thèmes clair/sombre.
 mode: subagent
-model: anthropic/claude-sonnet-4-6
 permission:
   edit: allow
   bash: ask

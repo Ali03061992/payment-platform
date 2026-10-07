@@ -1,9 +1,9 @@
 <div class="page-header">
-  <h1>Optimisation des stocks</h1>
+  <h1>{{ 'STOCK.OPTIM_TITLE' | translate }}</h1>
   <div class="header-actions">
-    <button class="btn btn-secondary" (click)="showConfig = !showConfig">Parametres</button>
+    <button class="btn btn-secondary" (click)="showConfig = !showConfig">{{ 'STOCK.OPTIM_SETTINGS' | translate }}</button>
     <button class="btn btn-primary" (click)="loadOptimization()" [disabled]="loading">
-      {{ loading ? 'Calcul...' : 'Recalculer' }}
+      {{ loading ? ('STOCK.OPTIM_CALCULATING' | translate) : ('STOCK.OPTIM_RECALCULATE' | translate) }}
     </button>
   </div>
 </div>
@@ -11,28 +11,28 @@
 <!-- Config Panel -->
 @if (showConfig) {
   <div class="config-panel">
-    <h3>Parametres d'optimisation</h3>
+    <h3>{{ 'STOCK.OPTIM_CONFIG_TITLE' | translate }}</h3>
     <div class="config-row">
       <div class="config-group">
-        <label>Delai moyen (jours)</label>
+        <label>{{ 'STOCK.OPTIM_LEAD_TIME' | translate }}</label>
         <input type="number" [(ngModel)]="configLeadTime" class="form-control" min="1">
       </div>
       <div class="config-group">
-        <label>Cout de commande (€)</label>
+        <label>{{ 'STOCK.OPTIM_ORDERING_COST' | translate }}</label>
         <input type="number" [(ngModel)]="configOrderingCost" class="form-control" min="0">
       </div>
       <div class="config-group">
-        <label>Cout de possession (%/an)</label>
+        <label>{{ 'STOCK.OPTIM_HOLDING_COST' | translate }}</label>
         <input type="number" [(ngModel)]="configHoldingCost" class="form-control" min="0" max="100">
       </div>
-      <button class="btn btn-primary" (click)="applyConfig()">Appliquer</button>
+      <button class="btn btn-primary" (click)="applyConfig()">{{ 'STOCK.OPTIM_APPLY' | translate }}</button>
     </div>
   </div>
 }
 
 <!-- Loading -->
 @if (loading) {
-  <div class="loading"><div class="spinner"></div><span>Calcul en cours...</span></div>
+  <div class="loading"><div class="spinner"></div><span>{{ 'STOCK.OPTIM_LOADING' | translate }}</span></div>
 }
 
 <!-- Error -->
@@ -40,7 +40,7 @@
   <div class="error-state">
     <div class="error-icon"><app-icon name="alert" [size]="32"></app-icon></div>
     <p>{{ error }}</p>
-    <button class="btn btn-primary" (click)="loadOptimization()">Reessayer</button>
+    <button class="btn btn-primary" (click)="loadOptimization()">{{ 'STOCK.OPTIM_RETRY' | translate }}</button>
   </div>
 }
 
@@ -51,53 +51,53 @@
       <div class="kpi-card">
         <div class="kpi-icon" style="background:#e3f2fd"><app-icon name="box" [size]="24"></app-icon></div>
         <div class="kpi-value">{{ data.products.length }}</div>
-        <div class="kpi-label">Produits analyses</div>
+        <div class="kpi-label">{{ 'STOCK.OPTIM_PRODUCTS_ANALYZED' | translate }}</div>
       </div>
       <div class="kpi-card">
         <div class="kpi-icon" style="background:#fff3e0"><app-icon name="wallet" [size]="24"></app-icon></div>
         <div class="kpi-value">{{ data.totalStockValue | number:'1.0-0' }}</div>
-        <div class="kpi-label">Valeur stock</div>
+        <div class="kpi-label">{{ 'STOCK.OPTIM_STOCK_VALUE' | translate }}</div>
       </div>
       <div class="kpi-card">
         <div class="kpi-icon" style="background:#fce4ec"><app-icon name="lock" [size]="24"></app-icon></div>
         <div class="kpi-value">{{ data.totalSafetyStockValue | number:'1.0-0' }}</div>
-        <div class="kpi-label">Stock securite</div>
+        <div class="kpi-label">{{ 'STOCK.OPTIM_SAFETY_VALUE' | translate }}</div>
       </div>
       @if (data.productsToOrder > 0) {
         <div class="kpi-card">
           <div class="kpi-icon" style="background:#fce4ec"><app-icon name="cart" [size]="24"></app-icon></div>
           <div class="kpi-value">{{ data.productsToOrder }}</div>
-          <div class="kpi-label">A commander</div>
+          <div class="kpi-label">{{ 'STOCK.OPTIM_TO_ORDER' | translate }}</div>
         </div>
       }
       @if (data.productsAtRisk > 0) {
         <div class="kpi-card">
           <div class="kpi-icon" style="background:#fce4ec"><app-icon name="alert" [size]="24"></app-icon></div>
           <div class="kpi-value">{{ data.productsAtRisk }}</div>
-          <div class="kpi-label">Rupture</div>
+          <div class="kpi-label">{{ 'STOCK.OUT_OF_STOCK' | translate }}</div>
         </div>
       }
       @if (data.productsOverstocked > 0) {
         <div class="kpi-card">
           <div class="kpi-icon" style="background:#fff3e0"><app-icon name="chart" [size]="24"></app-icon></div>
           <div class="kpi-value">{{ data.productsOverstocked }}</div>
-          <div class="kpi-label">Surstock</div>
+          <div class="kpi-label">{{ 'STOCK.OPTIM_OVERSTOCK' | translate }}</div>
         </div>
       }
     </div>
     <!-- Tabs -->
     <div class="tabs">
-      <button class="tab" [class.active]="activeTab === 'overview'" (click)="activeTab = 'overview'">Vue d'ensemble</button>
+      <button class="tab" [class.active]="activeTab === 'overview'" (click)="activeTab = 'overview'">{{ 'STOCK.OPTIM_TAB_OVERVIEW' | translate }}</button>
       <button class="tab" [class.active]="activeTab === 'abcxyz'" (click)="activeTab = 'abcxyz'">ABC-XYZ</button>
-      <button class="tab" [class.active]="activeTab === 'products'" (click)="activeTab = 'products'">Produits</button>
-      <button class="tab" [class.active]="activeTab === 'risks'" (click)="activeTab = 'risks'">Risques</button>
+      <button class="tab" [class.active]="activeTab === 'products'" (click)="activeTab = 'products'">{{ 'STOCK.PRODUCTS' | translate }}</button>
+      <button class="tab" [class.active]="activeTab === 'risks'" (click)="activeTab = 'risks'">{{ 'STOCK.OPTIM_TAB_RISKS' | translate }}</button>
     </div>
     <!-- Tab: Overview -->
     @if (activeTab === 'overview') {
       <div class="tab-content">
         <div class="grid-2">
           <div class="card">
-            <h3>Distribution ABC</h3>
+            <h3>{{ 'STOCK.OPTIM_ABC_DIST' | translate }}</h3>
             <div class="bar-chart">
               @for (item of data.abcDistribution | keyvalue; track item) {
                 <div class="bar-row">
@@ -109,7 +109,7 @@
             </div>
           </div>
           <div class="card">
-            <h3>Distribution XYZ</h3>
+            <h3>{{ 'STOCK.OPTIM_XYZ_DIST' | translate }}</h3>
             <div class="bar-chart">
               @for (item of data.xyzDistribution | keyvalue; track item) {
                 <div class="bar-row">
@@ -122,7 +122,7 @@
           </div>
         </div>
         <div class="card" style="margin-top:16px">
-          <h3>Matrice ABC x XYZ</h3>
+          <h3>{{ 'STOCK.OPTIM_MATRIX' | translate }}</h3>
           <div class="matrix-grid">
             @for (item of data.abcxzDistribution | keyvalue; track item) {
               <div class="matrix-cell">
@@ -133,7 +133,7 @@
           </div>
         </div>
         <div class="card" style="margin-top:16px">
-          <h3>Actions recommandees</h3>
+          <h3>{{ 'STOCK.OPTIM_ACTIONS' | translate }}</h3>
           <div class="bar-chart">
             @for (item of data.actionDistribution | keyvalue; track item) {
               <div class="bar-row">
@@ -150,11 +150,11 @@
     @if (activeTab === 'abcxyz') {
       <div class="tab-content">
         <div class="card">
-          <h3>Matrice ABC x XYZ — Politiques de gestion</h3>
+          <h3>{{ 'STOCK.OPTIM_MATRIX_POLICIES' | translate }}</h3>
           <div class="abcxyz-table">
             <table>
               <thead>
-                <tr><th></th><th>X (Stable)</th><th>Y (Variable)</th><th>Z (Sporadique)</th></tr>
+                <tr><th></th><th>{{ 'STOCK.OPTIM_XYZ_X' | translate }}</th><th>{{ 'STOCK.OPTIM_XYZ_Y' | translate }}</th><th>{{ 'STOCK.OPTIM_XYZ_Z' | translate }}</th></tr>
               </thead>
               <tbody>
                 @for (abc of ['A', 'B', 'C']; track abc) {
@@ -164,7 +164,7 @@
                       <td>
                         <div class="cell-content" [class.cell-highlight]="data.abcxzDistribution[abc+xyz]">
                           <span class="cell-count">{{ data.abcxzDistribution[abc+xyz] || 0 }}</span>
-                          <span class="cell-items">produits</span>
+                          <span class="cell-items">{{ 'STOCK.OPTIM_PRODUCTS_UNIT' | translate }}</span>
                         </div>
                       </td>
                     }
@@ -199,55 +199,55 @@
                   <div class="detail-grid">
                     <!-- Classification -->
                     <div class="detail-section">
-                      <h4>Classification</h4>
-                      <div class="detail-row"><span>ABC:</span><span class="val" [style.color]="abcColor(p.abcClass)">{{ p.abcClass }} (rang #{{ p.abcRank }})</span></div>
+                      <h4>{{ 'STOCK.OPTIM_CLASSIFICATION' | translate }}</h4>
+                      <div class="detail-row"><span>ABC:</span><span class="val" [style.color]="abcColor(p.abcClass)">{{ p.abcClass }} ({{ 'STOCK.OPTIM_RANK' | translate }} #{{ p.abcRank }})</span></div>
                       <div class="detail-row"><span>XYZ:</span><span class="val" [style.color]="xyzColor(p.xyzClass)">{{ p.xyzClass }} — {{ p.demandPattern }}</span></div>
                       <div class="detail-row"><span>CV:</span><span class="val">{{ formatPercent(p.coefficientOfVariation) }}</span></div>
-                      <div class="detail-row"><span>Politique:</span><span class="val small">{{ p.policyDescription }}</span></div>
+                      <div class="detail-row"><span>{{ 'STOCK.OPTIM_POLICY' | translate }}</span><span class="val small">{{ p.policyDescription }}</span></div>
                     </div>
                     <!-- Forecast -->
                     <div class="detail-section">
-                      <h4>Prevision</h4>
-                      <div class="detail-row"><span>Methode:</span><span class="val">{{ p.forecastMethod }}</span></div>
-                      <div class="detail-row"><span>Precision:</span><span class="val">{{ formatPercent(p.forecastAccuracy) }}</span></div>
-                      <div class="detail-row"><span>Demande moy/j:</span><span class="val">{{ formatNumber(p.avgDailyDemand) }}</span></div>
+                      <h4>{{ 'STOCK.OPTIM_FORECAST' | translate }}</h4>
+                      <div class="detail-row"><span>{{ 'STOCK.OPTIM_METHOD' | translate }}</span><span class="val">{{ p.forecastMethod }}</span></div>
+                      <div class="detail-row"><span>{{ 'STOCK.OPTIM_ACCURACY' | translate }}</span><span class="val">{{ formatPercent(p.forecastAccuracy) }}</span></div>
+                      <div class="detail-row"><span>{{ 'STOCK.OPTIM_AVG_DEMAND' | translate }}</span><span class="val">{{ formatNumber(p.avgDailyDemand) }}</span></div>
                     </div>
                     <!-- Safety Stock -->
                     <div class="detail-section">
-                      <h4>Stock de securite</h4>
-                      <div class="detail-row"><span>SS calcule:</span><span class="val">{{ p.safetyStock | number:'1.0-0' }}</span></div>
-                      <div class="detail-row"><span>Niveau service:</span><span class="val">{{ formatPercent(p.targetServiceLevel) }}</span></div>
+                      <h4>{{ 'STOCK.OPTIM_SAFETY' | translate }}</h4>
+                      <div class="detail-row"><span>{{ 'STOCK.OPTIM_SS_CALC' | translate }}</span><span class="val">{{ p.safetyStock | number:'1.0-0' }}</span></div>
+                      <div class="detail-row"><span>{{ 'STOCK.OPTIM_SERVICE_LEVEL' | translate }}</span><span class="val">{{ formatPercent(p.targetServiceLevel) }}</span></div>
                       <div class="detail-row"><span>Z-score:</span><span class="val">{{ p.zScore | number:'1.3-3' }}</span></div>
                     </div>
                     <!-- Reorder -->
                     <div class="detail-section">
-                      <h4>Point de commande</h4>
+                      <h4>{{ 'STOCK.OPTIM_ROP_TITLE' | translate }}</h4>
                       <div class="detail-row"><span>ROP:</span><span class="val">{{ p.reorderPoint | number:'1.0-0' }}</span></div>
-                      <div class="detail-row"><span>Commander?</span><span class="val" [class.urgent]="p.shouldReorder">{{ p.shouldReorder ? 'OUI' : 'Non' }}</span></div>
-                      <div class="detail-row"><span>Jours avant:</span><span class="val">{{ p.daysUntilReorder | number:'1.0-0' }}</span></div>
+                      <div class="detail-row"><span>{{ 'STOCK.OPTIM_SHOULD_ORDER' | translate }}</span><span class="val" [class.urgent]="p.shouldReorder">{{ p.shouldReorder ? ('STOCK.OPTIM_YES' | translate) : ('STOCK.OPTIM_NO' | translate) }}</span></div>
+                      <div class="detail-row"><span>{{ 'STOCK.OPTIM_DAYS_BEFORE' | translate }}</span><span class="val">{{ p.daysUntilReorder | number:'1.0-0' }}</span></div>
                     </div>
                     <!-- EOQ -->
                     <div class="detail-section">
-                      <h4>Quantite optimale</h4>
+                      <h4>{{ 'STOCK.OPTIM_EOQ_TITLE' | translate }}</h4>
                       <div class="detail-row"><span>EOQ:</span><span class="val">{{ p.economicOrderQty | number:'1.0-0' }}</span></div>
-                      <div class="detail-row"><span>Qte ajustee:</span><span class="val">{{ p.adjustedOrderQty | number:'1.0-0' }}</span></div>
-                      <div class="detail-row"><span>Cmd/an:</span><span class="val">{{ p.ordersPerYear | number:'1.1-1' }}</span></div>
-                      <div class="detail-row"><span>Cout/an:</span><span class="val">{{ p.totalAnnualCost | number:'1.0-0' }}</span></div>
+                      <div class="detail-row"><span>{{ 'STOCK.OPTIM_ADJ_QTY' | translate }}</span><span class="val">{{ p.adjustedOrderQty | number:'1.0-0' }}</span></div>
+                      <div class="detail-row"><span>{{ 'STOCK.OPTIM_ORDERS_YEAR' | translate }}</span><span class="val">{{ p.ordersPerYear | number:'1.1-1' }}</span></div>
+                      <div class="detail-row"><span>{{ 'STOCK.OPTIM_COST_YEAR' | translate }}</span><span class="val">{{ p.totalAnnualCost | number:'1.0-0' }}</span></div>
                     </div>
                     <!-- Risk -->
                     <div class="detail-section">
-                      <h4>Risques</h4>
-                      <div class="detail-row"><span>Rupture:</span><span class="val" [style.color]="riskColor(p.stockoutLevel)">{{ formatPercent(p.stockoutRisk) }} ({{ p.stockoutLevel }})</span></div>
-                      <div class="detail-row"><span>Surstock:</span><span class="val">{{ formatPercent(p.overstockRisk) }}</span></div>
-                      <div class="detail-row"><span>Jours de stock:</span><span class="val">{{ p.daysOfSupply | number:'1.0-0' }}</span></div>
-                      <div class="detail-row"><span>Rotation:</span><span class="val">{{ p.turnoverRate | number:'1.1-1' }}/an</span></div>
-                      <div class="detail-row"><span>Sante:</span><span class="val">{{ p.healthScore }}/100</span></div>
+                      <h4>{{ 'STOCK.OPTIM_RISKS' | translate }}</h4>
+                      <div class="detail-row"><span>{{ 'STOCK.OUT_OF_STOCK' | translate }}:</span><span class="val" [style.color]="riskColor(p.stockoutLevel)">{{ formatPercent(p.stockoutRisk) }} ({{ p.stockoutLevel }})</span></div>
+                      <div class="detail-row"><span>{{ 'STOCK.OPTIM_OVERSTOCK_LBL' | translate }}</span><span class="val">{{ formatPercent(p.overstockRisk) }}</span></div>
+                      <div class="detail-row"><span>{{ 'STOCK.OPTIM_DAYS_SUPPLY' | translate }}</span><span class="val">{{ p.daysOfSupply | number:'1.0-0' }}</span></div>
+                      <div class="detail-row"><span>{{ 'STOCK.OPTIM_TURNOVER' | translate }}</span><span class="val">{{ p.turnoverRate | number:'1.1-1' }}{{ 'STOCK.OPTIM_PER_YEAR' | translate }}</span></div>
+                      <div class="detail-row"><span>{{ 'STOCK.OPTIM_HEALTH' | translate }}</span><span class="val">{{ p.healthScore }}/100</span></div>
                     </div>
                     <!-- Recommendation -->
                     <div class="detail-section full-width">
-                      <h4>Recommandation</h4>
+                      <h4>{{ 'STOCK.OPTIM_RECOMMENDATION' | translate }}</h4>
                       <div class="rec-box" [style.border-left-color]="actionColor(p.recommendation.action)">
-                        <div class="rec-action" [style.color]="actionColor(p.recommendation.action)">{{ p.recommendation.action }} — Priorite {{ p.recommendation.priority }}</div>
+                        <div class="rec-action" [style.color]="actionColor(p.recommendation.action)">{{ p.recommendation.action }} — {{ 'STOCK.OPTIM_PRIORITY' | translate }} {{ p.recommendation.priority }}</div>
                         <p class="rec-reasoning">{{ p.recommendation.reasoning }}</p>
                         <div class="rec-factors">
                           @for (f of p.recommendation.keyFactors; track f) {
@@ -259,7 +259,7 @@
                     <!-- Anomalies -->
                     @if (p.anomalies.length > 0) {
                       <div class="detail-section full-width">
-                        <h4>Anomalies detectees</h4>
+                        <h4>{{ 'STOCK.OPTIM_ANOMALIES' | translate }}</h4>
                         @for (a of p.anomalies; track a) {
                           <div class="anomaly-box" [class.anomaly-high]="a.severity === 'HIGH'" [class.anomaly-med]="a.severity === 'MEDIUM'">
                             <strong>{{ a.type }}</strong> ({{ a.severity }})
@@ -280,7 +280,7 @@
     @if (activeTab === 'risks') {
       <div class="tab-content">
         <div class="card">
-          <h3>Niveaux de risque</h3>
+          <h3>{{ 'STOCK.OPTIM_RISK_LEVELS' | translate }}</h3>
           <div class="bar-chart">
             @for (item of data.riskDistribution | keyvalue; track item) {
               <div class="bar-row">
@@ -292,7 +292,7 @@
           </div>
         </div>
         <div class="card" style="margin-top:16px">
-          <h3>Produits a risque eleve</h3>
+          <h3>{{ 'STOCK.OPTIM_HIGH_RISK' | translate }}</h3>
           @for (p of data.products | filterByRisk; track p) {
             <div class="risk-row">
               <div class="risk-info">
@@ -301,18 +301,18 @@
               </div>
               <div class="risk-badges">
                 <span class="badge" [style.background]="riskColor(p.stockoutLevel) + '22'" [style.color]="riskColor(p.stockoutLevel)">
-                  Rupture: {{ formatPercent(p.stockoutRisk) }}
+                  {{ 'STOCK.OUT_OF_STOCK' | translate }}: {{ formatPercent(p.stockoutRisk) }}
                 </span>
                 @if (p.overstockRisk > 0.5) {
                   <span class="badge badge-out">
-                    Surstock: {{ formatPercent(p.overstockRisk) }}
+                    {{ 'STOCK.OPTIM_OVERSTOCK_LBL' | translate }} {{ formatPercent(p.overstockRisk) }}
                   </span>
                 }
               </div>
             </div>
           }
           @if ((data.products | filterByRisk).length === 0) {
-            <div class="empty">Aucun produit a risque eleve</div>
+            <div class="empty">{{ 'STOCK.OPTIM_NO_HIGH_RISK' | translate }}</div>
           }
         </div>
       </div>

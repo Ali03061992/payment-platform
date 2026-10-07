@@ -66,11 +66,55 @@ import { AppIconComponent } from './components/icon/icon.component';
 import { ConfirmDialogComponent } from './components/confirm-dialog/confirm-dialog.component';
 import { PaginationComponent } from './components/pagination/pagination.component';
 import { StatusLabelPipe } from './pipes/status-label.pipe';
+import { TimeAgoPipe } from './pipes/time-ago.pipe';
 
 import { JwtInterceptor } from './core/jwt.interceptor';
 import { AppRoutingModule } from './app-routing.module';
 import { AppTranslateModule } from './i18n/app-translate.module';
 import { LanguageSwitcherComponent } from './i18n/language-switcher.component';
+import { APP_INITIALIZER } from '@angular/core';
+import { TranslateService } from '@ngx-translate/core';
+import { LoginService } from './services/login.service';
+import { ThemePickerComponent } from './components/theme-picker/theme-picker.component';
+
+/**
+ * Précharge les traductions avant le bootstrap : les appels synchrones
+ * TranslateService.instant() (chatbot, toasts, libellés TS) renverraient
+ * sinon la clé brute tant que les JSON ./assets/i18n ne sont pas chargés.
+ */
+export function initAppTranslations(translate: TranslateService, loginService: LoginService): () => Promise<void> {
+  return () => new Promise<void>((resolve) => {
+    const raw = localStorage.getItem('lang') || 'fr';
+    let saved: 'fr' | 'en' = raw === 'en' ? 'en' : 'fr';
+    if (raw === 'ar') {
+      try { localStorage.setItem('lang', 'fr'); } catch {}
+      saved = 'fr';
+    }
+    try {
+      const cached = loginService.getCurrentUser();
+      if (cached?.id !== undefined && cached?.id !== null) {
+        const perUser = localStorage.getItem(`pp-lang-${cached.id}`);
+        if (perUser === 'en' || perUser === 'fr') saved = perUser;
+        else if (perUser === 'ar') {
+          try { localStorage.setItem(`pp-lang-${cached.id}`, 'fr'); } catch {}
+          saved = 'fr';
+        }
+      }
+      if (cached?.preferredLang === 'en' || cached?.preferredLang === 'fr') saved = cached.preferredLang;
+    } catch {}
+    translate.setDefaultLang('fr');
+    translate.use(saved).subscribe({
+      next: () => {
+        try {
+          document.documentElement.lang = saved;
+          localStorage.setItem('lang', saved);
+        } catch {}
+        resolve();
+      },
+      error: () => resolve()
+    });
+  });
+}
 
 @NgModule({ declarations: [
         AppComponent,
@@ -132,15 +176,20 @@ import { LanguageSwitcherComponent } from './i18n/language-switcher.component';
         AppIconComponent,
         ConfirmDialogComponent,
         PaginationComponent,
-        StatusLabelPipe
+        StatusLabelPipe,
+        TimeAgoPipe,
+        LanguageSwitcherComponent,
+        ThemePickerComponent
     ],
     bootstrap: [AppComponent], imports: [BrowserModule,
         FormsModule,
         QRCodeComponent,
         AppRoutingModule,
+        AppTranslateModule,
         ServiceWorkerModule.register('ngsw-worker.js', { enabled: environment.production })
     ], providers: [
         { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true },
-        provideHttpClient(withInterceptorsFromDi())
+        provideHttpClient(withInterceptorsFromDi()),
+        { provide: APP_INITIALIZER, useFactory: initAppTranslations, deps: [TranslateService, LoginService], multi: true }
     ] })
 export class AppModule { }

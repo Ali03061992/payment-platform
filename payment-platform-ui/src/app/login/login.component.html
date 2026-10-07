@@ -3,17 +3,17 @@
     <div class="login-logo">
       <img src="assets/icon-app.png" class="logo-img" alt="Payment Platform">
     </div>
-    <h1>Connexion</h1>
-    <p class="subtitle">Accédez à votre espace</p>
+    <h1>{{ 'AUTH.LOGIN_TITLE' | translate }}</h1>
+    <p class="subtitle">{{ 'AUTH.LOGIN_SUBTITLE' | translate }}</p>
 
     <form (ngSubmit)="onSubmit()">
       <div class="form-group">
-        <label for="username">Nom d'utilisateur</label>
+        <label for="username">{{ 'AUTH.USERNAME' | translate }}</label>
         <input id="username" type="text" [(ngModel)]="form.username" name="username" required placeholder="system.admin" autocomplete="username" aria-required="true">
       </div>
 
       <div class="form-group">
-        <label for="password">Mot de passe</label>
+        <label for="password">{{ 'AUTH.PASSWORD' | translate }}</label>
         <input id="password" type="password" [(ngModel)]="form.password" name="password" required placeholder="••••••••" autocomplete="current-password" aria-required="true">
       </div>
 
@@ -22,13 +22,13 @@
       }
 
       <button type="submit" class="btn btn-primary btn-block" [disabled]="loading"
-        [attr.aria-label]="loading ? 'Connexion en cours...' : 'Se connecter'">
-        {{ loading ? 'Connexion...' : 'Se connecter' }}
+        [attr.aria-label]="loading ? ('AUTH.LOGIN_LOADING' | translate) : ('AUTH.LOGIN_BUTTON' | translate)">
+        {{ loading ? ('AUTH.LOGIN_LOADING' | translate) : ('AUTH.LOGIN_BUTTON' | translate) }}
       </button>
     </form>
 
     <p class="register-link">
-      <a routerLink="/forgot-password">Mot de passe oublié ?</a>
+      <a routerLink="/forgot-password">{{ 'AUTH.FORGOT_PASSWORD' | translate }}</a>
     </p>
   </div>
 </div>

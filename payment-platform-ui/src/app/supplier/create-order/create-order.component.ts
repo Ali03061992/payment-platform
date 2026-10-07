@@ -1,5 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
+import { TranslateService } from '@ngx-translate/core';
 import { OrderService } from '../../services/order.service';
 import { OrganizationService } from '../../services/organization.service';
 import { StockService } from '../../services/stock.service';
@@ -41,7 +42,8 @@ export class SupplierCreateOrderComponent implements OnInit, OnDestroy {
     private orgService: OrganizationService,
     private stockService: StockService,
     private router: Router,
-    private toast: ToastService
+    private toast: ToastService,
+    private translate: TranslateService
   ) {}
 
   private subscriptions = new Subscription();
@@ -75,7 +77,7 @@ export class SupplierCreateOrderComponent implements OnInit, OnDestroy {
     const supplierId = this.supplierId;
     if (!supplierId) {
       this.loadingShops = false;
-      this.errorShops = 'Fournisseur non identifié';
+      this.errorShops = this.translate.instant('SUPPLIER_ORDERS.SUPPLIER_NOT_FOUND');
       return;
     }
     this.subscriptions.add(this.orgService.listRelationsBySupplier(supplierId).subscribe({
@@ -94,16 +96,16 @@ export class SupplierCreateOrderComponent implements OnInit, OnDestroy {
           },
           error: () => {
             this.loadingShops = false;
-            this.errorShops = 'Impossible de charger les boutiques';
+            this.errorShops = this.translate.instant('SUPPLIER_ORDERS.SHOPS_LOAD_ERROR');
           }
         }));
       },
       error: (err) => {
         this.loadingShops = false;
         if (err?.status === 403) {
-          this.errorShops = 'Permission insuffisante pour voir les relations (contactez admin)';
+          this.errorShops = this.translate.instant('SUPPLIER_ORDERS.RELATIONS_FORBIDDEN');
         } else {
-          this.errorShops = 'Impossible de charger les relations';
+          this.errorShops = this.translate.instant('SUPPLIER_ORDERS.RELATIONS_LOAD_ERROR');
         }
       }
     }));
@@ -128,7 +130,7 @@ export class SupplierCreateOrderComponent implements OnInit, OnDestroy {
       },
       error: () => {
         this.loadingProducts = false;
-        this.errorProducts = 'Impossible de charger les produits';
+        this.errorProducts = this.translate.instant('SUPPLIER_ORDERS.PRODUCTS_LOAD_ERROR');
         this.products = [];
       }
     }));
@@ -195,11 +197,11 @@ export class SupplierCreateOrderComponent implements OnInit, OnDestroy {
     };
     this.subscriptions.add(this.orderService.create(request).subscribe({
       next: () => {
-        this.toast.success('Commande créée avec succès');
+        this.toast.success(this.translate.instant('SUPPLIER_ORDERS.ORDER_CREATED'));
         this.router.navigate(['/dashboard/supplier/orders']);
       },
-      error: (err: any) => {
-        this.toast.error(err.error?.message || 'Erreur lors de la création');
+      error: (err: { error?: { message?: string }; status?: number; statusText?: string; message?: string }) => {
+        this.toast.error(err.error?.message || this.translate.instant('SUPPLIER_ORDERS.CREATE_ERROR'));
         this.creating = false;
       }
     }));

@@ -46,7 +46,22 @@ public class OrderCsvExportService {
                 .filter(o -> to == null || !o.getCreatedAt().isAfter(to))
                 .filter(o -> supplierId == null || supplierId.equals(o.getSupplierId()))
                 .filter(o -> shopId == null || shopId.equals(o.getShopId()))
+                .limit(5000)
                 .toList();
+
+        var orgCache = new java.util.HashMap<UUID, String>();
+        var userCache = new java.util.HashMap<UUID, String>();
+        java.util.function.Function<UUID, String> orgName = id -> {
+            if (id == null) return "";
+            return orgCache.computeIfAbsent(id, k ->
+                    organizationRepository.findById(OrganizationId.of(k))
+                            .map(org -> org.name().value()).orElse("Organization " + k));
+        };
+        java.util.function.Function<UUID, String> userName = id -> {
+            if (id == null) return "";
+            String v = userCache.computeIfAbsent(id, identityClient::resolveUserName);
+            return v != null ? v : "";
+        };
 
         StringWriter sw = new StringWriter();
         sw.write("Reference,Supplier,Shop,CreatedBy,Source,Status,Subtotal,TaxRate,TaxAmount,Total,Currency,"
@@ -54,11 +69,11 @@ public class OrderCsvExportService {
                 + "ReceivedAt,DeliveryRejectionReason,Notes,CreatedAt,UpdatedAt\n");
 
         for (Order o : filtered) {
-            String supplierName = resolveOrgName(o.getSupplierId());
-            String shopName = resolveOrgName(o.getShopId());
-            String deliveryAgentName = identityClient.resolveUserName(o.getDeliveryAgentId());
-            String receivedByName = identityClient.resolveUserName(o.getReceivedBy());
-            String createdByName = identityClient.resolveUserName(o.getCreatedBy());
+            String supplierName = orgName.apply(o.getSupplierId());
+            String shopName = orgName.apply(o.getShopId());
+            String deliveryAgentName = userName.apply(o.getDeliveryAgentId());
+            String receivedByName = userName.apply(o.getReceivedBy());
+            String createdByName = userName.apply(o.getCreatedBy());
 
             sw.write(String.format("%s,\"%s\",\"%s\",\"%s\",%s,%s,%s,%s,%s,%s,%s,\"%s\",%s,%s,%s,%s,\"%s\",%s,\"%s\",\"%s\",%s,%s\n",
                     o.getReference(),

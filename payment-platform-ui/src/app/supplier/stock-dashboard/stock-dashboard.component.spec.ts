@@ -13,6 +13,7 @@ import { StockDashboardComponent } from './stock-dashboard.component';
 import { StockService } from '../../services/stock.service';
 import { ToastService } from '../../services/toast.service';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { TranslateStubPipe, translateServiceProvider } from '../../testing/translate-stubs';
 
 describe('StockDashboardComponent', () => {
   let component: StockDashboardComponent;
@@ -33,10 +34,11 @@ describe('StockDashboardComponent', () => {
     stockSpy.getStockMovements.and.returnValue(of([]));
 
     TestBed.configureTestingModule({
-    declarations: [StockDashboardComponent],
+    declarations: [StockDashboardComponent, TranslateStubPipe],
     schemas: [NO_ERRORS_SCHEMA],
     imports: [FormsModule],
     providers: [
+        translateServiceProvider(),
         { provide: StockService, useValue: stockSpy },
         { provide: ToastService, useValue: toastSpy },
         provideHttpClient(withInterceptorsFromDi()),
@@ -71,7 +73,7 @@ describe('StockDashboardComponent', () => {
     it('should handle error without message', () => {
       stockService.getProducts.and.returnValue(throwError(() => ({})));
       component.loadData();
-      expect(toast.error).toHaveBeenCalledWith('Erreur de chargement');
+      expect(toast.error).toHaveBeenCalledWith('STOCK.LOAD_ERROR');
     });
   });
 
@@ -115,9 +117,9 @@ describe('StockDashboardComponent', () => {
 
   describe('movementTypeLabel', () => {
     it('should return correct labels', () => {
-      expect(component.movementTypeLabel('IN')).toBe('Entrée');
-      expect(component.movementTypeLabel('OUT')).toBe('Sortie');
-      expect(component.movementTypeLabel('ADJUSTMENT')).toBe('Ajustement');
+      expect(component.movementTypeLabel('IN')).toBe('STOCK.MOVEMENT_IN');
+      expect(component.movementTypeLabel('OUT')).toBe('STOCK.MOVEMENT_OUT');
+      expect(component.movementTypeLabel('ADJUSTMENT')).toBe('STOCK.MOVEMENT_ADJUSTMENT');
       expect(component.movementTypeLabel('UNKNOWN')).toBe('UNKNOWN');
     });
   });
@@ -174,7 +176,7 @@ describe('StockDashboardComponent', () => {
       component.movementRef = 'REF-001';
       component.movementNotes = 'notes';
       component.submitMovement();
-      expect(toast.success).toHaveBeenCalledWith('Mouvement de stock enregistré');
+      expect(toast.success).toHaveBeenCalledWith('STOCK.MOVEMENT_SAVED');
       expect(component.showMovementModal).toBeFalse();
     });
 
@@ -192,7 +194,7 @@ describe('StockDashboardComponent', () => {
       component.selectedProduct = mockProduct;
       component.movementQty = 10;
       component.submitMovement();
-      expect(toast.error).toHaveBeenCalledWith('Erreur');
+      expect(toast.error).toHaveBeenCalledWith('STOCK.ERROR');
     });
   });
 

@@ -1,24 +1,24 @@
 <div class="page-header">
-  <h2>Notifications</h2>
+  <h2>{{ 'NOTIFICATIONS.TITLE' | translate }}</h2>
   @if (unreadCount > 0) {
-    <button class="btn btn-primary" (click)="markAllRead()">Tout marquer lu</button>
+    <button class="btn btn-primary" (click)="markAllRead()">{{ 'NOTIFICATIONS.MARK_ALL_READ' | translate }}</button>
   }
 </div>
 
 <div class="filters">
   <select [(ngModel)]="filterType" class="form-control" style="max-width:200px;" (change)="onFilterChange()">
-    <option value="">Tous les types</option>
-    <option value="ORDER">Commandes</option>
-    <option value="PAYMENT">Paiements</option>
-    <option value="DELIVERY">Livraisons</option>
+    <option value="">{{ 'NOTIFICATIONS.ALL_TYPES' | translate }}</option>
+    <option value="ORDER">{{ 'NOTIFICATIONS.TYPE_ORDER' | translate }}</option>
+    <option value="PAYMENT">{{ 'NOTIFICATIONS.TYPE_PAYMENT' | translate }}</option>
+    <option value="DELIVERY">{{ 'NOTIFICATIONS.TYPE_DELIVERY' | translate }}</option>
   </select>
-  <span class="result-count">{{ totalElements }} résultat(s)</span>
+  <span class="result-count">{{ 'NOTIFICATIONS.RESULT_COUNT' | translate:{count: totalElements} }}</span>
 </div>
 
 @if (loading) {
   <div class="loading">
     <div class="spinner"></div>
-    <span>Chargement...</span>
+    <span>{{ 'NOTIFICATIONS.LOADING' | translate }}</span>
   </div>
 }
 
@@ -29,24 +29,24 @@
       <table>
         <thead>
           <tr>
-            <th>Statut</th>
-            <th>Type</th>
-            <th>Message</th>
-            <th>Date</th>
-            <th>Actions</th>
+            <th class="sortable-th" (click)="onSort('readStatus')" (keydown.enter)="onSort('readStatus')" tabindex="0" [attr.aria-sort]="ariaSort('readStatus')">{{ 'NOTIFICATIONS.COL_STATUS' | translate }} <span class="sort-indicator" aria-hidden="true">{{ sortIndicator('readStatus') }}</span></th>
+            <th class="sortable-th" (click)="onSort('type')" (keydown.enter)="onSort('type')" tabindex="0" [attr.aria-sort]="ariaSort('type')">{{ 'NOTIFICATIONS.COL_TYPE' | translate }} <span class="sort-indicator" aria-hidden="true">{{ sortIndicator('type') }}</span></th>
+            <th>{{ 'NOTIFICATIONS.COL_MESSAGE' | translate }}</th>
+            <th class="sortable-th" (click)="onSort('createdAt')" (keydown.enter)="onSort('createdAt')" tabindex="0" [attr.aria-sort]="ariaSort('createdAt')">{{ 'NOTIFICATIONS.COL_DATE' | translate }} <span class="sort-indicator" aria-hidden="true">{{ sortIndicator('createdAt') }}</span></th>
+            <th>{{ 'NOTIFICATIONS.COL_ACTIONS' | translate }}</th>
           </tr>
         </thead>
         <tbody>
-          @for (n of notifications; track n) {
+          @for (n of sortedNotifications; track n) {
             <tr
               class="clickable-row"
               [class.unread-row]="n.readStatus === 'UNREAD'"
               (click)="navigateNotification(n)">
               <td>
                 @if (n.readStatus === 'UNREAD') {
-                  <span class="notif-status-dot unread" aria-label="Non lu"></span>
+                  <span class="notif-status-dot unread" [attr.aria-label]="'NOTIFICATIONS.UNREAD_ARIA' | translate"></span>
                 } @else {
-                  <span class="notif-status-dot read" aria-label="Lu"></span>
+                  <span class="notif-status-dot read" [attr.aria-label]="'NOTIFICATIONS.READ_ARIA' | translate"></span>
                 }
               </td>
               <td>
@@ -56,17 +56,17 @@
                 <span class="notif-icon-inline"><app-icon [name]="getNotificationIcon(n.type)" [size]="18"></app-icon></span>
                 <span class="notif-message-text">{{ n.message }}</span>
               </td>
-              <td>{{ getTimeAgo(n.createdAt) }}</td>
+              <td>{{ n.createdAt | timeAgo }}</td>
               <td>
                 @if (n.readStatus === 'UNREAD') {
-                  <button class="btn btn-sm btn-secondary" (click)="markAsRead(n.id, $event)">Marquer lu</button>
+                  <button class="btn btn-sm btn-secondary" (click)="markAsRead(n.id, $event)">{{ 'NOTIFICATIONS.MARK_READ' | translate }}</button>
                 }
               </td>
             </tr>
           }
           @if (notifications.length === 0) {
             <tr>
-              <td colspan="5" class="empty">Aucune notification</td>
+              <td colspan="5" class="empty">{{ 'NOTIFICATIONS.EMPTY' | translate }}</td>
             </tr>
           }
         </tbody>
@@ -77,9 +77,9 @@
   <!-- Mobile Card View -->
   <div class="notif-cards show-mobile">
     @if (notifications.length === 0) {
-      <div class="empty-card">Aucune notification</div>
+      <div class="empty-card">{{ 'NOTIFICATIONS.EMPTY' | translate }}</div>
     }
-    @for (n of notifications; track n) {
+    @for (n of sortedNotifications; track n) {
       <div
         class="notif-card"
         [class.unread]="n.readStatus === 'UNREAD'"
@@ -88,7 +88,7 @@
           <span class="notif-icon-large"><app-icon [name]="getNotificationIcon(n.type)" [size]="28"></app-icon></span>
           <div class="notif-card-meta">
             <span class="type-badge" [ngClass]="typeBadgeClass(n.type)">{{ typeLabel(n.type) }}</span>
-            <span class="notif-time">{{ getTimeAgo(n.createdAt) }}</span>
+            <span class="notif-time">{{ n.createdAt | timeAgo }}</span>
           </div>
           @if (n.readStatus === 'UNREAD') {
             <span class="unread-dot"></span>
@@ -97,11 +97,11 @@
         <div class="notif-card-body">
           <div class="notif-message-full">{{ n.message }}</div>
         </div>
-        @if (n.readStatus === 'UNREAD') {
-          <div class="notif-card-actions" (click)="$event.stopPropagation()">
-            <button class="btn btn-sm btn-secondary" (click)="markAsRead(n.id, $event)">Marquer lu</button>
-          </div>
-        }
+          @if (n.readStatus === 'UNREAD') {
+            <div class="notif-card-actions" (click)="$event.stopPropagation()">
+              <button class="btn btn-sm btn-secondary" (click)="markAsRead(n.id, $event)">{{ 'NOTIFICATIONS.MARK_READ' | translate }}</button>
+            </div>
+          }
       </div>
     }
   </div>

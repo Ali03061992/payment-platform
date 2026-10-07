@@ -12,6 +12,7 @@ import { ShopManagementComponent } from './shop-management.component';
 import { OrganizationService } from '../../services/organization.service';
 import { ToastService } from '../../services/toast.service';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { TranslateStubPipe, translateServiceProvider } from '../../testing/translate-stubs';
 
 describe('ShopManagementComponent', () => {
   let component: ShopManagementComponent;
@@ -20,18 +21,20 @@ describe('ShopManagementComponent', () => {
   let toast: jasmine.SpyObj<ToastService>;
 
   beforeEach(() => {
-    const orgSpy = jasmine.createSpyObj('OrganizationService', ['listShops', 'createShop', 'activate', 'disable']);
+    const orgSpy = jasmine.createSpyObj('OrganizationService', ['listShops', 'listShopsPaged', 'createShop', 'activate', 'disable']);
     const toastSpy = jasmine.createSpyObj('ToastService', ['success', 'error']);
     orgSpy.listShops.and.returnValue(of([]));
+    orgSpy.listShopsPaged.and.returnValue(of({ items: [], totalElements: 0, totalPages: 1, number: 0 } as any));
     orgSpy.createShop.and.returnValue(of({ id: 1, name: 'Shop1' } as any));
     orgSpy.activate.and.returnValue(of({} as any));
     orgSpy.disable.and.returnValue(of({} as any));
 
     TestBed.configureTestingModule({
-    declarations: [ShopManagementComponent],
+    declarations: [ShopManagementComponent, TranslateStubPipe],
     schemas: [NO_ERRORS_SCHEMA],
     imports: [],
     providers: [
+        translateServiceProvider(),
         { provide: OrganizationService, useValue: orgSpy },
         { provide: ToastService, useValue: toastSpy },
         provideHttpClient(withInterceptorsFromDi()),
@@ -49,14 +52,14 @@ describe('ShopManagementComponent', () => {
   });
 
   it('should load shops on init', () => {
-    orgService.listShops.and.returnValue(of([{ id: 1, name: 'S1', status: 'ACTIVE' } as any]));
+    orgService.listShopsPaged.and.returnValue(of({ items: [{ id: 1, name: 'S1', status: 'ACTIVE' }], totalElements: 1, totalPages: 1, number: 0 } as any));
     component.ngOnInit();
     expect(component.shops.length).toBe(1);
     expect(component.loading).toBeFalse();
   });
 
   it('should handle load error', () => {
-    orgService.listShops.and.returnValue(throwError(() => new Error('fail')));
+    orgService.listShopsPaged.and.returnValue(throwError(() => new Error('fail')));
     component.load();
     expect(component.loading).toBeFalse();
   });
@@ -94,7 +97,7 @@ describe('ShopManagementComponent', () => {
     component.newName = 'Shop';
     orgService.createShop.and.returnValue(throwError(() => ({})));
     component.create();
-    expect(toast.error).toHaveBeenCalledWith('Erreur lors de la création');
+    expect(toast.error).toHaveBeenCalledWith('ORGS.CREATE_ERROR');
   });
 
   it('should toggle disable active shop', () => {

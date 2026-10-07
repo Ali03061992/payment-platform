@@ -1,7 +1,6 @@
 ---
 description: Expert Flutter mobile du Payment Platform. App multi-roles (SUPPLIER_ADMIN, SUPPLIER_AGENT, SHOP_ADMIN, SHOP_AGENT, sans SYSTEM_ADMIN), parite fonctionnelle avec Angular, Riverpod, Dio, FCM push + SSE fallback.
 mode: subagent
-model: anthropic/claude-sonnet-4-6
 permission:
   edit: allow
   bash: ask

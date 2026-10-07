@@ -1,4 +1,4 @@
-<a href="#main-content" class="skip-link">Aller au contenu principal</a>
+<a href="#main-content" class="skip-link">{{ 'LAYOUT.SKIP_LINK' | translate }}</a>
 <app-notification-banner></app-notification-banner>
 <app-toast></app-toast>
 <app-chatbot></app-chatbot>
@@ -20,6 +20,16 @@
     </button>
     <span class="mobile-title">Payment Platform</span>
     <div class="mobile-header-actions">
+      <div class="theme-picker-wrapper">
+        <button class="theme-toggle-mobile" (click)="toggleThemePicker(); $event.stopPropagation()" aria-haspopup="dialog" [attr.aria-expanded]="showThemePicker" aria-label="Personnaliser les couleurs du thème" title="Personnaliser le thème">
+          <app-icon name="sparkles" [size]="20"></app-icon>
+        </button>
+        @if (showThemePicker) {
+          <div class="theme-picker-panel" role="dialog" aria-label="Personnalisation du thème">
+            <app-theme-picker></app-theme-picker>
+          </div>
+        }
+      </div>
       <button class="theme-toggle-mobile" (click)="themeService.toggle()" [attr.aria-label]="themeService.isDark ? 'Passer en mode clair' : 'Passer en mode sombre'" [title]="themeService.isDark ? 'Mode clair' : 'Mode sombre'">
         @if (themeService.isDark) {
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -39,7 +49,7 @@
           </svg>
         }
       </button>
-      <button class="notif-bell-mobile" (click)="toggleNotifications()" aria-label="Notifications">
+      <button class="notif-bell-mobile" (click)="toggleNotifications()" [attr.aria-label]="'LAYOUT.NOTIFICATIONS' | translate">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
           <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
@@ -48,7 +58,7 @@
           <span class="notif-badge">{{ unreadCount > 99 ? '99+' : unreadCount }}</span>
         }
       </button>
-      <button class="mobile-logout-btn" (click)="logout()" aria-label="Se déconnecter">
+      <button class="mobile-logout-btn" (click)="logout()" [attr.aria-label]="'LAYOUT.LOGOUT' | translate">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
           <polyline points="16 17 21 12 16 7"></polyline>
@@ -87,7 +97,7 @@
         @if (notifications.length === 0) {
           <div class="notif-empty">
             <div class="notif-empty-icon"><app-icon name="bell" [size]="32"></app-icon></div>
-            <div class="notif-empty-text">Aucune notification</div>
+            <div class="notif-empty-text">{{ 'LAYOUT.NO_NOTIFICATIONS' | translate }}</div>
           </div>
         }
         @for (n of notifications; track n) {
@@ -98,7 +108,7 @@
             <span class="notif-icon"><app-icon [name]="getNotificationIcon(n.type)" [size]="20"></app-icon></span>
             <div class="notif-content">
               <div class="notif-message">{{ n.message }}</div>
-              <div class="notif-time">{{ getTimeAgo(n.createdAt) }}</div>
+              <div class="notif-time">{{ n.createdAt | timeAgo }}</div>
             </div>
           </div>
         }
@@ -143,8 +153,8 @@
         <div class="nav-group" [class.collapsed]="!isGroupOpen(group.label)">
           @if (sidebarOpen && group.items.length > 1) {
             <button class="nav-group-header" (click)="toggleGroup(group.label)"
-              [attr.aria-expanded]="isGroupOpen(group.label)" [attr.aria-label]="'Section ' + group.label">
-              <span class="nav-group-title">{{ group.label }}</span>
+              [attr.aria-expanded]="isGroupOpen(group.label)" [attr.aria-label]="group.label | translate">
+              <span class="nav-group-title">{{ group.label | translate }}</span>
               <svg class="nav-group-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <polyline points="6 9 12 15 18 9"></polyline>
               </svg>
@@ -160,7 +170,7 @@
                 (click)="onNavClick()">
                 <span class="nav-icon"><app-icon [name]="item.icon" [size]="20"></app-icon></span>
                 @if (sidebarOpen) {
-                  <span class="nav-label">{{ item.label }}</span>
+                  <span class="nav-label">{{ item.label | translate }}</span>
                 }
                 @if ((item.route === 'supplier/stock' || item.route === 'supplier/low-stock-alerts') && lowStockAlertCount > 0) {
                   <span class="nav-badge">{{ lowStockAlertCount }}</span>
@@ -186,14 +196,14 @@
           </div>
         </div>
       }
-      <button class="logout-btn" (click)="logout()" aria-label="Se déconnecter">
+      <button class="logout-btn" (click)="logout()" [attr.aria-label]="'LAYOUT.LOGOUT' | translate">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
           <polyline points="16 17 21 12 16 7"></polyline>
           <line x1="21" y1="12" x2="9" y2="12"></line>
         </svg>
         @if (sidebarOpen) {
-          <span>Déconnexion</span>
+          <span>{{ 'LAYOUT.LOGOUT' | translate }}</span>
         }
       </button>
     </div>
@@ -201,11 +211,17 @@
 
   <main class="main-content" id="main-content" role="main" aria-label="Contenu principal">
     <header class="top-bar hide-mobile">
-      <div class="page-title">
-        <h2>Bienvenue, {{ user?.firstName }}</h2>
-        <span class="breadcrumb">{{ user?.roles?.[0] }}</span>
-      </div>
       <div class="header-actions">
+        <div class="theme-picker-wrapper">
+          <button class="theme-toggle" (click)="toggleThemePicker(); $event.stopPropagation()" aria-haspopup="dialog" [attr.aria-expanded]="showThemePicker" aria-label="Personnaliser les couleurs du thème" title="Personnaliser le thème">
+            <app-icon name="sparkles" [size]="20"></app-icon>
+          </button>
+          @if (showThemePicker) {
+            <div class="theme-picker-panel" role="dialog" aria-label="Personnalisation du thème">
+              <app-theme-picker></app-theme-picker>
+            </div>
+          }
+        </div>
         <button class="theme-toggle" (click)="themeService.toggle()" [attr.aria-label]="themeService.isDark ? 'Passer en mode clair' : 'Passer en mode sombre'" [title]="themeService.isDark ? 'Mode clair' : 'Mode sombre'">
           @if (themeService.isDark) {
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -225,7 +241,7 @@
             </svg>
           }
         </button>
-        <button class="notif-bell" (click)="toggleNotifications()" aria-label="Notifications">
+        <button class="notif-bell" (click)="toggleNotifications()" [attr.aria-label]="'LAYOUT.NOTIFICATIONS' | translate">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
             <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
@@ -234,7 +250,9 @@
             <span class="notif-badge">{{ unreadCount > 99 ? '99+' : unreadCount }}</span>
           }
         </button>
-        <span class="status-badge active" role="status" aria-label="Statut de connexion : en ligne">En ligne</span>
+        <span class="status-badge active" role="status" aria-label="Statut de connexion : en ligne">{{ 'LAYOUT.ONLINE' | translate }}</span>
+        <span class="header-divider" aria-hidden="true"></span>
+        <app-language-switcher></app-language-switcher>
       </div>
     </header>
     <div class="content-area" (click)="closeNotifications()">

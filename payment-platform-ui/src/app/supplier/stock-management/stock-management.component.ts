@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
+import { TranslateService } from '@ngx-translate/core';
 import { StockService } from '../../services/stock.service';
 import { Product, StockMovement } from '../../models/stock.model';
-import { paginateItems } from '../../models/page.model';
+import { paginateItems, sortItems, toggleSortState, ariaSortFor, sortIndicatorFor, SortState } from '../../models/page.model';
 import { ToastService } from '../../services/toast.service';
 
 @Component({
@@ -19,9 +20,11 @@ export class StockManagementComponent implements OnInit {
   filterStatus = '';
   sortBy = 'lowStock';
   currentPage = 0;
-  pageSize = 20;
+  pageSize = 10;
   historyPage = 0;
   historySize = 10;
+  sort: SortState = { field: null, direction: 'asc' };
+  historySort: SortState = { field: null, direction: 'asc' };
 
   stats = { total: 0, totalQty: 0, totalValue: 0, lowStock: 0, outOfStock: 0 };
 
@@ -38,7 +41,7 @@ export class StockManagementComponent implements OnInit {
   historyMovements: StockMovement[] = [];
   loadingHistory = false;
 
-  constructor(private stockService: StockService, private toast: ToastService) {}
+  constructor(private stockService: StockService, private toast: ToastService, private translate: TranslateService) {}
 
   ngOnInit(): void { this.loadData(); }
 
@@ -83,11 +86,37 @@ export class StockManagementComponent implements OnInit {
   }
 
   get pagedProducts(): Product[] {
-    return paginateItems(this.filteredProducts, this.currentPage, this.pageSize);
+    return paginateItems(sortItems(this.filteredProducts, this.sort.field, this.sort.direction), this.currentPage, this.pageSize);
   }
 
   get pagedHistory(): StockMovement[] {
-    return paginateItems(this.historyMovements, this.historyPage, this.historySize);
+    return paginateItems(sortItems(this.historyMovements, this.historySort.field, this.historySort.direction), this.historyPage, this.historySize);
+  }
+
+  onSort(field: string): void {
+    this.sort = toggleSortState(this.sort, field);
+    this.currentPage = 0;
+  }
+
+  ariaSort(field: string): 'ascending' | 'descending' | 'none' {
+    return ariaSortFor(field, this.sort);
+  }
+
+  sortIndicator(field: string): string {
+    return sortIndicatorFor(field, this.sort);
+  }
+
+  onHistorySort(field: string): void {
+    this.historySort = toggleSortState(this.historySort, field);
+    this.historyPage = 0;
+  }
+
+  historyAriaSort(field: string): 'ascending' | 'descending' | 'none' {
+    return ariaSortFor(field, this.historySort);
+  }
+
+  historySortIndicator(field: string): string {
+    return sortIndicatorFor(field, this.historySort);
   }
 
   onPageChange(page: number): void {
@@ -144,8 +173,8 @@ export class StockManagementComponent implements OnInit {
     this.stockService.createStockMovement(this.selectedProduct.id, {
       type: this.movementType, quantity: this.movementQty, reference: this.movementRef, notes: this.movementNotes
     }).subscribe({
-      next: () => { this.toast.success('Mouvement enregistre'); this.closeMovement(); this.savingMovement = false; this.loadData(); },
-      error: (err) => { this.toast.error(err.error?.message || 'Erreur'); this.savingMovement = false; }
+      next: () => { this.toast.success(this.translate.instant('STOCK.MOVEMENT_SAVED')); this.closeMovement(); this.savingMovement = false; this.loadData(); },
+      error: (err) => { this.toast.error(err.error?.message || this.translate.instant('STOCK.ERROR')); this.savingMovement = false; }
     });
   }
 

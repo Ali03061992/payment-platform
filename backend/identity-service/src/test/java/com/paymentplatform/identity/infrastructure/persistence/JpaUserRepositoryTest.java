@@ -161,4 +161,28 @@ class JpaUserRepositoryTest {
         var found = repository.findById(new UserId(savedUser.id().value()));
         assertThat(found.get().firstName()).isEqualTo("Updated");
     }
+
+    @Test
+    void save_preferences_roundTrip() {
+        savedUser.updatePreferences("en", "#ff0000", "#00ff00");
+        savedUser.markTourSeen();
+        repository.save(savedUser);
+
+        var found = repository.findById(new UserId(savedUser.id().value()));
+        assertThat(found).isPresent();
+        assertThat(found.get().preferredLang()).isEqualTo("en");
+        assertThat(found.get().accentColor1()).isEqualTo("#ff0000");
+        assertThat(found.get().accentColor2()).isEqualTo("#00ff00");
+        assertThat(found.get().tourSeen()).isTrue();
+    }
+
+    @Test
+    void save_defaultPreferences_persisted() {
+        var found = repository.findById(new UserId(savedUser.id().value()));
+        assertThat(found).isPresent();
+        assertThat(found.get().preferredLang()).isEqualTo("fr");
+        assertThat(found.get().accentColor1()).isEqualTo("#0284c7");
+        assertThat(found.get().accentColor2()).isEqualTo("#e63946");
+        assertThat(found.get().tourSeen()).isFalse();
+    }
 }

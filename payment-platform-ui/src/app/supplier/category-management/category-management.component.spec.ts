@@ -14,6 +14,7 @@ import { ToastService } from '../../services/toast.service';
 import { ConfirmDialogService } from '../../components/confirm-dialog/confirm-dialog.service';
 import { ProductCategory } from '../../models/catalog.model';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { TranslateStubPipe, translateServiceProvider } from '../../testing/translate-stubs';
 
 describe('CategoryManagementComponent', () => {
   let component: CategoryManagementComponent;
@@ -31,9 +32,10 @@ describe('CategoryManagementComponent', () => {
     catalogSpy.listCategories.and.returnValue(of([]));
 
     TestBed.configureTestingModule({
-    declarations: [CategoryManagementComponent],
+    declarations: [CategoryManagementComponent, TranslateStubPipe],
     imports: [FormsModule],
     providers: [
+        translateServiceProvider(),
         { provide: CatalogService, useValue: catalogSpy },
         { provide: ToastService, useValue: toastSpy },
         { provide: ConfirmDialogService, useValue: confirmSpy },
@@ -69,7 +71,7 @@ describe('CategoryManagementComponent', () => {
       catalogService.createCategory.and.returnValue(of({} as any));
       component.form = { name: 'New Cat', code: 'NC' };
       component.save();
-      expect(toast.success).toHaveBeenCalled();
+      expect(toast.success).toHaveBeenCalledWith('CATALOG.CATEGORY_CREATED');
       expect(component.showForm).toBeFalse();
     });
 
@@ -112,7 +114,7 @@ describe('CategoryManagementComponent', () => {
       confirmDialog.confirm.and.returnValue(of(true));
       catalogService.deleteCategory.and.returnValue(throwError(() => ({ error: {} })));
       component.deleteCategory({ id: 1, name: 'Cat' } as ProductCategory);
-      expect(toast.error).toHaveBeenCalledWith('Erreur');
+      expect(toast.error).toHaveBeenCalledWith('STOCK.ERROR');
     });
   });
 
@@ -170,7 +172,7 @@ describe('CategoryManagementComponent', () => {
       catalogService.createCategory.and.returnValue(throwError(() => ({ error: {} })));
       component.form = { name: 'Cat', code: 'C' };
       component.save();
-      expect(toast.error).toHaveBeenCalledWith('Erreur');
+      expect(toast.error).toHaveBeenCalledWith('STOCK.ERROR');
       expect(component.saving).toBeFalse();
     });
 

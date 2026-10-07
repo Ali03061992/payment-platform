@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { TranslateService } from '@ngx-translate/core';
 import { CatalogService } from '../../services/catalog.service';
 import { ProductCategory } from '../../models/catalog.model';
 import { ToastService } from '../../services/toast.service';
@@ -21,7 +22,7 @@ export class CategoryManagementComponent implements OnInit {
   pageSize = 10;
   sort: SortState = { field: null, direction: 'asc' };
 
-  constructor(private catalogService: CatalogService, private toast: ToastService, private confirmDialog: ConfirmDialogService) {}
+  constructor(private catalogService: CatalogService, private toast: ToastService, private confirmDialog: ConfirmDialogService, private translate: TranslateService) {}
 
   ngOnInit(): void { this.loadCategories(); }
 
@@ -79,25 +80,25 @@ export class CategoryManagementComponent implements OnInit {
     this.saving = true;
     this.catalogService.createCategory({ supplierId: this.supplierId, name: this.form.name, code: this.form.code }).subscribe({
       next: () => {
-        this.toast.success('Categorie creee');
+        this.toast.success(this.translate.instant('CATALOG.CATEGORY_CREATED'));
         this.showForm = false;
         this.saving = false;
         this.loadCategories();
       },
-      error: (err) => { this.toast.error(err.error?.message || 'Erreur'); this.saving = false; }
+      error: (err) => { this.toast.error(err.error?.message || this.translate.instant('STOCK.ERROR')); this.saving = false; }
     });
   }
 
   deleteCategory(cat: ProductCategory): void {
     this.confirmDialog.confirm({
-      title: 'Supprimer la catégorie',
-      message: `Supprimer la categorie "${cat.name}" ?`,
+      title: this.translate.instant('CATALOG.DELETE_CATEGORY_TITLE'),
+      message: this.translate.instant('CATALOG.DELETE_CATEGORY_MSG', { name: cat.name }),
       danger: true,
     }).subscribe(ok => {
       if (!ok) return;
       this.catalogService.deleteCategory(cat.id).subscribe({
-        next: () => { this.toast.success('Categorie supprimee'); this.loadCategories(); },
-        error: (err) => this.toast.error(err.error?.message || 'Erreur')
+        next: () => { this.toast.success(this.translate.instant('CATALOG.CATEGORY_DELETED')); this.loadCategories(); },
+        error: (err) => this.toast.error(err.error?.message || this.translate.instant('STOCK.ERROR'))
       });
     });
   }

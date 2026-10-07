@@ -13,6 +13,7 @@ import { UserService } from '../../services/user.service';
 import { ToastService } from '../../services/toast.service';
 import { User } from '../../models/user.model';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { TranslateStubPipe, translateServiceProvider } from '../../testing/translate-stubs';
 
 describe('UserManagementComponent', () => {
   let component: UserManagementComponent;
@@ -26,9 +27,10 @@ describe('UserManagementComponent', () => {
     userSpy.listPaged.and.returnValue(of({ items: [], totalElements: 0, totalPages: 1, number: 0 }));
 
     TestBed.configureTestingModule({
-    declarations: [UserManagementComponent],
+    declarations: [UserManagementComponent, TranslateStubPipe],
     imports: [FormsModule],
     providers: [
+        translateServiceProvider(),
         { provide: UserService, useValue: userSpy },
         { provide: ToastService, useValue: toastSpy },
         provideHttpClient(withInterceptorsFromDi()),

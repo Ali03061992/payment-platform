@@ -15,6 +15,9 @@ import { DisputeService } from '../../services/dispute.service';
 import { ToastService } from '../../services/toast.service';
 import { ConfirmDialogService } from '../../components/confirm-dialog/confirm-dialog.service';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { TranslateStubPipe, translateServiceProvider } from '../../testing/translate-stubs';
+import { StatusLabelPipe } from '../../pipes/status-label.pipe';
+import { TimeAgoPipe } from '../../pipes/time-ago.pipe';
 
 describe('ShopOrderDetailComponent', () => {
   let component: ShopOrderDetailComponent;
@@ -45,10 +48,11 @@ describe('ShopOrderDetailComponent', () => {
     disputeSpy.getByOrder.and.returnValue(of([]));
 
     TestBed.configureTestingModule({
-    declarations: [ShopOrderDetailComponent],
+    declarations: [ShopOrderDetailComponent, TranslateStubPipe, StatusLabelPipe, TimeAgoPipe],
     schemas: [NO_ERRORS_SCHEMA],
     imports: [],
     providers: [
+        translateServiceProvider(),
         { provide: OrderService, useValue: orderSpy },
         { provide: DisputeService, useValue: disputeSpy },
         { provide: ToastService, useValue: toastSpy },
@@ -93,12 +97,21 @@ describe('ShopOrderDetailComponent', () => {
     });
   });
 
+  describe('rendering', () => {
+    it('should render without events from backend (non-régression crash length)', () => {
+      const { events, ...withoutEvents } = mockOrder as any;
+      component.order = withoutEvents;
+      component.loading = false;
+      expect(() => fixture.detectChanges()).not.toThrow();
+    });
+  });
+
   describe('accept', () => {
     it('should accept order', () => {
       orderService.accept.and.returnValue(of({ ...mockOrder, status: 'ACCEPTED' }));
       component.order = mockOrder;
       component.accept();
-      expect(toast.success).toHaveBeenCalledWith('Commande acceptée');
+      expect(toast.success).toHaveBeenCalledWith('ORDER_DETAIL.ACCEPTED_MSG');
     });
 
     it('should not accept when no order', () => {
@@ -118,7 +131,7 @@ describe('ShopOrderDetailComponent', () => {
       orderService.accept.and.returnValue(throwError(() => ({})));
       component.order = mockOrder;
       component.accept();
-      expect(toast.error).toHaveBeenCalledWith('Erreur');
+      expect(toast.error).toHaveBeenCalledWith('ORDER_DETAIL.ERROR');
     });
   });
 
@@ -127,7 +140,7 @@ describe('ShopOrderDetailComponent', () => {
       orderService.acceptAsap.and.returnValue(of({ ...mockOrder, status: 'ACCEPTED' }));
       component.order = mockOrder;
       component.acceptAsap();
-      expect(toast.success).toHaveBeenCalledWith('Commande acceptée avec paiement ASAP');
+      expect(toast.success).toHaveBeenCalledWith('ORDER_DETAIL.ACCEPTED_ASAP_MSG');
     });
 
     it('should not acceptAsap when no order', () => {
@@ -150,7 +163,7 @@ describe('ShopOrderDetailComponent', () => {
       orderService.reject.and.returnValue(of({ ...mockOrder, status: 'REJECTED' }));
       component.order = mockOrder;
       component.reject();
-      expect(toast.success).toHaveBeenCalledWith('Commande rejetée');
+      expect(toast.success).toHaveBeenCalledWith('ORDER_DETAIL.REJECTED_MSG');
     });
 
     it('should not reject when not confirmed', () => {
@@ -180,7 +193,7 @@ describe('ShopOrderDetailComponent', () => {
       orderService.cancel.and.returnValue(of({ ...mockOrder, status: 'CANCELLED' }));
       component.order = mockOrder;
       component.cancel();
-      expect(toast.success).toHaveBeenCalledWith('Commande annulée');
+      expect(toast.success).toHaveBeenCalledWith('ORDER_DETAIL.CANCELLED_MSG');
     });
 
     it('should not cancel when no order', () => {
@@ -233,17 +246,17 @@ describe('ShopOrderDetailComponent', () => {
 
   describe('actionLabel', () => {
     it('should return correct labels', () => {
-      expect(component.actionLabel('ORDER_CREATED')).toBe('Créé');
-      expect(component.actionLabel('ORDER_CONFIRMED')).toBe('Confirmé');
-      expect(component.actionLabel('ORDER_PREPARING')).toBe('En préparation');
-      expect(component.actionLabel('ORDER_READY_FOR_DELIVERY')).toBe('Prêt');
-      expect(component.actionLabel('ORDER_IN_DELIVERY')).toBe('En livraison');
-      expect(component.actionLabel('ORDER_DELIVERED')).toBe('Livré');
-      expect(component.actionLabel('ORDER_ACCEPTED')).toBe('Accepté');
-      expect(component.actionLabel('ORDER_CANCELLED')).toBe('Annulé');
-      expect(component.actionLabel('ORDER_ACCEPTED_ASAP')).toBe('Accepté (ASAP)');
-      expect(component.actionLabel('ORDER_REJECTED')).toBe('Rejeté');
-      expect(component.actionLabel('ORDER_DELIVERY_REJECTED')).toBe('Livraison rejetée');
+      expect(component.actionLabel('ORDER_CREATED')).toBe('ORDER_DETAIL.ACTION_CREATED');
+      expect(component.actionLabel('ORDER_CONFIRMED')).toBe('ORDER_DETAIL.ACTION_CONFIRMED');
+      expect(component.actionLabel('ORDER_PREPARING')).toBe('ORDER_DETAIL.ACTION_PREPARING');
+      expect(component.actionLabel('ORDER_READY_FOR_DELIVERY')).toBe('ORDER_DETAIL.ACTION_READY');
+      expect(component.actionLabel('ORDER_IN_DELIVERY')).toBe('ORDER_DETAIL.ACTION_IN_DELIVERY');
+      expect(component.actionLabel('ORDER_DELIVERED')).toBe('ORDER_DETAIL.ACTION_DELIVERED');
+      expect(component.actionLabel('ORDER_ACCEPTED')).toBe('ORDER_DETAIL.ACTION_ACCEPTED');
+      expect(component.actionLabel('ORDER_CANCELLED')).toBe('ORDER_DETAIL.ACTION_CANCELLED');
+      expect(component.actionLabel('ORDER_ACCEPTED_ASAP')).toBe('ORDER_DETAIL.ACTION_ACCEPTED_ASAP');
+      expect(component.actionLabel('ORDER_REJECTED')).toBe('ORDER_DETAIL.ACTION_REJECTED');
+      expect(component.actionLabel('ORDER_DELIVERY_REJECTED')).toBe('ORDER_DETAIL.ACTION_DELIVERY_REJECTED');
       expect(component.actionLabel('UNKNOWN')).toBe('UNKNOWN');
     });
   });

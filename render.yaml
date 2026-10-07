@@ -1,0 +1,133 @@
+services:
+  - type: web
+    name: payment-platform-gateway
+    env: docker
+    region: virginia
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    healthCheckPath: /actuator/health
+    autoDeploy: true
+    envVars:
+      - key: SERVICE_NAME
+        value: api-gateway
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod
+      - key: JWT_SECRET
+        sync: false
+      - key: INTERNAL_SECRET
+        sync: false
+      - key: IDENTITY_SERVICE_URL
+        value: payment-platform-identity
+      - key: ORGANIZATION_SERVICE_URL
+        value: payment-platform-organization
+      - key: PAYMENT_SERVICE_URL
+        value: payment-platform-payment
+      - key: NOTIFICATION_SERVICE_URL
+        value: payment-platform-notification
+      - key: CORS_ALLOWED_ORIGINS
+        sync: false
+
+  - type: web
+    name: payment-platform-identity
+    env: docker
+    region: virginia
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    healthCheckPath: /actuator/health
+    envVars:
+      - key: SERVICE_NAME
+        value: identity-service
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod
+      - key: JWT_SECRET
+        sync: false
+      - key: INTERNAL_SECRET
+        sync: false
+      - key: MYSQL_HOST
+        sync: false
+      - key: MYSQL_USER
+        sync: false
+      - key: MYSQL_PASSWORD
+        sync: false
+      - key: RABBITMQ_HOST
+        sync: false
+
+  - type: web
+    name: payment-platform-organization
+    env: docker
+    region: virginia
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    healthCheckPath: /actuator/health
+    envVars:
+      - key: SERVICE_NAME
+        value: organization-service
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod
+      - key: JWT_SECRET
+        sync: false
+      - key: INTERNAL_SECRET
+        sync: false
+      - key: MYSQL_HOST
+        sync: false
+      - key: MYSQL_USER
+        sync: false
+      - key: MYSQL_PASSWORD
+        sync: false
+
+  - type: web
+    name: payment-platform-payment
+    env: docker
+    region: virginia
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    healthCheckPath: /actuator/health
+    envVars:
+      - key: SERVICE_NAME
+        value: payment-service
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod
+      - key: JWT_SECRET
+        sync: false
+      - key: INTERNAL_SECRET
+        sync: false
+      - key: MYSQL_HOST
+        sync: false
+      - key: MYSQL_USER
+        sync: false
+      - key: MYSQL_PASSWORD
+        sync: false
+
+  - type: web
+    name: payment-platform-notification
+    env: docker
+    region: virginia
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    healthCheckPath: /actuator/health
+    envVars:
+      - key: SERVICE_NAME
+        value: notification-service
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod
+      - key: JWT_SECRET
+        sync: false
+      - key: INTERNAL_SECRET
+        sync: false
+      - key: MYSQL_HOST
+        sync: false
+      - key: MYSQL_USER
+        sync: false
+      - key: MYSQL_PASSWORD
+        sync: false
+
+  - type: web
+    name: payment-platform-frontend
+    env: docker
+    region: virginia
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /
+    envVars:
+      - key: CORS_ALLOWED_ORIGINS
+        sync: false

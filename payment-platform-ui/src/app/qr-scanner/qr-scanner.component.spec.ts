@@ -8,6 +8,7 @@ import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testin
 import { Router } from '@angular/router';
 import { QrScannerComponent } from './qr-scanner.component';
 import { ToastService } from '../services/toast.service';
+import { TranslateStubPipe, translateServiceProvider } from '../testing/translate-stubs';
 
 describe('QrScannerComponent', () => {
   let component: QrScannerComponent;
@@ -19,8 +20,9 @@ describe('QrScannerComponent', () => {
     const toastSpy = jasmine.createSpyObj('ToastService', ['error', 'success']);
     const routerSpy = jasmine.createSpyObj('Router', ['navigate']);
     TestBed.configureTestingModule({
-      declarations: [QrScannerComponent],
+      declarations: [QrScannerComponent, TranslateStubPipe],
       providers: [
+        translateServiceProvider(),
         { provide: ToastService, useValue: toastSpy },
         { provide: Router, useValue: routerSpy }
       ]
@@ -152,7 +154,7 @@ describe('QrScannerComponent', () => {
     it('should show error for invalid input', () => {
       component.manualUrl = 'invalid';
       component.submitManual();
-      expect(toast.error).toHaveBeenCalledWith('Lien ou ID non reconnu. Essayez un numéro de facture.');
+      expect(toast.error).toHaveBeenCalledWith('QR.ERR_UNRECOGNIZED');
     });
 
     it('should do nothing for empty input', () => {
@@ -204,7 +206,7 @@ describe('QrScannerComponent', () => {
 
     it('should show error when data is not valid', () => {
       component.handleResult('not-valid-data');
-      expect(toast.error).toHaveBeenCalledWith('QR Code non reconnu comme facture valide.');
+      expect(toast.error).toHaveBeenCalledWith('QR.ERR_NOT_RECOGNIZED');
     });
 
     it('should stop camera when called', () => {

@@ -1,5 +1,6 @@
 import { Component, OnInit, OnDestroy, ViewChild, ElementRef } from '@angular/core';
 import { Router } from '@angular/router';
+import { TranslateService } from '@ngx-translate/core';
 import { ToastService } from '../services/toast.service';
 import { BrowserMultiFormatReader } from '@zxing/library';
 
@@ -20,7 +21,7 @@ export class QrScannerComponent implements OnInit, OnDestroy {
   isSecureContext = false;
   private codeReader: BrowserMultiFormatReader | null = null;
 
-  constructor(private router: Router, private toast: ToastService) {}
+  constructor(private router: Router, private toast: ToastService, private translate: TranslateService) {}
 
   ngOnInit(): void {
     this.isSecureContext = window.isSecureContext;
@@ -39,13 +40,13 @@ export class QrScannerComponent implements OnInit, OnDestroy {
     this.useManual = false;
 
     if (!this.isSecureContext) {
-      this.cameraError = 'La caméra nécessite HTTPS. Accédez via https:// ou utilisez la saisie manuelle.';
+      this.cameraError = this.translate.instant('QR.ERR_HTTPS');
       this.useManual = true;
       return;
     }
 
     if (!this.isCameraSupported()) {
-      this.cameraError = 'Caméra non supportée par ce navigateur.';
+      this.cameraError = this.translate.instant('QR.ERR_UNSUPPORTED');
       this.useManual = true;
       return;
     }
@@ -55,7 +56,7 @@ export class QrScannerComponent implements OnInit, OnDestroy {
 
       const devices = await this.codeReader.getVideoInputDevices();
       if (devices.length === 0) {
-        this.cameraError = 'Aucune caméra détectée.';
+        this.cameraError = this.translate.instant('QR.ERR_NO_CAMERA');
         this.useManual = true;
         return;
       }
@@ -81,9 +82,9 @@ export class QrScannerComponent implements OnInit, OnDestroy {
     } catch (e: any) {
       const msg = e?.message || String(e);
       if (msg.includes('Permission') || msg.includes('denied') || msg.includes('NotAllowedError')) {
-        this.cameraError = 'Permission caméra refusée. Autorisez l\'accès dans les paramètres du navigateur.';
+        this.cameraError = this.translate.instant('QR.ERR_PERMISSION');
       } else {
-        this.cameraError = 'Erreur caméra: ' + msg;
+        this.cameraError = this.translate.instant('QR.ERR_GENERIC', { msg });
       }
       this.useManual = true;
       this.cameraActive = false;
@@ -97,7 +98,7 @@ export class QrScannerComponent implements OnInit, OnDestroy {
       if (paymentId) {
         this.router.navigate(['/dashboard/payments', paymentId]);
       } else {
-        this.toast.error('QR Code non reconnu comme facture valide.');
+        this.toast.error(this.translate.instant('QR.ERR_NOT_RECOGNIZED'));
       }
     }
   }
@@ -126,7 +127,7 @@ export class QrScannerComponent implements OnInit, OnDestroy {
     if (paymentId) {
       this.router.navigate(['/dashboard/payments', paymentId]);
     } else {
-      this.toast.error('Lien ou ID non reconnu. Essayez un numéro de facture.');
+      this.toast.error(this.translate.instant('QR.ERR_UNRECOGNIZED'));
     }
   }
 

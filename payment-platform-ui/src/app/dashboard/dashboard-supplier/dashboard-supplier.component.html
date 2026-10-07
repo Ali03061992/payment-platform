@@ -1,57 +1,57 @@
 <div class="dashboard">
   <div class="welcome-section">
     <h1>{{ getGreeting() }}, {{ user?.firstName }} !</h1>
-    <p>Vue d'ensemble de votre activité fournisseur.</p>
+    <p>{{ 'DASHBOARD.SUBTITLE_SUPPLIER' | translate }}</p>
   </div>
 
   @if (loading) {
-    <div class="loading">Chargement...</div>
+    <div class="loading">{{ 'COMMON.LOADING' | translate }}</div>
   } @else {
     <div class="stats-grid">
       <div class="stat-card">
         <div class="stat-icon blue"><app-icon name="box" [size]="26"></app-icon></div>
         <div class="stat-info">
           <div class="stat-value">{{ products.length }}</div>
-          <div class="stat-label">Produits</div>
+          <div class="stat-label">{{ 'DASHBOARD.PRODUCTS' | translate }}</div>
         </div>
       </div>
       <div class="stat-card">
         <div class="stat-icon orange"><app-icon name="alert" [size]="26"></app-icon></div>
         <div class="stat-info">
           <div class="stat-value">{{ lowStockCount }}</div>
-          <div class="stat-label">Stock bas</div>
+          <div class="stat-label">{{ 'DASHBOARD.LOW_STOCK' | translate }}</div>
         </div>
       </div>
       <div class="stat-card">
         <div class="stat-icon red"><app-icon name="ban" [size]="26"></app-icon></div>
         <div class="stat-info">
           <div class="stat-value">{{ outOfStockCount }}</div>
-          <div class="stat-label">Rupture stock</div>
+          <div class="stat-label">{{ 'DASHBOARD.OUT_OF_STOCK_COUNT' | translate }}</div>
         </div>
       </div>
       <div class="stat-card">
         <div class="stat-icon green"><app-icon name="cart" [size]="26"></app-icon></div>
         <div class="stat-info">
           <div class="stat-value">{{ pendingOrdersCount }}</div>
-          <div class="stat-label">Commandes en cours</div>
+          <div class="stat-label">{{ 'DASHBOARD.OPEN_ORDERS' | translate }}</div>
         </div>
       </div>
       <div class="stat-card">
         <div class="stat-icon purple"><app-icon name="card" [size]="26"></app-icon></div>
         <div class="stat-info">
           <div class="stat-value">{{ paymentStats.pending }}</div>
-          <div class="stat-label">Paiements en attente</div>
+          <div class="stat-label">{{ 'DASHBOARD.PENDING_PAYMENTS' | translate }}</div>
         </div>
       </div>
     </div>
 
     <div class="info-cards">
       <div class="info-card">
-        <h3><app-icon name="list" [size]="18"></app-icon> Mon profil</h3>
-        <div class="info-row"><span>Nom :</span><strong>{{ user?.firstName }} {{ user?.lastName }}</strong></div>
+        <h3><app-icon name="list" [size]="18"></app-icon> {{ 'DASHBOARD.MY_PROFILE' | translate }}</h3>
+        <div class="info-row"><span>{{ 'DASHBOARD.NAME' | translate }} :</span><strong>{{ user?.firstName }} {{ user?.lastName }}</strong></div>
         <div class="info-row"><span>Email :</span><strong>{{ user?.email }}</strong></div>
-        <div class="info-row"><span>Rôle :</span><strong>{{ user?.roles?.[0] }}</strong></div>
-        <div class="info-row"><span>Statut :</span>
+        <div class="info-row"><span>{{ 'DASHBOARD.ROLE' | translate }} :</span><strong>{{ user?.roles?.[0] }}</strong></div>
+        <div class="info-row"><span>{{ 'DASHBOARD.STATUS' | translate }} :</span>
           <span class="badge" [class]="user?.status === 'ACTIVE' ? 'badge-success' : 'badge-danger'">
             {{ user?.status }}
           </span>
@@ -59,37 +59,37 @@
       </div>
 
       <div class="info-card">
-        <h3><app-icon name="cart" [size]="18"></app-icon> Commandes récentes</h3>
+        <h3><app-icon name="cart" [size]="18"></app-icon> {{ 'DASHBOARD.RECENT_ORDERS' | translate }}</h3>
         @if (recentOrders.length === 0) {
-          <p class="empty-state">Aucune commande récente</p>
+          <p class="empty-state">{{ 'DASHBOARD.NO_RECENT_ORDERS' | translate }}</p>
         }
         @for (order of recentOrders; track order.id) {
           <div class="info-row">
             <span>{{ order.reference }}</span>
-            <span class="badge" [class]="getStatusClass(order.status)">{{ getStatusLabel(order.status) }}</span>
+            <span class="badge" [class]="getStatusClass(order.status)">{{ order.status | statusLabel }}</span>
           </div>
         }
       </div>
 
       <div class="info-card">
-        <h3><app-icon name="card" [size]="18"></app-icon> Résumé paiements</h3>
-        <div class="info-row"><span>Total :</span><strong>{{ paymentStats.total }}</strong></div>
-        <div class="info-row"><span>En attente :</span><strong class="text-orange">{{ paymentStats.pending }}</strong></div>
-        <div class="info-row"><span>Confirmés :</span><strong class="text-green">{{ paymentStats.confirmed }}</strong></div>
+        <h3><app-icon name="card" [size]="18"></app-icon> {{ 'DASHBOARD.PAYMENTS_SUMMARY' | translate }}</h3>
+        <div class="info-row"><span>{{ 'DASHBOARD.TOTAL_LBL' | translate }}</span><strong>{{ paymentStats.total }}</strong></div>
+        <div class="info-row"><span>{{ 'DASHBOARD.PENDING_LBL' | translate }}</span><strong class="text-orange">{{ paymentStats.pending }}</strong></div>
+        <div class="info-row"><span>{{ 'DASHBOARD.CONFIRMED_LBL' | translate }}</span><strong class="text-green">{{ paymentStats.confirmed }}</strong></div>
       </div>
 
       <div class="info-card">
-        <h3><app-icon name="zap" [size]="18"></app-icon> Actions rapides</h3>
-        <a routerLink="supplier/stock" class="quick-action"><app-icon name="box" [size]="18"></app-icon> Gérer le stock</a>
-        <a routerLink="supplier/stock/create" class="quick-action"><app-icon name="plus" [size]="18"></app-icon> Ajouter un produit</a>
-        <a routerLink="supplier/orders" class="quick-action"><app-icon name="cart" [size]="18"></app-icon> Voir les commandes</a>
-        <a routerLink="supplier/optimization" class="quick-action"><app-icon name="cpu" [size]="18"></app-icon> Optimisation stock</a>
+        <h3><app-icon name="zap" [size]="18"></app-icon> {{ 'DASHBOARD.QUICK_ACTIONS' | translate }}</h3>
+        <a routerLink="supplier/stock" class="quick-action"><app-icon name="box" [size]="18"></app-icon> {{ 'DASHBOARD.MANAGE_STOCK' | translate }}</a>
+        <a routerLink="supplier/stock/create" class="quick-action"><app-icon name="plus" [size]="18"></app-icon> {{ 'DASHBOARD.ADD_PRODUCT' | translate }}</a>
+        <a routerLink="supplier/orders" class="quick-action"><app-icon name="cart" [size]="18"></app-icon> {{ 'DASHBOARD.VIEW_ORDERS' | translate }}</a>
+        <a routerLink="supplier/optimization" class="quick-action"><app-icon name="cpu" [size]="18"></app-icon> {{ 'DASHBOARD.OPTIMIZE_STOCK' | translate }}</a>
       </div>
 
       <div class="info-card alert-card">
-        <h3><app-icon name="alert" [size]="18"></app-icon> Alertes stock</h3>
+        <h3><app-icon name="alert" [size]="18"></app-icon> {{ 'DASHBOARD.STOCK_ALERTS' | translate }}</h3>
         @if (lowStockAlerts.length === 0) {
-          <p class="empty-state">Aucune alerte de stock</p>
+          <p class="empty-state">{{ 'DASHBOARD.NO_STOCK_ALERTS' | translate }}</p>
         }
         @for (product of lowStockAlerts; track product.id) {
           <div class="alert-row" [ngClass]="'alert-' + getUrgencyLevel(product)">
@@ -106,7 +106,7 @@
           </div>
         }
         @if (lowStockAlerts.length > 0) {
-          <a routerLink="supplier/stock" class="view-all-link">Voir toutes les alertes →</a>
+          <a routerLink="supplier/stock" class="view-all-link">{{ 'DASHBOARD.VIEW_ALL_ALERTS' | translate }} →</a>
         }
       </div>
     </div>

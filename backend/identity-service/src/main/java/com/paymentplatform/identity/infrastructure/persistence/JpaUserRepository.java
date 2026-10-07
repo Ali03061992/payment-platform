@@ -114,6 +114,10 @@ public class JpaUserRepository implements UserRepository {
         e.setPhone(user.phone() == null ? null : user.phone().value());
         e.setOrganizationId(user.organizationId() == null ? null : user.organizationId().value());
         e.setStatus(user.status().name());
+        e.setPreferredLang(user.preferredLang());
+        e.setAccentColor1(user.accentColor1());
+        e.setAccentColor2(user.accentColor2());
+        e.setTourSeen(user.tourSeen());
         e.setCreatedAt(user.createdAt());
         e.setUpdatedAt(user.updatedAt());
         e.setRoles(EnumSet.copyOf(user.roles()));
@@ -132,6 +136,10 @@ public class JpaUserRepository implements UserRepository {
                 e.getOrganizationId() == null ? null : OrganizationId.of(e.getOrganizationId()),
                 UserStatus.valueOf(e.getStatus()),
                 roles,
+                e.getPreferredLang() == null ? User.DEFAULT_PREFERRED_LANG : e.getPreferredLang(),
+                e.getAccentColor1() == null ? User.DEFAULT_ACCENT_COLOR1 : e.getAccentColor1(),
+                e.getAccentColor2() == null ? User.DEFAULT_ACCENT_COLOR2 : e.getAccentColor2(),
+                e.isTourSeen(),
                 e.getVersion() == null ? 0 : e.getVersion(),
                 e.getCreatedAt(),
                 e.getUpdatedAt());

@@ -13,6 +13,7 @@ import { StockOptimizationService } from '../../services/stock-optimization.serv
 import { ToastService } from '../../services/toast.service';
 import { StockOptimizationResponse, ProductOptimization } from '../../models/stock-optimization.model';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { TranslateStubPipe, translateServiceProvider } from '../../testing/translate-stubs';
 
 describe('StockOptimizationComponent', () => {
   let component: StockOptimizationComponent;
@@ -33,9 +34,10 @@ describe('StockOptimizationComponent', () => {
     optSpy.optimize.and.returnValue(of(mockResponse));
 
     TestBed.configureTestingModule({
-    declarations: [StockOptimizationComponent],
+    declarations: [StockOptimizationComponent, TranslateStubPipe],
     imports: [FormsModule],
     providers: [
+        translateServiceProvider(),
         { provide: StockOptimizationService, useValue: optSpy },
         { provide: ToastService, useValue: toastSpy },
         provideHttpClient(withInterceptorsFromDi()),

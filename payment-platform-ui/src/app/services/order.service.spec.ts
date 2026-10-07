@@ -9,6 +9,7 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { OrderService } from './order.service';
 import { Order } from '../models/order.model';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { translateServiceProvider } from '../testing/translate-stubs';
 
 const mockOrder: Order = {
   id: 1, reference: 'ORD-001', supplierId: 1, shopId: 2, createdBy: 3, createdByName: null, createdByRole: 'SHOP_ADMIN',
@@ -24,7 +25,7 @@ describe('OrderService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
     imports: [],
-    providers: [OrderService, provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()]
+    providers: [OrderService, translateServiceProvider(), provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()]
 });
     service = TestBed.inject(OrderService);
     httpMock = TestBed.inject(HttpTestingController);
@@ -87,7 +88,7 @@ describe('OrderService', () => {
       service.create({ supplierId: 1, shopId: 2, asapPayment: false, currency: 'TND', notes: '', items: [] }).subscribe(data => {
         expect(data.id).toBe(1);
       });
-      const req = httpMock.expectOne('/api/orders');
+      const req = httpMock.expectOne(r => r.url === '/api/orders');
       expect(req.request.method).toBe('POST');
       req.flush(mockOrder);
     });
@@ -98,7 +99,7 @@ describe('OrderService', () => {
       service.list().subscribe(data => {
         expect(data.length).toBe(1);
       });
-      const req = httpMock.expectOne('/api/orders');
+      const req = httpMock.expectOne(r => r.url === '/api/orders');
       expect(req.request.method).toBe('GET');
       req.flush([mockOrder]);
     });
@@ -234,7 +235,7 @@ describe('OrderService', () => {
         expect(data.length).toBe(1);
         expect(data[0].id).toBe(1);
       });
-      const req = httpMock.expectOne('/api/orders');
+      const req = httpMock.expectOne(r => r.url === '/api/orders');
       req.flush({ items: [mockOrder] });
     });
 
@@ -242,7 +243,7 @@ describe('OrderService', () => {
       service.list().subscribe(data => {
         expect(data.length).toBe(1);
       });
-      const req = httpMock.expectOne('/api/orders');
+      const req = httpMock.expectOne(r => r.url === '/api/orders');
       req.flush({ content: [mockOrder] });
     });
 
@@ -250,7 +251,7 @@ describe('OrderService', () => {
       service.list().subscribe(data => {
         expect(data.length).toBe(1);
       });
-      const req = httpMock.expectOne('/api/orders');
+      const req = httpMock.expectOne(r => r.url === '/api/orders');
       req.flush({ data: [mockOrder] });
     });
 
@@ -258,7 +259,7 @@ describe('OrderService', () => {
       service.list().subscribe(data => {
         expect(data).toEqual([]);
       });
-      const req = httpMock.expectOne('/api/orders');
+      const req = httpMock.expectOne(r => r.url === '/api/orders');
       req.flush({});
     });
 
@@ -266,7 +267,7 @@ describe('OrderService', () => {
       service.list().subscribe(data => {
         expect(data).toEqual([]);
       });
-      const req = httpMock.expectOne('/api/orders');
+      const req = httpMock.expectOne(r => r.url === '/api/orders');
       req.flush(null);
     });
 
@@ -276,7 +277,7 @@ describe('OrderService', () => {
         next: () => fail('should not succeed'),
         error: () => errorCaught = true
       });
-      const req = httpMock.expectOne('/api/orders');
+      const req = httpMock.expectOne(r => r.url === '/api/orders');
       req.flush('error', { status: 500, statusText: 'Server Error' });
       expect(errorCaught).toBeTrue();
     });
@@ -285,7 +286,7 @@ describe('OrderService', () => {
       service.list().subscribe(data => {
         expect(data).toEqual([]);
       });
-      const req = httpMock.expectOne('/api/orders');
+      const req = httpMock.expectOne(r => r.url === '/api/orders');
       req.flush([]);
     });
   });

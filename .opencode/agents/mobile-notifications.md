@@ -1,7 +1,6 @@
 ---
 description: Specialiste notifications temps reel mobile + backend. FCM, SSE, polling, deep-links, badges, routing par role. Garantit zero notif perdue sur Payment Platform.
 mode: subagent
-model: anthropic/claude-sonnet-4-6
 permission:
   edit: allow
   bash: ask

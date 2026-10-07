@@ -1,5 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { TranslateService } from '@ngx-translate/core';
 import { OrderService } from '../../services/order.service';
 import { DisputeService } from '../../services/dispute.service';
 import { Order, OrderComment } from '../../models/order.model';
@@ -7,6 +8,7 @@ import { Dispute } from '../../models/dispute.model';
 import { ToastService } from '../../services/toast.service';
 import { ConfirmDialogService } from '../../components/confirm-dialog/confirm-dialog.service';
 import { Subscription } from 'rxjs';
+import { statusLabelFr } from '../../pipes/status-label.pipe';
 
 @Component({
     selector: 'app-order-detail',
@@ -38,7 +40,8 @@ export class ShopOrderDetailComponent implements OnInit, OnDestroy {
     private orderService: OrderService,
     private disputeService: DisputeService,
     private toast: ToastService,
-    private confirmDialog: ConfirmDialogService
+    private confirmDialog: ConfirmDialogService,
+    private translate: TranslateService
   ) {}
 
   ngOnInit(): void {
@@ -81,11 +84,11 @@ export class ShopOrderDetailComponent implements OnInit, OnDestroy {
         this.comments = [...this.comments, comment];
         this.newComment = '';
         this.submittingComment = false;
-        this.toast.success('Commentaire ajouté');
+        this.toast.success(this.translate.instant('ORDER_DETAIL.COMMENT_ADDED'));
       },
       error: (e: any) => {
         this.submittingComment = false;
-        this.toast.error(e.error?.message || 'Erreur');
+        this.toast.error(e.error?.message || this.translate.instant('ORDER_DETAIL.ERROR'));
       }
     }));
   }
@@ -107,25 +110,25 @@ export class ShopOrderDetailComponent implements OnInit, OnDestroy {
     const now = new Date();
     const eta = new Date(this.order.estimatedArrival);
     const diff = eta.getTime() - now.getTime();
-    if (diff <= 0) { this.countdown = 'Arrivée imminente'; return; }
+    if (diff <= 0) { this.countdown = this.translate.instant('ORDER_DETAIL.ARRIVING_SOON'); return; }
     const hours = Math.floor(diff / 3600000);
     const mins = Math.floor((diff % 3600000) / 60000);
-    this.countdown = hours > 0 ? `≈ ${hours}h ${mins}min` : `≈ ${mins} min`;
+    this.countdown = hours > 0 ? this.translate.instant('ORDER_DETAIL.COUNTDOWN_HM', { h: hours, m: mins }) : this.translate.instant('ORDER_DETAIL.COUNTDOWN_M', { m: mins });
   }
 
   accept(): void {
     if (!this.order) return;
     this.subscriptions.add(this.orderService.accept(this.order.id).subscribe({
-      next: (data: Order) => { this.order = data; this.toast.success('Commande acceptée'); },
-      error: (e: any) => { this.toast.error(e.error?.message || 'Erreur'); }
+      next: (data: Order) => { this.order = data; this.toast.success(this.translate.instant('ORDER_DETAIL.ACCEPTED_MSG')); },
+      error: (e: any) => { this.toast.error(e.error?.message || this.translate.instant('ORDER_DETAIL.ERROR')); }
     }));
   }
 
   acceptAsap(): void {
     if (!this.order) return;
     this.subscriptions.add(this.orderService.acceptAsap(this.order.id).subscribe({
-      next: (data: Order) => { this.order = data; this.toast.success('Commande acceptée avec paiement ASAP'); },
-      error: (e: any) => { this.toast.error(e.error?.message || 'Erreur'); }
+      next: (data: Order) => { this.order = data; this.toast.success(this.translate.instant('ORDER_DETAIL.ACCEPTED_ASAP_MSG')); },
+      error: (e: any) => { this.toast.error(e.error?.message || this.translate.instant('ORDER_DETAIL.ERROR')); }
     }));
   }
 
@@ -133,14 +136,14 @@ export class ShopOrderDetailComponent implements OnInit, OnDestroy {
     if (!this.order) return;
     const id = this.order.id;
     this.subscriptions.add(this.confirmDialog.confirm({
-      title: 'Rejeter cette commande',
-      message: 'Rejeter cette commande ? Elle sera marquée comme rejetée.',
+      title: this.translate.instant('ORDERS.REJECT_ORDER_TITLE'),
+      message: this.translate.instant('ORDERS.REJECT_ORDER_MSG'),
       danger: true,
     }).subscribe(ok => {
       if (!ok) return;
       this.subscriptions.add(this.orderService.reject(id).subscribe({
-        next: (data: Order) => { this.order = data; this.toast.success('Commande rejetée'); },
-        error: (e: any) => { this.toast.error(e.error?.message || 'Erreur'); }
+        next: (data: Order) => { this.order = data; this.toast.success(this.translate.instant('ORDER_DETAIL.REJECTED_MSG')); },
+        error: (e: any) => { this.toast.error(e.error?.message || this.translate.instant('ORDER_DETAIL.ERROR')); }
       }));
     }));
   }
@@ -148,8 +151,8 @@ export class ShopOrderDetailComponent implements OnInit, OnDestroy {
   cancel(): void {
     if (!this.order) return;
     this.subscriptions.add(this.orderService.cancel(this.order.id).subscribe({
-      next: (data: Order) => { this.order = data; this.toast.success('Commande annulée'); },
-      error: (e: any) => { this.toast.error(e.error?.message || 'Erreur'); }
+      next: (data: Order) => { this.order = data; this.toast.success(this.translate.instant('ORDER_DETAIL.CANCELLED_MSG')); },
+      error: (e: any) => { this.toast.error(e.error?.message || this.translate.instant('ORDER_DETAIL.ERROR')); }
     }));
   }
 
@@ -167,10 +170,10 @@ export class ShopOrderDetailComponent implements OnInit, OnDestroy {
         this.showDisputeForm = false;
         this.disputeReason = '';
         this.submittingDispute = false;
-        this.toast.success('Litige ouvert');
+        this.toast.success(this.translate.instant('DISPUTES.OPENED_MSG'));
         this.router.navigate(['/dashboard/shop/disputes', data.id]);
       },
-      error: (e: any) => { this.submittingDispute = false; this.toast.error(e.error?.message || 'Erreur'); }
+      error: (e: any) => { this.submittingDispute = false; this.toast.error(e.error?.message || this.translate.instant('ORDER_DETAIL.ERROR')); }
     }));
   }
 
@@ -179,14 +182,7 @@ export class ShopOrderDetailComponent implements OnInit, OnDestroy {
   }
 
   statusLabel(s: string): string {
-    const map: Record<string, string> = {
-      DRAFT: 'Brouillon', CONFIRMED: 'Confirmé',
-      PREPARING: 'En préparation', READY_FOR_DELIVERY: 'Prêt pour livraison',
-      DELIVERY_ACCEPTED: 'Livraison acceptée',
-      IN_DELIVERY: 'En livraison', DELIVERED: 'Livré', ACCEPTED: 'Accepté',
-      CANCELLED: 'Annulé', REJECTED: 'Rejeté', DELIVERY_REJECTED: 'Livraison rejetée'
-    };
-    return map[s] || s;
+    return statusLabelFr(s);
   }
 
   statusClass(s: string): string {
@@ -203,14 +199,14 @@ export class ShopOrderDetailComponent implements OnInit, OnDestroy {
 
   actionLabel(a: string): string {
     const map: Record<string, string> = {
-      ORDER_CREATED: 'Créé', ORDER_CONFIRMED: 'Confirmé',
-      ORDER_PREPARING: 'En préparation', ORDER_READY_FOR_DELIVERY: 'Prêt',
-      ORDER_IN_DELIVERY: 'En livraison', ORDER_DELIVERED: 'Livré',
-      ORDER_ACCEPTED: 'Accepté', ORDER_CANCELLED: 'Annulé',
-      ORDER_ACCEPTED_ASAP: 'Accepté (ASAP)',
-      ORDER_REJECTED: 'Rejeté', ORDER_DELIVERY_REJECTED: 'Livraison rejetée'
+      ORDER_CREATED: 'ORDER_DETAIL.ACTION_CREATED', ORDER_CONFIRMED: 'ORDER_DETAIL.ACTION_CONFIRMED',
+      ORDER_PREPARING: 'ORDER_DETAIL.ACTION_PREPARING', ORDER_READY_FOR_DELIVERY: 'ORDER_DETAIL.ACTION_READY',
+      ORDER_IN_DELIVERY: 'ORDER_DETAIL.ACTION_IN_DELIVERY', ORDER_DELIVERED: 'ORDER_DETAIL.ACTION_DELIVERED',
+      ORDER_ACCEPTED: 'ORDER_DETAIL.ACTION_ACCEPTED', ORDER_CANCELLED: 'ORDER_DETAIL.ACTION_CANCELLED',
+      ORDER_ACCEPTED_ASAP: 'ORDER_DETAIL.ACTION_ACCEPTED_ASAP',
+      ORDER_REJECTED: 'ORDER_DETAIL.ACTION_REJECTED', ORDER_DELIVERY_REJECTED: 'ORDER_DETAIL.ACTION_DELIVERY_REJECTED'
     };
-    return map[a] || a;
+    return this.translate.instant(map[a] || a);
   }
 
   printOrder(): void {
@@ -224,12 +220,12 @@ export class ShopOrderDetailComponent implements OnInit, OnDestroy {
 
   paymentTermsLabel(terms: string): string {
     const map: Record<string, string> = {
-      IMMEDIATE: 'Immédiat',
-      NET_15: 'Net 15 jours',
-      NET_30: 'Net 30 jours',
-      NET_60: 'Net 60 jours'
+      IMMEDIATE: 'ORDER_CREATE.PAY_IMMEDIATE',
+      NET_15: 'ORDER_CREATE.PAY_NET_15',
+      NET_30: 'ORDER_CREATE.PAY_NET_30',
+      NET_60: 'ORDER_CREATE.PAY_NET_60'
     };
-    return map[terms] || terms;
+    return this.translate.instant(map[terms] || terms);
   }
 
   isOverdue(): boolean {

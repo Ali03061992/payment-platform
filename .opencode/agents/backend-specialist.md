@@ -1,7 +1,6 @@
 ---
 description: Spécialiste backend Spring Boot du Payment Platform. Microservices DDD (organization, payment, identity, notification), statuts et transitions, outbox/RabbitMQ, idempotence, clients HTTP inter-services.
 mode: subagent
-model: anthropic/claude-sonnet-4-6
 permission:
   edit: allow
   bash: ask

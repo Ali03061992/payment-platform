@@ -11,6 +11,7 @@ import { of, throwError } from 'rxjs';
 import { OrganizationStatsComponent } from './organization-stats.component';
 import { OrganizationService } from '../../services/organization.service';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { TranslateStubPipe, translateServiceProvider } from '../../testing/translate-stubs';
 
 describe('OrganizationStatsComponent', () => {
   let component: OrganizationStatsComponent;
@@ -22,10 +23,11 @@ describe('OrganizationStatsComponent', () => {
     orgSpy.getStats.and.returnValue(of({ totalSuppliers: 5, totalShops: 10 } as any));
 
     TestBed.configureTestingModule({
-    declarations: [OrganizationStatsComponent],
+    declarations: [OrganizationStatsComponent, TranslateStubPipe],
     schemas: [NO_ERRORS_SCHEMA],
     imports: [],
     providers: [
+        translateServiceProvider(),
         { provide: OrganizationService, useValue: orgSpy },
         provideHttpClient(withInterceptorsFromDi()),
         provideHttpClientTesting()

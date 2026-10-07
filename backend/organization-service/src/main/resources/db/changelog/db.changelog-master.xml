@@ -6,7 +6,8 @@
             https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
 
     <include file="V1__schema.sql" relativeToChangelogFile="true"/>
-    <include file="V2__seed.sql" relativeToChangelogFile="true"/>
+    <!-- B4 : seed démo hors prod (identity déjà guardé, même règle ici). Prod : contexts=prod → non exécuté. -->
+    <include file="V2__seed.sql" relativeToChangelogFile="true" context="seed,dev,local,test"/>
     <include file="V3__add_delivery_rejection_reason.sql" relativeToChangelogFile="true"/>
     <include file="V4__add_order_item_product_snapshot.sql" relativeToChangelogFile="true"/>
     <include file="V4__add_estimated_arrival.sql" relativeToChangelogFile="true"/>

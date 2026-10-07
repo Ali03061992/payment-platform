@@ -14,6 +14,7 @@ import { UserService } from '../../services/user.service';
 import { ToastService } from '../../services/toast.service';
 import { User } from '../../models/user.model';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { TranslateStubPipe, translateServiceProvider } from '../../testing/translate-stubs';
 
 describe('AccountActivationComponent', () => {
   let component: AccountActivationComponent;
@@ -32,9 +33,10 @@ describe('AccountActivationComponent', () => {
     userSpy.list.and.returnValue(of(mockUsers));
 
     TestBed.configureTestingModule({
-    declarations: [AccountActivationComponent, AppIconComponent],
+    declarations: [AccountActivationComponent, AppIconComponent, TranslateStubPipe],
     imports: [FormsModule],
     providers: [
+        translateServiceProvider(),
         { provide: UserService, useValue: userSpy },
         { provide: ToastService, useValue: toastSpy },
         provideHttpClient(withInterceptorsFromDi()),
@@ -77,7 +79,7 @@ describe('AccountActivationComponent', () => {
     it('should handle error without message', () => {
       userService.list.and.returnValue(throwError(() => ({ error: {} })));
       component.loadUsers();
-      expect(toast.error).toHaveBeenCalledWith('Erreur de chargement');
+      expect(toast.error).toHaveBeenCalledWith('USERS.LOAD_ERROR');
       expect(component.loading).toBeFalse();
     });
   });
@@ -150,7 +152,7 @@ describe('AccountActivationComponent', () => {
       userService.activate.and.returnValue(of({ ...user, status: 'ACTIVE' } as any));
       component.activate(user);
       expect(user.status).toBe('ACTIVE');
-      expect(toast.success).toHaveBeenCalledWith('agent1 activé avec succès');
+      expect(toast.success).toHaveBeenCalledWith('USERS.ACTIVATED_SUCCESS');
     });
 
     it('should handle activation error', () => {
@@ -164,7 +166,7 @@ describe('AccountActivationComponent', () => {
       const user = { ...mockUsers[1] };
       userService.activate.and.returnValue(throwError(() => ({ error: {} })));
       component.activate(user);
-      expect(toast.error).toHaveBeenCalledWith('Erreur');
+      expect(toast.error).toHaveBeenCalledWith('COMMON.ERROR');
     });
   });
 
@@ -174,7 +176,7 @@ describe('AccountActivationComponent', () => {
       userService.disable.and.returnValue(of({ ...user, status: 'DISABLED' } as any));
       component.disable(user);
       expect(user.status).toBe('DISABLED');
-      expect(toast.success).toHaveBeenCalledWith('admin désactivé avec succès');
+      expect(toast.success).toHaveBeenCalledWith('USERS.DEACTIVATED_SUCCESS');
     });
 
     it('should handle disable error', () => {
@@ -188,7 +190,7 @@ describe('AccountActivationComponent', () => {
       const user = { ...mockUsers[0] };
       userService.disable.and.returnValue(throwError(() => ({ error: {} })));
       component.disable(user);
-      expect(toast.error).toHaveBeenCalledWith('Erreur');
+      expect(toast.error).toHaveBeenCalledWith('COMMON.ERROR');
     });
   });
 });

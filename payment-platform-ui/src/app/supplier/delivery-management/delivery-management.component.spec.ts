@@ -16,6 +16,7 @@ import { LoginService } from '../../services/login.service';
 import { ConfirmDialogService } from '../../components/confirm-dialog/confirm-dialog.service';
 import { Order } from '../../models/order.model';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { TranslateStubPipe, translateServiceProvider } from '../../testing/translate-stubs';
 
 describe('DeliveryManagementComponent', () => {
   let component: DeliveryManagementComponent;
@@ -44,9 +45,10 @@ describe('DeliveryManagementComponent', () => {
     orderSpy.getShopAgents.and.returnValue(of([]));
 
     TestBed.configureTestingModule({
-    declarations: [DeliveryManagementComponent],
+    declarations: [DeliveryManagementComponent, TranslateStubPipe],
     imports: [FormsModule],
     providers: [
+        translateServiceProvider(),
         { provide: OrderService, useValue: orderSpy },
         { provide: ToastService, useValue: toastSpy },
         { provide: LoginService, useValue: loginSpy },
@@ -176,13 +178,19 @@ describe('DeliveryManagementComponent', () => {
       orderService.accept.and.returnValue(of({ ...mockOrder, status: 'ACCEPTED' }));
       component.acceptReception(mockOrder);
       expect(orderService.accept).toHaveBeenCalledWith('1');
-      expect(toast.success).toHaveBeenCalledWith('Réception acceptée');
+      expect(toast.success).toHaveBeenCalledWith('DELIVERY.RECEPTION_ACCEPTED');
     });
 
     it('should handle error', () => {
       orderService.accept.and.returnValue(throwError(() => ({ error: { message: 'Fail' } })));
       component.acceptReception(mockOrder);
       expect(toast.error).toHaveBeenCalledWith('Fail');
+    });
+
+    it('should use key on error without message', () => {
+      orderService.accept.and.returnValue(throwError(() => ({})));
+      component.acceptReception(mockOrder);
+      expect(toast.error).toHaveBeenCalledWith('PAYMENTS.ERROR');
     });
   });
 
@@ -192,7 +200,7 @@ describe('DeliveryManagementComponent', () => {
       orderService.reject.and.returnValue(of({ ...mockOrder, status: 'REJECTED' }));
       component.rejectReception(mockOrder);
       expect(orderService.reject).toHaveBeenCalledWith('1');
-      expect(toast.success).toHaveBeenCalledWith('Réception rejetée');
+      expect(toast.success).toHaveBeenCalledWith('DELIVERY.RECEPTION_REJECTED');
     });
 
     it('should not reject when not confirmed', () => {
@@ -206,9 +214,9 @@ describe('DeliveryManagementComponent', () => {
     it('should return correct labels', () => {
       expect(component.statusLabel('IN_DELIVERY')).toBe('En livraison');
       expect(component.statusLabel('DELIVERED')).toBe('Livré');
-      expect(component.statusLabel('READY_FOR_DELIVERY')).toContain('acceptation');
-      expect(component.statusLabel('DELIVERY_ACCEPTED')).toContain('Acceptée');
-      expect(component.statusLabel('DELIVERY_REJECTED')).toBe('Rejetée');
+      expect(component.statusLabel('READY_FOR_DELIVERY')).toBe('Prêt pour livraison');
+      expect(component.statusLabel('DELIVERY_ACCEPTED')).toBe('Livraison acceptée');
+      expect(component.statusLabel('DELIVERY_REJECTED')).toBe('Livraison rejetée');
       expect(component.statusLabel('UNKNOWN')).toBe('UNKNOWN');
     });
   });

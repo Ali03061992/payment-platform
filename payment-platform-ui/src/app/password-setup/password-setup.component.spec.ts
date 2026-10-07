@@ -11,6 +11,7 @@ import { FormsModule } from '@angular/forms';
 import { PasswordSetupComponent } from './password-setup.component';
 import { ToastService } from '../services/toast.service';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { TranslateStubPipe, translateServiceProvider } from '../testing/translate-stubs';
 
 describe('PasswordSetupComponent', () => {
   let component: PasswordSetupComponent;
@@ -23,9 +24,10 @@ describe('PasswordSetupComponent', () => {
     const toastSpy = jasmine.createSpyObj('ToastService', ['error', 'success']);
     const routerSpy = jasmine.createSpyObj('Router', ['navigate']);
     TestBed.configureTestingModule({
-    declarations: [PasswordSetupComponent],
+    declarations: [PasswordSetupComponent, TranslateStubPipe],
     imports: [FormsModule],
     providers: [
+        translateServiceProvider(),
         { provide: ToastService, useValue: toastSpy },
         { provide: Router, useValue: routerSpy },
         { provide: ActivatedRoute, useValue: { snapshot: { queryParamMap: convertToParamMap({ token: 'valid-token' }) } } },
@@ -81,7 +83,7 @@ describe('PasswordSetupComponent', () => {
       component.newPassword = 'short';
       component.confirmPassword = 'short';
       component.onSubmit();
-      expect(toast.error).toHaveBeenCalledWith('Le mot de passe doit contenir au moins 8 caractères.');
+      expect(toast.error).toHaveBeenCalledWith('PASSWORD_SETUP.PASSWORD_MIN_ERROR');
     });
 
     it('should show error when passwords do not match', () => {
@@ -89,7 +91,7 @@ describe('PasswordSetupComponent', () => {
       component.newPassword = 'longpassword';
       component.confirmPassword = 'different';
       component.onSubmit();
-      expect(toast.error).toHaveBeenCalledWith('Les mots de passe ne correspondent pas.');
+      expect(toast.error).toHaveBeenCalledWith('PASSWORD_SETUP.PASSWORD_MISMATCH');
     });
 
     it('should submit when passwords match and are long enough', () => {
@@ -136,9 +138,10 @@ describe('PasswordSetupComponent (no token)', () => {
     const toastSpy = jasmine.createSpyObj('ToastService', ['error', 'success']);
     const routerSpy = jasmine.createSpyObj('Router', ['navigate']);
     TestBed.configureTestingModule({
-    declarations: [PasswordSetupComponent],
+    declarations: [PasswordSetupComponent, TranslateStubPipe],
     imports: [FormsModule],
     providers: [
+        translateServiceProvider(),
         { provide: ToastService, useValue: toastSpy },
         { provide: Router, useValue: routerSpy },
         { provide: ActivatedRoute, useValue: { snapshot: { queryParamMap: convertToParamMap({}) } } },
@@ -158,7 +161,7 @@ describe('PasswordSetupComponent (no token)', () => {
 
   it('should show error when no token', () => {
     component.ngOnInit();
-    expect(toast.error).toHaveBeenCalledWith('Lien invalide. Veuillez demander un nouveau lien de configuration.');
+    expect(toast.error).toHaveBeenCalledWith('PASSWORD_SETUP.INVALID_LINK_MSG');
     expect(component.checkingToken).toBeFalse();
     expect(component.token).toBe('');
   });

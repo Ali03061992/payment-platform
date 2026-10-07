@@ -28,7 +28,6 @@ export class PushNotificationService {
       this.firebaseApp = initializeApp(environment.firebase);
       this.messaging = getMessaging(this.firebaseApp);
     } catch (error) {
-      console.error('Failed to initialize Firebase', error);
       this.messaging = null;
     }
   }
@@ -60,16 +59,13 @@ export class PushNotificationService {
         return token;
       }
     } catch (error) {
-      console.error('Failed to get FCM token', error);
     }
     return null;
   }
 
   registerToken(token: string): Observable<void> {
     return this.http.post<void>(this.apiUrl, { token }).pipe(
-      tap(() => console.log('FCM token registered')),
       catchError(err => {
-        console.error('Failed to register FCM token', err);
         return of(undefined);
       })
     );
@@ -81,7 +77,6 @@ export class PushNotificationService {
     this.ngZone.runOutsideAngular(() => {
       onMessage(this.messaging!, (payload) => {
         this.ngZone.run(() => {
-          console.log('Push notification received:', payload);
         });
       });
     });

@@ -14,6 +14,7 @@ import { CatalogService } from '../../services/catalog.service';
 import { ToastService } from '../../services/toast.service';
 import { ConfirmDialogService } from '../../components/confirm-dialog/confirm-dialog.service';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { TranslateStubPipe, translateServiceProvider } from '../../testing/translate-stubs';
 
 describe('FamilyManagementComponent', () => {
   let component: FamilyManagementComponent;
@@ -32,10 +33,11 @@ describe('FamilyManagementComponent', () => {
     catalogSpy.listFamilies.and.returnValue(of([]));
 
     TestBed.configureTestingModule({
-    declarations: [FamilyManagementComponent],
+    declarations: [FamilyManagementComponent, TranslateStubPipe],
     schemas: [NO_ERRORS_SCHEMA],
     imports: [FormsModule],
     providers: [
+        translateServiceProvider(),
         { provide: CatalogService, useValue: catalogSpy },
         { provide: ToastService, useValue: toastSpy },
         { provide: ConfirmDialogService, useValue: confirmSpy },
@@ -164,7 +166,7 @@ describe('FamilyManagementComponent', () => {
       catalogService.createFamily.and.returnValue(of({} as any));
       component.form = { name: 'New', code: 'N', categoryIds: [] };
       component.save();
-      expect(toast.success).toHaveBeenCalledWith('Famille creee');
+      expect(toast.success).toHaveBeenCalledWith('CATALOG.FAMILY_CREATED');
       expect(component.showForm).toBeFalse();
     });
 
@@ -191,7 +193,7 @@ describe('FamilyManagementComponent', () => {
       component.editingFamily = { id: 1 } as any;
       component.form = { name: 'Updated', code: 'U', categoryIds: [1] };
       component.save();
-      expect(toast.success).toHaveBeenCalledWith('Famille mise a jour');
+      expect(toast.success).toHaveBeenCalledWith('CATALOG.FAMILY_UPDATED');
     });
 
     it('should handle create error', () => {
@@ -205,7 +207,7 @@ describe('FamilyManagementComponent', () => {
       catalogService.createFamily.and.returnValue(throwError(() => ({})));
       component.form = { name: 'New', code: 'N', categoryIds: [] };
       component.save();
-      expect(toast.error).toHaveBeenCalledWith('Erreur');
+      expect(toast.error).toHaveBeenCalledWith('STOCK.ERROR');
     });
 
     it('should handle update error', () => {
@@ -223,7 +225,7 @@ describe('FamilyManagementComponent', () => {
       catalogService.deleteFamily.and.returnValue(of(undefined as any));
       component.deleteFamily({ id: 1, name: 'Fam' } as any);
       expect(catalogService.deleteFamily).toHaveBeenCalledWith(1);
-      expect(toast.success).toHaveBeenCalledWith('Famille supprimee');
+      expect(toast.success).toHaveBeenCalledWith('CATALOG.FAMILY_DELETED');
     });
 
     it('should not delete when not confirmed', () => {

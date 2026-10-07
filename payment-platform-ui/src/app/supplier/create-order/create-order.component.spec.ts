@@ -16,6 +16,7 @@ import { OrganizationService } from '../../services/organization.service';
 import { StockService } from '../../services/stock.service';
 import { ToastService } from '../../services/toast.service';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { TranslateStubPipe, translateServiceProvider } from '../../testing/translate-stubs';
 
 describe('SupplierCreateOrderComponent', () => {
   let component: SupplierCreateOrderComponent;
@@ -39,10 +40,11 @@ describe('SupplierCreateOrderComponent', () => {
     stockSpy.getProducts.and.returnValue(of([]));
 
     TestBed.configureTestingModule({
-    declarations: [SupplierCreateOrderComponent],
+    declarations: [SupplierCreateOrderComponent, TranslateStubPipe],
     schemas: [NO_ERRORS_SCHEMA],
     imports: [FormsModule],
     providers: [
+        translateServiceProvider(),
         { provide: OrderService, useValue: orderSpy },
         { provide: OrganizationService, useValue: orgSpy },
         { provide: StockService, useValue: stockSpy },
@@ -241,7 +243,7 @@ describe('SupplierCreateOrderComponent', () => {
       component.orderLines = [{ product: { id: 5, unitPrice: 20 } as any, quantity: 3, discount: 5 }];
       component.submit();
       expect(orderService.create).toHaveBeenCalled();
-      expect(toast.success).toHaveBeenCalledWith('Commande créée avec succès');
+      expect(toast.success).toHaveBeenCalledWith('SUPPLIER_ORDERS.ORDER_CREATED');
       expect(router.navigate).toHaveBeenCalledWith(['/dashboard/supplier/orders']);
     });
 
@@ -261,7 +263,7 @@ describe('SupplierCreateOrderComponent', () => {
       component.selectedShopId = 10;
       component.orderLines = [{ product: { id: 5 } as any, quantity: 1, discount: 0 }];
       component.submit();
-      expect(toast.error).toHaveBeenCalledWith('Erreur lors de la création');
+      expect(toast.error).toHaveBeenCalledWith('SUPPLIER_ORDERS.CREATE_ERROR');
     });
   });
 });

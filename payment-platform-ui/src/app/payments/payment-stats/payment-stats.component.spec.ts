@@ -11,6 +11,7 @@ import { of, throwError } from 'rxjs';
 import { PaymentStatsComponent } from './payment-stats.component';
 import { PaymentService } from '../../services/payment.service';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { TranslateStubPipe, translateServiceProvider } from '../../testing/translate-stubs';
 
 describe('PaymentStatsComponent', () => {
   let component: PaymentStatsComponent;
@@ -22,10 +23,11 @@ describe('PaymentStatsComponent', () => {
     psSpy.getStats.and.returnValue(of({ totalPayments: 10, totalAmount: 5000 } as any));
 
     TestBed.configureTestingModule({
-    declarations: [PaymentStatsComponent],
+    declarations: [PaymentStatsComponent, TranslateStubPipe],
     schemas: [NO_ERRORS_SCHEMA],
     imports: [],
     providers: [
+        translateServiceProvider(),
         { provide: PaymentService, useValue: psSpy },
         provideHttpClient(withInterceptorsFromDi()),
         provideHttpClientTesting()

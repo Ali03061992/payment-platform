@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
+import { TranslateService } from '@ngx-translate/core';
 import { StockService } from '../../services/stock.service';
 import { ToastService } from '../../services/toast.service';
 
@@ -24,7 +25,7 @@ export class AddProductComponent {
   success = false;
   loading = false;
 
-  constructor(private stockService: StockService, private router: Router, private toast: ToastService) {}
+  constructor(private stockService: StockService, private router: Router, private toast: ToastService, private translate: TranslateService) {}
 
   getCurrencySymbol(code: string): string {
     const symbols: Record<string, string> = { TND: 'DT', EUR: '€', USD: '$' };
@@ -35,27 +36,27 @@ export class AddProductComponent {
     this.errors = {};
 
     if (!this.form.name.trim()) {
-      this.errors['name'] = 'Le nom est obligatoire.';
+      this.errors['name'] = 'CATALOG.ERR_NAME_REQUIRED';
     } else if (this.form.name.length < 2) {
-      this.errors['name'] = 'Le nom doit contenir au moins 2 caractères.';
+      this.errors['name'] = 'CATALOG.ERR_NAME_MIN';
     }
 
     if (!this.form.sku.trim()) {
-      this.errors['sku'] = 'Le SKU est obligatoire.';
+      this.errors['sku'] = 'CATALOG.ERR_SKU_REQUIRED';
     } else if (this.form.sku.length < 2) {
-      this.errors['sku'] = 'Le SKU doit contenir au moins 2 caractères.';
+      this.errors['sku'] = 'CATALOG.ERR_SKU_MIN';
     }
 
     if (!this.form.unitPrice || this.form.unitPrice <= 0) {
-      this.errors['unitPrice'] = 'Le prix doit être supérieur à 0.';
+      this.errors['unitPrice'] = 'CATALOG.ERR_PRICE';
     }
 
     if (this.form.quantity < 0) {
-      this.errors['quantity'] = 'La quantité ne peut pas être négative.';
+      this.errors['quantity'] = 'CATALOG.ERR_QTY';
     }
 
     if (this.form.minQuantity < 0) {
-      this.errors['minQuantity'] = 'Le seuil ne peut pas être négatif.';
+      this.errors['minQuantity'] = 'CATALOG.ERR_MIN';
     }
 
     return Object.keys(this.errors).length === 0;
@@ -69,10 +70,10 @@ export class AddProductComponent {
       next: () => {
         this.success = true;
         this.loading = false;
-        this.toast.success('Produit créé avec succès');
+        this.toast.success(this.translate.instant('CATALOG.SUCCESS_CREATED'));
       },
       error: (err) => {
-        this.toast.error(err.error?.message || 'Erreur lors de la création');
+        this.toast.error(err.error?.message || this.translate.instant('CATALOG.CREATE_ERROR'));
         this.loading = false;
       }
     });

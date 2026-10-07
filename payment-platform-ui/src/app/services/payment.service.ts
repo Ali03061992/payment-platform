@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
+import { TranslateService } from '@ngx-translate/core';
 import { Observable } from 'rxjs';
 import { Payment, PaymentStats, CreatePaymentRequest, RejectPaymentRequest, PaymentPage } from '../models/payment.model';
 import { AgentPaymentSummary } from '../models/agent-payment.model';
@@ -14,7 +15,7 @@ import { filenameFromDisposition, saveBlob } from '../core/file-download';
 export class PaymentService {
   private apiUrl = '/api/payments';
 
-  constructor(private http: HttpClient, private toast: ToastService) {}
+  constructor(private http: HttpClient, private toast: ToastService, private translate: TranslateService) {}
 
   /** Liste les paiements visibles, en normalisant les enveloppes paginées. */
   list(page = 0, size = 50): Observable<Payment[]> {
@@ -90,7 +91,7 @@ export class PaymentService {
     this.http.get(`${this.apiUrl}/${id}/invoice`, { observe: 'response', responseType: 'blob' }).subscribe({
       next: (res) => {
         if (!res.body) {
-          this.toast.error('Erreur lors du téléchargement de la facture');
+          this.toast.error(this.translate.instant('PAYMENTS.INVOICE_DOWNLOAD_ERROR'));
           return;
         }
         const filename = filenameFromDisposition(
@@ -99,7 +100,7 @@ export class PaymentService {
         );
         saveBlob(res.body, filename);
       },
-      error: () => this.toast.error('Erreur lors du téléchargement de la facture')
+      error: () => this.toast.error(this.translate.instant('PAYMENTS.INVOICE_DOWNLOAD_ERROR'))
     });
   }
 
@@ -127,7 +128,7 @@ export class PaymentService {
     this.http.get(`${this.apiUrl}/export/csv${qs ? '?' + qs : ''}`, { observe: 'response', responseType: 'blob' }).subscribe({
       next: (res) => {
         if (!res.body) {
-          this.toast.error('Erreur lors de l\'export CSV');
+          this.toast.error(this.translate.instant('PAYMENTS.CSV_EXPORT_ERROR'));
           return;
         }
         const filename = filenameFromDisposition(
@@ -136,7 +137,7 @@ export class PaymentService {
         );
         saveBlob(res.body, filename);
       },
-      error: () => this.toast.error('Erreur lors de l\'export CSV')
+      error: () => this.toast.error(this.translate.instant('PAYMENTS.CSV_EXPORT_ERROR'))
     });
   }
 }

@@ -338,7 +338,7 @@ jobs:
 
       - name: Build frontend image
         working-directory: .
-        run: docker build -t payment-platform/angular:latest -f frontend/Dockerfile .
+        run: docker build -t payment-platform/angular:latest -f Dockerfile .
 
       - name: Save Docker images
         run: |

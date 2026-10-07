@@ -13,6 +13,7 @@ import { PaymentDetailComponent } from './payment-detail.component';
 import { PaymentService } from '../../services/payment.service';
 import { ToastService } from '../../services/toast.service';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { TranslateStubPipe, translateServiceProvider } from '../../testing/translate-stubs';
 
 describe('PaymentDetailComponent', () => {
   let component: PaymentDetailComponent;
@@ -34,10 +35,11 @@ describe('PaymentDetailComponent', () => {
     psSpy.cancel.and.returnValue(of({ ...mockPayment, status: 'CANCELLED' }));
 
     TestBed.configureTestingModule({
-    declarations: [PaymentDetailComponent],
+    declarations: [PaymentDetailComponent, TranslateStubPipe],
     schemas: [NO_ERRORS_SCHEMA],
     imports: [],
     providers: [
+        translateServiceProvider(),
         { provide: Router, useValue: routerSpy },
         { provide: PaymentService, useValue: psSpy },
         { provide: ToastService, useValue: toastSpy },
@@ -100,7 +102,7 @@ describe('PaymentDetailComponent', () => {
       component.ngOnInit();
       component.confirm();
       expect(paymentService.confirm).toHaveBeenCalledWith(1);
-      expect(toast.success).toHaveBeenCalledWith('Paiement confirmé');
+      expect(toast.success).toHaveBeenCalledWith('PAYMENTS.PAYMENT_CONFIRMED');
       expect(component.payment?.status).toBe('CONFIRMED');
     });
 
@@ -121,7 +123,7 @@ describe('PaymentDetailComponent', () => {
       paymentService.confirm.and.returnValue(throwError(() => ({})));
       component.ngOnInit();
       component.confirm();
-      expect(toast.error).toHaveBeenCalledWith('Erreur');
+      expect(toast.error).toHaveBeenCalledWith('PAYMENTS.ERROR');
     });
   });
 
@@ -131,7 +133,7 @@ describe('PaymentDetailComponent', () => {
       component.rejectReason = 'bad';
       component.reject();
       expect(paymentService.reject).toHaveBeenCalledWith(1, { rejectionReason: 'bad' });
-      expect(toast.success).toHaveBeenCalledWith('Paiement rejeté');
+      expect(toast.success).toHaveBeenCalledWith('PAYMENTS.PAYMENT_REJECTED');
       expect(component.showReject).toBeFalse();
       expect(component.rejectReason).toBe('');
     });
@@ -170,7 +172,7 @@ describe('PaymentDetailComponent', () => {
       component.ngOnInit();
       component.rejectReason = 'reason';
       component.reject();
-      expect(toast.error).toHaveBeenCalledWith('Erreur');
+      expect(toast.error).toHaveBeenCalledWith('PAYMENTS.ERROR');
     });
   });
 
@@ -179,7 +181,7 @@ describe('PaymentDetailComponent', () => {
       component.ngOnInit();
       component.cancel();
       expect(paymentService.cancel).toHaveBeenCalledWith(1);
-      expect(toast.success).toHaveBeenCalledWith('Paiement annulé');
+      expect(toast.success).toHaveBeenCalledWith('PAYMENTS.PAYMENT_CANCELLED');
     });
 
     it('should not cancel without payment', () => {
@@ -199,7 +201,7 @@ describe('PaymentDetailComponent', () => {
       paymentService.cancel.and.returnValue(throwError(() => ({})));
       component.ngOnInit();
       component.cancel();
-      expect(toast.error).toHaveBeenCalledWith('Erreur');
+      expect(toast.error).toHaveBeenCalledWith('PAYMENTS.ERROR');
     });
   });
 
@@ -231,11 +233,11 @@ describe('PaymentDetailComponent', () => {
   });
 
   describe('actionLabel', () => {
-    it('should return French labels', () => {
-      expect(component.actionLabel('PAYMENT_CREATED')).toBe('Créé');
-      expect(component.actionLabel('PAYMENT_CONFIRMED')).toBe('Confirmé');
-      expect(component.actionLabel('PAYMENT_REJECTED')).toBe('Rejeté');
-      expect(component.actionLabel('PAYMENT_CANCELLED')).toBe('Annulé');
+    it('should return translated action labels', () => {
+      expect(component.actionLabel('PAYMENT_CREATED')).toBe('PAYMENT_DETAIL.ACTION_CREATED');
+      expect(component.actionLabel('PAYMENT_CONFIRMED')).toBe('PAYMENT_DETAIL.ACTION_CONFIRMED');
+      expect(component.actionLabel('PAYMENT_REJECTED')).toBe('PAYMENT_DETAIL.ACTION_REJECTED');
+      expect(component.actionLabel('PAYMENT_CANCELLED')).toBe('PAYMENT_DETAIL.ACTION_CANCELLED');
       expect(component.actionLabel('UNKNOWN')).toBe('UNKNOWN');
     });
   });

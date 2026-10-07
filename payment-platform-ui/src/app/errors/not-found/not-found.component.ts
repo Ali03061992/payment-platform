@@ -10,9 +10,9 @@ import { LoginService } from '../../services/login.service';
     template: `
         <div class="error-page">
             <h1>404</h1>
-            <h2>Page introuvable</h2>
-            <p>La page demandée n'existe pas ou a été déplacée.</p>
-            <button type="button" (click)="back()">Retour</button>
+            <h2>{{ 'ERRORS.NOTFOUND_TITLE' | translate }}</h2>
+            <p>{{ 'ERRORS.NOTFOUND_MSG' | translate }}</p>
+            <button type="button" (click)="back()">{{ 'ERRORS.NOTFOUND_BACK' | translate }}</button>
         </div>
     `,
     styles: [`

@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
+import { TranslateService } from '@ngx-translate/core';
 import { AuthService } from '../services/auth.service';
 
 @Component({
@@ -20,24 +21,24 @@ export class RegisterComponent {
   };
 
   roles = [
-    { value: 'SUPPLIER_ADMIN', label: 'Administrateur fournisseur' },
-    { value: 'SUPPLIER_AGENT', label: 'Agent fournisseur' },
-    { value: 'SHOP_ADMIN', label: 'Administrateur boutique' },
-    { value: 'SHOP_AGENT', label: 'Agent boutique' }
+    { value: 'SUPPLIER_ADMIN', label: 'AUTH.ROLE_SUPPLIER_ADMIN' },
+    { value: 'SUPPLIER_AGENT', label: 'AUTH.ROLE_SUPPLIER_AGENT' },
+    { value: 'SHOP_ADMIN', label: 'AUTH.ROLE_SHOP_ADMIN' },
+    { value: 'SHOP_AGENT', label: 'AUTH.ROLE_SHOP_AGENT' }
   ];
 
   error = '';
   success = false;
   loading = false;
 
-  constructor(private auth: AuthService, private router: Router) {}
+  constructor(private auth: AuthService, private router: Router, private translate: TranslateService) {}
 
   onSubmit(): void {
     this.error = '';
     this.loading = true;
     this.auth.register(this.form).subscribe({
       next: () => { this.success = true; this.loading = false; },
-      error: (err) => { this.error = err.error?.message || "Erreur lors de l'inscription"; this.loading = false; }
+      error: (err) => { this.error = err.error?.message || this.translate.instant('AUTH.REGISTER_ERROR'); this.loading = false; }
     });
   }
 }

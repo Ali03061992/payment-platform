@@ -23,7 +23,12 @@ import java.util.Enumeration;
 public class GatewayProxyController {
 
     private static final Logger log = LoggerFactory.getLogger(GatewayProxyController.class);
-    private final HttpClient httpClient = HttpClient.newHttpClient();
+    private final HttpClient httpClient = HttpClient.newBuilder()
+            .connectTimeout(java.time.Duration.ofSeconds(2))
+            .build();
+
+    @Value("${app.internal-secret:}")
+    private String internalSecret;
 
     @Value("${IDENTITY_SERVICE_URL:localhost}")
     private String identityUrl;
@@ -55,7 +60,7 @@ public class GatewayProxyController {
     }
 
     @RequestMapping(value = {"/admin/**", "/organizations/**",
-            "/supplier/catalog/**", "/orders/**", "/balances/**", "/reports/**",
+            "/supplier/catalog/**", "/orders/**", "/disputes/**", "/balances/**", "/reports/**",
             "/suppliers/{supplierId}/products/**", "/suppliers/{supplierId}/movements/**",
             "/suppliers/{supplierId}/low-stock-alerts", "/suppliers/{supplierId}/stocks/**",
             "/suppliers/{supplierId}/optimization/**", "/categories/**"}, method = {
@@ -113,6 +118,17 @@ public class GatewayProxyController {
                 .GET();
 
         String authHeader = request.getHeader("Authorization");
+        if (authHeader == null && query != null) {
+            // EventSource ne peut pas poser de header : le JWT arrive en query (?token=).
+            // Le service notifié l'exige en header (401 anonyme sinon) : on le réinjecte.
+            for (String param : query.split("&")) {
+                String[] kv = param.split("=", 2);
+                if (kv.length == 2 && "token".equals(kv[0]) && !kv[1].isBlank()) {
+                    authHeader = "Bearer " + java.net.URLDecoder.decode(kv[1], java.nio.charset.StandardCharsets.UTF_8);
+                    break;
+                }
+            }
+        }
         if (authHeader != null) {
             builder.header("Authorization", authHeader);
         }
@@ -152,7 +168,8 @@ public class GatewayProxyController {
                 .uri(URI.create(targetUri))
                 .method(request.getMethod(), body != null
                         ? HttpRequest.BodyPublishers.ofByteArray(body)
-                        : HttpRequest.BodyPublishers.noBody());
+                        : HttpRequest.BodyPublishers.noBody())
+                .timeout(java.time.Duration.ofSeconds(5));
 
         String contentType = request.getContentType();
         if (contentType != null) {
@@ -167,6 +184,12 @@ public class GatewayProxyController {
                     || lower.startsWith("x-") || lower.equals("user-agent")) {
                 builder.header(name, request.getHeader(name));
             }
+        }
+        String requestUri = request.getRequestURI();
+        if (requestUri != null && requestUri.contains("/internal/")
+                && internalSecret != null && !internalSecret.isBlank()
+                && request.getHeader("X-Internal-Token") == null) {
+            builder.header("X-Internal-Token", internalSecret);
         }
 
         HttpResponse<byte[]> response = httpClient.send(builder.build(),

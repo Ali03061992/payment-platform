@@ -17,14 +17,12 @@ if (__cfg.FIREBASE_API_KEY && __cfg.FIREBASE_PROJECT_ID
   });
   __messaging = firebase.messaging();
 } else {
-  console.info('[firebase-messaging-sw.js] Push non configuré (clés absentes).');
 }
 
 var messaging = __messaging;
 
 if (messaging) {
   messaging.onBackgroundMessage(function(payload) {
-    console.log('[firebase-messaging-sw.js] Received background message ', payload);
     const notificationTitle = payload.notification?.title || 'Payment Platform';
     const notificationOptions = {
       body: payload.notification?.body || '',

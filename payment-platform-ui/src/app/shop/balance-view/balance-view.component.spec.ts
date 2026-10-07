@@ -12,6 +12,7 @@ import { BalanceViewComponent } from './balance-view.component';
 import { BalanceService } from '../../services/balance.service';
 import { ToastService } from '../../services/toast.service';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { TranslateStubPipe, translateServiceProvider } from '../../testing/translate-stubs';
 
 describe('BalanceViewComponent', () => {
   let component: BalanceViewComponent;
@@ -26,10 +27,11 @@ describe('BalanceViewComponent', () => {
     balanceSpy.listByShop.and.returnValue(of([]));
 
     TestBed.configureTestingModule({
-    declarations: [BalanceViewComponent],
+    declarations: [BalanceViewComponent, TranslateStubPipe],
     schemas: [NO_ERRORS_SCHEMA],
     imports: [],
     providers: [
+        translateServiceProvider(),
         { provide: BalanceService, useValue: balanceSpy },
         { provide: ToastService, useValue: toastSpy },
         provideHttpClient(withInterceptorsFromDi()),
@@ -92,7 +94,7 @@ describe('BalanceViewComponent', () => {
     it('should handle error without message', () => {
       balanceService.listByShop.and.returnValue(throwError(() => ({})));
       component.load();
-      expect(toast.error).toHaveBeenCalledWith('Erreur');
+      expect(toast.error).toHaveBeenCalledWith('SHOP_BALANCE.ERROR');
     });
   });
 
@@ -116,7 +118,7 @@ describe('BalanceViewComponent', () => {
     it('should handle ledger load error without message', () => {
       balanceService.getHistory.and.returnValue(throwError(() => ({})));
       component.viewLedger(1, 2);
-      expect(toast.error).toHaveBeenCalledWith('Erreur');
+      expect(toast.error).toHaveBeenCalledWith('SHOP_BALANCE.ERROR');
     });
   });
 
@@ -131,9 +133,9 @@ describe('BalanceViewComponent', () => {
 
   describe('typeLabel', () => {
     it('should return correct labels', () => {
-      expect(component.typeLabel('ORDER')).toBe('Commande');
-      expect(component.typeLabel('PAYMENT')).toBe('Paiement');
-      expect(component.typeLabel('ADJUSTMENT')).toBe('Ajustement');
+      expect(component.typeLabel('ORDER')).toBe('SHOP_BALANCE.TYPE_ORDER');
+      expect(component.typeLabel('PAYMENT')).toBe('SHOP_BALANCE.TYPE_PAYMENT');
+      expect(component.typeLabel('ADJUSTMENT')).toBe('SHOP_BALANCE.TYPE_ADJUSTMENT');
       expect(component.typeLabel('UNKNOWN')).toBe('UNKNOWN');
     });
   });

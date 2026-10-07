@@ -1,43 +1,43 @@
 <div class="dashboard">
   <div class="welcome-section">
     <h1>{{ getGreeting() }}, {{ user?.firstName }} !</h1>
-    <p>Vos livraisons du jour.</p>
+    <p>{{ 'DASHBOARD.SUBTITLE_AGENT' | translate }}</p>
   </div>
 
   @if (loading) {
-    <div class="loading">Chargement...</div>
+    <div class="loading">{{ 'COMMON.LOADING' | translate }}</div>
   } @else {
     <div class="stats-grid">
       <div class="stat-card">
         <div class="stat-icon orange"><app-icon name="list" [size]="26"></app-icon></div>
         <div class="stat-info">
           <div class="stat-value">{{ assignedCount }}</div>
-          <div class="stat-label">Assignées</div>
+          <div class="stat-label">{{ 'DASHBOARD.ASSIGNED' | translate }}</div>
         </div>
       </div>
       <div class="stat-card">
         <div class="stat-icon blue"><app-icon name="truck" [size]="26"></app-icon></div>
         <div class="stat-info">
           <div class="stat-value">{{ inProgressCount }}</div>
-          <div class="stat-label">En cours</div>
+          <div class="stat-label">{{ 'DASHBOARD.IN_PROGRESS' | translate }}</div>
         </div>
       </div>
       <div class="stat-card">
         <div class="stat-icon green"><app-icon name="check-circle" [size]="26"></app-icon></div>
         <div class="stat-info">
           <div class="stat-value">{{ completedTodayCount }}</div>
-          <div class="stat-label">Terminées aujourd'hui</div>
+          <div class="stat-label">{{ 'DASHBOARD.DONE_TODAY' | translate }}</div>
         </div>
       </div>
     </div>
 
     <div class="info-cards">
       <div class="info-card">
-        <h3><app-icon name="list" [size]="18"></app-icon> Mon profil</h3>
-        <div class="info-row"><span>Nom :</span><strong>{{ user?.firstName }} {{ user?.lastName }}</strong></div>
+        <h3><app-icon name="list" [size]="18"></app-icon> {{ 'DASHBOARD.MY_PROFILE' | translate }}</h3>
+        <div class="info-row"><span>{{ 'DASHBOARD.NAME' | translate }} :</span><strong>{{ user?.firstName }} {{ user?.lastName }}</strong></div>
         <div class="info-row"><span>Email :</span><strong>{{ user?.email }}</strong></div>
-        <div class="info-row"><span>Rôle :</span><strong>Livreur</strong></div>
-        <div class="info-row"><span>Statut :</span>
+        <div class="info-row"><span>{{ 'DASHBOARD.ROLE' | translate }} :</span><strong>{{ 'DASHBOARD.ROLE_DELIVERY' | translate }}</strong></div>
+        <div class="info-row"><span>{{ 'DASHBOARD.STATUS' | translate }} :</span>
           <span class="badge" [class]="user?.status === 'ACTIVE' ? 'badge-success' : 'badge-danger'">
             {{ user?.status }}
           </span>
@@ -45,48 +45,48 @@
       </div>
 
       <div class="info-card">
-        <h3><app-icon name="list" [size]="18"></app-icon> Livraisons assignées</h3>
+        <h3><app-icon name="list" [size]="18"></app-icon> {{ 'DASHBOARD.ASSIGNED_DELIVERIES' | translate }}</h3>
         @if (assignedOrders.length === 0) {
-          <p class="empty-state">Aucune livraison assignée</p>
+          <p class="empty-state">{{ 'DASHBOARD.NO_ASSIGNED' | translate }}</p>
         }
         @for (order of assignedOrders; track order.id) {
           <div class="info-row">
             <span>{{ order.reference }}</span>
-            <span class="badge badge-warning">{{ getStatusLabel(order.status) }}</span>
+            <span class="badge badge-warning">{{ order.status | statusLabel }}</span>
           </div>
         }
       </div>
 
       <div class="info-card">
-        <h3><app-icon name="truck" [size]="18"></app-icon> Livraisons en cours</h3>
+        <h3><app-icon name="truck" [size]="18"></app-icon> {{ 'DASHBOARD.ONGOING' | translate }}</h3>
         @if (inProgressOrders.length === 0) {
-          <p class="empty-state">Aucune livraison en cours</p>
+          <p class="empty-state">{{ 'DASHBOARD.NO_ONGOING' | translate }}</p>
         }
         @for (order of inProgressOrders; track order.id) {
           <div class="info-row">
             <span>{{ order.reference }}</span>
-            <span class="badge badge-info">{{ getStatusLabel(order.status) }}</span>
+            <span class="badge badge-info">{{ order.status | statusLabel }}</span>
           </div>
         }
       </div>
 
       <div class="info-card">
-        <h3><app-icon name="check-circle" [size]="18"></app-icon> Terminées aujourd'hui</h3>
+        <h3><app-icon name="check-circle" [size]="18"></app-icon> {{ 'DASHBOARD.DONE_TODAY' | translate }}</h3>
         @if (completedToday.length === 0) {
-          <p class="empty-state">Aucune livraison terminée aujourd'hui</p>
+          <p class="empty-state">{{ 'DASHBOARD.NO_DONE_TODAY' | translate }}</p>
         }
         @for (order of completedToday; track order.id) {
           <div class="info-row">
             <span>{{ order.reference }}</span>
-            <span class="badge badge-success">{{ getStatusLabel(order.status) }}</span>
+            <span class="badge badge-success">{{ order.status | statusLabel }}</span>
           </div>
         }
       </div>
 
       <div class="info-card">
-        <h3><app-icon name="zap" [size]="18"></app-icon> Actions rapides</h3>
-        <a routerLink="supplier/deliveries" class="quick-action"><app-icon name="truck" [size]="18"></app-icon> Gérer les livraisons</a>
-        <a routerLink="scan" class="quick-action"><app-icon name="scan" [size]="18"></app-icon> Scanner QR code</a>
+        <h3><app-icon name="zap" [size]="18"></app-icon> {{ 'DASHBOARD.QUICK_ACTIONS' | translate }}</h3>
+        <a routerLink="supplier/deliveries" class="quick-action"><app-icon name="truck" [size]="18"></app-icon> {{ 'DASHBOARD.MANAGE_DELIVERIES' | translate }}</a>
+        <a routerLink="scan" class="quick-action"><app-icon name="scan" [size]="18"></app-icon> {{ 'NAV.QR_SCANNER' | translate }}</a>
       </div>
     </div>
   }

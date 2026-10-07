@@ -1,11 +1,11 @@
 <div class="page-header">
-  <h2>Statistiques des organisations</h2>
+  <h2>{{ 'ORGS.STATS_TITLE' | translate }}</h2>
 </div>
 
 @if (loading) {
   <div class="loading">
     <div class="spinner"></div>
-    <span>Chargement...</span>
+    <span>{{ 'COMMON.LOADING' | translate }}</span>
   </div>
 }
 
@@ -13,11 +13,11 @@
   <div class="stats-grid">
     <div class="stat-card">
       <div class="stat-value">{{ stats.suppliers }}</div>
-      <div class="stat-label">Fournisseurs</div>
+      <div class="stat-label">{{ 'DASHBOARD.SUPPLIERS' | translate }}</div>
     </div>
     <div class="stat-card">
       <div class="stat-value">{{ stats.shops }}</div>
-      <div class="stat-label">Boutiques</div>
+      <div class="stat-label">{{ 'DASHBOARD.SHOPS' | translate }}</div>
     </div>
   </div>
 }

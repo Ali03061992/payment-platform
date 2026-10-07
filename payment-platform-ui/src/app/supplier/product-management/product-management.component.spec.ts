@@ -16,6 +16,7 @@ import { ToastService } from '../../services/toast.service';
 import { ConfirmDialogService } from '../../components/confirm-dialog/confirm-dialog.service';
 import { Product } from '../../models/stock.model';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { TranslateStubPipe, translateServiceProvider } from '../../testing/translate-stubs';
 
 describe('ProductManagementComponent', () => {
   let component: ProductManagementComponent;
@@ -43,10 +44,11 @@ describe('ProductManagementComponent', () => {
     catalogSpy.listFamilies.and.returnValue(of([]));
 
     TestBed.configureTestingModule({
-    declarations: [ProductManagementComponent],
+    declarations: [ProductManagementComponent, TranslateStubPipe],
     schemas: [NO_ERRORS_SCHEMA],
     imports: [FormsModule],
     providers: [
+        translateServiceProvider(),
         { provide: StockService, useValue: stockSpy },
         { provide: CatalogService, useValue: catalogSpy },
         { provide: ToastService, useValue: toastSpy },
@@ -266,7 +268,7 @@ describe('ProductManagementComponent', () => {
       component.form.sku = 'NEW-001';
       component.save();
       expect(stockService.createProduct).toHaveBeenCalled();
-      expect(toast.success).toHaveBeenCalledWith('Produit cree');
+      expect(toast.success).toHaveBeenCalledWith('CATALOG.SUCCESS_CREATED');
     });
 
     it('should handle create error', () => {
@@ -282,7 +284,7 @@ describe('ProductManagementComponent', () => {
       component.form.name = 'New Product';
       component.form.sku = 'NEW-001';
       component.save();
-      expect(toast.error).toHaveBeenCalledWith('Erreur');
+      expect(toast.error).toHaveBeenCalledWith('STOCK.ERROR');
     });
 
     it('should update product when editing', () => {
@@ -292,7 +294,7 @@ describe('ProductManagementComponent', () => {
       component.form.sku = 'UPD-001';
       component.save();
       expect(stockService.updateProduct).toHaveBeenCalledWith(1, jasmine.objectContaining({ name: 'Updated' }));
-      expect(toast.success).toHaveBeenCalledWith('Produit mis a jour');
+      expect(toast.success).toHaveBeenCalledWith('CATALOG.SUCCESS_UPDATED');
     });
 
     it('should handle update error', () => {
@@ -331,7 +333,7 @@ describe('ProductManagementComponent', () => {
       stockService.deleteProduct.and.returnValue(of({} as any));
       component.deleteProduct({ id: 1, name: 'P' } as any);
       expect(stockService.deleteProduct).toHaveBeenCalledWith(1);
-      expect(toast.success).toHaveBeenCalledWith('Produit supprime');
+      expect(toast.success).toHaveBeenCalledWith('CATALOG.SUCCESS_DELETED');
     });
 
     it('should not delete when not confirmed', () => {

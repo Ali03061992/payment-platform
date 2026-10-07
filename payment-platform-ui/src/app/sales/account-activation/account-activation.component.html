@@ -1,20 +1,20 @@
 <div class="page-header">
-  <h1><app-icon name="key" [size]="26"></app-icon> Activation / Désactivation des comptes</h1>
+  <h1><app-icon name="key" [size]="26"></app-icon> {{ 'USERS.ACTIVATION_TITLE' | translate }}</h1>
 </div>
 
 <div class="search-bar">
-  <input type="text" [(ngModel)]="searchQuery" placeholder="Rechercher par nom, email, username..." class="search-input">
+  <input type="text" [(ngModel)]="searchQuery" [placeholder]="'USERS.SEARCH_PLACEHOLDER' | translate" class="search-input">
   <select [(ngModel)]="filterStatus" class="filter-select">
-    <option value="">Tous les statuts</option>
-    <option value="ACTIVE">Actif</option>
-    <option value="DISABLED">Désactivé</option>
+    <option value="">{{ 'USERS.ALL_STATUSES' | translate }}</option>
+    <option value="ACTIVE">{{ 'STATUS.ACTIVE' | translate }}</option>
+    <option value="DISABLED">{{ 'USERS.STATUS_DISABLED' | translate }}</option>
   </select>
 </div>
 
 @if (loading) {
   <div class="loading">
     <div class="spinner"></div>
-    <span>Chargement...</span>
+    <span>{{ 'COMMON.LOADING' | translate }}</span>
   </div>
 }
 
@@ -29,7 +29,7 @@
             <div class="card-username">{{ '@' }}{{ user.username }}</div>
           </div>
           <span class="status-badge" [class.active]="user.status === 'ACTIVE'" [class.disabled]="user.status === 'DISABLED'">
-            {{ user.status }}
+            {{ (user.status === 'ACTIVE' ? ('STATUS.ACTIVE' | translate) : ('USERS.STATUS_DISABLED' | translate)) }}
           </span>
         </div>
         <div class="card-details">
@@ -42,12 +42,12 @@
         <div class="card-actions">
           @if (user.status === 'ACTIVE') {
             <button class="btn btn-danger btn-sm" (click)="disable(user)">
-              <app-icon name="ban" [size]="16"></app-icon> Désactiver
+              <app-icon name="ban" [size]="16"></app-icon> {{ 'USERS.DEACTIVATE' | translate }}
             </button>
           }
           @if (user.status === 'DISABLED') {
             <button class="btn btn-success btn-sm" (click)="activate(user)">
-              <app-icon name="check" [size]="16"></app-icon> Activer
+              <app-icon name="check" [size]="16"></app-icon> {{ 'USERS.ACTIVATE' | translate }}
             </button>
           }
         </div>
@@ -55,7 +55,7 @@
     }
     @if (filteredUsers.length === 0) {
       <div class="empty-state">
-        Aucun compte trouvé
+        {{ 'USERS.NO_ACCOUNT' | translate }}
       </div>
     }
   </div>

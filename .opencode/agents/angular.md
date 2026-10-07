@@ -1,7 +1,6 @@
 ---
 description: Expert Angular developer specialized in this Payment Platform project. Handles Angular components, services, routing, templates, RxJS, forms, HTTP calls, and Angular-specific debugging.
 mode: subagent
-model: anthropic/claude-sonnet-4-6
 permission:
   edit: allow
   bash: ask

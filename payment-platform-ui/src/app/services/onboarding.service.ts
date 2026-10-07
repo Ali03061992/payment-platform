@@ -1,5 +1,7 @@
 import { Injectable } from '@angular/core';
 import { LoginService } from './login.service';
+import { TranslateService } from '@ngx-translate/core';
+import { UserPreferencesService } from './user-preferences.service';
 
 export interface TourStep {
   title: string;
@@ -12,26 +14,58 @@ export interface TourStep {
 export class OnboardingService {
   private readonly STORAGE_KEY = 'onboarding_completed';
 
-  constructor(private loginService: LoginService) {}
+  constructor(private loginService: LoginService, private translate: TranslateService, private prefs: UserPreferencesService) {}
 
   isOnboardingCompleted(): boolean {
-    const flag = localStorage.getItem(this.STORAGE_KEY);
-    if (flag === 'true') {
-      return true;
+    try {
+      const user = this.loginService.getCurrentUser();
+      if ((user as any)?.tourSeen === true) return true;
+      if (!user) return true;
+      const flag = localStorage.getItem(this.STORAGE_KEY);
+      return flag === `user_${user.id}`;
+    } catch {
+      return false;
     }
-    const user = this.loginService.getCurrentUser();
-    if (!user) return true;
-    return flag === `user_${user.id}`;
   }
 
   completeOnboarding(): void {
-    const user = this.loginService.getCurrentUser();
+    let user: any = null;
+    try {
+      user = this.loginService.getCurrentUser();
+    } catch {}
     const flag = user ? `user_${user.id}` : 'true';
-    localStorage.setItem(this.STORAGE_KEY, flag);
+    try {
+      localStorage.setItem(this.STORAGE_KEY, flag);
+    } catch {}
+    try {
+      this.prefs.update({ tourSeen: true }).subscribe({ error: () => {} });
+    } catch {}
+    try {
+      const svc = this.loginService as any;
+      const patch = { tourSeen: true };
+      if (typeof svc.updateCurrentUser === 'function') {
+        svc.updateCurrentUser(patch);
+      } else if (typeof svc.setCurrentUser === 'function') {
+        const current = typeof svc.getCurrentUser === 'function' ? svc.getCurrentUser() : user;
+        svc.setCurrentUser({ ...(current || {}), ...patch });
+      } else if (typeof svc.updateCachedUser === 'function') {
+        svc.updateCachedUser(patch);
+      } else if (typeof svc.saveUser === 'function') {
+        const current = typeof svc.getCurrentUser === 'function' ? svc.getCurrentUser() : user;
+        svc.saveUser({ ...(current || {}), ...patch });
+      } else if (user) {
+        const merged = { ...user, ...patch };
+        try {
+          sessionStorage.setItem('user', JSON.stringify(merged));
+        } catch {}
+      }
+    } catch {}
   }
 
   resetOnboarding(): void {
-    localStorage.removeItem(this.STORAGE_KEY);
+    try {
+      localStorage.removeItem(this.STORAGE_KEY);
+    } catch {}
   }
 
   getTourSteps(): TourStep[] {
@@ -53,33 +87,27 @@ export class OnboardingService {
   private getAdminSteps(): TourStep[] {
     return [
       {
-        title: 'Bienvenue sur Payment Platform',
-        description: 'Cette plateforme vous permet de gérer les utilisateurs, fournisseurs, boutiques et paiements.',
+        title: this.translate.instant('TOUR.STEP_WELCOME_TITLE'),
+        description: this.translate.instant('TOUR.STEP_ADMIN_DASH_DESC'),
         icon: 'sparkles',
       },
       {
-        title: 'Tableau de bord',
-        description: 'Consultez les statistiques globales : nombre d\'utilisateurs, comptes actifs et fournisseurs enregistrés.',
-        icon: 'dashboard',
-        targetSelector: '.stats-grid',
-      },
-      {
-        title: 'Gestion des utilisateurs',
-        description: 'Créez, activez ou désactivez les comptes utilisateurs depuis le menu latéral.',
+        title: this.translate.instant('TOUR.STEP_ADMIN_USERS_TITLE'),
+        description: this.translate.instant('TOUR.STEP_ADMIN_USERS_DESC'),
         icon: 'users',
-        targetSelector: 'nav.sidebar-nav',
+        targetSelector: '.sidebar-nav',
       },
       {
-        title: 'Fournisseurs & Boutiques',
-        description: 'Gérez les relations fournisseur-boutique et suivez les statistiques d\'organisations.',
+        title: this.translate.instant('TOUR.STEP_ADMIN_ORGS_TITLE'),
+        description: this.translate.instant('TOUR.STEP_ADMIN_ORGS_DESC'),
         icon: 'factory',
-        targetSelector: 'nav.sidebar-nav',
+        targetSelector: '.content-area',
       },
       {
-        title: 'Paiements & QR Scanner',
-        description: 'Suivez tous les paiements et scannez les QR codes directement depuis l\'application.',
+        title: this.translate.instant('TOUR.STEP_ADMIN_PAY_TITLE'),
+        description: this.translate.instant('TOUR.STEP_ADMIN_PAY_DESC'),
         icon: 'card',
-        targetSelector: 'nav.sidebar-nav',
+        targetSelector: '.header-actions',
       },
     ];
   }
@@ -87,33 +115,27 @@ export class OnboardingService {
   private getSupplierSteps(): TourStep[] {
     return [
       {
-        title: 'Bienvenue sur Payment Platform',
-        description: 'En tant que fournisseur, vous pouvez gérer votre stock, produits et suivre vos commandes.',
+        title: this.translate.instant('TOUR.STEP_WELCOME_TITLE'),
+        description: this.translate.instant('TOUR.STEP_WELCOME_SUP_DESC'),
         icon: 'sparkles',
       },
       {
-        title: 'Gestion du stock',
-        description: 'Ajoutez et gérez vos produits, catégories et familles depuis le menu latéral.',
+        title: this.translate.instant('TOUR.STEP_SUP_STOCK_TITLE'),
+        description: this.translate.instant('TOUR.STEP_SUP_STOCK_DESC'),
         icon: 'box',
-        targetSelector: 'nav.sidebar-nav',
+        targetSelector: '.sidebar-nav',
       },
       {
-        title: 'Optimisation',
-        description: 'Utilisez l\'intelligence artificielle pour optimiser votre gestion de stock.',
+        title: this.translate.instant('TOUR.STEP_SUP_OPTIM_TITLE'),
+        description: this.translate.instant('TOUR.STEP_SUP_OPTIM_DESC'),
         icon: 'cpu',
-        targetSelector: 'nav.sidebar-nav',
+        targetSelector: '.content-area',
       },
       {
-        title: 'Commandes & Livraisons',
-        description: 'Suivez les commandes passées par les boutiques et gérez vos livraisons.',
+        title: this.translate.instant('TOUR.STEP_SUP_ORDERS_TITLE'),
+        description: this.translate.instant('TOUR.STEP_SUP_ORDERS_DESC'),
         icon: 'cart',
-        targetSelector: 'nav.sidebar-nav',
-      },
-      {
-        title: 'Paiements',
-        description: 'Consultez l\'historique des paiements et les paiements de vos agents.',
-        icon: 'card',
-        targetSelector: 'nav.sidebar-nav',
+        targetSelector: '.header-actions',
       },
     ];
   }
@@ -121,33 +143,27 @@ export class OnboardingService {
   private getShopSteps(): TourStep[] {
     return [
       {
-        title: 'Bienvenue sur Payment Platform',
-        description: 'En tant que boutique, vous pouvez passer des commandes et suivre vos paiements.',
+        title: this.translate.instant('TOUR.STEP_WELCOME_TITLE'),
+        description: this.translate.instant('TOUR.STEP_WELCOME_SHOP_DESC'),
         icon: 'sparkles',
       },
       {
-        title: 'Mes commandes',
-        description: 'Consultez et créez de nouvelles commandes auprès de vos fournisseurs.',
+        title: this.translate.instant('TOUR.STEP_SHOP_ORDERS_TITLE'),
+        description: this.translate.instant('TOUR.STEP_SHOP_ORDERS_DESC'),
         icon: 'cart',
-        targetSelector: 'nav.sidebar-nav',
+        targetSelector: '.sidebar-nav',
       },
       {
-        title: 'Balance',
-        description: 'Suivez votre solde et l\'historique de vos transactions.',
+        title: this.translate.instant('TOUR.STEP_SHOP_BALANCE_TITLE'),
+        description: this.translate.instant('TOUR.STEP_SHOP_BALANCE_DESC'),
         icon: 'scale',
-        targetSelector: 'nav.sidebar-nav',
+        targetSelector: '.content-area',
       },
       {
-        title: 'Paiements',
-        description: 'Consultez vos paiements et génerez des exports.',
-        icon: 'card',
-        targetSelector: 'nav.sidebar-nav',
-      },
-      {
-        title: 'Scanner QR',
-        description: 'Scanpez les QR codes pour effectuer des paiements rapidement.',
+        title: this.translate.instant('TOUR.STEP_SHOP_QR_TITLE'),
+        description: this.translate.instant('TOUR.STEP_SHOP_QR_DESC'),
         icon: 'scan',
-        targetSelector: 'nav.sidebar-nav',
+        targetSelector: '.header-actions',
       },
     ];
   }
@@ -155,21 +171,21 @@ export class OnboardingService {
   private getDefaultSteps(): TourStep[] {
     return [
       {
-        title: 'Bienvenue sur Payment Platform',
-        description: 'Explorez les fonctionnalités disponibles pour votre rôle.',
+        title: this.translate.instant('TOUR.STEP_WELCOME_TITLE'),
+        description: this.translate.instant('TOUR.STEP_WELCOME_DEF_DESC'),
         icon: 'sparkles',
       },
       {
-        title: 'Paiements',
-        description: 'Consultez et gérez vos paiements depuis le menu latéral.',
+        title: this.translate.instant('TOUR.STEP_DEF_PAY_TITLE'),
+        description: this.translate.instant('TOUR.STEP_DEF_PAY_DESC'),
         icon: 'card',
-        targetSelector: 'nav.sidebar-nav',
+        targetSelector: '.sidebar-nav',
       },
       {
-        title: 'Scanner QR',
-        description: 'Utilisez le scanner QR pour effectuer des paiements.',
+        title: this.translate.instant('TOUR.STEP_DEF_QR_TITLE'),
+        description: this.translate.instant('TOUR.STEP_DEF_QR_DESC'),
         icon: 'scan',
-        targetSelector: 'nav.sidebar-nav',
+        targetSelector: '.header-actions',
       },
     ];
   }

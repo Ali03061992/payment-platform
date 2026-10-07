@@ -1,36 +1,34 @@
 <div class="page-header">
-  <h2>Mes livraisons</h2>
+  <h2>{{ 'DELIVERY.TITLE' | translate }}</h2>
 </div>
-
 @if (loading) {
   <div class="loading">
     <div class="spinner"></div>
-    <span>Chargement des livraisons...</span>
+    <span>{{ 'DELIVERY.LOADING' | translate }}</span>
   </div>
 }
-
 @if (!loading) {
   <div>
     @if (pendingAcceptance.length > 0) {
       <div class="section-header">
-        <h3>En attente d'acceptation</h3>
-        <span class="result-count">{{ pendingAcceptance.length }} livraison(s)</span>
+        <h3>{{ 'DELIVERY.PENDING_ACCEPTANCE' | translate }}</h3>
+        <span class="result-count">{{ 'DELIVERY.COUNT' | translate:{count: pendingAcceptance.length} }}</span>
       </div>
       <div class="table-card">
         <div class="table-wrapper">
           <table>
             <thead>
               <tr>
-                <th>Référence</th>
-                <th>Boutique</th>
-                <th>Total</th>
-                <th>Date prévue</th>
-                <th>Statut</th>
-                <th>Actions</th>
+                <th class="sortable-th" (click)="onSort('reference')" (keydown.enter)="onSort('reference')" tabindex="0" [attr.aria-sort]="ariaSort('reference')">{{ 'ORDERS.REFERENCE' | translate }} <span class="sort-indicator" aria-hidden="true">{{ sortIndicator('reference') }}</span></th>
+                <th class="sortable-th" (click)="onSort('shopName')" (keydown.enter)="onSort('shopName')" tabindex="0" [attr.aria-sort]="ariaSort('shopName')">{{ 'PAYMENTS.SHOP' | translate }} <span class="sort-indicator" aria-hidden="true">{{ sortIndicator('shopName') }}</span></th>
+                <th class="sortable-th" (click)="onSort('total')" (keydown.enter)="onSort('total')" tabindex="0" [attr.aria-sort]="ariaSort('total')">{{ 'ORDERS.TOTAL' | translate }} <span class="sort-indicator" aria-hidden="true">{{ sortIndicator('total') }}</span></th>
+                <th class="sortable-th" (click)="onSort('plannedDeliveryDate')" (keydown.enter)="onSort('plannedDeliveryDate')" tabindex="0" [attr.aria-sort]="ariaSort('plannedDeliveryDate')">{{ 'SUPPLIER_ORDERS.PLANNED_DATE' | translate }} <span class="sort-indicator" aria-hidden="true">{{ sortIndicator('plannedDeliveryDate') }}</span></th>
+                <th class="sortable-th" (click)="onSort('status')" (keydown.enter)="onSort('status')" tabindex="0" [attr.aria-sort]="ariaSort('status')">{{ 'ORDERS.STATUS' | translate }} <span class="sort-indicator" aria-hidden="true">{{ sortIndicator('status') }}</span></th>
+                <th>{{ 'ORDERS.ACTIONS' | translate }}</th>
               </tr>
             </thead>
             <tbody>
-              @for (d of pendingAcceptance; track d.id) {
+              @for (d of sorted(pendingAcceptance); track d.id) {
                 <tr id="delivery-{{ d.id }}" class="clickable-row" (click)="openDetail(d)">
                   <td><strong>{{ d.reference }}</strong></td>
                   <td>{{ d.shopName || d.shopId }}</td>
@@ -38,12 +36,12 @@
                   <td>{{ d.plannedDeliveryDate || '-' }}</td>
                   <td>
                     <span class="payment-badge" [ngClass]="statusClass(d.status)">
-                      {{ statusLabel(d.status) }}
+                      {{ d.status | statusLabel }}
                     </span>
                   </td>
                   <td class="actions">
-                    <button class="btn btn-sm btn-success" (click)="acceptDelivery(d)">Accepter</button>
-                    <button class="btn btn-sm btn-danger" (click)="openRejectModal(d)">Rejeter</button>
+                    <button class="btn btn-sm btn-success" (click)="acceptDelivery(d)">{{ 'ORDERS.ACCEPT_BTN' | translate }}</button>
+                    <button class="btn btn-sm btn-danger" (click)="openRejectModal(d)">{{ 'ORDERS.REJECT_BTN' | translate }}</button>
                   </td>
                 </tr>
               }
@@ -54,24 +52,24 @@
     }
     @if (activeDeliveries.length > 0) {
       <div class="section-header" style="margin-top: 32px;">
-        <h3>Livraisons actives</h3>
-        <span class="result-count">{{ activeDeliveries.length }} livraison(s)</span>
+        <h3>{{ 'DELIVERY.ACTIVE' | translate }}</h3>
+        <span class="result-count">{{ 'DELIVERY.COUNT' | translate:{count: activeDeliveries.length} }}</span>
       </div>
       <div class="table-card">
         <div class="table-wrapper">
           <table>
             <thead>
               <tr>
-                <th>Référence</th>
-                <th>Boutique</th>
-                <th>Total</th>
-                <th>Date confirmée</th>
-                <th>Statut</th>
-                <th>Actions</th>
+                <th class="sortable-th" (click)="onSort('reference')" (keydown.enter)="onSort('reference')" tabindex="0" [attr.aria-sort]="ariaSort('reference')">{{ 'ORDERS.REFERENCE' | translate }} <span class="sort-indicator" aria-hidden="true">{{ sortIndicator('reference') }}</span></th>
+                <th class="sortable-th" (click)="onSort('shopName')" (keydown.enter)="onSort('shopName')" tabindex="0" [attr.aria-sort]="ariaSort('shopName')">{{ 'PAYMENTS.SHOP' | translate }} <span class="sort-indicator" aria-hidden="true">{{ sortIndicator('shopName') }}</span></th>
+                <th class="sortable-th" (click)="onSort('total')" (keydown.enter)="onSort('total')" tabindex="0" [attr.aria-sort]="ariaSort('total')">{{ 'ORDERS.TOTAL' | translate }} <span class="sort-indicator" aria-hidden="true">{{ sortIndicator('total') }}</span></th>
+                <th class="sortable-th" (click)="onSort('confirmedDeliveryDate')" (keydown.enter)="onSort('confirmedDeliveryDate')" tabindex="0" [attr.aria-sort]="ariaSort('confirmedDeliveryDate')">{{ 'SUPPLIER_ORDERS.CONFIRMED_DATE' | translate }} <span class="sort-indicator" aria-hidden="true">{{ sortIndicator('confirmedDeliveryDate') }}</span></th>
+                <th class="sortable-th" (click)="onSort('status')" (keydown.enter)="onSort('status')" tabindex="0" [attr.aria-sort]="ariaSort('status')">{{ 'ORDERS.STATUS' | translate }} <span class="sort-indicator" aria-hidden="true">{{ sortIndicator('status') }}</span></th>
+                <th>{{ 'ORDERS.ACTIONS' | translate }}</th>
               </tr>
             </thead>
             <tbody>
-              @for (d of activeDeliveries; track d.id) {
+              @for (d of sorted(activeDeliveries); track d.id) {
                 <tr id="delivery-{{ d.id }}" class="clickable-row" (click)="openDetail(d)">
                   <td><strong>{{ d.reference }}</strong></td>
                   <td>{{ d.shopName || d.shopId }}</td>
@@ -79,15 +77,15 @@
                   <td>{{ d.confirmedDeliveryDate || '-' }}</td>
                   <td>
                     <span class="payment-badge" [ngClass]="statusClass(d.status)">
-                      {{ statusLabel(d.status) }}
+                      {{ d.status | statusLabel }}
                     </span>
                   </td>
                   <td class="actions">
                     @if (d.status === 'DELIVERY_ACCEPTED') {
-                      <button class="btn btn-sm btn-primary" (click)="openConfirmDate(d)">Confirmer la date</button>
+                      <button class="btn btn-sm btn-primary" (click)="openConfirmDate(d)">{{ 'DELIVERY.CONFIRM_DATE' | translate }}</button>
                     }
                     @if (d.status === 'IN_DELIVERY') {
-                      <button class="btn btn-sm btn-success" (click)="openDeliver(d)">Marquer livré</button>
+                      <button class="btn btn-sm btn-success" (click)="openDeliver(d)">{{ 'DELIVERY.MARK_DELIVERED' | translate }}</button>
                     }
                   </td>
                 </tr>
@@ -99,24 +97,24 @@
     }
     @if (isShopUser() && pendingReception.length > 0) {
       <div class="section-header" style="margin-top: 32px;">
-        <h3>En attente de réception</h3>
-        <span class="result-count">{{ pendingReception.length }} livraison(s)</span>
+        <h3>{{ 'DELIVERY.PENDING_RECEPTION' | translate }}</h3>
+        <span class="result-count">{{ 'DELIVERY.COUNT' | translate:{count: pendingReception.length} }}</span>
       </div>
       <div class="table-card">
         <div class="table-wrapper">
           <table>
             <thead>
               <tr>
-                <th>Référence</th>
-                <th>Fournisseur</th>
-                <th>Total</th>
-                <th>Livré le</th>
-                <th>Statut</th>
-                <th>Actions</th>
+                <th class="sortable-th" (click)="onSort('reference')" (keydown.enter)="onSort('reference')" tabindex="0" [attr.aria-sort]="ariaSort('reference')">{{ 'ORDERS.REFERENCE' | translate }} <span class="sort-indicator" aria-hidden="true">{{ sortIndicator('reference') }}</span></th>
+                <th class="sortable-th" (click)="onSort('supplierName')" (keydown.enter)="onSort('supplierName')" tabindex="0" [attr.aria-sort]="ariaSort('supplierName')">{{ 'PAYMENTS.SUPPLIER' | translate }} <span class="sort-indicator" aria-hidden="true">{{ sortIndicator('supplierName') }}</span></th>
+                <th class="sortable-th" (click)="onSort('total')" (keydown.enter)="onSort('total')" tabindex="0" [attr.aria-sort]="ariaSort('total')">{{ 'ORDERS.TOTAL' | translate }} <span class="sort-indicator" aria-hidden="true">{{ sortIndicator('total') }}</span></th>
+                <th class="sortable-th" (click)="onSort('deliveredAt')" (keydown.enter)="onSort('deliveredAt')" tabindex="0" [attr.aria-sort]="ariaSort('deliveredAt')">{{ 'SUPPLIER_ORDERS.DELIVERED_AT' | translate }} <span class="sort-indicator" aria-hidden="true">{{ sortIndicator('deliveredAt') }}</span></th>
+                <th class="sortable-th" (click)="onSort('status')" (keydown.enter)="onSort('status')" tabindex="0" [attr.aria-sort]="ariaSort('status')">{{ 'ORDERS.STATUS' | translate }} <span class="sort-indicator" aria-hidden="true">{{ sortIndicator('status') }}</span></th>
+                <th>{{ 'ORDERS.ACTIONS' | translate }}</th>
               </tr>
             </thead>
             <tbody>
-              @for (d of pendingReception; track d.id) {
+              @for (d of sorted(pendingReception); track d.id) {
                 <tr id="delivery-{{ d.id }}" class="clickable-row" (click)="openDetail(d)">
                   <td><strong>{{ d.reference }}</strong></td>
                   <td>{{ d.supplierName || d.supplierId }}</td>
@@ -124,12 +122,12 @@
                   <td>{{ d.deliveredAt | date:'dd/MM/yyyy HH:mm' }}</td>
                   <td>
                     <span class="payment-badge" [ngClass]="statusClass(d.status)">
-                      {{ statusLabel(d.status) }}
+                      {{ d.status | statusLabel }}
                     </span>
                   </td>
                   <td class="actions">
-                    <button class="btn btn-sm btn-success" (click)="acceptReception(d); $event.stopPropagation()" [attr.aria-label]="'Accepter la réception ' + d.reference">Accepter</button>
-                    <button class="btn btn-sm btn-danger" (click)="rejectReception(d); $event.stopPropagation()" [attr.aria-label]="'Rejeter la réception ' + d.reference">Rejeter</button>
+                    <button class="btn btn-sm btn-success" (click)="acceptReception(d); $event.stopPropagation()" [attr.aria-label]="('DELIVERY.ACCEPT_RECEPTION_ARIA' | translate) + ' ' + d.reference">{{ 'ORDERS.ACCEPT_BTN' | translate }}</button>
+                    <button class="btn btn-sm btn-danger" (click)="rejectReception(d); $event.stopPropagation()" [attr.aria-label]="('DELIVERY.REJECT_RECEPTION_ARIA' | translate) + ' ' + d.reference">{{ 'ORDERS.REJECT_BTN' | translate }}</button>
                   </td>
                 </tr>
               }
@@ -140,31 +138,31 @@
     }
     @if (completedDeliveries.length > 0) {
       <div class="section-header" style="margin-top: 32px;">
-        <h3>Livraisons terminées</h3>
-        <span class="result-count">{{ completedDeliveries.length }} livraison(s)</span>
+        <h3>{{ 'DELIVERY.COMPLETED' | translate }}</h3>
+        <span class="result-count">{{ 'DELIVERY.COUNT' | translate:{count: completedDeliveries.length} }}</span>
       </div>
       <div class="table-card">
         <div class="table-wrapper">
           <table>
             <thead>
               <tr>
-                <th>Référence</th>
-                <th>Boutique</th>
-                <th>Total</th>
-                <th>Statut</th>
-                <th>Reçu par</th>
-                <th>Livré le</th>
+                <th class="sortable-th" (click)="onSort('reference')" (keydown.enter)="onSort('reference')" tabindex="0" [attr.aria-sort]="ariaSort('reference')">{{ 'ORDERS.REFERENCE' | translate }} <span class="sort-indicator" aria-hidden="true">{{ sortIndicator('reference') }}</span></th>
+                <th class="sortable-th" (click)="onSort('shopName')" (keydown.enter)="onSort('shopName')" tabindex="0" [attr.aria-sort]="ariaSort('shopName')">{{ 'PAYMENTS.SHOP' | translate }} <span class="sort-indicator" aria-hidden="true">{{ sortIndicator('shopName') }}</span></th>
+                <th class="sortable-th" (click)="onSort('total')" (keydown.enter)="onSort('total')" tabindex="0" [attr.aria-sort]="ariaSort('total')">{{ 'ORDERS.TOTAL' | translate }} <span class="sort-indicator" aria-hidden="true">{{ sortIndicator('total') }}</span></th>
+                <th class="sortable-th" (click)="onSort('status')" (keydown.enter)="onSort('status')" tabindex="0" [attr.aria-sort]="ariaSort('status')">{{ 'ORDERS.STATUS' | translate }} <span class="sort-indicator" aria-hidden="true">{{ sortIndicator('status') }}</span></th>
+                <th>{{ 'SUPPLIER_ORDERS.RECEIVED_BY' | translate }}</th>
+                <th class="sortable-th" (click)="onSort('deliveredAt')" (keydown.enter)="onSort('deliveredAt')" tabindex="0" [attr.aria-sort]="ariaSort('deliveredAt')">{{ 'SUPPLIER_ORDERS.DELIVERED_AT' | translate }} <span class="sort-indicator" aria-hidden="true">{{ sortIndicator('deliveredAt') }}</span></th>
               </tr>
             </thead>
             <tbody>
-              @for (d of completedDeliveries; track d.id) {
+              @for (d of sorted(completedDeliveries); track d.id) {
                 <tr id="delivery-{{ d.id }}" class="clickable-row" (click)="openDetail(d)">
                   <td><strong>{{ d.reference }}</strong></td>
                   <td>{{ d.shopName || d.shopId }}</td>
                   <td>{{ d.total | number:'1.2-2' }} {{ d.currency }}</td>
                   <td>
                     <span class="payment-badge" [ngClass]="statusClass(d.status)">
-                      {{ statusLabel(d.status) }}
+                      {{ d.status | statusLabel }}
                     </span>
                   </td>
                   <td>{{ d.receivedByName || '-' }}</td>
@@ -178,22 +176,22 @@
     }
     @if (rejectedDeliveries.length > 0) {
       <div class="section-header" style="margin-top: 32px;">
-        <h3>Livraisons rejetées</h3>
-        <span class="result-count">{{ rejectedDeliveries.length }} livraison(s)</span>
+        <h3>{{ 'DELIVERY.REJECTED' | translate }}</h3>
+        <span class="result-count">{{ 'DELIVERY.COUNT' | translate:{count: rejectedDeliveries.length} }}</span>
       </div>
       <div class="table-card">
         <div class="table-wrapper">
           <table>
             <thead>
               <tr>
-                <th>Référence</th>
-                <th>Boutique</th>
-                <th>Total</th>
-                <th>Motif</th>
+                <th class="sortable-th" (click)="onSort('reference')" (keydown.enter)="onSort('reference')" tabindex="0" [attr.aria-sort]="ariaSort('reference')">{{ 'ORDERS.REFERENCE' | translate }} <span class="sort-indicator" aria-hidden="true">{{ sortIndicator('reference') }}</span></th>
+                <th class="sortable-th" (click)="onSort('shopName')" (keydown.enter)="onSort('shopName')" tabindex="0" [attr.aria-sort]="ariaSort('shopName')">{{ 'PAYMENTS.SHOP' | translate }} <span class="sort-indicator" aria-hidden="true">{{ sortIndicator('shopName') }}</span></th>
+                <th class="sortable-th" (click)="onSort('total')" (keydown.enter)="onSort('total')" tabindex="0" [attr.aria-sort]="ariaSort('total')">{{ 'ORDERS.TOTAL' | translate }} <span class="sort-indicator" aria-hidden="true">{{ sortIndicator('total') }}</span></th>
+                <th>{{ 'DELIVERY.REASON' | translate }}</th>
               </tr>
             </thead>
             <tbody>
-              @for (d of rejectedDeliveries; track d.id) {
+              @for (d of sorted(rejectedDeliveries); track d.id) {
                 <tr id="delivery-{{ d.id }}" class="clickable-row" (click)="openDetail(d)">
                   <td><strong>{{ d.reference }}</strong></td>
                   <td>{{ d.shopName || d.shopId }}</td>
@@ -208,106 +206,104 @@
     }
     @if (deliveries.length === 0) {
       <div class="empty">
-        Aucune livraison assignée
+        {{ 'DELIVERY.EMPTY' | translate }}
       </div>
     }
   </div>
 }
-
-<!-- Détail livraison -->
 @if (showDetail) {
   <div class="modal-overlay" (click)="closeDetail()">
     <div class="modal-content modal-lg" (click)="$event.stopPropagation()">
       <div class="modal-header">
-        <h3>Livraison {{ selectedDetailOrder?.reference }}</h3>
+        <h3>{{ 'DELIVERY.DETAIL_TITLE' | translate }} {{ selectedDetailOrder?.reference }}</h3>
         <button class="btn-close" (click)="closeDetail()">&times;</button>
       </div>
       @if (selectedDetailOrder) {
         <div>
           <div class="detail-grid">
             <div class="detail-card">
-              <div class="detail-label">Statut</div>
+              <div class="detail-label">{{ 'ORDERS.STATUS' | translate }}</div>
               <div class="detail-value">
-                <span class="payment-badge" [ngClass]="statusClass(selectedDetailOrder.status)">{{ statusLabel(selectedDetailOrder.status) }}</span>
+                <span class="payment-badge" [ngClass]="statusClass(selectedDetailOrder.status)">{{ selectedDetailOrder.status | statusLabel }}</span>
               </div>
             </div>
             <div class="detail-card">
-              <div class="detail-label">Total</div>
+              <div class="detail-label">{{ 'ORDERS.TOTAL' | translate }}</div>
               <div class="detail-value amount">{{ selectedDetailOrder.total | number:'1.2-2' }} {{ selectedDetailOrder.currency }}</div>
             </div>
             <div class="detail-card">
-              <div class="detail-label">Boutique</div>
+              <div class="detail-label">{{ 'PAYMENTS.SHOP' | translate }}</div>
               <div class="detail-value">{{ selectedDetailOrder.shopName || selectedDetailOrder.shopId }}</div>
             </div>
             <div class="detail-card">
-              <div class="detail-label">Paiement ASAP</div>
-              <div class="detail-value">{{ selectedDetailOrder.asapPayment ? 'Oui' : 'Non' }}</div>
+              <div class="detail-label">{{ 'SUPPLIER_ORDERS.ASAP_PAYMENT' | translate }}</div>
+              <div class="detail-value">{{ selectedDetailOrder.asapPayment ? ('SUPPLIER_ORDERS.YES' | translate) : ('SUPPLIER_ORDERS.NO' | translate) }}</div>
             </div>
             @if (selectedDetailOrder.createdByName) {
               <div class="detail-card">
-                <div class="detail-label">Créé par</div>
+                <div class="detail-label">{{ 'PAYMENTS.CREATED_BY' | translate }}</div>
                 <div class="detail-value">{{ selectedDetailOrder.createdByName }}</div>
               </div>
             }
             <div class="detail-card">
-              <div class="detail-label">Créé le</div>
+              <div class="detail-label">{{ 'PAYMENTS.CREATED_AT' | translate }}</div>
               <div class="detail-value">{{ selectedDetailOrder.createdAt | date:'dd/MM/yyyy HH:mm:ss' }}</div>
             </div>
             @if (selectedDetailOrder.deliveryAgentName) {
               <div class="detail-card">
-                <div class="detail-label">Livreur</div>
+                <div class="detail-label">{{ 'ORDERS.DRIVER' | translate }}</div>
                 <div class="detail-value">{{ selectedDetailOrder.deliveryAgentName }}</div>
               </div>
             }
             @if (selectedDetailOrder.plannedDeliveryDate) {
               <div class="detail-card">
-                <div class="detail-label">Date prévue</div>
+                <div class="detail-label">{{ 'SUPPLIER_ORDERS.PLANNED_DATE' | translate }}</div>
                 <div class="detail-value">{{ selectedDetailOrder.plannedDeliveryDate }}</div>
               </div>
             }
             @if (selectedDetailOrder.confirmedDeliveryDate) {
               <div class="detail-card">
-                <div class="detail-label">Date confirmée</div>
+                <div class="detail-label">{{ 'SUPPLIER_ORDERS.CONFIRMED_DATE' | translate }}</div>
                 <div class="detail-value">{{ selectedDetailOrder.confirmedDeliveryDate }}</div>
               </div>
             }
             @if (selectedDetailOrder.deliveredAt) {
               <div class="detail-card">
-                <div class="detail-label">Livré le</div>
+                <div class="detail-label">{{ 'SUPPLIER_ORDERS.DELIVERED_AT' | translate }}</div>
                 <div class="detail-value">{{ selectedDetailOrder.deliveredAt | date:'dd/MM/yyyy HH:mm:ss' }}</div>
               </div>
             }
             @if (selectedDetailOrder.receivedByName) {
               <div class="detail-card">
-                <div class="detail-label">Reçu par</div>
+                <div class="detail-label">{{ 'SUPPLIER_ORDERS.RECEIVED_BY' | translate }}</div>
                 <div class="detail-value">{{ selectedDetailOrder.receivedByName }}</div>
               </div>
             }
             @if (selectedDetailOrder.receivedAt) {
               <div class="detail-card">
-                <div class="detail-label">Reçu le</div>
+                <div class="detail-label">{{ 'SUPPLIER_ORDERS.RECEIVED_AT' | translate }}</div>
                 <div class="detail-value">{{ selectedDetailOrder.receivedAt | date:'dd/MM/yyyy HH:mm:ss' }}</div>
               </div>
             }
             @if (selectedDetailOrder.deliveryRejectionReason) {
               <div class="detail-card" style="grid-column: 1 / -1;">
-                <div class="detail-label">Motif de rejet</div>
+                <div class="detail-label">{{ 'SUPPLIER_ORDERS.REJECT_REASON' | translate }}</div>
                 <div class="detail-value" style="color: #e53935;">{{ selectedDetailOrder.deliveryRejectionReason }}</div>
               </div>
             }
           </div>
           @if (selectedDetailOrder.items && selectedDetailOrder.items.length > 0) {
             <div class="table-card" style="margin-top: 16px;">
-              <h4 style="padding: 16px 20px 0;">Articles</h4>
+              <h4 style="padding: 16px 20px 0;">{{ 'SUPPLIER_ORDERS.ITEMS' | translate }}</h4>
               <div class="table-wrapper">
                 <table>
                   <thead>
                     <tr>
-                      <th>Produit</th>
-                      <th>Quantité</th>
-                      <th>Prix unitaire</th>
-                      <th>Remise</th>
-                      <th>Total</th>
+                      <th>{{ 'SUPPLIER_ORDERS.PRODUCT' | translate }}</th>
+                      <th>{{ 'SUPPLIER_ORDERS.QUANTITY' | translate }}</th>
+                      <th>{{ 'SUPPLIER_ORDERS.UNIT_PRICE' | translate }}</th>
+                      <th>{{ 'SUPPLIER_ORDERS.DISCOUNT' | translate }}</th>
+                      <th>{{ 'ORDERS.TOTAL' | translate }}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -323,15 +319,15 @@
                   </tbody>
                   <tfoot>
                     <tr>
-                      <td colspan="4" style="text-align:right;font-weight:600;">Sous-total</td>
+                      <td colspan="4" style="text-align:right;font-weight:600;">{{ 'SUPPLIER_ORDERS.SUBTOTAL' | translate }}</td>
                       <td><strong>{{ selectedDetailOrder.subtotal | number:'1.2-2' }} {{ selectedDetailOrder.currency }}</strong></td>
                     </tr>
                     <tr>
-                      <td colspan="4" style="text-align:right;font-weight:600;">TVA ({{ selectedDetailOrder.taxRate }}%)</td>
+                      <td colspan="4" style="text-align:right;font-weight:600;">{{ 'SUPPLIER_ORDERS.VAT' | translate }} ({{ selectedDetailOrder.taxRate }}%)</td>
                       <td><strong>{{ selectedDetailOrder.taxAmount | number:'1.2-2' }} {{ selectedDetailOrder.currency }}</strong></td>
                     </tr>
                     <tr>
-                      <td colspan="4" style="text-align:right;font-weight:700;font-size:16px;">Total</td>
+                      <td colspan="4" style="text-align:right;font-weight:700;font-size:16px;">{{ 'ORDERS.TOTAL' | translate }}</td>
                       <td><strong style="font-size:16px;color:#0f3460;">{{ selectedDetailOrder.total | number:'1.2-2' }} {{ selectedDetailOrder.currency }}</strong></td>
                     </tr>
                   </tfoot>
@@ -344,30 +340,28 @@
     </div>
   </div>
 }
-
-<!-- Modal confirmation date -->
 @if (showConfirmDateModal) {
   <div class="modal-overlay" (click)="closeConfirmDate()">
     <div class="modal-content" (click)="$event.stopPropagation()">
       <div class="modal-header">
-        <h3>Confirmer la date de livraison</h3>
+        <h3>{{ 'DELIVERY.CONFIRM_DATE_TITLE' | translate }}</h3>
         <button class="btn-close" (click)="closeConfirmDate()">&times;</button>
       </div>
       @if (confirmDateOrder) {
         <div>
           <p style="margin-bottom: 16px; color: #555;">
-            Commande <strong>{{ confirmDateOrder.reference }}</strong> — {{ confirmDateOrder.total | number:'1.2-2' }} {{ confirmDateOrder.currency }}
+            {{ 'SUPPLIER_ORDERS.ORDER' | translate }} <strong>{{ confirmDateOrder.reference }}</strong> — {{ confirmDateOrder.total | number:'1.2-2' }} {{ confirmDateOrder.currency }}
           </p>
           <form (ngSubmit)="submitConfirmDate()">
             <div class="form-group">
-              <label>Date prévue : {{ confirmDateOrder.plannedDeliveryDate }}</label>
-              <label>Confirmer la date exacte de livraison</label>
+              <label>{{ 'DELIVERY.PLANNED_LABEL' | translate }} {{ confirmDateOrder.plannedDeliveryDate }}</label>
+              <label>{{ 'DELIVERY.CONFIRM_EXACT' | translate }}</label>
               <input type="date" [(ngModel)]="confirmedDate" name="confirmedDate" class="form-control" required>
             </div>
             <div class="form-actions">
-              <button type="button" class="btn btn-secondary" (click)="closeConfirmDate()">Annuler</button>
+              <button type="button" class="btn btn-secondary" (click)="closeConfirmDate()">{{ 'ORDERS.CANCEL_BTN' | translate }}</button>
               <button type="submit" class="btn btn-primary" [disabled]="confirming || !confirmedDate">
-                {{ confirming ? 'Confirmation...' : 'Confirmer la date' }}
+                {{ confirming ? ('DELIVERY.CONFIRMING' | translate) : ('DELIVERY.CONFIRM_DATE_BTN' | translate) }}
               </button>
             </div>
           </form>
@@ -376,50 +370,48 @@
     </div>
   </div>
 }
-
-<!-- Modal confirmation livraison -->
 @if (showDeliverModal) {
   <div class="modal-overlay" (click)="closeDeliver()">
     <div class="modal-content" (click)="$event.stopPropagation()">
       <div class="modal-header">
-        <h3>Confirmer la livraison</h3>
+        <h3>{{ 'DELIVERY.CONFIRM_DELIVERY_TITLE' | translate }}</h3>
         <button class="btn-close" (click)="closeDeliver()">&times;</button>
       </div>
       @if (selectedOrder) {
         <div>
           <p style="margin-bottom: 16px; color: #555;">
-            Commande <strong>{{ selectedOrder.reference }}</strong> — {{ selectedOrder.total | number:'1.2-2' }} {{ selectedOrder.currency }}
+            {{ 'SUPPLIER_ORDERS.ORDER' | translate }} <strong>{{ selectedOrder.reference }}</strong> — {{ selectedOrder.total | number:'1.2-2' }} {{ selectedOrder.currency }}
           </p>
           @if (selectedOrder.asapPayment) {
             <div class="info-box" style="margin-bottom: 16px; background: #e8f5e9; border: 1px solid #4caf50; padding: 12px; border-radius: 8px;">
-              <strong>Paiement ASAP :</strong> Un paiement sera automatiquement créé lors de la validation.
+              <strong>{{ 'SUPPLIER_ORDERS.ASAP_PAYMENT' | translate }} :</strong> {{ 'DELIVERY.ASAP_INFO' | translate }}
             </div>
           }
            <form (ngSubmit)="confirmDeliver()">
             <div class="form-group">
-              <label>Personne qui a reçu la livraison</label>
+              <label>{{ 'DELIVERY.RECEIVED_PERSON' | translate }}</label>
               @if (loadingShopAgents) {
                 <div class="loading" style="padding: 8px;">
                   <div class="spinner" style="width:20px;height:20px;"></div>
-                  <span>Chargement des agents...</span>
+                  <span>{{ 'DELIVERY.LOADING_AGENTS' | translate }}</span>
                 </div>
               } @else if (shopAgents.length > 0) {
                 <select [(ngModel)]="receivedBy" name="receivedBy" class="form-control" required>
-                  <option value="">-- Sélectionner --</option>
+                  <option value="">{{ 'SUPPLIER_ORDERS.SELECT' | translate }}</option>
                   @for (agent of shopAgents; track agent.id) {
-                    <option [value]="agent.id">{{ agent.name }}{{ isShopAdmin(agent) ? ' (admin boutique)' : '' }}</option>
+                    <option [value]="agent.id">{{ agent.name }}{{ isShopAdmin(agent) ? ('DELIVERY.SHOP_ADMIN_SUFFIX' | translate) : '' }}</option>
                   }
                 </select>
               } @else {
                 <div class="info-box" style="background: #fff3e0; border: 1px solid #ff9800;">
-                  Aucun destinataire disponible pour cette boutique (ni agent, ni admin). Impossible de confirmer la livraison.
+                  {{ 'DELIVERY.NO_RECIPIENT' | translate }}
                 </div>
               }
             </div>
             <div class="form-actions">
-              <button type="button" class="btn btn-secondary" (click)="closeDeliver()">Annuler</button>
+              <button type="button" class="btn btn-secondary" (click)="closeDeliver()">{{ 'ORDERS.CANCEL_BTN' | translate }}</button>
               <button type="submit" class="btn btn-success" [disabled]="delivering || !receivedBy || shopAgents.length === 0">
-                {{ delivering ? 'Confirmation...' : 'Confirmer la livraison' }}
+                {{ delivering ? ('DELIVERY.CONFIRMING' | translate) : ('DELIVERY.CONFIRM_DELIVERY_BTN' | translate) }}
               </button>
             </div>
           </form>
@@ -428,30 +420,28 @@
     </div>
   </div>
 }
-
-<!-- Modal rejet livraison -->
 @if (showRejectModal) {
   <div class="modal-overlay" (click)="closeRejectModal()">
     <div class="modal-content" (click)="$event.stopPropagation()">
       <div class="modal-header">
-        <h3>Rejeter la livraison</h3>
+        <h3>{{ 'SUPPLIER_ORDERS.REJECT_DELIVERY_TITLE' | translate }}</h3>
         <button class="btn-close" (click)="closeRejectModal()">&times;</button>
       </div>
       @if (rejectOrder) {
         <div>
           <p style="margin-bottom: 16px; color: #555;">
-            Commande <strong>{{ rejectOrder.reference }}</strong> — {{ rejectOrder.total | number:'1.2-2' }} {{ rejectOrder.currency }}
+            {{ 'SUPPLIER_ORDERS.ORDER' | translate }} <strong>{{ rejectOrder.reference }}</strong> — {{ rejectOrder.total | number:'1.2-2' }} {{ rejectOrder.currency }}
           </p>
           <form (ngSubmit)="submitReject()">
             <div class="form-group">
-              <label>Motif du rejet</label>
+              <label>{{ 'DELIVERY.REJECT_MOTIF' | translate }}</label>
               <textarea [(ngModel)]="rejectReason" name="rejectReason" class="form-control" rows="3"
-                placeholder="Indiquez le motif du rejet..." required></textarea>
+                [placeholder]="'DELIVERY.REJECT_PLACEHOLDER' | translate" required></textarea>
             </div>
             <div class="form-actions">
-              <button type="button" class="btn btn-secondary" (click)="closeRejectModal()">Annuler</button>
+              <button type="button" class="btn btn-secondary" (click)="closeRejectModal()">{{ 'ORDERS.CANCEL_BTN' | translate }}</button>
               <button type="submit" class="btn btn-danger" [disabled]="rejecting || !rejectReason">
-                {{ rejecting ? 'Rejet...' : 'Rejeter la livraison' }}
+                {{ rejecting ? ('DELIVERY.REJECTING' | translate) : ('DELIVERY.REJECT_DELIVERY_BTN' | translate) }}
               </button>
             </div>
           </form>

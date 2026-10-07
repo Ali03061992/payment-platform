@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
+import { TranslateService } from '@ngx-translate/core';
 import { ToastService } from '../services/toast.service';
 
 @Component({
@@ -18,13 +19,15 @@ export class ForgotPasswordComponent {
   constructor(
     private http: HttpClient,
     private router: Router,
-    private toast: ToastService
+    private toast: ToastService,
+    private translate: TranslateService
   ) {}
 
   onSubmit(): void {
     if (!this.email) {
-      this.error = 'Veuillez saisir votre adresse email.';
-      this.toast.error(this.error);
+      const msg: string = this.translate.instant('FORGOT_PASSWORD.EMAIL_REQUIRED');
+      this.error = msg;
+      this.toast.error(msg);
       return;
     }
     this.loading = true;
@@ -33,11 +36,11 @@ export class ForgotPasswordComponent {
       next: (res) => {
         this.sent = true;
         this.loading = false;
-        this.toast.success(res.message || 'Email envoyé.');
+        this.toast.success(res.message || this.translate.instant('FORGOT_PASSWORD.EMAIL_SENT_FALLBACK'));
       },
       error: (err) => {
         // Email inconnu (404) ou autre échec : message affiché, on reste sur la page.
-        const message: string = err.error?.message || "Erreur lors de l'envoi de l'email.";
+        const message: string = err.error?.message || this.translate.instant('FORGOT_PASSWORD.SEND_ERROR');
         this.error = message;
         this.toast.error(message);
         this.loading = false;

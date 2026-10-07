@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { TranslateService } from '@ngx-translate/core';
 import { StockOptimizationService } from '../../services/stock-optimization.service';
 import { StockOptimizationResponse, ProductOptimization } from '../../models/stock-optimization.model';
 import { ToastService } from '../../services/toast.service';
@@ -22,7 +23,7 @@ export class StockOptimizationComponent implements OnInit {
   configOrderingCost = 50;
   configHoldingCost = 25;
 
-  constructor(private optimizationService: StockOptimizationService, private toast: ToastService) {}
+  constructor(private optimizationService: StockOptimizationService, private toast: ToastService, private translate: TranslateService) {}
 
   ngOnInit(): void { this.loadOptimization(); }
 
@@ -31,15 +32,15 @@ export class StockOptimizationComponent implements OnInit {
     this.error = '';
     this.optimizationService.optimize().subscribe({
       next: (data) => { this.data = data; this.loading = false; },
-      error: (err) => { this.error = err.error?.message || 'Erreur de chargement'; this.loading = false; }
+      error: (err) => { this.error = err.error?.message || this.translate.instant('STOCK.LOAD_ERROR'); this.loading = false; }
     });
   }
 
   applyConfig(): void {
     this.loading = true;
     this.optimizationService.configure(this.configLeadTime, this.configOrderingCost, this.configHoldingCost / 100).subscribe({
-      next: (data) => { this.data = data; this.showConfig = false; this.loading = false; this.toast.success('Parametres applies'); },
-      error: (err) => { this.toast.error(err.error?.message || 'Erreur'); this.loading = false; }
+      next: (data) => { this.data = data; this.showConfig = false; this.loading = false; this.toast.success(this.translate.instant('STOCK.OPTIM_APPLIED')); },
+      error: (err) => { this.toast.error(err.error?.message || this.translate.instant('STOCK.ERROR')); this.loading = false; }
     });
   }
 

@@ -5,7 +5,9 @@ import { NotificationService } from '../services/notification.service';
 import { StockService } from '../services/stock.service';
 import { ThemeService, Theme } from '../services/theme.service';
 import { Notification } from '../models/notification.model';
+import { User } from '../models/user.model';
 import { Subscription } from 'rxjs';
+import { timeAgo } from '../pipes/time-ago.pipe';
 
 interface NavItem {
   label: string;
@@ -27,10 +29,11 @@ interface NavGroup {
     standalone: false
 })
 export class LayoutComponent implements OnInit, OnDestroy {
-  user: any;
+  user: User | null = null;
   sidebarOpen = false;
   isMobile = false;
   showNotifications = false;
+  showThemePicker = false;
   unreadCount = 0;
   lowStockAlertCount = 0;
   notifications: Notification[] = [];
@@ -44,38 +47,38 @@ export class LayoutComponent implements OnInit, OnDestroy {
   private swipeThreshold = 80;
 
   navItems: NavItem[] = [
-    { label: 'Tableau de bord', icon: 'dashboard', route: '/dashboard', roles: ['SYSTEM_ADMIN', 'SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_AGENT'], group: 'Principal' },
-    { label: 'Gestion des utilisateurs', icon: 'users', route: 'admin/users', roles: ['SYSTEM_ADMIN'], group: 'Administration' },
-    { label: 'Créer un compte', icon: 'user-plus', route: 'admin/users/create', roles: ['SYSTEM_ADMIN'], group: 'Administration' },
-    { label: 'Activation comptes', icon: 'key', route: 'sales/accounts', roles: ['SYSTEM_ADMIN'], group: 'Administration' },
-    { label: 'Fournisseurs', icon: 'factory', route: 'admin/suppliers', roles: ['SYSTEM_ADMIN'], group: 'Administration' },
-    { label: 'Boutiques', icon: 'store', route: 'admin/shops', roles: ['SYSTEM_ADMIN'], group: 'Administration' },
-    { label: 'Relations F-B', icon: 'link', route: 'admin/relations', roles: ['SYSTEM_ADMIN'], group: 'Administration' },
-    { label: 'Stats organisations', icon: 'chart', route: 'admin/org-stats', roles: ['SYSTEM_ADMIN'], group: 'Administration' },
-    { label: 'Journal d\'audit', icon: 'list', route: 'admin/audit-logs', roles: ['SYSTEM_ADMIN'], group: 'Administration' },
-    { label: 'Réclamations', icon: 'alert', route: 'admin/disputes', roles: ['SYSTEM_ADMIN'], group: 'Administration' },
-    { label: 'Categories', icon: 'tag', route: 'supplier/categories', roles: ['SUPPLIER_ADMIN'], group: 'Catalogue' },
-    { label: 'Familles', icon: 'folder', route: 'supplier/families', roles: ['SUPPLIER_ADMIN'], group: 'Catalogue' },
-    { label: 'Produits', icon: 'list', route: 'supplier/products', roles: ['SUPPLIER_ADMIN'], group: 'Catalogue' },
-    { label: 'Stock', icon: 'box', route: 'supplier/stock', roles: ['SUPPLIER_ADMIN', 'SUPPLIER_AGENT'], group: 'Stock' },
-    { label: 'Alertes stock', icon: 'alert', route: 'supplier/low-stock-alerts', roles: ['SUPPLIER_ADMIN'], group: 'Stock' },
-    { label: 'Optimisation', icon: 'cpu', route: 'supplier/optimization', roles: ['SUPPLIER_ADMIN'], group: 'Stock' },
-    { label: 'Commandes', icon: 'cart', route: 'supplier/orders', roles: ['SUPPLIER_ADMIN'], group: 'Ventes' },
-    { label: 'Finance', icon: 'wallet', route: 'supplier/financial', roles: ['SUPPLIER_ADMIN'], group: 'Finance' },
-    { label: 'Balance', icon: 'scale', route: 'supplier/balance', roles: ['SUPPLIER_ADMIN'], group: 'Finance' },
-    { label: 'Livraisons', icon: 'truck', route: 'supplier/deliveries', roles: ['SUPPLIER_ADMIN', 'SUPPLIER_AGENT'], group: 'Ventes' },
-    { label: 'Mes commandes', icon: 'cart', route: 'shop/orders', roles: ['SHOP_ADMIN', 'SHOP_AGENT'], group: 'Boutique' },
-    { label: 'Livraisons', icon: 'truck', route: 'shop/deliveries', roles: ['SHOP_ADMIN', 'SHOP_AGENT'], group: 'Boutique' },
-    { label: 'Nouvelle commande', icon: 'plus', route: 'shop/orders/create', roles: ['SHOP_ADMIN'], group: 'Boutique' },
-    { label: 'Balance', icon: 'scale', route: 'shop/balance', roles: ['SHOP_ADMIN'], group: 'Boutique' },
-    { label: 'Réclamations', icon: 'alert', route: 'shop/disputes', roles: ['SHOP_ADMIN', 'SHOP_AGENT'], group: 'Boutique' },
-    { label: 'Paiements', icon: 'card', route: 'payments', roles: ['SYSTEM_ADMIN', 'SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_AGENT'], group: 'Paiements' },
-    { label: 'Stats paiements', icon: 'chart', route: 'payments/stats', roles: ['SYSTEM_ADMIN', 'SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_AGENT'], group: 'Paiements' },
-    { label: 'Scanner QR', icon: 'scan', route: 'scan', roles: ['SYSTEM_ADMIN', 'SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_AGENT'], group: 'Outils' },
-    { label: 'Export', icon: 'upload', route: 'export', roles: ['SYSTEM_ADMIN', 'SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_AGENT'], group: 'Outils' },
-    { label: 'Paiements agents', icon: 'users', route: 'supplier/agent-payments', roles: ['SUPPLIER_ADMIN', 'SUPPLIER_AGENT'], group: 'Ventes' },
-    { label: 'Notifications', icon: 'bell', route: 'notifications', roles: ['SYSTEM_ADMIN', 'SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_AGENT'], group: 'Outils' },
-    { label: 'Changer mot de passe', icon: 'lock', route: 'change-password', roles: ['SYSTEM_ADMIN', 'SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_AGENT'], group: 'Compte' },
+    { label: 'NAV.DASHBOARD', icon: 'dashboard', route: '/dashboard', roles: ['SYSTEM_ADMIN', 'SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_AGENT'], group: 'NAV.GROUP_MAIN' },
+    { label: 'NAV.USER_MANAGEMENT', icon: 'users', route: 'admin/users', roles: ['SYSTEM_ADMIN'], group: 'NAV.GROUP_ADMIN' },
+    { label: 'NAV.CREATE_ACCOUNT', icon: 'user-plus', route: 'admin/users/create', roles: ['SYSTEM_ADMIN'], group: 'NAV.GROUP_ADMIN' },
+    { label: 'NAV.ACCOUNT_ACTIVATION', icon: 'key', route: 'sales/accounts', roles: ['SYSTEM_ADMIN'], group: 'NAV.GROUP_ADMIN' },
+    { label: 'NAV.SUPPLIERS', icon: 'factory', route: 'admin/suppliers', roles: ['SYSTEM_ADMIN'], group: 'NAV.GROUP_ADMIN' },
+    { label: 'NAV.SHOPS', icon: 'store', route: 'admin/shops', roles: ['SYSTEM_ADMIN'], group: 'NAV.GROUP_ADMIN' },
+    { label: 'NAV.RELATIONS', icon: 'link', route: 'admin/relations', roles: ['SYSTEM_ADMIN'], group: 'NAV.GROUP_ADMIN' },
+    { label: 'NAV.ORG_STATS', icon: 'chart', route: 'admin/org-stats', roles: ['SYSTEM_ADMIN'], group: 'NAV.GROUP_ADMIN' },
+    { label: 'NAV.AUDIT_LOG', icon: 'list', route: 'admin/audit-logs', roles: ['SYSTEM_ADMIN'], group: 'NAV.GROUP_ADMIN' },
+    { label: 'NAV.DISPUTES', icon: 'alert', route: 'admin/disputes', roles: ['SYSTEM_ADMIN'], group: 'NAV.GROUP_ADMIN' },
+    { label: 'NAV.CATEGORIES', icon: 'tag', route: 'supplier/categories', roles: ['SUPPLIER_ADMIN'], group: 'NAV.GROUP_CATALOG' },
+    { label: 'NAV.FAMILIES', icon: 'folder', route: 'supplier/families', roles: ['SUPPLIER_ADMIN'], group: 'NAV.GROUP_CATALOG' },
+    { label: 'NAV.PRODUCTS', icon: 'list', route: 'supplier/products', roles: ['SUPPLIER_ADMIN'], group: 'NAV.GROUP_CATALOG' },
+    { label: 'NAV.STOCK', icon: 'box', route: 'supplier/stock', roles: ['SUPPLIER_ADMIN', 'SUPPLIER_AGENT'], group: 'NAV.GROUP_STOCK' },
+    { label: 'NAV.LOW_STOCK_ALERTS', icon: 'alert', route: 'supplier/low-stock-alerts', roles: ['SUPPLIER_ADMIN'], group: 'NAV.GROUP_STOCK' },
+    { label: 'NAV.OPTIMIZATION', icon: 'cpu', route: 'supplier/optimization', roles: ['SUPPLIER_ADMIN'], group: 'NAV.GROUP_STOCK' },
+    { label: 'NAV.ORDERS', icon: 'cart', route: 'supplier/orders', roles: ['SUPPLIER_ADMIN'], group: 'NAV.GROUP_SALES' },
+    { label: 'NAV.FINANCE', icon: 'wallet', route: 'supplier/financial', roles: ['SUPPLIER_ADMIN'], group: 'NAV.GROUP_FINANCE' },
+    { label: 'NAV.BALANCE', icon: 'scale', route: 'supplier/balance', roles: ['SUPPLIER_ADMIN'], group: 'NAV.GROUP_FINANCE' },
+    { label: 'NAV.DELIVERIES', icon: 'truck', route: 'supplier/deliveries', roles: ['SUPPLIER_ADMIN', 'SUPPLIER_AGENT'], group: 'NAV.GROUP_SALES' },
+    { label: 'NAV.MY_ORDERS', icon: 'cart', route: 'shop/orders', roles: ['SHOP_ADMIN', 'SHOP_AGENT'], group: 'NAV.GROUP_SHOP' },
+    { label: 'NAV.DELIVERIES', icon: 'truck', route: 'shop/deliveries', roles: ['SHOP_ADMIN', 'SHOP_AGENT'], group: 'NAV.GROUP_SHOP' },
+    { label: 'NAV.NEW_ORDER', icon: 'plus', route: 'shop/orders/create', roles: ['SHOP_ADMIN'], group: 'NAV.GROUP_SHOP' },
+    { label: 'NAV.BALANCE', icon: 'scale', route: 'shop/balance', roles: ['SHOP_ADMIN'], group: 'NAV.GROUP_SHOP' },
+    { label: 'NAV.DISPUTES', icon: 'alert', route: 'shop/disputes', roles: ['SHOP_ADMIN', 'SHOP_AGENT'], group: 'NAV.GROUP_SHOP' },
+    { label: 'NAV.PAYMENTS', icon: 'card', route: 'payments', roles: ['SYSTEM_ADMIN', 'SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_AGENT'], group: 'NAV.GROUP_PAYMENTS' },
+    { label: 'NAV.PAYMENT_STATS', icon: 'chart', route: 'payments/stats', roles: ['SYSTEM_ADMIN', 'SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_AGENT'], group: 'NAV.GROUP_PAYMENTS' },
+    { label: 'NAV.QR_SCANNER', icon: 'scan', route: 'scan', roles: ['SYSTEM_ADMIN', 'SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_AGENT'], group: 'NAV.GROUP_TOOLS' },
+    { label: 'NAV.EXPORT', icon: 'upload', route: 'export', roles: ['SYSTEM_ADMIN', 'SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_AGENT'], group: 'NAV.GROUP_TOOLS' },
+    { label: 'NAV.AGENT_PAYMENTS', icon: 'users', route: 'supplier/agent-payments', roles: ['SUPPLIER_ADMIN', 'SUPPLIER_AGENT'], group: 'NAV.GROUP_SALES' },
+    { label: 'LAYOUT.NOTIFICATIONS', icon: 'bell', route: 'notifications', roles: ['SYSTEM_ADMIN', 'SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_AGENT'], group: 'NAV.GROUP_TOOLS' },
+    { label: 'NAV.CHANGE_PASSWORD', icon: 'lock', route: 'change-password', roles: ['SYSTEM_ADMIN', 'SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_AGENT'], group: 'NAV.GROUP_ACCOUNT' },
   ];
 
   /** Groupes repliés (persistés, tous ouverts par défaut). */
@@ -85,7 +88,8 @@ export class LayoutComponent implements OnInit, OnDestroy {
     private router: Router,
     private notificationService: NotificationService,
     private stockService: StockService,
-    public themeService: ThemeService
+    public themeService: ThemeService,
+    private elRef: ElementRef
   ) {
     this.user = this.loginService.getCurrentUser();
     this.checkMobile();
@@ -225,6 +229,28 @@ export class LayoutComponent implements OnInit, OnDestroy {
     }
   }
 
+  toggleThemePicker(): void {
+    this.showThemePicker = !this.showThemePicker;
+  }
+
+  closeThemePicker(): void {
+    this.showThemePicker = false;
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: Event): void {
+    if (!this.showThemePicker) return;
+    const target = event.target as HTMLElement;
+    if (!this.elRef.nativeElement.querySelector('.theme-picker-wrapper')?.contains(target)) {
+      this.showThemePicker = false;
+    }
+  }
+
+  @HostListener('document:keydown.escape')
+  onEscapeKey(): void {
+    this.showThemePicker = false;
+  }
+
   closeNotifications(): void {
     this.showNotifications = false;
   }
@@ -289,15 +315,6 @@ export class LayoutComponent implements OnInit, OnDestroy {
   }
 
   getTimeAgo(dateStr: string): string {
-    const now = Date.now();
-    const then = new Date(dateStr).getTime();
-    const diff = now - then;
-    const mins = Math.floor(diff / 60000);
-    if (mins < 1) return 'à l\'instant';
-    if (mins < 60) return `il y a ${mins}min`;
-    const hours = Math.floor(mins / 60);
-    if (hours < 24) return `il y a ${hours}h`;
-    const days = Math.floor(hours / 24);
-    return `il y a ${days}j`;
+    return timeAgo(dateStr);
   }
 }

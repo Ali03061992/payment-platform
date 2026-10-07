@@ -1,57 +1,57 @@
 <div class="dashboard">
   <div class="welcome-section">
     <h1>{{ getGreeting() }}, {{ user?.firstName }} !</h1>
-    <p>Vue d'ensemble de la plateforme.</p>
+    <p>{{ 'DASHBOARD.WELCOME_SUBTITLE' | translate }}</p>
   </div>
 
   @if (loading) {
-    <div class="loading">Chargement...</div>
+    <div class="loading">{{ 'COMMON.LOADING' | translate }}</div>
   } @else {
     <div class="stats-grid">
       <div class="stat-card">
         <div class="stat-icon blue"><app-icon name="users" [size]="26"></app-icon></div>
         <div class="stat-info">
           <div class="stat-value">{{ stats.totalUsers }}</div>
-          <div class="stat-label">Total utilisateurs</div>
+          <div class="stat-label">{{ 'DASHBOARD.TOTAL_USERS' | translate }}</div>
         </div>
       </div>
       <div class="stat-card">
         <div class="stat-icon green"><app-icon name="check-circle" [size]="26"></app-icon></div>
         <div class="stat-info">
           <div class="stat-value">{{ stats.activeUsers }}</div>
-          <div class="stat-label">Comptes actifs</div>
+          <div class="stat-label">{{ 'DASHBOARD.ACTIVE_ACCOUNTS' | translate }}</div>
         </div>
       </div>
       <div class="stat-card">
         <div class="stat-icon red"><app-icon name="ban" [size]="26"></app-icon></div>
         <div class="stat-info">
           <div class="stat-value">{{ stats.disabledUsers }}</div>
-          <div class="stat-label">Comptes désactivés</div>
+          <div class="stat-label">{{ 'DASHBOARD.DISABLED_ACCOUNTS' | translate }}</div>
         </div>
       </div>
       <div class="stat-card">
         <div class="stat-icon orange"><app-icon name="factory" [size]="26"></app-icon></div>
         <div class="stat-info">
           <div class="stat-value">{{ stats.suppliers }}</div>
-          <div class="stat-label">Fournisseurs</div>
+          <div class="stat-label">{{ 'DASHBOARD.SUPPLIERS' | translate }}</div>
         </div>
       </div>
       <div class="stat-card">
         <div class="stat-icon purple"><app-icon name="store" [size]="26"></app-icon></div>
         <div class="stat-info">
           <div class="stat-value">{{ stats.shops }}</div>
-          <div class="stat-label">Boutiques</div>
+          <div class="stat-label">{{ 'DASHBOARD.SHOPS' | translate }}</div>
         </div>
       </div>
     </div>
 
     <div class="info-cards">
       <div class="info-card">
-        <h3><app-icon name="list" [size]="18"></app-icon> Mon profil</h3>
-        <div class="info-row"><span>Nom :</span><strong>{{ user?.firstName }} {{ user?.lastName }}</strong></div>
+        <h3><app-icon name="list" [size]="18"></app-icon> {{ 'DASHBOARD.MY_PROFILE' | translate }}</h3>
+        <div class="info-row"><span>{{ 'DASHBOARD.NAME' | translate }} :</span><strong>{{ user?.firstName }} {{ user?.lastName }}</strong></div>
         <div class="info-row"><span>Email :</span><strong>{{ user?.email }}</strong></div>
-        <div class="info-row"><span>Rôle :</span><strong>{{ user?.roles?.[0] }}</strong></div>
-        <div class="info-row"><span>Statut :</span>
+        <div class="info-row"><span>{{ 'DASHBOARD.ROLE' | translate }} :</span><strong>{{ user?.roles?.[0] }}</strong></div>
+        <div class="info-row"><span>{{ 'DASHBOARD.STATUS' | translate }} :</span>
           <span class="badge" [class]="user?.status === 'ACTIVE' ? 'badge-success' : 'badge-danger'">
             {{ user?.status }}
           </span>
@@ -59,26 +59,26 @@
       </div>
 
       <div class="info-card">
-        <h3><app-icon name="card" [size]="18"></app-icon> Paiements</h3>
-        <div class="info-row"><span>Total :</span><strong>{{ paymentStats.total }}</strong></div>
-        <div class="info-row"><span>En attente :</span><strong class="text-orange">{{ paymentStats.pending }}</strong></div>
-        <div class="info-row"><span>Confirmés :</span><strong class="text-green">{{ paymentStats.confirmed }}</strong></div>
-        <div class="info-row"><span>Rejetés :</span><strong class="text-red">{{ paymentStats.rejected }}</strong></div>
+        <h3><app-icon name="card" [size]="18"></app-icon> {{ 'NAV.PAYMENTS' | translate }}</h3>
+        <div class="info-row"><span>{{ 'DASHBOARD.TOTAL_LBL' | translate }}</span><strong>{{ paymentStats.total }}</strong></div>
+        <div class="info-row"><span>{{ 'DASHBOARD.PENDING_LBL' | translate }}</span><strong class="text-orange">{{ paymentStats.pending }}</strong></div>
+        <div class="info-row"><span>{{ 'DASHBOARD.CONFIRMED_LBL' | translate }}</span><strong class="text-green">{{ paymentStats.confirmed }}</strong></div>
+        <div class="info-row"><span>{{ 'DASHBOARD.REJECTED_LBL' | translate }}</span><strong class="text-red">{{ paymentStats.rejected }}</strong></div>
       </div>
 
       <div class="info-card">
-        <h3><app-icon name="box" [size]="18"></app-icon> Commandes</h3>
-        <div class="info-row"><span>Total commandes :</span><strong>{{ recentOrdersCount }}</strong></div>
+        <h3><app-icon name="box" [size]="18"></app-icon> {{ 'NAV.ORDERS' | translate }}</h3>
+        <div class="info-row"><span>{{ 'DASHBOARD.TOTAL_ORDERS_LBL' | translate }}</span><strong>{{ recentOrdersCount }}</strong></div>
       </div>
 
       <div class="info-card">
-        <h3><app-icon name="zap" [size]="18"></app-icon> Actions rapides</h3>
-        <a routerLink="admin/users" class="quick-action"><app-icon name="users" [size]="18"></app-icon> Gérer les utilisateurs</a>
-        <a routerLink="admin/users/create" class="quick-action"><app-icon name="user-plus" [size]="18"></app-icon> Créer un compte</a>
-        <a routerLink="sales/accounts" class="quick-action"><app-icon name="key" [size]="18"></app-icon> Activer / Désactiver</a>
-        <a routerLink="admin/suppliers" class="quick-action"><app-icon name="factory" [size]="18"></app-icon> Gérer les fournisseurs</a>
-        <a routerLink="admin/shops" class="quick-action"><app-icon name="store" [size]="18"></app-icon> Gérer les boutiques</a>
-        <a routerLink="admin/audit-logs" class="quick-action"><app-icon name="list" [size]="18"></app-icon> Journal d'audit</a>
+        <h3><app-icon name="zap" [size]="18"></app-icon> {{ 'DASHBOARD.QUICK_ACTIONS' | translate }}</h3>
+        <a routerLink="admin/users" class="quick-action"><app-icon name="users" [size]="18"></app-icon> {{ 'DASHBOARD.MANAGE_USERS' | translate }}</a>
+        <a routerLink="admin/users/create" class="quick-action"><app-icon name="user-plus" [size]="18"></app-icon> {{ 'DASHBOARD.CREATE_ACCOUNT' | translate }}</a>
+        <a routerLink="sales/accounts" class="quick-action"><app-icon name="key" [size]="18"></app-icon> {{ 'DASHBOARD.TOGGLE_ACCOUNTS' | translate }}</a>
+        <a routerLink="admin/suppliers" class="quick-action"><app-icon name="factory" [size]="18"></app-icon> {{ 'DASHBOARD.MANAGE_SUPPLIERS' | translate }}</a>
+        <a routerLink="admin/shops" class="quick-action"><app-icon name="store" [size]="18"></app-icon> {{ 'DASHBOARD.MANAGE_SHOPS' | translate }}</a>
+        <a routerLink="admin/audit-logs" class="quick-action"><app-icon name="list" [size]="18"></app-icon> {{ 'NAV.AUDIT_LOG' | translate }}</a>
       </div>
     </div>
   }

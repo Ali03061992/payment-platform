@@ -148,6 +148,7 @@ public class AgentManagementUseCase {
     public List<UserResponse> listAgents(UUID actorUserId, UUID organizationId) {
         requireActor(actorUserId, organizationId);
         return users.findByOrganizationId(OrganizationId.of(organizationId)).stream()
+                .filter(u -> u.isActive())
                 .map(UserResponse::from)
                 .toList();
     }

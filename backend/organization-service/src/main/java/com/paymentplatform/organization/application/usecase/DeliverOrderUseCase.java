@@ -64,13 +64,17 @@ public class DeliverOrderUseCase {
         orders.save(order);
 
         events.save(OrderEvent.create(orderId, "ORDER_DELIVERED", actorUserId,
-                "Reçu par: " + receivedBy));
+                "Reçu par: " + (receivedBy != null ? receivedBy : actorUserId)));
         outbox.append(new OrderEvents.OrderDeliveredEvent(UUID.randomUUID(), Instant.now(),
                 orderId, order.getReference(),
                 order.getShopId(), order.getSupplierId(),
                 actorUserId, receivedBy),
                 String.valueOf(orderId));
 
+        if (order.isAsapPayment()) {
+            // Note : paiement auto à la réception pour toutes les commandes (dette constatée),
+            // idempotent via asap-<orderId> — le flag ASAP ne conditionne que accept-asap.
+        }
         try {
             paymentClient.createAutoPayment(order.getShopId(), order.getSupplierId(),
                     order.getCurrency(), actorUserId, order.getTotal(), orderId);

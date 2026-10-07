@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { TranslateService } from '@ngx-translate/core';
 import { StockService } from '../../services/stock.service';
 import { Product } from '../../models/stock.model';
 
@@ -12,7 +13,7 @@ export class LowStockAlertsComponent implements OnInit {
   alerts: Product[] = [];
   loading = true;
 
-  constructor(private stockService: StockService) {}
+  constructor(private stockService: StockService, private translate: TranslateService) {}
 
   ngOnInit(): void {
     this.loadAlerts();
@@ -53,12 +54,12 @@ export class LowStockAlertsComponent implements OnInit {
 
   getUrgencyLabel(product: Product): string {
     const level = this.getUrgencyLevel(product);
-    const labels: Record<string, string> = {
-      critical: 'Critique',
-      high: 'Élevée',
-      medium: 'Moyenne'
+    const keys: Record<string, string> = {
+      critical: 'STOCK.URGENCY_CRITICAL',
+      high: 'STOCK.URGENCY_HIGH',
+      medium: 'STOCK.URGENCY_MEDIUM'
     };
-    return labels[level] || level;
+    return this.translate.instant(keys[level] || level);
   }
 
   getAvailableQty(product: Product): number {

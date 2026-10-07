@@ -14,6 +14,7 @@ import { PaymentService } from '../../services/payment.service';
 import { OrganizationService } from '../../services/organization.service';
 import { ToastService } from '../../services/toast.service';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { TranslateStubPipe, translateServiceProvider } from '../../testing/translate-stubs';
 
 describe('CreatePaymentComponent', () => {
   let component: CreatePaymentComponent;
@@ -36,10 +37,11 @@ describe('CreatePaymentComponent', () => {
     sessionStorage.clear();
 
     TestBed.configureTestingModule({
-    declarations: [CreatePaymentComponent],
+    declarations: [CreatePaymentComponent, TranslateStubPipe],
     schemas: [NO_ERRORS_SCHEMA],
     imports: [],
     providers: [
+        translateServiceProvider(),
         { provide: Router, useValue: routerSpy },
         { provide: PaymentService, useValue: psSpy },
         { provide: OrganizationService, useValue: orgSpy },
@@ -205,7 +207,7 @@ describe('CreatePaymentComponent', () => {
       component.amount = 100;
       paymentService.create.and.returnValue(throwError(() => ({})));
       component.create();
-      expect(toast.error).toHaveBeenCalledWith('Erreur lors de la création');
+      expect(toast.error).toHaveBeenCalledWith('PAYMENT_CREATE.CREATE_ERROR');
     });
   });
 });

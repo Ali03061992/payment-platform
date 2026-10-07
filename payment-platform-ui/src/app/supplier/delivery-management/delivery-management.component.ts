@@ -1,11 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
+import { TranslateService } from '@ngx-translate/core';
 import { OrderService } from '../../services/order.service';
 import { Order } from '../../models/order.model';
-import { paginateItems } from '../../models/page.model';
+import { paginateItems, sortItems, toggleSortState, ariaSortFor, sortIndicatorFor, SortState } from '../../models/page.model';
 import { ToastService } from '../../services/toast.service';
 import { LoginService } from '../../services/login.service';
 import { ConfirmDialogService } from '../../components/confirm-dialog/confirm-dialog.service';
+import { statusLabelFr } from '../../pipes/status-label.pipe';
 
 /**
  * Écran livreur/admin des livraisons (acceptation, confirmation de date, livraison, rejet).
@@ -52,13 +54,15 @@ export class DeliveryManagementComponent implements OnInit {
   /** Pagination par section (endpoints livraisons non paginés côté serveur). */
   sectionPages: { [key: string]: number } = {};
   sectionSize = 10;
+  sort: SortState = { field: null, direction: 'asc' };
 
   constructor(
     private orderService: OrderService,
     private route: ActivatedRoute,
     private toast: ToastService,
     private loginService: LoginService,
-    private confirmDialog: ConfirmDialogService
+    private confirmDialog: ConfirmDialogService,
+    private translate: TranslateService
   ) {}
 
   /** Indique si l'utilisateur connecté est un profil boutique (accès réceptions). */
@@ -96,9 +100,8 @@ export class DeliveryManagementComponent implements OnInit {
           }, 300);
         }
       },
-      error: (err: any) => {
-        console.error('Deliveries error:', err);
-        this.toast.error(err.error?.message || 'Erreur de chargement');
+      error: (err: { error?: { message?: string }; status?: number; statusText?: string; message?: string }) => {
+        this.toast.error(err.error?.message || this.translate.instant('SUPPLIER_ORDERS.LOAD_ERROR'));
         this.loading = false;
       }
     });
@@ -129,11 +132,11 @@ export class DeliveryManagementComponent implements OnInit {
   acceptReception(order: Order): void {
     this.orderService.accept(order.id).subscribe({
       next: () => {
-        this.toast.success('Réception acceptée');
+        this.toast.success(this.translate.instant('DELIVERY.RECEPTION_ACCEPTED'));
         this.loadDeliveries();
       },
-      error: (err: any) => {
-        this.toast.error(err.error?.message || 'Erreur');
+      error: (err: { error?: { message?: string }; status?: number; statusText?: string; message?: string }) => {
+        this.toast.error(err.error?.message || this.translate.instant('PAYMENTS.ERROR'));
       }
     });
   }
@@ -141,18 +144,18 @@ export class DeliveryManagementComponent implements OnInit {
   /** Rejette la réception via popup (profil boutique). */
   rejectReception(order: Order): void {
     this.confirmDialog.confirm({
-      title: 'Rejeter la réception',
-      message: `Rejeter la réception de ${order.reference} ?`,
+      title: this.translate.instant('DELIVERY.REJECT_RECEPTION_TITLE'),
+      message: this.translate.instant('DELIVERY.REJECT_RECEPTION_MSG', { ref: order.reference }),
       danger: true,
     }).subscribe(ok => {
       if (!ok) return;
       this.orderService.reject(order.id).subscribe({
         next: () => {
-          this.toast.success('Réception rejetée');
+          this.toast.success(this.translate.instant('DELIVERY.RECEPTION_REJECTED'));
           this.loadDeliveries();
         },
-        error: (err: any) => {
-          this.toast.error(err.error?.message || 'Erreur');
+        error: (err: { error?: { message?: string }; status?: number; statusText?: string; message?: string }) => {
+          this.toast.error(err.error?.message || this.translate.instant('PAYMENTS.ERROR'));
         }
       });
     });
@@ -162,11 +165,11 @@ export class DeliveryManagementComponent implements OnInit {
   acceptDelivery(order: Order): void {
     this.orderService.acceptDelivery(order.id, true).subscribe({
       next: () => {
-        this.toast.success('Livraison acceptée');
+        this.toast.success(this.translate.instant('DELIVERY.DELIVERY_ACCEPTED'));
         this.loadDeliveries();
       },
-      error: (err: any) => {
-        this.toast.error(err.error?.message || 'Erreur');
+      error: (err: { error?: { message?: string }; status?: number; statusText?: string; message?: string }) => {
+        this.toast.error(err.error?.message || this.translate.instant('PAYMENTS.ERROR'));
       }
     });
   }
@@ -191,13 +194,13 @@ export class DeliveryManagementComponent implements OnInit {
     this.rejecting = true;
     this.orderService.acceptDelivery(this.rejectOrder.id, false, this.rejectReason).subscribe({
       next: () => {
-        this.toast.success('Livraison rejetée, commande annulée');
+        this.toast.success(this.translate.instant('SUPPLIER_ORDERS.DELIVERY_REJECTED_SUCCESS'));
         this.closeRejectModal();
         this.rejecting = false;
         this.loadDeliveries();
       },
-      error: (err: any) => {
-        this.toast.error(err.error?.message || 'Erreur');
+      error: (err: { error?: { message?: string }; status?: number; statusText?: string; message?: string }) => {
+        this.toast.error(err.error?.message || this.translate.instant('PAYMENTS.ERROR'));
         this.rejecting = false;
       }
     });
@@ -222,13 +225,13 @@ export class DeliveryManagementComponent implements OnInit {
     this.confirming = true;
     this.orderService.confirmDelivery(this.confirmDateOrder.id, this.confirmedDate).subscribe({
       next: () => {
-        this.toast.success('Date de livraison confirmée');
+        this.toast.success(this.translate.instant('DELIVERY.DATE_CONFIRMED'));
         this.closeConfirmDate();
         this.confirming = false;
         this.loadDeliveries();
       },
-      error: (err: any) => {
-        this.toast.error(err.error?.message || 'Erreur');
+      error: (err: { error?: { message?: string }; status?: number; statusText?: string; message?: string }) => {
+        this.toast.error(err.error?.message || this.translate.instant('PAYMENTS.ERROR'));
         this.confirming = false;
       }
     });
@@ -263,13 +266,13 @@ export class DeliveryManagementComponent implements OnInit {
     this.delivering = true;
     this.orderService.deliver(this.selectedOrder.id, this.receivedBy).subscribe({
       next: () => {
-        this.toast.success('Livraison confirmée, paiement créé');
+        this.toast.success(this.translate.instant('DELIVERY.DELIVERY_CONFIRMED'));
         this.closeDeliver();
         this.delivering = false;
         this.loadDeliveries();
       },
-      error: (err: any) => {
-        this.toast.error(err.error?.message || 'Erreur');
+      error: (err: { error?: { message?: string }; status?: number; statusText?: string; message?: string }) => {
+        this.toast.error(err.error?.message || this.translate.instant('PAYMENTS.ERROR'));
         this.delivering = false;
       }
     });
@@ -277,16 +280,7 @@ export class DeliveryManagementComponent implements OnInit {
 
   /** Traduit un statut de livraison en libellé français d'affichage. */
   statusLabel(s: string): string {
-    const map: Record<string, string> = {
-      READY_FOR_DELIVERY: 'En attente d\'acceptation',
-      DELIVERY_ACCEPTED: 'Acceptée - En attente de livraison',
-      IN_DELIVERY: 'En livraison',
-      DELIVERED: 'Livré',
-      ACCEPTED: 'Accepté par la boutique',
-      DELIVERY_REJECTED: 'Rejetée',
-      CANCELLED: 'Annulée'
-    };
-    return map[s] || s;
+    return statusLabelFr(s);
   }
 
   /** Traduit un statut de livraison en classe CSS de badge. */
@@ -324,6 +318,22 @@ export class DeliveryManagementComponent implements OnInit {
   /** Page d'une section de livraisons (pagination côté client). */
   paged(list: Order[], key: string): Order[] {
     return paginateItems(list, this.sectionPages[key] || 0, this.sectionSize);
+  }
+
+  onSort(field: string): void {
+    this.sort = toggleSortState(this.sort, field);
+  }
+
+  ariaSort(field: string): 'ascending' | 'descending' | 'none' {
+    return ariaSortFor(field, this.sort);
+  }
+
+  sortIndicator(field: string): string {
+    return sortIndicatorFor(field, this.sort);
+  }
+
+  sorted(list: Order[]): Order[] {
+    return sortItems(list, this.sort.field, this.sort.direction);
   }
 
   onSectionPage(key: string, page: number): void {

@@ -1,9 +1,10 @@
 import { Component, OnInit } from '@angular/core';
+import { TranslateService } from '@ngx-translate/core';
 import { StockService } from '../../services/stock.service';
 import { CatalogService } from '../../services/catalog.service';
 import { Product } from '../../models/stock.model';
 import { ProductFamily, ProductCategory } from '../../models/catalog.model';
-import { paginateItems } from '../../models/page.model';
+import { paginateItems, sortItems, toggleSortState, ariaSortFor, sortIndicatorFor, SortState } from '../../models/page.model';
 import { ToastService } from '../../services/toast.service';
 import { ConfirmDialogService } from '../../components/confirm-dialog/confirm-dialog.service';
 
@@ -24,7 +25,8 @@ export class ProductManagementComponent implements OnInit {
   editingProduct: Product | null = null;
   saving = false;
   currentPage = 0;
-  pageSize = 20;
+  pageSize = 10;
+  sort: SortState = { field: null, direction: 'asc' };
 
   form = {
     name: '', sku: '', description: '', unitPrice: 0, currency: 'TND',
@@ -35,7 +37,8 @@ export class ProductManagementComponent implements OnInit {
     private stockService: StockService,
     private catalogService: CatalogService,
     private toast: ToastService,
-    private confirmDialog: ConfirmDialogService
+    private confirmDialog: ConfirmDialogService,
+    private translate: TranslateService
   ) {}
 
   ngOnInit(): void { this.loadData(); }
@@ -65,7 +68,20 @@ export class ProductManagementComponent implements OnInit {
   }
 
   get pagedProducts(): Product[] {
-    return paginateItems(this.filteredProducts, this.currentPage, this.pageSize);
+    return paginateItems(sortItems(this.filteredProducts, this.sort.field, this.sort.direction), this.currentPage, this.pageSize);
+  }
+
+  onSort(field: string): void {
+    this.sort = toggleSortState(this.sort, field);
+    this.currentPage = 0;
+  }
+
+  ariaSort(field: string): 'ascending' | 'descending' | 'none' {
+    return ariaSortFor(field, this.sort);
+  }
+
+  sortIndicator(field: string): string {
+    return sortIndicatorFor(field, this.sort);
   }
 
   onFilterChange(): void {
@@ -122,13 +138,13 @@ export class ProductManagementComponent implements OnInit {
 
     if (this.editingProduct) {
       this.stockService.updateProduct(this.editingProduct.id, data).subscribe({
-        next: () => { this.toast.success('Produit mis a jour'); this.showForm = false; this.saving = false; this.loadData(); },
-        error: (err) => { this.toast.error(err.error?.message || 'Erreur'); this.saving = false; }
+        next: () => { this.toast.success(this.translate.instant('CATALOG.SUCCESS_UPDATED')); this.showForm = false; this.saving = false; this.loadData(); },
+        error: (err) => { this.toast.error(err.error?.message || this.translate.instant('STOCK.ERROR')); this.saving = false; }
       });
     } else {
       this.stockService.createProduct({ ...data, quantity: 0 }).subscribe({
-        next: () => { this.toast.success('Produit cree'); this.showForm = false; this.saving = false; this.loadData(); },
-        error: (err) => { this.toast.error(err.error?.message || 'Erreur'); this.saving = false; }
+        next: () => { this.toast.success(this.translate.instant('CATALOG.SUCCESS_CREATED')); this.showForm = false; this.saving = false; this.loadData(); },
+        error: (err) => { this.toast.error(err.error?.message || this.translate.instant('STOCK.ERROR')); this.saving = false; }
       });
     }
   }
@@ -137,20 +153,20 @@ export class ProductManagementComponent implements OnInit {
     const newStatus = p.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
     this.stockService.updateProduct(p.id, { status: newStatus }).subscribe({
       next: () => this.loadData(),
-      error: (err) => this.toast.error(err.error?.message || 'Erreur')
+      error: (err) => this.toast.error(err.error?.message || this.translate.instant('STOCK.ERROR'))
     });
   }
 
   deleteProduct(p: Product): void {
     this.confirmDialog.confirm({
-      title: 'Supprimer le produit',
-      message: `Supprimer "${p.name}" ?`,
+      title: this.translate.instant('CATALOG.DELETE_PRODUCT_TITLE'),
+      message: this.translate.instant('CATALOG.DELETE_PRODUCT_MSG', { name: p.name }),
       danger: true,
     }).subscribe(ok => {
       if (!ok) return;
       this.stockService.deleteProduct(p.id).subscribe({
-        next: () => { this.toast.success('Produit supprime'); this.loadData(); },
-        error: (err) => this.toast.error(err.error?.message || 'Erreur')
+        next: () => { this.toast.success(this.translate.instant('CATALOG.SUCCESS_DELETED')); this.loadData(); },
+        error: (err) => this.toast.error(err.error?.message || this.translate.instant('STOCK.ERROR'))
       });
     });
   }

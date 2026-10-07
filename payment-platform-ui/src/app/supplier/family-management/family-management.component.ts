@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { TranslateService } from '@ngx-translate/core';
 import { CatalogService } from '../../services/catalog.service';
 import { ProductFamily, ProductCategory } from '../../models/catalog.model';
 import { ToastService } from '../../services/toast.service';
@@ -23,7 +24,7 @@ export class FamilyManagementComponent implements OnInit {
   pageSize = 10;
   sort: SortState = { field: null, direction: 'asc' };
 
-  constructor(private catalogService: CatalogService, private toast: ToastService, private confirmDialog: ConfirmDialogService) {}
+  constructor(private catalogService: CatalogService, private toast: ToastService, private confirmDialog: ConfirmDialogService, private translate: TranslateService) {}
 
   ngOnInit(): void { this.loadData(); }
 
@@ -120,27 +121,27 @@ export class FamilyManagementComponent implements OnInit {
 
     if (this.editingFamily) {
       this.catalogService.updateFamily(this.editingFamily.id, data).subscribe({
-        next: () => { this.toast.success('Famille mise a jour'); this.showForm = false; this.saving = false; this.loadFamilies(); },
-        error: (err) => { this.toast.error(err.error?.message || 'Erreur'); this.saving = false; }
+        next: () => { this.toast.success(this.translate.instant('CATALOG.FAMILY_UPDATED')); this.showForm = false; this.saving = false; this.loadFamilies(); },
+        error: (err) => { this.toast.error(err.error?.message || this.translate.instant('STOCK.ERROR')); this.saving = false; }
       });
     } else {
       this.catalogService.createFamily(data).subscribe({
-        next: () => { this.toast.success('Famille creee'); this.showForm = false; this.saving = false; this.loadFamilies(); },
-        error: (err) => { this.toast.error(err.error?.message || 'Erreur'); this.saving = false; }
+        next: () => { this.toast.success(this.translate.instant('CATALOG.FAMILY_CREATED')); this.showForm = false; this.saving = false; this.loadFamilies(); },
+        error: (err) => { this.toast.error(err.error?.message || this.translate.instant('STOCK.ERROR')); this.saving = false; }
       });
     }
   }
 
   deleteFamily(fam: ProductFamily): void {
     this.confirmDialog.confirm({
-      title: 'Supprimer la famille',
-      message: `Supprimer la famille "${fam.name}" ?`,
+      title: this.translate.instant('CATALOG.DELETE_FAMILY_TITLE'),
+      message: this.translate.instant('CATALOG.DELETE_FAMILY_MSG', { name: fam.name }),
       danger: true,
     }).subscribe(ok => {
       if (!ok) return;
       this.catalogService.deleteFamily(fam.id).subscribe({
-        next: () => { this.toast.success('Famille supprimee'); this.loadFamilies(); },
-        error: (err) => this.toast.error(err.error?.message || 'Erreur')
+        next: () => { this.toast.success(this.translate.instant('CATALOG.FAMILY_DELETED')); this.loadFamilies(); },
+        error: (err) => this.toast.error(err.error?.message || this.translate.instant('STOCK.ERROR'))
       });
     });
   }

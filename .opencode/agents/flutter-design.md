@@ -1,7 +1,6 @@
 ---
 description: Designer-developpeur Flutter du Payment Platform. Parite totale avec Angular + touche artistique premium (style Apple, sobre) + typographies store-safe. Transforme chaque ecran desktop en experience mobile qui sort du lot, sans jamais perdre une fonctionnalite.
 mode: subagent
-model: anthropic/claude-sonnet-4-6
 permission:
   edit: allow
   bash: ask

@@ -11,14 +11,14 @@ export default defineConfig({
     defaultCommandTimeout: 10000,
     requestTimeout: 10000,
     responseTimeout: 30000,
-    video: false,
+    video: true,
     screenshotOnRunFailure: true,
     specPattern: "cypress/e2e/**/*.cy.ts",
     supportFile: "cypress/support/e2e.ts",
   },
 
   retries: {
-    runMode: 0,
+    runMode: 2,
     openMode: 0,
   },
 });

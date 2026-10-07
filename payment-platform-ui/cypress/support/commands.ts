@@ -226,6 +226,12 @@ function createRelation(token: string, supplierId: string, shopId: string) {
 // ── User helpers ────────────────────────────────────────────────────
 
 function createUser(token: string, data: any) {
+  const normalizeUser = (body: any) => {
+    if (!body) return null;
+    const u = body.user || body.data || body;
+    if (u?.username) return u;
+    return null;
+  };
   return cy.request({
     method: 'POST',
     url: `${API_URL()}/api/users`,
@@ -233,16 +239,32 @@ function createUser(token: string, data: any) {
     body: data,
     failOnStatusCode: false,
   }).then((r) => {
-    if (r.status === 200 || r.status === 201) return r.body;
-    // User may already exist - try to find via login
+    const created = normalizeUser(r.body);
+    if ((r.status === 200 || r.status === 201) && created) return created;
+    if ((r.status === 200 || r.status === 201) && r.body) return r.body;
     return cy.request({
       method: 'POST',
       url: `${API_URL()}/api/auth/login`,
       body: { username: data.username, password: data.password },
       failOnStatusCode: false,
     }).then((lr) => {
-      if (lr.status === 200) return lr.body.user;
-      return null;
+      if (lr.status !== 200) return null;
+      const fromLogin = normalizeUser(lr.body);
+      if (fromLogin) return fromLogin;
+      const loginToken = lr.body?.accessToken;
+      if (!loginToken) return { username: data.username };
+      return cy.request({
+        method: 'GET',
+        url: `${API_URL()}/api/auth/me`,
+        headers: authHeaders(loginToken),
+        failOnStatusCode: false,
+      }).then((me) => {
+        if (me.status === 200 && me.body) {
+          const meUser = normalizeUser(me.body);
+          if (meUser) return meUser;
+        }
+        return { username: data.username };
+      });
     });
   });
 }
@@ -263,9 +285,17 @@ interface TestContext {
   };
 }
 
+function isCtxUsable(ctx: any): ctx is TestContext {
+  return !!(
+    ctx?.suppliers?.covale?.id &&
+    ctx?.users?.supplierAdmin?.username &&
+    ctx?.users?.shopAdmin?.username
+  );
+}
+
 function buildTestContext(): Cypress.Chainable<TestContext> {
   const existing = Cypress.env('testCtx') as TestContext | undefined;
-  if (existing && existing.suppliers?.covale?.id) {
+  if (isCtxUsable(existing)) {
     return cy.wrap(existing);
   }
 
@@ -339,7 +369,7 @@ function buildTestContext(): Cypress.Chainable<TestContext> {
         { sid: ctx.suppliers.pointteck?.id, shopid: ctx.shops.ptSfax?.id },
       ].filter((p) => p.sid && p.shopid);
       return cy.wrap(pairs).each((pair: any) => {
-        createRelation(adminToken, pair.sid, pair.shopid);
+        return createRelation(adminToken, pair.sid, pair.shopid);
       }).then(() => ctx);
     });
   }).then((ctx: any) => {
@@ -354,7 +384,7 @@ function buildTestContext(): Cypress.Chainable<TestContext> {
     ].filter((u) => !!u.organizationId);
 
     return cy.wrap(users).each((u: any) => {
-      createUser(adminToken, u).then((created: any) => {
+      return createUser(adminToken, u).then((created: any) => {
         if (!created) return;
         const ctx: any = Cypress.env('testCtx');
         ctx.users = ctx.users || {};
@@ -380,12 +410,12 @@ function buildTestContext(): Cypress.Chainable<TestContext> {
 }
 
 Cypress.Commands.add('ensureTestUsers', () => {
-  buildTestContext();
+  return buildTestContext().then(() => undefined) as unknown as Cypress.Chainable<void>;
 });
 
 Cypress.Commands.add('getTestCtx', () => {
   const ctx = Cypress.env('testCtx') as TestContext | undefined;
-  if (ctx) return cy.wrap(ctx);
+  if (isCtxUsable(ctx)) return cy.wrap(ctx);
   return buildTestContext();
 });
 

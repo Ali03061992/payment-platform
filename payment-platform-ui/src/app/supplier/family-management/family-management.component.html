@@ -1,24 +1,24 @@
 <div class="page-header">
-  <h1>Familles produit</h1>
-  <button class="btn btn-primary" (click)="openCreate()">+ Nouvelle famille</button>
+  <h1>{{ 'CATALOG.FAMILIES_TITLE' | translate }}</h1>
+  <button class="btn btn-primary" (click)="openCreate()">{{ 'CATALOG.NEW_FAMILY' | translate }}</button>
 </div>
 
 @if (showForm) {
   <div class="form-card">
-    <h3>{{ editingFamily ? 'Modifier la famille' : 'Creer une famille' }}</h3>
+    <h3>{{ editingFamily ? ('CATALOG.EDIT_FAMILY' | translate) : ('CATALOG.CREATE_FAMILY' | translate) }}</h3>
     <form (ngSubmit)="save()">
       <div class="form-row">
         <div class="form-group">
-          <label>Nom <span class="required">*</span></label>
-          <input type="text" [(ngModel)]="form.name" name="name" class="form-control" placeholder="Ex: Vetements" required>
+          <label>{{ 'CATALOG.FIELD_NAME' | translate }} <span class="required">*</span></label>
+          <input type="text" [(ngModel)]="form.name" name="name" class="form-control" [placeholder]="'CATALOG.NAME_PLACEHOLDER' | translate" required>
         </div>
         <div class="form-group">
-          <label>Code <span class="required">*</span></label>
-          <input type="text" [(ngModel)]="form.code" name="code" class="form-control" placeholder="Ex: VET" required>
+          <label>{{ 'CATALOG.FIELD_CODE' | translate }} <span class="required">*</span></label>
+          <input type="text" [(ngModel)]="form.code" name="code" class="form-control" [placeholder]="'CATALOG.CODE_PLACEHOLDER' | translate" required>
         </div>
       </div>
       <div class="form-group">
-        <label>Categories associees</label>
+        <label>{{ 'CATALOG.LINKED_CATEGORIES' | translate }}</label>
         <div class="category-grid">
           @for (cat of categories; track cat) {
             <label class="category-chip" [class.selected]="isCategorySelected(cat.id)">
@@ -27,14 +27,14 @@
             </label>
           }
           @if (categories.length === 0) {
-            <span class="no-cats">Aucune categorie disponible</span>
+            <span class="no-cats">{{ 'CATALOG.NO_CATEGORIES' | translate }}</span>
           }
         </div>
       </div>
       <div class="form-actions">
-        <button type="button" class="btn btn-secondary" (click)="showForm = false">Annuler</button>
+        <button type="button" class="btn btn-secondary" (click)="showForm = false">{{ 'CATALOG.BTN_CANCEL' | translate }}</button>
         <button type="submit" class="btn btn-primary" [disabled]="saving || !form.name || !form.code">
-          {{ saving ? 'Enregistrement...' : (editingFamily ? 'Mettre a jour' : 'Creer') }}
+          {{ saving ? ('CATALOG.BTN_SAVING' | translate) : (editingFamily ? ('CATALOG.BTN_UPDATE' | translate) : ('CATALOG.BTN_CREATE' | translate)) }}
         </button>
       </div>
     </form>
@@ -51,11 +51,11 @@
       <table>
         <thead>
           <tr>
-            <th class="sortable-th" (click)="onSort('name')" (keydown.enter)="onSort('name')" (keydown.space)="onSort('name'); $event.preventDefault()" tabindex="0" [attr.aria-sort]="ariaSort('name')" title="Trier par nom">Nom <span class="sort-indicator" aria-hidden="true">{{ sortIndicator('name') }}</span></th>
-            <th class="sortable-th" (click)="onSort('code')" (keydown.enter)="onSort('code')" (keydown.space)="onSort('code'); $event.preventDefault()" tabindex="0" [attr.aria-sort]="ariaSort('code')" title="Trier par code">Code <span class="sort-indicator" aria-hidden="true">{{ sortIndicator('code') }}</span></th>
-            <th>Categories</th>
-            <th class="sortable-th" (click)="onSort('status')" (keydown.enter)="onSort('status')" (keydown.space)="onSort('status'); $event.preventDefault()" tabindex="0" [attr.aria-sort]="ariaSort('status')" title="Trier par statut">Statut <span class="sort-indicator" aria-hidden="true">{{ sortIndicator('status') }}</span></th>
-            <th>Actions</th>
+            <th class="sortable-th" (click)="onSort('name')" (keydown.enter)="onSort('name')" (keydown.space)="onSort('name'); $event.preventDefault()" tabindex="0" [attr.aria-sort]="ariaSort('name')" [title]="'CATALOG.SORT_BY_NAME' | translate">{{ 'CATALOG.COL_NAME' | translate }} <span class="sort-indicator" aria-hidden="true">{{ sortIndicator('name') }}</span></th>
+            <th class="sortable-th" (click)="onSort('code')" (keydown.enter)="onSort('code')" (keydown.space)="onSort('code'); $event.preventDefault()" tabindex="0" [attr.aria-sort]="ariaSort('code')" [title]="'CATALOG.SORT_BY_CODE' | translate">{{ 'CATALOG.COL_CODE' | translate }} <span class="sort-indicator" aria-hidden="true">{{ sortIndicator('code') }}</span></th>
+            <th>{{ 'CATALOG.COL_CATEGORIES' | translate }}</th>
+            <th class="sortable-th" (click)="onSort('status')" (keydown.enter)="onSort('status')" (keydown.space)="onSort('status'); $event.preventDefault()" tabindex="0" [attr.aria-sort]="ariaSort('status')" [title]="'CATALOG.SORT_BY_STATUS' | translate">{{ 'CATALOG.COL_STATUS' | translate }} <span class="sort-indicator" aria-hidden="true">{{ sortIndicator('status') }}</span></th>
+            <th>{{ 'CATALOG.COL_ACTIONS' | translate }}</th>
           </tr>
         </thead>
         <tbody>
@@ -66,14 +66,14 @@
               <td>{{ getCategoryNames(fam) }}</td>
               <td><span class="badge badge-active">{{ fam.status }}</span></td>
               <td class="actions">
-                <button class="btn btn-sm btn-secondary" (click)="openEdit(fam)">Modifier</button>
-                <button class="btn btn-sm btn-danger" (click)="deleteFamily(fam)">Supprimer</button>
+                <button class="btn btn-sm btn-secondary" (click)="openEdit(fam)">{{ 'CATALOG.BTN_EDIT' | translate }}</button>
+                <button class="btn btn-sm btn-danger" (click)="deleteFamily(fam)">{{ 'CATALOG.BTN_DELETE' | translate }}</button>
               </td>
             </tr>
           }
           @if (families.length === 0) {
             <tr>
-              <td colspan="5" class="empty">Aucune famille</td>
+              <td colspan="5" class="empty">{{ 'CATALOG.EMPTY_FAMILIES' | translate }}</td>
             </tr>
           }
         </tbody>

@@ -1,28 +1,28 @@
 <div class="page-header">
-  <h2>Relations Fournisseur-Boutique</h2>
+  <h2>{{ 'ORGS.RELATIONS_TITLE' | translate }}</h2>
   <button class="btn btn-primary" (click)="showCreate = !showCreate">
-    {{ showCreate ? 'Annuler' : '+ Nouvelle relation' }}
+    {{ showCreate ? ('COMMON.CANCEL' | translate) : ('ORGS.NEW_RELATION' | translate) }}
   </button>
 </div>
 
 @if (showCreate) {
   <div class="form-card" style="margin-bottom: 24px;">
-    <h3 style="margin-bottom: 16px;">Créer une relation</h3>
+    <h3 style="margin-bottom: 16px;">{{ 'ORGS.CREATE_RELATION_TITLE' | translate }}</h3>
     <form (ngSubmit)="create()">
       <div class="form-row">
         <div class="form-group">
-          <label>Fournisseur</label>
+          <label>{{ 'ORGS.SUPPLIER' | translate }}</label>
           <select [(ngModel)]="selectedSupplierId" name="supplier" class="form-control" required>
-            <option [value]="0">-- Sélectionner --</option>
+            <option [value]="0">{{ 'COMMON.SELECT' | translate }}</option>
             @for (s of suppliers; track s) {
               <option [value]="s.id">{{ s.name }}</option>
             }
           </select>
         </div>
         <div class="form-group">
-          <label>Boutique</label>
+          <label>{{ 'ORGS.SHOP' | translate }}</label>
           <select [(ngModel)]="selectedShopId" name="shop" class="form-control" required>
-            <option [value]="0">-- Sélectionner --</option>
+            <option [value]="0">{{ 'COMMON.SELECT' | translate }}</option>
             @for (s of shops; track s) {
               <option [value]="s.id">{{ s.name }}</option>
             }
@@ -30,7 +30,7 @@
         </div>
       </div>
       <button class="btn btn-primary" [disabled]="creating || !selectedSupplierId || !selectedShopId">
-        {{ creating ? 'Création...' : 'Créer la relation' }}
+        {{ creating ? ('COMMON.CREATING' | translate) : ('ORGS.CREATE_RELATION_BUTTON' | translate) }}
       </button>
     </form>
   </div>
@@ -39,7 +39,7 @@
 @if (loading) {
   <div class="loading">
     <div class="spinner"></div>
-    <span>Chargement...</span>
+    <span>{{ 'COMMON.LOADING' | translate }}</span>
   </div>
 }
 
@@ -49,11 +49,11 @@
       <table>
         <thead>
           <tr>
-            <th>Fournisseur</th>
-            <th>Boutique</th>
-            <th>Statut</th>
-            <th>Créé le</th>
-            <th>Actions</th>
+            <th class="sortable-th" (click)="onSort('supplierId')" (keydown.enter)="onSort('supplierId')" tabindex="0" [attr.aria-sort]="ariaSort('supplierId')">{{ 'ORGS.SUPPLIER' | translate }} <span class="sort-indicator" aria-hidden="true">{{ sortIndicator('supplierId') }}</span></th>
+            <th class="sortable-th" (click)="onSort('shopId')" (keydown.enter)="onSort('shopId')" tabindex="0" [attr.aria-sort]="ariaSort('shopId')">{{ 'ORGS.SHOP' | translate }} <span class="sort-indicator" aria-hidden="true">{{ sortIndicator('shopId') }}</span></th>
+            <th class="sortable-th" (click)="onSort('status')" (keydown.enter)="onSort('status')" tabindex="0" [attr.aria-sort]="ariaSort('status')">{{ 'DASHBOARD.STATUS' | translate }} <span class="sort-indicator" aria-hidden="true">{{ sortIndicator('status') }}</span></th>
+            <th class="sortable-th" (click)="onSort('createdAt')" (keydown.enter)="onSort('createdAt')" tabindex="0" [attr.aria-sort]="ariaSort('createdAt')">{{ 'ORGS.CREATED_AT' | translate }} <span class="sort-indicator" aria-hidden="true">{{ sortIndicator('createdAt') }}</span></th>
+            <th>{{ 'USERS.ACTIONS' | translate }}</th>
           </tr>
         </thead>
         <tbody>
@@ -63,14 +63,14 @@
               <td>{{ getShopName(r.shopId) }}</td>
               <td>
                 <span class="status-badge" [class.active]="r.status === 'ACTIVE'" [class.disabled]="r.status === 'INACTIVE'">
-                  {{ r.status === 'ACTIVE' ? 'Actif' : 'Inactif' }}
+                  {{ r.status === 'ACTIVE' ? ('STATUS.ACTIVE' | translate) : ('STATUS.INACTIVE' | translate) }}
                 </span>
               </td>
               <td>{{ r.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
               <td>
                 @if (r.status === 'ACTIVE') {
                   <button class="btn btn-sm btn-danger" (click)="deactivate(r.id)">
-                    Désactiver
+                    {{ 'USERS.DEACTIVATE' | translate }}
                   </button>
                 }
               </td>
@@ -78,7 +78,7 @@
           }
           @if (relations.length === 0) {
             <tr>
-              <td colspan="5" style="text-align:center;color:#8896ab;padding:32px;">Aucune relation trouvée</td>
+              <td colspan="5" style="text-align:center;color:#8896ab;padding:32px;">{{ 'ORGS.NO_RELATION' | translate }}</td>
             </tr>
           }
         </tbody>

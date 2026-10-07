@@ -1,28 +1,28 @@
 <div class="page-header">
-  <h1>Gestion des utilisateurs</h1>
-  <a routerLink="create" class="btn btn-primary" aria-label="Créer un nouveau compte">+ Créer un compte</a>
+  <h1>{{ 'NAV.USER_MANAGEMENT' | translate }}</h1>
+  <a routerLink="create" class="btn btn-primary" [attr.aria-label]="'USERS.CREATE_ARIA' | translate">+ {{ 'NAV.CREATE_ACCOUNT' | translate }}</a>
 </div>
 
 <div class="filters">
-  <select [(ngModel)]="filterRole" (change)="applyFilter()" class="form-control filter-select" aria-label="Filtrer par rôle">
-    <option value="">Tous les rôles</option>
+  <select [(ngModel)]="filterRole" (change)="applyFilter()" class="form-control filter-select" [attr.aria-label]="'USERS.FILTER_ROLE_ARIA' | translate">
+    <option value="">{{ 'USERS.ALL_ROLES' | translate }}</option>
     <option value="SYSTEM_ADMIN">SYSTEM_ADMIN</option>
     <option value="SUPPLIER_ADMIN">SUPPLIER_ADMIN</option>
     <option value="SUPPLIER_AGENT">SUPPLIER_AGENT</option>
     <option value="SHOP_ADMIN">SHOP_ADMIN</option>
     <option value="SHOP_AGENT">SHOP_AGENT</option>
   </select>
-  <select [(ngModel)]="filterStatus" (change)="applyFilter()" class="form-control filter-select" aria-label="Filtrer par statut">
-    <option value="">Tous les statuts</option>
-    <option value="ACTIVE">Actif</option>
-    <option value="DISABLED">Désactivé</option>
+  <select [(ngModel)]="filterStatus" (change)="applyFilter()" class="form-control filter-select" [attr.aria-label]="'USERS.FILTER_STATUS_ARIA' | translate">
+    <option value="">{{ 'USERS.ALL_STATUSES' | translate }}</option>
+    <option value="ACTIVE">{{ 'STATUS.ACTIVE' | translate }}</option>
+    <option value="DISABLED">{{ 'USERS.STATUS_DISABLED' | translate }}</option>
   </select>
 </div>
 
 @if (loading) {
   <div class="loading">
     <div class="spinner"></div>
-    <span>Chargement...</span>
+    <span>{{ 'COMMON.LOADING' | translate }}</span>
   </div>
 }
 
@@ -32,17 +32,17 @@
       <table>
         <thead>
           <tr>
-            <th>Nom d'utilisateur</th>
-            <th>Nom complet</th>
-            <th>Email</th>
-            <th>Téléphone</th>
-            <th>Rôle</th>
-            <th>Statut</th>
-            <th>Actions</th>
+            <th class="sortable-th" (click)="onSort('username')" (keydown.enter)="onSort('username')" tabindex="0" [attr.aria-sort]="ariaSort('username')">{{ 'AUTH.USERNAME' | translate }} <span class="sort-indicator" aria-hidden="true">{{ sortIndicator('username') }}</span></th>
+            <th class="sortable-th" (click)="onSort('lastName')" (keydown.enter)="onSort('lastName')" tabindex="0" [attr.aria-sort]="ariaSort('lastName')">{{ 'USERS.FULL_NAME' | translate }} <span class="sort-indicator" aria-hidden="true">{{ sortIndicator('lastName') }}</span></th>
+            <th class="sortable-th" (click)="onSort('email')" (keydown.enter)="onSort('email')" tabindex="0" [attr.aria-sort]="ariaSort('email')">{{ 'AUTH.EMAIL' | translate }} <span class="sort-indicator" aria-hidden="true">{{ sortIndicator('email') }}</span></th>
+            <th>{{ 'USERS.PHONE' | translate }}</th>
+            <th>{{ 'AUTH.ROLE' | translate }}</th>
+            <th class="sortable-th" (click)="onSort('status')" (keydown.enter)="onSort('status')" tabindex="0" [attr.aria-sort]="ariaSort('status')">{{ 'DASHBOARD.STATUS' | translate }} <span class="sort-indicator" aria-hidden="true">{{ sortIndicator('status') }}</span></th>
+            <th>{{ 'USERS.ACTIONS' | translate }}</th>
           </tr>
         </thead>
         <tbody>
-          @for (user of users; track user) {
+          @for (user of sortedUsers; track user) {
             <tr>
               <td><strong>{{ user.username }}</strong></td>
               <td>{{ user.firstName }} {{ user.lastName }}</td>
@@ -51,23 +51,23 @@
               <td><span class="role-badge">{{ user.roles[0] }}</span></td>
               <td>
                 <span class="status-badge" [class.active]="user.status === 'ACTIVE'" [class.disabled]="user.status === 'DISABLED'"
-                  [attr.aria-label]="'Statut de l\'utilisateur : ' + (user.status === 'ACTIVE' ? 'Actif' : 'Désactivé')" role="status">
-                  {{ user.status }}
+                  [attr.aria-label]="('USERS.STATUS_ARIA' | translate) + (user.status === 'ACTIVE' ? ('STATUS.ACTIVE' | translate) : ('USERS.STATUS_DISABLED' | translate))" role="status">
+                  {{ (user.status === 'ACTIVE' ? ('STATUS.ACTIVE' | translate) : ('USERS.STATUS_DISABLED' | translate)) }}
                 </span>
               </td>
               <td class="actions">
                 @if (user.status === 'ACTIVE') {
-                  <button class="btn btn-sm btn-danger" (click)="disable(user)" [attr.aria-label]="'Désactiver l\'utilisateur ' + user.username">Désactiver</button>
+                  <button class="btn btn-sm btn-danger" (click)="disable(user)" [attr.aria-label]="('USERS.DEACTIVATE_USER' | translate) + ' ' + user.username">{{ 'USERS.DEACTIVATE' | translate }}</button>
                 }
                 @if (user.status === 'DISABLED') {
-                  <button class="btn btn-sm btn-success" (click)="activate(user)" [attr.aria-label]="'Activer l\'utilisateur ' + user.username">Activer</button>
+                  <button class="btn btn-sm btn-success" (click)="activate(user)" [attr.aria-label]="('USERS.ACTIVATE_USER' | translate) + ' ' + user.username">{{ 'USERS.ACTIVATE' | translate }}</button>
                 }
               </td>
             </tr>
           }
           @if (users.length === 0) {
             <tr>
-              <td colspan="7" class="empty">Aucun utilisateur trouvé</td>
+              <td colspan="7" class="empty">{{ 'USERS.EMPTY' | translate }}</td>
             </tr>
           }
         </tbody>

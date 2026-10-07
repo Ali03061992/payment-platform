@@ -1,7 +1,6 @@
 ---
 description: Spécialiste debug et correction des tests Cypress E2E du Payment Platform. Analyse les screenshots d'échecs, corrige les specs flaky, le support Cypress et les incompatibilités UI/tests.
 mode: subagent
-model: anthropic/claude-sonnet-4-6
 permission:
   edit: allow
   bash: ask

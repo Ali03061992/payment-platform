@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
+import { TranslateService } from '@ngx-translate/core';
 import { Observable } from 'rxjs';
 import { Order, CreateOrderRequest, UpdateOrderRequest, OrderComment, OrderPage } from '../models/order.model';
 import { ToastService } from './toast.service';
@@ -13,14 +14,14 @@ import { filenameFromDisposition, saveBlob } from '../core/file-download';
 export class OrderService {
   private apiUrl = '/api/orders';
 
-  constructor(private http: HttpClient, private toast: ToastService) {}
+  constructor(private http: HttpClient, private toast: ToastService, private translate: TranslateService) {}
 
   /** Télécharge la facture PDF d'une commande et la sauvegarde localement. */
   downloadInvoice(id: string): void {
     this.http.get(`${this.apiUrl}/${id}/invoice`, { observe: 'response', responseType: 'blob' }).subscribe({
       next: (res) => {
         if (!res.body) {
-          this.toast.error('Erreur lors du téléchargement de la facture');
+          this.toast.error(this.translate.instant('PAYMENTS.INVOICE_DOWNLOAD_ERROR'));
           return;
         }
         const filename = filenameFromDisposition(
@@ -29,7 +30,7 @@ export class OrderService {
         );
         saveBlob(res.body, filename);
       },
-      error: () => this.toast.error('Erreur lors du téléchargement de la facture')
+      error: () => this.toast.error(this.translate.instant('PAYMENTS.INVOICE_DOWNLOAD_ERROR'))
     });
   }
 

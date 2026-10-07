@@ -1,18 +1,17 @@
 <div class="page-header">
-  <h2>Nouvelle commande</h2>
-  <a class="btn btn-secondary" routerLink="/dashboard/supplier/orders">Retour</a>
+  <h2>{{ 'SUPPLIER_ORDERS.NEW_TITLE' | translate }}</h2>
+  <a class="btn btn-secondary" routerLink="/dashboard/supplier/orders">{{ 'SUPPLIER_ORDERS.BACK' | translate }}</a>
 </div>
-
 <div class="form-card">
   <form (ngSubmit)="submit()">
     <div class="form-row">
       <div class="form-group">
-        <label>Boutique @if (loadingShops) {
-          <span class="text-muted">(chargement...)</span>
+        <label>{{ 'PAYMENTS.SHOP' | translate }} @if (loadingShops) {
+          <span class="text-muted">{{ 'SUPPLIER_ORDERS.LOADING_SUFFIX' | translate }}</span>
         }</label>
         <select [(ngModel)]="selectedShopId" name="shop" class="form-control"
           (ngModelChange)="onShopChange()" required [disabled]="loadingShops">
-          <option [ngValue]="0">-- Sélectionner --</option>
+          <option [ngValue]="0">{{ 'SUPPLIER_ORDERS.SELECT' | translate }}</option>
           @for (s of shops; track s) {
             <option [ngValue]="s.id">{{ s.name }} ({{ s.status }})</option>
           }
@@ -21,14 +20,14 @@
           <small class="text-danger">{{ errorShops }}</small>
         }
         @if (!loadingShops && !errorShops && shops.length === 0) {
-          <small class="text-muted">Aucune boutique liée à votre fournisseur. Contactez un administrateur pour créer une relation.</small>
+          <small class="text-muted">{{ 'SUPPLIER_ORDERS.NO_SHOPS_HINT' | translate }}</small>
         }
         @if (shops.length > 0) {
-          <small class="text-muted">{{ shops.length }} boutique(s) disponible(s)</small>
+          <small class="text-muted">{{ 'SUPPLIER_ORDERS.SHOPS_AVAILABLE' | translate:{count: shops.length} }}</small>
         }
       </div>
       <div class="form-group">
-        <label>Devise</label>
+        <label>{{ 'SUPPLIER_ORDERS.CURRENCY' | translate }}</label>
         <select [(ngModel)]="currency" name="currency" class="form-control">
           <option value="TND">TND</option>
           <option value="EUR">EUR</option>
@@ -36,47 +35,44 @@
         </select>
       </div>
     </div>
-
     <div class="form-row">
       <div class="form-group">
-        <label>Remise globale (%)</label>
+        <label>{{ 'SUPPLIER_ORDERS.GLOBAL_DISCOUNT' | translate }}</label>
         <input type="number" [(ngModel)]="globalDiscount" name="globalDiscount" class="form-control"
           min="0" max="100" placeholder="0">
       </div>
       <div class="form-group">
-        <label>TVA (%)</label>
+        <label>{{ 'SUPPLIER_ORDERS.VAT_RATE' | translate }}</label>
         <input type="number" [(ngModel)]="taxRate" name="taxRate" class="form-control"
-          min="0" max="100" step="0.01" placeholder="19" aria-label="Taux de TVA">
-        <small class="text-muted">Modifiable uniquement par le fournisseur à la création</small>
+          min="0" max="100" step="0.01" placeholder="19" [attr.aria-label]="'SUPPLIER_ORDERS.VAT_ARIA' | translate">
+        <small class="text-muted">{{ 'SUPPLIER_ORDERS.VAT_HINT' | translate }}</small>
       </div>
     </div>
-
     @if (selectedShopId) {
       <div class="form-group">
-        <label>Rechercher un produit</label>
+        <label>{{ 'SUPPLIER_ORDERS.SEARCH_PRODUCT' | translate }}</label>
         <input type="text" [(ngModel)]="searchQuery" name="search" class="form-control"
-          placeholder="Nom ou SKU...">
+          [placeholder]="'SUPPLIER_ORDERS.SEARCH_PRODUCT_PLACEHOLDER' | translate">
       </div>
     }
-
     @if (loadingProducts) {
-      <div class="text-muted" style="padding:12px;">Chargement des produits...</div>
+      <div class="text-muted" style="padding:12px;">{{ 'SUPPLIER_ORDERS.LOADING_PRODUCTS' | translate }}</div>
     }
     @if (errorProducts) {
       <div class="text-danger" style="padding:12px;">{{ errorProducts }}</div>
     }
     @if (selectedShopId && !loadingProducts) {
       <div class="table-card" style="margin-bottom:24px;">
-        <h3 style="padding:16px 20px 0;">Produits disponibles ({{ filteredProducts.length }})</h3>
+        <h3 style="padding:16px 20px 0;">{{ 'SUPPLIER_ORDERS.AVAILABLE_PRODUCTS_COUNT' | translate:{count: filteredProducts.length} }}</h3>
         <div class="table-wrapper">
           <table>
             <thead>
               <tr>
-                <th>Nom</th>
-                <th>SKU</th>
-                <th>Prix unitaire</th>
-                <th>Stock</th>
-                <th>Action</th>
+                <th>{{ 'SUPPLIER_ORDERS.NAME' | translate }}</th>
+                <th>{{ 'SUPPLIER_ORDERS.SKU' | translate }}</th>
+                <th>{{ 'SUPPLIER_ORDERS.UNIT_PRICE' | translate }}</th>
+                <th>{{ 'SUPPLIER_ORDERS.STOCK' | translate }}</th>
+                <th>{{ 'SUPPLIER_ORDERS.ACTION' | translate }}</th>
               </tr>
             </thead>
             <tbody>
@@ -87,13 +83,13 @@
                   <td>{{ p.unitPrice | number:'1.2-2' }} {{ p.currency }}</td>
                   <td>{{ p.quantity }}</td>
                   <td>
-                    <button class="btn btn-sm btn-primary" type="button" (click)="addProduct(p)">Ajouter</button>
+                    <button class="btn btn-sm btn-primary" type="button" (click)="addProduct(p)">{{ 'SUPPLIER_ORDERS.ADD' | translate }}</button>
                   </td>
                 </tr>
               }
               @if (filteredProducts.length === 0) {
                 <tr>
-                  <td colspan="5" class="empty">Aucun produit trouvé</td>
+                  <td colspan="5" class="empty">{{ 'SUPPLIER_ORDERS.NO_PRODUCTS' | translate }}</td>
                 </tr>
               }
             </tbody>
@@ -101,19 +97,18 @@
         </div>
       </div>
     }
-
     @if (orderLines.length > 0) {
       <div class="table-card" style="margin-bottom:24px;">
-        <h3 style="padding:16px 20px 0;">Lignes de commande</h3>
+        <h3 style="padding:16px 20px 0;">{{ 'SUPPLIER_ORDERS.ORDER_LINES' | translate }}</h3>
         <div class="table-wrapper">
           <table>
             <thead>
               <tr>
-                <th>Produit</th>
-                <th>Quantité</th>
-                <th>Prix unitaire</th>
-                <th>Remise %</th>
-                <th>Total</th>
+                <th>{{ 'SUPPLIER_ORDERS.PRODUCT' | translate }}</th>
+                <th>{{ 'SUPPLIER_ORDERS.QUANTITY' | translate }}</th>
+                <th>{{ 'SUPPLIER_ORDERS.UNIT_PRICE' | translate }}</th>
+                <th>{{ 'SUPPLIER_ORDERS.DISCOUNT_PCT' | translate }}</th>
+                <th>{{ 'ORDERS.TOTAL' | translate }}</th>
                 <th></th>
               </tr>
             </thead>
@@ -132,7 +127,7 @@
                   </td>
                   <td>{{ (line.product.unitPrice * line.quantity * (1 - line.discount / 100)) | number:'1.2-2' }}</td>
                   <td>
-                    <button class="btn btn-sm btn-danger" type="button" (click)="removeLine(i)">Supprimer</button>
+                    <button class="btn btn-sm btn-danger" type="button" (click)="removeLine(i)">{{ 'SUPPLIER_ORDERS.REMOVE' | translate }}</button>
                   </td>
                 </tr>
               }
@@ -141,47 +136,43 @@
         </div>
       </div>
     }
-
     @if (orderLines.length > 0) {
       <div class="order-summary">
         <div class="summary-row">
-          <span>Sous-total</span>
+          <span>{{ 'SUPPLIER_ORDERS.SUBTOTAL' | translate }}</span>
           <span>{{ subtotal | number:'1.2-2' }} {{ currency }}</span>
         </div>
         <div class="summary-row">
-          <span>TVA ({{ taxRate }}%)</span>
+          <span>{{ 'SUPPLIER_ORDERS.VAT' | translate }} ({{ taxRate }}%)</span>
           <span>{{ taxAmount | number:'1.2-2' }} {{ currency }}</span>
         </div>
         @if (globalDiscount > 0) {
           <div class="summary-row">
-            <span>Remise globale ({{ globalDiscount }}%)</span>
+            <span>{{ 'SUPPLIER_ORDERS.GLOBAL_DISCOUNT_LABEL' | translate }} ({{ globalDiscount }}%)</span>
             <span>-{{ discountAmount | number:'1.2-2' }} {{ currency }}</span>
           </div>
         }
         <div class="summary-row total">
-          <span>Total</span>
+          <span>{{ 'ORDERS.TOTAL' | translate }}</span>
           <span>{{ total | number:'1.2-2' }} {{ currency }}</span>
         </div>
       </div>
     }
-
     <div class="form-group" style="margin-top:16px;">
       <label class="toggle-label">
         <input type="checkbox" [(ngModel)]="asapPayment" name="asapPayment">
-        <span>Paiement ASAP</span>
+        <span>{{ 'SUPPLIER_ORDERS.ASAP_PAYMENT' | translate }}</span>
       </label>
     </div>
-
     <div class="form-group">
-      <label>Notes</label>
+      <label>{{ 'SUPPLIER_ORDERS.NOTES' | translate }}</label>
       <textarea [(ngModel)]="notes" name="notes" class="form-control" rows="3"
-      placeholder="Notes optionnelles..."></textarea>
+      [placeholder]="'SUPPLIER_ORDERS.NOTES_PLACEHOLDER' | translate"></textarea>
     </div>
-
     <div class="form-actions">
-      <a class="btn btn-secondary" routerLink="/dashboard/supplier/orders">Annuler</a>
+      <a class="btn btn-secondary" routerLink="/dashboard/supplier/orders">{{ 'ORDERS.CANCEL_BTN' | translate }}</a>
       <button class="btn btn-primary" [disabled]="!canSubmit()">
-        {{ creating ? 'Création...' : 'Créer la commande' }}
+        {{ creating ? ('SUPPLIER_ORDERS.CREATING' | translate) : ('SUPPLIER_ORDERS.CREATE_ORDER' | translate) }}
       </button>
     </div>
   </form>

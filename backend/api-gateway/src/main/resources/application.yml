@@ -16,6 +16,7 @@ app:
     secret: ${JWT_SECRET:local-dev-jwt-secret-change-me-in-production-32bytes}
     expiration: ${JWT_EXPIRATION:30m}
     shared: false
+  internal-secret: ${INTERNAL_SECRET:local-internal-secret-change-me}
   gateway:
     rate-limit-per-minute: ${RATE_LIMIT_PER_MINUTE:500}
     rate-limit-auth-per-minute: ${RATE_LIMIT_AUTH_PER_MINUTE:10}

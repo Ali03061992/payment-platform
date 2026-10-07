@@ -8,6 +8,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { NotificationBannerComponent } from './notification-banner.component';
 import { NotificationService } from '../../services/notification.service';
 import { PushNotificationService } from '../../services/push-notification.service';
+import { TranslateStubPipe } from '../../testing/translate-stubs';
 
 describe('NotificationBannerComponent', () => {
   let component: NotificationBannerComponent;
@@ -23,7 +24,7 @@ describe('NotificationBannerComponent', () => {
     localStorage.clear();
 
     TestBed.configureTestingModule({
-      declarations: [NotificationBannerComponent],
+      declarations: [NotificationBannerComponent, TranslateStubPipe],
       providers: [
         { provide: NotificationService, useValue: notifSpy },
         { provide: PushNotificationService, useValue: pushSpy }

@@ -1,21 +1,21 @@
 @if (totalElements > 0) {
-  <nav class="pagination" aria-label="Pagination des résultats">
+  <nav class="pagination" [attr.aria-label]="'PAGINATION.NAV_ARIA' | translate">
     <button type="button" class="btn btn-sm btn-secondary" (click)="prev()" [disabled]="!canPrev"
-      aria-label="Page précédente">Précédent</button>
+      aria-label="Page précédente">{{ 'PAGINATION.PREV' | translate }}</button>
     @for (p of pageNumbers; track p) {
       <button type="button" class="btn btn-sm page-num" [class.active]="p === page"
         [class.btn-primary]="p === page" [class.btn-secondary]="p !== page"
-        (click)="goTo(p)" [attr.aria-label]="'Aller à la page ' + (p + 1)"
+        (click)="goTo(p)" [attr.aria-label]="('PAGINATION.GOTO_ARIA' | translate:{page: p + 1})"
         [attr.aria-current]="p === page ? 'page' : null">{{ p + 1 }}</button>
     }
     <button type="button" class="btn btn-sm btn-secondary" (click)="next()" [disabled]="!canNext"
-      aria-label="Page suivante">Suivant</button>
-    <span class="pagination-info" aria-live="polite">{{ from }}-{{ to }} sur {{ totalElements }}</span>
+      aria-label="Page suivante">{{ 'PAGINATION.NEXT' | translate }}</button>
+    <span class="pagination-info" aria-live="polite">{{ 'PAGINATION.INFO' | translate:{from: from, to: to, total: totalElements} }}</span>
     @if (showSize) {
       <label class="pagination-size">
-        <span>Taille de page</span>
+        <span>{{ 'PAGINATION.SIZE_LABEL' | translate }}</span>
         <select [ngModel]="size" (ngModelChange)="onSizeChange($event)" class="form-control"
-          aria-label="Taille de page">
+          [attr.aria-label]="'PAGINATION.SIZE_ARIA' | translate">
           @for (s of pageSizes; track s) {
             <option [value]="s">{{ s }}</option>
           }

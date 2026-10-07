@@ -13,6 +13,7 @@ import { LoginComponent } from './login.component';
 import { LoginService } from '../services/login.service';
 import { NotificationService } from '../services/notification.service';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { TranslateStubPipe, translateServiceProvider } from '../testing/translate-stubs';
 
 describe('LoginComponent', () => {
   let component: LoginComponent;
@@ -26,9 +27,10 @@ describe('LoginComponent', () => {
     const routerSpy = jasmine.createSpyObj('Router', ['navigate']);
 
     TestBed.configureTestingModule({
-    declarations: [LoginComponent],
+    declarations: [LoginComponent, TranslateStubPipe],
     imports: [FormsModule],
     providers: [
+        translateServiceProvider(),
         { provide: LoginService, useValue: loginSpy },
         { provide: NotificationService, useValue: notifSpy },
         { provide: Router, useValue: routerSpy },
@@ -77,7 +79,7 @@ describe('LoginComponent', () => {
     it('should set default error message when no error message', () => {
       loginService.login.and.returnValue(throwError(() => ({ error: {} })));
       component.onSubmit();
-      expect(component.error).toBe('Identifiants invalides');
+      expect(component.error).toBe('AUTH.INVALID_CREDENTIALS');
     });
 
     it('should handle getMe failure', () => {
@@ -85,7 +87,7 @@ describe('LoginComponent', () => {
       loginService.getMe.and.returnValue(throwError(() => ({ error: {} })));
 
       component.onSubmit();
-      expect(component.error).toBe('Impossible de récupérer les informations utilisateur');
+      expect(component.error).toBe('AUTH.USER_FETCH_ERROR');
       expect(sessionStorage.getItem('token')).toBeNull();
     });
   });

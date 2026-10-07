@@ -129,22 +129,51 @@ public class OrderController {
     }
 
     private OrderResponse buildOrderResponse(com.paymentplatform.organization.domain.model.Order o) {
+        return buildOrderResponseCached(o, new java.util.HashMap<>(), new java.util.HashMap<>());
+    }
+
+    private OrderResponse buildOrderResponseCached(com.paymentplatform.organization.domain.model.Order o,
+                                                  java.util.Map<java.util.UUID, String> orgCache,
+                                                  java.util.Map<java.util.UUID, String> userCache) {
         var items = orderItemRepository.findByOrderId(o.getId());
         var events = orderEventRepository.findByOrderIdOrderByTimestampDesc(o.getId());
 
+        java.util.function.Function<java.util.UUID, String> orgName = id -> {
+            if (id == null) return null;
+            return orgCache.computeIfAbsent(id, k ->
+                    organizationRepository.findById(OrganizationId.of(k))
+                            .map(org -> org.name().value()).orElse(null));
+        };
+        java.util.function.Function<java.util.UUID, String> userName = id -> {
+            if (id == null) return null;
+            return userCache.computeIfAbsent(id, identityClient::resolveUserName);
+        };
+        java.util.function.Function<String, String> eventActor = action -> events.stream()
+                .filter(e -> action.equals(e.getAction()))
+                .findFirst()
+                .map(e -> userName.apply(e.getUserId()))
+                .orElse(null);
+
         return OrderResponse.from(o, items,
-                resolveOrgName(o.getSupplierId()),
-                resolveOrgName(o.getShopId()),
-                identityClient.resolveUserName(o.getDeliveryAgentId()),
-                identityClient.resolveUserName(o.getReceivedBy()),
-                identityClient.resolveUserName(o.getCreatedBy()),
-                resolveEventActor(events, "ORDER_CONFIRMED"),
-                resolveEventActor(events, "ORDER_PREPARING"),
-                resolveEventActor(events, "ORDER_READY_FOR_DELIVERY"),
-                resolveEventActor(events, "ORDER_DELIVERY_ASSIGNED"),
-                resolveEventActor(events, "ORDER_DELIVERY_ACCEPTED"),
-                resolveEventActor(events, "ORDER_DELIVERY_CONFIRMED"),
-                resolveEventActor(events, "ORDER_DELIVERED"));
+                orgName.apply(o.getSupplierId()),
+                orgName.apply(o.getShopId()),
+                userName.apply(o.getDeliveryAgentId()),
+                userName.apply(o.getReceivedBy()),
+                userName.apply(o.getCreatedBy()),
+                eventActor.apply("ORDER_CONFIRMED"),
+                eventActor.apply("ORDER_PREPARING"),
+                eventActor.apply("ORDER_READY_FOR_DELIVERY"),
+                eventActor.apply("ORDER_DELIVERY_ASSIGNED"),
+                eventActor.apply("ORDER_DELIVERY_ACCEPTED"),
+                eventActor.apply("ORDER_DELIVERY_CONFIRMED"),
+                eventActor.apply("ORDER_DELIVERED"));
+    }
+
+    private java.util.List<OrderResponse> buildOrderResponses(
+            java.util.List<com.paymentplatform.organization.domain.model.Order> orders) {
+        var orgCache = new java.util.HashMap<java.util.UUID, String>();
+        var userCache = new java.util.HashMap<java.util.UUID, String>();
+        return orders.stream().map(o -> buildOrderResponseCached(o, orgCache, userCache)).toList();
     }
 
     /**
@@ -192,7 +221,9 @@ public class OrderController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "50") int size) {
         var current = CurrentUser.get();
-        var pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        int safePage = Math.max(0, page);
+        int safeSize = Math.min(Math.max(1, size), 100);
+        var pageable = PageRequest.of(safePage, safeSize, Sort.by(Sort.Direction.DESC, "createdAt"));
         org.springframework.data.domain.Page<com.paymentplatform.organization.domain.model.Order> orderPage;
 
         if ((current.roles().contains("SUPPLIER_ADMIN") || current.roles().contains("SUPPLIER_AGENT")) && current.organizationId() != null) {
@@ -205,15 +236,18 @@ public class OrderController {
                     : orderRepository.findByShopId(current.organizationId(), pageable);
         } else if (current.roles().contains("SUPPLIER_AGENT")) {
             List<com.paymentplatform.organization.domain.model.Order> orders = orderRepository.findByDeliveryAgentId(current.userId());
-            List<OrderResponse> responses = orders.stream()
-                    .map(this::buildOrderResponse)
-                    .toList();
+            List<OrderResponse> responses = buildOrderResponses(orders);
             return ResponseEntity.ok(new PageResponse<>(responses, responses.size(), 1, 0));
         } else {
-            return ResponseEntity.ok(PageResponse.of(orderRepository.findAll(pageable).map(this::buildOrderResponse)));
+            var pageResult = orderRepository.findAll(pageable);
+            List<OrderResponse> responses = buildOrderResponses(pageResult.getContent());
+            return ResponseEntity.ok(new PageResponse<>(responses, (int) pageResult.getTotalElements(),
+                    pageResult.getTotalPages(), pageResult.getNumber()));
         }
 
-        return ResponseEntity.ok(PageResponse.of(orderPage.map(this::buildOrderResponse)));
+        List<OrderResponse> responses = buildOrderResponses(orderPage.getContent());
+        return ResponseEntity.ok(new PageResponse<>(responses, (int) orderPage.getTotalElements(),
+                orderPage.getTotalPages(), orderPage.getNumber()));
     }
 
     /**
@@ -230,7 +264,16 @@ public class OrderController {
         List<com.paymentplatform.organization.domain.model.Order> orders;
 
         if (agentId != null) {
+            if (current.roles().contains("SUPPLIER_AGENT") && !agentId.equals(current.userId())) {
+                return ResponseEntity.status(403).build();
+            }
             orders = orderRepository.findByDeliveryAgentId(agentId);
+            if (!current.roles().contains("SYSTEM_ADMIN") && current.organizationId() != null) {
+                UUID orgId = current.organizationId();
+                orders = orders.stream()
+                        .filter(o -> orgId.equals(o.getSupplierId()) || orgId.equals(o.getShopId()))
+                        .toList();
+            }
         } else if (current.roles().contains("SUPPLIER_AGENT")) {
             orders = orderRepository.findByDeliveryAgentId(current.userId());
         } else if (current.organizationId() != null) {
@@ -241,9 +284,7 @@ public class OrderController {
             orders = List.of();
         }
 
-        List<OrderResponse> responses = orders.stream()
-                .map(this::buildOrderResponse)
-                .toList();
+        List<OrderResponse> responses = buildOrderResponses(orders);
         return ResponseEntity.ok(responses);
     }
 
@@ -260,6 +301,9 @@ public class OrderController {
         List<Map<String, String>> agents = new java.util.ArrayList<>();
         if (users != null && users.isArray()) {
             for (var user : users) {
+                if (user.has("status") && "DISABLED".equalsIgnoreCase(user.get("status").asText())) {
+                    continue;
+                }
                 String firstName = user.has("firstName") ? user.get("firstName").asText() : "";
                 String lastName = user.has("lastName") ? user.get("lastName").asText() : "";
                 String id = user.has("id") ? user.get("id").asText() : "";
@@ -289,7 +333,8 @@ public class OrderController {
     public ResponseEntity<List<OrderResponse>> recentOrders(
             @RequestParam(defaultValue = "5") int limit) {
         var current = CurrentUser.get();
-        var pageable = PageRequest.of(0, limit, Sort.by(Sort.Direction.DESC, "createdAt"));
+        int safeLimit = Math.min(Math.max(1, limit), 100);
+        var pageable = PageRequest.of(0, safeLimit, Sort.by(Sort.Direction.DESC, "createdAt"));
         List<com.paymentplatform.organization.domain.model.Order> orders;
 
         if ((current.roles().contains("SUPPLIER_ADMIN") || current.roles().contains("SUPPLIER_AGENT")) && current.organizationId() != null) {
@@ -300,9 +345,7 @@ public class OrderController {
             orders = orderRepository.findAll(pageable).getContent();
         }
 
-        List<OrderResponse> responses = orders.stream()
-                .map(this::buildOrderResponse)
-                .toList();
+        List<OrderResponse> responses = buildOrderResponses(orders);
         return ResponseEntity.ok(responses);
     }
 
@@ -344,7 +387,9 @@ public class OrderController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
         var current = CurrentUser.get();
-        var pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        int safePage = Math.max(0, page);
+        int safeSize = Math.min(Math.max(1, size), 100);
+        var pageable = PageRequest.of(safePage, safeSize, Sort.by(Sort.Direction.DESC, "createdAt"));
         org.springframework.data.domain.Page<com.paymentplatform.organization.domain.model.Order> orderPage;
 
         if ((current.roles().contains("SUPPLIER_ADMIN") || current.roles().contains("SUPPLIER_AGENT")) && current.organizationId() != null) {
@@ -355,7 +400,9 @@ public class OrderController {
             orderPage = orderRepository.search(q, pageable);
         }
 
-        return ResponseEntity.ok(PageResponse.of(orderPage.map(this::buildOrderResponse)));
+        List<OrderResponse> searchResponses = buildOrderResponses(orderPage.getContent());
+        return ResponseEntity.ok(new PageResponse<>(searchResponses, (int) orderPage.getTotalElements(),
+                orderPage.getTotalPages(), orderPage.getNumber()));
     }
 
     /**
@@ -493,9 +540,13 @@ public class OrderController {
     @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SUPPLIER_AGENT')")
     public ResponseEntity<OrderResponse> deliverOrder(
             @PathVariable UUID id,
-            @RequestBody Map<String, UUID> body) {
+            @RequestBody(required = false) Map<String, UUID> body) {
         var current = CurrentUser.get();
-        return ResponseEntity.ok(deliverOrder.execute(id, body.get("receivedBy"), current.userId()));
+        UUID receivedBy = body != null ? body.get("receivedBy") : null;
+        if (receivedBy == null) {
+            return ResponseEntity.badRequest().build();
+        }
+        return ResponseEntity.ok(deliverOrder.execute(id, receivedBy, current.userId()));
     }
 
     /**
@@ -609,11 +660,30 @@ public class OrderController {
         if (o.getDeliveryAgentId() == null || !o.getDeliveryAgentId().equals(current.userId())) {
             return ResponseEntity.status(403).build();
         }
-        java.math.BigDecimal latitude = new java.math.BigDecimal(body.get("latitude").toString());
-        java.math.BigDecimal longitude = new java.math.BigDecimal(body.get("longitude").toString());
+        if (body == null || body.get("latitude") == null || body.get("longitude") == null) {
+            return ResponseEntity.badRequest().build();
+        }
+        java.math.BigDecimal latitude;
+        java.math.BigDecimal longitude;
+        try {
+            latitude = new java.math.BigDecimal(body.get("latitude").toString());
+            longitude = new java.math.BigDecimal(body.get("longitude").toString());
+        } catch (NumberFormatException ex) {
+            return ResponseEntity.badRequest().build();
+        }
+        if (latitude.compareTo(new java.math.BigDecimal("-90")) < 0
+                || latitude.compareTo(new java.math.BigDecimal("90")) > 0
+                || longitude.compareTo(new java.math.BigDecimal("-180")) < 0
+                || longitude.compareTo(new java.math.BigDecimal("180")) > 0) {
+            return ResponseEntity.badRequest().build();
+        }
         o.updateLocation(latitude, longitude);
         if (body.containsKey("estimatedArrival") && body.get("estimatedArrival") != null) {
-            o.setEstimatedArrival(Instant.parse(body.get("estimatedArrival").toString()));
+            try {
+                o.setEstimatedArrival(Instant.parse(body.get("estimatedArrival").toString()));
+            } catch (Exception ex) {
+                return ResponseEntity.badRequest().build();
+            }
         }
         orderRepository.save(o);
         return ResponseEntity.ok(buildOrderResponse(o));
@@ -644,9 +714,7 @@ public class OrderController {
         } else {
             orders = orderRepository.findByDeliveryAgentId(current.userId());
         }
-        List<OrderResponse> responses = orders.stream()
-                .map(this::buildOrderResponse)
-                .toList();
+        List<OrderResponse> responses = buildOrderResponses(orders);
         return ResponseEntity.ok(responses);
     }
 

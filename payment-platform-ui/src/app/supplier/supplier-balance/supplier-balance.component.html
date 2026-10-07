@@ -1,14 +1,12 @@
 <div class="page-header">
-  <h2>Balance fournisseur</h2>
+  <h2>{{ 'FINANCE.BALANCE_TITLE' | translate }}</h2>
 </div>
-
 @if (loading) {
   <div class="loading">
     <div class="spinner"></div>
-    <span>Chargement...</span>
+    <span>{{ 'COMMON.LOADING' | translate }}</span>
   </div>
 }
-
 @if (!loading) {
   <div>
     @if (balances.length > 0) {
@@ -16,61 +14,59 @@
         <div class="stat-card">
           <div>
             <div class="stat-value">{{ balances.length }}</div>
-            <div class="stat-label">Boutique(s)</div>
+            <div class="stat-label">{{ 'FINANCE.SHOPS_LABEL' | translate }}</div>
           </div>
         </div>
         <div class="stat-card stat-pending">
           <div>
             <div class="stat-value">{{ getTotalBalance() | number:'1.2-2' }}</div>
-            <div class="stat-label">Solde total</div>
+            <div class="stat-label">{{ 'FINANCE.TOTAL_BALANCE' | translate }}</div>
           </div>
         </div>
       </div>
     }
-
     <div class="form-card" style="margin-bottom:24px;">
-      <h3 style="margin-top:0;">Ajouter un crédit à une boutique</h3>
+      <h3 style="margin-top:0;">{{ 'FINANCE.ADD_CREDIT_TITLE' | translate }}</h3>
       <form (ngSubmit)="submitCredit()">
         <div class="form-row">
           <div class="form-group">
-            <label for="creditShop">Boutique</label>
+            <label for="creditShop">{{ 'PAYMENTS.SHOP' | translate }}</label>
             <select id="creditShop" [(ngModel)]="creditShopId" name="creditShop" class="form-control" required>
-              <option value="">-- Sélectionner --</option>
+              <option value="">{{ 'FINANCE.SELECT' | translate }}</option>
               @for (b of balances; track b) {
                 <option [value]="b.shopId">{{ b.shopName || b.shopId }}</option>
               }
             </select>
           </div>
           <div class="form-group">
-            <label for="creditAmount">Montant</label>
+            <label for="creditAmount">{{ 'PAYMENTS.AMOUNT' | translate }}</label>
             <input type="number" id="creditAmount" [(ngModel)]="creditAmount" name="creditAmount"
-              class="form-control" min="0.01" step="0.01" placeholder="0.00" required>
+              class="form-control" min="0.01" step="0.01" [placeholder]="'FINANCE.AMOUNT_PLACEHOLDER' | translate" required>
           </div>
         </div>
         <div class="form-group">
-          <label for="creditReason">Motif</label>
+          <label for="creditReason">{{ 'FINANCE.REASON' | translate }}</label>
           <input type="text" id="creditReason" [(ngModel)]="creditReason" name="creditReason"
-            class="form-control" placeholder="Crédit manuel fournisseur">
+            class="form-control" [placeholder]="'FINANCE.CREDIT_DEFAULT' | translate">
         </div>
         <div class="form-actions">
           <button class="btn btn-primary" type="submit" [disabled]="!canCredit()">
-            {{ submitting ? 'Envoi...' : 'Ajouter le crédit' }}
+            {{ submitting ? ('FINANCE.SENDING' | translate) : ('FINANCE.ADD_CREDIT' | translate) }}
           </button>
         </div>
       </form>
     </div>
-
     <div class="table-card">
       <div class="table-wrapper">
         <table>
           <thead>
             <tr>
-              <th class="sortable-th" (click)="onSort('shopName')" (keydown.enter)="onSort('shopName')" (keydown.space)="onSort('shopName'); $event.preventDefault()" tabindex="0" [attr.aria-sort]="ariaSort('shopName')" title="Trier par boutique">Boutique <span class="sort-indicator" aria-hidden="true">{{ sortIndicator('shopName') }}</span></th>
-              <th class="sortable-th" (click)="onSort('currentBalance')" (keydown.enter)="onSort('currentBalance')" (keydown.space)="onSort('currentBalance'); $event.preventDefault()" tabindex="0" [attr.aria-sort]="ariaSort('currentBalance')" title="Trier par solde">Solde actuel <span class="sort-indicator" aria-hidden="true">{{ sortIndicator('currentBalance') }}</span></th>
-              <th class="sortable-th" (click)="onSort('totalOrders')" (keydown.enter)="onSort('totalOrders')" (keydown.space)="onSort('totalOrders'); $event.preventDefault()" tabindex="0" [attr.aria-sort]="ariaSort('totalOrders')" title="Trier par commandes">Total commandes <span class="sort-indicator" aria-hidden="true">{{ sortIndicator('totalOrders') }}</span></th>
-              <th class="sortable-th" (click)="onSort('totalPayments')" (keydown.enter)="onSort('totalPayments')" (keydown.space)="onSort('totalPayments'); $event.preventDefault()" tabindex="0" [attr.aria-sort]="ariaSort('totalPayments')" title="Trier par paiements">Total paiements <span class="sort-indicator" aria-hidden="true">{{ sortIndicator('totalPayments') }}</span></th>
-              <th class="sortable-th" (click)="onSort('remainingDue')" (keydown.enter)="onSort('remainingDue')" (keydown.space)="onSort('remainingDue'); $event.preventDefault()" tabindex="0" [attr.aria-sort]="ariaSort('remainingDue')" title="Trier par reste à payer">Reste à payer <span class="sort-indicator" aria-hidden="true">{{ sortIndicator('remainingDue') }}</span></th>
-              <th>Actions</th>
+              <th class="sortable-th" (click)="onSort('shopName')" (keydown.enter)="onSort('shopName')" (keydown.space)="onSort('shopName'); $event.preventDefault()" tabindex="0" [attr.aria-sort]="ariaSort('shopName')" [title]="'FINANCE.SORT_SHOP' | translate">{{ 'PAYMENTS.SHOP' | translate }} <span class="sort-indicator" aria-hidden="true">{{ sortIndicator('shopName') }}</span></th>
+              <th class="sortable-th" (click)="onSort('currentBalance')" (keydown.enter)="onSort('currentBalance')" (keydown.space)="onSort('currentBalance'); $event.preventDefault()" tabindex="0" [attr.aria-sort]="ariaSort('currentBalance')" [title]="'FINANCE.SORT_BALANCE' | translate">{{ 'FINANCE.CURRENT_BALANCE' | translate }} <span class="sort-indicator" aria-hidden="true">{{ sortIndicator('currentBalance') }}</span></th>
+              <th class="sortable-th" (click)="onSort('totalOrders')" (keydown.enter)="onSort('totalOrders')" (keydown.space)="onSort('totalOrders'); $event.preventDefault()" tabindex="0" [attr.aria-sort]="ariaSort('totalOrders')" [title]="'FINANCE.SORT_ORDERS' | translate">{{ 'FINANCE.TOTAL_ORDERS' | translate }} <span class="sort-indicator" aria-hidden="true">{{ sortIndicator('totalOrders') }}</span></th>
+              <th class="sortable-th" (click)="onSort('totalPayments')" (keydown.enter)="onSort('totalPayments')" (keydown.space)="onSort('totalPayments'); $event.preventDefault()" tabindex="0" [attr.aria-sort]="ariaSort('totalPayments')" [title]="'FINANCE.SORT_PAYMENTS' | translate">{{ 'FINANCE.TOTAL_PAYMENTS' | translate }} <span class="sort-indicator" aria-hidden="true">{{ sortIndicator('totalPayments') }}</span></th>
+              <th class="sortable-th" (click)="onSort('remainingDue')" (keydown.enter)="onSort('remainingDue')" (keydown.space)="onSort('remainingDue'); $event.preventDefault()" tabindex="0" [attr.aria-sort]="ariaSort('remainingDue')" [title]="'FINANCE.SORT_DUE' | translate">{{ 'FINANCE.REMAINING_DUE' | translate }} <span class="sort-indicator" aria-hidden="true">{{ sortIndicator('remainingDue') }}</span></th>
+              <th>{{ 'ORDERS.ACTIONS' | translate }}</th>
             </tr>
           </thead>
           <tbody>
@@ -86,14 +82,14 @@
                   {{ b.remainingDue | number:'1.2-2' }}
                 </td>
                 <td class="actions" (click)="$event.stopPropagation()">
-                  <button class="btn btn-sm btn-secondary" (click)="viewLedger(b.supplierId, b.shopId)">Voir le journal</button>
-                  <button class="btn btn-sm btn-primary" (click)="creditShopId = b.shopId">Créditer</button>
+                  <button class="btn btn-sm btn-secondary" (click)="viewLedger(b.supplierId, b.shopId)">{{ 'FINANCE.VIEW_LEDGER' | translate }}</button>
+                  <button class="btn btn-sm btn-primary" (click)="creditShopId = b.shopId">{{ 'FINANCE.CREDIT' | translate }}</button>
                 </td>
               </tr>
             }
             @if (balances.length === 0) {
               <tr>
-                <td colspan="6" class="empty">Aucune boutique liée</td>
+                <td colspan="6" class="empty">{{ 'FINANCE.NO_SHOPS' | translate }}</td>
               </tr>
             }
           </tbody>
@@ -104,17 +100,16 @@
       <app-pagination [page]="currentPage" [size]="pageSize" [totalElements]="balances.length"
         (pageChange)="onPageChange($event)" (sizeChange)="onSizeChange($event)"></app-pagination>
     }
-
     @if (selectedShopId !== null) {
       <div class="ledger-panel">
         <div class="ledger-header">
-          <h3>Journal des mouvements</h3>
-          <button class="btn btn-sm btn-secondary" (click)="closeLedger()">Fermer</button>
+          <h3>{{ 'FINANCE.LEDGER_TITLE' | translate }}</h3>
+          <button class="btn btn-sm btn-secondary" (click)="closeLedger()">{{ 'FINANCE.CLOSE' | translate }}</button>
         </div>
         @if (loadingLedger) {
           <div class="loading">
             <div class="spinner"></div>
-            <span>Chargement du journal...</span>
+            <span>{{ 'FINANCE.LOADING_LEDGER' | translate }}</span>
           </div>
         }
         @if (!loadingLedger) {
@@ -123,12 +118,12 @@
               <table>
                 <thead>
                   <tr>
-                    <th class="sortable-th" (click)="onLedgerSort('createdAt')" (keydown.enter)="onLedgerSort('createdAt')" (keydown.space)="onLedgerSort('createdAt'); $event.preventDefault()" tabindex="0" [attr.aria-sort]="ledgerAriaSort('createdAt')" title="Trier par date">Date <span class="sort-indicator" aria-hidden="true">{{ ledgerSortIndicator('createdAt') }}</span></th>
-                    <th class="sortable-th" (click)="onLedgerSort('type')" (keydown.enter)="onLedgerSort('type')" (keydown.space)="onLedgerSort('type'); $event.preventDefault()" tabindex="0" [attr.aria-sort]="ledgerAriaSort('type')" title="Trier par type">Type <span class="sort-indicator" aria-hidden="true">{{ ledgerSortIndicator('type') }}</span></th>
-                    <th class="sortable-th" (click)="onLedgerSort('amount')" (keydown.enter)="onLedgerSort('amount')" (keydown.space)="onLedgerSort('amount'); $event.preventDefault()" tabindex="0" [attr.aria-sort]="ledgerAriaSort('amount')" title="Trier par montant">Montant <span class="sort-indicator" aria-hidden="true">{{ ledgerSortIndicator('amount') }}</span></th>
-                    <th class="sortable-th" (click)="onLedgerSort('balanceAfter')" (keydown.enter)="onLedgerSort('balanceAfter')" (keydown.space)="onLedgerSort('balanceAfter'); $event.preventDefault()" tabindex="0" [attr.aria-sort]="ledgerAriaSort('balanceAfter')" title="Trier par solde">Solde après <span class="sort-indicator" aria-hidden="true">{{ ledgerSortIndicator('balanceAfter') }}</span></th>
-                    <th>Référence</th>
-                    <th>Motif</th>
+                    <th class="sortable-th" (click)="onLedgerSort('createdAt')" (keydown.enter)="onLedgerSort('createdAt')" (keydown.space)="onLedgerSort('createdAt'); $event.preventDefault()" tabindex="0" [attr.aria-sort]="ledgerAriaSort('createdAt')" [title]="'FINANCE.SORT_DATE' | translate">{{ 'ORDERS.DATE' | translate }} <span class="sort-indicator" aria-hidden="true">{{ ledgerSortIndicator('createdAt') }}</span></th>
+                    <th class="sortable-th" (click)="onLedgerSort('type')" (keydown.enter)="onLedgerSort('type')" (keydown.space)="onLedgerSort('type'); $event.preventDefault()" tabindex="0" [attr.aria-sort]="ledgerAriaSort('type')" [title]="'FINANCE.SORT_TYPE' | translate">{{ 'FINANCE.TYPE' | translate }} <span class="sort-indicator" aria-hidden="true">{{ ledgerSortIndicator('type') }}</span></th>
+                    <th class="sortable-th" (click)="onLedgerSort('amount')" (keydown.enter)="onLedgerSort('amount')" (keydown.space)="onLedgerSort('amount'); $event.preventDefault()" tabindex="0" [attr.aria-sort]="ledgerAriaSort('amount')" [title]="'FINANCE.SORT_AMOUNT' | translate">{{ 'PAYMENTS.AMOUNT' | translate }} <span class="sort-indicator" aria-hidden="true">{{ ledgerSortIndicator('amount') }}</span></th>
+                    <th class="sortable-th" (click)="onLedgerSort('balanceAfter')" (keydown.enter)="onLedgerSort('balanceAfter')" (keydown.space)="onLedgerSort('balanceAfter'); $event.preventDefault()" tabindex="0" [attr.aria-sort]="ledgerAriaSort('balanceAfter')" [title]="'FINANCE.SORT_BALANCE_AFTER' | translate">{{ 'FINANCE.BALANCE_AFTER' | translate }} <span class="sort-indicator" aria-hidden="true">{{ ledgerSortIndicator('balanceAfter') }}</span></th>
+                    <th>{{ 'ORDERS.REFERENCE' | translate }}</th>
+                    <th>{{ 'FINANCE.REASON' | translate }}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -150,7 +145,7 @@
                   }
                   @if (ledgerEntries.length === 0) {
                     <tr>
-                      <td colspan="6" class="empty">Aucun mouvement</td>
+                      <td colspan="6" class="empty">{{ 'FINANCE.NO_MOVEMENTS' | translate }}</td>
                     </tr>
                   }
                 </tbody>

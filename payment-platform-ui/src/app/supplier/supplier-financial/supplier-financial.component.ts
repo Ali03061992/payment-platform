@@ -1,10 +1,12 @@
 import { Component, OnInit, OnDestroy, ViewChild, ElementRef, AfterViewInit, ChangeDetectorRef } from '@angular/core';
+import { TranslateService } from '@ngx-translate/core';
 import { ReportService } from '../../services/report.service';
 import { SupplierFinancialReport } from '../../models/supplier-financial.model';
 import { ToastService } from '../../services/toast.service';
 import { ThemeService } from '../../services/theme.service';
 import { Subscription } from 'rxjs';
 import type { ECharts, EChartsCoreOption } from 'echarts/core';
+import { statusLabelFr } from '../../pipes/status-label.pipe';
 
 @Component({
     selector: 'app-supplier-financial',
@@ -54,7 +56,8 @@ export class SupplierFinancialComponent implements OnInit, AfterViewInit, OnDest
     private reportService: ReportService,
     private toast: ToastService,
     private cdr: ChangeDetectorRef,
-    private themeService: ThemeService
+    private themeService: ThemeService,
+    private translate: TranslateService
   ) {}
 
   ngOnInit(): void {
@@ -83,17 +86,9 @@ export class SupplierFinancialComponent implements OnInit, AfterViewInit, OnDest
   loadReport(): void {
     this.loading = true;
     this.loadError = null;
-    console.log('[Financial] Chargement du rapport…');
     this.reportService.getSupplierFinancialReport().subscribe({
       next: (data) => {
         if (!this.alive) return;
-        console.log('[Financial] Rapport reçu', {
-          monthlyPoints: data?.monthlyRevenue?.length ?? 0,
-          months: (data?.monthlyRevenue ?? []).map((m) => `${m.month}:${m.orderCount}/${m.revenue}`),
-          orderStatuses: data?.orderCountByStatus ?? {},
-          topProducts: data?.topProducts?.length ?? 0,
-          paymentSummary: data?.paymentSummary ?? null,
-        });
         this.report = data;
         this.loading = false;
         // Rendu déterministe : on force la détection de changements pour que les
@@ -102,15 +97,9 @@ export class SupplierFinancialComponent implements OnInit, AfterViewInit, OnDest
         this.cdr.detectChanges();
         this.renderCharts();
       },
-      error: (err: any) => {
+      error: (err: { error?: { message?: string }; status?: number; statusText?: string; message?: string }) => {
         if (!this.alive) return;
-        console.error('[Financial] Échec du chargement', {
-          status: err?.status,
-          statusText: err?.statusText,
-          message: err?.error?.message,
-          url: err?.url,
-        });
-        const message: string = err.error?.message || 'Erreur de chargement du rapport';
+        const message: string = err.error?.message || this.translate.instant('FINANCE.LOAD_ERROR');
         this.loadError = message;
         this.toast.error(message);
         this.loading = false;
@@ -167,11 +156,6 @@ export class SupplierFinancialComponent implements OnInit, AfterViewInit, OnDest
     if (!this.report) return;
     // Chaque chart est isolé : un canvas manquant ou une donnée vérolée ne doit
     // jamais empêcher les autres charts (ni boucler : un seul passage, pas de retry).
-    console.log('[Financial] renderCharts refs', {
-      revenue: !!this.revenueChartRef,
-      status: !!this.statusChartRef,
-      products: !!this.productsChartRef,
-    });
     this.destroyCharts();
     this.trackResize();
     // ECharts est chargé en lazy (hors bundle initial) : un seul passage, pas de retry.
@@ -180,23 +164,17 @@ export class SupplierFinancialComponent implements OnInit, AfterViewInit, OnDest
       try {
         this.renderRevenueChart(echarts);
         const el = this.revenueChartRef?.nativeElement;
-        console.log('[Financial] revenue chart ok', { w: el?.clientWidth, h: el?.clientHeight });
       } catch (e) {
-        console.error('[Financial] revenue chart FAILED', e);
       }
       try {
         this.renderStatusChart(echarts);
         const el = this.statusChartRef?.nativeElement;
-        console.log('[Financial] status chart ok', { w: el?.clientWidth, h: el?.clientHeight });
       } catch (e) {
-        console.error('[Financial] status chart FAILED', e);
       }
       try {
         this.renderProductsChart(echarts);
         const el = this.productsChartRef?.nativeElement;
-        console.log('[Financial] products chart ok', { w: el?.clientWidth, h: el?.clientHeight });
       } catch (e) {
-        console.error('[Financial] products chart FAILED', e);
       }
     });
   }
@@ -215,7 +193,7 @@ export class SupplierFinancialComponent implements OnInit, AfterViewInit, OnDest
       xAxis: { type: 'category', data: labels },
       yAxis: { type: 'value', axisLabel: { formatter: '{value} TND' } },
       series: [{
-        name: "Chiffre d'affaires (TND)",
+        name: this.translate.instant('FINANCE.REVENUE_SERIES'),
         type: 'line',
         smooth: true,
         data,
@@ -260,7 +238,7 @@ export class SupplierFinancialComponent implements OnInit, AfterViewInit, OnDest
       xAxis: { type: 'value' },
       yAxis: { type: 'category', data: labels },
       series: [{
-        name: 'Quantité vendue',
+        name: this.translate.instant('FINANCE.QTY_SOLD'),
         type: 'bar',
         data,
         itemStyle: { color: '#4fc3f7' },
@@ -271,13 +249,7 @@ export class SupplierFinancialComponent implements OnInit, AfterViewInit, OnDest
   }
 
   statusLabel(s: string): string {
-    const map: Record<string, string> = {
-      DRAFT: 'Brouillon', CONFIRMED: 'Confirmé', PREPARING: 'En préparation',
-      READY_FOR_DELIVERY: 'Prêt livraison', DELIVERY_ACCEPTED: 'Livraison acceptée',
-      DELIVERY_REJECTED: 'Livraison rejetée', IN_DELIVERY: 'En livraison',
-      DELIVERED: 'Livré', ACCEPTED: 'Accepté', CANCELLED: 'Annulé', REJECTED: 'Rejeté'
-    };
-    return map[s] || s;
+    return statusLabelFr(s);
   }
 
   objectKeys(obj: Record<string, number>): string[] {

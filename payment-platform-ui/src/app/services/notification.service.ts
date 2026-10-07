@@ -63,12 +63,10 @@ export class NotificationService {
         const notification: Notification = JSON.parse(event.data);
         this.addNotification(notification);
       } catch (e) {
-        console.error('Failed to parse SSE notification', e);
       }
     });
 
     this.eventSource.onerror = () => {
-      console.log('SSE connection error, will reconnect in 5s...');
       this.stopRealtime();
       this.reconnectTimer = setTimeout(() => this.startRealtime(), 5000);
     };

@@ -1,13 +1,13 @@
 <div class="page-header">
-  <h2>Commandes</h2>
-  <button class="btn btn-primary" routerLink="/dashboard/shop/orders/create">+ Nouvelle commande</button>
+  <h2>{{ 'ORDERS.TITLE' | translate }}</h2>
+  <button class="btn btn-primary" routerLink="/dashboard/shop/orders/create">{{ 'ORDERS.NEW_ORDER' | translate }}</button>
 </div>
 
 @if (!loading) {
   <div class="filters">
     <div class="search-container">
       <input type="text" [(ngModel)]="searchQuery" (ngModelChange)="searchSubject.next($event)"
-        class="form-control" placeholder="Rechercher par référence ou boutique..." style="max-width:300px;">
+        class="form-control" [placeholder]="'ORDERS.SEARCH_PLACEHOLDER' | translate" style="max-width:300px;">
       @if (searching) {
         <div class="search-spinner"></div>
       }
@@ -17,7 +17,7 @@
             <div class="search-dropdown-item" [routerLink]="['/dashboard/shop/orders', r.id]">
               <div class="search-dropdown-ref">{{ r.reference }}</div>
               <div class="search-dropdown-meta">
-                <span class="payment-badge" [ngClass]="statusClass(r.status)">{{ statusLabel(r.status) }}</span>
+                <span class="payment-badge" [ngClass]="statusClass(r.status)">{{ r.status | statusLabel }}</span>
                 <span>{{ r.supplierName || r.supplierId }}</span>
               </div>
             </div>
@@ -26,28 +26,28 @@
       }
     </div>
     <select [(ngModel)]="filterStatus" (change)="onFilterChange()" class="form-control" style="max-width:200px;">
-      <option value="">Tous les statuts</option>
-      <option value="DRAFT">Brouillon</option>
-      <option value="CONFIRMED">Confirmé</option>
-      <option value="PREPARING">En préparation</option>
-      <option value="READY_FOR_DELIVERY">Prêt pour livraison</option>
-      <option value="DELIVERY_ACCEPTED">Livraison acceptée</option>
-      <option value="IN_DELIVERY">En livraison</option>
-      <option value="DELIVERED">Livré</option>
-      <option value="ACCEPTED">Accepté</option>
-      <option value="CANCELLED">Annulé</option>
-      <option value="REJECTED">Rejeté</option>
-      <option value="DELIVERY_REJECTED">Livraison rejetée</option>
+      <option value="">{{ 'ORDERS.ALL_STATUSES' | translate }}</option>
+      <option value="DRAFT">{{ 'ORDERS.DRAFT' | translate }}</option>
+      <option value="CONFIRMED">{{ 'ORDERS.CONFIRMED' | translate }}</option>
+      <option value="PREPARING">{{ 'ORDERS.PREPARING' | translate }}</option>
+      <option value="READY_FOR_DELIVERY">{{ 'ORDERS.READY_FOR_DELIVERY' | translate }}</option>
+      <option value="DELIVERY_ACCEPTED">{{ 'ORDERS.DELIVERY_ACCEPTED' | translate }}</option>
+      <option value="IN_DELIVERY">{{ 'ORDERS.IN_DELIVERY' | translate }}</option>
+      <option value="DELIVERED">{{ 'ORDERS.DELIVERED' | translate }}</option>
+      <option value="ACCEPTED">{{ 'ORDERS.ACCEPTED' | translate }}</option>
+      <option value="CANCELLED">{{ 'ORDERS.CANCELLED' | translate }}</option>
+      <option value="REJECTED">{{ 'ORDERS.REJECTED' | translate }}</option>
+      <option value="DELIVERY_REJECTED">{{ 'ORDERS.DELIVERY_REJECTED' | translate }}</option>
     </select>
-    <span class="result-count">{{ totalElements }} résultat(s)</span>
-    <button class="btn btn-secondary" style="margin-left:auto;" (click)="exportCsv()">Exporter CSV</button>
+    <span class="result-count">{{ 'ORDERS.RESULT_COUNT' | translate:{count: totalElements} }}</span>
+    <button class="btn btn-secondary" style="margin-left:auto;" (click)="exportCsv()">{{ 'ORDERS.EXPORT_CSV' | translate }}</button>
   </div>
 }
 
 @if (loading) {
   <div class="loading">
     <div class="spinner"></div>
-    <span>Chargement...</span>
+    <span>{{ 'ORDERS.LOADING' | translate }}</span>
   </div>
 }
 
@@ -58,13 +58,13 @@
       <table>
         <thead>
           <tr>
-            <th>Référence</th>
-            <th>Fournisseur</th>
-            <th>Livreur</th>
-            <th>Date</th>
-            <th>Total</th>
-            <th>Statut</th>
-            <th>Actions</th>
+            <th class="sortable-th" (click)="onSort('reference')" (keydown.enter)="onSort('reference')" tabindex="0" [attr.aria-sort]="ariaSort('reference')">{{ 'ORDERS.REFERENCE' | translate }} <span class="sort-indicator" aria-hidden="true">{{ sortIndicator('reference') }}</span></th>
+            <th class="sortable-th" (click)="onSort('supplierName')" (keydown.enter)="onSort('supplierName')" tabindex="0" [attr.aria-sort]="ariaSort('supplierName')">{{ 'ORDERS.SUPPLIER' | translate }} <span class="sort-indicator" aria-hidden="true">{{ sortIndicator('supplierName') }}</span></th>
+            <th class="sortable-th" (click)="onSort('deliveryAgentName')" (keydown.enter)="onSort('deliveryAgentName')" tabindex="0" [attr.aria-sort]="ariaSort('deliveryAgentName')">{{ 'ORDERS.DRIVER' | translate }} <span class="sort-indicator" aria-hidden="true">{{ sortIndicator('deliveryAgentName') }}</span></th>
+            <th class="sortable-th" (click)="onSort('createdAt')" (keydown.enter)="onSort('createdAt')" tabindex="0" [attr.aria-sort]="ariaSort('createdAt')">{{ 'ORDERS.DATE' | translate }} <span class="sort-indicator" aria-hidden="true">{{ sortIndicator('createdAt') }}</span></th>
+            <th class="sortable-th" (click)="onSort('total')" (keydown.enter)="onSort('total')" tabindex="0" [attr.aria-sort]="ariaSort('total')">{{ 'ORDERS.TOTAL' | translate }} <span class="sort-indicator" aria-hidden="true">{{ sortIndicator('total') }}</span></th>
+            <th class="sortable-th" (click)="onSort('status')" (keydown.enter)="onSort('status')" tabindex="0" [attr.aria-sort]="ariaSort('status')">{{ 'ORDERS.STATUS' | translate }} <span class="sort-indicator" aria-hidden="true">{{ sortIndicator('status') }}</span></th>
+            <th>{{ 'ORDERS.ACTIONS' | translate }}</th>
           </tr>
         </thead>
         <tbody>
@@ -77,26 +77,26 @@
               <td>{{ o.total | number:'1.2-2' }} {{ o.currency }}</td>
               <td>
                 <span class="payment-badge" [ngClass]="statusClass(o.status)">
-                  {{ statusLabel(o.status) }}
+                  {{ o.status | statusLabel }}
                 </span>
               </td>
               <td class="actions" (click)="$event.stopPropagation()">
-                <a class="btn btn-sm btn-secondary" [routerLink]="['/dashboard/shop/orders', o.id]">Détail</a>
+                <a class="btn btn-sm btn-secondary" [routerLink]="['/dashboard/shop/orders', o.id]">{{ 'ORDERS.DETAIL' | translate }}</a>
                 @if (o.status === 'DELIVERED') {
-                  <button class="btn btn-sm btn-success" (click)="accept(o.id)">Accepter</button>
+                  <button class="btn btn-sm btn-success" (click)="accept(o.id)">{{ 'ORDERS.ACCEPT_BTN' | translate }}</button>
                 }
                 @if (o.status === 'DELIVERED') {
-                  <button class="btn btn-sm btn-danger" (click)="reject(o.id)">Rejeter</button>
+                  <button class="btn btn-sm btn-danger" (click)="reject(o.id)">{{ 'ORDERS.REJECT_BTN' | translate }}</button>
                 }
                 @if (o.status === 'DRAFT' || o.status === 'CONFIRMED' || o.status === 'PREPARING') {
-                  <button class="btn btn-sm btn-danger" (click)="cancel(o.id)">Annuler</button>
+                  <button class="btn btn-sm btn-danger" (click)="cancel(o.id)">{{ 'ORDERS.CANCEL_BTN' | translate }}</button>
                 }
               </td>
             </tr>
           }
           @if (filteredOrders.length === 0) {
             <tr>
-              <td colspan="7" class="empty">Aucune commande trouvée</td>
+              <td colspan="7" class="empty">{{ 'ORDERS.NO_ORDERS' | translate }}</td>
             </tr>
           }
         </tbody>
@@ -113,36 +113,36 @@
         <div class="order-card-header">
           <span class="order-reference">{{ o.reference }}</span>
           <span class="payment-badge" [ngClass]="statusClass(o.status)">
-            {{ statusLabel(o.status) }}
+            {{ o.status | statusLabel }}
           </span>
         </div>
         <div class="order-card-body">
           <div class="order-row">
-            <span class="order-label">Fournisseur</span>
+            <span class="order-label">{{ 'ORDERS.SUPPLIER' | translate }}</span>
             <span class="order-value">{{ o.supplierName || o.supplierId }}</span>
           </div>
           <div class="order-row">
-            <span class="order-label">Livreur</span>
+            <span class="order-label">{{ 'ORDERS.DRIVER' | translate }}</span>
             <span class="order-value">{{ o.deliveryAgentName || '-' }}</span>
           </div>
           <div class="order-row">
-            <span class="order-label">Total</span>
+            <span class="order-label">{{ 'ORDERS.TOTAL' | translate }}</span>
             <span class="order-amount">{{ o.total | number:'1.2-2' }} {{ o.currency }}</span>
           </div>
           <div class="order-row">
-            <span class="order-label">Date</span>
+            <span class="order-label">{{ 'ORDERS.DATE' | translate }}</span>
             <span class="order-value">{{ o.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
           </div>
         </div>
         <div class="order-card-actions" (click)="$event.stopPropagation()">
           @if (o.status === 'DELIVERED') {
-            <button class="btn btn-sm btn-success" (click)="accept(o.id)">Accepter</button>
+            <button class="btn btn-sm btn-success" (click)="accept(o.id)">{{ 'ORDERS.ACCEPT_BTN' | translate }}</button>
           }
           @if (o.status === 'DELIVERED') {
-            <button class="btn btn-sm btn-danger" (click)="reject(o.id)">Rejeter</button>
+            <button class="btn btn-sm btn-danger" (click)="reject(o.id)">{{ 'ORDERS.REJECT_BTN' | translate }}</button>
           }
           @if (o.status === 'DRAFT' || o.status === 'CONFIRMED' || o.status === 'PREPARING') {
-            <button class="btn btn-sm btn-danger" (click)="cancel(o.id)">Annuler</button>
+            <button class="btn btn-sm btn-danger" (click)="cancel(o.id)">{{ 'ORDERS.CANCEL_BTN' | translate }}</button>
           }
         </div>
       </div>

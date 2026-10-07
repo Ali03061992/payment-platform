@@ -12,6 +12,7 @@ import { of, throwError } from 'rxjs';
 import { RegisterComponent } from './register.component';
 import { AuthService } from '../services/auth.service';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { TranslateStubPipe, translateServiceProvider } from '../testing/translate-stubs';
 
 describe('RegisterComponent', () => {
   let component: RegisterComponent;
@@ -23,9 +24,10 @@ describe('RegisterComponent', () => {
     const authSpy = jasmine.createSpyObj('AuthService', ['register']);
     const routerSpy = jasmine.createSpyObj('Router', ['navigate']);
     TestBed.configureTestingModule({
-    declarations: [RegisterComponent],
+    declarations: [RegisterComponent, TranslateStubPipe],
     imports: [FormsModule],
     providers: [
+        translateServiceProvider(),
         { provide: AuthService, useValue: authSpy },
         { provide: Router, useValue: routerSpy },
         provideHttpClient(withInterceptorsFromDi()),
@@ -75,7 +77,7 @@ describe('RegisterComponent', () => {
     it('should set default error when no message', () => {
       authService.register.and.returnValue(throwError(() => ({ error: {} })));
       component.onSubmit();
-      expect(component.error).toBe("Erreur lors de l'inscription");
+      expect(component.error).toBe('AUTH.REGISTER_ERROR');
     });
   });
 });

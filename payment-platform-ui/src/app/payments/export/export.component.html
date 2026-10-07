@@ -1,19 +1,19 @@
 <div class="export-page">
   <div class="page-header">
-    <h2>Export des paiements</h2>
+    <h2>{{ 'PAYMENT_EXPORT.TITLE' | translate }}</h2>
   </div>
 
   <div class="export-card">
-    <h3>Exporter en CSV</h3>
-    <p>Sélectionnez la période à exporter.</p>
+    <h3>{{ 'PAYMENT_EXPORT.CSV_TITLE' | translate }}</h3>
+    <p>{{ 'PAYMENT_EXPORT.PERIOD_HINT' | translate }}</p>
 
     <div class="date-row">
       <div class="field">
-        <label for="from">Du</label>
+        <label for="from">{{ 'PAYMENT_EXPORT.FROM' | translate }}</label>
         <input id="from" type="date" [(ngModel)]="from" />
       </div>
       <div class="field">
-        <label for="to">Au</label>
+        <label for="to">{{ 'PAYMENT_EXPORT.TO' | translate }}</label>
         <input id="to" type="date" [(ngModel)]="to" />
       </div>
     </div>
@@ -25,10 +25,10 @@
     <div class="actions">
       <button class="btn btn-primary" (click)="exportCsv()" [disabled]="loading">
         @if (!loading) {
-          <span class="btn-icon-text"><app-icon name="download" [size]="18"></app-icon> Télécharger CSV</span>
+          <span class="btn-icon-text"><app-icon name="download" [size]="18"></app-icon> {{ 'PAYMENT_EXPORT.DOWNLOAD' | translate }}</span>
         }
         @if (loading) {
-          <span>Export en cours...</span>
+          <span>{{ 'PAYMENT_EXPORT.EXPORTING' | translate }}</span>
         }
       </button>
     </div>

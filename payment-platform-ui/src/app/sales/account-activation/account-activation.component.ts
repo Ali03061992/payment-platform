@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { TranslateService } from '@ngx-translate/core';
 import { UserService } from '../../services/user.service';
 import { User } from '../../models/user.model';
 import { ToastService } from '../../services/toast.service';
@@ -15,7 +16,7 @@ export class AccountActivationComponent implements OnInit {
   searchQuery = '';
   filterStatus = '';
 
-  constructor(private userService: UserService, private toast: ToastService) {}
+  constructor(private userService: UserService, private toast: ToastService, private translate: TranslateService) {}
 
   ngOnInit(): void {
     this.loadUsers();
@@ -25,7 +26,7 @@ export class AccountActivationComponent implements OnInit {
     this.loading = true;
     this.userService.list().subscribe({
       next: (users) => { this.users = users; this.loading = false; },
-      error: (err) => { this.toast.error(err.error?.message || 'Erreur de chargement'); this.loading = false; }
+      error: (err) => { this.toast.error(err.error?.message || this.translate.instant('USERS.LOAD_ERROR')); this.loading = false; }
     });
   }
 
@@ -45,9 +46,9 @@ export class AccountActivationComponent implements OnInit {
     this.userService.activate(user.id).subscribe({
       next: () => {
         user.status = 'ACTIVE';
-        this.toast.success(`${user.username} activé avec succès`);
+        this.toast.success(this.translate.instant('USERS.ACTIVATED_SUCCESS', { username: user.username }));
       },
-      error: (err) => { this.toast.error(err.error?.message || 'Erreur'); }
+      error: (err) => { this.toast.error(err.error?.message || this.translate.instant('COMMON.ERROR')); }
     });
   }
 
@@ -55,9 +56,9 @@ export class AccountActivationComponent implements OnInit {
     this.userService.disable(user.id).subscribe({
       next: () => {
         user.status = 'DISABLED';
-        this.toast.success(`${user.username} désactivé avec succès`);
+        this.toast.success(this.translate.instant('USERS.DEACTIVATED_SUCCESS', { username: user.username }));
       },
-      error: (err) => { this.toast.error(err.error?.message || 'Erreur'); }
+      error: (err) => { this.toast.error(err.error?.message || this.translate.instant('COMMON.ERROR')); }
     });
   }
 }

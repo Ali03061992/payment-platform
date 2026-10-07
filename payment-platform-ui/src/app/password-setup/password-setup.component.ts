@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
+import { TranslateService } from '@ngx-translate/core';
 import { ToastService } from '../services/toast.service';
 
 @Component({
@@ -22,14 +23,15 @@ export class PasswordSetupComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private http: HttpClient,
-    private toast: ToastService
+    private toast: ToastService,
+    private translate: TranslateService
   ) {}
 
   ngOnInit(): void {
     this.token = this.route.snapshot.queryParamMap.get('token') || '';
     if (!this.token) {
       this.checkingToken = false;
-      this.toast.error('Lien invalide. Veuillez demander un nouveau lien de configuration.');
+      this.toast.error(this.translate.instant('PASSWORD_SETUP.INVALID_LINK_MSG'));
       return;
     }
     this.http.get<{ valid: boolean }>(`/api/auth/password-setup/validate?token=${this.token}`).subscribe({
@@ -37,23 +39,23 @@ export class PasswordSetupComponent implements OnInit {
         this.tokenValid = res.valid;
         this.checkingToken = false;
         if (!this.tokenValid) {
-          this.toast.error('Ce lien est invalide ou a déjà été utilisé. Veuillez demander un nouveau lien.');
+          this.toast.error(this.translate.instant('PASSWORD_SETUP.INVALID_LINK_USED'));
         }
       },
       error: () => {
         this.checkingToken = false;
-        this.toast.error('Erreur lors de la vérification du lien.');
+        this.toast.error(this.translate.instant('PASSWORD_SETUP.VERIFY_ERROR'));
       }
     });
   }
 
   onSubmit(): void {
     if (this.newPassword.length < 8) {
-      this.toast.error('Le mot de passe doit contenir au moins 8 caractères.');
+      this.toast.error(this.translate.instant('PASSWORD_SETUP.PASSWORD_MIN_ERROR'));
       return;
     }
     if (this.newPassword !== this.confirmPassword) {
-      this.toast.error('Les mots de passe ne correspondent pas.');
+      this.toast.error(this.translate.instant('PASSWORD_SETUP.PASSWORD_MISMATCH'));
       return;
     }
     this.loading = true;
@@ -66,7 +68,7 @@ export class PasswordSetupComponent implements OnInit {
         this.loading = false;
       },
       error: (err) => {
-        this.toast.error(err.error?.message || 'Erreur lors de la configuration du mot de passe.');
+        this.toast.error(err.error?.message || this.translate.instant('PASSWORD_SETUP.SETUP_ERROR'));
         this.loading = false;
       }
     });

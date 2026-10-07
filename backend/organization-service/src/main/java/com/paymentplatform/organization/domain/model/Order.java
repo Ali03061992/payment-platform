@@ -204,6 +204,9 @@ public class Order {
     }
 
     public void deliver(UUID receivedBy) {
+        if (receivedBy == null) {
+            throw new ConflictException("Le destinataire de la livraison est requis");
+        }
         transitionTo(OrderStatus.DELIVERED);
         this.receivedBy = receivedBy;
         this.receivedAt = Instant.now();

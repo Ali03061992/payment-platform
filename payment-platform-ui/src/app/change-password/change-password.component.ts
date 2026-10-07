@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
+import { TranslateService } from '@ngx-translate/core';
 import { AuthService } from '../services/auth.service';
 import { ToastService } from '../services/toast.service';
 
@@ -20,21 +21,22 @@ export class ChangePasswordComponent {
   constructor(
     private authService: AuthService,
     private toastService: ToastService,
-    private router: Router
+    private router: Router,
+    private translate: TranslateService
   ) {}
 
   onSubmit(): void {
     this.error = '';
     if (!this.currentPassword || !this.newPassword || !this.confirmPassword) {
-      this.error = 'Tous les champs sont requis';
+      this.error = this.translate.instant('CHANGE_PASSWORD.ALL_FIELDS_REQUIRED');
       return;
     }
     if (this.newPassword.length < 8) {
-      this.error = 'Le nouveau mot de passe doit contenir au moins 8 caractères';
+      this.error = this.translate.instant('CHANGE_PASSWORD.MIN_LENGTH_ERROR');
       return;
     }
     if (this.newPassword !== this.confirmPassword) {
-      this.error = 'Les mots de passe ne correspondent pas';
+      this.error = this.translate.instant('CHANGE_PASSWORD.MISMATCH_ERROR');
       return;
     }
     this.loading = true;
@@ -42,11 +44,11 @@ export class ChangePasswordComponent {
       next: () => {
         this.loading = false;
         this.submitted = true;
-        this.toastService.show('Mot de passe modifié avec succès', 'success');
+        this.toastService.show(this.translate.instant('CHANGE_PASSWORD.SUCCESS_TOAST'), 'success');
       },
       error: (err) => {
         this.loading = false;
-        this.error = err.error?.message || 'Erreur lors de la modification du mot de passe';
+        this.error = err.error?.message || this.translate.instant('CHANGE_PASSWORD.ERROR_TOAST');
       }
     });
   }

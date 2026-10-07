@@ -1,14 +1,16 @@
 import { Component, OnInit, OnDestroy, HostListener, ElementRef } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
+import { TranslateService } from '@ngx-translate/core';
 import { OrderService } from '../../services/order.service';
 import { SupplierAgentService } from '../../services/supplier-agent.service';
 import { StockService } from '../../services/stock.service';
 import { Order, OrderComment, OrderPage } from '../../models/order.model';
-import { paginateItems } from '../../models/page.model';
+import { paginateItems, sortItems, toggleSortState, ariaSortFor, sortIndicatorFor, SortState } from '../../models/page.model';
 import { ToastService } from '../../services/toast.service';
 import { ConfirmDialogService } from '../../components/confirm-dialog/confirm-dialog.service';
 import { Subscription, Subject, debounceTime, distinctUntilChanged, switchMap, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
+import { statusLabelFr } from '../../pipes/status-label.pipe';
 
 @Component({
     selector: 'app-order-management',
@@ -25,11 +27,13 @@ export class OrderManagementComponent implements OnInit, OnDestroy {
   activeTab: 'orders' | 'deliveries' = 'orders';
   filterAgentId = '';
   currentPage = 0;
-  pageSize = 20;
+  pageSize = 10;
   totalElements = 0;
   totalPages = 0;
   deliveriesPage = 0;
-  deliveriesSize = 20;
+  deliveriesSize = 10;
+  sort: SortState = { field: null, direction: 'asc' };
+  deliverySort: SortState = { field: null, direction: 'asc' };
 
   showDetail = false;
   selectedOrder: Order | null = null;
@@ -72,7 +76,8 @@ export class OrderManagementComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private toast: ToastService,
     private confirmDialog: ConfirmDialogService,
-    private elRef: ElementRef
+    private elRef: ElementRef,
+    private translate: TranslateService
   ) {}
 
   @HostListener('document:click', ['$event'])
@@ -148,7 +153,7 @@ export class OrderManagementComponent implements OnInit, OnDestroy {
           }
         }
       },
-      error: (err: any) => { this.toast.error(err.error?.message || 'Erreur de chargement'); this.loading = false; }
+      error: (err: { error?: { message?: string }; status?: number; statusText?: string; message?: string }) => { this.toast.error(err.error?.message || this.translate.instant('SUPPLIER_ORDERS.LOAD_ERROR')); this.loading = false; }
     }));
   }
 
@@ -156,7 +161,7 @@ export class OrderManagementComponent implements OnInit, OnDestroy {
     this.loading = true;
     this.subscriptions.add(this.orderService.listDeliveries(agentId).subscribe({
       next: (data: Order[]) => { this.deliveries = data; this.loading = false; },
-      error: (err: any) => { this.toast.error(err.error?.message || 'Erreur de chargement'); this.loading = false; }
+      error: (err: { error?: { message?: string }; status?: number; statusText?: string; message?: string }) => { this.toast.error(err.error?.message || this.translate.instant('SUPPLIER_ORDERS.LOAD_ERROR')); this.loading = false; }
     }));
   }
 
@@ -225,7 +230,36 @@ export class OrderManagementComponent implements OnInit, OnDestroy {
   }
 
   get pagedDeliveries(): Order[] {
-    return paginateItems(this.filteredDeliveries, this.deliveriesPage, this.deliveriesSize);
+    return paginateItems(this.sortedDeliveries, this.deliveriesPage, this.deliveriesSize);
+  }
+
+  onSort(field: string): void {
+    this.sort = toggleSortState(this.sort, field);
+  }
+
+  ariaSort(field: string): 'ascending' | 'descending' | 'none' {
+    return ariaSortFor(field, this.sort);
+  }
+
+  sortIndicator(field: string): string {
+    return sortIndicatorFor(field, this.sort);
+  }
+
+  onDeliverySort(field: string): void {
+    this.deliverySort = toggleSortState(this.deliverySort, field);
+    this.deliveriesPage = 0;
+  }
+
+  deliveryAriaSort(field: string): 'ascending' | 'descending' | 'none' {
+    return ariaSortFor(field, this.deliverySort);
+  }
+
+  deliverySortIndicator(field: string): string {
+    return sortIndicatorFor(field, this.deliverySort);
+  }
+
+  get sortedDeliveries(): Order[] {
+    return sortItems(this.filteredDeliveries, this.deliverySort.field, this.deliverySort.direction);
   }
 
   get deliveriesTotal(): number {
@@ -260,7 +294,7 @@ export class OrderManagementComponent implements OnInit, OnDestroy {
     if (this.filterShopId) {
       result = result.filter(o => o.shopId === this.filterShopId);
     }
-    return result;
+    return sortItems(result, this.sort.field, this.sort.direction);
   }
 
   get filteredDeliveries(): Order[] {
@@ -275,20 +309,7 @@ export class OrderManagementComponent implements OnInit, OnDestroy {
   }
 
   statusLabel(s: string): string {
-    const map: Record<string, string> = {
-      DRAFT: 'Brouillon',
-      CONFIRMED: 'Confirmé',
-      PREPARING: 'En préparation',
-      READY_FOR_DELIVERY: 'Prêt pour livraison',
-      DELIVERY_ACCEPTED: 'Livraison acceptée',
-      DELIVERY_REJECTED: 'Livraison rejetée',
-      IN_DELIVERY: 'En livraison',
-      DELIVERED: 'Livré',
-      ACCEPTED: 'Accepté',
-      CANCELLED: 'Annulé',
-      REJECTED: 'Rejeté'
-    };
-    return map[s] || s;
+    return statusLabelFr(s);
   }
 
   statusClass(s: string): string {
@@ -343,11 +364,11 @@ export class OrderManagementComponent implements OnInit, OnDestroy {
         this.detailComments = [...this.detailComments, comment];
         this.detailNewComment = '';
         this.detailSubmittingComment = false;
-        this.toast.success('Commentaire ajouté');
+        this.toast.success(this.translate.instant('SUPPLIER_ORDERS.COMMENT_ADDED'));
       },
       error: (e: any) => {
         this.detailSubmittingComment = false;
-        this.toast.error(e.error?.message || 'Erreur');
+        this.toast.error(e.error?.message || this.translate.instant('PAYMENTS.ERROR'));
       }
     }));
   }
@@ -359,22 +380,22 @@ export class OrderManagementComponent implements OnInit, OnDestroy {
 
   confirm(order: Order): void {
     this.subscriptions.add(this.orderService.confirm(order.id).subscribe({
-      next: () => { this.toast.success('Commande confirmée'); this.loadOrders(); },
-      error: (err: any) => { this.toast.error(err.error?.message || 'Erreur'); }
+      next: () => { this.toast.success(this.translate.instant('SUPPLIER_ORDERS.ORDER_CONFIRMED')); this.loadOrders(); },
+      error: (err: { error?: { message?: string }; status?: number; statusText?: string; message?: string }) => { this.toast.error(err.error?.message || this.translate.instant('PAYMENTS.ERROR')); }
     }));
   }
 
   prepare(order: Order): void {
     this.subscriptions.add(this.orderService.prepare(order.id).subscribe({
-      next: () => { this.toast.success('Commande mise en préparation'); this.loadOrders(); },
-      error: (err: any) => { this.toast.error(err.error?.message || 'Erreur'); }
+      next: () => { this.toast.success(this.translate.instant('SUPPLIER_ORDERS.ORDER_PREPARING')); this.loadOrders(); },
+      error: (err: { error?: { message?: string }; status?: number; statusText?: string; message?: string }) => { this.toast.error(err.error?.message || this.translate.instant('PAYMENTS.ERROR')); }
     }));
   }
 
   ready(order: Order): void {
     this.subscriptions.add(this.orderService.readyForDelivery(order.id).subscribe({
-      next: () => { this.toast.success('Commande prête pour livraison'); this.loadOrders(); },
-      error: (err: any) => { this.toast.error(err.error?.message || 'Erreur'); }
+      next: () => { this.toast.success(this.translate.instant('SUPPLIER_ORDERS.ORDER_READY')); this.loadOrders(); },
+      error: (err: { error?: { message?: string }; status?: number; statusText?: string; message?: string }) => { this.toast.error(err.error?.message || this.translate.instant('PAYMENTS.ERROR')); }
     }));
   }
 
@@ -396,39 +417,39 @@ export class OrderManagementComponent implements OnInit, OnDestroy {
     this.assigning = true;
     this.subscriptions.add(this.orderService.assignDelivery(this.assignOrderId, this.assignAgentId, this.assignPlannedDate).subscribe({
       next: () => {
-        this.toast.success('Agent assigné avec succès');
+        this.toast.success(this.translate.instant('SUPPLIER_ORDERS.AGENT_ASSIGNED'));
         this.closeAssign();
         this.assigning = false;
         this.loadOrders();
       },
-      error: (err: any) => { this.toast.error(err.error?.message || 'Erreur'); this.assigning = false; }
+      error: (err: { error?: { message?: string }; status?: number; statusText?: string; message?: string }) => { this.toast.error(err.error?.message || this.translate.instant('PAYMENTS.ERROR')); this.assigning = false; }
     }));
   }
 
   deliveryReject(order: Order): void {
     this.subscriptions.add(this.confirmDialog.confirm({
-      title: 'Rejeter la livraison',
-      message: `Rejeter la livraison de ${order.reference} ? La commande sera annulée et aucun paiement ne sera créé.`,
+      title: this.translate.instant('SUPPLIER_ORDERS.REJECT_DELIVERY_TITLE'),
+      message: this.translate.instant('SUPPLIER_ORDERS.REJECT_DELIVERY_MSG', { ref: order.reference }),
       danger: true,
     }).subscribe(ok => {
       if (!ok) return;
       this.subscriptions.add(this.orderService.deliveryReject(order.id).subscribe({
-        next: () => { this.toast.success('Livraison rejetée, commande annulée'); this.loadOrders(); },
-        error: (err: any) => { this.toast.error(err.error?.message || 'Erreur'); }
+        next: () => { this.toast.success(this.translate.instant('SUPPLIER_ORDERS.DELIVERY_REJECTED_SUCCESS')); this.loadOrders(); },
+        error: (err: { error?: { message?: string }; status?: number; statusText?: string; message?: string }) => { this.toast.error(err.error?.message || this.translate.instant('PAYMENTS.ERROR')); }
       }));
     }));
   }
 
   cancel(order: Order): void {
     this.subscriptions.add(this.confirmDialog.confirm({
-      title: 'Annuler la commande',
-      message: `Annuler la commande ${order.reference} ?`,
+      title: this.translate.instant('SUPPLIER_ORDERS.CANCEL_TITLE'),
+      message: this.translate.instant('SUPPLIER_ORDERS.CANCEL_MSG', { ref: order.reference }),
       danger: true,
     }).subscribe(ok => {
       if (!ok) return;
       this.subscriptions.add(this.orderService.cancel(order.id).subscribe({
-        next: () => { this.toast.success('Commande annulée'); this.loadOrders(); },
-        error: (err: any) => { this.toast.error(err.error?.message || 'Erreur'); }
+        next: () => { this.toast.success(this.translate.instant('SUPPLIER_ORDERS.ORDER_CANCELLED')); this.loadOrders(); },
+        error: (err: { error?: { message?: string }; status?: number; statusText?: string; message?: string }) => { this.toast.error(err.error?.message || this.translate.instant('PAYMENTS.ERROR')); }
       }));
     }));
   }
@@ -550,13 +571,13 @@ export class OrderManagementComponent implements OnInit, OnDestroy {
     };
     this.subscriptions.add(this.orderService.update(this.editOrderId, request).subscribe({
       next: () => {
-        this.toast.success('Commande modifiée avec succès');
+        this.toast.success(this.translate.instant('SUPPLIER_ORDERS.ORDER_UPDATED'));
         this.closeEdit();
         this.editing = false;
         this.loadOrders();
       },
-      error: (err: any) => {
-        this.toast.error(err.error?.message || 'Erreur lors de la modification');
+      error: (err: { error?: { message?: string }; status?: number; statusText?: string; message?: string }) => {
+        this.toast.error(err.error?.message || this.translate.instant('SUPPLIER_ORDERS.UPDATE_ERROR'));
         this.editing = false;
       }
     }));

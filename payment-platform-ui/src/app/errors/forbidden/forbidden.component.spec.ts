@@ -8,6 +8,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { ForbiddenComponent } from './forbidden.component';
 import { LoginService } from '../../services/login.service';
+import { TranslateStubPipe } from '../../testing/translate-stubs';
 
 describe('ForbiddenComponent', () => {
   let component: ForbiddenComponent;
@@ -19,7 +20,7 @@ describe('ForbiddenComponent', () => {
     const routerSpy = jasmine.createSpyObj('Router', ['navigate']);
     const loginSpy = jasmine.createSpyObj('LoginService', ['isLoggedIn']);
     TestBed.configureTestingModule({
-      declarations: [ForbiddenComponent],
+      declarations: [ForbiddenComponent, TranslateStubPipe],
       providers: [
         { provide: Router, useValue: routerSpy },
         { provide: LoginService, useValue: loginSpy }
@@ -39,7 +40,7 @@ describe('ForbiddenComponent', () => {
   it('should display 403 content', () => {
     const el: HTMLElement = fixture.nativeElement;
     expect(el.textContent).toContain('403');
-    expect(el.textContent).toContain('Accès refusé');
+    expect(el.textContent).toContain('ERRORS.FORBIDDEN_TITLE');
   });
 
   it('should go to dashboard when logged in', () => {

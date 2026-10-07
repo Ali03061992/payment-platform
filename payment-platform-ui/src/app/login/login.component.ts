@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
+import { TranslateService } from '@ngx-translate/core';
 import { LoginService } from '../services/login.service';
 import { NotificationService } from '../services/notification.service';
 import { PushNotificationService } from '../services/push-notification.service';
@@ -19,7 +20,8 @@ export class LoginComponent {
     private loginService: LoginService,
     private router: Router,
     private notificationService: NotificationService,
-    private pushNotificationService: PushNotificationService
+    private pushNotificationService: PushNotificationService,
+    private translate: TranslateService
   ) {}
 
   onSubmit(): void {
@@ -39,13 +41,13 @@ export class LoginComponent {
           },
           error: () => {
             sessionStorage.removeItem('token');
-            this.error = 'Impossible de récupérer les informations utilisateur';
+            this.error = this.translate.instant('AUTH.USER_FETCH_ERROR');
             this.loading = false;
           }
         });
       },
       error: (err) => {
-        this.error = err.error?.message || 'Identifiants invalides';
+        this.error = err.error?.message || this.translate.instant('AUTH.INVALID_CREDENTIALS');
         this.loading = false;
       }
     });

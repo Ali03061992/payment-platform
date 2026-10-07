@@ -8,6 +8,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { PwaUpdateComponent } from './pwa-update.component';
 import { SwUpdate, VersionReadyEvent } from '@angular/service-worker';
 import { Subject } from 'rxjs';
+import { TranslateStubPipe } from '../testing/translate-stubs';
 
 describe('PwaUpdateComponent', () => {
   let component: PwaUpdateComponent;
@@ -24,7 +25,7 @@ describe('PwaUpdateComponent', () => {
     swSpy.activateUpdate.and.returnValue(Promise.resolve(true));
 
     TestBed.configureTestingModule({
-      declarations: [PwaUpdateComponent],
+      declarations: [PwaUpdateComponent, TranslateStubPipe],
       providers: [
         { provide: SwUpdate, useValue: swSpy }
       ]

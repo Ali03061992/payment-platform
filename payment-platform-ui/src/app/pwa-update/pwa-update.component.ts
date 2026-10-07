@@ -7,9 +7,9 @@ import { filter } from 'rxjs/operators';
     template: `
     @if (showUpdate) {
       <div class="pwa-update-banner">
-        <span>Nouvelle version disponible !</span>
-        <button (click)="updateApp()" class="btn-update">Mettre à jour</button>
-        <button (click)="dismiss()" class="btn-dismiss">&times;</button>
+        <span>{{ 'PWA.NEW_VERSION' | translate }}</span>
+        <button (click)="updateApp()" class="btn-update">{{ 'PWA.UPDATE' | translate }}</button>
+        <button (click)="dismiss()" class="btn-dismiss" [attr.aria-label]="'PWA.DISMISS_ARIA' | translate">&times;</button>
       </div>
     }
     `,

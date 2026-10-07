@@ -13,6 +13,7 @@ import { StockManagementComponent } from './stock-management.component';
 import { StockService } from '../../services/stock.service';
 import { ToastService } from '../../services/toast.service';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { TranslateStubPipe, translateServiceProvider } from '../../testing/translate-stubs';
 
 describe('StockManagementComponent', () => {
   let component: StockManagementComponent;
@@ -33,10 +34,11 @@ describe('StockManagementComponent', () => {
     stockSpy.getStockMovements.and.returnValue(of([]));
 
     TestBed.configureTestingModule({
-    declarations: [StockManagementComponent],
+    declarations: [StockManagementComponent, TranslateStubPipe],
     schemas: [NO_ERRORS_SCHEMA],
     imports: [FormsModule],
     providers: [
+        translateServiceProvider(),
         { provide: StockService, useValue: stockSpy },
         { provide: ToastService, useValue: toastSpy },
         provideHttpClient(withInterceptorsFromDi()),
@@ -290,7 +292,7 @@ describe('StockManagementComponent', () => {
       component.movementRef = 'REF-001';
       component.movementNotes = 'notes';
       component.submitMovement();
-      expect(toast.success).toHaveBeenCalledWith('Mouvement enregistre');
+      expect(toast.success).toHaveBeenCalledWith('STOCK.MOVEMENT_SAVED');
       expect(component.showMovementModal).toBeFalse();
     });
 
@@ -308,7 +310,7 @@ describe('StockManagementComponent', () => {
       component.selectedProduct = mockProduct;
       component.movementQty = 10;
       component.submitMovement();
-      expect(toast.error).toHaveBeenCalledWith('Erreur');
+      expect(toast.error).toHaveBeenCalledWith('STOCK.ERROR');
     });
   });
 

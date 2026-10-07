@@ -21,12 +21,12 @@ export class TourComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    if (!this.onboardingService.isOnboardingCompleted()) {
-      this.steps = this.onboardingService.getTourSteps();
-      if (this.steps.length > 0) {
-        setTimeout(() => this.startTour(), 800);
-      }
-    }
+    if (this.onboardingService.isOnboardingCompleted()) return;
+    const steps = this.onboardingService.getTourSteps();
+    if (!steps || steps.length === 0) return;
+    if (!document.body) return;
+    this.steps = steps;
+    setTimeout(() => this.startTour(), 800);
   }
 
   startTour(): void {
@@ -98,6 +98,11 @@ export class TourComponent implements OnInit {
     if (this.isActive) {
       this.positionTooltip();
     }
+  }
+
+  @HostListener('document:keydown.escape')
+  onEscape(): void {
+    if (this.isActive) this.skipTour();
   }
 
   get progressPercent(): number {

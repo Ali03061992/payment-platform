@@ -1,68 +1,58 @@
 <div class="page-header">
-  <h2>Paiements par agent</h2>
+  <h2>{{ 'AGENT_PAYMENTS.TITLE' | translate }}</h2>
 </div>
-
-<!-- Date Filter -->
 <div class="filter-card">
   <div class="filter-row">
     <div class="form-group">
-      <label>Date début</label>
+      <label>{{ 'AGENT_PAYMENTS.FROM_DATE' | translate }}</label>
       <input type="date" [(ngModel)]="fromDate" class="form-control" (change)="load()">
     </div>
     <div class="form-group">
-      <label>Date fin</label>
+      <label>{{ 'AGENT_PAYMENTS.TO_DATE' | translate }}</label>
       <input type="date" [(ngModel)]="toDate" class="form-control" (change)="load()">
     </div>
     <div class="form-group filter-status">
-      <label>Statut</label>
+      <label>{{ 'PAYMENTS.STATUS' | translate }}</label>
       <select [(ngModel)]="statusFilter" class="form-control">
-        <option value="">Tous</option>
-        <option value="PENDING">En attente</option>
-        <option value="CONFIRMED">Confirmé</option>
-        <option value="REJECTED">Rejeté</option>
-        <option value="CANCELLED">Annulé</option>
+        <option value="">{{ 'AGENT_PAYMENTS.ALL' | translate }}</option>
+        <option value="PENDING">{{ 'PAYMENTS.PENDING' | translate }}</option>
+        <option value="CONFIRMED">{{ 'PAYMENTS.CONFIRMED' | translate }}</option>
+        <option value="REJECTED">{{ 'PAYMENTS.REJECTED' | translate }}</option>
+        <option value="CANCELLED">{{ 'PAYMENTS.CANCELLED' | translate }}</option>
       </select>
     </div>
   </div>
 </div>
-
-<!-- Grand Totals -->
 @if (!loading && summaries.length > 0) {
   <div class="totals-bar">
     <div class="total-item total-confirmed">
-      <div class="total-label">Total confirmé</div>
+      <div class="total-label">{{ 'AGENT_PAYMENTS.TOTAL_CONFIRMED' | translate }}</div>
       <div class="total-value green">{{ grandConfirmedTotal | number:'1.2-2' }} TND</div>
     </div>
     <div class="total-item">
-      <div class="total-label">Total période</div>
+      <div class="total-label">{{ 'AGENT_PAYMENTS.TOTAL_PERIOD' | translate }}</div>
       <div class="total-value">{{ grandTotal | number:'1.2-2' }} TND</div>
     </div>
     <div class="total-item">
-      <div class="total-label">Paiements</div>
+      <div class="total-label">{{ 'PAYMENTS.TITLE' | translate }}</div>
       <div class="total-value">{{ totalPayments }}</div>
     </div>
   </div>
 }
-
-<!-- Loading -->
 @if (loading) {
   <div class="loading">
     <div class="spinner"></div>
-    <span>Chargement...</span>
+    <span>{{ 'PAYMENTS.LOADING' | translate }}</span>
   </div>
 }
-
-<!-- Empty -->
 @if (!loading && summaries.length === 0) {
   <div class="empty">
-    <p>Aucun paiement trouvé pour cette période</p>
+    <p>{{ 'AGENT_PAYMENTS.EMPTY_PERIOD' | translate }}</p>
   </div>
 }
-
-<!-- Agent Cards -->
 @if (!loading && summaries.length > 0) {
   <div class="agent-list">
-    @for (agent of summaries; track agent) {
+    @for (agent of sortedSummaries; track agent) {
       <div class="agent-card"
         [class.expanded]="expandedAgent === agent.userId">
         <div class="agent-header" (click)="toggleAgent(agent.userId)">
@@ -70,36 +60,34 @@
             <div class="agent-avatar">{{ agent.username.charAt(0) }}</div>
             <div class="agent-details">
               <div class="agent-name">{{ agent.username }}</div>
-              <div class="agent-meta">{{ agent.paymentCount }} paiement(s)</div>
+              <div class="agent-meta">{{ 'AGENT_PAYMENTS.PAYMENT_COUNT' | translate:{count: agent.paymentCount} }}</div>
             </div>
           </div>
           <div class="agent-totals">
             <div class="confirmed-amount">
-              <span class="confirmed-label">Confirmé</span>
+              <span class="confirmed-label">{{ 'PAYMENTS.CONFIRMED' | translate }}</span>
               <span class="confirmed-value">{{ agent.confirmedTotal | number:'1.2-2' }} {{ agent.currency }}</span>
             </div>
             <div class="period-amount">
-              <span class="period-label">Total</span>
+              <span class="period-label">{{ 'ORDERS.TOTAL' | translate }}</span>
               <span class="period-value">{{ agent.totalAmount | number:'1.2-2' }} {{ agent.currency }}</span>
             </div>
           </div>
           <div class="expand-icon">{{ expandedAgent === agent.userId ? '▲' : '▼' }}</div>
         </div>
-        <!-- Agent Detail (expandable) -->
         @if (expandedAgent === agent.userId) {
           <div class="agent-detail">
-            <!-- Desktop Table -->
             <div class="detail-table hide-mobile">
               <table>
                 <thead>
                   <tr>
-                    <th>Référence</th>
-                    <th>Boutique</th>
-                    <th>Créé par</th>
-                    <th>Montant</th>
-                    <th>Statut</th>
-                    <th>Traité par</th>
-                    <th>Date</th>
+                    <th class="sortable-th" (click)="onSort('reference')" (keydown.enter)="onSort('reference')" tabindex="0" [attr.aria-sort]="ariaSort('reference')">{{ 'PAYMENTS.REFERENCE' | translate }} <span class="sort-indicator" aria-hidden="true">{{ sortIndicator('reference') }}</span></th>
+                    <th class="sortable-th" (click)="onSort('shopName')" (keydown.enter)="onSort('shopName')" tabindex="0" [attr.aria-sort]="ariaSort('shopName')">{{ 'PAYMENTS.SHOP' | translate }} <span class="sort-indicator" aria-hidden="true">{{ sortIndicator('shopName') }}</span></th>
+                    <th class="sortable-th" (click)="onSort('createdByName')" (keydown.enter)="onSort('createdByName')" tabindex="0" [attr.aria-sort]="ariaSort('createdByName')">{{ 'PAYMENTS.CREATED_BY' | translate }} <span class="sort-indicator" aria-hidden="true">{{ sortIndicator('createdByName') }}</span></th>
+                    <th class="sortable-th" (click)="onSort('amount')" (keydown.enter)="onSort('amount')" tabindex="0" [attr.aria-sort]="ariaSort('amount')">{{ 'PAYMENTS.AMOUNT' | translate }} <span class="sort-indicator" aria-hidden="true">{{ sortIndicator('amount') }}</span></th>
+                    <th class="sortable-th" (click)="onSort('status')" (keydown.enter)="onSort('status')" tabindex="0" [attr.aria-sort]="ariaSort('status')">{{ 'PAYMENTS.STATUS' | translate }} <span class="sort-indicator" aria-hidden="true">{{ sortIndicator('status') }}</span></th>
+                    <th>{{ 'PAYMENTS.PROCESSED_BY' | translate }}</th>
+                    <th class="sortable-th" (click)="onSort('createdAt')" (keydown.enter)="onSort('createdAt')" tabindex="0" [attr.aria-sort]="ariaSort('createdAt')">{{ 'ORDERS.DATE' | translate }} <span class="sort-indicator" aria-hidden="true">{{ sortIndicator('createdAt') }}</span></th>
                     <th></th>
                   </tr>
                 </thead>
@@ -111,7 +99,7 @@
                       <td>{{ p.createdByName }}</td>
                       <td class="amount-cell">{{ p.amount | number:'1.2-2' }} {{ p.currency }}</td>
                       <td>
-                        <span class="payment-badge" [ngClass]="p.status.toLowerCase()">{{ statusLabel(p.status) }}</span>
+                        <span class="payment-badge" [ngClass]="p.status.toLowerCase()">{{ p.status | statusLabel }}</span>
                       </td>
                       <td>
                         @if (p.status === 'CONFIRMED') {
@@ -129,44 +117,43 @@
                       </td>
                       <td>{{ p.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
                       <td>
-                        <a [routerLink]="['/dashboard/payments', p.id]" class="btn btn-sm btn-secondary">Voir</a>
+                        <a [routerLink]="['/dashboard/payments', p.id]" class="btn btn-sm btn-secondary">{{ 'AGENT_PAYMENTS.VIEW' | translate }}</a>
                       </td>
                     </tr>
                   }
                 </tbody>
               </table>
             </div>
-            <!-- Mobile Cards -->
             <div class="payment-cards show-mobile">
               @for (p of getAgentPayments(agent); track p) {
                 <div class="payment-card" [routerLink]="['/dashboard/payments', p.id]">
                   <div class="payment-card-header">
                     <span class="payment-reference">{{ p.reference }}</span>
-                    <span class="payment-badge" [ngClass]="p.status.toLowerCase()">{{ statusLabel(p.status) }}</span>
+                    <span class="payment-badge" [ngClass]="p.status.toLowerCase()">{{ p.status | statusLabel }}</span>
                   </div>
                   <div class="payment-card-body">
                     <div class="payment-row">
-                      <span class="payment-label">Montant</span>
+                      <span class="payment-label">{{ 'PAYMENTS.AMOUNT' | translate }}</span>
                       <span class="payment-amount">{{ p.amount | number:'1.2-2' }} {{ p.currency }}</span>
                     </div>
                     <div class="payment-row">
-                      <span class="payment-label">Boutique</span>
+                      <span class="payment-label">{{ 'PAYMENTS.SHOP' | translate }}</span>
                       <span class="payment-value">{{ p.shopName }}</span>
                     </div>
                     <div class="payment-row">
-                      <span class="payment-label">Créé par</span>
+                      <span class="payment-label">{{ 'PAYMENTS.CREATED_BY' | translate }}</span>
                       <span class="payment-value">{{ p.createdByName }}</span>
                     </div>
                     @if (p.status !== 'PENDING') {
                       <div class="payment-row">
-                        <span class="payment-label">Traité par</span>
+                        <span class="payment-label">{{ 'PAYMENTS.PROCESSED_BY' | translate }}</span>
                         <span class="payment-value">
                           {{ p.confirmedByName || p.rejectedByName || p.cancelledByName }}
                         </span>
                       </div>
                     }
                     <div class="payment-row">
-                      <span class="payment-label">Date</span>
+                      <span class="payment-label">{{ 'ORDERS.DATE' | translate }}</span>
                       <span class="payment-value">{{ p.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
                     </div>
                   </div>
@@ -175,11 +162,11 @@
             </div>
             <div class="agent-total-row">
               <div class="agent-total-item">
-                <strong>Total confirmé :</strong>
+                <strong>{{ 'AGENT_PAYMENTS.TOTAL_CONFIRMED_LABEL' | translate }}</strong>
                 <span class="total-amount green">{{ agent.confirmedTotal | number:'1.2-2' }} {{ agent.currency }}</span>
               </div>
               <div class="agent-total-item">
-                <strong>Total période :</strong>
+                <strong>{{ 'AGENT_PAYMENTS.TOTAL_PERIOD_LABEL' | translate }}</strong>
                 <span class="total-amount">{{ agent.totalAmount | number:'1.2-2' }} {{ agent.currency }}</span>
               </div>
             </div>

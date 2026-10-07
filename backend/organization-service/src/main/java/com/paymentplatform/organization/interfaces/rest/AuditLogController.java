@@ -56,7 +56,8 @@ public class AuditLogController {
             spec = spec.and((root, query, cb) -> cb.lessThan(root.get("timestamp"), to));
         }
 
-        PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "timestamp"));
+        PageRequest pageRequest = PageRequest.of(Math.max(0, page),
+                Math.min(Math.max(1, size), 100), Sort.by(Sort.Direction.DESC, "timestamp"));
         Page<AuditLogEntity> result = auditLogRepository.findAll(spec, pageRequest);
 
         Page<AuditLogEntry> dtoPage = result.map(AuditLogEntry::from);

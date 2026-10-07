@@ -1,8 +1,12 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
+import { TranslateService } from '@ngx-translate/core';
+import { LoginService } from '../../services/login.service';
 import { NotificationService } from '../../services/notification.service';
 import { Notification, NotificationPage } from '../../models/notification.model';
 import { Subscription } from 'rxjs';
+import { timeAgo } from '../../pipes/time-ago.pipe';
+import { sortItems, toggleSortState, ariaSortFor, sortIndicatorFor, SortState } from '../../models/page.model';
 
 @Component({
   selector: 'app-notifications',
@@ -15,9 +19,10 @@ export class NotificationsComponent implements OnInit, OnDestroy {
   loading = true;
   filterType = '';
   currentPage = 0;
-  pageSize = 20;
+  pageSize = 10;
   totalElements = 0;
   totalPages = 0;
+  sort: SortState = { field: null, direction: 'asc' };
   private subscriptions = new Subscription();
 
   typeOptions = [
@@ -29,8 +34,16 @@ export class NotificationsComponent implements OnInit, OnDestroy {
 
   constructor(
     private notificationService: NotificationService,
-    private router: Router
+    private router: Router,
+    private translate: TranslateService,
+    private loginService: LoginService
   ) {}
+
+  /** Boutique (admin/agent) : les pages fournisseur rendraient 403. */
+  isShopUser(): boolean {
+    const roles = this.loginService.getCurrentUser()?.roles || [];
+    return roles.includes('SHOP_ADMIN') || roles.includes('SHOP_AGENT');
+  }
 
   ngOnInit(): void {
     this.load();
@@ -77,6 +90,22 @@ export class NotificationsComponent implements OnInit, OnDestroy {
     this.pageSize = size;
     this.currentPage = 0;
     this.load();
+  }
+
+  onSort(field: string): void {
+    this.sort = toggleSortState(this.sort, field);
+  }
+
+  ariaSort(field: string): 'ascending' | 'descending' | 'none' {
+    return ariaSortFor(field, this.sort);
+  }
+
+  sortIndicator(field: string): string {
+    return sortIndicatorFor(field, this.sort);
+  }
+
+  get sortedNotifications(): Notification[] {
+    return sortItems(this.notifications, this.sort.field, this.sort.direction);
   }
 
   nextPage(): void {
@@ -130,11 +159,27 @@ export class NotificationsComponent implements OnInit, OnDestroy {
     if (notif.relatedEntityType === 'PAYMENT' && notif.relatedEntityId) {
       this.router.navigate(['/dashboard/payments', notif.relatedEntityId]);
     } else if (notif.relatedEntityType === 'ORDER' && notif.relatedEntityId) {
-      this.router.navigate(['/dashboard/supplier/orders'], { queryParams: { ref: notif.relatedEntityId } });
+      // Boutique : détail commande boutique (la liste fournisseur rendrait 403).
+      if (this.isShopUser()) {
+        this.router.navigate(['/dashboard/shop/orders', notif.relatedEntityId]);
+      } else {
+        this.router.navigate(['/dashboard/supplier/orders'], { queryParams: { ref: notif.relatedEntityId } });
+      }
     } else if (notif.relatedEntityType === 'DELIVERY' && notif.relatedEntityId) {
-      this.router.navigate(['/dashboard/supplier/deliveries'], { queryParams: { orderId: notif.relatedEntityId } });
+      // Boutique : page livraisons boutique (la page fournisseur rendrait 403).
+      const target = this.isShopUser() ? '/dashboard/shop/deliveries' : '/dashboard/supplier/deliveries';
+      this.router.navigate([target], { queryParams: { orderId: notif.relatedEntityId } });
     } else if (notif.relatedEntityType === 'SHOP_ORDER' && notif.relatedEntityId) {
       this.router.navigate(['/dashboard/shop/orders', notif.relatedEntityId]);
+    } else if (notif.relatedEntityType === 'DISPUTE' && notif.relatedEntityId) {
+      const roles = this.loginService.getCurrentUser()?.roles || [];
+      if (roles.includes('SYSTEM_ADMIN')) {
+        this.router.navigate(['/dashboard/admin/disputes', notif.relatedEntityId]);
+      } else if (this.isShopUser()) {
+        this.router.navigate(['/dashboard/shop/disputes', notif.relatedEntityId]);
+      } else {
+        this.router.navigate(['/dashboard/supplier/orders']);
+      }
     }
   }
 
@@ -157,14 +202,14 @@ export class NotificationsComponent implements OnInit, OnDestroy {
 
   typeLabel(type: string): string {
     const n = this.notifications.find(x => x.type === type);
-    if (n?.relatedEntityType === 'ORDER') return 'Commande';
-    if (n?.relatedEntityType === 'PAYMENT') return 'Paiement';
-    if (n?.relatedEntityType === 'DELIVERY') return 'Livraison';
-    if (n?.relatedEntityType === 'SHOP_ORDER') return 'Commande boutique';
-    if (type.includes('PAYMENT')) return 'Paiement';
-    if (type.includes('ORDER')) return 'Commande';
-    if (type.includes('DELIVERY')) return 'Livraison';
-    return 'Autre';
+    if (n?.relatedEntityType === 'ORDER') return this.translate.instant('NOTIFICATIONS.TYPE_ORDER');
+    if (n?.relatedEntityType === 'PAYMENT') return this.translate.instant('NOTIFICATIONS.TYPE_PAYMENT');
+    if (n?.relatedEntityType === 'DELIVERY') return this.translate.instant('NOTIFICATIONS.TYPE_DELIVERY');
+    if (n?.relatedEntityType === 'SHOP_ORDER') return this.translate.instant('NOTIFICATIONS.TYPE_SHOP_ORDER');
+    if (type.includes('PAYMENT')) return this.translate.instant('NOTIFICATIONS.TYPE_PAYMENT');
+    if (type.includes('ORDER')) return this.translate.instant('NOTIFICATIONS.TYPE_ORDER');
+    if (type.includes('DELIVERY')) return this.translate.instant('NOTIFICATIONS.TYPE_DELIVERY');
+    return this.translate.instant('NOTIFICATIONS.TYPE_OTHER');
   }
 
   typeBadgeClass(type: string): string {
@@ -175,16 +220,7 @@ export class NotificationsComponent implements OnInit, OnDestroy {
   }
 
   getTimeAgo(dateStr: string): string {
-    const now = Date.now();
-    const then = new Date(dateStr).getTime();
-    const diff = now - then;
-    const mins = Math.floor(diff / 60000);
-    if (mins < 1) return 'à l\'instant';
-    if (mins < 60) return `il y a ${mins}min`;
-    const hours = Math.floor(mins / 60);
-    if (hours < 24) return `il y a ${hours}h`;
-    const days = Math.floor(hours / 24);
-    return `il y a ${days}j`;
+    return timeAgo(dateStr);
   }
 
   get unreadCount(): number {

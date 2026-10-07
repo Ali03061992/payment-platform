@@ -8,6 +8,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { NotFoundComponent } from './not-found.component';
 import { LoginService } from '../../services/login.service';
+import { TranslateStubPipe } from '../../testing/translate-stubs';
 
 describe('NotFoundComponent', () => {
   let component: NotFoundComponent;
@@ -19,7 +20,7 @@ describe('NotFoundComponent', () => {
     const routerSpy = jasmine.createSpyObj('Router', ['navigate']);
     const loginSpy = jasmine.createSpyObj('LoginService', ['isLoggedIn']);
     TestBed.configureTestingModule({
-      declarations: [NotFoundComponent],
+      declarations: [NotFoundComponent, TranslateStubPipe],
       providers: [
         { provide: Router, useValue: routerSpy },
         { provide: LoginService, useValue: loginSpy }
@@ -39,7 +40,7 @@ describe('NotFoundComponent', () => {
   it('should display 404 content', () => {
     const el: HTMLElement = fixture.nativeElement;
     expect(el.textContent).toContain('404');
-    expect(el.textContent).toContain('introuvable');
+    expect(el.textContent).toContain('ERRORS.NOTFOUND_TITLE');
   });
 
   it('should go to dashboard when logged in', () => {

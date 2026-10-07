@@ -3,6 +3,8 @@ import { LoginService } from '../../services/login.service';
 import { OrderService } from '../../services/order.service';
 import { User } from '../../models/user.model';
 import { Order } from '../../models/order.model';
+import { statusLabelFr } from '../../pipes/status-label.pipe';
+import { TranslateService } from '@ngx-translate/core';
 
 @Component({
     selector: 'app-dashboard-agent',
@@ -22,7 +24,8 @@ export class DashboardAgentComponent implements OnInit {
 
   constructor(
     private loginService: LoginService,
-    private orderService: OrderService
+    private orderService: OrderService,
+    private translate: TranslateService
   ) {}
 
   ngOnInit(): void {
@@ -58,22 +61,13 @@ export class DashboardAgentComponent implements OnInit {
 
   getGreeting(): string {
     const hour = new Date().getHours();
-    if (hour < 12) return 'Bonjour';
-    if (hour < 18) return 'Bon après-midi';
-    return 'Bonsoir';
+    if (hour < 12) return this.translate.instant('DASHBOARD.MORNING');
+    if (hour < 18) return this.translate.instant('DASHBOARD.AFTERNOON');
+    return this.translate.instant('DASHBOARD.EVENING');
   }
 
   getStatusLabel(status: string): string {
-    const labels: Record<string, string> = {
-      'PENDING': 'En attente',
-      'CONFIRMED': 'Confirmée',
-      'PREPARING': 'En préparation',
-      'READY': 'Prête',
-      'ASSIGNED': 'Assignée',
-      'DELIVERED': 'Livrée',
-      'CANCELLED': 'Annulée'
-    };
-    return labels[status] || status;
+    return statusLabelFr(status);
   }
 
   getStatusClass(status: string): string {

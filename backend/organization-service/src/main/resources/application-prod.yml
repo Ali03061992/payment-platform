@@ -1,4 +1,6 @@
 spring:
+  liquibase:
+    contexts: prod
   datasource:
     url: jdbc:mysql://${MYSQL_HOST}:${MYSQL_PORT:3306}/organization_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&sendStringParametersAsUnicode=false
     username: ${MYSQL_USER}

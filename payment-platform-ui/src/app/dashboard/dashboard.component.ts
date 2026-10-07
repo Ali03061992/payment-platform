@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { LoginService } from '../services/login.service';
 import { User } from '../models/user.model';
+import { TranslateService } from '@ngx-translate/core';
 
 @Component({
     selector: 'app-dashboard',
@@ -12,7 +13,7 @@ export class DashboardComponent implements OnInit {
   user: User | null = null;
   activeRole: string | null = null;
 
-  constructor(private loginService: LoginService) {}
+  constructor(private loginService: LoginService, private translate: TranslateService) {}
 
   ngOnInit(): void {
     this.user = this.loginService.getCurrentUser();
@@ -31,8 +32,8 @@ export class DashboardComponent implements OnInit {
 
   getGreeting(): string {
     const hour = new Date().getHours();
-    if (hour < 12) return 'Bonjour';
-    if (hour < 18) return 'Bon après-midi';
-    return 'Bonsoir';
+    if (hour < 12) return this.translate.instant('DASHBOARD.MORNING');
+    if (hour < 18) return this.translate.instant('DASHBOARD.AFTERNOON');
+    return this.translate.instant('DASHBOARD.EVENING');
   }
 }

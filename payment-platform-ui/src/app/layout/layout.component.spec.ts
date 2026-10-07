@@ -7,12 +7,17 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { Router } from '@angular/router';
-import { NO_ERRORS_SCHEMA } from '@angular/core';
+import { NO_ERRORS_SCHEMA, Pipe, PipeTransform } from '@angular/core';
 import { of, Subject } from 'rxjs';
 import { LayoutComponent } from './layout.component';
 import { LoginService } from '../services/login.service';
 import { NotificationService } from '../services/notification.service';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+
+@Pipe({ name: 'translate', standalone: false })
+class TranslateStubPipe implements PipeTransform {
+  transform(value: string): string { return value; }
+}
 
 describe('LayoutComponent', () => {
   let component: LayoutComponent;
@@ -37,7 +42,7 @@ describe('LayoutComponent', () => {
     loginSpy.getCurrentUser.and.returnValue({ id: 1, username: 'admin', firstName: 'A', lastName: 'B', roles: ['SYSTEM_ADMIN'], organizationId: 1 } as any);
 
     TestBed.configureTestingModule({
-    declarations: [LayoutComponent],
+    declarations: [LayoutComponent, TranslateStubPipe],
     schemas: [NO_ERRORS_SCHEMA],
     imports: [],
     providers: [

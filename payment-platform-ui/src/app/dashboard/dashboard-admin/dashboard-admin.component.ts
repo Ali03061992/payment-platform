@@ -7,6 +7,7 @@ import { OrderService } from '../../services/order.service';
 import { User } from '../../models/user.model';
 import { OrganizationStats } from '../../models/organization.model';
 import { PaymentStats } from '../../models/payment.model';
+import { TranslateService } from '@ngx-translate/core';
 
 @Component({
     selector: 'app-dashboard-admin',
@@ -27,7 +28,8 @@ export class DashboardAdminComponent implements OnInit {
     private userService: UserService,
     private organizationService: OrganizationService,
     private paymentService: PaymentService,
-    private orderService: OrderService
+    private orderService: OrderService,
+    private translate: TranslateService
   ) {}
 
   ngOnInit(): void {
@@ -84,8 +86,8 @@ export class DashboardAdminComponent implements OnInit {
 
   getGreeting(): string {
     const hour = new Date().getHours();
-    if (hour < 12) return 'Bonjour';
-    if (hour < 18) return 'Bon après-midi';
-    return 'Bonsoir';
+    if (hour < 12) return this.translate.instant('DASHBOARD.MORNING');
+    if (hour < 18) return this.translate.instant('DASHBOARD.AFTERNOON');
+    return this.translate.instant('DASHBOARD.EVENING');
   }
 }

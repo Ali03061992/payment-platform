@@ -1,11 +1,11 @@
 <div class="page-header">
-  <h2>Alertes de stock bas</h2>
+  <h2>{{ 'STOCK.ALERTS_TITLE' | translate }}</h2>
 </div>
 
 @if (loading) {
   <div class="loading">
     <div class="spinner"></div>
-    <span>Chargement des alertes...</span>
+    <span>{{ 'STOCK.ALERTS_LOADING' | translate }}</span>
   </div>
 }
 
@@ -13,12 +13,12 @@
   @if (alerts.length === 0) {
     <div class="empty-state">
       <div class="empty-icon"><app-icon name="check-circle" [size]="40"></app-icon></div>
-      <h3>Aucune alerte de stock</h3>
-      <p>Tous vos produits ont un stock suffisant.</p>
+      <h3>{{ 'STOCK.ALERTS_EMPTY_TITLE' | translate }}</h3>
+      <p>{{ 'STOCK.ALERTS_EMPTY_HINT' | translate }}</p>
     </div>
   } @else {
     <div class="alerts-summary">
-      <span class="alert-count">{{ alerts.length }} produit(s) en alerte</span>
+      <span class="alert-count">{{ alerts.length }} {{ 'STOCK.ALERTS_COUNT_SUFFIX' | translate }}</span>
     </div>
     <div class="alerts-list">
       @for (product of alerts; track product.id) {
@@ -34,21 +34,21 @@
           </div>
           <div class="alert-details">
             <div class="detail-item">
-              <span class="detail-label">Disponible</span>
+              <span class="detail-label">{{ 'STOCK.ALERTS_AVAILABLE' | translate }}</span>
               <span class="detail-value" [class.critical-text]="getAvailableQty(product) <= 0">
                 {{ getAvailableQty(product) }} {{ product.unit }}
               </span>
             </div>
             <div class="detail-item">
-              <span class="detail-label">Seuil min</span>
+              <span class="detail-label">{{ 'STOCK.COL_MIN_QTY' | translate }}</span>
               <span class="detail-value">{{ product.minQuantity }} {{ product.unit }}</span>
             </div>
             <div class="detail-item">
-              <span class="detail-label">Déficit</span>
+              <span class="detail-label">{{ 'STOCK.ALERTS_DEFICIT' | translate }}</span>
               <span class="detail-value deficit">{{ getDeficit(product) }} {{ product.unit }}</span>
             </div>
             <div class="detail-item">
-              <span class="detail-label">Réserve</span>
+              <span class="detail-label">{{ 'STOCK.ALERTS_RESERVED' | translate }}</span>
               <span class="detail-value">{{ product.reservedQty }} {{ product.unit }}</span>
             </div>
           </div>

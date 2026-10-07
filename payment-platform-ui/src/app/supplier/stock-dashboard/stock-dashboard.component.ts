@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
+import { TranslateService } from '@ngx-translate/core';
 import { StockService } from '../../services/stock.service';
 import { Product, StockMovement } from '../../models/stock.model';
-import { paginateItems } from '../../models/page.model';
+import { paginateItems, sortItems, toggleSortState, ariaSortFor, sortIndicatorFor, SortState } from '../../models/page.model';
 import { ToastService } from '../../services/toast.service';
 
 @Component({
@@ -21,9 +22,11 @@ export class StockDashboardComponent implements OnInit {
   lowStock = 0;
   outOfStock = 0;
   currentPage = 0;
-  pageSize = 20;
+  pageSize = 10;
   historyPage = 0;
   historySize = 10;
+  sort: SortState = { field: null, direction: 'asc' };
+  historySort: SortState = { field: null, direction: 'asc' };
 
   showMovementModal = false;
   selectedProduct: Product | null = null;
@@ -38,7 +41,7 @@ export class StockDashboardComponent implements OnInit {
   historyMovements: StockMovement[] = [];
   loadingHistory = false;
 
-  constructor(private stockService: StockService, private toast: ToastService) {}
+  constructor(private stockService: StockService, private toast: ToastService, private translate: TranslateService) {}
 
   ngOnInit(): void {
     this.loadData();
@@ -53,16 +56,42 @@ export class StockDashboardComponent implements OnInit {
         this.computeStats();
         this.loading = false;
       },
-      error: (err: any) => { this.toast.error(err.error?.message || 'Erreur de chargement'); this.loading = false; }
+      error: (err: { error?: { message?: string }; status?: number; statusText?: string; message?: string }) => { this.toast.error(err.error?.message || this.translate.instant('STOCK.LOAD_ERROR')); this.loading = false; }
     });
   }
 
   get pagedProducts(): Product[] {
-    return paginateItems(this.products, this.currentPage, this.pageSize);
+    return paginateItems(sortItems(this.products, this.sort.field, this.sort.direction), this.currentPage, this.pageSize);
   }
 
   get pagedHistory(): StockMovement[] {
-    return paginateItems(this.historyMovements, this.historyPage, this.historySize);
+    return paginateItems(sortItems(this.historyMovements, this.historySort.field, this.historySort.direction), this.historyPage, this.historySize);
+  }
+
+  onSort(field: string): void {
+    this.sort = toggleSortState(this.sort, field);
+    this.currentPage = 0;
+  }
+
+  ariaSort(field: string): 'ascending' | 'descending' | 'none' {
+    return ariaSortFor(field, this.sort);
+  }
+
+  sortIndicator(field: string): string {
+    return sortIndicatorFor(field, this.sort);
+  }
+
+  onHistorySort(field: string): void {
+    this.historySort = toggleSortState(this.historySort, field);
+    this.historyPage = 0;
+  }
+
+  historyAriaSort(field: string): 'ascending' | 'descending' | 'none' {
+    return ariaSortFor(field, this.historySort);
+  }
+
+  historySortIndicator(field: string): string {
+    return sortIndicatorFor(field, this.historySort);
   }
 
   onPageChange(page: number): void {
@@ -115,12 +144,12 @@ export class StockDashboardComponent implements OnInit {
       notes: this.movementNotes
     }).subscribe({
       next: () => {
-        this.toast.success('Mouvement de stock enregistré');
+        this.toast.success(this.translate.instant('STOCK.MOVEMENT_SAVED'));
         this.closeMovement();
         this.savingMovement = false;
         this.loadData();
       },
-      error: (err: any) => { this.toast.error(err.error?.message || 'Erreur'); this.savingMovement = false; }
+      error: (err: { error?: { message?: string }; status?: number; statusText?: string; message?: string }) => { this.toast.error(err.error?.message || this.translate.instant('STOCK.ERROR')); this.savingMovement = false; }
     });
   }
 
@@ -142,8 +171,9 @@ export class StockDashboardComponent implements OnInit {
   }
 
   movementTypeLabel(type: string): string {
-    const map: Record<string, string> = { IN: 'Entrée', OUT: 'Sortie', ADJUSTMENT: 'Ajustement' };
-    return map[type] || type;
+    const keys: Record<string, string> = { IN: 'STOCK.MOVEMENT_IN', OUT: 'STOCK.MOVEMENT_OUT', ADJUSTMENT: 'STOCK.MOVEMENT_ADJUSTMENT' };
+    const key = keys[type];
+    return key ? this.translate.instant(key) : type;
   }
 
   movementTypeClass(type: string): string {

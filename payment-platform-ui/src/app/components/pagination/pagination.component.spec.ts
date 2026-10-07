@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { PaginationComponent } from './pagination.component';
+import { TranslateStubPipe } from '../../testing/translate-stubs';
 
 describe('PaginationComponent', () => {
   let component: PaginationComponent;
@@ -8,7 +9,7 @@ describe('PaginationComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [PaginationComponent],
+      declarations: [PaginationComponent, TranslateStubPipe],
       imports: [FormsModule]
     }).compileComponents();
     fixture = TestBed.createComponent(PaginationComponent);
