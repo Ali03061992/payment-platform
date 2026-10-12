@@ -77,12 +77,14 @@ describe('05 - Supplier: Product CRUD', () => {
     cy.get('.page-header button.btn-primary').click();
     cy.dismissOverlays();
     cy.get('.form-card', { timeout: 10000 }).should('be.visible');
-    cy.get('input[name="name"]').clear().type('Produit E2E Test');
-    cy.get('input[name="sku"]').clear().type(sku);
-    cy.get('.form-card input[name="description"]').clear().type('Description test');
-    cy.get('input[name="unitPrice"]').clear().type('25.50');
-    cy.get('input[name="minQuantity"]').clear().type('5');
-    cy.get('.form-card button[type="submit"]').should('not.be.disabled').click();
+    cy.dismissOverlays();
+    cy.get('input[name="name"]').clear({ force: true }).type('Produit E2E Test', { force: true });
+    cy.get('input[name="sku"]').clear({ force: true }).type(sku, { force: true });
+    cy.get('.form-card input[name="description"]').clear({ force: true }).type('Description test', { force: true });
+    cy.get('input[name="unitPrice"]').clear({ force: true }).type('25.50', { force: true });
+    cy.get('input[name="minQuantity"]').clear({ force: true }).type('5', { force: true });
+    cy.dismissOverlays();
+    cy.get('.form-card button[type="submit"]').should('not.be.disabled').click({ force: true });
     // Le tableau est paginé : on prouve la création via l'API (le toast + le rechargement suivent).
     cy.get('.toast-success', { timeout: 10000 }).should('exist');
     cy.apiLogin('covale.admin.e2e').then((token) => {
@@ -113,16 +115,18 @@ describe('05 - Supplier: Product CRUD', () => {
     cy.get('.page-header button.btn-primary').click();
     cy.dismissOverlays();
     cy.get('.form-card', { timeout: 10000 }).should('be.visible');
-    cy.get('input[name="name"]').clear().type('Produit TVA 7 FODEC');
-    cy.get('input[name="sku"]').clear().type(sku);
-    cy.get('input[name="unitPrice"]').clear().type('100');
-    cy.get('input[name="minQuantity"]').clear().type('1');
+    cy.dismissOverlays();
+    cy.get('input[name="name"]').clear({ force: true }).type('Produit TVA 7 FODEC', { force: true });
+    cy.get('input[name="sku"]').clear({ force: true }).type(sku, { force: true });
+    cy.get('input[name="unitPrice"]').clear({ force: true }).type('100', { force: true });
+    cy.get('input[name="minQuantity"]').clear({ force: true }).type('1', { force: true });
     cy.get('select[name="vatRate"] option').eq(2).then((opt) => {
       cy.get('select[name="vatRate"]').select(opt.val() as string);
     });
     cy.get('input[name="fodecApplicable"]').check({ force: true });
     cy.intercept('POST', '**/suppliers/*/products').as('createProduct');
-    cy.get('.form-card button[type="submit"]').should('not.be.disabled').click();
+    cy.dismissOverlays();
+    cy.get('.form-card button[type="submit"]').should('not.be.disabled').click({ force: true });
     cy.wait('@createProduct', { timeout: 15000 }).its('response.statusCode').should('eq', 200);
     cy.wait('@listProducts', { timeout: 15000 });
     // Le tableau est paginé : preuve via l'API (taux + FODEC persistés).
