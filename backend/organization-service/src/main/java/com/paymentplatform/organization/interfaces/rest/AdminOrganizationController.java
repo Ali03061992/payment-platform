@@ -3,9 +3,11 @@ package com.paymentplatform.organization.interfaces.rest;
 import com.paymentplatform.organization.application.dto.CreateOrganizationRequest;
 import com.paymentplatform.organization.application.dto.OrganizationResponse;
 import com.paymentplatform.organization.application.dto.PageResponse;
+import com.paymentplatform.organization.application.dto.UpdateOrganizationRequest;
 import com.paymentplatform.organization.application.usecase.CreateOrganizationUseCase;
 import com.paymentplatform.organization.application.usecase.OrganizationQueryUseCase;
 import com.paymentplatform.organization.application.usecase.OrganizationStatusUseCase;
+import com.paymentplatform.organization.application.usecase.UpdateOrganizationFiscalProfileUseCase;
 import com.paymentplatform.shared.infrastructure.security.CurrentUser;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -22,13 +24,16 @@ public class AdminOrganizationController {
     private final CreateOrganizationUseCase createOrg;
     private final OrganizationQueryUseCase queryOrg;
     private final OrganizationStatusUseCase statusOrg;
+    private final UpdateOrganizationFiscalProfileUseCase fiscalProfileOrg;
 
     public AdminOrganizationController(CreateOrganizationUseCase createOrg,
                                        OrganizationQueryUseCase queryOrg,
-                                       OrganizationStatusUseCase statusOrg) {
+                                       OrganizationStatusUseCase statusOrg,
+                                       UpdateOrganizationFiscalProfileUseCase fiscalProfileOrg) {
         this.createOrg = createOrg;
         this.queryOrg = queryOrg;
         this.statusOrg = statusOrg;
+        this.fiscalProfileOrg = fiscalProfileOrg;
     }
 
     @PostMapping("/suppliers")
@@ -37,7 +42,12 @@ public class AdminOrganizationController {
             @Valid @RequestBody CreateOrganizationRequest request) {
         var current = CurrentUser.get();
         return ResponseEntity.status(201).body(createOrg.execute(
-                new CreateOrganizationRequest(request.name(), "SUPPLIER"), current.userId()));
+                new CreateOrganizationRequest(request.name(), "SUPPLIER",
+                        request.matriculeFiscal(), request.patente(), request.address(),
+                        request.fiscalRegime(), request.suspensionAttestationNumber(),
+                        request.suspensionAttestationDate(), request.suspensionExpiryDate(),
+                        request.tejIdentifier(), request.defaultWithholdingNature()),
+                current.userId()));
     }
 
     @GetMapping("/suppliers")
@@ -74,7 +84,32 @@ public class AdminOrganizationController {
             @Valid @RequestBody CreateOrganizationRequest request) {
         var current = CurrentUser.get();
         return ResponseEntity.status(201).body(createOrg.execute(
-                new CreateOrganizationRequest(request.name(), "SHOP"), current.userId()));
+                new CreateOrganizationRequest(request.name(), "SHOP",
+                        request.matriculeFiscal(), request.patente(), request.address(),
+                        request.fiscalRegime(), request.suspensionAttestationNumber(),
+                        request.suspensionAttestationDate(), request.suspensionExpiryDate(),
+                        request.tejIdentifier(), request.defaultWithholdingNature()),
+                current.userId()));
+    }
+
+    /**
+     * Met à jour le profil fiscal (MF, patente, adresse, régime, attestation).
+     * Sert aussi à régulariser les organisations créées sans MF.
+     */
+    @PatchMapping("/suppliers/{id}/fiscal-profile")
+    @PreAuthorize("hasAuthority('ADMIN_MANAGE_ORGANIZATIONS')")
+    public ResponseEntity<OrganizationResponse> updateSupplierFiscalProfile(
+            @PathVariable UUID id, @Valid @RequestBody UpdateOrganizationRequest request) {
+        var current = CurrentUser.get();
+        return ResponseEntity.ok(fiscalProfileOrg.execute(id, request, current.userId()));
+    }
+
+    @PatchMapping("/shops/{id}/fiscal-profile")
+    @PreAuthorize("hasAuthority('ADMIN_MANAGE_ORGANIZATIONS')")
+    public ResponseEntity<OrganizationResponse> updateShopFiscalProfile(
+            @PathVariable UUID id, @Valid @RequestBody UpdateOrganizationRequest request) {
+        var current = CurrentUser.get();
+        return ResponseEntity.ok(fiscalProfileOrg.execute(id, request, current.userId()));
     }
 
     @GetMapping("/shops")

@@ -126,9 +126,19 @@ describe('12 - API: Admin Organizations', () => {
   it('POST /api/admin/suppliers - should create supplier', () => {
     cy.apiLogin('system.admin').then((token) => {
       const name = `Supplier API ${Date.now()}`;
-      cy.apiPost(token, '/api/admin/suppliers', { name }).then((r) => {
+      cy.apiPost(token, '/api/admin/suppliers', { name, matriculeFiscal: '1234567A/A/M/000', address: 'Tunis' }).then((r) => {
         expect(r.status).to.be.oneOf([200, 201]);
         expect(r.body).to.have.property('name', name);
+        expect(r.body).to.have.property('matriculeFiscal', '1234567A/A/M/000');
+      });
+    });
+  });
+
+  it('POST /api/admin/suppliers - should reject without matricule fiscal', () => {
+    cy.apiLogin('system.admin').then((token) => {
+      const name = `Supplier NoMF ${Date.now()}`;
+      cy.apiPost(token, '/api/admin/suppliers', { name }).then((r) => {
+        expect(r.status).to.be.oneOf([400, 409, 422]);
       });
     });
   });
@@ -136,9 +146,23 @@ describe('12 - API: Admin Organizations', () => {
   it('POST /api/admin/shops - should create shop', () => {
     cy.apiLogin('system.admin').then((token) => {
       const name = `Shop API ${Date.now()}`;
-      cy.apiPost(token, '/api/admin/shops', { name }).then((r) => {
+      cy.apiPost(token, '/api/admin/shops', { name, matriculeFiscal: '7654321B/A/M/000', address: 'Sfax' }).then((r) => {
         expect(r.status).to.be.oneOf([200, 201]);
         expect(r.body).to.have.property('name', name);
+      });
+    });
+  });
+
+  it('PATCH /api/admin/shops/:id/fiscal-profile - should update fiscal profile', () => {
+    cy.apiLogin('system.admin').then((token) => {
+      const name = `Shop Fisc ${Date.now()}`;
+      cy.apiPost(token, '/api/admin/shops', { name, matriculeFiscal: '1111111C/A/M/000' }).then((r) => {
+        expect(r.status).to.be.oneOf([200, 201]);
+        const id = r.body.id;
+        cy.apiPatch(token, `/api/admin/shops/${id}/fiscal-profile`, { name, fiscalRegime: 'SUSPENDU', suspensionAttestationNumber: 'ATT-E2E-001' }).then((r2) => {
+          expect(r2.status).to.eq(200);
+          expect(r2.body).to.have.property('fiscalRegime', 'SUSPENDU');
+        });
       });
     });
   });

@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { Organization, OrganizationStats, SupplierShopRelation, CreateRelationRequest } from '../models/organization.model';
+import { Organization, OrganizationStats, SupplierShopRelation, CreateRelationRequest, CreateOrganizationRequest } from '../models/organization.model';
 import { PageResponse } from '../models/page.model';
 
 /**
@@ -54,14 +54,20 @@ export class OrganizationService {
     return this.http.get<Organization>(`${this.apiUrl}/suppliers/${id}`);
   }
 
-  /** Crée un fournisseur. */
-  createSupplier(name: string): Observable<Organization> {
-    return this.http.post<Organization>(`${this.apiUrl}/suppliers`, { name });
+  /** Crée un fournisseur (MF + adresse obligatoires, art. 18 Code TVA). */
+  createSupplier(data: CreateOrganizationRequest): Observable<Organization> {
+    return this.http.post<Organization>(`${this.apiUrl}/suppliers`, data);
   }
 
-  /** Crée une boutique. */
-  createShop(name: string): Observable<Organization> {
-    return this.http.post<Organization>(`${this.apiUrl}/shops`, { name });
+  /** Crée une boutique (MF obligatoire sauf particulier/export). */
+  createShop(data: CreateOrganizationRequest): Observable<Organization> {
+    return this.http.post<Organization>(`${this.apiUrl}/shops`, data);
+  }
+
+  /** Met à jour le profil fiscal (MF, patente, adresse, régime, attestation). */
+  updateFiscalProfile(id: string, type: string, data: CreateOrganizationRequest): Observable<Organization> {
+    const path = type === 'SUPPLIER' ? 'suppliers' : 'shops';
+    return this.http.patch<Organization>(`${this.apiUrl}/${path}/${id}/fiscal-profile`, data);
   }
 
   /** Active une organisation (fournisseur ou boutique selon le type). */

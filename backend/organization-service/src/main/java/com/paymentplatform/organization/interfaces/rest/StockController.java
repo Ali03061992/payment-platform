@@ -174,7 +174,7 @@ public class StockController {
             throw new com.paymentplatform.shared.domain.exception.ConflictException(
                     "Erreur lors de la lecture du fichier : " + e.getMessage());
         }
-        ProductUpdateRequest updateRequest = new ProductUpdateRequest(null, null, imageUrl, null, null, null, null);
+        ProductUpdateRequest updateRequest = new ProductUpdateRequest(null, null, imageUrl, null, null, null, null, null, null, null, null);
         ProductResponse updated = stockService.updateProduct(supplierId, productId, updateRequest);
         return ResponseEntity.ok(updated);
     }

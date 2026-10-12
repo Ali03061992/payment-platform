@@ -322,13 +322,35 @@
                       <td colspan="4" style="text-align:right;font-weight:600;">{{ 'SUPPLIER_ORDERS.SUBTOTAL' | translate }}</td>
                       <td><strong>{{ selectedDetailOrder.subtotal | number:'1.2-2' }} {{ selectedDetailOrder.currency }}</strong></td>
                     </tr>
-                    <tr>
-                      <td colspan="4" style="text-align:right;font-weight:600;">{{ 'SUPPLIER_ORDERS.VAT' | translate }} ({{ selectedDetailOrder.taxRate }}%)</td>
-                      <td><strong>{{ selectedDetailOrder.taxAmount | number:'1.2-2' }} {{ selectedDetailOrder.currency }}</strong></td>
-                    </tr>
+                    @if (selectedDetailOrder.fodecTotal > 0) {
+                      <tr>
+                        <td colspan="4" style="text-align:right;font-weight:600;">{{ 'SUPPLIER_ORDERS.FODEC' | translate }}</td>
+                        <td><strong>{{ selectedDetailOrder.fodecTotal | number:'1.2-2' }} {{ selectedDetailOrder.currency }}</strong></td>
+                      </tr>
+                    }
+                    @for (line of (selectedDetailOrder.vatBreakdown || []); track line.rate) {
+                      <tr>
+                        <td colspan="4" style="text-align:right;font-weight:600;">{{ 'SUPPLIER_ORDERS.VAT_LINE' | translate:{rate: line.rate} }}</td>
+                        <td><strong>{{ line.amount | number:'1.2-2' }} {{ selectedDetailOrder.currency }}</strong></td>
+                      </tr>
+                    }
+                    @if (!(selectedDetailOrder.vatBreakdown || []).length) {
+                      <tr>
+                        <td colspan="4" style="text-align:right;font-weight:600;">{{ 'SUPPLIER_ORDERS.VAT' | translate }} ({{ selectedDetailOrder.taxRate }}%)</td>
+                        <td><strong>{{ selectedDetailOrder.taxAmount | number:'1.2-2' }} {{ selectedDetailOrder.currency }}</strong></td>
+                      </tr>
+                    }
                     <tr>
                       <td colspan="4" style="text-align:right;font-weight:700;font-size:16px;">{{ 'ORDERS.TOTAL' | translate }}</td>
                       <td><strong style="font-size:16px;color:#0f3460;">{{ selectedDetailOrder.total | number:'1.2-2' }} {{ selectedDetailOrder.currency }}</strong></td>
+                    </tr>
+                    <tr>
+                      <td colspan="4" style="text-align:right;font-weight:600;">{{ 'SUPPLIER_ORDERS.STAMP' | translate }}</td>
+                      <td><strong>{{ selectedDetailOrder.stampAmount | number:'1.2-2' }} {{ selectedDetailOrder.currency }}</strong></td>
+                    </tr>
+                    <tr>
+                      <td colspan="4" style="text-align:right;font-weight:700;font-size:16px;">{{ 'SUPPLIER_ORDERS.NET_PAYABLE' | translate }}</td>
+                      <td><strong style="font-size:16px;color:#0f3460;">{{ selectedDetailOrder.netPayable | number:'1.2-2' }} {{ selectedDetailOrder.currency }}</strong></td>
                     </tr>
                   </tfoot>
                 </table>

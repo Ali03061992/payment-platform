@@ -52,6 +52,38 @@ public class Order {
     @Column(name = "global_discount", nullable = false, precision = 5, scale = 2)
     private BigDecimal globalDiscount;
 
+    /** Total FODEC de la commande (1% du HT net des lignes concernées). */
+    @Column(name = "fodec_total", nullable = false, precision = 19, scale = 4)
+    private BigDecimal fodecTotal;
+
+    /** Droit de timbre fiscal du pied de facture (1,000 DT ; 0 à l'export). */
+    @Column(name = "stamp_amount", nullable = false, precision = 19, scale = 4)
+    private BigDecimal stampAmount;
+
+    /** Ventilation TVA par taux au format « taux|base|montant;... » (FiscalRules). */
+    @Column(name = "vat_breakdown", columnDefinition = "TEXT")
+    private String vatBreakdown;
+
+    /** Mention légale d'exonération portée sur la facture (art. 11), le cas échéant. */
+    @Column(name = "fiscal_mention", columnDefinition = "TEXT")
+    private String fiscalMention;
+
+    /** Motif d'exonération (référence du texte / n° attestation) pour les lignes à 0%. */
+    @Column(name = "exemption_reason", length = 255)
+    private String exemptionReason;
+
+    /** Régime fiscal de l'acheteur au moment de la commande (FiscalRegime). */
+    @Column(name = "buyer_regime", length = 30)
+    private String buyerRegime;
+
+    /**
+     * Référence électronique externe de la facture (plateforme TTN/El Fatoora pour
+     * les e-factures, ou TEJ) : affichée avec QR en haut à droite, comme les
+     * outils tunisiens (référence unique + QR de validation).
+     */
+    @Column(name = "external_reference", length = 64)
+    private String externalReference;
+
     @Column(nullable = false, length = 3)
     private String currency;
 
@@ -124,6 +156,9 @@ public class Order {
         if (taxRate == null) taxRate = new BigDecimal("19");
         if (taxAmount == null) taxAmount = BigDecimal.ZERO;
         if (globalDiscount == null) globalDiscount = BigDecimal.ZERO;
+        if (fodecTotal == null) fodecTotal = BigDecimal.ZERO;
+        if (stampAmount == null) stampAmount = FiscalRules.STAMP_AMOUNT;
+        if (buyerRegime == null) buyerRegime = FiscalRegime.ASSUJETTI.name();
         if (total == null) total = BigDecimal.ZERO;
         if (currency == null) currency = "TND";
     }
@@ -159,6 +194,9 @@ public class Order {
         order.taxRate = new BigDecimal("19");
         order.taxAmount = BigDecimal.ZERO;
         order.globalDiscount = BigDecimal.ZERO;
+        order.fodecTotal = BigDecimal.ZERO;
+        order.stampAmount = FiscalRules.STAMP_AMOUNT;
+        order.buyerRegime = FiscalRegime.ASSUJETTI.name();
         order.total = BigDecimal.ZERO;
         return order;
     }
@@ -241,13 +279,54 @@ public class Order {
         this.updatedAt = Instant.now();
     }
 
-    public void recalculateTotals() {
-        // Subtotal is expected to be set by the caller based on order items
-        this.taxAmount = this.subtotal.multiply(this.taxRate).divide(new BigDecimal("100"), 4, BigDecimal.ROUND_HALF_UP);
-        BigDecimal totalBeforeDiscount = this.subtotal.add(this.taxAmount);
-        BigDecimal discountAmount = totalBeforeDiscount.multiply(this.globalDiscount).divide(new BigDecimal("100"), 4, BigDecimal.ROUND_HALF_UP);
-        this.total = totalBeforeDiscount.subtract(discountAmount);
+    /**
+     * Recalcule les totaux selon l'ordre fiscal tunisien légal : remise globale
+     * AVANT TVA, FODEC dans la base TVA, TVA ventilée par taux de ligne.
+     * Met à jour chaque ligne (fodecAmount, vatBase, vatAmount) et les totaux.
+     * {@code total} = TTC hors timbre ; net à payer = {@link #getNetPayable()}.
+     */
+    public void recalculateTotals(java.util.List<OrderItem> items) {
+        BigDecimal subtotal = BigDecimal.ZERO;
+        BigDecimal fodecTotal = BigDecimal.ZERO;
+        BigDecimal taxAmount = BigDecimal.ZERO;
+        BigDecimal total = BigDecimal.ZERO;
+        java.util.Map<BigDecimal, FiscalRules.VatLine> byRate = new java.util.LinkedHashMap<>();
+
+        if (items != null) {
+            for (OrderItem item : items) {
+                FiscalRules.LineResult r = FiscalRules.computeLine(
+                        item.getUnitPrice(), item.getQuantity(), item.getDiscount(),
+                        this.globalDiscount, item.getVatRate(), item.isFodecApplicable(),
+                        item.isPriceTtc());
+                item.setFodecAmount(r.fodec());
+                item.setVatBase(r.base());
+                item.setVatAmount(r.vat());
+                item.setHtUnitPrice(r.htUnitPrice());
+                subtotal = subtotal.add(r.netHt());
+                fodecTotal = fodecTotal.add(r.fodec());
+                taxAmount = taxAmount.add(r.vat());
+                total = total.add(r.ttc());
+                byRate = FiscalRules.accumulate(byRate, item.getVatRate(), r.base(), r.vat());
+            }
+        }
+
+        this.subtotal = subtotal.setScale(4, java.math.RoundingMode.HALF_UP);
+        this.fodecTotal = fodecTotal.setScale(4, java.math.RoundingMode.HALF_UP);
+        this.taxAmount = taxAmount.setScale(4, java.math.RoundingMode.HALF_UP);
+        this.total = total.setScale(4, java.math.RoundingMode.HALF_UP);
+        this.vatBreakdown = FiscalRules.buildVatBreakdown(byRate);
+        // Compatibilité historique : taxRate = taux maximal des lignes (lecteurs legacy).
+        this.taxRate = byRate.keySet().stream()
+                .max(java.util.Comparator.naturalOrder())
+                .orElse(new BigDecimal("19"));
         this.updatedAt = Instant.now();
+    }
+
+    /** Net à payer : TTC + timbre fiscal (retenue à la source P1 non déduite ici). */
+    public BigDecimal getNetPayable() {
+        BigDecimal stamp = stampAmount != null ? stampAmount : BigDecimal.ZERO;
+        BigDecimal ttc = total != null ? total : BigDecimal.ZERO;
+        return ttc.add(stamp).setScale(4, java.math.RoundingMode.HALF_UP);
     }
 
     public UUID getId() { return id; }
@@ -284,7 +363,24 @@ public class Order {
     public BigDecimal getGlobalDiscount() { return globalDiscount; }
 
     public void setSubtotal(BigDecimal subtotal) { this.subtotal = subtotal; }
+    /**
+     * @deprecated Taux global historique. La TVA est désormais portée par chaque
+     * ligne (OrderItem.vatRate). Conservé pour compatibilité de lecture.
+     */
+    @Deprecated
     public void setTaxRate(BigDecimal taxRate) { this.taxRate = taxRate; }
+    public BigDecimal getFodecTotal() { return fodecTotal; }
+    public BigDecimal getStampAmount() { return stampAmount; }
+    public void setStampAmount(BigDecimal stampAmount) { this.stampAmount = stampAmount; }
+    public String getVatBreakdown() { return vatBreakdown; }
+    public String getFiscalMention() { return fiscalMention; }
+    public void setFiscalMention(String fiscalMention) { this.fiscalMention = fiscalMention; }
+    public String getExemptionReason() { return exemptionReason; }
+    public void setExemptionReason(String exemptionReason) { this.exemptionReason = exemptionReason; }
+    public String getBuyerRegime() { return buyerRegime; }
+    public void setBuyerRegime(String buyerRegime) { this.buyerRegime = buyerRegime; }
+    public String getExternalReference() { return externalReference; }
+    public void setExternalReference(String externalReference) { this.externalReference = externalReference; }
     public void setGlobalDiscount(BigDecimal globalDiscount) { this.globalDiscount = globalDiscount; }
     public void setPlannedDeliveryDate(LocalDate plannedDeliveryDate) { this.plannedDeliveryDate = plannedDeliveryDate; }
     public void setNotes(String notes) { this.notes = notes; }

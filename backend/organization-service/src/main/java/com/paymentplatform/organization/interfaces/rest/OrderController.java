@@ -2,7 +2,10 @@ package com.paymentplatform.organization.interfaces.rest;
 
 import com.paymentplatform.organization.application.dto.*;
 import com.paymentplatform.organization.application.service.InvoicePdfService;
+import com.paymentplatform.organization.application.service.WithholdingCertificatePdfService;
+import com.paymentplatform.organization.application.service.WithholdingXmlService;
 import com.paymentplatform.organization.application.usecase.*;
+import com.paymentplatform.organization.domain.model.WithholdingCertificateStatus;
 import com.paymentplatform.organization.domain.model.OrderComment;
 import com.paymentplatform.organization.domain.model.OrderEvent;
 import com.paymentplatform.organization.domain.repository.OrderCommentRepository;
@@ -62,6 +65,10 @@ public class OrderController {
     private final UpdateOrderUseCase updateOrderUseCase;
     private final OrderCommentRepository orderCommentRepository;
     private final OutboxEventStore outbox;
+    private final UpdateOrderExternalReferenceUseCase updateExternalReference;
+    private final GetWithholdingCertificateUseCase getWithholdingCertificate;
+    private final WithholdingCertificatePdfService withholdingCertificatePdfService;
+    private final WithholdingBatchUseCase withholdingBatch;
 
     public OrderController(CreateOrderUseCase createOrder,
                            ConfirmOrderUseCase confirmOrder,
@@ -83,8 +90,12 @@ public class OrderController {
                            InvoicePdfService invoicePdfService,
                            ReorderUseCase reorderUseCase,
                            UpdateOrderUseCase updateOrderUseCase,
-                           OrderCommentRepository orderCommentRepository,
-                           OutboxEventStore outbox) {
+                            OrderCommentRepository orderCommentRepository,
+                            OutboxEventStore outbox,
+                            UpdateOrderExternalReferenceUseCase updateExternalReference,
+                            GetWithholdingCertificateUseCase getWithholdingCertificate,
+                            WithholdingCertificatePdfService withholdingCertificatePdfService,
+                            WithholdingBatchUseCase withholdingBatch) {
         this.createOrder = createOrder;
         this.confirmOrder = confirmOrder;
         this.prepareOrder = prepareOrder;
@@ -107,6 +118,10 @@ public class OrderController {
         this.updateOrderUseCase = updateOrderUseCase;
         this.orderCommentRepository = orderCommentRepository;
         this.outbox = outbox;
+        this.updateExternalReference = updateExternalReference;
+        this.getWithholdingCertificate = getWithholdingCertificate;
+        this.withholdingCertificatePdfService = withholdingCertificatePdfService;
+        this.withholdingBatch = withholdingBatch;
     }
 
     private String resolveOrgName(UUID orgId) {
@@ -114,6 +129,24 @@ public class OrderController {
         return organizationRepository.findById(OrganizationId.of(orgId))
                 .map(org -> org.name().value())
                 .orElse(null);
+    }
+
+    /** Partie fiscale pour la facture (nom, adresse, MF, régime, attestation). */
+    private com.paymentplatform.organization.application.service.InvoicePdfService.InvoiceParty toInvoiceParty(
+            UUID orgId) {
+        if (orgId == null) {
+            return com.paymentplatform.organization.application.service.InvoicePdfService.InvoiceParty.named(null);
+        }
+        return organizationRepository.findById(OrganizationId.of(orgId))
+                .map(org -> new com.paymentplatform.organization.application.service.InvoicePdfService.InvoiceParty(
+                        org.name().value(),
+                        org.address(),
+                        org.matriculeFiscal(),
+                        org.patente(),
+                        org.fiscalRegime() != null ? org.fiscalRegime().name() : null,
+                        org.suspensionAttestationNumber(),
+                        org.suspensionAttestationDate()))
+                .orElse(com.paymentplatform.organization.application.service.InvoicePdfService.InvoiceParty.named(null));
     }
 
     private String resolveUserName(UUID userId) {
@@ -540,13 +573,14 @@ public class OrderController {
     @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SUPPLIER_AGENT')")
     public ResponseEntity<OrderResponse> deliverOrder(
             @PathVariable UUID id,
-            @RequestBody(required = false) Map<String, UUID> body) {
+            @RequestBody(required = false) Map<String, UUID> body,
+            @RequestParam(required = false) String withholdingNature) {
         var current = CurrentUser.get();
         UUID receivedBy = body != null ? body.get("receivedBy") : null;
         if (receivedBy == null) {
             return ResponseEntity.badRequest().build();
         }
-        return ResponseEntity.ok(deliverOrder.execute(id, receivedBy, current.userId()));
+        return ResponseEntity.ok(deliverOrder.execute(id, receivedBy, current.userId(), withholdingNature));
     }
 
     /**
@@ -867,9 +901,9 @@ public class OrderController {
         }
 
         var items = orderItemRepository.findByOrderId(id);
-        String supplierName = resolveOrgName(o.getSupplierId());
-        String shopName = resolveOrgName(o.getShopId());
-        byte[] pdf = invoicePdfService.generateInvoicePdf(o, items, supplierName, shopName);
+        var supplier = toInvoiceParty(o.getSupplierId());
+        var buyer = toInvoiceParty(o.getShopId());
+        byte[] pdf = invoicePdfService.generateInvoicePdf(o, items, supplier, buyer);
 
         response.setContentType("application/pdf");
         response.setHeader(HttpHeaders.CONTENT_DISPOSITION,
@@ -877,5 +911,123 @@ public class OrderController {
         response.setContentLength(pdf.length);
         response.getOutputStream().write(pdf);
         response.getOutputStream().flush();
+    }
+
+    /**
+     * Enregistre la référence électronique externe de la facture (TTN/TEJ).
+     * Affichée avec QR en haut à droite de la facture.
+     */
+    @PatchMapping("/{id}/external-reference")
+    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SHOP_ADMIN', 'SHOP_MANAGER', 'SYSTEM_ADMIN')")
+    public ResponseEntity<OrderResponse> updateExternalReference(
+            @PathVariable UUID id, @RequestBody Map<String, String> body) {
+        return ResponseEntity.ok(updateExternalReference.execute(id, body.get("reference")));
+    }
+
+    /**
+     * Consulte le certificat de retenue de la commande, restreint à son périmètre.
+     * Le certificat est rattaché à la FACTURE (le paiement suit la facture).
+     */
+    @GetMapping("/{id}/withholding-certificate")
+    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_MANAGER', 'SYSTEM_ADMIN')")
+    public ResponseEntity<WithholdingCertificateResponse> getWithholdingCertificate(@PathVariable UUID id) {
+        var current = CurrentUser.get();
+        return ResponseEntity.ok(getWithholdingCertificate.execute(id, current.organizationId(),
+                current.roles().contains("SYSTEM_ADMIN")));
+    }
+
+    /**
+     * Télécharge le certificat de retenue en PDF (QR + référence), restreint à son périmètre.
+     * Pour les bénéficiaires non-inscrits TEJ : copie à remettre (papier/électronique).
+     */
+    @GetMapping("/{id}/withholding-certificate/pdf")
+    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_MANAGER', 'SYSTEM_ADMIN')")
+    public void downloadWithholdingCertificatePdf(@PathVariable UUID id, HttpServletResponse response)
+            throws Exception {
+        var current = CurrentUser.get();
+        var certificate = getWithholdingCertificate.execute(id, current.organizationId(),
+                current.roles().contains("SYSTEM_ADMIN"));
+        if (WithholdingCertificateStatus.CANCELLED.name().equals(certificate.status())) {
+            response.sendError(HttpServletResponse.SC_CONFLICT, "Le certificat de retenue est annulé");
+            return;
+        }
+        byte[] pdf = withholdingCertificatePdfService.generateCertificatePdf(certificate);
+        response.setContentType("application/pdf");
+        response.setHeader(HttpHeaders.CONTENT_DISPOSITION,
+                "attachment; filename=\"certificat-retenue-" + certificate.number() + ".pdf\"");
+        response.setContentLength(pdf.length);
+        response.getOutputStream().write(pdf);
+        response.getOutputStream().flush();
+    }
+
+    /**
+     * Télécharge le certificat au format XML d'échange (dépôt TEJ, fichier prêt à déposer).
+     */
+    @GetMapping("/{id}/withholding-certificate/xml")
+    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_MANAGER', 'SYSTEM_ADMIN')")
+    public void downloadWithholdingCertificateXml(@PathVariable UUID id, HttpServletResponse response)
+            throws Exception {
+        var current = CurrentUser.get();
+        var certificate = getWithholdingCertificate.execute(id, current.organizationId(),
+                current.roles().contains("SYSTEM_ADMIN"));
+        if (WithholdingCertificateStatus.CANCELLED.name().equals(certificate.status())) {
+            response.sendError(HttpServletResponse.SC_CONFLICT, "Le certificat de retenue est annulé");
+            return;
+        }
+        String xml = WithholdingXmlService.buildCertificate(certificate);
+        byte[] bytes = xml.getBytes(java.nio.charset.StandardCharsets.UTF_8);
+        response.setContentType("application/xml");
+        response.setHeader(HttpHeaders.CONTENT_DISPOSITION,
+                "attachment; filename=\"certificat-retenue-" + certificate.number() + ".xml\"");
+        response.setContentLength(bytes.length);
+        response.getOutputStream().write(bytes);
+        response.getOutputStream().flush();
+    }
+
+    /**
+     * Enregistre la référence TEJ après dépôt manuel du certificat (débiteur ou admin).
+     */
+    @PatchMapping("/{id}/withholding-certificate/deposit")
+    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SHOP_ADMIN', 'SHOP_MANAGER', 'SYSTEM_ADMIN')")
+    public ResponseEntity<WithholdingCertificateResponse> markCertificateDeposited(
+            @PathVariable UUID id, @RequestBody Map<String, String> body) {
+        var current = CurrentUser.get();
+        return ResponseEntity.ok(withholdingBatch.markDeposited(id, body.get("tejReference"),
+                current.organizationId(), current.roles().contains("SYSTEM_ADMIN")));
+    }
+
+    /**
+     * Exporte le lot mensuel des certificats d'un débiteur (fichier XML à déposer sur TEJ).
+     */
+    @GetMapping("/withholding-certificates/batch")
+    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SHOP_ADMIN', 'SHOP_MANAGER', 'SYSTEM_ADMIN')")
+    public void downloadWithholdingBatch(
+            @RequestParam UUID debtorId,
+            @RequestParam String month,
+            HttpServletResponse response) throws Exception {
+        var current = CurrentUser.get();
+        var list = withholdingBatch.exportMonth(debtorId, java.time.YearMonth.parse(month),
+                current.organizationId(), current.roles().contains("SYSTEM_ADMIN"));
+        String xml = WithholdingXmlService.buildBatch(list, withholdingBatch.depositorTejIdentifier(debtorId));
+        byte[] bytes = xml.getBytes(java.nio.charset.StandardCharsets.UTF_8);
+        response.setContentType("application/xml");
+        response.setHeader(HttpHeaders.CONTENT_DISPOSITION,
+                "attachment; filename=\"tej-retenues-" + month + ".xml\"");
+        response.setContentLength(bytes.length);
+        response.getOutputStream().write(bytes);
+        response.getOutputStream().flush();
+    }
+
+    /**
+     * Certificats à échéance proche pour un débiteur (rappel J-7 par défaut).
+     */
+    @GetMapping("/withholding-certificates/due")
+    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SHOP_ADMIN', 'SHOP_MANAGER', 'SYSTEM_ADMIN')")
+    public ResponseEntity<List<WithholdingCertificateResponse>> withholdingDueSoon(
+            @RequestParam UUID debtorId,
+            @RequestParam(defaultValue = "7") int days) {
+        var current = CurrentUser.get();
+        return ResponseEntity.ok(withholdingBatch.dueSoon(debtorId, days,
+                current.organizationId(), current.roles().contains("SYSTEM_ADMIN")));
     }
 }

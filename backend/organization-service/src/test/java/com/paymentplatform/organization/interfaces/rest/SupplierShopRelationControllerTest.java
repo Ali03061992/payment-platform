@@ -61,12 +61,12 @@ class SupplierShopRelationControllerTest {
     }
 
     private UUID createSupplier(String name) {
-        var resp = createOrg.execute(new CreateOrganizationRequest(name + "-" + System.nanoTime(), "SUPPLIER"), UUID.fromString("00000000-0000-0000-0000-000000000001"));
+        var resp = createOrg.execute(new CreateOrganizationRequest(name + "-" + System.nanoTime(), "SUPPLIER", "1234567A/A/M/000", "PAT-TEST", "Adresse Test, Tunis", null, null, null, null, null, null), UUID.fromString("00000000-0000-0000-0000-000000000001"));
         return resp.id();
     }
 
     private UUID createShop(String name) {
-        var resp = createOrg.execute(new CreateOrganizationRequest(name + "-" + System.nanoTime(), "SHOP"), UUID.fromString("00000000-0000-0000-0000-000000000001"));
+        var resp = createOrg.execute(new CreateOrganizationRequest(name + "-" + System.nanoTime(), "SHOP", "1234567A/A/M/000", "PAT-TEST", "Adresse Test, Tunis", null, null, null, null, null, null), UUID.fromString("00000000-0000-0000-0000-000000000001"));
         return resp.id();
     }
 

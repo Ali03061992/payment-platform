@@ -9,5 +9,9 @@ public record ProductUpdateRequest(
     BigDecimal unitPrice,
     Integer quantity,
     Integer minQuantity,
-    String status
+    String status,
+    BigDecimal vatRate,
+    Boolean fodecApplicable,
+    String vatExemptionText,
+    Boolean priceTtc
 ) {}

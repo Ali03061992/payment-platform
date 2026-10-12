@@ -61,6 +61,78 @@ describe('OrderService', () => {
     });
   });
 
+  describe('printInvoice', () => {
+    it('should open PDF blob in new window for printing', () => {
+      const blob = new Blob(['%PDF-1.4'], { type: 'application/pdf' });
+      spyOn(window.URL, 'createObjectURL').and.returnValue('blob:test');
+      const openSpy = spyOn(window, 'open').and.returnValue({ addEventListener: () => {}, focus: () => {}, print: () => {} } as any);
+      service.printInvoice('ord-1');
+      const req = httpMock.expectOne('/api/orders/ord-1/invoice');
+      expect(req.request.method).toBe('GET');
+      req.flush(blob);
+      expect(openSpy).toHaveBeenCalledWith('blob:test', '_blank');
+    });
+  });
+
+  describe('withholding certificate', () => {
+    it('should GET certificate JSON', () => {
+      service.getWithholdingCertificate('ord-1').subscribe(cert => {
+        expect(cert.number).toBe('CRT-1');
+      });
+      const req = httpMock.expectOne('/api/orders/ord-1/withholding-certificate');
+      expect(req.request.method).toBe('GET');
+      req.flush({ number: 'CRT-1' } as any);
+    });
+
+    it('should download certificate PDF and XML as blobs', () => {
+      const blob = new Blob(['%PDF-1.4'], { type: 'application/pdf' });
+      spyOn(window.URL, 'createObjectURL').and.returnValue('blob:test');
+      spyOn(window.URL, 'revokeObjectURL');
+      spyOn(HTMLAnchorElement.prototype, 'click');
+      service.downloadWithholdingCertificatePdf('ord-1');
+      httpMock.expectOne('/api/orders/ord-1/withholding-certificate/pdf').flush(blob);
+      service.downloadWithholdingCertificateXml('ord-1');
+      httpMock.expectOne('/api/orders/ord-1/withholding-certificate/xml').flush(blob);
+    });
+
+    it('should PATCH deposit with TEJ reference', () => {
+      service.markCertificateDeposited('ord-1', 'TEJ-1').subscribe(cert => {
+        expect(cert.status).toBe('DEPOSITED');
+      });
+      const req = httpMock.expectOne('/api/orders/ord-1/withholding-certificate/deposit');
+      expect(req.request.method).toBe('PATCH');
+      expect(req.request.body).toEqual({ tejReference: 'TEJ-1' });
+      req.flush({ status: 'DEPOSITED' } as any);
+    });
+
+    it('should download batch XML and list due certificates', () => {
+      const blob = new Blob(['<certificatsRetenue/>'], { type: 'application/xml' });
+      spyOn(window.URL, 'createObjectURL').and.returnValue('blob:test');
+      spyOn(window.URL, 'revokeObjectURL');
+      spyOn(HTMLAnchorElement.prototype, 'click');
+      service.downloadWithholdingBatch('shop-1', '2026-10');
+      const batch = httpMock.expectOne(r => r.url === '/api/orders/withholding-certificates/batch');
+      expect(batch.request.params.get('month')).toBe('2026-10');
+      batch.flush(blob);
+      service.withholdingDueSoon('shop-1', 7).subscribe();
+      const due = httpMock.expectOne(r => r.url === '/api/orders/withholding-certificates/due');
+      expect(due.request.params.get('debtorId')).toBe('shop-1');
+      due.flush([]);
+    });
+  });
+
+  describe('externalReference', () => {
+    it('should PATCH external reference', () => {
+      service.updateExternalReference('ord-1', 'TTN-123').subscribe(order => {
+        expect(order.externalReference).toBe('TTN-123');
+      });
+      const req = httpMock.expectOne('/api/orders/ord-1/external-reference');
+      expect(req.request.method).toBe('PATCH');
+      expect(req.request.body).toEqual({ reference: 'TTN-123' });
+      req.flush({ externalReference: 'TTN-123' } as any);
+    });
+  });
+
   describe('exportCsv', () => {
     it('should GET CSV as blob and save it', () => {
       const blob = new Blob(['ref,status'], { type: 'text/csv' });

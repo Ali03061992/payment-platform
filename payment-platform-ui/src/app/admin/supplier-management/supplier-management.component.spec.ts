@@ -64,13 +64,34 @@ describe('SupplierManagementComponent', () => {
     expect(component.loading).toBeFalse();
   });
 
-  it('should create supplier with valid name', () => {
+  it('should create supplier with valid name and MF', () => {
     component.newName = 'New Supplier';
+    component.fiscalForm.matriculeFiscal = '1234567A/A/M/000';
+    component.fiscalForm.address = 'Tunis';
     component.create();
-    expect(orgService.createSupplier).toHaveBeenCalledWith('New Supplier');
+    expect(orgService.createSupplier).toHaveBeenCalledWith(jasmine.objectContaining({
+      name: 'New Supplier', matriculeFiscal: '1234567A/A/M/000', address: 'Tunis'
+    }));
     expect(toast.success).toHaveBeenCalled();
     expect(component.newName).toBe('');
     expect(component.showCreate).toBeFalse();
+  });
+
+  it('should not create supplier without MF', () => {
+    component.newName = 'New Supplier';
+    component.fiscalForm.matriculeFiscal = '';
+    component.fiscalForm.address = 'Tunis';
+    component.create();
+    expect(orgService.createSupplier).not.toHaveBeenCalled();
+  });
+
+  it('should save fiscal profile edit', () => {
+    (orgService as any).updateFiscalProfile = jasmine.createSpy('updateFiscalProfile').and.returnValue(of({} as any));
+    component.openFiscalEdit({ id: 1, name: 'S1', matriculeFiscal: 'MF-1' } as any);
+    expect(component.showFiscalEdit).toBeTrue();
+    expect(component.fiscalForm.matriculeFiscal).toBe('MF-1');
+    component.saveFiscalEdit();
+    expect((orgService as any).updateFiscalProfile).toHaveBeenCalledWith(1, 'SUPPLIER', jasmine.objectContaining({ matriculeFiscal: 'MF-1' }));
   });
 
   it('should not create supplier with empty name', () => {
@@ -87,6 +108,8 @@ describe('SupplierManagementComponent', () => {
 
   it('should handle create error with message', () => {
     component.newName = 'Supplier';
+    component.fiscalForm.matriculeFiscal = 'MF';
+    component.fiscalForm.address = 'Tunis';
     orgService.createSupplier.and.returnValue(throwError(() => ({ error: { message: 'Err' } })));
     component.create();
     expect(toast.error).toHaveBeenCalledWith('Err');
@@ -95,6 +118,8 @@ describe('SupplierManagementComponent', () => {
 
   it('should handle create error without message', () => {
     component.newName = 'Supplier';
+    component.fiscalForm.matriculeFiscal = 'MF';
+    component.fiscalForm.address = 'Tunis';
     orgService.createSupplier.and.returnValue(throwError(() => ({})));
     component.create();
     expect(toast.error).toHaveBeenCalledWith('ORGS.CREATE_ERROR');

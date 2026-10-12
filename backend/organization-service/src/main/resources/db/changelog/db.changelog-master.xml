@@ -19,5 +19,10 @@
     <include file="V8__add_payment_terms.sql" relativeToChangelogFile="true"/>
     <include file="V9__add_disputes.sql" relativeToChangelogFile="true"/>
     <include file="V10__catalog_soft_delete.sql" relativeToChangelogFile="true"/>
+    <include file="V11__fiscal_tva_facturation.sql" relativeToChangelogFile="true"/>
+    <include file="V12__org_patente.sql" relativeToChangelogFile="true"/>
+    <include file="V13__org_tej_identifier.sql" relativeToChangelogFile="true"/>
+    <include file="V14__withholding_and_price_ttc.sql" relativeToChangelogFile="true"/>
+    <include file="V15__order_external_ref_supplier_nature.sql" relativeToChangelogFile="true"/>
 
 </databaseChangeLog>

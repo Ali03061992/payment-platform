@@ -42,7 +42,7 @@ class StockServiceH2Test {
     @Test
     void createProduct_validRequest_createsProduct() {
         var request = new ProductCreateRequest("Widget", "WDG-001", "A widget", null,
-                new BigDecimal("15.50"), "TND", 100, 10);
+                new BigDecimal("15.50"), "TND", 100, 10, null, null, null, null);
         var response = stockService.createProduct(supplierId, request);
 
         assertThat(response.id()).isNotNull();
@@ -54,11 +54,11 @@ class StockServiceH2Test {
     @Test
     void createProduct_duplicateSku_throwsConflict() {
         var request1 = new ProductCreateRequest("Widget", "DUP-001", null, null,
-                new BigDecimal("10.00"), "TND", 50, 5);
+                new BigDecimal("10.00"), "TND", 50, 5, null, null, null, null);
         stockService.createProduct(supplierId, request1);
 
         var request2 = new ProductCreateRequest("Widget2", "DUP-001", null, null,
-                new BigDecimal("20.00"), "TND", 30, 3);
+                new BigDecimal("20.00"), "TND", 30, 3, null, null, null, null);
         assertThatThrownBy(() -> stockService.createProduct(supplierId, request2))
                 .isInstanceOf(ConflictException.class)
                 .hasMessageContaining("SKU");
@@ -67,9 +67,9 @@ class StockServiceH2Test {
     @Test
     void listProducts_returnsAll() {
         stockService.createProduct(supplierId, new ProductCreateRequest("P1", "P1-001", null, null,
-                new BigDecimal("10.00"), "TND", 10, 1));
+                new BigDecimal("10.00"), "TND", 10, 1, null, null, null, null));
         stockService.createProduct(supplierId, new ProductCreateRequest("P2", "P2-001", null, null,
-                new BigDecimal("20.00"), "TND", 20, 2));
+                new BigDecimal("20.00"), "TND", 20, 2, null, null, null, null));
         var result = stockService.listProducts(supplierId, null);
         assertThat(result).hasSize(2);
     }
@@ -77,9 +77,9 @@ class StockServiceH2Test {
     @Test
     void listProducts_filterByStatus() {
         stockService.createProduct(supplierId, new ProductCreateRequest("Active", "ACT-001", null, null,
-                new BigDecimal("10.00"), "TND", 10, 1));
+                new BigDecimal("10.00"), "TND", 10, 1, null, null, null, null));
         var inactiveProduct = stockService.createProduct(supplierId, new ProductCreateRequest("Inactive", "INA-001", null, null,
-                new BigDecimal("10.00"), "TND", 10, 1));
+                new BigDecimal("10.00"), "TND", 10, 1, null, null, null, null));
         stockService.deleteProduct(supplierId, inactiveProduct.id());
         var active = stockService.listProducts(supplierId, "ACTIVE");
         assertThat(active).hasSize(1);
@@ -88,7 +88,7 @@ class StockServiceH2Test {
     @Test
     void getProduct_valid_returnsProduct() {
         var created = stockService.createProduct(supplierId, new ProductCreateRequest("Get", "GET-001", null, null,
-                new BigDecimal("10.00"), "TND", 10, 1));
+                new BigDecimal("10.00"), "TND", 10, 1, null, null, null, null));
         var found = stockService.getProduct(supplierId, created.id());
         assertThat(found.name()).isEqualTo("Get");
     }
@@ -96,7 +96,7 @@ class StockServiceH2Test {
     @Test
     void getProduct_wrongSupplier_throwsNotFound() {
         var created = stockService.createProduct(supplierId, new ProductCreateRequest("Get", "GET-002", null, null,
-                new BigDecimal("10.00"), "TND", 10, 1));
+                new BigDecimal("10.00"), "TND", 10, 1, null, null, null, null));
         assertThatThrownBy(() -> stockService.getProduct(UUID.fromString("00000000-0000-0000-0000-000000000099"), created.id()))
                 .isInstanceOf(NotFoundException.class);
     }
@@ -104,8 +104,8 @@ class StockServiceH2Test {
     @Test
     void updateProduct_updatesFields() {
         var created = stockService.createProduct(supplierId, new ProductCreateRequest("Upd", "UPD-001", null, null,
-                new BigDecimal("10.00"), "TND", 10, 1));
-        var request = new ProductUpdateRequest("Updated Name", null, null, new BigDecimal("15.00"), 20, null, null);
+                new BigDecimal("10.00"), "TND", 10, 1, null, null, null, null));
+        var request = new ProductUpdateRequest("Updated Name", null, null, new BigDecimal("15.00"), 20, null, null, null, null, null, null);
         var updated = stockService.updateProduct(supplierId, created.id(), request);
         assertThat(updated.name()).isEqualTo("Updated Name");
         assertThat(updated.unitPrice()).isEqualByComparingTo(new BigDecimal("15.00"));
@@ -114,7 +114,7 @@ class StockServiceH2Test {
     @Test
     void deleteProduct_noReservations_setsInactive() {
         var created = stockService.createProduct(supplierId, new ProductCreateRequest("Del", "DEL-001", null, null,
-                new BigDecimal("10.00"), "TND", 10, 1));
+                new BigDecimal("10.00"), "TND", 10, 1, null, null, null, null));
         var deleted = stockService.deleteProduct(supplierId, created.id());
         assertThat(deleted.status()).isEqualTo("INACTIVE");
     }
@@ -122,7 +122,7 @@ class StockServiceH2Test {
     @Test
     void createMovement_increasesQuantity() {
         var created = stockService.createProduct(supplierId, new ProductCreateRequest("Mov", "MOV-001", null, null,
-                new BigDecimal("10.00"), "TND", 50, 1));
+                new BigDecimal("10.00"), "TND", 50, 1, null, null, null, null));
         var movement = stockService.createMovement(supplierId,
                 new StockMovementRequest(created.id(), "IN", 20, "Restock", null));
         assertThat(movement.quantity()).isEqualTo(20);
@@ -131,7 +131,7 @@ class StockServiceH2Test {
     @Test
     void createMovement_decreasesQuantity() {
         var created = stockService.createProduct(supplierId, new ProductCreateRequest("Mov2", "MOV-002", null, null,
-                new BigDecimal("10.00"), "TND", 50, 1));
+                new BigDecimal("10.00"), "TND", 50, 1, null, null, null, null));
         stockService.createMovement(supplierId,
                 new StockMovementRequest(created.id(), "OUT", 10, "Sale", null));
         var product = products.findById(created.id()).orElseThrow();
@@ -141,7 +141,7 @@ class StockServiceH2Test {
     @Test
     void createMovement_insufficientStock_throws() {
         var created = stockService.createProduct(supplierId, new ProductCreateRequest("Mov3", "MOV-003", null, null,
-                new BigDecimal("10.00"), "TND", 5, 1));
+                new BigDecimal("10.00"), "TND", 5, 1, null, null, null, null));
         assertThatThrownBy(() -> stockService.createMovement(supplierId,
                 new StockMovementRequest(created.id(), "OUT", 10, "Sale", null)))
                 .isInstanceOf(ConflictException.class)
@@ -151,7 +151,7 @@ class StockServiceH2Test {
     @Test
     void createMovement_adjustment_setsQuantity() {
         var created = stockService.createProduct(supplierId, new ProductCreateRequest("Mov4", "MOV-004", null, null,
-                new BigDecimal("10.00"), "TND", 50, 1));
+                new BigDecimal("10.00"), "TND", 50, 1, null, null, null, null));
         stockService.createMovement(supplierId,
                 new StockMovementRequest(created.id(), "ADJUSTMENT", 75, "Count", null));
         var product = products.findById(created.id()).orElseThrow();
@@ -161,7 +161,7 @@ class StockServiceH2Test {
     @Test
     void createMovement_invalidType_throws() {
         var created = stockService.createProduct(supplierId, new ProductCreateRequest("Mov5", "MOV-005", null, null,
-                new BigDecimal("10.00"), "TND", 50, 1));
+                new BigDecimal("10.00"), "TND", 50, 1, null, null, null, null));
         assertThatThrownBy(() -> stockService.createMovement(supplierId,
                 new StockMovementRequest(created.id(), "INVALID", 10, null, null)))
                 .isInstanceOf(ConflictException.class)
@@ -171,7 +171,7 @@ class StockServiceH2Test {
     @Test
     void createMovement_zeroQuantity_throws() {
         var created = stockService.createProduct(supplierId, new ProductCreateRequest("Mov6", "MOV-006", null, null,
-                new BigDecimal("10.00"), "TND", 50, 1));
+                new BigDecimal("10.00"), "TND", 50, 1, null, null, null, null));
         assertThatThrownBy(() -> stockService.createMovement(supplierId,
                 new StockMovementRequest(created.id(), "IN", 0, null, null)))
                 .isInstanceOf(ConflictException.class)

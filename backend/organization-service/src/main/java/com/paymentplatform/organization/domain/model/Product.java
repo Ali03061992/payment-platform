@@ -53,6 +53,28 @@ public class Product {
     @Column(nullable = false, length = 20)
     private String unit;
 
+    /**
+     * Taux de TVA tunisien propre au produit (19, 13, 7, ou 0 avec motif).
+     * Chaque ligne de facture porte son propre taux (art. 18 Code TVA).
+     */
+    @Column(name = "vat_rate", nullable = false, precision = 5, scale = 2)
+    private BigDecimal vatRate;
+
+    /** Vrai si le produit est soumis au FODEC (1% du HT net, dans la base TVA). */
+    @Column(name = "fodec_applicable", nullable = false)
+    private boolean fodecApplicable;
+
+    /**
+     * Prix de vente TTC (TVA incluse, non ajoutée) : le HT est déduit au lieu
+     * d'ajouter la TVA. Sinon prix HT (TVA ajoutée).
+     */
+    @Column(name = "price_ttc", nullable = false)
+    private boolean priceTtc;
+
+    /** Motif d'exonération obligatoire quand vatRate = 0 (référence du texte). */
+    @Column(name = "vat_exemption_text", length = 255)
+    private String vatExemptionText;
+
     @Column(nullable = false, length = 20)
     private String status;
 
@@ -76,6 +98,7 @@ public class Product {
         if (minQuantity == null) minQuantity = 0;
         if (reservedQty == null) reservedQty = 0;
         if (unit == null) unit = "unite";
+        if (vatRate == null) vatRate = new BigDecimal("19");
     }
 
     @PreUpdate
@@ -115,4 +138,12 @@ public class Product {
     public void setUnit(String unit) { this.unit = unit; }
     public String getImageUrl() { return imageUrl; }
     public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
+    public BigDecimal getVatRate() { return vatRate; }
+    public void setVatRate(BigDecimal vatRate) { this.vatRate = vatRate; }
+    public boolean isFodecApplicable() { return fodecApplicable; }
+    public void setFodecApplicable(boolean fodecApplicable) { this.fodecApplicable = fodecApplicable; }
+    public boolean isPriceTtc() { return priceTtc; }
+    public void setPriceTtc(boolean priceTtc) { this.priceTtc = priceTtc; }
+    public String getVatExemptionText() { return vatExemptionText; }
+    public void setVatExemptionText(String vatExemptionText) { this.vatExemptionText = vatExemptionText; }
 }

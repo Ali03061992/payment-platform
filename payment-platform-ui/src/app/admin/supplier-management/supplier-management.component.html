@@ -16,7 +16,41 @@
         <input type="text" [(ngModel)]="newName" name="name" id="supplierName" class="form-control"
           [placeholder]="'ORGS.SUPPLIER_PLACEHOLDER' | translate" required aria-required="true">
       </div>
-      <button class="btn btn-primary" [disabled]="creating || !newName.trim()"
+      <div class="form-row">
+        <div class="form-group">
+          <label for="supplierMf">{{ 'ORGS.MATRICULE_FISCAL' | translate }} <span class="required">*</span></label>
+          <input type="text" [(ngModel)]="fiscalForm.matriculeFiscal" name="mf" id="supplierMf" class="form-control"
+            [placeholder]="'ORGS.MF_PLACEHOLDER' | translate" required aria-required="true">
+          <span class="field-hint">{{ 'ORGS.MF_HINT' | translate }}</span>
+        </div>
+        <div class="form-group">
+          <label for="supplierPatente">{{ 'ORGS.PATENTE' | translate }}</label>
+          <input type="text" [(ngModel)]="fiscalForm.patente" name="patente" id="supplierPatente" class="form-control"
+            [placeholder]="'ORGS.PATENTE_PLACEHOLDER' | translate">
+        </div>
+        <div class="form-group">
+          <label for="supplierTej">{{ 'ORGS.TEJ_IDENTIFIER' | translate }}</label>
+          <input type="text" [(ngModel)]="fiscalForm.tejIdentifier" name="tejIdentifier" id="supplierTej" class="form-control"
+            [placeholder]="'ORGS.TEJ_PLACEHOLDER' | translate">
+          <span class="field-hint">{{ 'ORGS.TEJ_HINT' | translate }}</span>
+        </div>
+        <div class="form-group">
+          <label for="supplierNature">{{ 'ORGS.DEFAULT_NATURE' | translate }}</label>
+          <select [(ngModel)]="fiscalForm.defaultWithholdingNature" name="defaultNature" id="supplierNature" class="form-control">
+            <option value="">{{ 'ORGS.NATURE_AUTO' | translate }}</option>
+            <option value="MARCHANDISES">{{ 'PREPARE.NATURE_MARCHANDISES' | translate }}</option>
+            <option value="HONORAIRES_REEL">{{ 'PREPARE.NATURE_HONORAIRES_REEL' | translate }}</option>
+            <option value="HONORAIRES_FORFAIT">{{ 'PREPARE.NATURE_HONORAIRES_FORFAIT' | translate }}</option>
+          </select>
+          <span class="field-hint">{{ 'ORGS.NATURE_HINT' | translate }}</span>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="supplierAddress">{{ 'ORGS.ADDRESS' | translate }} <span class="required">*</span></label>
+        <input type="text" [(ngModel)]="fiscalForm.address" name="address" id="supplierAddress" class="form-control"
+          [placeholder]="'ORGS.ADDRESS_PLACEHOLDER' | translate" required aria-required="true">
+      </div>
+      <button class="btn btn-primary" [disabled]="creating || !canCreate()"
         [attr.aria-label]="creating ? ('COMMON.CREATING' | translate) : ('ORGS.CREATE_SUPPLIER_ARIA' | translate)">
         {{ creating ? ('COMMON.CREATING' | translate) : ('COMMON.CREATE' | translate) }}
       </button>
@@ -40,6 +74,7 @@
             <th class="sortable-th" (click)="onSort('name')" (keydown.enter)="onSort('name')" tabindex="0" [attr.aria-sort]="ariaSort('name')">{{ 'ORGS.NAME' | translate }} <span class="sort-indicator" aria-hidden="true">{{ sortIndicator('name') }}</span></th>
             <th class="sortable-th" (click)="onSort('status')" (keydown.enter)="onSort('status')" tabindex="0" [attr.aria-sort]="ariaSort('status')">{{ 'DASHBOARD.STATUS' | translate }} <span class="sort-indicator" aria-hidden="true">{{ sortIndicator('status') }}</span></th>
             <th class="sortable-th" (click)="onSort('createdAt')" (keydown.enter)="onSort('createdAt')" tabindex="0" [attr.aria-sort]="ariaSort('createdAt')">{{ 'ORGS.CREATED_AT' | translate }} <span class="sort-indicator" aria-hidden="true">{{ sortIndicator('createdAt') }}</span></th>
+            <th>{{ 'ORGS.MATRICULE_FISCAL' | translate }}</th>
             <th>{{ 'USERS.ACTIONS' | translate }}</th>
           </tr>
         </thead>
@@ -54,7 +89,12 @@
                 </span>
               </td>
               <td>{{ s.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
+              <td>{{ s.matriculeFiscal || '-' }}</td>
               <td>
+                <button class="btn btn-sm btn-secondary" (click)="openFiscalEdit(s)"
+                  [attr.aria-label]="('ORGS.EDIT_FISCAL_ARIA' | translate) + ' ' + s.name">
+                  {{ 'ORGS.EDIT_FISCAL' | translate }}
+                </button>
                 <button class="btn btn-sm" [class.btn-success]="s.status === 'DISABLED'" [class.btn-danger]="s.status === 'ACTIVE'"
                   (click)="toggle(s)"
                   [attr.aria-label]="(s.status === 'ACTIVE' ? ('USERS.DEACTIVATE' | translate) : ('USERS.ACTIVATE' | translate)) + ' ' + s.name">
@@ -65,12 +105,54 @@
           }
           @if (suppliers.length === 0) {
             <tr>
-              <td colspan="4" style="text-align:center;color:#8896ab;padding:32px;">{{ 'ORGS.NO_SUPPLIER' | translate }}</td>
+              <td colspan="5" style="text-align:center;color:#8896ab;padding:32px;">{{ 'ORGS.NO_SUPPLIER' | translate }}</td>
             </tr>
           }
         </tbody>
       </table>
     </div>
+  </div>
+}
+
+@if (showFiscalEdit && editingSupplier) {
+  <div class="form-card" style="margin-bottom: 24px;">
+    <h3 style="margin-bottom: 16px;">{{ 'ORGS.EDIT_FISCAL_TITLE' | translate }} — {{ editingSupplier.name }}</h3>
+    <form (ngSubmit)="saveFiscalEdit()">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="editMf">{{ 'ORGS.MATRICULE_FISCAL' | translate }} <span class="required">*</span></label>
+          <input type="text" [(ngModel)]="fiscalForm.matriculeFiscal" name="editMf" id="editMf" class="form-control" required>
+        </div>
+        <div class="form-group">
+          <label for="editPatente">{{ 'ORGS.PATENTE' | translate }}</label>
+          <input type="text" [(ngModel)]="fiscalForm.patente" name="editPatente" id="editPatente" class="form-control">
+        </div>
+        <div class="form-group">
+          <label for="editTej">{{ 'ORGS.TEJ_IDENTIFIER' | translate }}</label>
+          <input type="text" [(ngModel)]="fiscalForm.tejIdentifier" name="editTej" id="editTej" class="form-control"
+            [placeholder]="'ORGS.TEJ_PLACEHOLDER' | translate">
+        </div>
+        <div class="form-group">
+          <label for="editNature">{{ 'ORGS.DEFAULT_NATURE' | translate }}</label>
+          <select [(ngModel)]="fiscalForm.defaultWithholdingNature" name="editNature" id="editNature" class="form-control">
+            <option value="">{{ 'ORGS.NATURE_AUTO' | translate }}</option>
+            <option value="MARCHANDISES">{{ 'PREPARE.NATURE_MARCHANDISES' | translate }}</option>
+            <option value="HONORAIRES_REEL">{{ 'PREPARE.NATURE_HONORAIRES_REEL' | translate }}</option>
+            <option value="HONORAIRES_FORFAIT">{{ 'PREPARE.NATURE_HONORAIRES_FORFAIT' | translate }}</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="editAddress">{{ 'ORGS.ADDRESS' | translate }}</label>
+        <input type="text" [(ngModel)]="fiscalForm.address" name="editAddress" id="editAddress" class="form-control">
+      </div>
+      <div class="form-actions">
+        <button type="button" class="btn btn-secondary" (click)="showFiscalEdit = false">{{ 'COMMON.CANCEL' | translate }}</button>
+        <button type="submit" class="btn btn-primary" [disabled]="savingFiscal || !fiscalForm.matriculeFiscal.trim()">
+          {{ savingFiscal ? ('COMMON.SAVING' | translate) : ('COMMON.SAVE' | translate) }}
+        </button>
+      </div>
+    </form>
   </div>
 }
 

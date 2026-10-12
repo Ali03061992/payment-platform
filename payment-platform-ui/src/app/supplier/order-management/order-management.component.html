@@ -229,6 +229,11 @@
         <div>
           @if (selectedOrder && (selectedOrder.status === 'DELIVERED' || selectedOrder.status === 'ACCEPTED')) {
             <button class="btn btn-sm btn-primary" style="margin-right:8px;" (click)="downloadInvoice(selectedOrder)" [attr.aria-label]="'SUPPLIER_ORDERS.DOWNLOAD_INVOICE_ARIA' | translate">{{ 'SUPPLIER_ORDERS.DOWNLOAD_INVOICE' | translate }}</button>
+            <button class="btn btn-sm btn-secondary" style="margin-right:8px;" (click)="printDetailInvoice()" [attr.aria-label]="'SUPPLIER_ORDERS.PRINT_INVOICE_ARIA' | translate">{{ 'SUPPLIER_ORDERS.PRINT_INVOICE' | translate }}</button>
+            @if (detailCertificate) {
+              <button class="btn btn-sm btn-secondary" style="margin-right:8px;" (click)="downloadDetailCertificatePdf()">{{ 'PAYMENT_DETAIL.DOWNLOAD_CERT_PDF' | translate }}</button>
+              <button class="btn btn-sm btn-secondary" style="margin-right:8px;" (click)="downloadDetailCertificateXml()">{{ 'PAYMENT_DETAIL.DOWNLOAD_CERT_XML' | translate }}</button>
+            }
           }
           <button class="btn-close" (click)="closeDetail()" [attr.aria-label]="'SUPPLIER_ORDERS.CLOSE_DETAIL_ARIA' | translate">&times;</button>
         </div>
@@ -252,6 +257,18 @@
             <div class="detail-card">
               <div class="detail-label">{{ 'ORDERS.TOTAL' | translate }}</div>
               <div class="detail-value amount">{{ selectedOrder.total | number:'1.2-2' }} {{ selectedOrder.currency }}</div>
+            </div>
+            <div class="detail-card">
+              <div class="detail-label">{{ 'ORDER_DETAIL.EXTREF' | translate }}</div>
+              <div class="detail-value">
+                @if (selectedOrder.externalReference) {
+                  <strong>{{ selectedOrder.externalReference }}</strong>
+                  <qrcode [qrdata]="'FACTURE:' + selectedOrder.externalReference + '|DOC:' + selectedOrder.reference" [width]="72" [margin]="1"></qrcode>
+                } @else {
+                  <span style="color:#8896ab;">—</span>
+                  <button class="btn btn-sm btn-secondary" style="margin-left:8px;" (click)="toggleDetailExtRefForm()">{{ 'ORDER_DETAIL.EXTREF_ADD' | translate }}</button>
+                }
+              </div>
             </div>
             <div class="detail-card">
               <div class="detail-label">{{ 'PAYMENTS.SHOP' | translate }}</div>
@@ -341,7 +358,7 @@
                   <tbody>
                     @for (item of selectedOrder.items; track item) {
                       <tr>
-                        <td><strong>{{ item.productName }}</strong></td>
+                        <td><strong>{{ item.productName }}</strong>@if (item.priceTtc) { <small style="color:#2e7d32;">TTC</small> }</td>
                         <td>{{ item.quantity }}</td>
                         <td>{{ item.unitPrice | number:'1.2-2' }}</td>
                         <td>{{ item.discount > 0 ? item.discount + '%' : '-' }}</td>
@@ -354,22 +371,85 @@
                       <td colspan="4" style="text-align:right;font-weight:600;">{{ 'SUPPLIER_ORDERS.SUBTOTAL' | translate }}</td>
                       <td><strong>{{ selectedOrder.subtotal | number:'1.2-2' }} {{ selectedOrder.currency }}</strong></td>
                     </tr>
-                    <tr>
-                      <td colspan="4" style="text-align:right;font-weight:600;">{{ 'SUPPLIER_ORDERS.VAT' | translate }} ({{ selectedOrder.taxRate }}%)</td>
-                      <td><strong>{{ selectedOrder.taxAmount | number:'1.2-2' }} {{ selectedOrder.currency }}</strong></td>
-                    </tr>
-                    @if (selectedOrder.globalDiscount > 0) {
+                    @if (selectedOrder.fodecTotal > 0) {
                       <tr>
-                        <td colspan="4" style="text-align:right;font-weight:600;">{{ 'SUPPLIER_ORDERS.GLOBAL_DISCOUNT' | translate }} ({{ selectedOrder.globalDiscount }}%)</td>
-                        <td><strong style="color:#e53935;">-{{ (selectedOrder.subtotal + selectedOrder.taxAmount) * selectedOrder.globalDiscount / 100 | number:'1.2-2' }} {{ selectedOrder.currency }}</strong></td>
+                        <td colspan="4" style="text-align:right;font-weight:600;">{{ 'SUPPLIER_ORDERS.FODEC' | translate }}</td>
+                        <td><strong>{{ selectedOrder.fodecTotal | number:'1.2-2' }} {{ selectedOrder.currency }}</strong></td>
+                      </tr>
+                    }
+                    @for (line of (selectedOrder.vatBreakdown || []); track line.rate) {
+                      <tr>
+                        <td colspan="4" style="text-align:right;font-weight:600;">{{ 'SUPPLIER_ORDERS.VAT_LINE' | translate:{rate: line.rate} }}</td>
+                        <td><strong>{{ line.amount | number:'1.2-2' }} {{ selectedOrder.currency }}</strong></td>
+                      </tr>
+                    }
+                    @if (!(selectedOrder.vatBreakdown || []).length) {
+                      <tr>
+                        <td colspan="4" style="text-align:right;font-weight:600;">{{ 'SUPPLIER_ORDERS.VAT' | translate }} ({{ selectedOrder.taxRate }}%)</td>
+                        <td><strong>{{ selectedOrder.taxAmount | number:'1.2-2' }} {{ selectedOrder.currency }}</strong></td>
                       </tr>
                     }
                     <tr>
                       <td colspan="4" style="text-align:right;font-weight:700;font-size:16px;">{{ 'ORDERS.TOTAL' | translate }}</td>
                       <td><strong style="font-size:16px;color:#0f3460;">{{ selectedOrder.total | number:'1.2-2' }} {{ selectedOrder.currency }}</strong></td>
                     </tr>
+                    <tr>
+                      <td colspan="4" style="text-align:right;font-weight:600;">{{ 'SUPPLIER_ORDERS.STAMP' | translate }}</td>
+                      <td><strong>{{ selectedOrder.stampAmount | number:'1.2-2' }} {{ selectedOrder.currency }}</strong></td>
+                    </tr>
+                    <tr>
+                      <td colspan="4" style="text-align:right;font-weight:700;font-size:16px;">{{ 'SUPPLIER_ORDERS.NET_PAYABLE' | translate }}</td>
+                      <td><strong style="font-size:16px;color:#0f3460;">{{ selectedOrder.netPayable | number:'1.2-2' }} {{ selectedOrder.currency }}</strong></td>
+                    </tr>
                   </tfoot>
                 </table>
+              </div>
+            </div>
+          }
+          @if (showDetailExtRefForm && selectedOrder) {
+            <div class="form-card" style="margin-top:16px;">
+              <div class="form-group">
+                <label for="detailExtRef">{{ 'ORDER_DETAIL.EXTREF' | translate }}</label>
+                <input id="detailExtRef" type="text" [(ngModel)]="detailExternalReference" name="detailExternalReference" class="form-control"
+                  [placeholder]="'ORDER_DETAIL.EXTREF_PLACEHOLDER' | translate">
+                <span class="field-hint">{{ 'ORDER_DETAIL.EXTREF_HINT' | translate }}</span>
+              </div>
+              <div class="form-actions">
+                <button type="button" class="btn btn-secondary" (click)="toggleDetailExtRefForm()">{{ 'COMMON.CANCEL' | translate }}</button>
+                <button type="button" class="btn btn-primary" [disabled]="savingDetailExtRef || !detailExternalReference.trim()" (click)="saveDetailExtRef()">
+                  {{ savingDetailExtRef ? ('COMMON.SAVING' | translate) : ('COMMON.SAVE' | translate) }}
+                </button>
+              </div>
+            </div>
+          }
+          @if (detailCertificate) {
+            <div class="info-box" style="border-left:4px solid #0f3460;margin-top:16px;">
+              <strong>{{ 'PAYMENT_DETAIL.CERT_TITLE' | translate }} {{ detailCertificate.number }}</strong><br>
+              <span>{{ 'PAYMENT_DETAIL.CERT_LINE' | translate:{rate: detailCertificate.rate, amount: detailCertificate.withholdingAmount, currency: detailCertificate.currency} }}</span><br>
+              <span>{{ 'PAYMENT_DETAIL.CERT_DUE' | translate:{date: detailCertificate.dueDate} }}</span>
+              @if (detailCertificate.tejReference) {
+                <span> — {{ 'PAYMENT_DETAIL.CERT_TEJ_REF' | translate }} {{ detailCertificate.tejReference }}</span>
+              } @else {
+                <span> — {{ 'PAYMENT_DETAIL.CERT_TEJ_PENDING' | translate }}</span>
+              }
+              @if ((detailCertificate.status === 'READY' || detailCertificate.status === 'REJECTED') && !showDetailDepositForm) {
+                <div style="margin-top:8px;">
+                  <button class="btn btn-sm btn-secondary" (click)="toggleDetailDepositForm()">{{ 'PAYMENT_DETAIL.CERT_MARK_DEPOSITED' | translate }}</button>
+                </div>
+              }
+            </div>
+          }
+          @if (showDetailDepositForm && detailCertificate) {
+            <div class="form-card" style="margin-top:16px;">
+              <div class="form-group">
+                <label for="detailTejRef">{{ 'PAYMENT_DETAIL.CERT_TEJ_REF_INPUT' | translate }}</label>
+                <input id="detailTejRef" type="text" [(ngModel)]="detailTejReference" name="detailTejReference" class="form-control">
+              </div>
+              <div class="form-actions">
+                <button type="button" class="btn btn-secondary" (click)="toggleDetailDepositForm()">{{ 'COMMON.CANCEL' | translate }}</button>
+                <button type="button" class="btn btn-primary" [disabled]="savingDetailDeposit || !detailTejReference.trim()" (click)="saveDetailDeposit()">
+                  {{ savingDetailDeposit ? ('COMMON.SAVING' | translate) : ('COMMON.SAVE' | translate) }}
+                </button>
               </div>
             </div>
           }

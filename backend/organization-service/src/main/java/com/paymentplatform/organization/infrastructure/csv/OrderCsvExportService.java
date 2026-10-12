@@ -66,7 +66,8 @@ public class OrderCsvExportService {
         StringWriter sw = new StringWriter();
         sw.write("Reference,Supplier,Shop,CreatedBy,Source,Status,Subtotal,TaxRate,TaxAmount,Total,Currency,"
                 + "DeliveryAgent,PlannedDeliveryDate,ConfirmedDeliveryDate,AsapPayment,DeliveredAt,ReceivedBy,"
-                + "ReceivedAt,DeliveryRejectionReason,Notes,CreatedAt,UpdatedAt\n");
+                + "ReceivedAt,DeliveryRejectionReason,Notes,CreatedAt,UpdatedAt,"
+                + "FodecTotal,StampAmount,NetPayable,BuyerRegime,VatBreakdown\n");
 
         for (Order o : filtered) {
             String supplierName = orgName.apply(o.getSupplierId());
@@ -75,7 +76,7 @@ public class OrderCsvExportService {
             String receivedByName = userName.apply(o.getReceivedBy());
             String createdByName = userName.apply(o.getCreatedBy());
 
-            sw.write(String.format("%s,\"%s\",\"%s\",\"%s\",%s,%s,%s,%s,%s,%s,%s,\"%s\",%s,%s,%s,%s,\"%s\",%s,\"%s\",\"%s\",%s,%s\n",
+            sw.write(String.format("%s,\"%s\",\"%s\",\"%s\",%s,%s,%s,%s,%s,%s,%s,\"%s\",%s,%s,%s,%s,\"%s\",%s,\"%s\",\"%s\",%s,%s,%s,%s,%s,%s,\"%s\"\n",
                     o.getReference(),
                     esc(supplierName),
                     esc(shopName),
@@ -97,7 +98,12 @@ public class OrderCsvExportService {
                     esc(o.getDeliveryRejectionReason() != null ? o.getDeliveryRejectionReason() : ""),
                     esc(o.getNotes() != null ? o.getNotes() : ""),
                     FORMATTER.format(o.getCreatedAt()),
-                    FORMATTER.format(o.getUpdatedAt())
+                    FORMATTER.format(o.getUpdatedAt()),
+                    o.getFodecTotal() != null ? o.getFodecTotal().toPlainString() : "0",
+                    o.getStampAmount() != null ? o.getStampAmount().toPlainString() : "0",
+                    o.getNetPayable().toPlainString(),
+                    o.getBuyerRegime() != null ? o.getBuyerRegime() : "",
+                    esc(o.getVatBreakdown() != null ? o.getVatBreakdown() : "")
             ));
         }
 

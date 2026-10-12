@@ -33,9 +33,9 @@ class OrganizationStatusUseCaseH2Test {
 
     @BeforeEach
     void setUp() {
-        var supplier = createOrg.execute(new CreateOrganizationRequest("Test Supplier", "SUPPLIER"), UUID.fromString("00000000-0000-0000-0000-000000000001"));
+        var supplier = createOrg.execute(new CreateOrganizationRequest("Test Supplier", "SUPPLIER", "1234567A/A/M/000", "PAT-TEST", "Adresse Test, Tunis", null, null, null, null, null, null), UUID.fromString("00000000-0000-0000-0000-000000000001"));
         supplierId = supplier.id();
-        var shop = createOrg.execute(new CreateOrganizationRequest("Test Shop", "SHOP"), UUID.fromString("00000000-0000-0000-0000-000000000001"));
+        var shop = createOrg.execute(new CreateOrganizationRequest("Test Shop", "SHOP", "1234567A/A/M/000", "PAT-TEST", "Adresse Test, Tunis", null, null, null, null, null, null), UUID.fromString("00000000-0000-0000-0000-000000000001"));
         shopId = shop.id();
     }
 

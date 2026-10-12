@@ -23,7 +23,11 @@ public record ProductResponse(
     String unit,
     String status,
     Instant createdAt,
-    Instant updatedAt
+    Instant updatedAt,
+    BigDecimal vatRate,
+    boolean fodecApplicable,
+    String vatExemptionText,
+    boolean priceTtc
 ) {
     public static ProductResponse from(Product product) {
         return new ProductResponse(
@@ -43,7 +47,11 @@ public record ProductResponse(
             product.getUnit(),
             product.getStatus(),
             product.getCreatedAt(),
-            product.getUpdatedAt()
+            product.getUpdatedAt(),
+            product.getVatRate(),
+            product.isFodecApplicable(),
+            product.getVatExemptionText(),
+            product.isPriceTtc()
         );
     }
 }

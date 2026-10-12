@@ -70,27 +70,45 @@ describe('OrganizationService', () => {
   });
 
   describe('createSupplier', () => {
-    it('should POST to create supplier', () => {
+    it('should POST to create supplier with fiscal profile', () => {
       const mock: Organization = { id: 3, name: 'New Supplier', type: 'SUPPLIER', status: 'ACTIVE', version: 1, createdAt: '', updatedAt: '', relations: [] };
-      service.createSupplier('New Supplier').subscribe(data => {
+      service.createSupplier({ name: 'New Supplier', matriculeFiscal: '1234567A/A/M/000', address: 'Tunis' }).subscribe(data => {
         expect(data.name).toBe('New Supplier');
       });
       const req = httpMock.expectOne('/api/admin/suppliers');
       expect(req.request.method).toBe('POST');
-      expect(req.request.body).toEqual({ name: 'New Supplier' });
+      expect(req.request.body).toEqual({ name: 'New Supplier', matriculeFiscal: '1234567A/A/M/000', address: 'Tunis' });
       req.flush(mock);
     });
   });
 
   describe('createShop', () => {
-    it('should POST to create shop', () => {
+    it('should POST to create shop with fiscal profile', () => {
       const mock: Organization = { id: 4, name: 'New Shop', type: 'SHOP', status: 'ACTIVE', version: 1, createdAt: '', updatedAt: '', relations: [] };
-      service.createShop('New Shop').subscribe(data => {
+      service.createShop({ name: 'New Shop', fiscalRegime: 'NON_ASSUJETTI' }).subscribe(data => {
         expect(data.name).toBe('New Shop');
       });
       const req = httpMock.expectOne('/api/admin/shops');
       expect(req.request.method).toBe('POST');
-      expect(req.request.body).toEqual({ name: 'New Shop' });
+      expect(req.request.body).toEqual({ name: 'New Shop', fiscalRegime: 'NON_ASSUJETTI' });
+      req.flush(mock);
+    });
+  });
+
+  describe('updateFiscalProfile', () => {
+    it('should PATCH supplier fiscal profile', () => {
+      const mock: Organization = { id: 3, name: 'S', type: 'SUPPLIER', status: 'ACTIVE', version: 2, createdAt: '', updatedAt: '', relations: [] };
+      service.updateFiscalProfile('3', 'SUPPLIER', { name: 'S', matriculeFiscal: '1234567A/A/M/000' }).subscribe();
+      const req = httpMock.expectOne('/api/admin/suppliers/3/fiscal-profile');
+      expect(req.request.method).toBe('PATCH');
+      req.flush(mock);
+    });
+
+    it('should PATCH shop fiscal profile', () => {
+      const mock: Organization = { id: 4, name: 'S', type: 'SHOP', status: 'ACTIVE', version: 2, createdAt: '', updatedAt: '', relations: [] };
+      service.updateFiscalProfile('4', 'SHOP', { name: 'S', fiscalRegime: 'SUSPENDU' }).subscribe();
+      const req = httpMock.expectOne('/api/admin/shops/4/fiscal-profile');
+      expect(req.request.method).toBe('PATCH');
       req.flush(mock);
     });
   });

@@ -24,7 +24,12 @@
               "src/favicon.ico",
               "src/assets",
               "src/manifest.json",
-              "src/firebase-messaging-sw.js"
+              "src/firebase-messaging-sw.js",
+              {
+                "glob": "pdf.worker.min.mjs",
+                "input": "node_modules/pdfjs-dist/build",
+                "output": "assets/"
+              }
             ],
             "styles": [
               "src/styles.css"
@@ -44,7 +49,7 @@
                 {
                   "type": "anyComponentStyle",
                   "maximumWarning": "8kb",
-                  "maximumError": "12kb"
+                  "maximumError": "16kb"
                 }
               ],
               "outputHashing": "all",

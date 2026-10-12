@@ -16,7 +16,54 @@
         <input type="text" [(ngModel)]="newName" name="name" id="shopName" class="form-control"
           [placeholder]="'ORGS.SHOP_PLACEHOLDER' | translate" required aria-required="true">
       </div>
-      <button class="btn btn-primary" [disabled]="creating || !newName.trim()"
+      <div class="form-row">
+        <div class="form-group">
+          <label for="shopRegime">{{ 'ORGS.FISCAL_REGIME' | translate }}</label>
+          <select [(ngModel)]="fiscalForm.fiscalRegime" name="regime" id="shopRegime" class="form-control">
+            @for (r of fiscalRegimes; track r) {
+              <option [ngValue]="r">{{ 'ORGS.REGIME_' + r | translate }}</option>
+            }
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="shopMf">{{ 'ORGS.MATRICULE_FISCAL' | translate }}
+            @if (mfRequired()) { <span class="required">*</span> }</label>
+          <input type="text" [(ngModel)]="fiscalForm.matriculeFiscal" name="mf" id="shopMf" class="form-control"
+            [placeholder]="'ORGS.MF_PLACEHOLDER' | translate">
+          <span class="field-hint">{{ 'ORGS.MF_HINT_SHOP' | translate }}</span>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="shopPatente">{{ 'ORGS.PATENTE' | translate }}</label>
+          <input type="text" [(ngModel)]="fiscalForm.patente" name="patente" id="shopPatente" class="form-control"
+            [placeholder]="'ORGS.PATENTE_PLACEHOLDER' | translate">
+        </div>
+        <div class="form-group">
+          <label for="shopAddress">{{ 'ORGS.ADDRESS' | translate }}</label>
+          <input type="text" [(ngModel)]="fiscalForm.address" name="address" id="shopAddress" class="form-control"
+            [placeholder]="'ORGS.ADDRESS_PLACEHOLDER' | translate">
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="shopTej">{{ 'ORGS.TEJ_IDENTIFIER' | translate }}</label>
+        <input type="text" [(ngModel)]="fiscalForm.tejIdentifier" name="tejIdentifier" id="shopTej" class="form-control"
+          [placeholder]="'ORGS.TEJ_PLACEHOLDER' | translate">
+        <span class="field-hint">{{ 'ORGS.TEJ_HINT' | translate }}</span>
+      </div>
+      @if (fiscalForm.fiscalRegime === 'SUSPENDU') {
+        <div class="form-row">
+          <div class="form-group">
+            <label for="shopAttNum">{{ 'ORGS.ATTESTATION_NUMBER' | translate }} <span class="required">*</span></label>
+            <input type="text" [(ngModel)]="fiscalForm.suspensionAttestationNumber" name="attNum" id="shopAttNum" class="form-control">
+          </div>
+          <div class="form-group">
+            <label for="shopAttExp">{{ 'ORGS.ATTESTATION_EXPIRY' | translate }}</label>
+            <input type="date" [(ngModel)]="fiscalForm.suspensionExpiryDate" name="attExp" id="shopAttExp" class="form-control">
+          </div>
+        </div>
+      }
+      <button class="btn btn-primary" [disabled]="creating || !canCreate()"
         [attr.aria-label]="creating ? ('COMMON.CREATING' | translate) : ('ORGS.CREATE_SHOP_ARIA' | translate)">
         {{ creating ? ('COMMON.CREATING' | translate) : ('COMMON.CREATE' | translate) }}
       </button>
@@ -40,6 +87,7 @@
             <th class="sortable-th" (click)="onSort('name')" (keydown.enter)="onSort('name')" tabindex="0" [attr.aria-sort]="ariaSort('name')">{{ 'ORGS.NAME' | translate }} <span class="sort-indicator" aria-hidden="true">{{ sortIndicator('name') }}</span></th>
             <th class="sortable-th" (click)="onSort('status')" (keydown.enter)="onSort('status')" tabindex="0" [attr.aria-sort]="ariaSort('status')">{{ 'DASHBOARD.STATUS' | translate }} <span class="sort-indicator" aria-hidden="true">{{ sortIndicator('status') }}</span></th>
             <th class="sortable-th" (click)="onSort('createdAt')" (keydown.enter)="onSort('createdAt')" tabindex="0" [attr.aria-sort]="ariaSort('createdAt')">{{ 'ORGS.CREATED_AT' | translate }} <span class="sort-indicator" aria-hidden="true">{{ sortIndicator('createdAt') }}</span></th>
+            <th>{{ 'ORGS.MATRICULE_FISCAL' | translate }}</th>
             <th>{{ 'USERS.ACTIONS' | translate }}</th>
           </tr>
         </thead>
@@ -54,7 +102,12 @@
                 </span>
               </td>
               <td>{{ s.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
+              <td>{{ s.matriculeFiscal || '-' }}</td>
               <td>
+                <button class="btn btn-sm btn-secondary" (click)="openFiscalEdit(s)"
+                  [attr.aria-label]="('ORGS.EDIT_FISCAL_ARIA' | translate) + ' ' + s.name">
+                  {{ 'ORGS.EDIT_FISCAL' | translate }}
+                </button>
                 <button class="btn btn-sm" [class.btn-success]="s.status === 'DISABLED'" [class.btn-danger]="s.status === 'ACTIVE'"
                   (click)="toggle(s)"
                   [attr.aria-label]="(s.status === 'ACTIVE' ? ('USERS.DEACTIVATE' | translate) : ('USERS.ACTIVATE' | translate)) + ' ' + s.name">
@@ -65,12 +118,67 @@
           }
           @if (shops.length === 0) {
             <tr>
-              <td colspan="4" style="text-align:center;color:#8896ab;padding:32px;">{{ 'ORGS.NO_SHOP' | translate }}</td>
+              <td colspan="5" style="text-align:center;color:#8896ab;padding:32px;">{{ 'ORGS.NO_SHOP' | translate }}</td>
             </tr>
           }
         </tbody>
       </table>
     </div>
+  </div>
+}
+
+@if (showFiscalEdit && editingShop) {
+  <div class="form-card" style="margin-bottom: 24px;">
+    <h3 style="margin-bottom: 16px;">{{ 'ORGS.EDIT_FISCAL_TITLE' | translate }} — {{ editingShop.name }}</h3>
+    <form (ngSubmit)="saveFiscalEdit()">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="editRegime">{{ 'ORGS.FISCAL_REGIME' | translate }}</label>
+          <select [(ngModel)]="fiscalForm.fiscalRegime" name="editRegime" id="editRegime" class="form-control">
+            @for (r of fiscalRegimes; track r) {
+              <option [ngValue]="r">{{ 'ORGS.REGIME_' + r | translate }}</option>
+            }
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="editMf">{{ 'ORGS.MATRICULE_FISCAL' | translate }}</label>
+          <input type="text" [(ngModel)]="fiscalForm.matriculeFiscal" name="editMf" id="editMf" class="form-control">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="editPatente">{{ 'ORGS.PATENTE' | translate }}</label>
+          <input type="text" [(ngModel)]="fiscalForm.patente" name="editPatente" id="editPatente" class="form-control">
+        </div>
+        <div class="form-group">
+          <label for="editAddress">{{ 'ORGS.ADDRESS' | translate }}</label>
+          <input type="text" [(ngModel)]="fiscalForm.address" name="editAddress" id="editAddress" class="form-control">
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="editTej">{{ 'ORGS.TEJ_IDENTIFIER' | translate }}</label>
+        <input type="text" [(ngModel)]="fiscalForm.tejIdentifier" name="editTej" id="editTej" class="form-control"
+          [placeholder]="'ORGS.TEJ_PLACEHOLDER' | translate">
+      </div>
+      @if (fiscalForm.fiscalRegime === 'SUSPENDU') {
+        <div class="form-row">
+          <div class="form-group">
+            <label for="editAttNum">{{ 'ORGS.ATTESTATION_NUMBER' | translate }}</label>
+            <input type="text" [(ngModel)]="fiscalForm.suspensionAttestationNumber" name="editAttNum" id="editAttNum" class="form-control">
+          </div>
+          <div class="form-group">
+            <label for="editAttExp">{{ 'ORGS.ATTESTATION_EXPIRY' | translate }}</label>
+            <input type="date" [(ngModel)]="fiscalForm.suspensionExpiryDate" name="editAttExp" id="editAttExp" class="form-control">
+          </div>
+        </div>
+      }
+      <div class="form-actions">
+        <button type="button" class="btn btn-secondary" (click)="showFiscalEdit = false">{{ 'COMMON.CANCEL' | translate }}</button>
+        <button type="submit" class="btn btn-primary" [disabled]="savingFiscal">
+          {{ savingFiscal ? ('COMMON.SAVING' | translate) : ('COMMON.SAVE' | translate) }}
+        </button>
+      </div>
+    </form>
   </div>
 }
 

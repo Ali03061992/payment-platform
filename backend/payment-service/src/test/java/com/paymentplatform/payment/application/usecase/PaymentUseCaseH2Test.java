@@ -258,4 +258,5 @@ class PaymentUseCaseH2Test {
         assertThat(second.id()).isNotEqualTo(first.id());
         assertThat(payments.findAll()).hasSize(2);
     }
+
 }

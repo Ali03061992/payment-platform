@@ -1,0 +1,25 @@
+<div class="page-header">
+  <h2>{{ 'TEJ_GUIDE.TITLE' | translate }}</h2>
+  <div class="page-header-actions">
+    <a class="btn btn-primary" href="https://tej.finances.gov.tn" target="_blank" rel="noopener">{{ 'TEJ_GUIDE.OPEN_PLATFORM' | translate }}</a>
+    <a class="btn btn-secondary" routerLink="/dashboard/payments-help/tej-prepare">{{ 'TEJ_GUIDE.PREPARE' | translate }}</a>
+    <a class="btn btn-secondary" routerLink="/dashboard/payments">{{ 'TEJ_GUIDE.BACK' | translate }}</a>
+  </div>
+</div>
+
+<div class="form-card" style="margin-bottom:16px;">
+  <p>{{ 'TEJ_GUIDE.INTRO' | translate }}</p>
+  <p class="field-hint">{{ 'TEJ_GUIDE.LEGAL_BASE' | translate }}</p>
+</div>
+
+@for (n of steps; track n) {
+  <div class="table-card" style="margin-bottom:12px;">
+    <h3 style="padding:16px 20px 0;">{{ n }}. {{ ('TEJ_GUIDE.STEP' + n + '_TITLE') | translate }}</h3>
+    <p style="padding:0 20px 16px;">{{ ('TEJ_GUIDE.STEP' + n + '_TEXT') | translate }}</p>
+  </div>
+}
+
+<div class="info-box" style="border-left:4px solid #781e1e;margin-top:16px;">
+  <strong>{{ 'TEJ_GUIDE.WARNING_TITLE' | translate }}</strong>
+  {{ 'TEJ_GUIDE.WARNING_TEXT' | translate }}
+</div>

@@ -31,6 +31,8 @@ import { OrganizationStatsComponent } from './admin/organization-stats/organizat
 import { PaymentListComponent } from './payments/payment-list/payment-list.component';
 import { CreatePaymentComponent } from './payments/create-payment/create-payment.component';
 import { PaymentDetailComponent } from './payments/payment-detail/payment-detail.component';
+import { TejGuideComponent } from './payments/tej-guide/tej-guide.component';
+import { WithholdingPrepareComponent } from './payments/withholding-prepare/withholding-prepare.component';
 import { PaymentStatsComponent } from './payments/payment-stats/payment-stats.component';
 import { ProductManagementComponent } from './supplier/product-management/product-management.component';
 import { CategoryManagementComponent } from './supplier/category-management/category-management.component';
@@ -142,6 +144,8 @@ export function initAppTranslations(translate: TranslateService, loginService: L
         PaymentListComponent,
         CreatePaymentComponent,
         PaymentDetailComponent,
+        TejGuideComponent,
+        WithholdingPrepareComponent,
         PaymentStatsComponent,
         ProductManagementComponent,
         CategoryManagementComponent,

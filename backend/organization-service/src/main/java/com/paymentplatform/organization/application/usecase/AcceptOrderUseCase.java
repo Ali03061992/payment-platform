@@ -13,6 +13,8 @@ import com.paymentplatform.shared.domain.event.OrderEvents;
 import com.paymentplatform.shared.domain.exception.ConflictException;
 import com.paymentplatform.shared.domain.exception.NotFoundException;
 import com.paymentplatform.shared.infrastructure.outbox.OutboxEventStore;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,20 +25,25 @@ import java.util.UUID;
 @Service
 public class AcceptOrderUseCase {
 
+    private static final Logger log = LoggerFactory.getLogger(AcceptOrderUseCase.class);
+
     private final OrderRepository orders;
     private final OrderItemRepository orderItems;
     private final OrderEventRepository events;
     private final ProductRepository products;
     private final OutboxEventStore outbox;
+    private final IssueWithholdingCertificateUseCase withholding;
 
     public AcceptOrderUseCase(OrderRepository orders, OrderItemRepository orderItems,
                               OrderEventRepository events, ProductRepository products,
-                              OutboxEventStore outbox) {
+                              OutboxEventStore outbox,
+                              IssueWithholdingCertificateUseCase withholding) {
         this.orders = orders;
         this.orderItems = orderItems;
         this.events = events;
         this.products = products;
         this.outbox = outbox;
+        this.withholding = withholding;
     }
 
     @Transactional
@@ -65,6 +72,14 @@ public class AcceptOrderUseCase {
                 orderId, order.getReference(),
                 order.getShopId(), order.getSupplierId(), actorUserId),
                 String.valueOf(orderId));
+
+        // Rattrapage : émet le certificat s'il n'existe pas encore (idempotent).
+        try {
+            withholding.issueForDeliveredOrder(order, null);
+        } catch (Exception e) {
+            log.error("Émission du certificat de retenue impossible pour la commande {}",
+                    order.getReference(), e);
+        }
 
         return OrderResponse.from(order, items);
     }

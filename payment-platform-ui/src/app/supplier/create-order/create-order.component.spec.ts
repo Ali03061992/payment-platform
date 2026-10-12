@@ -197,6 +197,33 @@ describe('SupplierCreateOrderComponent', () => {
       expect(component.taxAmount).toBe(0);
       expect(component.total).toBe(0);
     });
+
+    it('should ventilate mixed VAT rates with FODEC and stamp', () => {
+      component.globalDiscount = 0;
+      component.orderLines = [
+        { product: { id: 1, unitPrice: 1000, vatRate: 19, fodecApplicable: false } as any, quantity: 1, discount: 0 },
+        { product: { id: 2, unitPrice: 500, vatRate: 7, fodecApplicable: false } as any, quantity: 1, discount: 0 },
+        { product: { id: 3, unitPrice: 5000, vatRate: 19, fodecApplicable: true } as any, quantity: 1, discount: 0 }
+      ];
+      expect(component.subtotal).toBeCloseTo(6500, 4);
+      expect(component.fodecAmount).toBeCloseTo(50, 4);
+      expect(component.taxAmount).toBeCloseTo(1184.5, 4);
+      expect(component.total).toBeCloseTo(7734.5, 4);
+      expect(component.stampAmount).toBe(1);
+      expect(component.netPayable).toBeCloseTo(7735.5, 4);
+      expect(component.vatByRate.length).toBe(2);
+      expect(component.vatByRate[0].rate).toBe(19);
+    });
+
+    it('should deduct global discount before VAT', () => {
+      component.globalDiscount = 5;
+      component.orderLines = [
+        { product: { id: 1, unitPrice: 10000, vatRate: 19, fodecApplicable: false } as any, quantity: 1, discount: 0 }
+      ];
+      expect(component.discountAmount).toBeCloseTo(500, 4);
+      expect(component.taxAmount).toBeCloseTo(1805, 4);
+      expect(component.total).toBeCloseTo(11305, 4);
+    });
   });
 
   describe('canSubmit', () => {

@@ -42,7 +42,39 @@ public class CreateOrganizationUseCase {
             throw new ConflictException("Une organisation avec ce nom existe déjà : " + name.value());
         }
 
+        com.paymentplatform.organization.domain.model.FiscalRegime regime =
+                com.paymentplatform.organization.domain.model.FiscalRegime.from(request.fiscalRegime());
+        // Loi : tout professionnel immatriculé dispose d'un MF (déclaration d'existence,
+        // art. 56 IRPP/IS ; mention obligatoire art. 18 Code TVA). Le fournisseur, qui
+        // émet les factures, y est toujours tenu ; l'acheteur aussi sauf particulier
+        // (NON_ASSUJETTI) ou client étranger (EXPORT).
+        if (type == OrganizationType.SUPPLIER) {
+            if (request.matriculeFiscal() == null || request.matriculeFiscal().isBlank()) {
+                throw new ConflictException("Le matricule fiscal est obligatoire pour un fournisseur "
+                        + "(art. 18 du Code TVA : mention obligatoire sur chaque facture)");
+            }
+            if (request.address() == null || request.address().isBlank()) {
+                throw new ConflictException("L'adresse est obligatoire pour un fournisseur "
+                        + "(identification sur facture, art. 18 du Code TVA)");
+            }
+        } else if (regime != com.paymentplatform.organization.domain.model.FiscalRegime.NON_ASSUJETTI
+                && regime != com.paymentplatform.organization.domain.model.FiscalRegime.EXPORT
+                && (request.matriculeFiscal() == null || request.matriculeFiscal().isBlank())) {
+            throw new ConflictException("Le matricule fiscal est obligatoire pour une boutique professionnelle "
+                    + "(seuls les particuliers et clients export en sont dispensés)");
+        }
+
         Organization org = Organization.create(new OrganizationId(null), name, type);
+        org.updateFiscalProfile(
+                request.matriculeFiscal(),
+                request.patente(),
+                request.address(),
+                regime,
+                request.suspensionAttestationNumber(),
+                request.suspensionAttestationDate(),
+                request.suspensionExpiryDate(),
+                request.tejIdentifier());
+        org.setDefaultWithholdingNature(request.defaultWithholdingNature());
         Organization saved = organizations.save(org);
 
         audit.record(null, saved.id().value(), type == OrganizationType.SUPPLIER

@@ -16,6 +16,9 @@ public record CreateOrderRequest(
         @Min(value = 0, message = "La remise globale doit être entre 0 et 100")
         @Max(value = 100, message = "La remise globale doit être entre 0 et 100")
         BigDecimal globalDiscount,
+        /* @deprecated Taux global historique IGNORÉ : la TVA est portée par chaque
+           produit (Product.vatRate 19/13/7/0, art. 18 Code TVA). Conservé pour
+           compatibilité ascendante des clients API. */
         @Min(value = 0, message = "Le taux de TVA doit être entre 0 et 100")
         @Max(value = 100, message = "Le taux de TVA doit être entre 0 et 100")
         BigDecimal taxRate,

@@ -148,9 +148,9 @@ jobs:
         run: npm ci --legacy-peer-deps
 
       - name: Run tests with coverage (ChromeHeadlessCI)
-        run: npx ng test --code-coverage --watch=false --browsers=ChromeHeadlessCI
-        # fallback pour runners sans ChromeHeadlessCI custom launcher -> ChromeHeadless
-        # crée coverage/payment-platform-ui/lcov.info
+        # Fallback explicite : si le launcher custom manque, repli sur ChromeHeadless.
+        # Crée coverage/payment-platform-ui/lcov.info
+        run: npx ng test --code-coverage --watch=false --browsers=ChromeHeadlessCI || npx ng test --code-coverage --watch=false --browsers=ChromeHeadless
 
       - name: Check coverage output
         if: always()
@@ -166,9 +166,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: frontend-coverage
-          path: |
-            payment-platform-ui/coverage/**
-            frontend/coverage/**
+          path: payment-platform-ui/coverage/**
           retention-days: 1
           if-no-files-found: warn
 
@@ -178,6 +176,7 @@ jobs:
           name: frontend-dist
           path: payment-platform-ui/dist/
           retention-days: 1
+          if-no-files-found: error
 
   # ──────────────────────────────────────────────────────────────
   # Sonar – Backend (Maven)
@@ -410,7 +409,9 @@ jobs:
 
       - name: Run Cypress tests
         working-directory: payment-platform-ui
-        run: npx cypress run
+        # Config dev impérative : baseUrl 8080 (nginx déployé) + apiUrl 8081.
+        # cypress.config.ts par défaut pointe 4200 (ng serve local), inexistant en CI.
+        run: npx cypress run --config-file cypress.config.dev.ts --browser chrome --headless
 
       - name: Tear down
         if: always()

@@ -36,7 +36,7 @@ describe('ShopOrderDetailComponent', () => {
   };
 
   beforeEach(() => {
-    const orderSpy = jasmine.createSpyObj('OrderService', ['getById', 'getByReference', 'accept', 'acceptAsap', 'reject', 'cancel', 'downloadInvoice', 'getComments', 'addComment']);
+    const orderSpy = jasmine.createSpyObj('OrderService', ['getById', 'getByReference', 'accept', 'acceptAsap', 'reject', 'cancel', 'downloadInvoice', 'printInvoice', 'getComments', 'addComment', 'getWithholdingCertificate', 'downloadWithholdingCertificatePdf', 'downloadWithholdingCertificateXml', 'markCertificateDeposited', 'updateExternalReference']);
     const disputeSpy = jasmine.createSpyObj('DisputeService', ['getByOrder', 'create']);
     const toastSpy = jasmine.createSpyObj('ToastService', ['success', 'error']);
     const confirmSpy = jasmine.createSpyObj('ConfirmDialogService', ['confirm']);
@@ -94,6 +94,59 @@ describe('ShopOrderDetailComponent', () => {
     it('should unsubscribe', () => {
       component.ngOnInit();
       expect(() => component.ngOnDestroy()).not.toThrow();
+    });
+  });
+
+  describe('withholding certificate', () => {
+    it('should load certificate when order is DELIVERED', () => {
+      orderService.getByReference.and.returnValue(of({ ...mockOrder, status: 'DELIVERED' }));
+      orderService.getWithholdingCertificate.and.returnValue(of({ number: 'CRT-1' } as any));
+      component.ngOnInit();
+      expect(orderService.getWithholdingCertificate).toHaveBeenCalled();
+      expect(component.certificate).toEqual({ number: 'CRT-1' } as any);
+    });
+
+    it('should not load certificate when order is DRAFT', () => {
+      component.ngOnInit();
+      expect(orderService.getWithholdingCertificate).not.toHaveBeenCalled();
+      expect(component.certificate).toBeNull();
+    });
+
+    it('should download certificate PDF and XML and print invoice', () => {
+      component.order = { ...mockOrder, id: 'ord-1' } as any;
+      component.downloadCertificatePdf();
+      expect(orderService.downloadWithholdingCertificatePdf).toHaveBeenCalledWith('ord-1');
+      component.downloadCertificateXml();
+      expect(orderService.downloadWithholdingCertificateXml).toHaveBeenCalledWith('ord-1');
+      component.printInvoice();
+      expect(orderService.printInvoice).toHaveBeenCalledWith('ord-1');
+    });
+
+    it('should mark certificate deposited', () => {
+      orderService.markCertificateDeposited.and.returnValue(of({ number: 'CRT-1', status: 'DEPOSITED' } as any));
+      component.order = { ...mockOrder, id: 'ord-1' } as any;
+      component.tejReference = 'TEJ-1';
+      component.markDeposited();
+      expect(orderService.markCertificateDeposited).toHaveBeenCalledWith('ord-1', 'TEJ-1');
+      expect(component.certificate).toEqual({ number: 'CRT-1', status: 'DEPOSITED' } as any);
+      expect(component.showDepositForm).toBeFalse();
+    });
+
+    it('should save external reference', () => {
+      orderService.updateExternalReference.and.returnValue(of({ ...mockOrder, externalReference: 'TTN-1' } as any));
+      component.order = { ...mockOrder, id: 'ord-1' } as any;
+      component.externalReference = 'TTN-1';
+      component.saveExternalReference();
+      expect(orderService.updateExternalReference).toHaveBeenCalledWith('ord-1', 'TTN-1');
+      expect(component.order.externalReference).toBe('TTN-1');
+      expect(component.showExtRefForm).toBeFalse();
+    });
+
+    it('should not save blank external reference', () => {
+      component.order = { ...mockOrder, id: 'ord-1' } as any;
+      component.externalReference = '  ';
+      component.saveExternalReference();
+      expect(orderService.updateExternalReference).not.toHaveBeenCalled();
     });
   });
 

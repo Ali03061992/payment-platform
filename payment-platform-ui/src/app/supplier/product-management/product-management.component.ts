@@ -30,7 +30,8 @@ export class ProductManagementComponent implements OnInit {
 
   form = {
     name: '', sku: '', description: '', unitPrice: 0, currency: 'TND',
-    categoryId: '', familyId: '', unit: 'unite', minQuantity: 0
+    categoryId: '', familyId: '', unit: 'unite', minQuantity: 0,
+    vatRate: 19, fodecApplicable: false, vatExemptionText: '', priceTtc: false
   };
 
   constructor(
@@ -111,7 +112,7 @@ export class ProductManagementComponent implements OnInit {
 
   openCreate(): void {
     this.editingProduct = null;
-    this.form = { name: '', sku: '', description: '', unitPrice: 0, currency: 'TND', categoryId: '', familyId: '', unit: 'unite', minQuantity: 0 };
+    this.form = { name: '', sku: '', description: '', unitPrice: 0, currency: 'TND', categoryId: '', familyId: '', unit: 'unite', minQuantity: 0, vatRate: 19, fodecApplicable: false, vatExemptionText: '', priceTtc: false };
     this.showForm = true;
   }
 
@@ -120,20 +121,28 @@ export class ProductManagementComponent implements OnInit {
     this.form = {
       name: p.name, sku: p.sku, description: p.description || '', unitPrice: p.unitPrice,
       currency: p.currency, categoryId: p.categoryId || '', familyId: p.familyId || '',
-      unit: p.unit || 'unite', minQuantity: p.minQuantity
+      unit: p.unit || 'unite', minQuantity: p.minQuantity,
+      vatRate: p.vatRate ?? 19, fodecApplicable: p.fodecApplicable ?? false,
+      vatExemptionText: p.vatExemptionText || '', priceTtc: p.priceTtc ?? false
     };
     this.showForm = true;
   }
 
   save(): void {
     if (!this.form.name.trim() || !this.form.sku.trim()) return;
+    if (this.form.vatRate === 0 && !this.form.vatExemptionText.trim()) {
+      this.toast.error(this.translate.instant('CATALOG.ERR_EXEMPTION_REQUIRED'));
+      return;
+    }
     this.saving = true;
 
     const data = {
       name: this.form.name, sku: this.form.sku, description: this.form.description,
       unitPrice: this.form.unitPrice, currency: this.form.currency,
       categoryId: this.form.categoryId || null, familyId: this.form.familyId || null,
-      unit: this.form.unit, minQuantity: this.form.minQuantity
+      unit: this.form.unit, minQuantity: this.form.minQuantity,
+      vatRate: this.form.vatRate, fodecApplicable: this.form.fodecApplicable,
+      vatExemptionText: this.form.vatExemptionText || null, priceTtc: this.form.priceTtc
     };
 
     if (this.editingProduct) {

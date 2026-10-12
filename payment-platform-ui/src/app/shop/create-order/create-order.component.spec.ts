@@ -111,6 +111,20 @@ describe('CreateOrderComponent (shop)', () => {
       expect(component.taxAmount).toBe(38);
       expect(component.total).toBe(238);
     });
+
+    it('should use product VAT rate with FODEC, stamp and net payable', () => {
+      component.orderLines = [
+        { product: { id: 1, unitPrice: 500, vatRate: 7, fodecApplicable: false } as any, quantity: 1, discount: 0 },
+        { product: { id: 2, unitPrice: 1000, vatRate: 19, fodecApplicable: true } as any, quantity: 1, discount: 0 }
+      ];
+      // HT 1500 ; FODEC 10 ; TVA 35 + 191.9 ; TTC 1736.9 ; timbre 1 ; net 1737.9
+      expect(component.fodecAmount).toBeCloseTo(10, 4);
+      expect(component.taxAmount).toBeCloseTo(226.9, 4);
+      expect(component.total).toBeCloseTo(1736.9, 4);
+      expect(component.stampAmount).toBe(1);
+      expect(component.netPayable).toBeCloseTo(1737.9, 4);
+      expect(component.vatByRate.length).toBe(2);
+    });
   });
 
   describe('canSubmit', () => {

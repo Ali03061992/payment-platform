@@ -1,6 +1,6 @@
 # Fallback Dockerfile for Render (service configured with root Dockerfile)
 # Builds the frontend (Angular) - matches frontend/Dockerfile logic
-FROM node:18-alpine AS build
+FROM node:22-alpine AS build
 WORKDIR /app
 COPY payment-platform-ui/package.json payment-platform-ui/package-lock.json ./
 RUN npm install --legacy-peer-deps

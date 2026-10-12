@@ -26,6 +26,14 @@ public record OrderResponse(
         BigDecimal taxRate,
         BigDecimal taxAmount,
         BigDecimal globalDiscount,
+        BigDecimal fodecTotal,
+        BigDecimal stampAmount,
+        BigDecimal netPayable,
+        List<VatBreakdownLine> vatBreakdown,
+        String fiscalMention,
+        String exemptionReason,
+        String buyerRegime,
+        String externalReference,
         BigDecimal total,
         String currency,
         UUID deliveryAgentId,
@@ -101,6 +109,15 @@ public record OrderResponse(
                 order.getTaxRate(),
                 order.getTaxAmount(),
                 order.getGlobalDiscount(),
+                order.getFodecTotal(),
+                order.getStampAmount(),
+                order.getNetPayable(),
+                com.paymentplatform.organization.domain.model.FiscalRules.parseVatBreakdown(order.getVatBreakdown())
+                        .stream().map(v -> new VatBreakdownLine(v.rate(), v.base(), v.amount())).toList(),
+                order.getFiscalMention(),
+                order.getExemptionReason(),
+                order.getBuyerRegime(),
+                order.getExternalReference(),
                 order.getTotal(),
                 order.getCurrency(),
                 order.getDeliveryAgentId(),
@@ -134,6 +151,12 @@ public record OrderResponse(
         );
     }
 
+    public record VatBreakdownLine(
+            BigDecimal rate,
+            BigDecimal base,
+            BigDecimal amount
+    ) {}
+
     public record OrderItemResponse(
             UUID id,
             UUID productId,
@@ -143,6 +166,13 @@ public record OrderResponse(
             BigDecimal unitPrice,
             BigDecimal discount,
             BigDecimal lineTotal,
+            BigDecimal vatRate,
+            boolean fodecApplicable,
+            boolean priceTtc,
+            BigDecimal htUnitPrice,
+            BigDecimal fodecAmount,
+            BigDecimal vatBase,
+            BigDecimal vatAmount,
             String productSnapshot,
             Instant createdAt
     ) {
@@ -156,6 +186,13 @@ public record OrderResponse(
                     item.getUnitPrice(),
                     item.getDiscount(),
                     item.getLineTotal(),
+                    item.getVatRate(),
+                    item.isFodecApplicable(),
+                    item.isPriceTtc(),
+                    item.getHtUnitPrice(),
+                    item.getFodecAmount(),
+                    item.getVatBase(),
+                    item.getVatAmount(),
                     item.getProductSnapshot(),
                     item.getCreatedAt()
             );

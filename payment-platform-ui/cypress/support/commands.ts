@@ -57,12 +57,13 @@ Cypress.Commands.add('login', (username: string, password: string) => {
         headers: authHeaders(auth.token),
       }).then((me) => ({ ...auth, user: me.body }));
     withUser.then((a) => {
-      cy.visit('/login', {
-        log: false,
-        onBeforeLoad: (win) => injectSession(win, a),
-      });
+      // Injection APRES visite : le callback onBeforeLoad de cy.visit n'est pas
+      // déclenché de façon fiable quand un service worker contrôle la page
+      // (constaté sur le build prod servi par nginx).
+      cy.visit('/login', { log: false });
+      cy.window({ log: false }).then((win) => injectSession(win, a));
       // La session doit survivre au chargement (garde anti-redirect /login).
-      cy.window({ log: false }).then((win) => {
+      cy.window({ log: false }).should((win) => {
         expect(win.sessionStorage.getItem('token'), 'token injected').to.not.be.null;
       });
     });
@@ -150,11 +151,14 @@ Cypress.Commands.add('loginAsPointteckAgent', () => {
 
 function createOrg(token: string, name: string, type: string) {
   const endpoint = type === 'SUPPLIER' ? 'suppliers' : 'shops';
+  // MF + adresse obligatoires depuis la règle fiscale (art. 18 Code TVA).
+  const n = Date.now() % 10000000;
+  const matriculeFiscal = `${String(1000000 + (n % 9000000))}A/A/M/000`;
   return cy.request({
     method: 'POST',
     url: `${API_URL()}/api/admin/${endpoint}`,
     headers: authHeaders(token),
-    body: { name, type },
+    body: { name, type, matriculeFiscal, patente: `PAT-E2E-${n}`, address: 'Adresse E2E, Tunis' },
     failOnStatusCode: false,
   }).then((r) => {
     if ((r.status === 200 || r.status === 201) && r.body?.id) return r.body;

@@ -64,13 +64,31 @@ describe('ShopManagementComponent', () => {
     expect(component.loading).toBeFalse();
   });
 
-  it('should create shop with valid name', () => {
+  it('should create shop with valid name and MF', () => {
     component.newName = 'New Shop';
+    component.fiscalForm.matriculeFiscal = '1234567A/A/M/000';
     component.create();
-    expect(orgService.createShop).toHaveBeenCalledWith('New Shop');
+    expect(orgService.createShop).toHaveBeenCalledWith(jasmine.objectContaining({
+      name: 'New Shop', matriculeFiscal: '1234567A/A/M/000'
+    }));
     expect(toast.success).toHaveBeenCalled();
     expect(component.newName).toBe('');
     expect(component.showCreate).toBeFalse();
+  });
+
+  it('should create particulier shop without MF', () => {
+    component.newName = 'Particulier';
+    component.fiscalForm.fiscalRegime = 'NON_ASSUJETTI';
+    component.fiscalForm.matriculeFiscal = '';
+    component.create();
+    expect(orgService.createShop).toHaveBeenCalledWith(jasmine.objectContaining({ fiscalRegime: 'NON_ASSUJETTI' }));
+  });
+
+  it('should not create pro shop without MF', () => {
+    component.newName = 'Pro sans MF';
+    component.fiscalForm.matriculeFiscal = '';
+    component.create();
+    expect(orgService.createShop).not.toHaveBeenCalled();
   });
 
   it('should not create shop with empty name', () => {
@@ -87,6 +105,7 @@ describe('ShopManagementComponent', () => {
 
   it('should handle create error', () => {
     component.newName = 'Shop';
+    component.fiscalForm.matriculeFiscal = 'MF';
     orgService.createShop.and.returnValue(throwError(() => ({ error: { message: 'Erreur' } })));
     component.create();
     expect(toast.error).toHaveBeenCalledWith('Erreur');
@@ -95,6 +114,7 @@ describe('ShopManagementComponent', () => {
 
   it('should handle create error with fallback message', () => {
     component.newName = 'Shop';
+    component.fiscalForm.matriculeFiscal = 'MF';
     orgService.createShop.and.returnValue(throwError(() => ({})));
     component.create();
     expect(toast.error).toHaveBeenCalledWith('ORGS.CREATE_ERROR');

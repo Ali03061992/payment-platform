@@ -5,11 +5,14 @@ import com.paymentplatform.organization.application.dto.OrderResponse;
 import com.paymentplatform.organization.application.dto.UpdateOrderRequest;
 import com.paymentplatform.organization.domain.model.Order;
 import com.paymentplatform.organization.domain.model.OrderEvent;
+import com.paymentplatform.organization.domain.model.OrderFiscalizer;
 import com.paymentplatform.organization.domain.model.OrderItem;
+import com.paymentplatform.organization.domain.model.Organization;
 import com.paymentplatform.organization.domain.model.Product;
 import com.paymentplatform.organization.domain.repository.OrderEventRepository;
 import com.paymentplatform.organization.domain.repository.OrderItemRepository;
 import com.paymentplatform.organization.domain.repository.OrderRepository;
+import com.paymentplatform.organization.domain.repository.OrganizationRepository;
 import com.paymentplatform.organization.domain.repository.ProductRepository;
 import com.paymentplatform.shared.domain.exception.ConflictException;
 import com.paymentplatform.shared.domain.exception.NotFoundException;
@@ -28,13 +31,16 @@ public class UpdateOrderUseCase {
     private final OrderItemRepository orderItems;
     private final OrderEventRepository events;
     private final ProductRepository products;
+    private final OrganizationRepository organizations;
 
     public UpdateOrderUseCase(OrderRepository orders, OrderItemRepository orderItems,
-                              OrderEventRepository events, ProductRepository products) {
+                              OrderEventRepository events, ProductRepository products,
+                              OrganizationRepository organizations) {
         this.orders = orders;
         this.orderItems = orderItems;
         this.events = events;
         this.products = products;
+        this.organizations = organizations;
     }
 
     @Transactional
@@ -66,8 +72,11 @@ public class UpdateOrderUseCase {
             order.setAsapPayment(request.asapPayment());
         }
 
+        Organization shop = organizations.findById(
+                        new com.paymentplatform.organization.domain.valueobject.OrganizationId(order.getShopId()))
+                .orElseThrow(() -> new NotFoundException("Boutique non trouvée : " + order.getShopId()));
+
         List<OrderItem> newItems = new ArrayList<>();
-        BigDecimal subtotal = BigDecimal.ZERO;
 
         for (OrderItemRequest itemReq : request.items()) {
             Product product = products.findById(itemReq.productId())
@@ -89,19 +98,22 @@ public class UpdateOrderUseCase {
             item.setQuantity(itemReq.quantity());
             item.setUnitPrice(product.getUnitPrice());
             item.setDiscount(discount);
+            CreateOrderUseCase.snapshotFiscalFields(item, product);
             item.setProductSnapshot(buildProductSnapshot(product));
 
             product.setReservedQty(product.getReservedQty() + itemReq.quantity());
             products.save(product);
 
-            OrderItem savedItem = orderItems.save(item);
-            newItems.add(savedItem);
-            subtotal = subtotal.add(savedItem.getLineTotal());
+            newItems.add(item);
         }
 
-        order.setSubtotal(subtotal);
-        order.recalculateTotals();
+        OrderFiscalizer.apply(order, newItems, shop);
         orders.save(order);
+        List<OrderItem> savedItems = new ArrayList<>();
+        for (OrderItem item : newItems) {
+            savedItems.add(orderItems.save(item));
+        }
+        newItems = savedItems;
 
         events.save(OrderEvent.create(orderId, "ORDER_UPDATED", actorUserId, "Commande modifiée"));
 
@@ -112,8 +124,11 @@ public class UpdateOrderUseCase {
         String name = product.getName() != null ? product.getName() : "";
         String sku = product.getSku() != null ? product.getSku() : "";
         String price = product.getUnitPrice() != null ? product.getUnitPrice().toPlainString() : "0";
+        String vat = product.getVatRate() != null ? product.getVatRate().toPlainString() : "19";
+        boolean fodec = product.isFodecApplicable();
         return "{\"name\":\"" + escapeJson(name) + "\",\"sku\":\"" + escapeJson(sku)
-                + "\",\"unitPrice\":" + price + "}";
+                + "\",\"unitPrice\":" + price + ",\"vatRate\":" + vat + ",\"fodec\":" + fodec
+                + ",\"priceTtc\":" + product.isPriceTtc() + "}";
     }
 
     private String escapeJson(String value) {

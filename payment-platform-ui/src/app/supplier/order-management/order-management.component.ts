@@ -4,7 +4,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { OrderService } from '../../services/order.service';
 import { SupplierAgentService } from '../../services/supplier-agent.service';
 import { StockService } from '../../services/stock.service';
-import { Order, OrderComment, OrderPage } from '../../models/order.model';
+import { Order, OrderComment, OrderPage, WithholdingCertificate } from '../../models/order.model';
 import { paginateItems, sortItems, toggleSortState, ariaSortFor, sortIndicatorFor, SortState } from '../../models/page.model';
 import { ToastService } from '../../services/toast.service';
 import { ConfirmDialogService } from '../../components/confirm-dialog/confirm-dialog.service';
@@ -38,6 +38,13 @@ export class OrderManagementComponent implements OnInit, OnDestroy {
   showDetail = false;
   selectedOrder: Order | null = null;
   loadingDetail = false;
+  detailCertificate: WithholdingCertificate | null = null;
+  showDetailDepositForm = false;
+  detailTejReference = '';
+  savingDetailDeposit = false;
+  showDetailExtRefForm = false;
+  detailExternalReference = '';
+  savingDetailExtRef = false;
 
   showAssignModal = false;
   assignOrderId = '';
@@ -339,13 +346,84 @@ export class OrderManagementComponent implements OnInit, OnDestroy {
     const request$ = isUuid
       ? this.orderService.getById(order.id)
       : this.orderService.getByReference(order.reference || order.id);
+    this.detailCertificate = null;
+    this.showDetailDepositForm = false;
     this.subscriptions.add(request$.subscribe({
       next: (data) => {
         this.selectedOrder = data;
         this.loadingDetail = false;
         this.loadDetailComments(data.id);
+        if (data.status === 'DELIVERED' || data.status === 'ACCEPTED') this.loadDetailCertificate(data.id);
       },
       error: () => { this.selectedOrder = order; this.loadingDetail = false; }
+    }));
+  }
+
+  loadDetailCertificate(orderId: string): void {
+    this.subscriptions.add(this.orderService.getWithholdingCertificate(orderId).subscribe({
+      next: (cert) => { this.detailCertificate = cert; },
+      error: () => { this.detailCertificate = null; }
+    }));
+  }
+
+  toggleDetailDepositForm(): void {
+    this.showDetailDepositForm = !this.showDetailDepositForm;
+  }
+
+  saveDetailDeposit(): void {
+    if (!this.selectedOrder || !this.detailTejReference.trim()) return;
+    this.savingDetailDeposit = true;
+    this.subscriptions.add(this.orderService.markCertificateDeposited(this.selectedOrder.id, this.detailTejReference.trim()).subscribe({
+      next: (cert) => {
+        this.detailCertificate = cert;
+        this.showDetailDepositForm = false;
+        this.detailTejReference = '';
+        this.savingDetailDeposit = false;
+        this.toast.success(this.translate.instant('PAYMENT_DETAIL.CERT_DEPOSITED'));
+      },
+      error: (e: any) => {
+        this.toast.error(e.error?.message || this.translate.instant('SUPPLIER_ORDERS.ERROR'));
+        this.savingDetailDeposit = false;
+      }
+    }));
+  }
+
+  downloadDetailCertificatePdf(): void {
+    if (!this.selectedOrder) return;
+    this.orderService.downloadWithholdingCertificatePdf(this.selectedOrder.id);
+  }
+
+  downloadDetailCertificateXml(): void {
+    if (!this.selectedOrder) return;
+    this.orderService.downloadWithholdingCertificateXml(this.selectedOrder.id);
+  }
+
+  printDetailInvoice(): void {
+    if (!this.selectedOrder) return;
+    this.orderService.printInvoice(this.selectedOrder.id);
+  }
+
+  toggleDetailExtRefForm(): void {
+    if (this.selectedOrder && !this.detailExternalReference) {
+      this.detailExternalReference = this.selectedOrder.externalReference || '';
+    }
+    this.showDetailExtRefForm = !this.showDetailExtRefForm;
+  }
+
+  saveDetailExtRef(): void {
+    if (!this.selectedOrder || !this.detailExternalReference.trim()) return;
+    this.savingDetailExtRef = true;
+    this.subscriptions.add(this.orderService.updateExternalReference(this.selectedOrder.id, this.detailExternalReference.trim()).subscribe({
+      next: (order) => {
+        this.selectedOrder = order;
+        this.showDetailExtRefForm = false;
+        this.savingDetailExtRef = false;
+        this.toast.success(this.translate.instant('ORDER_DETAIL.EXTREF_SAVED'));
+      },
+      error: (e: any) => {
+        this.toast.error(e.error?.message || this.translate.instant('SUPPLIER_ORDERS.ERROR'));
+        this.savingDetailExtRef = false;
+      }
     }));
   }
 

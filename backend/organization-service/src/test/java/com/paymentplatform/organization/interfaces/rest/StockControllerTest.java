@@ -114,7 +114,7 @@ class StockControllerTest {
     @Test
     void createProduct_validRequest_returnsOk() throws Exception {
         ProductCreateRequest request = new ProductCreateRequest(
-                "Widget", "SKU-NEW", "Description", null, new BigDecimal("15.00"), "TND", 50, 5);
+                "Widget", "SKU-NEW", "Description", null, new BigDecimal("15.00"), "TND", 50, 5, null, null, null, null);
 
         mockMvc.perform(post("/api/suppliers/" + SUPPLIER_ID + "/products")
                         .with(SecurityMockMvcRequestPostProcessors.authentication(supplierAdmin()))
@@ -127,7 +127,7 @@ class StockControllerTest {
     @Test
     void updateProduct_validRequest_returnsOk() throws Exception {
         Product p = createProduct("SKU-UPD");
-        ProductUpdateRequest request = new ProductUpdateRequest("Updated", null, null, null, 200, null, null);
+        ProductUpdateRequest request = new ProductUpdateRequest("Updated", null, null, null, 200, null, null, null, null, null, null);
 
         mockMvc.perform(patch("/api/suppliers/" + SUPPLIER_ID + "/products/" + p.getId())
                         .with(SecurityMockMvcRequestPostProcessors.authentication(supplierAdmin()))
@@ -207,7 +207,7 @@ class StockControllerTest {
     @Test
     void createProduct_wrongSupplier_returns403() throws Exception {
         ProductCreateRequest request = new ProductCreateRequest(
-                "Widget", "SKU-NEW-403", "Description", null, new BigDecimal("15.00"), "TND", 50, 5);
+                "Widget", "SKU-NEW-403", "Description", null, new BigDecimal("15.00"), "TND", 50, 5, null, null, null, null);
         UsernamePasswordAuthenticationToken other = auth(UUID.fromString("00000000-0000-0000-0000-000000000005"), "other2", List.of("SUPPLIER_MANAGE_PRODUCTS"), UUID.fromString("00000000-0000-0000-0000-000000000099"));
         mockMvc.perform(post("/api/suppliers/" + SUPPLIER_ID + "/products")
                         .with(SecurityMockMvcRequestPostProcessors.authentication(other))
@@ -219,7 +219,7 @@ class StockControllerTest {
     @Test
     void updateProduct_wrongSupplier_returns403() throws Exception {
         Product p = createProduct("SKU-UPD-403");
-        ProductUpdateRequest request = new ProductUpdateRequest("Updated", null, null, null, 200, null, null);
+        ProductUpdateRequest request = new ProductUpdateRequest("Updated", null, null, null, 200, null, null, null, null, null, null);
         UsernamePasswordAuthenticationToken other = auth(UUID.fromString("00000000-0000-0000-0000-000000000006"), "other3", List.of("SUPPLIER_MANAGE_PRODUCTS"), UUID.fromString("00000000-0000-0000-0000-000000000099"));
         mockMvc.perform(patch("/api/suppliers/" + SUPPLIER_ID + "/products/" + p.getId())
                         .with(SecurityMockMvcRequestPostProcessors.authentication(other))
@@ -284,7 +284,7 @@ class StockControllerTest {
     @Test
     void updateProduct_valid_partialUpdate_returnsOk() throws Exception {
         Product p = createProduct("SKU-PARTIAL");
-        ProductUpdateRequest request = new ProductUpdateRequest(null, "NEW-SKU", null, new BigDecimal("99.99"), null, null, "Updated description");
+        ProductUpdateRequest request = new ProductUpdateRequest(null, "NEW-SKU", null, new BigDecimal("99.99"), null, null, "Updated description", null, null, null, null);
         mockMvc.perform(patch("/api/suppliers/" + SUPPLIER_ID + "/products/" + p.getId())
                         .with(SecurityMockMvcRequestPostProcessors.authentication(supplierAdmin()))
                         .contentType(MediaType.APPLICATION_JSON)

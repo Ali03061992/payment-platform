@@ -16,7 +16,14 @@ export interface Product {
   status: 'ACTIVE' | 'INACTIVE' | 'OUT_OF_STOCK';
   createdAt: string;
   updatedAt: string;
+  vatRate?: number;
+  fodecApplicable?: boolean;
+  vatExemptionText?: string | null;
+  priceTtc?: boolean;
 }
+
+/** Taux TVA tunisiens légaux par produit (0 = exonéré avec motif). */
+export const TUNISIAN_VAT_RATES = [19, 13, 7, 0] as const;
 
 export interface ProductCreateRequest {
   name: string;
@@ -29,6 +36,10 @@ export interface ProductCreateRequest {
   categoryId?: string | null;
   familyId?: string | null;
   unit?: string;
+  vatRate?: number;
+  fodecApplicable?: boolean;
+  vatExemptionText?: string | null;
+  priceTtc?: boolean;
 }
 
 export interface ProductUpdateRequest {
@@ -41,6 +52,10 @@ export interface ProductUpdateRequest {
   categoryId?: string | null;
   familyId?: string | null;
   unit?: string;
+  vatRate?: number;
+  fodecApplicable?: boolean;
+  vatExemptionText?: string | null;
+  priceTtc?: boolean;
 }
 
 export interface StockMovement {

@@ -27,6 +27,8 @@ import { OrganizationStatsComponent } from './admin/organization-stats/organizat
 import { PaymentListComponent } from './payments/payment-list/payment-list.component';
 import { CreatePaymentComponent } from './payments/create-payment/create-payment.component';
 import { PaymentDetailComponent } from './payments/payment-detail/payment-detail.component';
+import { TejGuideComponent } from './payments/tej-guide/tej-guide.component';
+import { WithholdingPrepareComponent } from './payments/withholding-prepare/withholding-prepare.component';
 import { PaymentStatsComponent } from './payments/payment-stats/payment-stats.component';
 import { ProductManagementComponent } from './supplier/product-management/product-management.component';
 import { CategoryManagementComponent } from './supplier/category-management/category-management.component';
@@ -85,6 +87,8 @@ const routes: Routes = [
       { path: 'payments/create', component: CreatePaymentComponent, canActivate: [RoleGuard], data: { roles: [...adminRoles, ...shopRoles] } },
       { path: 'payments/stats', component: PaymentStatsComponent, canActivate: [RoleGuard], data: { roles: allRoles } },
       { path: 'payments/:id', component: PaymentDetailComponent, canActivate: [RoleGuard], data: { roles: allRoles } },
+      { path: 'payments-help/tej', component: TejGuideComponent, canActivate: [RoleGuard], data: { roles: allRoles } },
+      { path: 'payments-help/tej-prepare', component: WithholdingPrepareComponent, canActivate: [RoleGuard], data: { roles: allRoles } },
       { path: 'scan', component: QrScannerComponent, canActivate: [RoleGuard], data: { roles: allRoles } },
       { path: 'export', component: ExportComponent, canActivate: [RoleGuard], data: { roles: allRoles } },
       { path: 'supplier/agent-payments', component: AgentPaymentsComponent, canActivate: [RoleGuard], data: { roles: supplierRoles } },

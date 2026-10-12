@@ -64,7 +64,49 @@ class InvoicePdfServiceTest {
     void generateInvoicePdf_nullOrgNames_returnsPdfBytes() {
         Order order = order();
 
-        byte[] pdf = service.generateInvoicePdf(order, List.of(item(order)), null, null);
+        byte[] pdf = service.generateInvoicePdf(order, List.of(item(order)), (String) null, (String) null);
+
+        assertThat(pdf).isNotEmpty();
+        assertThat(new String(pdf, 0, 4)).isEqualTo("%PDF");
+    }
+
+    @Test
+    void generateInvoicePdf_withPartiesAndBreakdown_returnsPdfBytes() {
+        Order order = order();
+        org.springframework.test.util.ReflectionTestUtils.setField(order, "vatBreakdown", "19|1000|190;7|500|35");
+        org.springframework.test.util.ReflectionTestUtils.setField(order, "fodecTotal", new BigDecimal("10.00"));
+        org.springframework.test.util.ReflectionTestUtils.setField(order, "stampAmount", new BigDecimal("1.000"));
+        org.springframework.test.util.ReflectionTestUtils.setField(order, "total", new BigDecimal("1735.00"));
+
+        var supplier = new InvoicePdfService.InvoiceParty("Fournisseur SARL", "Rue de l'Industrie, Tunis",
+                "1234567A/A/M/000", "PAT-001", "ASSUJETTI", null, null);
+        var buyer = new InvoicePdfService.InvoiceParty("Boutique", "Avenue Habib Bourguiba, Tunis",
+                "7654321B/A/M/001", null, "ASSUJETTI", null, null);
+
+        OrderItem line = item(order);
+        org.springframework.test.util.ReflectionTestUtils.setField(line, "vatRate", new BigDecimal("19"));
+
+        byte[] pdf = service.generateInvoicePdf(order, List.of(line), supplier, buyer);
+
+        assertThat(pdf).isNotEmpty();
+        assertThat(new String(pdf, 0, 4)).isEqualTo("%PDF");
+    }
+
+    @Test
+    void generateInvoicePdf_suspendedMention_returnsPdfBytes() {
+        Order order = order();
+        org.springframework.test.util.ReflectionTestUtils.setField(order, "taxAmount", BigDecimal.ZERO);
+        org.springframework.test.util.ReflectionTestUtils.setField(order, "total", new BigDecimal("100.00"));
+        org.springframework.test.util.ReflectionTestUtils.setField(order, "vatBreakdown", "0|100|0");
+        org.springframework.test.util.ReflectionTestUtils.setField(order, "fiscalMention",
+                "Vente en suspension de la taxe sur la valeur ajoutée suivant attestation n°ATT-1 du 01/01/2026 (art. 11 du Code TVA)");
+
+        var supplier = new InvoicePdfService.InvoiceParty("Fournisseur SARL", null,
+                "1234567A/A/M/000", null, "ASSUJETTI", null, null);
+        var buyer = new InvoicePdfService.InvoiceParty("Client Suspendu", null,
+                "1111111C/A/M/000", null, "SUSPENDU", "ATT-1", java.time.LocalDate.of(2026, 1, 1));
+
+        byte[] pdf = service.generateInvoicePdf(order, List.of(item(order)), supplier, buyer);
 
         assertThat(pdf).isNotEmpty();
         assertThat(new String(pdf, 0, 4)).isEqualTo("%PDF");

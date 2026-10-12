@@ -36,15 +36,18 @@ public class DeliverOrderUseCase {
     private final OrderEventRepository events;
     private final OutboxEventStore outbox;
     private final PaymentClient paymentClient;
+    private final IssueWithholdingCertificateUseCase withholding;
 
     public DeliverOrderUseCase(OrderRepository orders, OrderItemRepository orderItems,
                                OrderEventRepository events, OutboxEventStore outbox,
-                               PaymentClient paymentClient) {
+                               PaymentClient paymentClient,
+                               IssueWithholdingCertificateUseCase withholding) {
         this.orders = orders;
         this.orderItems = orderItems;
         this.events = events;
         this.outbox = outbox;
         this.paymentClient = paymentClient;
+        this.withholding = withholding;
     }
 
     /**
@@ -57,11 +60,30 @@ public class DeliverOrderUseCase {
      */
     @Transactional
     public OrderResponse execute(UUID orderId, UUID receivedBy, UUID actorUserId) {
+        return execute(orderId, receivedBy, actorUserId, null);
+    }
+
+    /**
+     * Déclare une commande livrée (réception confirmée), crée son paiement et émet
+     * son certificat de retenue (art. 55 IRPP/IS, TEJ) — sans assiette, aucun
+     * certificat. L'émission n'échoue jamais la livraison (tracée en log).
+     *
+     * @param withholdingNature nature du montant (MARCHANDISES par défaut)
+     */
+    @Transactional
+    public OrderResponse execute(UUID orderId, UUID receivedBy, UUID actorUserId, String withholdingNature) {
         Order order = orders.findById(orderId)
                 .orElseThrow(() -> new NotFoundException("Commande non trouvée : " + orderId));
 
         order.deliver(receivedBy);
         orders.save(order);
+
+        try {
+            withholding.issueForDeliveredOrder(order, withholdingNature);
+        } catch (Exception e) {
+            log.error("Émission du certificat de retenue impossible pour la commande {}",
+                    order.getReference(), e);
+        }
 
         events.save(OrderEvent.create(orderId, "ORDER_DELIVERED", actorUserId,
                 "Reçu par: " + (receivedBy != null ? receivedBy : actorUserId)));

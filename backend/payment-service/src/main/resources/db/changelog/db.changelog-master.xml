@@ -8,5 +8,7 @@
     <include file="V1__schema.sql" relativeToChangelogFile="true"/>
     <include file="V2__add_order_payment_terms.sql" relativeToChangelogFile="true"/>
     <include file="V3__add_idempotency_key.sql" relativeToChangelogFile="true"/>
+    <include file="V4__withholding_certificates.sql" relativeToChangelogFile="true"/>
+    <include file="V5__drop_withholding_certificates.sql" relativeToChangelogFile="true"/>
 
 </databaseChangeLog>

@@ -2,3 +2,8 @@ app:
   security:
     secret: ${JWT_SECRET:dev-jwt-secret-change-me-in-production-32bytes}
     expiration: ${JWT_EXPIRATION:30m}
+  gateway:
+    # Dev/Docker : les conteneurs (UI, hôte via la passerelle bridge) arrivent avec des IP
+    # dynamiques 172.16.0.0/12 — plage CIDR gérée par IpWhitelistFilter. Prod : surcharger
+    # ALLOWED_IPS avec des IP exactes (voir application-prod.yml).
+    allowed-ips: ${ALLOWED_IPS:127.0.0.1,0:0:0:0:0:0:0:1,172.16.0.0/12}

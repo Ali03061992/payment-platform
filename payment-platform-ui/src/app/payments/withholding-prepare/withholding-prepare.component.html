@@ -1,0 +1,162 @@
+<div class="page-header">
+  <h2>{{ 'PREPARE.TITLE' | translate }}</h2>
+  <div class="page-header-actions">
+    <a class="btn btn-secondary" routerLink="/dashboard/payments-help/tej">{{ 'PREPARE.GUIDE' | translate }}</a>
+    <a class="btn btn-secondary" href="https://tej.finances.gov.tn" target="_blank" rel="noopener">{{ 'TEJ_GUIDE.OPEN_PLATFORM' | translate }}</a>
+  </div>
+</div>
+
+<div class="tabs">
+  <button type="button" class="tab-btn" [class.active]="mode === 'reference'" (click)="setMode('reference')">
+    {{ 'PREPARE.MODE_REFERENCE' | translate }}
+  </button>
+  <button type="button" class="tab-btn" [class.active]="mode === 'manual'" (click)="setMode('manual')">
+    {{ 'PREPARE.MODE_MANUAL' | translate }}
+  </button>
+</div>
+
+@if (mode === 'reference') {
+  <div class="form-card" style="margin-bottom:16px;">
+    <h3 style="margin-bottom:12px;">{{ 'PREPARE.REF_TITLE' | translate }}</h3>
+    <p class="field-hint">{{ 'PREPARE.REF_HINT' | translate }}</p>
+    <div class="form-row">
+      <div class="form-group">
+        <label for="payRef">{{ 'PREPARE.PAYMENT_REF' | translate }}</label>
+        <input id="payRef" type="text" [(ngModel)]="reference" name="reference" class="form-control"
+          [placeholder]="'PREPARE.PAYMENT_REF_PLACEHOLDER' | translate">
+      </div>
+      <div class="form-group" style="align-self:flex-end;">
+        <button type="button" class="btn btn-primary" [disabled]="loadingRef || !reference.trim()" (click)="lookupByReference()">
+          {{ loadingRef ? ('COMMON.LOADING' | translate) : ('PREPARE.LOOKUP' | translate) }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  @if (certificate) {
+    <div class="info-box" style="border-left:4px solid #0f3460;margin-bottom:16px;">
+      <strong>{{ 'PAYMENT_DETAIL.CERT_TITLE' | translate }} {{ certificate.number }}</strong><br>
+      <span>{{ 'PAYMENT_DETAIL.CERT_LINE' | translate:{rate: certificate.rate, amount: certificate.withholdingAmount, currency: certificate.currency} }}</span><br>
+      <span>{{ 'PAYMENT_DETAIL.CERT_DUE' | translate:{date: certificate.dueDate} }}</span>
+      @if (certificate.tejReference) {
+        <span> — {{ 'PAYMENT_DETAIL.CERT_TEJ_REF' | translate }} {{ certificate.tejReference }}</span>
+      }
+    </div>
+    <div class="form-card" style="margin-bottom:16px;">
+      <div class="form-actions">
+        <button type="button" class="btn btn-primary" (click)="downloadRefXml()">{{ 'PAYMENT_DETAIL.DOWNLOAD_CERT_XML' | translate }}</button>
+        <button type="button" class="btn btn-secondary" (click)="downloadRefPdf()">{{ 'PAYMENT_DETAIL.DOWNLOAD_CERT_PDF' | translate }}</button>
+      </div>
+      @if (certificate.status === 'READY' || certificate.status === 'REJECTED') {
+        <div class="form-row" style="margin-top:12px;">
+          <div class="form-group">
+            <label for="refTej">{{ 'PAYMENT_DETAIL.CERT_TEJ_REF_INPUT' | translate }}</label>
+            <input id="refTej" type="text" [(ngModel)]="refTejReference" name="refTej" class="form-control">
+          </div>
+          <div class="form-group" style="align-self:flex-end;">
+            <button type="button" class="btn btn-secondary" [disabled]="savingDeposit || !refTejReference.trim()" (click)="markRefDeposited()">
+              {{ 'PAYMENT_DETAIL.CERT_MARK_DEPOSITED' | translate }}
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+  }
+}
+
+@if (mode === 'manual') {
+  <div class="form-card" style="margin-bottom:16px;">
+    <h3 style="margin-bottom:12px;">{{ 'PREPARE.MANUAL_TITLE' | translate }}</h3>
+    <p class="field-hint">{{ 'PREPARE.MANUAL_HINT' | translate }}</p>
+    <div class="form-group">
+      <label for="pdfFile">{{ 'PREPARE.PDF_IMPORT' | translate }}</label>
+      <input id="pdfFile" type="file" accept="application/pdf,.pdf" (change)="onPdfSelected($event)" class="form-control">
+      @if (pdfParsing) {
+        <span class="field-hint">{{ 'COMMON.LOADING' | translate }}</span>
+      }
+      @if (pdfFileName && !pdfParsing) {
+        <span class="field-hint">{{ pdfFileName }} — {{ 'PREPARE.PDF_VERIFY' | translate }}</span>
+      }
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label for="mDebtorName">{{ 'PREPARE.DEBTOR_NAME' | translate }} <span class="required">*</span></label>
+        <input id="mDebtorName" type="text" [(ngModel)]="form.debtorName" name="mDebtorName" class="form-control">
+      </div>
+      <div class="form-group">
+        <label for="mDebtorMf">{{ 'ORGS.MATRICULE_FISCAL' | translate }}</label>
+        <input id="mDebtorMf" type="text" [(ngModel)]="form.debtorMatricule" name="mDebtorMf" class="form-control">
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="mDebtorAddr">{{ 'ORGS.ADDRESS' | translate }}</label>
+      <input id="mDebtorAddr" type="text" [(ngModel)]="form.debtorAddress" name="mDebtorAddr" class="form-control">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label for="mBenName">{{ 'PREPARE.BENEFICIARY_NAME' | translate }} <span class="required">*</span></label>
+        <input id="mBenName" type="text" [(ngModel)]="form.beneficiaryName" name="mBenName" class="form-control">
+      </div>
+      <div class="form-group">
+        <label for="mBenMf">{{ 'ORGS.MATRICULE_FISCAL' | translate }}</label>
+        <input id="mBenMf" type="text" [(ngModel)]="form.beneficiaryMatricule" name="mBenMf" class="form-control">
+        <span class="field-hint">{{ 'PREPARE.SANS_MF_HINT' | translate }}</span>
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="mBenAddr">{{ 'ORGS.ADDRESS' | translate }}</label>
+      <input id="mBenAddr" type="text" [(ngModel)]="form.beneficiaryAddress" name="mBenAddr" class="form-control">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label for="mGross">{{ 'PREPARE.GROSS_TTC' | translate }} <span class="required">*</span></label>
+        <input id="mGross" type="number" [(ngModel)]="form.grossAmount" name="mGross" class="form-control" min="0" step="0.001">
+      </div>
+      <div class="form-group">
+        <label for="mNature">{{ 'PREPARE.NATURE' | translate }}</label>
+        <select id="mNature" [(ngModel)]="form.nature" name="mNature" class="form-control">
+          @for (n of natures; track n) {
+            <option [ngValue]="n">{{ 'PREPARE.NATURE_' + n | translate }}</option>
+          }
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label for="mPayRef">{{ 'PREPARE.PAYMENT_REF' | translate }} <span class="required">*</span></label>
+        <input id="mPayRef" type="text" [(ngModel)]="form.paymentReference" name="mPayRef" class="form-control">
+      </div>
+      <div class="form-group">
+        <label for="mPayDate">{{ 'PREPARE.PAYMENT_DATE' | translate }} <span class="required">*</span></label>
+        <input id="mPayDate" type="date" [(ngModel)]="form.paymentDate" name="mPayDate" class="form-control">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label for="mNumber">{{ 'PREPARE.CERT_NUMBER' | translate }}</label>
+        <input id="mNumber" type="text" [(ngModel)]="form.number" name="mNumber" class="form-control"
+          [placeholder]="'PREPARE.CERT_NUMBER_PLACEHOLDER' | translate">
+      </div>
+      <div class="form-group">
+        <label for="mDepositor">{{ 'ORGS.TEJ_IDENTIFIER' | translate }}</label>
+        <input id="mDepositor" type="text" [(ngModel)]="form.depositorTejId" name="mDepositor" class="form-control"
+          [placeholder]="'ORGS.TEJ_PLACEHOLDER' | translate">
+      </div>
+    </div>
+    <div class="info-box" style="margin:12px 0;">
+      {{ 'PREPARE.PREVIEW' | translate }} :
+      {{ 'PREPARE.NATURE' | translate }} {{ manualComputation.nature }} —
+      {{ manualComputation.rate }} % —
+      {{ 'PREPARE.WITHHOLDING' | translate }} {{ manualComputation.withholding | number:'1.3-3' }} TND —
+      {{ 'PREPARE.NET' | translate }} {{ manualComputation.net | number:'1.3-3' }} TND
+      @if (manualDueDate) {
+        — {{ 'PAYMENT_DETAIL.CERT_DUE' | translate:{date: manualDueDate} }}
+      }
+    </div>
+    <div class="form-actions">
+      <button type="button" class="btn btn-primary" [disabled]="!canBuildManualXml()" (click)="buildManualXml(); downloadManualXml()">
+        {{ 'PREPARE.DOWNLOAD_XML' | translate }}
+      </button>
+    </div>
+  </div>
+}

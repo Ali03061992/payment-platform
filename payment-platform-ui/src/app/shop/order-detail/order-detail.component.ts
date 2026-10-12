@@ -3,7 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { OrderService } from '../../services/order.service';
 import { DisputeService } from '../../services/dispute.service';
-import { Order, OrderComment } from '../../models/order.model';
+import { Order, OrderComment, WithholdingCertificate } from '../../models/order.model';
 import { Dispute } from '../../models/dispute.model';
 import { ToastService } from '../../services/toast.service';
 import { ConfirmDialogService } from '../../components/confirm-dialog/confirm-dialog.service';
@@ -27,6 +27,14 @@ export class ShopOrderDetailComponent implements OnInit, OnDestroy {
   comments: OrderComment[] = [];
   newComment = '';
   submittingComment = false;
+
+  certificate: WithholdingCertificate | null = null;
+  showDepositForm = false;
+  tejReference = '';
+  savingDeposit = false;
+  showExtRefForm = false;
+  externalReference = '';
+  savingExtRef = false;
 
   statusSteps = ['DRAFT', 'CONFIRMED', 'PREPARING', 'READY_FOR_DELIVERY', 'DELIVERY_ACCEPTED', 'IN_DELIVERY', 'DELIVERED', 'ACCEPTED'];
   countdown = '';
@@ -57,8 +65,77 @@ export class ShopOrderDetailComponent implements OnInit, OnDestroy {
         this.loadDisputes(data.id);
         this.loadComments(data.id);
         this.startCountdown();
+        if (data.status === 'DELIVERED' || data.status === 'ACCEPTED') this.loadCertificate(data.id);
       },
       error: () => { this.loading = false; this.router.navigate(['/dashboard/shop/orders']); }
+    }));
+  }
+
+  loadCertificate(orderId: string): void {
+    this.subscriptions.add(this.orderService.getWithholdingCertificate(orderId).subscribe({
+      next: (cert) => { this.certificate = cert; },
+      error: () => { this.certificate = null; }
+    }));
+  }
+
+  toggleDepositForm(): void {
+    this.showDepositForm = !this.showDepositForm;
+  }
+
+  markDeposited(): void {
+    if (!this.order || !this.tejReference.trim()) return;
+    this.savingDeposit = true;
+    this.subscriptions.add(this.orderService.markCertificateDeposited(this.order.id, this.tejReference.trim()).subscribe({
+      next: (cert) => {
+        this.certificate = cert;
+        this.showDepositForm = false;
+        this.tejReference = '';
+        this.savingDeposit = false;
+        this.toast.success(this.translate.instant('PAYMENT_DETAIL.CERT_DEPOSITED'));
+      },
+      error: (e: any) => {
+        this.toast.error(e.error?.message || this.translate.instant('ORDER_DETAIL.ERROR'));
+        this.savingDeposit = false;
+      }
+    }));
+  }
+
+  downloadCertificatePdf(): void {
+    if (!this.order) return;
+    this.orderService.downloadWithholdingCertificatePdf(this.order.id);
+  }
+
+  downloadCertificateXml(): void {
+    if (!this.order) return;
+    this.orderService.downloadWithholdingCertificateXml(this.order.id);
+  }
+
+  printInvoice(): void {
+    if (!this.order) return;
+    this.orderService.printInvoice(this.order.id);
+  }
+
+  toggleExtRefForm(): void {
+    if (this.order && !this.externalReference) {
+      this.externalReference = this.order.externalReference || '';
+    }
+    this.showExtRefForm = !this.showExtRefForm;
+  }
+
+  saveExternalReference(): void {
+    if (!this.order || !this.externalReference.trim()) return;
+    this.savingExtRef = true;
+    this.subscriptions.add(this.orderService.updateExternalReference(this.order.id, this.externalReference.trim()).subscribe({
+      next: (order) => {
+        this.order = order;
+        this.showExtRefForm = false;
+        this.savingExtRef = false;
+        this.toast.success(this.translate.instant('ORDER_DETAIL.EXTREF_SAVED'));
+      },
+      error: (e: any) => {
+        this.toast.error(e.error?.message || this.translate.instant('ORDER_DETAIL.ERROR'));
+        this.savingExtRef = false;
+      }
     }));
   }
 

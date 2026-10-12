@@ -2,6 +2,7 @@ package com.paymentplatform.organization.application.service;
 
 import com.paymentplatform.organization.application.dto.*;
 import com.paymentplatform.organization.domain.model.Product;
+import com.paymentplatform.organization.domain.valueobject.VatRate;
 import com.paymentplatform.organization.domain.model.StockMovement;
 import com.paymentplatform.organization.domain.repository.ProductRepository;
 import com.paymentplatform.organization.domain.repository.StockMovementRepository;
@@ -23,6 +24,34 @@ public class StockService {
     public StockService(ProductRepository products, StockMovementRepository movements) {
         this.products = products;
         this.movements = movements;
+    }
+
+    /**
+     * Applique et valide les champs fiscaux (taux TVA légal, motif si 0%).
+     * Exonération par nature du produit : vatRate 0 exige un motif textuel.
+     */
+    private void applyFiscalFields(Product product, java.math.BigDecimal vatRate,
+                                   Boolean fodecApplicable, String exemptionText) {
+        applyFiscalFields(product, vatRate, fodecApplicable, exemptionText, null);
+    }
+
+    private void applyFiscalFields(Product product, java.math.BigDecimal vatRate,
+                                   Boolean fodecApplicable, String exemptionText, Boolean priceTtc) {
+        VatRate validated = VatRate.of(vatRate);
+        if (validated.isExempt() && (exemptionText == null || exemptionText.isBlank())
+                && (product.getVatExemptionText() == null || product.getVatExemptionText().isBlank())) {
+            throw new ConflictException("Un produit à TVA 0% exige un motif d'exonération (référence du texte)");
+        }
+        product.setVatRate(validated.value());
+        if (fodecApplicable != null) {
+            product.setFodecApplicable(fodecApplicable);
+        }
+        if (exemptionText != null) {
+            product.setVatExemptionText(exemptionText);
+        }
+        if (priceTtc != null) {
+            product.setPriceTtc(priceTtc);
+        }
     }
 
     public List<ProductResponse> getLowStockAlerts(UUID supplierId) {
@@ -63,6 +92,8 @@ public class StockService {
         product.setCurrency(request.currency());
         product.setQuantity(request.quantity());
         product.setMinQuantity(request.minQuantity());
+        applyFiscalFields(product, request.vatRate(), request.fodecApplicable(), request.vatExemptionText(),
+                request.priceTtc());
         products.save(product);
         return ProductResponse.from(product);
     }
@@ -79,6 +110,14 @@ public class StockService {
         if (request.quantity() != null) product.setQuantity(request.quantity());
         if (request.minQuantity() != null) product.setMinQuantity(request.minQuantity());
         if (request.status() != null) product.setStatus(request.status());
+        if (request.vatRate() != null || request.fodecApplicable() != null || request.vatExemptionText() != null
+                || request.priceTtc() != null) {
+            applyFiscalFields(product,
+                    request.vatRate() != null ? request.vatRate() : product.getVatRate(),
+                    request.fodecApplicable() != null ? request.fodecApplicable() : product.isFodecApplicable(),
+                    request.vatExemptionText() != null ? request.vatExemptionText() : product.getVatExemptionText(),
+                    request.priceTtc() != null ? request.priceTtc() : product.isPriceTtc());
+        }
         products.save(product);
         return ProductResponse.from(product);
     }

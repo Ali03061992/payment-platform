@@ -77,6 +77,11 @@ describe('07 - Supplier: Create Order', () => {
   it('should have cancel button', () => {
     cy.get('a[routerLink*="supplier/orders"]').should('contain', 'Retour');
   });
+
+  it('should apply VAT per product without global rate input', () => {
+    cy.get('input[name="taxRate"]').should('not.exist');
+    cy.get('.form-group').should('contain', 'TVA par produit');
+  });
 });
 
 describe('07 - Supplier: Order Detail', () => {
@@ -90,6 +95,22 @@ describe('07 - Supplier: Order Detail', () => {
       if (clickableRows.length > 0) {
         cy.wrap(clickableRows).first().click();
         cy.get('.modal-content', { timeout: 5000 }).should('be.visible');
+        cy.get('.btn-close').click();
+      }
+    });
+  });
+
+  it('should show ventilated VAT, stamp and net payable in detail', () => {
+    cy.loginAsSupplierAdmin();
+    cy.visit('/dashboard/supplier/orders');
+    cy.get('table tbody', { timeout: 10000 }).then(($tbody) => {
+      const clickableRows = $tbody.find('tr.clickable-row');
+      if (clickableRows.length > 0) {
+        cy.wrap(clickableRows).first().click();
+        cy.get('.modal-content', { timeout: 5000 }).should('be.visible');
+        cy.get('.modal-content tfoot').should('contain', 'TVA');
+        cy.get('.modal-content tfoot').should('contain', 'Timbre');
+        cy.get('.modal-content tfoot').should('contain', 'Net à payer');
         cy.get('.btn-close').click();
       }
     });

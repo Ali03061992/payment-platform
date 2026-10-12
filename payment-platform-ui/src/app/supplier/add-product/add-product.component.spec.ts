@@ -61,61 +61,97 @@ describe('AddProductComponent', () => {
 
   describe('validate', () => {
     it('should pass with valid data', () => {
-      component.form = { name: 'Product', sku: 'SKU-1', description: '', unitPrice: 10, currency: 'TND', quantity: 0, minQuantity: 0 };
+      component.form = { name: 'Product', sku: 'SKU-1', description: '', unitPrice: 10, currency: 'TND', quantity: 0, minQuantity: 0, vatRate: 19, fodecApplicable: false, vatExemptionText: '' };
       expect(component.validate()).toBeTrue();
       expect(Object.keys(component.errors).length).toBe(0);
     });
 
     it('should fail when name is empty', () => {
-      component.form = { name: '', sku: 'SKU-1', description: '', unitPrice: 10, currency: 'TND', quantity: 0, minQuantity: 0 };
+      component.form = { name: '', sku: 'SKU-1', description: '', unitPrice: 10, currency: 'TND', quantity: 0, minQuantity: 0, vatRate: 19, fodecApplicable: false, vatExemptionText: '' };
       expect(component.validate()).toBeFalse();
       expect(component.errors['name']).toBeTruthy();
     });
 
     it('should fail when name is too short', () => {
-      component.form = { name: 'P', sku: 'SKU-1', description: '', unitPrice: 10, currency: 'TND', quantity: 0, minQuantity: 0 };
+      component.form = { name: 'P', sku: 'SKU-1', description: '', unitPrice: 10, currency: 'TND', quantity: 0, minQuantity: 0, vatRate: 19, fodecApplicable: false, vatExemptionText: '' };
       expect(component.validate()).toBeFalse();
     });
 
     it('should fail when sku is empty', () => {
-      component.form = { name: 'Product', sku: '', description: '', unitPrice: 10, currency: 'TND', quantity: 0, minQuantity: 0 };
+      component.form = { name: 'Product', sku: '', description: '', unitPrice: 10, currency: 'TND', quantity: 0, minQuantity: 0, vatRate: 19, fodecApplicable: false, vatExemptionText: '' };
       expect(component.validate()).toBeFalse();
       expect(component.errors['sku']).toBeTruthy();
     });
 
     it('should fail when sku is too short', () => {
-      component.form = { name: 'Product', sku: 'S', description: '', unitPrice: 10, currency: 'TND', quantity: 0, minQuantity: 0 };
+      component.form = { name: 'Product', sku: 'S', description: '', unitPrice: 10, currency: 'TND', quantity: 0, minQuantity: 0, vatRate: 19, fodecApplicable: false, vatExemptionText: '' };
       expect(component.validate()).toBeFalse();
     });
 
     it('should fail when unitPrice is 0', () => {
-      component.form = { name: 'Product', sku: 'SKU-1', description: '', unitPrice: 0, currency: 'TND', quantity: 0, minQuantity: 0 };
+      component.form = { name: 'Product', sku: 'SKU-1', description: '', unitPrice: 0, currency: 'TND', quantity: 0, minQuantity: 0, vatRate: 19, fodecApplicable: false, vatExemptionText: '' };
       expect(component.validate()).toBeFalse();
       expect(component.errors['unitPrice']).toBeTruthy();
     });
 
     it('should fail when unitPrice is negative', () => {
-      component.form = { name: 'Product', sku: 'SKU-1', description: '', unitPrice: -5, currency: 'TND', quantity: 0, minQuantity: 0 };
+      component.form = { name: 'Product', sku: 'SKU-1', description: '', unitPrice: -5, currency: 'TND', quantity: 0, minQuantity: 0, vatRate: 19, fodecApplicable: false, vatExemptionText: '' };
       expect(component.validate()).toBeFalse();
     });
 
     it('should fail when quantity is negative', () => {
-      component.form = { name: 'Product', sku: 'SKU-1', description: '', unitPrice: 10, currency: 'TND', quantity: -1, minQuantity: 0 };
+      component.form = { name: 'Product', sku: 'SKU-1', description: '', unitPrice: 10, currency: 'TND', quantity: -1, minQuantity: 0, vatRate: 19, fodecApplicable: false, vatExemptionText: '' };
       expect(component.validate()).toBeFalse();
       expect(component.errors['quantity']).toBeTruthy();
     });
 
     it('should fail when minQuantity is negative', () => {
-      component.form = { name: 'Product', sku: 'SKU-1', description: '', unitPrice: 10, currency: 'TND', quantity: 0, minQuantity: -1 };
+      component.form = { name: 'Product', sku: 'SKU-1', description: '', unitPrice: 10, currency: 'TND', quantity: 0, minQuantity: -1, vatRate: 19, fodecApplicable: false, vatExemptionText: '' };
       expect(component.validate()).toBeFalse();
       expect(component.errors['minQuantity']).toBeTruthy();
+    });
+  });
+
+  describe('validate fiscal', () => {
+    const base = { name: 'Product', sku: 'SKU-1', description: '', unitPrice: 10, currency: 'TND', quantity: 0, minQuantity: 0, fodecApplicable: false, vatExemptionText: '' };
+
+    it('should accept legal rates 19/13/7', () => {
+      for (const vatRate of [19, 13, 7]) {
+        component.form = { ...base, vatRate };
+        expect(component.validate()).toBeTrue();
+      }
+    });
+
+    it('should reject illegal rate', () => {
+      component.form = { ...base, vatRate: 20 };
+      expect(component.validate()).toBeFalse();
+      expect(component.errors['vatRate']).toBeTruthy();
+    });
+
+    it('should require exemption reason at 0%', () => {
+      component.form = { ...base, vatRate: 0, vatExemptionText: '' };
+      expect(component.validate()).toBeFalse();
+      expect(component.errors['vatExemptionText']).toBeTruthy();
+    });
+
+    it('should accept 0% with exemption reason', () => {
+      component.form = { ...base, vatRate: 0, vatExemptionText: 'Art. 11 suspension' };
+      expect(component.validate()).toBeTrue();
+    });
+
+    it('should submit fiscal fields', () => {
+      stockService.createProduct.and.returnValue(of({} as any));
+      component.form = { ...base, vatRate: 13, fodecApplicable: true };
+      component.onSubmit();
+      expect(stockService.createProduct).toHaveBeenCalledWith(
+        jasmine.objectContaining({ vatRate: 13, fodecApplicable: true }));
     });
   });
 
   describe('onSubmit', () => {
     it('should create product on valid form', () => {
       stockService.createProduct.and.returnValue(of({} as any));
-      component.form = { name: 'Product', sku: 'SKU-1', description: '', unitPrice: 10, currency: 'TND', quantity: 0, minQuantity: 0 };
+      component.form = { name: 'Product', sku: 'SKU-1', description: '', unitPrice: 10, currency: 'TND', quantity: 0, minQuantity: 0, vatRate: 19, fodecApplicable: false, vatExemptionText: '' };
       component.onSubmit();
       expect(component.success).toBeTrue();
       expect(toast.success).toHaveBeenCalled();
@@ -128,14 +164,14 @@ describe('AddProductComponent', () => {
 
     it('should handle error', () => {
       stockService.createProduct.and.returnValue(throwError(() => ({ error: { message: 'Fail' } })));
-      component.form = { name: 'Product', sku: 'SKU-1', description: '', unitPrice: 10, currency: 'TND', quantity: 0, minQuantity: 0 };
+      component.form = { name: 'Product', sku: 'SKU-1', description: '', unitPrice: 10, currency: 'TND', quantity: 0, minQuantity: 0, vatRate: 19, fodecApplicable: false, vatExemptionText: '' };
       component.onSubmit();
       expect(toast.error).toHaveBeenCalledWith('Fail');
     });
 
     it('should handle error without message', () => {
       stockService.createProduct.and.returnValue(throwError(() => ({ error: {} })));
-      component.form = { name: 'Product', sku: 'SKU-1', description: '', unitPrice: 10, currency: 'TND', quantity: 0, minQuantity: 0 };
+      component.form = { name: 'Product', sku: 'SKU-1', description: '', unitPrice: 10, currency: 'TND', quantity: 0, minQuantity: 0, vatRate: 19, fodecApplicable: false, vatExemptionText: '' };
       component.onSubmit();
       expect(toast.error).toHaveBeenCalledWith('CATALOG.CREATE_ERROR');
     });
@@ -143,7 +179,7 @@ describe('AddProductComponent', () => {
 
   describe('resetForm', () => {
     it('should reset form and errors', () => {
-      component.form = { name: 'Test', sku: 'SKU', description: '', unitPrice: 10, currency: 'TND', quantity: 5, minQuantity: 2 };
+      component.form = { name: 'Test', sku: 'SKU', description: '', unitPrice: 10, currency: 'TND', quantity: 5, minQuantity: 2, vatRate: 19, fodecApplicable: false, vatExemptionText: '' };
       component.errors = { name: 'Error' };
       component.success = true;
       component.resetForm();

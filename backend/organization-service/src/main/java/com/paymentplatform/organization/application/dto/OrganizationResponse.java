@@ -15,18 +15,19 @@ public record OrganizationResponse(
         long version,
         Instant createdAt,
         Instant updatedAt,
-        List<RelationResponse> relations
+        List<RelationResponse> relations,
+        String matriculeFiscal,
+        String patente,
+        String tejIdentifier,
+        String defaultWithholdingNature,
+        String address,
+        String fiscalRegime,
+        String suspensionAttestationNumber,
+        java.time.LocalDate suspensionAttestationDate,
+        java.time.LocalDate suspensionExpiryDate
 ) {
     public static OrganizationResponse from(Organization org) {
-        return new OrganizationResponse(
-                org.id().value(),
-                org.name().value(),
-                org.type().name(),
-                org.status().name(),
-                org.version(),
-                org.createdAt(),
-                org.updatedAt(),
-                List.of());
+        return from(org, List.of());
     }
 
     public static OrganizationResponse from(Organization org, List<SupplierShopRelation> relations) {
@@ -38,6 +39,15 @@ public record OrganizationResponse(
                 org.version(),
                 org.createdAt(),
                 org.updatedAt(),
-                relations.stream().map(RelationResponse::from).toList());
+                relations.stream().map(RelationResponse::from).toList(),
+                org.matriculeFiscal(),
+                org.patente(),
+                org.tejIdentifier(),
+                org.defaultWithholdingNature(),
+                org.address(),
+                org.fiscalRegime().name(),
+                org.suspensionAttestationNumber(),
+                org.suspensionAttestationDate(),
+                org.suspensionExpiryDate());
     }
 }

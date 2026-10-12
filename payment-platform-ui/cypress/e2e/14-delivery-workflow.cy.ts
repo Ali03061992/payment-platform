@@ -467,8 +467,8 @@ describe('14 - Delivery: Cross-role Access Control', () => {
         cy.dismissOverlays();
         cy.get('.tabs .tab-btn').contains('Livraisons').click();
         cy.dismissOverlays();
-        cy.get('table tbody tr', { timeout: 10000 }).should('have.length.gte', 1);
-        cy.get('table tbody tr').first().click();
+        cy.get('table tbody tr.clickable-row', { timeout: 15000 }).should('have.length.gte', 1);
+        cy.get('table tbody tr.clickable-row').first().click();
         cy.get('.modal-overlay').should('be.visible');
         cy.get('.modal-content').should('contain', 'Commande');
         cy.get('.detail-grid').should('exist');

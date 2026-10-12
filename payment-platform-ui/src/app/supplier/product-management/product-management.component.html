@@ -78,6 +78,42 @@
           </div>
         </div>
       </div>
+      <div class="form-section">
+        <h4>{{ 'CATALOG.SECTION_FISCAL' | translate }}</h4>
+        <div class="form-row">
+          <div class="form-group">
+            <label>{{ 'CATALOG.FIELD_VAT_RATE' | translate }} <span class="required">*</span></label>
+            <select [(ngModel)]="form.vatRate" name="vatRate" class="form-control">
+              <option [ngValue]="19">{{ 'CATALOG.VAT_19' | translate }}</option>
+              <option [ngValue]="13">{{ 'CATALOG.VAT_13' | translate }}</option>
+              <option [ngValue]="7">{{ 'CATALOG.VAT_7' | translate }}</option>
+              <option [ngValue]="0">{{ 'CATALOG.VAT_0' | translate }}</option>
+            </select>
+            <span class="field-hint">{{ 'CATALOG.VAT_HINT' | translate }}</span>
+          </div>
+          <div class="form-group">
+            <label class="checkbox-label">
+              <input type="checkbox" [(ngModel)]="form.fodecApplicable" name="fodecApplicable">
+              {{ 'CATALOG.FIELD_FODEC' | translate }}
+            </label>
+            <span class="field-hint">{{ 'CATALOG.FODEC_HINT' | translate }}</span>
+          </div>
+          <div class="form-group">
+            <label class="checkbox-label">
+              <input type="checkbox" [(ngModel)]="form.priceTtc" name="priceTtc">
+              {{ 'CATALOG.FIELD_PRICE_TTC' | translate }}
+            </label>
+            <span class="field-hint">{{ 'CATALOG.PRICE_TTC_HINT' | translate }}</span>
+          </div>
+        </div>
+        @if (form.vatRate === 0) {
+          <div class="form-group">
+            <label>{{ 'CATALOG.FIELD_EXEMPTION' | translate }} <span class="required">*</span></label>
+            <input type="text" [(ngModel)]="form.vatExemptionText" name="vatExemptionText" class="form-control"
+              [placeholder]="'CATALOG.EXEMPTION_PLACEHOLDER' | translate">
+          </div>
+        }
+      </div>
       <div class="form-actions">
         <button type="button" class="btn btn-secondary" (click)="showForm = false">{{ 'CATALOG.BTN_CANCEL' | translate }}</button>
         <button type="submit" class="btn btn-primary" [disabled]="saving || !form.name || !form.sku">
@@ -121,6 +157,7 @@
             <th>{{ 'CATALOG.COL_CATEGORY' | translate }}</th>
             <th>{{ 'CATALOG.COL_FAMILY' | translate }}</th>
             <th class="sortable-th" (click)="onSort('unitPrice')" (keydown.enter)="onSort('unitPrice')" tabindex="0" [attr.aria-sort]="ariaSort('unitPrice')">{{ 'CATALOG.COL_PRICE' | translate }} <span class="sort-indicator" aria-hidden="true">{{ sortIndicator('unitPrice') }}</span></th>
+            <th>{{ 'CATALOG.COL_VAT' | translate }}</th>
             <th>{{ 'CATALOG.COL_UNIT' | translate }}</th>
             <th class="sortable-th" (click)="onSort('status')" (keydown.enter)="onSort('status')" tabindex="0" [attr.aria-sort]="ariaSort('status')">{{ 'CATALOG.COL_STATUS' | translate }} <span class="sort-indicator" aria-hidden="true">{{ sortIndicator('status') }}</span></th>
             <th>{{ 'CATALOG.COL_ACTIONS' | translate }}</th>
@@ -136,6 +173,7 @@
             <td>{{ getCategoryName(p.categoryId) }}</td>
             <td>{{ getFamilyName(p.familyId) }}</td>
             <td>{{ p.unitPrice | number:'1.2-2' }} {{ p.currency }}</td>
+            <td>{{ p.vatRate ?? 19 }} %</td>
             <td>{{ p.unit }}</td>
             <td>
               <span class="badge" [class.badge-active]="p.status === 'ACTIVE'" [class.badge-inactive]="p.status !== 'ACTIVE'">

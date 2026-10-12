@@ -4,6 +4,7 @@ import com.paymentplatform.organization.application.dto.*;
 import com.paymentplatform.organization.domain.model.Product;
 import com.paymentplatform.organization.domain.repository.OrderRepository;
 import com.paymentplatform.organization.domain.repository.ProductRepository;
+import com.paymentplatform.organization.domain.valueobject.OrganizationId;
 import com.paymentplatform.shared.domain.exception.ConflictException;
 import com.paymentplatform.shared.domain.exception.NotFoundException;
 import org.junit.jupiter.api.BeforeEach;
@@ -46,6 +47,7 @@ class OrderUseCaseH2Test {
     @Autowired private UpdateOrderUseCase updateOrder;
     @Autowired private ProductRepository products;
     @Autowired private OrderRepository orderRepository;
+    @Autowired private com.paymentplatform.organization.domain.repository.OrganizationRepository organizations;
 
     private UUID supplierId;
     private UUID shopId;
@@ -53,9 +55,9 @@ class OrderUseCaseH2Test {
 
     @BeforeEach
     void setUp() {
-        var supplier = createOrg.execute(new CreateOrganizationRequest("Ord Supplier", "SUPPLIER"), UUID.fromString("00000000-0000-0000-0000-000000000001"));
+        var supplier = createOrg.execute(new CreateOrganizationRequest("Ord Supplier", "SUPPLIER", "1234567A/A/M/000", "PAT-TEST", "Adresse Test, Tunis", null, null, null, null, null, null), UUID.fromString("00000000-0000-0000-0000-000000000001"));
         supplierId = supplier.id();
-        var shop = createOrg.execute(new CreateOrganizationRequest("Ord Shop", "SHOP"), UUID.fromString("00000000-0000-0000-0000-000000000001"));
+        var shop = createOrg.execute(new CreateOrganizationRequest("Ord Shop", "SHOP", "1234567A/A/M/000", "PAT-TEST", "Adresse Test, Tunis", null, null, null, null, null, null), UUID.fromString("00000000-0000-0000-0000-000000000001"));
         shopId = shop.id();
         relationUseCase.createRelation(new CreateRelationRequest(supplierId, shopId));
 
@@ -396,5 +398,107 @@ class OrderUseCaseH2Test {
                 List.of(new OrderItemRequest(productId, 1, null)));
         assertThatThrownBy(() -> updateOrder.execute(UUID.fromString("00000000-0000-0000-0000-000000099999"), updateRequest, UUID.fromString("00000000-0000-0000-0000-000000000010")))
                 .isInstanceOf(NotFoundException.class);
+    }
+
+    private UUID createProductWithVat(String sku, String price, String vatRate, boolean fodec) {
+        Product product = new Product();
+        product.setSupplierId(supplierId);
+        product.setName("Prod " + sku);
+        product.setSku(sku);
+        product.setUnitPrice(new BigDecimal(price));
+        product.setCurrency("TND");
+        product.setQuantity(100);
+        product.setMinQuantity(1);
+        product.setReservedQty(0);
+        product.setVatRate(new BigDecimal(vatRate));
+        product.setFodecApplicable(fodec);
+        return products.save(product).getId();
+    }
+
+    private void setShopFiscalProfile(String matricule, String regime, String attestation) {
+        var shopOrg = organizations.findById(new OrganizationId(shopId)).orElseThrow();
+        shopOrg.updateFiscalProfile(matricule, null, "Avenue Test, Tunis",
+                com.paymentplatform.organization.domain.model.FiscalRegime.valueOf(regime),
+                attestation, attestation != null ? java.time.LocalDate.now().minusDays(1) : null,
+                attestation != null ? java.time.LocalDate.now().plusYears(1) : null);
+        organizations.save(shopOrg);
+    }
+
+    @Test
+    void createOrder_mixedVatRates_computesVentilatedTotals() {
+        UUID p19 = createProductWithVat("MIX-19", "10.00", "19", false);
+        UUID p7 = createProductWithVat("MIX-7", "100.00", "7", false);
+        var request = new CreateOrderRequest(supplierId, shopId, false, null, "TND", null, null, null,
+                List.of(new OrderItemRequest(p19, 5, null), new OrderItemRequest(p7, 2, null)));
+        var response = createOrder.execute(request, UUID.fromString("00000000-0000-0000-0000-000000000010"), "SHOP");
+        // HT = 50 + 200 = 250 ; TVA = 9.5 + 14 = 23.5 ; TTC = 273.5 ; timbre 1 ; net 274.5
+        assertThat(response.subtotal()).isEqualByComparingTo("250.0000");
+        assertThat(response.taxAmount()).isEqualByComparingTo("23.5000");
+        assertThat(response.total()).isEqualByComparingTo("273.5000");
+        assertThat(response.fodecTotal()).isEqualByComparingTo("0");
+        assertThat(response.stampAmount()).isEqualByComparingTo("1.000");
+        assertThat(response.netPayable()).isEqualByComparingTo("274.5000");
+        assertThat(response.vatBreakdown()).hasSize(2);
+        assertThat(response.items().get(0).vatRate()).isEqualByComparingTo("19");
+        assertThat(response.items().get(1).vatRate()).isEqualByComparingTo("7");
+    }
+
+    @Test
+    void createOrder_fodecProduct_includedInVatBase() {
+        UUID p = createProductWithVat("FOD-1", "1000.00", "19", true);
+        var request = new CreateOrderRequest(supplierId, shopId, false, null, "TND", null, null, null,
+                List.of(new OrderItemRequest(p, 1, null)));
+        var response = createOrder.execute(request, UUID.fromString("00000000-0000-0000-0000-000000000010"), "SHOP");
+        // FODEC = 10 ; base = 1010 ; TVA = 191.9 ; TTC = 1201.9
+        assertThat(response.fodecTotal()).isEqualByComparingTo("10.0000");
+        assertThat(response.taxAmount()).isEqualByComparingTo("191.9000");
+        assertThat(response.total()).isEqualByComparingTo("1201.9000");
+    }
+
+    @Test
+    void createOrder_suspendedBuyer_zeroVatWithMention() {
+        setShopFiscalProfile("1111111C/A/M/000", "SUSPENDU", "ATT-H2-001");
+        var request = new CreateOrderRequest(supplierId, shopId, false, null, "TND", null, null, null,
+                List.of(new OrderItemRequest(productId, 5, null)));
+        var response = createOrder.execute(request, UUID.fromString("00000000-0000-0000-0000-000000000010"), "SHOP");
+        assertThat(response.taxAmount()).isEqualByComparingTo("0");
+        assertThat(response.total()).isEqualByComparingTo("50.0000");
+        assertThat(response.buyerRegime()).isEqualTo("SUSPENDU");
+        assertThat(response.fiscalMention()).contains("ATT-H2-001");
+        assertThat(response.exemptionReason()).isEqualTo("SUSPENDU:ATT-H2-001");
+        assertThat(response.items().get(0).vatRate()).isEqualByComparingTo("0");
+    }
+
+    @Test
+    void createOrder_suspendedBuyerWithoutAttestation_throws() {
+        var shopOrg = organizations.findById(new OrganizationId(shopId)).orElseThrow();
+        org.springframework.test.util.ReflectionTestUtils.setField(shopOrg, "fiscalRegime",
+                com.paymentplatform.organization.domain.model.FiscalRegime.SUSPENDU);
+        organizations.save(shopOrg);
+        var request = new CreateOrderRequest(supplierId, shopId, false, null, "TND", null, null, null,
+                List.of(new OrderItemRequest(productId, 1, null)));
+        assertThatThrownBy(() -> createOrder.execute(request, UUID.fromString("00000000-0000-0000-0000-000000000010"), "SHOP"))
+                .isInstanceOf(ConflictException.class)
+                .hasMessageContaining("suspension");
+    }
+
+    @Test
+    void createOrder_productZeroWithoutMotif_throws() {
+        Product product = new Product();
+        product.setSupplierId(supplierId);
+        product.setName("Zero sans motif");
+        product.setSku("ZERO-1");
+        product.setUnitPrice(new BigDecimal("10.00"));
+        product.setCurrency("TND");
+        product.setQuantity(10);
+        product.setMinQuantity(1);
+        product.setReservedQty(0);
+        product.setVatRate(BigDecimal.ZERO);
+        UUID zeroId = products.save(product).getId();
+        var request = new CreateOrderRequest(supplierId, shopId, false, null, "TND", null, null, null,
+                List.of(new OrderItemRequest(zeroId, 1, null)));
+        assertThatThrownBy(() -> createOrder.execute(request, UUID.fromString("00000000-0000-0000-0000-000000000010"), "SHOP"))
+                .isInstanceOf(ConflictException.class)
+                .hasMessageContaining("exonération");
     }
 }

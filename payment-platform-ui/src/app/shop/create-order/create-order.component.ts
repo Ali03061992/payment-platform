@@ -8,6 +8,7 @@ import { Organization } from '../../models/organization.model';
 import { Product } from '../../models/stock.model';
 import { CreateOrderRequest } from '../../models/order.model';
 import { ToastService } from '../../services/toast.service';
+import { previewFiscal } from '../../utils/tunisian-fiscal';
 
 interface OrderLine {
   product: Product;
@@ -176,22 +177,50 @@ export class CreateOrderComponent implements OnInit {
     this.orderLines.splice(index, 1);
   }
 
+  /** Aperçu fiscal (TVA par produit 19/13/7, FODEC, timbre) — le backend recalcule. */
+  private get fiscalPreview() {
+    return previewFiscal(
+      this.orderLines.map(l => ({
+        unitPrice: l.product.unitPrice,
+        quantity: l.quantity,
+        discountPct: l.discount,
+        vatRate: l.product.vatRate,
+        fodecApplicable: l.product.fodecApplicable
+      })),
+      this.globalDiscount
+    );
+  }
+
   get subtotal(): number {
-    return this.orderLines.reduce((sum, l) => sum + (l.product.unitPrice * l.quantity * (1 - l.discount / 100)), 0);
+    return this.fiscalPreview.subtotal;
   }
 
   get taxAmount(): number {
-    return this.subtotal * 0.19;
+    return this.fiscalPreview.vatTotal;
   }
 
-  readonly taxRate = 19;
-
   get discountAmount(): number {
-    return (this.subtotal + this.taxAmount) * (this.globalDiscount / 100);
+    return this.fiscalPreview.discountAmount;
+  }
+
+  get fodecAmount(): number {
+    return this.fiscalPreview.fodec;
+  }
+
+  get vatByRate(): { rate: number; base: number; amount: number }[] {
+    return this.fiscalPreview.vatByRate;
+  }
+
+  get stampAmount(): number {
+    return this.fiscalPreview.stamp;
+  }
+
+  get netPayable(): number {
+    return this.fiscalPreview.netPayable;
   }
 
   get total(): number {
-    return this.subtotal + this.taxAmount - this.discountAmount;
+    return this.fiscalPreview.ttc;
   }
 
   canSubmit(): boolean {

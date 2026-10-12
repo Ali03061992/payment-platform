@@ -15,6 +15,12 @@ interface ThemeColor {
       <h3 class="tp-title">{{ 'SETTINGS.TITLE' | translate }}</h3>
       <div class="tp-group">
         <span class="tp-label">{{ 'SETTINGS.ACCENT1' | translate }}</span>
+        <div class="tp-custom">
+          <input type="color" [value]="accent1" (change)="applyCustomPrimary($any($event.target).value)" [attr.aria-label]="'SETTINGS.CUSTOM_COLOR' | translate">
+          <input type="text" [(ngModel)]="customPrimary" name="customPrimary" class="tp-hex" maxlength="7"
+            [placeholder]="'SETTINGS.HEX_PLACEHOLDER' | translate" [attr.aria-label]="'SETTINGS.CUSTOM_COLOR' | translate"
+            (change)="applyCustomPrimary(customPrimary)">
+        </div>
         <div class="tp-swatches" role="radiogroup" [attr.aria-label]="'SETTINGS.ACCENT1' | translate">
           @for (c of colors; track c.id) {
             <button
@@ -36,6 +42,12 @@ interface ThemeColor {
       </div>
       <div class="tp-group">
         <span class="tp-label">{{ 'SETTINGS.ACCENT2' | translate }}</span>
+        <div class="tp-custom">
+          <input type="color" [value]="accent2" (change)="applyCustomSecondary($any($event.target).value)" [attr.aria-label]="'SETTINGS.CUSTOM_COLOR' | translate">
+          <input type="text" [(ngModel)]="customSecondary" name="customSecondary" class="tp-hex" maxlength="7"
+            [placeholder]="'SETTINGS.HEX_PLACEHOLDER' | translate" [attr.aria-label]="'SETTINGS.CUSTOM_COLOR' | translate"
+            (change)="applyCustomSecondary(customSecondary)">
+        </div>
         <div class="tp-swatches" role="radiogroup" [attr.aria-label]="'SETTINGS.ACCENT2' | translate">
           @for (c of colors; track c.id) {
             <button
@@ -64,6 +76,9 @@ interface ThemeColor {
     .tp-group { display: flex; flex-direction: column; gap: 8px; }
     .tp-label { font-size: 12px; font-weight: 600; color: var(--text-secondary); }
     .tp-swatches { display: flex; gap: 8px; flex-wrap: wrap; }
+    .tp-custom { display: flex; gap: 8px; align-items: center; }
+    .tp-custom input[type="color"] { width: 44px; height: 32px; border: 1px solid var(--border-color); border-radius: 8px; padding: 2px; background: var(--card-bg); cursor: pointer; }
+    .tp-hex { flex: 1; min-height: 32px; padding: 4px 8px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--card-bg); color: var(--text-primary); font-size: 12px; font-family: monospace; }
     .tp-swatch { width: 44px; height: 44px; border-radius: 999px; border: 2px solid transparent; outline: 1px solid var(--border-color); outline-offset: 2px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; padding: 0; transition: transform 0.15s; }
     .tp-swatch:hover { transform: scale(1.08); }
     .tp-swatch.selected { border-color: #fff; outline: 2px solid var(--sky-dark); }
@@ -76,6 +91,8 @@ interface ThemeColor {
 export class ThemePickerComponent implements OnInit, OnDestroy {
   accent1 = '#0284c7';
   accent2 = '#e63946';
+  customPrimary = '';
+  customSecondary = '';
   readonly colors: ThemeColor[] = [
     { id: 'ciel', hex: '#0284c7', labelKey: 'SETTINGS.COLOR_SKY' },
     { id: 'rouge', hex: '#e63946', labelKey: 'SETTINGS.COLOR_ROUGE' },
@@ -107,6 +124,21 @@ export class ThemePickerComponent implements OnInit, OnDestroy {
 
   selectSecondary(hex: string): void {
     this.themeService.setAccents(this.accent1, hex);
+  }
+
+  /** Couleur personnalisée saisie (code hex) : appliquée + persistée comme les pastilles. */
+  applyCustomPrimary(hex: string): void {
+    const normalized = (hex || '').trim().toLowerCase();
+    if (!/^#[0-9a-f]{6}$/.test(normalized)) return;
+    this.customPrimary = normalized;
+    this.themeService.setAccents(normalized, this.accent2);
+  }
+
+  applyCustomSecondary(hex: string): void {
+    const normalized = (hex || '').trim().toLowerCase();
+    if (!/^#[0-9a-f]{6}$/.test(normalized)) return;
+    this.customSecondary = normalized;
+    this.themeService.setAccents(this.accent1, normalized);
   }
 
   reset(): void {

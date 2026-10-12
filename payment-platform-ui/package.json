@@ -47,6 +47,7 @@
     "angularx-qrcode": "^20.0.0",
     "echarts": "^6.1.0",
     "firebase": "^12.19.0",
+    "pdfjs-dist": "^6.4.299",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
     "zone.js": "~0.15.1"

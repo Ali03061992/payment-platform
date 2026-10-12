@@ -23,6 +23,10 @@ public class OrganizationValidationUseCase {
     public OrganizationStatusResponse validate(UUID organizationId) {
         Organization org = organizations.findById(OrganizationId.of(organizationId))
                 .orElseThrow(() -> new NotFoundException("Organisation non trouvée : " + organizationId));
-        return new OrganizationStatusResponse(org.id().value(), org.name().value(), org.type().name(), org.status().name());
+        return new OrganizationStatusResponse(org.id().value(), org.name().value(), org.type().name(),
+                org.status().name(), org.matriculeFiscal(), org.patente(), org.address(),
+                org.fiscalRegime().name(), org.suspensionAttestationNumber(),
+                org.suspensionAttestationDate(), org.suspensionExpiryDate(), org.tejIdentifier(),
+                org.defaultWithholdingNature());
     }
 }

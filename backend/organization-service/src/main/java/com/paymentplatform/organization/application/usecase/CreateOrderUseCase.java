@@ -5,9 +5,12 @@ import com.paymentplatform.organization.application.dto.OrderItemRequest;
 import com.paymentplatform.organization.application.dto.OrderResponse;
 import com.paymentplatform.organization.domain.model.Order;
 import com.paymentplatform.organization.domain.model.OrderEvent;
+import com.paymentplatform.organization.domain.model.OrderFiscalizer;
 import com.paymentplatform.organization.domain.model.OrderItem;
+import com.paymentplatform.organization.domain.model.Organization;
 import com.paymentplatform.organization.domain.model.Product;
 import com.paymentplatform.organization.domain.repository.*;
+import com.paymentplatform.organization.domain.valueobject.VatRate;
 import com.paymentplatform.shared.domain.event.OrderEvents;
 import com.paymentplatform.shared.domain.exception.ConflictException;
 import com.paymentplatform.shared.domain.exception.NotFoundException;
@@ -77,14 +80,16 @@ public class CreateOrderUseCase {
         if (request.globalDiscount() != null) {
             order.setGlobalDiscount(request.globalDiscount());
         }
-        if ("SUPPLIER".equals(actorRole) && request.taxRate() != null) {
-            order.setTaxRate(request.taxRate());
-        }
+        // request.taxRate() global IGNORÉ : la TVA est portée par chaque produit
+        // (art. 18 Code TVA — ventilation par taux). Champ conservé pour compatibilité.
+
+        Organization shop = organizations.findById(
+                        new com.paymentplatform.organization.domain.valueobject.OrganizationId(request.shopId()))
+                .orElseThrow(() -> new NotFoundException("Boutique non trouvée : " + request.shopId()));
 
         Order savedOrder = orders.save(order);
 
         List<OrderItem> items = new ArrayList<>();
-        BigDecimal subtotal = BigDecimal.ZERO;
 
         for (OrderItemRequest itemReq : request.items()) {
             Product product = products.findById(itemReq.productId())
@@ -106,19 +111,23 @@ public class CreateOrderUseCase {
             item.setQuantity(itemReq.quantity());
             item.setUnitPrice(product.getUnitPrice());
             item.setDiscount(discount);
+            snapshotFiscalFields(item, product);
             item.setProductSnapshot(buildProductSnapshot(product));
 
             product.setReservedQty(product.getReservedQty() + itemReq.quantity());
             products.save(product);
 
-            OrderItem savedItem = orderItems.save(item);
-            items.add(savedItem);
-            subtotal = subtotal.add(savedItem.getLineTotal());
+            items.add(item);
         }
 
-        savedOrder.setSubtotal(subtotal);
-        savedOrder.recalculateTotals();
+        // Régime acheteur (5 cas sans TVA) + remise→FODEC→TVA par taux + timbre.
+        OrderFiscalizer.apply(savedOrder, items, shop);
         orders.save(savedOrder);
+        List<OrderItem> savedItems = new ArrayList<>();
+        for (OrderItem item : items) {
+            savedItems.add(orderItems.save(item));
+        }
+        items = savedItems;
 
         events.save(OrderEvent.create(savedOrder.getId(), "ORDER_CREATED", actorUserId, null));
         outbox.append(new OrderEvents.OrderCreatedEvent(UUID.randomUUID(), Instant.now(),
@@ -164,12 +173,31 @@ public class CreateOrderUseCase {
         }
     }
 
+    /**
+     * Snapshot fiscal de la fiche produit vers la ligne (taux + FODEC).
+     * Un produit à 0% exige son motif d'exonération par nature.
+     */
+    static void snapshotFiscalFields(OrderItem item, Product product) {
+        VatRate rate = VatRate.of(product.getVatRate());
+        if (rate.isExempt() && (product.getVatExemptionText() == null
+                || product.getVatExemptionText().isBlank())) {
+            throw new ConflictException("Produit « " + product.getName()
+                    + " » à TVA 0% sans motif d'exonération : renseignez le motif sur la fiche produit");
+        }
+        item.setVatRate(rate.value());
+        item.setFodecApplicable(product.isFodecApplicable());
+        item.setPriceTtc(product.isPriceTtc());
+    }
+
     private String buildProductSnapshot(Product product) {
         String name = product.getName() != null ? product.getName() : "";
         String sku = product.getSku() != null ? product.getSku() : "";
         String price = product.getUnitPrice() != null ? product.getUnitPrice().toPlainString() : "0";
+        String vat = product.getVatRate() != null ? product.getVatRate().toPlainString() : "19";
+        boolean fodec = product.isFodecApplicable();
         return "{\"name\":\"" + escapeJson(name) + "\",\"sku\":\"" + escapeJson(sku)
-                + "\",\"unitPrice\":" + price + "}";
+                + "\",\"unitPrice\":" + price + ",\"vatRate\":" + vat + ",\"fodec\":" + fodec
+                + ",\"priceTtc\":" + product.isPriceTtc() + "}";
     }
 
     private String escapeJson(String value) {

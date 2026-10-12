@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { OrganizationService } from '../../services/organization.service';
-import { Organization } from '../../models/organization.model';
+import { FISCAL_REGIMES, FiscalRegime, Organization } from '../../models/organization.model';
 import { PageResponse, sortItems, toggleSortState, ariaSortFor, sortIndicatorFor, SortState } from '../../models/page.model';
 import { ToastService } from '../../services/toast.service';
 
@@ -17,6 +17,29 @@ export class ShopManagementComponent implements OnInit {
   showCreate = false;
   newName = '';
   creating = false;
+  fiscalRegimes = FISCAL_REGIMES;
+  fiscalForm = ShopManagementComponent.emptyFiscalForm();
+  editingShop: Organization | null = null;
+  showFiscalEdit = false;
+  savingFiscal = false;
+
+  static emptyFiscalForm() {
+    return {
+      matriculeFiscal: '', patente: '', tejIdentifier: '', address: '', fiscalRegime: 'ASSUJETTI' as FiscalRegime,
+      suspensionAttestationNumber: '', suspensionAttestationDate: '', suspensionExpiryDate: ''
+    };
+  }
+
+  /** MF exigible sauf particulier (NON_ASSUJETTI) ou client export. */
+  mfRequired(): boolean {
+    return this.fiscalForm.fiscalRegime !== 'NON_ASSUJETTI'
+      && this.fiscalForm.fiscalRegime !== 'EXPORT';
+  }
+
+  canCreate(): boolean {
+    if (!this.newName.trim()) return false;
+    return !this.mfRequired() || !!this.fiscalForm.matriculeFiscal.trim();
+  }
   currentPage = 0;
   pageSize = 10;
   totalElements = 0;
@@ -68,12 +91,24 @@ export class ShopManagementComponent implements OnInit {
   }
 
   create(): void {
-    if (!this.newName.trim()) return;
+    if (!this.canCreate()) return;
     this.creating = true;
-    this.orgService.createShop(this.newName.trim()).subscribe({
+    const f = this.fiscalForm;
+    this.orgService.createShop({
+      name: this.newName.trim(),
+      matriculeFiscal: f.matriculeFiscal.trim() || null,
+      patente: f.patente.trim() || null,
+      tejIdentifier: f.tejIdentifier.trim() || null,
+      address: f.address.trim() || null,
+      fiscalRegime: f.fiscalRegime,
+      suspensionAttestationNumber: f.suspensionAttestationNumber.trim() || null,
+      suspensionAttestationDate: f.suspensionAttestationDate || null,
+      suspensionExpiryDate: f.suspensionExpiryDate || null
+    }).subscribe({
       next: () => {
         this.toast.success(this.translate.instant('ORGS.SHOP_CREATED'));
         this.newName = '';
+        this.fiscalForm = ShopManagementComponent.emptyFiscalForm();
         this.showCreate = false;
         this.creating = false;
         this.load();
@@ -81,6 +116,48 @@ export class ShopManagementComponent implements OnInit {
       error: (err: { error?: { message?: string }; status?: number; statusText?: string; message?: string }) => {
         this.toast.error(err.error?.message || this.translate.instant('ORGS.CREATE_ERROR'));
         this.creating = false;
+      }
+    });
+  }
+
+  openFiscalEdit(s: Organization): void {
+    this.editingShop = s;
+    this.fiscalForm = {
+      matriculeFiscal: s.matriculeFiscal || '', patente: s.patente || '', tejIdentifier: s.tejIdentifier || '',
+      address: s.address || '',
+      fiscalRegime: (s.fiscalRegime as FiscalRegime) || 'ASSUJETTI',
+      suspensionAttestationNumber: s.suspensionAttestationNumber || '',
+      suspensionAttestationDate: s.suspensionAttestationDate || '',
+      suspensionExpiryDate: s.suspensionExpiryDate || ''
+    };
+    this.showFiscalEdit = true;
+  }
+
+  saveFiscalEdit(): void {
+    if (!this.editingShop) return;
+    this.savingFiscal = true;
+    const f = this.fiscalForm;
+    this.orgService.updateFiscalProfile(this.editingShop.id, 'SHOP', {
+      name: this.editingShop.name,
+      matriculeFiscal: f.matriculeFiscal.trim() || null,
+      patente: f.patente.trim() || null,
+      tejIdentifier: f.tejIdentifier.trim() || null,
+      address: f.address.trim() || null,
+      fiscalRegime: f.fiscalRegime,
+      suspensionAttestationNumber: f.suspensionAttestationNumber.trim() || null,
+      suspensionAttestationDate: f.suspensionAttestationDate || null,
+      suspensionExpiryDate: f.suspensionExpiryDate || null
+    }).subscribe({
+      next: () => {
+        this.toast.success(this.translate.instant('ORGS.FISCAL_UPDATED'));
+        this.showFiscalEdit = false;
+        this.editingShop = null;
+        this.savingFiscal = false;
+        this.load();
+      },
+      error: (err: { error?: { message?: string } }) => {
+        this.toast.error(err.error?.message || this.translate.instant('ORGS.CREATE_ERROR'));
+        this.savingFiscal = false;
       }
     });
   }

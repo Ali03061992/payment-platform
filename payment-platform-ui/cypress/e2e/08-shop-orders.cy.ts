@@ -130,4 +130,19 @@ describe('08 - Shop: Order Detail', () => {
       }
     });
   });
+
+  it('should show per-line VAT, stamp and net payable in detail', () => {
+    cy.loginAsShopAdmin();
+    cy.visit('/dashboard/shop/orders');
+    cy.get('table tbody', { timeout: 10000 }).then(($tbody) => {
+      const clickableRows = $tbody.find('tr.clickable-row');
+      if (clickableRows.length > 0) {
+        cy.wrap(clickableRows).first().click({ force: true });
+        cy.url({ timeout: 5000 }).should('match', /\/shop\/orders\/[\w-]+/);
+        cy.get('table tfoot', { timeout: 10000 }).should('contain', 'TVA');
+        cy.get('table tfoot').should('contain', 'Timbre');
+        cy.get('table tfoot').should('contain', 'Net à payer');
+      }
+    });
+  });
 });

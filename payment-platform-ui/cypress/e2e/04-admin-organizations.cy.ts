@@ -16,10 +16,11 @@ describe('04 - Admin: Supplier Management', () => {
   });
 
   it('should show supplier table with columns', () => {
-    cy.get('table thead th').should('have.length', 4);
+    cy.get('table thead th').should('have.length', 5);
     cy.get('table thead').should('contain', 'Nom');
     cy.get('table thead').should('contain', 'Statut');
     cy.get('table thead').should('contain', 'Créé le');
+    cy.get('table thead').should('contain', 'Matricule');
     cy.get('table thead').should('contain', 'Actions');
   });
 
@@ -38,20 +39,34 @@ describe('04 - Admin: Supplier Management', () => {
   it('should create a new supplier', () => {
     const name = `Supplier Auto ${Date.now()}`;
     cy.get('.page-header button.btn-primary').click();
+    cy.get('.form-card').should('be.visible');
+    cy.dismissOverlays();
     cy.get('.form-card input[name="name"]').clear().type(name);
-    cy.get('.form-card button.btn-primary').should('not.be.disabled').click();
+    cy.get('.form-card input[name="mf"]').clear({ force: true }).type('1234567A/A/M/000', { force: true });
+    cy.get('.form-card input[name="address"]').clear({ force: true }).type('Adresse E2E, Tunis', { force: true });
+    cy.dismissOverlays();
+    cy.get('.form-card button.btn-primary').should('not.be.disabled').click({ force: true });
     cy.get('table tbody tr', { timeout: 10000 }).should('contain', name);
+  });
+
+  it('should require matricule fiscal for supplier', () => {
+    cy.get('.page-header button.btn-primary').click();
+    cy.get('.form-card').should('be.visible');
+    cy.dismissOverlays();
+    cy.get('.form-card input[name="name"]').clear().type(`Supplier NoMF ${Date.now()}`);
+    cy.get('.form-card input[name="address"]').clear({ force: true }).type('Adresse E2E, Tunis', { force: true });
+    cy.get('.form-card button.btn-primary').should('be.disabled');
   });
 
   it('should toggle supplier status', () => {
     cy.get('table tbody tr', { timeout: 10000 }).should('have.length.gte', 1);
     cy.get('table tbody tr').first().within(() => {
-      cy.get('button.btn-sm').should('exist').click();
+      cy.get('button.btn-sm').contains(/Désactiver|Activer/).should('exist').click();
     });
     cy.wait(1000);
     cy.dismissOverlays();
     cy.get('table tbody tr').first().within(() => {
-      cy.get('button.btn-sm').should('exist').click();
+      cy.get('button.btn-sm').contains(/Désactiver|Activer/).should('exist').click();
     });
     cy.wait(1000);
   });
@@ -76,7 +91,7 @@ describe('04 - Admin: Shop Management', () => {
   });
 
   it('should show shop table', () => {
-    cy.get('table thead th').should('have.length', 4);
+    cy.get('table thead th').should('have.length', 5);
     cy.get('table tbody tr').should('have.length.gte', 2);
   });
 
@@ -90,8 +105,12 @@ describe('04 - Admin: Shop Management', () => {
   it('should create a new shop', () => {
     const name = `Shop Auto ${Date.now()}`;
     cy.get('.page-header button.btn-primary').click();
+    cy.get('.form-card').should('be.visible');
+    cy.dismissOverlays();
     cy.get('.form-card input[name="name"]').clear().type(name);
-    cy.get('.form-card button.btn-primary').should('not.be.disabled').click();
+    cy.get('.form-card input[name="mf"]').clear({ force: true }).type('7654321B/A/M/000', { force: true });
+    cy.dismissOverlays();
+    cy.get('.form-card button.btn-primary').should('not.be.disabled').click({ force: true });
     cy.get('table tbody tr', { timeout: 10000 }).should('contain', name);
   });
 });

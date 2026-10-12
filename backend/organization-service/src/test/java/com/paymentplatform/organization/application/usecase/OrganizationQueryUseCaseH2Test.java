@@ -30,9 +30,9 @@ class OrganizationQueryUseCaseH2Test {
 
     @BeforeEach
     void setUp() {
-        createOrg.execute(new CreateOrganizationRequest("Supplier A", "SUPPLIER"), UUID.fromString("00000000-0000-0000-0000-000000000001"));
-        createOrg.execute(new CreateOrganizationRequest("Supplier B", "SUPPLIER"), UUID.fromString("00000000-0000-0000-0000-000000000001"));
-        createOrg.execute(new CreateOrganizationRequest("Shop A", "SHOP"), UUID.fromString("00000000-0000-0000-0000-000000000001"));
+        createOrg.execute(new CreateOrganizationRequest("Supplier A", "SUPPLIER", "1234567A/A/M/000", "PAT-TEST", "Adresse Test, Tunis", null, null, null, null, null, null), UUID.fromString("00000000-0000-0000-0000-000000000001"));
+        createOrg.execute(new CreateOrganizationRequest("Supplier B", "SUPPLIER", "1234567A/A/M/000", "PAT-TEST", "Adresse Test, Tunis", null, null, null, null, null, null), UUID.fromString("00000000-0000-0000-0000-000000000001"));
+        createOrg.execute(new CreateOrganizationRequest("Shop A", "SHOP", "1234567A/A/M/000", "PAT-TEST", "Adresse Test, Tunis", null, null, null, null, null, null), UUID.fromString("00000000-0000-0000-0000-000000000001"));
     }
 
     @Test

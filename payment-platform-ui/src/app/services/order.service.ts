@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { TranslateService } from '@ngx-translate/core';
 import { Observable } from 'rxjs';
-import { Order, CreateOrderRequest, UpdateOrderRequest, OrderComment, OrderPage } from '../models/order.model';
+import { Order, CreateOrderRequest, UpdateOrderRequest, OrderComment, OrderPage, WithholdingCertificate } from '../models/order.model';
 import { ToastService } from './toast.service';
 import { filenameFromDisposition, saveBlob } from '../core/file-download';
 
@@ -32,6 +32,97 @@ export class OrderService {
       },
       error: () => this.toast.error(this.translate.instant('PAYMENTS.INVOICE_DOWNLOAD_ERROR'))
     });
+  }
+
+  /** Imprime la facture PDF d'une commande (nouvel onglet + dialogue d'impression). */
+  printInvoice(id: string): void {
+    this.http.get(`${this.apiUrl}/${id}/invoice`, { observe: 'response', responseType: 'blob' }).subscribe({
+      next: (res) => {
+        if (!res.body) {
+          this.toast.error(this.translate.instant('PAYMENTS.INVOICE_DOWNLOAD_ERROR'));
+          return;
+        }
+        const url = URL.createObjectURL(res.body);
+        const win = window.open(url, '_blank');
+        if (!win) {
+          this.toast.error(this.translate.instant('ORDER_DETAIL.PRINT_BLOCKED'));
+          URL.revokeObjectURL(url);
+          return;
+        }
+        const done = () => URL.revokeObjectURL(url);
+        win.addEventListener('load', () => {
+          win.focus();
+          win.print();
+        });
+        win.addEventListener('afterprint', done);
+        setTimeout(done, 60000);
+      },
+      error: () => this.toast.error(this.translate.instant('PAYMENTS.INVOICE_DOWNLOAD_ERROR'))
+    });
+  }
+
+  /** Enregistre la référence électronique externe de la facture (TTN/TEJ + QR). */
+  updateExternalReference(id: string, reference: string): Observable<Order> {
+    return this.http.patch<Order>(`${this.apiUrl}/${id}/external-reference`, { reference });
+  }
+
+  /** Consulte le certificat de retenue de la commande (art. 55 IRPP/IS, TEJ). */
+  getWithholdingCertificate(orderId: string): Observable<WithholdingCertificate> {
+    return this.http.get<WithholdingCertificate>(`${this.apiUrl}/${orderId}/withholding-certificate`);
+  }
+
+  /** Télécharge le certificat de retenue en PDF (QR + référence). */
+  downloadWithholdingCertificatePdf(orderId: string): void {
+    this.http.get(`${this.apiUrl}/${orderId}/withholding-certificate/pdf`, { observe: 'response', responseType: 'blob' }).subscribe({
+      next: (res) => {
+        if (!res.body) {
+          this.toast.error(this.translate.instant('PAYMENTS.CERT_DOWNLOAD_ERROR'));
+          return;
+        }
+        saveBlob(res.body, filenameFromDisposition(res.headers.get('Content-Disposition'), `certificat-retenue-${orderId}.pdf`));
+      },
+      error: () => this.toast.error(this.translate.instant('PAYMENTS.CERT_DOWNLOAD_ERROR'))
+    });
+  }
+
+  /** Télécharge le certificat au format XML d'échange (dépôt TEJ). */
+  downloadWithholdingCertificateXml(orderId: string): void {
+    this.http.get(`${this.apiUrl}/${orderId}/withholding-certificate/xml`, { observe: 'response', responseType: 'blob' }).subscribe({
+      next: (res) => {
+        if (!res.body) {
+          this.toast.error(this.translate.instant('PAYMENTS.CERT_DOWNLOAD_ERROR'));
+          return;
+        }
+        saveBlob(res.body, filenameFromDisposition(res.headers.get('Content-Disposition'), `certificat-retenue-${orderId}.xml`));
+      },
+      error: () => this.toast.error(this.translate.instant('PAYMENTS.CERT_DOWNLOAD_ERROR'))
+    });
+  }
+
+  /** Enregistre la référence TEJ après dépôt manuel du certificat. */
+  markCertificateDeposited(orderId: string, tejReference: string): Observable<WithholdingCertificate> {
+    return this.http.patch<WithholdingCertificate>(`${this.apiUrl}/${orderId}/withholding-certificate/deposit`, { tejReference });
+  }
+
+  /** Télécharge le lot mensuel XML des certificats d'un débiteur (fichier à déposer sur TEJ). */
+  downloadWithholdingBatch(debtorId: string, month: string): void {
+    const params = new HttpParams().set('debtorId', debtorId).set('month', month);
+    this.http.get(`${this.apiUrl}/withholding-certificates/batch`, { params, observe: 'response', responseType: 'blob' }).subscribe({
+      next: (res) => {
+        if (!res.body) {
+          this.toast.error(this.translate.instant('PAYMENTS.CERT_DOWNLOAD_ERROR'));
+          return;
+        }
+        saveBlob(res.body, filenameFromDisposition(res.headers.get('Content-Disposition'), `tej-retenues-${month}.xml`));
+      },
+      error: () => this.toast.error(this.translate.instant('PAYMENTS.CERT_DOWNLOAD_ERROR'))
+    });
+  }
+
+  /** Certificats à échéance proche pour un débiteur (rappel, défaut J-7). */
+  withholdingDueSoon(debtorId: string, days = 7): Observable<WithholdingCertificate[]> {
+    const params = new HttpParams().set('debtorId', debtorId).set('days', days);
+    return this.http.get<WithholdingCertificate[]>(`${this.apiUrl}/withholding-certificates/due`, { params });
   }
 
   /** Crée une commande. */

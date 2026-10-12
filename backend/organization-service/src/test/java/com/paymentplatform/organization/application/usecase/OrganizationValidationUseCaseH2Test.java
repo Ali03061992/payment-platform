@@ -31,7 +31,7 @@ class OrganizationValidationUseCaseH2Test {
 
     @BeforeEach
     void setUp() {
-        var org = createOrg.execute(new CreateOrganizationRequest("Valid Supplier", "SUPPLIER"), UUID.fromString("00000000-0000-0000-0000-000000000001"));
+        var org = createOrg.execute(new CreateOrganizationRequest("Valid Supplier", "SUPPLIER", "1234567A/A/M/000", "PAT-TEST", "Adresse Test, Tunis", null, null, null, null, null, null), UUID.fromString("00000000-0000-0000-0000-000000000001"));
         orgId = org.id();
     }
 

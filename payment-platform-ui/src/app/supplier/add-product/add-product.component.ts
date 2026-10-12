@@ -18,7 +18,11 @@ export class AddProductComponent {
     unitPrice: 0,
     currency: 'TND',
     quantity: 0,
-    minQuantity: 0
+    minQuantity: 0,
+    vatRate: 19,
+    fodecApplicable: false,
+    vatExemptionText: '',
+    priceTtc: false
   };
 
   errors: { [key: string]: string } = {};
@@ -59,6 +63,12 @@ export class AddProductComponent {
       this.errors['minQuantity'] = 'CATALOG.ERR_MIN';
     }
 
+    if (![19, 13, 7, 0].includes(Number(this.form.vatRate))) {
+      this.errors['vatRate'] = 'CATALOG.ERR_VAT_RATE';
+    } else if (Number(this.form.vatRate) === 0 && !this.form.vatExemptionText.trim()) {
+      this.errors['vatExemptionText'] = 'CATALOG.ERR_EXEMPTION_REQUIRED';
+    }
+
     return Object.keys(this.errors).length === 0;
   }
 
@@ -80,7 +90,7 @@ export class AddProductComponent {
   }
 
   resetForm(): void {
-    this.form = { name: '', sku: '', description: '', unitPrice: 0, currency: 'TND', quantity: 0, minQuantity: 0 };
+    this.form = { name: '', sku: '', description: '', unitPrice: 0, currency: 'TND', quantity: 0, minQuantity: 0, vatRate: 19, fodecApplicable: false, vatExemptionText: '', priceTtc: false };
     this.errors = {};
     this.success = false;
   }

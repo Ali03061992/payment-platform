@@ -59,7 +59,7 @@ class AdminOrganizationControllerTest {
     @Test
     void createSupplier_validRequest_returns201() throws Exception {
         String name = "Supplier-" + System.nanoTime();
-        String body = objectMapper.writeValueAsString(new com.paymentplatform.organization.application.dto.CreateOrganizationRequest(name, "SUPPLIER"));
+        String body = objectMapper.writeValueAsString(new com.paymentplatform.organization.application.dto.CreateOrganizationRequest(name, "SUPPLIER", "1234567A/A/M/000", "PAT-TEST", "Adresse Test, Tunis", null, null, null, null, null, null));
 
         mockMvc.perform(post("/api/admin/suppliers")
                         .with(SecurityMockMvcRequestPostProcessors.authentication(adminUser()))
@@ -93,7 +93,7 @@ class AdminOrganizationControllerTest {
     @Test
     void createShop_validRequest_returns201() throws Exception {
         String name = "Shop-" + System.nanoTime();
-        String body = objectMapper.writeValueAsString(new com.paymentplatform.organization.application.dto.CreateOrganizationRequest(name, "SHOP"));
+        String body = objectMapper.writeValueAsString(new com.paymentplatform.organization.application.dto.CreateOrganizationRequest(name, "SHOP", "1234567A/A/M/000", "PAT-TEST", "Adresse Test, Tunis", null, null, null, null, null, null));
 
         mockMvc.perform(post("/api/admin/shops")
                         .with(SecurityMockMvcRequestPostProcessors.authentication(adminUser()))
@@ -124,7 +124,7 @@ class AdminOrganizationControllerTest {
 
     @Test
     void createSupplier_withoutAuth_returns401() throws Exception {
-        String body = objectMapper.writeValueAsString(new com.paymentplatform.organization.application.dto.CreateOrganizationRequest("Test", "SUPPLIER"));
+        String body = objectMapper.writeValueAsString(new com.paymentplatform.organization.application.dto.CreateOrganizationRequest("Test", "SUPPLIER", "1234567A/A/M/000", "PAT-TEST", "Adresse Test, Tunis", null, null, null, null, null, null));
 
         mockMvc.perform(post("/api/admin/suppliers")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -144,7 +144,7 @@ class AdminOrganizationControllerTest {
     @Test
     void getSupplier_existing_returns200() throws Exception {
         String name = "Get-Supplier-" + System.nanoTime();
-        String body = objectMapper.writeValueAsString(new com.paymentplatform.organization.application.dto.CreateOrganizationRequest(name, "SUPPLIER"));
+        String body = objectMapper.writeValueAsString(new com.paymentplatform.organization.application.dto.CreateOrganizationRequest(name, "SUPPLIER", "1234567A/A/M/000", "PAT-TEST", "Adresse Test, Tunis", null, null, null, null, null, null));
         String result = mockMvc.perform(post("/api/admin/suppliers")
                         .with(SecurityMockMvcRequestPostProcessors.authentication(adminUser()))
                         .contentType(MediaType.APPLICATION_JSON)
@@ -170,7 +170,7 @@ class AdminOrganizationControllerTest {
     @Test
     void getShop_existing_returns200() throws Exception {
         String name = "Get-Shop-" + System.nanoTime();
-        String body = objectMapper.writeValueAsString(new com.paymentplatform.organization.application.dto.CreateOrganizationRequest(name, "SHOP"));
+        String body = objectMapper.writeValueAsString(new com.paymentplatform.organization.application.dto.CreateOrganizationRequest(name, "SHOP", "1234567A/A/M/000", "PAT-TEST", "Adresse Test, Tunis", null, null, null, null, null, null));
         String result = mockMvc.perform(post("/api/admin/shops")
                         .with(SecurityMockMvcRequestPostProcessors.authentication(adminUser()))
                         .contentType(MediaType.APPLICATION_JSON)
@@ -188,7 +188,7 @@ class AdminOrganizationControllerTest {
     @Test
     void activateSupplier_existing_returns200() throws Exception {
         String name = "Activate-Supplier-" + System.nanoTime();
-        String body = objectMapper.writeValueAsString(new com.paymentplatform.organization.application.dto.CreateOrganizationRequest(name, "SUPPLIER"));
+        String body = objectMapper.writeValueAsString(new com.paymentplatform.organization.application.dto.CreateOrganizationRequest(name, "SUPPLIER", "1234567A/A/M/000", "PAT-TEST", "Adresse Test, Tunis", null, null, null, null, null, null));
         String result = mockMvc.perform(post("/api/admin/suppliers")
                         .with(SecurityMockMvcRequestPostProcessors.authentication(adminUser()))
                         .contentType(MediaType.APPLICATION_JSON)
@@ -210,7 +210,7 @@ class AdminOrganizationControllerTest {
     @Test
     void disableSupplier_existing_returns200() throws Exception {
         String name = "Disable-Supplier-" + System.nanoTime();
-        String body = objectMapper.writeValueAsString(new com.paymentplatform.organization.application.dto.CreateOrganizationRequest(name, "SUPPLIER"));
+        String body = objectMapper.writeValueAsString(new com.paymentplatform.organization.application.dto.CreateOrganizationRequest(name, "SUPPLIER", "1234567A/A/M/000", "PAT-TEST", "Adresse Test, Tunis", null, null, null, null, null, null));
         String result = mockMvc.perform(post("/api/admin/suppliers")
                         .with(SecurityMockMvcRequestPostProcessors.authentication(adminUser()))
                         .contentType(MediaType.APPLICATION_JSON)
@@ -226,7 +226,7 @@ class AdminOrganizationControllerTest {
     @Test
     void activateShop_existing_returns200() throws Exception {
         String name = "Activate-Shop-" + System.nanoTime();
-        String body = objectMapper.writeValueAsString(new com.paymentplatform.organization.application.dto.CreateOrganizationRequest(name, "SHOP"));
+        String body = objectMapper.writeValueAsString(new com.paymentplatform.organization.application.dto.CreateOrganizationRequest(name, "SHOP", "1234567A/A/M/000", "PAT-TEST", "Adresse Test, Tunis", null, null, null, null, null, null));
         String result = mockMvc.perform(post("/api/admin/shops")
                         .with(SecurityMockMvcRequestPostProcessors.authentication(adminUser()))
                         .contentType(MediaType.APPLICATION_JSON)
@@ -246,7 +246,7 @@ class AdminOrganizationControllerTest {
     @Test
     void disableShop_existing_returns200() throws Exception {
         String name = "Disable-Shop-" + System.nanoTime();
-        String body = objectMapper.writeValueAsString(new com.paymentplatform.organization.application.dto.CreateOrganizationRequest(name, "SHOP"));
+        String body = objectMapper.writeValueAsString(new com.paymentplatform.organization.application.dto.CreateOrganizationRequest(name, "SHOP", "1234567A/A/M/000", "PAT-TEST", "Adresse Test, Tunis", null, null, null, null, null, null));
         String result = mockMvc.perform(post("/api/admin/shops")
                         .with(SecurityMockMvcRequestPostProcessors.authentication(adminUser()))
                         .contentType(MediaType.APPLICATION_JSON)
@@ -278,7 +278,7 @@ class AdminOrganizationControllerTest {
     @Test
     void createShop_withoutAdminRole_returns403() throws Exception {
         UsernamePasswordAuthenticationToken shopUser = auth(UUID.fromString("00000000-0000-0000-0000-000000000007"), "shop.user3", List.of("SHOP_ADMIN"), null);
-        String body = objectMapper.writeValueAsString(new com.paymentplatform.organization.application.dto.CreateOrganizationRequest("ShouldFail", "SHOP"));
+        String body = objectMapper.writeValueAsString(new com.paymentplatform.organization.application.dto.CreateOrganizationRequest("ShouldFail", "SHOP", "1234567A/A/M/000", "PAT-TEST", "Adresse Test, Tunis", null, null, null, null, null, null));
         mockMvc.perform(post("/api/admin/shops")
                         .with(SecurityMockMvcRequestPostProcessors.authentication(shopUser))
                         .contentType(MediaType.APPLICATION_JSON)

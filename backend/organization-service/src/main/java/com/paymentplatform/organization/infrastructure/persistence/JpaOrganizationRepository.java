@@ -90,6 +90,15 @@ public class JpaOrganizationRepository implements OrganizationRepository {
         e.setName(org.name().value());
         e.setType(org.type().name());
         e.setStatus(org.status().name());
+        e.setMatriculeFiscal(org.matriculeFiscal());
+        e.setPatente(org.patente());
+        e.setTejIdentifier(org.tejIdentifier());
+        e.setDefaultWithholdingNature(org.defaultWithholdingNature());
+        e.setAddress(org.address());
+        e.setFiscalRegime(org.fiscalRegime().name());
+        e.setSuspensionAttestationNumber(org.suspensionAttestationNumber());
+        e.setSuspensionAttestationDate(org.suspensionAttestationDate());
+        e.setSuspensionExpiryDate(org.suspensionExpiryDate());
         e.setVersion(org.version());
         e.setCreatedAt(org.createdAt());
         e.setUpdatedAt(org.updatedAt());
@@ -97,13 +106,25 @@ public class JpaOrganizationRepository implements OrganizationRepository {
     }
 
     private Organization toDomain(OrganizationJpaEntity e) {
-        return Organization.reconstruct(
+        Organization org = Organization.reconstruct(
                 OrganizationId.of(e.getId()),
                 OrganizationName.of(e.getName()),
                 OrganizationType.valueOf(e.getType()),
                 OrganizationStatus.valueOf(e.getStatus()),
                 e.getVersion() == null ? 0 : e.getVersion(),
                 e.getCreatedAt(),
-                e.getUpdatedAt());
+                e.getUpdatedAt(),
+                e.getMatriculeFiscal(),
+                e.getPatente(),
+                e.getAddress(),
+                com.paymentplatform.organization.domain.model.FiscalRegime.from(e.getFiscalRegime()),
+                e.getSuspensionAttestationNumber(),
+                e.getSuspensionAttestationDate(),
+                e.getSuspensionExpiryDate(),
+                e.getTejIdentifier());
+        if (e.getDefaultWithholdingNature() != null) {
+            org.setDefaultWithholdingNature(e.getDefaultWithholdingNature());
+        }
+        return org;
     }
 }

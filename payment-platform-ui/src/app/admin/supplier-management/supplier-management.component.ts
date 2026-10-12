@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { OrganizationService } from '../../services/organization.service';
-import { Organization } from '../../models/organization.model';
+import { FISCAL_REGIMES, FiscalRegime, Organization } from '../../models/organization.model';
 import { PageResponse, sortItems, toggleSortState, ariaSortFor, sortIndicatorFor, SortState } from '../../models/page.model';
 import { ToastService } from '../../services/toast.service';
 
@@ -17,6 +17,19 @@ export class SupplierManagementComponent implements OnInit {
   showCreate = false;
   newName = '';
   creating = false;
+  fiscalRegimes = FISCAL_REGIMES;
+  fiscalForm = SupplierManagementComponent.emptyFiscalForm();
+  editingSupplier: Organization | null = null;
+  showFiscalEdit = false;
+  savingFiscal = false;
+
+  static emptyFiscalForm() {
+    return {
+      matriculeFiscal: '', patente: '', tejIdentifier: '', defaultWithholdingNature: '',
+      address: '', fiscalRegime: 'ASSUJETTI' as FiscalRegime,
+      suspensionAttestationNumber: '', suspensionAttestationDate: '', suspensionExpiryDate: ''
+    };
+  }
   currentPage = 0;
   pageSize = 10;
   totalElements = 0;
@@ -68,13 +81,32 @@ export class SupplierManagementComponent implements OnInit {
     return sortItems(this.suppliers, this.sort.field, this.sort.direction);
   }
 
+  /** MF + adresse obligatoires pour un fournisseur (art. 18 Code TVA). */
+  canCreate(): boolean {
+    return !!this.newName.trim() && !!this.fiscalForm.matriculeFiscal.trim()
+      && !!this.fiscalForm.address.trim();
+  }
+
   create(): void {
-    if (!this.newName.trim()) return;
+    if (!this.canCreate()) return;
     this.creating = true;
-    this.orgService.createSupplier(this.newName.trim()).subscribe({
+    const f = this.fiscalForm;
+    this.orgService.createSupplier({
+      name: this.newName.trim(),
+      matriculeFiscal: f.matriculeFiscal.trim(),
+      patente: f.patente.trim() || null,
+      tejIdentifier: f.tejIdentifier.trim() || null,
+      defaultWithholdingNature: f.defaultWithholdingNature.trim() || null,
+      address: f.address.trim(),
+      fiscalRegime: f.fiscalRegime,
+      suspensionAttestationNumber: f.suspensionAttestationNumber.trim() || null,
+      suspensionAttestationDate: f.suspensionAttestationDate || null,
+      suspensionExpiryDate: f.suspensionExpiryDate || null
+    }).subscribe({
       next: () => {
         this.toast.success(this.translate.instant('ORGS.SUPPLIER_CREATED'));
         this.newName = '';
+        this.fiscalForm = SupplierManagementComponent.emptyFiscalForm();
         this.showCreate = false;
         this.creating = false;
         this.load();
@@ -82,6 +114,50 @@ export class SupplierManagementComponent implements OnInit {
       error: (err: { error?: { message?: string }; status?: number; statusText?: string; message?: string }) => {
         this.toast.error(err.error?.message || this.translate.instant('ORGS.CREATE_ERROR'));
         this.creating = false;
+      }
+    });
+  }
+
+  openFiscalEdit(s: Organization): void {
+    this.editingSupplier = s;
+    this.fiscalForm = {
+      matriculeFiscal: s.matriculeFiscal || '', patente: s.patente || '', tejIdentifier: s.tejIdentifier || '',
+      defaultWithholdingNature: s.defaultWithholdingNature || '',
+      address: s.address || '',
+      fiscalRegime: (s.fiscalRegime as FiscalRegime) || 'ASSUJETTI',
+      suspensionAttestationNumber: s.suspensionAttestationNumber || '',
+      suspensionAttestationDate: s.suspensionAttestationDate || '',
+      suspensionExpiryDate: s.suspensionExpiryDate || ''
+    };
+    this.showFiscalEdit = true;
+  }
+
+  saveFiscalEdit(): void {
+    if (!this.editingSupplier || !this.fiscalForm.matriculeFiscal.trim()) return;
+    this.savingFiscal = true;
+    const f = this.fiscalForm;
+    this.orgService.updateFiscalProfile(this.editingSupplier.id, 'SUPPLIER', {
+      name: this.editingSupplier.name,
+      matriculeFiscal: f.matriculeFiscal.trim(),
+      patente: f.patente.trim() || null,
+      tejIdentifier: f.tejIdentifier.trim() || null,
+      defaultWithholdingNature: f.defaultWithholdingNature.trim() || null,
+      address: f.address.trim() || null,
+      fiscalRegime: f.fiscalRegime,
+      suspensionAttestationNumber: f.suspensionAttestationNumber.trim() || null,
+      suspensionAttestationDate: f.suspensionAttestationDate || null,
+      suspensionExpiryDate: f.suspensionExpiryDate || null
+    }).subscribe({
+      next: () => {
+        this.toast.success(this.translate.instant('ORGS.FISCAL_UPDATED'));
+        this.showFiscalEdit = false;
+        this.editingSupplier = null;
+        this.savingFiscal = false;
+        this.load();
+      },
+      error: (err: { error?: { message?: string } }) => {
+        this.toast.error(err.error?.message || this.translate.instant('ORGS.CREATE_ERROR'));
+        this.savingFiscal = false;
       }
     });
   }

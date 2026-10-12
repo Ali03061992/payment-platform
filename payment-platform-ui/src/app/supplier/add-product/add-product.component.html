@@ -63,6 +63,50 @@
         </div>
       </div>
       <div class="form-section">
+        <h3>{{ 'CATALOG.SECTION_FISCAL' | translate }}</h3>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="vatRate">{{ 'CATALOG.FIELD_VAT_RATE' | translate }} <span class="required">*</span></label>
+            <select id="vatRate" [(ngModel)]="form.vatRate" name="vatRate" required class="form-control"
+              [class.input-error]="errors['vatRate']">
+              <option [ngValue]="19">{{ 'CATALOG.VAT_19' | translate }}</option>
+              <option [ngValue]="13">{{ 'CATALOG.VAT_13' | translate }}</option>
+              <option [ngValue]="7">{{ 'CATALOG.VAT_7' | translate }}</option>
+              <option [ngValue]="0">{{ 'CATALOG.VAT_0' | translate }}</option>
+            </select>
+            <span class="field-hint">{{ 'CATALOG.VAT_HINT' | translate }}</span>
+            @if (errors['vatRate']) {
+              <span class="field-error">{{ errors['vatRate'] | translate }}</span>
+            }
+          </div>
+          <div class="form-group">
+            <label class="checkbox-label">
+              <input type="checkbox" [(ngModel)]="form.fodecApplicable" name="fodecApplicable">
+              {{ 'CATALOG.FIELD_FODEC' | translate }}
+            </label>
+            <span class="field-hint">{{ 'CATALOG.FODEC_HINT' | translate }}</span>
+          </div>
+          <div class="form-group">
+            <label class="checkbox-label">
+              <input type="checkbox" [(ngModel)]="form.priceTtc" name="priceTtc">
+              {{ 'CATALOG.FIELD_PRICE_TTC' | translate }}
+            </label>
+            <span class="field-hint">{{ 'CATALOG.PRICE_TTC_HINT' | translate }}</span>
+          </div>
+        </div>
+        @if (form.vatRate === 0) {
+          <div class="form-group">
+            <label for="vatExemptionText">{{ 'CATALOG.FIELD_EXEMPTION' | translate }} <span class="required">*</span></label>
+            <input id="vatExemptionText" type="text" [(ngModel)]="form.vatExemptionText" name="vatExemptionText"
+              [placeholder]="'CATALOG.EXEMPTION_PLACEHOLDER' | translate" class="form-control"
+              [class.input-error]="errors['vatExemptionText']">
+            @if (errors['vatExemptionText']) {
+              <span class="field-error">{{ errors['vatExemptionText'] | translate }}</span>
+            }
+          </div>
+        }
+      </div>
+      <div class="form-section">
         <h3>{{ 'CATALOG.SECTION_STOCK' | translate }}</h3>
         <div class="form-row">
           <div class="form-group">

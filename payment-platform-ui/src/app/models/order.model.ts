@@ -14,6 +14,14 @@ export interface Order {
   taxRate: number;
   taxAmount: number;
   globalDiscount: number;
+  fodecTotal: number;
+  stampAmount: number;
+  netPayable: number;
+  vatBreakdown: VatBreakdownLine[];
+  fiscalMention: string | null;
+  exemptionReason: string | null;
+  buyerRegime: string | null;
+  externalReference: string | null;
   total: number;
   currency: string;
   deliveryAgentId: string | null;
@@ -47,6 +55,12 @@ export interface Order {
   events: OrderEvent[];
 }
 
+export interface VatBreakdownLine {
+  rate: number;
+  base: number;
+  amount: number;
+}
+
 export interface OrderItem {
   id: string;
   orderId: string;
@@ -57,6 +71,41 @@ export interface OrderItem {
   unitPrice: number;
   discount: number;
   lineTotal: number;
+  vatRate: number;
+  fodecApplicable: boolean;
+  priceTtc: boolean;
+  htUnitPrice: number | null;
+  fodecAmount: number;
+  vatBase: number;
+  vatAmount: number;
+  createdAt: string;
+}
+
+/** Certificat de retenue à la source rattaché à la facture de commande (art. 55 IRPP/IS, TEJ). */
+export interface WithholdingCertificate {
+  id: string;
+  orderId: string;
+  number: string;
+  debtorId: string;
+  debtorName: string;
+  debtorMatricule: string | null;
+  debtorAddress: string | null;
+  beneficiaryId: string;
+  beneficiaryName: string;
+  beneficiaryMatricule: string | null;
+  beneficiaryAddress: string | null;
+  nature: string;
+  grossAmount: number;
+  rate: number;
+  withholdingAmount: number;
+  netAmount: number;
+  currency: string;
+  orderReference: string;
+  orderDate: string;
+  billingPeriod: string | null;
+  dueDate: string;
+  status: 'READY' | 'DEPOSITED' | 'ACCEPTED' | 'REJECTED' | 'CANCELLED';
+  tejReference: string | null;
   createdAt: string;
 }
 
