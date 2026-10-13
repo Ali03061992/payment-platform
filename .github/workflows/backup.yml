@@ -20,7 +20,7 @@ on:
 jobs:
   backup-test:
     name: Backup → TEST (VM OVH)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     if: inputs.environment == 'test'
     steps:
       - name: Check OVH test config
@@ -56,7 +56,7 @@ jobs:
 
   backup-prod:
     name: Backup → PROD (VM OVH)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     if: inputs.environment == 'prod'
     steps:
       - name: Check OVH prod config

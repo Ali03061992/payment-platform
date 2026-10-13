@@ -38,7 +38,7 @@ jobs:
   # ──────────────────────────────────────────────────────────────
   cleanup:
     name: Cleanup old artifacts & runs
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Delete old artifacts (older than 1 day)
         uses: geekyeggo/delete-artifact@v5
@@ -66,7 +66,7 @@ jobs:
   build-backend:
     name: Backend – Build & Tests (JaCoCo)
     needs: [cleanup]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
         with:
@@ -141,7 +141,7 @@ jobs:
   build-frontend:
     name: Frontend – Tests & Build (lcov)
     needs: [cleanup]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     defaults:
       run:
         working-directory: payment-platform-ui
@@ -199,7 +199,7 @@ jobs:
   # ──────────────────────────────────────────────────────────────
   sonar-backend:
     name: SonarQube – Backend
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [build-backend]
     steps:
       - name: Check Sonar token availability
@@ -265,7 +265,7 @@ jobs:
   # ──────────────────────────────────────────────────────────────
   sonar-frontend:
     name: SonarQube – Frontend
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [build-frontend]
     steps:
       - name: Check Sonar token availability
@@ -323,7 +323,7 @@ jobs:
   # ──────────────────────────────────────────────────────────────
   build-images:
     name: Build Docker Images
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [build-backend, build-frontend]
     steps:
       - uses: actions/checkout@v4
@@ -374,7 +374,7 @@ jobs:
   # ──────────────────────────────────────────────────────────────
   deploy-test:
     name: Publish → TEST (VM OVH)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [build-images]
     if: |
       (github.event_name == 'push' && startsWith(github.ref, 'refs/heads/release/'))
@@ -443,7 +443,7 @@ jobs:
   # ──────────────────────────────────────────────────────────────
   deploy-prod:
     name: Publish → PROD (VM OVH)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [build-images]
     if: |
       (github.event_name == 'push' && github.ref == 'refs/heads/master')
