@@ -67,6 +67,7 @@ Consommateur principal : notification-service (SSE + push FCM).
 ## 5. Sécurité
 
 - JWT HS256 (secret via env, expiration 30 min), re-validation par service, contrôle RBAC par endpoint (`@PreAuthorize`).
+- SSE (`/api/notifications/stream`) : nginx contourne le gateway (EventSource sans header) ; le JWT signé en query (`?token=`, HMAC + expiry vérifiés dans le contrôleur) fait foi, pas de session.
 - Gateway : `JwtValidationFilter`, `IpWhitelistFilter` (CIDR, `172.16.0.0/12` en dev), `RateLimitFilter` (quotas stricts sur l'auth).
 - Isolation inter-organisations vérifiée (tests d'accès croisés), journal d'audit, secrets jamais commités (voir `deploy/.env`).
 
