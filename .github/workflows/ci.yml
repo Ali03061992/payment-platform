@@ -394,6 +394,16 @@ jobs:
             echo "mode=real" >> "$GITHUB_OUTPUT"
           fi
 
+      - name: Debug SSH key format (secret jamais affiché)
+        if: steps.check.outputs.mode == 'real'
+        run: |
+          KEY="${{ secrets.OVH_TEST_SSH_KEY }}"
+          echo "longueur: ${#KEY} chars"
+          echo "$KEY" | head -n 1 | grep -q "BEGIN OPENSSH PRIVATE KEY" && echo "header OK" || echo "header BAD"
+          echo "$KEY" | tail -n 1 | grep -q "END OPENSSH PRIVATE KEY" && echo "footer OK" || echo "footer BAD"
+          if echo "$KEY" | grep -q "$(printf '\r')"; then echo "CRLF DETECTE - PROBLEM (recopier en LF)"; else echo "LF only OK"; fi
+          echo "lignes: $(echo "$KEY" | wc -l)"
+
       - name: Deploy to OVH test VM
         if: steps.check.outputs.mode == 'real'
         uses: appleboy/ssh-action@v1
