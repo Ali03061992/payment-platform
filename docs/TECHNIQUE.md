@@ -91,7 +91,7 @@ Consommateur principal : notification-service (SSE + push FCM).
 - Branching : `release/**` → publication **auto vers TEST** ; `master` → publication **auto vers PROD** ; `develop` → build + tests **sans déploiement**. Publication **manuelle** : Actions → Run workflow → `test` ou `prod` (déploie la branche sélectionnée).
 ### Mise en route déploiement (VM OVH) — pas à pas
 
-VM TEST : `ubuntu@51.222.6.2` (même procédure pour la PROD avec les secrets `OVH_PROD_*`).
+VM TEST : `ubuntu@51.222.6.2` — **en service** (Docker 29, clone à jour, `.env` renseigné, clé CI installée). Même procédure pour la PROD avec les secrets `OVH_PROD_*`.
 
 1. **Clé SSH dédiée (sans passphrase, obligatoire pour la CI)** — sur ton poste :
    ```powershell
