@@ -91,6 +91,13 @@ Consommateur principal : notification-service (SSE + push FCM).
 - Branching : `release/**` → publication **auto vers TEST** ; `main` → publication **auto vers PROD** ; `develop` → build + tests **sans déploiement**. Publication **manuelle** : Actions → Run workflow → `test` ou `prod` (déploie la branche sélectionnée).
 - Déploiement sur **VM OVH** (SSH via `appleboy/ssh-action`) : `git pull` de la branche puis `docker compose up -d --build` sur la VM (aucun registre requis). Secrets : `OVH_TEST_HOST/USER/SSH_KEY` (+ `PORT`, `DIR`, `URL` optionnels), idem `OVH_PROD_*`. Préparer sur chaque VM : clone dans `/opt/payment-platform` (ou `OVH_*_DIR`), `deploy/.env` renseigné (modèle : `deploy/.env.example`), accès git au dépôt (clé de déploiement si privé), Docker installé.
 
+### Backups MySQL
+
+- Service `db-backup` (image `mysql:8.4`, dans `deploy/docker-compose.yml`) : dump des 4 bases (`identity/organization/payment/notification_db`, `--single-transaction`, routines+events) **toutes les 8 h** (`BACKUP_INTERVAL_SECONDS`, défaut 28800), fichiers `AAAAMMJJ-HHMMSS-<tag>.sql.gz` dans `./backups/` (**gitignoré**), **rotation : suppression au-delà de 3 j** (`BACKUP_RETENTION_DAYS`).
+- **Backup pré-prod automatique** : avant chaque déploiement PROD, la CI sauvegarde la base (`pre-prod-<timestamp>`) puis déploie.
+- **Backup manuel** : workflow `Backup` (Actions → Run workflow → `test`/`prod` + tag), ou sur la VM : `docker compose exec db-backup /scripts/backup-now.sh [tag]`.
+- **Restauration** (sur la VM, depuis la racine du repo) : `sh deploy/backup/restore.sh <fichier.sql.gz>` (confirmation `RESTORE` requise, écrase les données). Scripts : `deploy/backup/` (`backup-now.sh`, `backup-loop.sh`, `restore.sh`).
+
 ## 9. Versioning (SemVer)
 
 - Format `MAJEUR.MINEUR.PATCH` (ex. `1.2.0`) : MAJEUR = rupture, MINEUR = fonctionnalité, PATCH = correctif.

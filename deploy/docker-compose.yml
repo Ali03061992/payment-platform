@@ -19,6 +19,26 @@ services:
     networks:
       - payment-net
 
+  # Backup MySQL : dump des 4 bases toutes les 8 h (BACKUP_INTERVAL_SECONDS),
+  # rétention 3 j (BACKUP_RETENTION_DAYS), fichiers dans ./backups/.
+  # Manuel : docker compose exec db-backup /scripts/backup-now.sh [tag]
+  db-backup:
+    image: mysql:8.4
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      MYSQL_HOST: mysql
+      MYSQL_PWD: ${MYSQL_ROOT_PASSWORD}
+      BACKUP_INTERVAL_SECONDS: ${BACKUP_INTERVAL_SECONDS:-28800}
+      BACKUP_RETENTION_DAYS: ${BACKUP_RETENTION_DAYS:-3}
+    volumes:
+      - ./backups:/backups
+      - ./backup:/scripts:ro
+    entrypoint: ["/bin/sh", "/scripts/backup-loop.sh"]
+    networks:
+      - payment-net
+
   rabbitmq:
     image: rabbitmq:4-management
     environment:

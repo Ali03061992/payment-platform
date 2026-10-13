@@ -463,6 +463,24 @@ jobs:
             echo "mode=real" >> "$GITHUB_OUTPUT"
           fi
 
+      - name: Backup PROD database before release
+        if: steps.check.outputs.mode == 'real'
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.OVH_PROD_HOST }}
+          username: ${{ secrets.OVH_PROD_USER }}
+          key: ${{ secrets.OVH_PROD_SSH_KEY }}
+          port: ${{ secrets.OVH_PROD_PORT || '22' }}
+          script: |
+            set -e
+            APP_DIR="${{ secrets.OVH_PROD_DIR || '/opt/payment-platform' }}"
+            cd "$APP_DIR"
+            git fetch origin
+            git checkout main
+            git pull origin main
+            docker compose -f deploy/docker-compose.yml up -d db-backup
+            docker compose -f deploy/docker-compose.yml exec -T db-backup /scripts/backup-now.sh "pre-prod-$(date +%Y%m%d-%H%M%S)"
+
       - name: Deploy to OVH prod VM
         if: steps.check.outputs.mode == 'real'
         uses: appleboy/ssh-action@v1
@@ -491,7 +509,7 @@ jobs:
           echo " FAKE deploy PROD (mode: ${{ steps.check.outputs.mode }})"
           echo " Branche : main"
           echo " Hote    : ${{ secrets.OVH_PROD_HOST || 'vm-prod.invalid (non defini)' }}"
-          echo " Simule  : git pull + docker compose up -d --build"
+          echo " Simule  : backup pre-prod + git pull + docker compose up -d --build"
           echo "=============================================="
 
       - name: Health check PROD (si URL configurée)

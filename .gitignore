@@ -61,3 +61,6 @@ uploads/
 
 # Docs historiques archivés (hors suivi : voir docs/FONCTIONNALITES.md et docs/TECHNIQUE.md)
 archive-docs/
+
+# Backups MySQL locaux (générés par deploy/backup, ne jamais committer)
+deploy/backups/
