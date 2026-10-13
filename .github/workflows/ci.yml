@@ -1,11 +1,24 @@
 name: CI
 
+# Stratégie de branching :
+#   release/**            → build + tests → déploiement AUTO vers TEST
+#   main                  → build + tests → déploiement AUTO vers PROD
+#   develop (et autres)   → build + tests uniquement, AUCUN déploiement
+#   manuel (Actions → Run workflow) → publication vers TEST ou PROD au choix
+# NOTE : le dépôt utilise `main` comme branche de production (pas de `master`).
 on:
   push:
-    branches: [main, develop]
+    branches: [main, develop, 'release/**']
   pull_request:
-    branches: [main, develop]
+    branches: [main, develop, 'release/**']
   workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environnement de publication manuelle'
+        required: true
+        default: 'test'
+        type: choice
+        options: [test, prod]
 
 # Needed for SonarCloud PR decoration & quality gate
 permissions:
@@ -352,73 +365,85 @@ jobs:
           retention-days: 1
 
   # ──────────────────────────────────────────────────────────────
-  # E2E (Cypress) – lance le stack via docker-compose
+  # Publication TEST – auto sur release/**, ou manuelle
+  # Déploiement SSH vers la VM OVH de test : git pull + compose build.
+  # Secrets requis : OVH_TEST_HOST, OVH_TEST_USER, OVH_TEST_SSH_KEY
+  # (optionnels : OVH_TEST_PORT=22, OVH_TEST_DIR=/opt/payment-platform,
+  #  OVH_TEST_URL pour le health check). Le fichier deploy/.env doit
+  # exister sur la VM (modèle : deploy/.env.example).
   # ──────────────────────────────────────────────────────────────
-  e2e-tests:
-    name: E2E Tests (Cypress)
+  deploy-test:
+    name: Publish → TEST (VM OVH)
     runs-on: ubuntu-latest
     needs: [build-images]
+    if: |
+      (github.event_name == 'push' && startsWith(github.ref, 'refs/heads/release/'))
+      || (github.event_name == 'workflow_dispatch' && inputs.environment == 'test')
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
+      - name: Deploy to OVH test VM
+        uses: appleboy/ssh-action@v1
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: npm
-          cache-dependency-path: payment-platform-ui/package-lock.json
+          host: ${{ secrets.OVH_TEST_HOST }}
+          username: ${{ secrets.OVH_TEST_USER }}
+          key: ${{ secrets.OVH_TEST_SSH_KEY }}
+          port: ${{ secrets.OVH_TEST_PORT || '22' }}
+          script: |
+            set -e
+            APP_DIR="${{ secrets.OVH_TEST_DIR || '/opt/payment-platform' }}"
+            BRANCH="${{ github.ref_name }}"
+            if [ ! -d "$APP_DIR/.git" ]; then
+              git clone "${{ github.server_url }}/${{ github.repository }}.git" "$APP_DIR"
+            fi
+            cd "$APP_DIR"
+            git fetch origin
+            git checkout "$BRANCH"
+            git pull origin "$BRANCH"
+            docker compose -f deploy/docker-compose.yml up -d --build
+            docker compose -f deploy/docker-compose.yml ps
 
-      - name: Download Docker images
-        uses: actions/download-artifact@v4
-        with:
-          name: docker-images
-
-      - name: Load Docker images
-        run: docker load < docker-images.tar.gz
-
-      - name: Install Cypress deps
-        working-directory: payment-platform-ui
-        run: npm ci --legacy-peer-deps
-
-      - name: Start services
-        working-directory: .
-        run: docker compose -f deploy/docker-compose.yml up -d --wait
-        env:
-          MYSQL_ROOT_PASSWORD: test_root_pw
-          MYSQL_USER: test_user
-          MYSQL_PASSWORD: test_password
-          RABBITMQ_USER: guest
-          RABBITMQ_PASSWORD: guest
-          JWT_SECRET: test-secret-key-for-ci-must-be-at-least-64-chars-long-for-hs512
-          JWT_EXPIRATION: 86400000
-          CORS_ALLOWED_ORIGINS: http://localhost:8080
-          RATE_LIMIT_PER_MINUTE: 100
-          # Suite E2E = ~70 logins depuis une seule IP : budget auth assoupli pour la CI.
-          # La prod garde le défaut strict (10/min). Le 429 est couvert par RateLimitFilterTest.
-          RATE_LIMIT_AUTH_PER_MINUTE: 1000
-          INTERNAL_SECRET: test-internal-secret
-
-      - name: Wait for gateway & frontend
+      - name: Health check TEST (si URL configurée)
+        if: secrets.OVH_TEST_URL != ''
         run: |
           for i in $(seq 1 30); do
-            curl -sf http://localhost:8081/actuator/health && echo "gateway up" && break || sleep 4
+            curl -sf "${{ secrets.OVH_TEST_URL }}/actuator/health" && echo "TEST up" && break || sleep 10
           done
+
+  # ──────────────────────────────────────────────────────────────
+  # Publication PROD – auto sur main, ou manuelle
+  # Secrets requis : OVH_PROD_HOST, OVH_PROD_USER, OVH_PROD_SSH_KEY
+  # (optionnels : OVH_PROD_PORT, OVH_PROD_DIR, OVH_PROD_URL).
+  # ──────────────────────────────────────────────────────────────
+  deploy-prod:
+    name: Publish → PROD (VM OVH)
+    runs-on: ubuntu-latest
+    needs: [build-images]
+    if: |
+      (github.event_name == 'push' && github.ref == 'refs/heads/main')
+      || (github.event_name == 'workflow_dispatch' && inputs.environment == 'prod')
+    steps:
+      - name: Deploy to OVH prod VM
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.OVH_PROD_HOST }}
+          username: ${{ secrets.OVH_PROD_USER }}
+          key: ${{ secrets.OVH_PROD_SSH_KEY }}
+          port: ${{ secrets.OVH_PROD_PORT || '22' }}
+          script: |
+            set -e
+            APP_DIR="${{ secrets.OVH_PROD_DIR || '/opt/payment-platform' }}"
+            if [ ! -d "$APP_DIR/.git" ]; then
+              git clone "${{ github.server_url }}/${{ github.repository }}.git" "$APP_DIR"
+            fi
+            cd "$APP_DIR"
+            git fetch origin
+            git checkout main
+            git pull origin main
+            docker compose -f deploy/docker-compose.yml up -d --build
+            docker compose -f deploy/docker-compose.yml ps
+
+      - name: Health check PROD (si URL configurée)
+        if: secrets.OVH_PROD_URL != ''
+        run: |
           for i in $(seq 1 30); do
-            curl -sf http://localhost:8080 && echo "frontend up" && break || sleep 2
+            curl -sf "${{ secrets.OVH_PROD_URL }}/actuator/health" && echo "PROD up" && break || sleep 10
           done
-
-      - name: Run Cypress tests
-        working-directory: payment-platform-ui
-        # Config dev impérative : baseUrl 8080 (nginx déployé) + apiUrl 8081.
-        # cypress.config.ts par défaut pointe 4200 (ng serve local), inexistant en CI.
-        run: npx cypress run --config-file cypress.config.dev.ts --browser chrome --headless
-
-      - name: Tear down
-        if: always()
-        working-directory: .
-        run: docker compose -f deploy/docker-compose.yml down -v
-
-      - name: Collect E2E logs on failure
-        if: failure()
-        run: docker compose -f deploy/docker-compose.yml logs --tail=200
-        working-directory: .

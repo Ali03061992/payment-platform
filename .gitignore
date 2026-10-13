@@ -58,3 +58,6 @@ cypress/videos/
 
 # Uploads
 uploads/
+
+# Docs historiques archivés (hors suivi : voir docs/FONCTIONNALITES.md et docs/TECHNIQUE.md)
+archive-docs/
