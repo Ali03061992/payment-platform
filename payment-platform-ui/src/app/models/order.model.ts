@@ -109,6 +109,15 @@ export interface WithholdingCertificate {
   createdAt: string;
 }
 
+/** Synthèse mensuelle des retenues d'un débiteur (réconciliation déclaration TEJ). */
+export interface WithholdingMonthlySummary {
+  month: string;
+  certificateCount: number;
+  grossTotal: number;
+  withholdingTotal: number;
+  byNature: Record<string, number>;
+}
+
 export interface OrderEvent {
   id: string;
   orderId: string;

@@ -403,6 +403,11 @@ export class OrderManagementComponent implements OnInit, OnDestroy {
     this.orderService.printInvoice(this.selectedOrder.id);
   }
 
+  downloadDetailTeif(): void {
+    if (!this.selectedOrder) return;
+    this.orderService.downloadTeif(this.selectedOrder.id);
+  }
+
   toggleDetailExtRefForm(): void {
     if (this.selectedOrder && !this.detailExternalReference) {
       this.detailExternalReference = this.selectedOrder.externalReference || '';

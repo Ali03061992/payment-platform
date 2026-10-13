@@ -54,6 +54,16 @@ public class JpaWithholdingCertificateRepository implements WithholdingCertifica
         return jpa.findByDebtorId(debtorId).stream().map(this::toDomain).toList();
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public List<WithholdingCertificate> findDueBefore(java.time.LocalDate limit) {
+        return jpa.findByDueDateLessThanEqualAndStatusNot(limit,
+                        com.paymentplatform.organization.domain.model.WithholdingCertificateStatus.CANCELLED)
+                .stream()
+                .filter(c -> !c.getStatus().isTerminal())
+                .map(this::toDomain).toList();
+    }
+
     private WithholdingCertificateJpaEntity toEntity(WithholdingCertificate c) {
         WithholdingCertificateJpaEntity e = new WithholdingCertificateJpaEntity();
         e.setId(c.id());

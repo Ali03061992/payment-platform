@@ -295,6 +295,11 @@ export class ShopOrderDetailComponent implements OnInit, OnDestroy {
     this.orderService.downloadInvoice(this.order.id);
   }
 
+  downloadTeif(): void {
+    if (!this.order) return;
+    this.orderService.downloadTeif(this.order.id);
+  }
+
   paymentTermsLabel(terms: string): string {
     const map: Record<string, string> = {
       IMMEDIATE: 'ORDER_CREATE.PAY_IMMEDIATE',

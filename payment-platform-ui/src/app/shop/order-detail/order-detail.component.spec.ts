@@ -36,7 +36,7 @@ describe('ShopOrderDetailComponent', () => {
   };
 
   beforeEach(() => {
-    const orderSpy = jasmine.createSpyObj('OrderService', ['getById', 'getByReference', 'accept', 'acceptAsap', 'reject', 'cancel', 'downloadInvoice', 'printInvoice', 'getComments', 'addComment', 'getWithholdingCertificate', 'downloadWithholdingCertificatePdf', 'downloadWithholdingCertificateXml', 'markCertificateDeposited', 'updateExternalReference']);
+    const orderSpy = jasmine.createSpyObj('OrderService', ['getById', 'getByReference', 'accept', 'acceptAsap', 'reject', 'cancel', 'downloadInvoice', 'downloadTeif', 'printInvoice', 'getComments', 'addComment', 'getWithholdingCertificate', 'downloadWithholdingCertificatePdf', 'downloadWithholdingCertificateXml', 'markCertificateDeposited', 'updateExternalReference']);
     const disputeSpy = jasmine.createSpyObj('DisputeService', ['getByOrder', 'create']);
     const toastSpy = jasmine.createSpyObj('ToastService', ['success', 'error']);
     const confirmSpy = jasmine.createSpyObj('ConfirmDialogService', ['confirm']);
@@ -120,6 +120,8 @@ describe('ShopOrderDetailComponent', () => {
       expect(orderService.downloadWithholdingCertificateXml).toHaveBeenCalledWith('ord-1');
       component.printInvoice();
       expect(orderService.printInvoice).toHaveBeenCalledWith('ord-1');
+      component.downloadTeif();
+      expect(orderService.downloadTeif).toHaveBeenCalledWith('ord-1');
     });
 
     it('should mark certificate deposited', () => {

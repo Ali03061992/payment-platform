@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { TranslateService } from '@ngx-translate/core';
 import { Observable } from 'rxjs';
-import { Order, CreateOrderRequest, UpdateOrderRequest, OrderComment, OrderPage, WithholdingCertificate } from '../models/order.model';
+import { Order, CreateOrderRequest, UpdateOrderRequest, OrderComment, OrderPage, WithholdingCertificate, WithholdingMonthlySummary } from '../models/order.model';
 import { ToastService } from './toast.service';
 import { filenameFromDisposition, saveBlob } from '../core/file-download';
 
@@ -56,6 +56,20 @@ export class OrderService {
         });
         win.addEventListener('afterprint', done);
         setTimeout(done, 60000);
+      },
+      error: () => this.toast.error(this.translate.instant('PAYMENTS.INVOICE_DOWNLOAD_ERROR'))
+    });
+  }
+
+  /** Télécharge la facture électronique TEIF v1.8.8 (XML TTN, à signer puis déposer). */
+  downloadTeif(id: string): void {
+    this.http.get(`${this.apiUrl}/${id}/teif.xml`, { observe: 'response', responseType: 'blob' }).subscribe({
+      next: (res) => {
+        if (!res.body) {
+          this.toast.error(this.translate.instant('PAYMENTS.INVOICE_DOWNLOAD_ERROR'));
+          return;
+        }
+        saveBlob(res.body, filenameFromDisposition(res.headers.get('Content-Disposition'), `teif-${id}.xml`));
       },
       error: () => this.toast.error(this.translate.instant('PAYMENTS.INVOICE_DOWNLOAD_ERROR'))
     });
@@ -123,6 +137,12 @@ export class OrderService {
   withholdingDueSoon(debtorId: string, days = 7): Observable<WithholdingCertificate[]> {
     const params = new HttpParams().set('debtorId', debtorId).set('days', days);
     return this.http.get<WithholdingCertificate[]>(`${this.apiUrl}/withholding-certificates/due`, { params });
+  }
+
+  /** Synthèse mensuelle des retenues d'un débiteur (réconciliation déclaration TEJ). */
+  withholdingMonthlySummary(debtorId: string, month: string): Observable<WithholdingMonthlySummary> {
+    const params = new HttpParams().set('debtorId', debtorId).set('month', month);
+    return this.http.get<WithholdingMonthlySummary>(`${this.apiUrl}/withholding-certificates/monthly-summary`, { params });
   }
 
   /** Crée une commande. */
