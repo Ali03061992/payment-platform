@@ -402,8 +402,11 @@ jobs:
             docker compose -f deploy/docker-compose.yml ps
 
       - name: Health check TEST (si URL configurée)
-        if: secrets.OVH_TEST_URL != ''
         run: |
+          if [ -z "${{ secrets.OVH_TEST_URL }}" ]; then
+            echo "OVH_TEST_URL non configurée : health check ignoré."
+            exit 0
+          fi
           for i in $(seq 1 30); do
             curl -sf "${{ secrets.OVH_TEST_URL }}/actuator/health" && echo "TEST up" && break || sleep 10
           done
@@ -442,8 +445,11 @@ jobs:
             docker compose -f deploy/docker-compose.yml ps
 
       - name: Health check PROD (si URL configurée)
-        if: secrets.OVH_PROD_URL != ''
         run: |
+          if [ -z "${{ secrets.OVH_PROD_URL }}" ]; then
+            echo "OVH_PROD_URL non configurée : health check ignoré."
+            exit 0
+          fi
           for i in $(seq 1 30); do
             curl -sf "${{ secrets.OVH_PROD_URL }}/actuator/health" && echo "PROD up" && break || sleep 10
           done
