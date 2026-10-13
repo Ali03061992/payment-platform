@@ -380,7 +380,22 @@ jobs:
       (github.event_name == 'push' && startsWith(github.ref, 'refs/heads/release/'))
       || (github.event_name == 'workflow_dispatch' && inputs.environment == 'test')
     steps:
+      - name: Check OVH test config (real / fake / missing)
+        id: check
+        run: |
+          HOST="${{ secrets.OVH_TEST_HOST }}"
+          if [ -z "$HOST" ] || [ -z "${{ secrets.OVH_TEST_USER }}" ] || [ -z "${{ secrets.OVH_TEST_SSH_KEY }}" ]; then
+            echo "mode=missing" >> "$GITHUB_OUTPUT"
+            echo "::warning::Secrets OVH TEST absents : déploiement simulé."
+          elif [[ "$HOST" == *.invalid ]]; then
+            echo "mode=fake" >> "$GITHUB_OUTPUT"
+            echo "Hôte fake détecté ($HOST) : déploiement simulé."
+          else
+            echo "mode=real" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Deploy to OVH test VM
+        if: steps.check.outputs.mode == 'real'
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.OVH_TEST_HOST }}
@@ -400,6 +415,16 @@ jobs:
             git pull origin "$BRANCH"
             docker compose -f deploy/docker-compose.yml up -d --build
             docker compose -f deploy/docker-compose.yml ps
+
+      - name: Fake deploy TEST (simulation, run vert)
+        if: steps.check.outputs.mode != 'real'
+        run: |
+          echo "=============================================="
+          echo " FAKE deploy TEST (mode: ${{ steps.check.outputs.mode }})"
+          echo " Branche : ${{ github.ref_name }}"
+          echo " Hote    : ${{ secrets.OVH_TEST_HOST || 'vm-test.invalid (non defini)' }}"
+          echo " Simule  : git pull + docker compose up -d --build"
+          echo "=============================================="
 
       - name: Health check TEST (si URL configurée)
         run: |
@@ -424,7 +449,22 @@ jobs:
       (github.event_name == 'push' && github.ref == 'refs/heads/main')
       || (github.event_name == 'workflow_dispatch' && inputs.environment == 'prod')
     steps:
+      - name: Check OVH prod config (real / fake / missing)
+        id: check
+        run: |
+          HOST="${{ secrets.OVH_PROD_HOST }}"
+          if [ -z "$HOST" ] || [ -z "${{ secrets.OVH_PROD_USER }}" ] || [ -z "${{ secrets.OVH_PROD_SSH_KEY }}" ]; then
+            echo "mode=missing" >> "$GITHUB_OUTPUT"
+            echo "::warning::Secrets OVH PROD absents : déploiement simulé."
+          elif [[ "$HOST" == *.invalid ]]; then
+            echo "mode=fake" >> "$GITHUB_OUTPUT"
+            echo "Hôte fake détecté ($HOST) : déploiement simulé."
+          else
+            echo "mode=real" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Deploy to OVH prod VM
+        if: steps.check.outputs.mode == 'real'
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.OVH_PROD_HOST }}
@@ -443,6 +483,16 @@ jobs:
             git pull origin main
             docker compose -f deploy/docker-compose.yml up -d --build
             docker compose -f deploy/docker-compose.yml ps
+
+      - name: Fake deploy PROD (simulation, run vert)
+        if: steps.check.outputs.mode != 'real'
+        run: |
+          echo "=============================================="
+          echo " FAKE deploy PROD (mode: ${{ steps.check.outputs.mode }})"
+          echo " Branche : main"
+          echo " Hote    : ${{ secrets.OVH_PROD_HOST || 'vm-prod.invalid (non defini)' }}"
+          echo " Simule  : git pull + docker compose up -d --build"
+          echo "=============================================="
 
       - name: Health check PROD (si URL configurée)
         run: |
