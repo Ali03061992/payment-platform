@@ -88,7 +88,7 @@ Consommateur principal : notification-service (SSE + push FCM).
 
 - Local : `deploy/` (compose + `.env` + scripts `e2e-local/e2e-dev/stop`) ; dev direct : Angular `:4200`, services `:8081-:8085`.
 - CI (`.github/workflows/ci.yml`) : build, tests backend/frontend, Sonar, images Docker, budgets CSS (16 ko). **Pas d'e2e en CI** (lancé uniquement en local sur feu vert).
-- Branching : `release/**` → publication **auto vers TEST** ; `main` → publication **auto vers PROD** ; `develop` → build + tests **sans déploiement**. Publication **manuelle** : Actions → Run workflow → `test` ou `prod` (déploie la branche sélectionnée).
+- Branching : `release/**` → publication **auto vers TEST** ; `master` → publication **auto vers PROD** ; `develop` → build + tests **sans déploiement**. Publication **manuelle** : Actions → Run workflow → `test` ou `prod` (déploie la branche sélectionnée).
 - Déploiement sur **VM OVH** (SSH via `appleboy/ssh-action`) : `git pull` de la branche puis `docker compose up -d --build` sur la VM (aucun registre requis). Secrets : `OVH_TEST_HOST/USER/SSH_KEY` (+ `PORT`, `DIR`, `URL` optionnels), idem `OVH_PROD_*`. Préparer sur chaque VM : clone dans `/opt/payment-platform` (ou `OVH_*_DIR`), `deploy/.env` renseigné (modèle : `deploy/.env.example`), accès git au dépôt (clé de déploiement si privé), Docker installé.
 
 ### Backups MySQL
@@ -96,6 +96,9 @@ Consommateur principal : notification-service (SSE + push FCM).
 - Service `db-backup` (image `mysql:8.4`, dans `deploy/docker-compose.yml`) : dump des 4 bases (`identity/organization/payment/notification_db`, `--single-transaction`, routines+events) **toutes les 8 h** (`BACKUP_INTERVAL_SECONDS`, défaut 28800), fichiers `AAAAMMJJ-HHMMSS-<tag>.sql.gz` dans `./backups/` (**gitignoré**), **rotation : suppression au-delà de 3 j** (`BACKUP_RETENTION_DAYS`).
 - **Backup pré-prod automatique** : avant chaque déploiement PROD, la CI sauvegarde la base (`pre-prod-<timestamp>`) puis déploie.
 - **Backup manuel** : workflow `Backup` (Actions → Run workflow → `test`/`prod` + tag), ou sur la VM : `docker compose exec db-backup /scripts/backup-now.sh [tag]`.
+- **Commandes toutes prêtes** (sur la VM, depuis la racine du repo) :
+  - Backup database daté : `sh deploy/backup/backup.sh db` → tag `db-AAAAMMJJ-HHMMSS`
+  - Backup release : `sh deploy/backup/backup.sh release 1.1.0` → tag `release-1.1.0`
 - **Restauration** (sur la VM, depuis la racine du repo) : `sh deploy/backup/restore.sh <fichier.sql.gz>` (confirmation `RESTORE` requise, écrase les données). Scripts : `deploy/backup/` (`backup-now.sh`, `backup-loop.sh`, `restore.sh`).
 
 ## 9. Versioning (SemVer)
@@ -103,12 +106,12 @@ Consommateur principal : notification-service (SSE + push FCM).
 - Format `MAJEUR.MINEUR.PATCH` (ex. `1.2.0`) : MAJEUR = rupture, MINEUR = fonctionnalité, PATCH = correctif.
 - Sources uniques, bumpées **ensemble** à chaque release : `backend/pom.xml` (`<version>`), `payment-platform-ui/package.json` (`"version"`), `sonar.projectVersion` (`sonar-project.properties`). Version actuelle : `1.0.0`.
 - Branches :
-  - `main` : production, toujours déployable. Chaque merge de release = **tag `vX.Y.Z`** (ex. `git tag v1.1.0`).
+  - `master` : production, toujours déployable. Chaque merge de release = **tag `vX.Y.Z`** (ex. `git tag v1.1.0`).
   - `develop` : intégration (build + tests, jamais déployée). Après une release, elle porte la version suivante en `-SNAPSHOT` côté backend (ex. `1.2.0-SNAPSHOT`).
-  - `release/X.Y.Z` : coupée depuis `develop` pour stabiliser (correctifs uniquement) → **déploiement auto vers TEST** à chaque push → merge vers `main` (+ tag) et back-merge vers `develop`.
-  - `hotfix/X.Y.Z` : coupée depuis `main` pour un correctif prod urgent → merge vers `main` (+ tag PATCH) et back-merge vers `develop`.
+  - `release/X.Y.Z` : coupée depuis `develop` pour stabiliser (correctifs uniquement) → **déploiement auto vers TEST** à chaque push → merge vers `master` (+ tag) et back-merge vers `develop`.
+  - `hotfix/X.Y.Z` : coupée depuis `master` pour un correctif prod urgent → merge vers `master` (+ tag PATCH) et back-merge vers `develop`.
 - Commandes types :
   - `git checkout -b release/1.1.0 develop` (puis bumper les 3 versions à `1.1.0`)
-  - `git checkout main && git merge --no-ff release/1.1.0 && git tag v1.1.0 && git push origin main --tags`
+  - `git checkout master && git merge --no-ff release/1.1.0 && git tag v1.1.0 && git push origin master --tags`
   - `git checkout develop && git merge --no-ff release/1.1.0 && git push origin develop`
 - Observabilité : logs structurés, correlation-id, healthchecks Spring, console RabbitMQ/Adminer/Mailpit en dev.
