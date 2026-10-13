@@ -51,7 +51,8 @@ jobs:
 
       - name: Fake backup TEST (simulation)
         if: steps.check.outputs.mode != 'real'
-        run: echo "FAKE backup TEST (mode: ${{ steps.check.outputs.mode }}) — simule : backup-now.sh '${{ inputs.tag }}'"
+        run: |
+          echo "FAKE backup TEST (mode: ${{ steps.check.outputs.mode }}) — simule : backup-now.sh '${{ inputs.tag }}'"
 
   backup-prod:
     name: Backup → PROD (VM OVH)
@@ -86,4 +87,5 @@ jobs:
 
       - name: Fake backup PROD (simulation)
         if: steps.check.outputs.mode != 'real'
-        run: echo "FAKE backup PROD (mode: ${{ steps.check.outputs.mode }}) — simule : backup-now.sh '${{ inputs.tag }}'"
+        run: |
+          echo "FAKE backup PROD (mode: ${{ steps.check.outputs.mode }}) — simule : backup-now.sh '${{ inputs.tag }}'"
