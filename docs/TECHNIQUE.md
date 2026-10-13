@@ -89,7 +89,7 @@ Consommateur principal : notification-service (SSE + push FCM).
 - Local : `deploy/` (compose + `.env` + scripts `e2e-local/e2e-dev/stop`) ; dev direct : Angular `:4200`, services `:8081-:8085`.
 - CI (`.github/workflows/ci.yml`) : build, tests backend/frontend, Sonar, images Docker, budgets CSS (16 ko). **Pas d'e2e en CI** (lancé uniquement en local sur feu vert).
 - Branching : `release/**` → publication **auto vers TEST** ; `master` → publication **auto vers PROD** ; `develop` → build + tests **sans déploiement**. Publication **manuelle** : Actions → Run workflow → `test` ou `prod` (déploie la branche sélectionnée).
-- Déploiement sur **VM OVH** (SSH via `appleboy/ssh-action`) : `git pull` de la branche puis `docker compose up -d --build` sur la VM (aucun registre requis). Secrets : `OVH_TEST_HOST/USER/SSH_KEY` (+ `PORT`, `DIR`, `URL` optionnels), idem `OVH_PROD_*`. Préparer sur chaque VM : clone dans `/opt/payment-platform` (ou `OVH_*_DIR`), `deploy/.env` renseigné (modèle : `deploy/.env.example`), accès git au dépôt (clé de déploiement si privé), Docker installé.
+- Déploiement sur **VM OVH** (SSH via `appleboy/ssh-action`) : `git pull` de la branche puis `docker compose up -d --build` sur la VM (aucun registre requis). VM TEST : `ubuntu@51.222.6.2`. Secrets : `OVH_TEST_HOST/USER/SSH_KEY` (+ `PORT`, `DIR`, `URL` optionnels), idem `OVH_PROD_*`. Préparer sur chaque VM : clone dans `/opt/payment-platform` (ou `OVH_*_DIR`), `deploy/.env` renseigné (modèle : `deploy/.env.example`), accès git au dépôt (clé de déploiement si privé), Docker installé.
 
 ### Backups MySQL
 
