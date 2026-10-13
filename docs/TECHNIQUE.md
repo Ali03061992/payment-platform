@@ -89,7 +89,32 @@ Consommateur principal : notification-service (SSE + push FCM).
 - Local : `deploy/` (compose + `.env` + scripts `e2e-local/e2e-dev/stop`) ; dev direct : Angular `:4200`, services `:8081-:8085`.
 - CI (`.github/workflows/ci.yml`) : build, tests backend/frontend, Sonar, images Docker, budgets CSS (16 ko). **Pas d'e2e en CI** (lancé uniquement en local sur feu vert).
 - Branching : `release/**` → publication **auto vers TEST** ; `master` → publication **auto vers PROD** ; `develop` → build + tests **sans déploiement**. Publication **manuelle** : Actions → Run workflow → `test` ou `prod` (déploie la branche sélectionnée).
-- Déploiement sur **VM OVH** (SSH via `appleboy/ssh-action`) : `git pull` de la branche puis `docker compose up -d --build` sur la VM (aucun registre requis). VM TEST : `ubuntu@51.222.6.2`. Secrets : `OVH_TEST_HOST/USER/SSH_KEY` (+ `PORT`, `DIR`, `URL` optionnels), idem `OVH_PROD_*`. Préparer sur chaque VM : clone dans `/opt/payment-platform` (ou `OVH_*_DIR`), `deploy/.env` renseigné (modèle : `deploy/.env.example`), accès git au dépôt (clé de déploiement si privé), Docker installé.
+### Mise en route déploiement (VM OVH) — pas à pas
+
+VM TEST : `ubuntu@51.222.6.2` (même procédure pour la PROD avec les secrets `OVH_PROD_*`).
+
+1. **Clé SSH dédiée (sans passphrase, obligatoire pour la CI)** — sur ton poste :
+   ```powershell
+   ssh-keygen -t ed25519 -C "github-deploy-test" -f $env:USERPROFILE\.ssh\ovh_test_deploy -N '""'
+   ```
+   Si tu as déjà une clé qui se connecte à la VM, réutilise-la (affiche-la avec `type $env:USERPROFILE\.ssh\id_ed25519`).
+2. **Autoriser la clé sur la VM** (clé publique → `authorized_keys`) :
+   ```powershell
+   type $env:USERPROFILE\.ssh\ovh_test_deploy.pub | ssh ubuntu@51.222.6.2 "mkdir -p ~/.ssh; cat >> ~/.ssh/authorized_keys; chmod 600 ~/.ssh/authorized_keys; chmod 700 ~/.ssh"
+   ssh -i $env:USERPROFILE\.ssh\ovh_test_deploy ubuntu@51.222.6.2 "echo OK"
+   ```
+3. **Secrets GitHub** (repo → Settings → Secrets and variables → Actions) :
+   `OVH_TEST_HOST`=`51.222.6.2`, `OVH_TEST_USER`=`ubuntu`, `OVH_TEST_SSH_KEY`=contenu complet de la clé **privée** (`type $env:USERPROFILE\.ssh\ovh_test_deploy`), optionnels : `OVH_TEST_PORT` (défaut 22), `OVH_TEST_DIR` (défaut `/opt/payment-platform`), `OVH_TEST_URL` (ex. `http://51.222.6.2:8081`, active le health check).
+4. **Préparer la VM** (en SSH, une seule fois) :
+   ```bash
+   sudo apt update && sudo apt install -y docker.io docker-compose-plugin git
+   sudo mkdir -p /opt/payment-platform && sudo chown $USER /opt/payment-platform
+   cd /opt/payment-platform && git clone <url-du-depot>.git .
+   cp deploy/.env.example deploy/.env && nano deploy/.env   # mots de passe + secrets applicatifs
+   ```
+   Dépôt privé : ajoute une clé de déploiement (repo → Settings → Deploy keys) ou clone via token.
+5. **Vérifier** : tout push sur `release/**` déclenche build + tests + déploiement auto sur la VM (suivi dans l'onglet Actions). Hôte en `.invalid` ou secrets absents = simulation verte (mode fake), jamais d'échec bloquant.
+6. **Backup manuel** : Actions → workflow `Backup` → `test`/`prod` + tag. Restauration sur VM : `sh deploy/backup/restore.sh <fichier.sql.gz>` (confirmation `RESTORE`).
 
 ### Backups MySQL
 
