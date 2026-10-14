@@ -1,0 +1,95 @@
+name: Backup
+
+# Backup manuel des bases MySQL (dump + gzip + rotation 3 j sur la VM).
+# Actions → Run workflow → environnement (test/prod) + tag libre.
+# Hôtes en `.invalid` ou secrets absents → simulation (run vert).
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environnement à sauvegarder'
+        required: true
+        default: 'test'
+        type: choice
+        options: [test, prod]
+      tag:
+        description: 'Tag du backup (ex. avant-migration)'
+        required: false
+        default: 'manual'
+
+jobs:
+  backup-test:
+    name: Backup → TEST (VM OVH)
+    runs-on: ubuntu-24.04
+    if: inputs.environment == 'test'
+    steps:
+      - name: Check OVH test config
+        id: check
+        run: |
+          HOST="${{ secrets.OVH_TEST_HOST }}"
+          if [ -z "$HOST" ] || [ -z "${{ secrets.OVH_TEST_USER }}" ] || [ -z "${{ secrets.OVH_TEST_SSH_KEY }}" ]; then
+            echo "mode=missing" >> "$GITHUB_OUTPUT"
+          elif [[ "$HOST" == *.invalid ]]; then
+            echo "mode=fake" >> "$GITHUB_OUTPUT"
+          else
+            echo "mode=real" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Run backup on test VM
+        if: steps.check.outputs.mode == 'real'
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.OVH_TEST_HOST }}
+          username: ${{ secrets.OVH_TEST_USER }}
+          key: ${{ secrets.OVH_TEST_SSH_KEY }}
+          port: ${{ secrets.OVH_TEST_PORT || '22' }}
+          script: |
+            sudo -i <<'ROOT_EOF'
+            set -e
+            cd "${{ secrets.OVH_TEST_DIR || '/opt/payment-platform' }}"
+            docker compose -f deploy/docker-compose.yml --profile backup up -d db-backup
+            docker compose -f deploy/docker-compose.yml exec -T db-backup /scripts/backup-now.sh "${{ inputs.tag }}"
+            ROOT_EOF
+
+      - name: Fake backup TEST (simulation)
+        if: steps.check.outputs.mode != 'real'
+        run: |
+          echo "FAKE backup TEST (mode: ${{ steps.check.outputs.mode }}) — simule : backup-now.sh '${{ inputs.tag }}'"
+
+  backup-prod:
+    name: Backup → PROD (VM OVH)
+    runs-on: ubuntu-24.04
+    if: inputs.environment == 'prod'
+    steps:
+      - name: Check OVH prod config
+        id: check
+        run: |
+          HOST="${{ secrets.OVH_PROD_HOST }}"
+          if [ -z "$HOST" ] || [ -z "${{ secrets.OVH_PROD_USER }}" ] || [ -z "${{ secrets.OVH_PROD_SSH_KEY }}" ]; then
+            echo "mode=missing" >> "$GITHUB_OUTPUT"
+          elif [[ "$HOST" == *.invalid ]]; then
+            echo "mode=fake" >> "$GITHUB_OUTPUT"
+          else
+            echo "mode=real" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Run backup on prod VM
+        if: steps.check.outputs.mode == 'real'
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.OVH_PROD_HOST }}
+          username: ${{ secrets.OVH_PROD_USER }}
+          key: ${{ secrets.OVH_PROD_SSH_KEY }}
+          port: ${{ secrets.OVH_PROD_PORT || '22' }}
+          script: |
+            sudo -i <<'ROOT_EOF'
+            set -e
+            cd "${{ secrets.OVH_PROD_DIR || '/opt/payment-platform' }}"
+            docker compose -f deploy/docker-compose.yml --profile backup up -d db-backup
+            docker compose -f deploy/docker-compose.yml exec -T db-backup /scripts/backup-now.sh "${{ inputs.tag }}"
+            ROOT_EOF
+
+      - name: Fake backup PROD (simulation)
+        if: steps.check.outputs.mode != 'real'
+        run: |
+          echo "FAKE backup PROD (mode: ${{ steps.check.outputs.mode }}) — simule : backup-now.sh '${{ inputs.tag }}'"

@@ -8,12 +8,13 @@ COPY organization-service/pom.xml organization-service/pom.xml
 COPY payment-service/pom.xml payment-service/pom.xml
 COPY notification-service/pom.xml notification-service/pom.xml
 
-RUN mvn dependency:go-offline -B || true
+# Cache BuildKit ~/.m2 : les dépendances survivent aux rebuilds (VM 2 CPU).
+RUN --mount=type=cache,target=/root/.m2 mvn dependency:go-offline -B || true
 
 COPY . ./
 
 ARG SERVICE_NAME
-RUN mvn -pl ${SERVICE_NAME} -am package -DskipTests -B
+RUN --mount=type=cache,target=/root/.m2 mvn -pl ${SERVICE_NAME} -am package -DskipTests -B
 
 FROM eclipse-temurin:26-jre
 WORKDIR /app

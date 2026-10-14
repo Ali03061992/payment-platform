@@ -2,7 +2,9 @@ package com.paymentplatform.payment.interfaces.rest;
 
 import com.paymentplatform.payment.application.dto.CreatePaymentRequest;
 import com.paymentplatform.payment.application.dto.PaymentResponse;
+import com.paymentplatform.payment.application.dto.SupplierPaymentSummaryResponse;
 import com.paymentplatform.payment.application.usecase.CreatePaymentUseCase;
+import com.paymentplatform.payment.application.usecase.ListPaymentsUseCase;
 import com.paymentplatform.payment.infrastructure.http.PaymentInternalAuthGuard;
 import com.paymentplatform.shared.domain.exception.UnauthorizedException;
 import jakarta.validation.Valid;
@@ -22,11 +24,14 @@ import java.util.UUID;
 public class InternalPaymentController {
 
     private final CreatePaymentUseCase createPayment;
+    private final ListPaymentsUseCase listPayments;
     private final PaymentInternalAuthGuard guard;
 
     public InternalPaymentController(CreatePaymentUseCase createPayment,
-                                      PaymentInternalAuthGuard guard) {
+                                     ListPaymentsUseCase listPayments,
+                                     PaymentInternalAuthGuard guard) {
         this.createPayment = createPayment;
+        this.listPayments = listPayments;
         this.guard = guard;
     }
 
@@ -58,5 +63,23 @@ public class InternalPaymentController {
         String idempotencyKey = request.orderId() != null ? "asap-" + request.orderId() : null;
         return ResponseEntity.status(201).body(
                 createPayment.execute(request, actor, request.shopId(), idempotencyKey));
+    }
+
+    /**
+     * Synthèse des totaux par statut pour un fournisseur (rapport financier
+     * organization-service). Même secret partagé que {@link #auto}.
+     *
+     * @param token secret interne partagé
+     * @param supplierId fournisseur concerné
+     * @return totaux et compteurs par statut
+     */
+    @GetMapping("/supplier-summary")
+    public ResponseEntity<SupplierPaymentSummaryResponse> supplierSummary(
+            @RequestHeader(value = "X-Internal-Token", required = false) String token,
+            @RequestParam UUID supplierId) {
+        if (!guard.isValid(token)) {
+            throw new UnauthorizedException("Secret interne invalide ou manquant");
+        }
+        return ResponseEntity.ok(listPayments.summarizeBySupplier(supplierId));
     }
 }
