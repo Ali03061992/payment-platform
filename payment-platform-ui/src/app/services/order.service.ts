@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { TranslateService } from '@ngx-translate/core';
 import { Observable } from 'rxjs';
-import { Order, CreateOrderRequest, UpdateOrderRequest, OrderComment, OrderPage, WithholdingCertificate, WithholdingMonthlySummary } from '../models/order.model';
+import { Order, CreateOrderRequest, UpdateOrderRequest, OrderComment, OrderPage, WithholdingCertificate, WithholdingMonthlySummary, OrderQuote } from '../models/order.model';
 import { ToastService } from './toast.service';
 import { filenameFromDisposition, saveBlob } from '../core/file-download';
 
@@ -143,6 +143,30 @@ export class OrderService {
   withholdingMonthlySummary(debtorId: string, month: string): Observable<WithholdingMonthlySummary> {
     const params = new HttpParams().set('debtorId', debtorId).set('month', month);
     return this.http.get<WithholdingMonthlySummary>(`${this.apiUrl}/withholding-certificates/monthly-summary`, { params });
+  }
+
+  /** Envoie un devis versionné (fournisseur) : lignes modifiées + remises %, notifie la boutique. */
+  sendQuote(orderId: string, items: { productId: string; quantity: number; discount: number }[], globalDiscount: number): Observable<OrderQuote> {
+    return this.http.post<OrderQuote>(`${this.apiUrl}/${orderId}/quote`, { items, globalDiscount });
+  }
+
+  /** Historique des devis d'une commande (fournisseur + boutique). */
+  getQuotes(orderId: string): Observable<OrderQuote[]> {
+    return this.http.get<OrderQuote[]>(`${this.apiUrl}/${orderId}/quotes`);
+  }
+
+  /** Télécharge un devis en PDF (mise en page facture, intitulé DEVIS). */
+  downloadQuotePdf(orderId: string, version: number, reference: string): void {
+    this.http.get(`${this.apiUrl}/${orderId}/quotes/${version}/pdf`, { observe: 'response', responseType: 'blob' }).subscribe({
+      next: (res) => {
+        if (!res.body) {
+          this.toast.error(this.translate.instant('PAYMENTS.INVOICE_DOWNLOAD_ERROR'));
+          return;
+        }
+        saveBlob(res.body, filenameFromDisposition(res.headers.get('Content-Disposition'), `devis-${reference}-v${version}.pdf`));
+      },
+      error: () => this.toast.error(this.translate.instant('PAYMENTS.INVOICE_DOWNLOAD_ERROR'))
+    });
   }
 
   /** Crée une commande. */

@@ -49,6 +49,7 @@ Payment Platform est une plateforme B2B qui relie **fournisseurs** et **boutique
 
 ### Commandes et livraisons
 - Liste, recherche, fiche détail (articles, événements, commentaires).
+- **Devis** : sur demande boutique (brouillon/confirmée), modification des lignes et quantités, remises lignes (%) + remise globale (%), envoi versionné avec notification à la boutique.
 - Cycle complet : confirmation → préparation → prêt → affectation d'un livreur → livraison → réception confirmée par la boutique → **réception acceptée** (avec paiement automatique créé et certificat de retenue émis, avec rattrapage si manqué).
 - Annulation, rejet, **recommande** (reorder), rejet de livraison, commentaires par commande.
 - Suivi GPS : positions des livraisons, livraisons du jour, « mes livraisons » (livreur), agents boutique.
@@ -63,6 +64,8 @@ Payment Platform est une plateforme B2B qui relie **fournisseurs** et **boutique
 ## 4. Espace boutique
 
 - **Commandes** : création (manuelle ou depuis le catalogue), liste, recherche, fiche détail, modification (brouillon), annulation, réclamation (rejet), **recommande**, paiement ASAP (acceptation + paiement immédiat).
+- **Demande sans remise** : la boutique chiffre sans aucune remise (remises = devis fournisseur).
+- **Devis reçus** : historique versionné par commande (totaux, date), téléchargement de chaque devis en PDF, notification à chaque envoi.
 - **Réception** : acceptation / rejet de livraison, confirmation de date, personne ayant réceptionné.
 - **Factures** : téléchargement PDF, impression, facture électronique TEIF, référence externe + QR.
 - **Retenue à la source** : consultation du certificat de la facture, téléchargement PDF (QR + référence) et XML (dépôt TEJ), enregistrement de la référence TEJ après dépôt.

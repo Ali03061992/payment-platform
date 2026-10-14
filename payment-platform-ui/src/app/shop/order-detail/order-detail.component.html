@@ -312,6 +312,36 @@
         }
       </div>
     }
+    @if (quotes.length > 0) {
+      <div class="table-card" style="margin-top:16px;">
+        <h3 style="padding:16px 20px 0;">{{ 'ORDER_DETAIL.QUOTES_TITLE' | translate }}</h3>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>{{ 'ORDER_DETAIL.QUOTE_VERSION' | translate }}</th>
+                <th>{{ 'ORDER_DETAIL.QUOTE_TOTAL' | translate }}</th>
+                <th>{{ 'ORDER_DETAIL.QUOTE_DATE' | translate }}</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (q of quotes; track q.id) {
+                <tr>
+                  <td>{{ 'ORDER_DETAIL.QUOTE_N' | translate:{version: q.version} }}</td>
+                  <td>{{ q.total | number:'1.2-2' }} {{ q.currency }}</td>
+                  <td>{{ q.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
+                  <td>
+                    <button class="btn btn-sm btn-secondary" type="button" (click)="downloadQuote(q)"
+                      [attr.aria-label]="'ORDER_DETAIL.QUOTE_DOWNLOAD_ARIA' | translate">{{ 'ORDER_DETAIL.QUOTE_DOWNLOAD' | translate }}</button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    }
     @if (showDepositForm && certificate) {
       <div class="form-card" style="margin-bottom:16px;">
         <div class="form-group">

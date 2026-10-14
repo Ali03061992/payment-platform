@@ -28,6 +28,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 import java.util.UUID;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -106,6 +107,27 @@ class UserPreferencesControllerTest {
         mockMvc.perform(patch("/api/users/me/preferences")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void getMyPreferences_afterPatch_returnsSavedAccents() throws Exception {
+        var request = new UpdatePreferencesRequest("en", "#123456", "#654321", null);
+        mockMvc.perform(patch("/api/users/me/preferences")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk());
+        mockMvc.perform(get("/api/users/me/preferences")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.accentColor1").value("#123456"))
+                .andExpect(jsonPath("$.accentColor2").value("#654321"));
+    }
+
+    @Test
+    void getMyPreferences_withoutAuth_returns401() throws Exception {
+        mockMvc.perform(get("/api/users/me/preferences"))
                 .andExpect(status().isUnauthorized());
     }
 }

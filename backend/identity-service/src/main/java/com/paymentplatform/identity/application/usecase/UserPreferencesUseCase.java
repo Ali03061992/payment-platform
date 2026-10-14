@@ -19,6 +19,13 @@ public class UserPreferencesUseCase {
         this.users = users;
     }
 
+    @Transactional(readOnly = true)
+    public UserResponse getMyPreferences() {
+        User user = users.findById(UserId.of(CurrentUser.id()))
+                .orElseThrow(() -> new UnauthorizedException("Utilisateur non trouvé"));
+        return UserResponse.from(user);
+    }
+
     @Transactional
     public UserResponse updatePreferences(UpdatePreferencesRequest request) {
         User user = users.findById(UserId.of(CurrentUser.id()))

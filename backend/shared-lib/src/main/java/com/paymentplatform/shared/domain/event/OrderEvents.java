@@ -152,4 +152,14 @@ public final class OrderEvents {
         @Override public int eventVersion() { return 1; }
         @Override public String aggregateId() { return String.valueOf(certificateId); }
     }
+
+    public record QuoteSentEvent(UUID eventId, Instant occurredAt, UUID orderId, String reference,
+                                 UUID shopId, UUID supplierId, int version, String total)
+            implements DomainEvent {
+        public static final String EVENT_TYPE = "order.quote_sent";
+
+        @Override public String eventType() { return EVENT_TYPE; }
+        @Override public int eventVersion() { return 1; }
+        @Override public String aggregateId() { return String.valueOf(orderId); }
+    }
 }
