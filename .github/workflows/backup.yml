@@ -44,10 +44,12 @@ jobs:
           key: ${{ secrets.OVH_TEST_SSH_KEY }}
           port: ${{ secrets.OVH_TEST_PORT || '22' }}
           script: |
+            sudo -i <<'ROOT_EOF'
             set -e
             cd "${{ secrets.OVH_TEST_DIR || '/opt/payment-platform' }}"
             docker compose -f deploy/docker-compose.yml up -d db-backup
             docker compose -f deploy/docker-compose.yml exec -T db-backup /scripts/backup-now.sh "${{ inputs.tag }}"
+            ROOT_EOF
 
       - name: Fake backup TEST (simulation)
         if: steps.check.outputs.mode != 'real'
@@ -80,10 +82,12 @@ jobs:
           key: ${{ secrets.OVH_PROD_SSH_KEY }}
           port: ${{ secrets.OVH_PROD_PORT || '22' }}
           script: |
+            sudo -i <<'ROOT_EOF'
             set -e
             cd "${{ secrets.OVH_PROD_DIR || '/opt/payment-platform' }}"
             docker compose -f deploy/docker-compose.yml up -d db-backup
             docker compose -f deploy/docker-compose.yml exec -T db-backup /scripts/backup-now.sh "${{ inputs.tag }}"
+            ROOT_EOF
 
       - name: Fake backup PROD (simulation)
         if: steps.check.outputs.mode != 'real'

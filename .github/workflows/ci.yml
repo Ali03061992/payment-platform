@@ -437,6 +437,7 @@ jobs:
           key: ${{ secrets.OVH_TEST_SSH_KEY }}
           port: ${{ secrets.OVH_TEST_PORT || '22' }}
           script: |
+            sudo -i <<'ROOT_EOF'
             set -e
             APP_DIR="${{ secrets.OVH_TEST_DIR || '/opt/payment-platform' }}"
             BRANCH="${{ github.ref_name }}"
@@ -449,6 +450,8 @@ jobs:
             git pull origin "$BRANCH"
             docker compose -f deploy/docker-compose.yml up -d --build
             docker compose -f deploy/docker-compose.yml ps
+            chown -R "${SUDO_USER:-root}:${SUDO_USER:-root}" "$APP_DIR"
+            ROOT_EOF
 
       - name: Fake deploy TEST (simulation, run vert)
         if: steps.check.outputs.mode != 'real'
@@ -457,7 +460,7 @@ jobs:
           echo " FAKE deploy TEST (mode: ${{ steps.check.outputs.mode }})"
           echo " Branche : ${{ github.ref_name }}"
           echo " Hote    : ${{ secrets.OVH_TEST_HOST || 'vm-test.invalid (non defini)' }}"
-          echo " Simule  : git pull + docker compose up -d --build"
+          echo " Simule (root) : git pull + docker compose up -d --build"
           echo "=============================================="
 
       - name: Health check TEST (si URL configurée)
@@ -506,6 +509,7 @@ jobs:
           key: ${{ secrets.OVH_PROD_SSH_KEY }}
           port: ${{ secrets.OVH_PROD_PORT || '22' }}
           script: |
+            sudo -i <<'ROOT_EOF'
             set -e
             APP_DIR="${{ secrets.OVH_PROD_DIR || '/opt/payment-platform' }}"
             cd "$APP_DIR"
@@ -514,6 +518,8 @@ jobs:
             git pull origin master
             docker compose -f deploy/docker-compose.yml up -d db-backup
             docker compose -f deploy/docker-compose.yml exec -T db-backup /scripts/backup-now.sh "pre-prod-$(date +%Y%m%d-%H%M%S)"
+            chown -R "${SUDO_USER:-root}:${SUDO_USER:-root}" "$APP_DIR"
+            ROOT_EOF
 
       - name: Deploy to OVH prod VM
         if: steps.check.outputs.mode == 'real'
@@ -524,6 +530,7 @@ jobs:
           key: ${{ secrets.OVH_PROD_SSH_KEY }}
           port: ${{ secrets.OVH_PROD_PORT || '22' }}
           script: |
+            sudo -i <<'ROOT_EOF'
             set -e
             APP_DIR="${{ secrets.OVH_PROD_DIR || '/opt/payment-platform' }}"
             if [ ! -d "$APP_DIR/.git" ]; then
@@ -535,6 +542,8 @@ jobs:
             git pull origin master
             docker compose -f deploy/docker-compose.yml up -d --build
             docker compose -f deploy/docker-compose.yml ps
+            chown -R "${SUDO_USER:-root}:${SUDO_USER:-root}" "$APP_DIR"
+            ROOT_EOF
 
       - name: Fake deploy PROD (simulation, run vert)
         if: steps.check.outputs.mode != 'real'
@@ -543,7 +552,7 @@ jobs:
           echo " FAKE deploy PROD (mode: ${{ steps.check.outputs.mode }})"
           echo " Branche : master"
           echo " Hote    : ${{ secrets.OVH_PROD_HOST || 'vm-prod.invalid (non defini)' }}"
-          echo " Simule  : backup pre-prod + git pull + docker compose up -d --build"
+          echo " Simule (root) : backup pre-prod + git pull + docker compose up -d --build"
           echo "=============================================="
 
       - name: Health check PROD (si URL configurée)
