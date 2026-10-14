@@ -423,6 +423,10 @@ jobs:
           echo "$KEY" > /tmp/ci_key && chmod 600 /tmp/ci_key
           ssh-keygen -y -f /tmp/ci_key > /tmp/ci_key.pub 2>/dev/null && ssh-keygen -lf /tmp/ci_key.pub || echo "CLE ILLISIBLE"
           rm -f /tmp/ci_key /tmp/ci_key.pub
+          U="${{ secrets.OVH_TEST_USER }}"; H="${{ secrets.OVH_TEST_HOST }}"
+          echo "user len: ${#U} (attendu 6), host len: ${#H} (attendu 11)"
+          echo "user hex: $(echo -n "$U" | od -An -tx1 | tr -d ' \n')"
+          echo "host hex: $(echo -n "$H" | od -An -tx1 | tr -d ' \n')"
 
       - name: Deploy to OVH test VM
         if: steps.check.outputs.mode == 'real'
