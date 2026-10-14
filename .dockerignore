@@ -2,5 +2,13 @@ frontend/node_modules/
 frontend/.angular/
 payment-platform-ui/node_modules/
 payment-platform-ui/.angular/
+payment-platform-ui/cypress/
+payment-platform-ui/coverage/
+payment-platform-ui/dist/
+payment-platform-ui/cypress-results.txt
 backend/**/target/
+deploy/backups/
+presentation/
+archive-docs/
 .git/
+*.log

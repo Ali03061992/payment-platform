@@ -1,10 +1,13 @@
-# Fallback Dockerfile for Render (service configured with root Dockerfile)
-# Builds the frontend (Angular) - matches frontend/Dockerfile logic
+# Production : frontend Angular servi par nginx (VM OVH + CI).
 FROM node:22-alpine AS build
 WORKDIR /app
 COPY payment-platform-ui/package.json payment-platform-ui/package-lock.json ./
-RUN npm install --legacy-peer-deps
-COPY payment-platform-ui/ ./
+# Cache BuildKit npm + install déterministe (lockfile).
+RUN --mount=type=cache,target=/root/.npm npm ci --no-audit --no-fund --legacy-peer-deps
+# Seuls les fichiers utiles au build (tests/cypress/dist exclus aussi via .dockerignore).
+COPY payment-platform-ui/angular.json payment-platform-ui/tsconfig.json ./
+COPY payment-platform-ui/tsconfig.app.json payment-platform-ui/ngsw-config.json ./
+COPY payment-platform-ui/src ./src
 RUN npx ng build --configuration production
 
 FROM nginx:1.27-alpine
