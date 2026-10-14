@@ -65,6 +65,7 @@ public class OrderEventConsumer {
                 case "order.rejected" -> handleOrderRejected(event);
                 case "order.delivery_confirmed" -> handleOrderDeliveryConfirmed(event);
                 case "order.delivery_rejected" -> handleOrderDeliveryRejected(event);
+                case "order.quote_sent" -> handleOrderQuoteSent(event);
                 case "order.low_stock_alert" -> handleLowStockAlert(event);
                 case "order.comment_created" -> handleOrderCommentCreated(event);
                 default -> log.warn("Unknown order routing key: {}", routingKey);
@@ -233,6 +234,23 @@ public class OrderEventConsumer {
                         + (reason.isEmpty() ? "" : " : " + reason),
                 "ORDER", reference
         )));
+    }
+
+    private void handleOrderQuoteSent(JsonNode event) {
+        UUID shopId = UUID.fromString(event.get("shopId").asText());
+        String reference = event.get("reference").asText();
+        int version = event.has("version") ? event.get("version").asInt(1) : 1;
+        String total = event.has("total") ? event.get("total").asText("") : "";
+
+        broadcaster.broadcastNotification(notifications.save(new Notification(null, shopId,
+                "ORDER_QUOTE",
+                "Devis n°" + version + " reçu pour la commande " + reference
+                        + (total.isEmpty() ? "" : " — total " + total + " TND"),
+                "ORDER", reference
+        )));
+
+        pushService.sendToUser(shopId, "Devis reçu",
+                "Devis n°" + version + " pour la commande " + reference, "ORDER_QUOTE", "/dashboard/shop/orders");
     }
 
     private void handleOrderCommentCreated(JsonNode event) {

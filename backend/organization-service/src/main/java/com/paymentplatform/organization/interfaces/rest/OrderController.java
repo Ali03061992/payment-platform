@@ -2,6 +2,7 @@ package com.paymentplatform.organization.interfaces.rest;
 
 import com.paymentplatform.organization.application.dto.*;
 import com.paymentplatform.organization.application.service.InvoicePdfService;
+import com.paymentplatform.organization.application.service.QuotePdfService;
 import com.paymentplatform.organization.application.service.TeifGeneratorService;
 import com.paymentplatform.organization.application.service.WithholdingCertificatePdfService;
 import com.paymentplatform.organization.application.service.WithholdingXmlService;
@@ -70,6 +71,9 @@ public class OrderController {
     private final GetWithholdingCertificateUseCase getWithholdingCertificate;
     private final WithholdingCertificatePdfService withholdingCertificatePdfService;
     private final WithholdingBatchUseCase withholdingBatch;
+    private final SendQuoteUseCase sendQuoteUseCase;
+    private final com.paymentplatform.organization.domain.repository.OrderQuoteRepository orderQuoteRepository;
+    private final QuotePdfService quotePdfService;
 
     public OrderController(CreateOrderUseCase createOrder,
                            ConfirmOrderUseCase confirmOrder,
@@ -95,8 +99,11 @@ public class OrderController {
                             OutboxEventStore outbox,
                             UpdateOrderExternalReferenceUseCase updateExternalReference,
                             GetWithholdingCertificateUseCase getWithholdingCertificate,
-                            WithholdingCertificatePdfService withholdingCertificatePdfService,
-                            WithholdingBatchUseCase withholdingBatch) {
+                             WithholdingCertificatePdfService withholdingCertificatePdfService,
+                             WithholdingBatchUseCase withholdingBatch,
+                             SendQuoteUseCase sendQuoteUseCase,
+                             com.paymentplatform.organization.domain.repository.OrderQuoteRepository orderQuoteRepository,
+                             QuotePdfService quotePdfService) {
         this.createOrder = createOrder;
         this.confirmOrder = confirmOrder;
         this.prepareOrder = prepareOrder;
@@ -123,6 +130,9 @@ public class OrderController {
         this.getWithholdingCertificate = getWithholdingCertificate;
         this.withholdingCertificatePdfService = withholdingCertificatePdfService;
         this.withholdingBatch = withholdingBatch;
+        this.sendQuoteUseCase = sendQuoteUseCase;
+        this.orderQuoteRepository = orderQuoteRepository;
+        this.quotePdfService = quotePdfService;
     }
 
     private String resolveOrgName(UUID orgId) {
@@ -1096,5 +1106,87 @@ public class OrderController {
         var current = CurrentUser.get();
         return ResponseEntity.ok(withholdingBatch.monthlySummary(debtorId, java.time.YearMonth.parse(month),
                 current.organizationId(), current.roles().contains("SYSTEM_ADMIN")));
+    }
+
+    /**
+     * Envoie un devis versionné (fournisseur) : modifie les lignes, pose les
+     * remises et notifie la boutique. Demandes en brouillon ou confirmées.
+     */
+    @PostMapping("/{id}/quote")
+    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SYSTEM_ADMIN')")
+    public ResponseEntity<OrderQuoteResponse> sendQuote(
+            @PathVariable UUID id, @Valid @RequestBody SendQuoteRequest request) {
+        var current = CurrentUser.get();
+        UUID supplierId = current.roles().contains("SYSTEM_ADMIN")
+                ? orderRepository.findById(id).map(o -> o.getSupplierId()).orElse(null)
+                : current.organizationId();
+        return ResponseEntity.ok(sendQuoteUseCase.execute(id, request, supplierId, current.userId()));
+    }
+
+    /**
+     * Historique des devis d'une commande (fournisseur et boutique concernés).
+     */
+    @GetMapping("/{id}/quotes")
+    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_MANAGER', 'SYSTEM_ADMIN')")
+    public ResponseEntity<List<OrderQuoteResponse>> getQuotes(@PathVariable UUID id) {
+        var order = orderRepository.findById(id);
+        if (order.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        var current = CurrentUser.get();
+        if (!current.roles().contains("SYSTEM_ADMIN") && current.organizationId() != null) {
+            var o = order.get();
+            boolean isSupplier = o.getSupplierId() != null && o.getSupplierId().equals(current.organizationId());
+            boolean isShop = o.getShopId() != null && o.getShopId().equals(current.organizationId());
+            if (!isSupplier && !isShop) {
+                return ResponseEntity.status(403).build();
+            }
+        }
+        return ResponseEntity.ok(orderQuoteRepository.findByOrderId(id).stream()
+                .map(OrderQuoteResponse::from).toList());
+    }
+
+    /**
+     * Télécharge un devis en PDF (mise en page facture, intitulé DEVIS).
+     */
+    @GetMapping("/{id}/quotes/{version}/pdf")
+    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_MANAGER', 'SYSTEM_ADMIN')")
+    public void downloadQuotePdf(@PathVariable UUID id, @PathVariable int version,
+                                 HttpServletResponse response) throws Exception {
+        var order = orderRepository.findById(id);
+        if (order.isEmpty()) {
+            response.sendError(HttpServletResponse.SC_NOT_FOUND, "Commande non trouvée");
+            return;
+        }
+        var o = order.get();
+        var current = CurrentUser.get();
+        if (!current.roles().contains("SYSTEM_ADMIN") && current.organizationId() != null) {
+            boolean isSupplier = o.getSupplierId() != null && o.getSupplierId().equals(current.organizationId());
+            boolean isShop = o.getShopId() != null && o.getShopId().equals(current.organizationId());
+            if (!isSupplier && !isShop) {
+                response.sendError(HttpServletResponse.SC_FORBIDDEN, "Accès refusé");
+                return;
+            }
+        }
+        var quote = orderQuoteRepository.findByOrderId(id).stream()
+                .filter(q -> q.version() == version).findFirst();
+        if (quote.isEmpty()) {
+            response.sendError(HttpServletResponse.SC_NOT_FOUND, "Devis non trouvé");
+            return;
+        }
+        var supplier = toInvoiceParty(o.getSupplierId());
+        var buyer = toInvoiceParty(o.getShopId());
+        byte[] pdf = quotePdfService.generateQuotePdf(quote.get(),
+                new InvoicePdfService.InvoiceParty(supplier.name(), supplier.address(),
+                        supplier.matriculeFiscal(), null, null, null, null),
+                new InvoicePdfService.InvoiceParty(buyer.name(), buyer.address(),
+                        buyer.matriculeFiscal(), null, null, null, null),
+                o.getShopId());
+        response.setContentType("application/pdf");
+        response.setHeader(HttpHeaders.CONTENT_DISPOSITION,
+                "attachment; filename=\"devis-" + o.getReference() + "-v" + version + ".pdf\"");
+        response.setContentLength(pdf.length);
+        response.getOutputStream().write(pdf);
+        response.getOutputStream().flush();
     }
 }

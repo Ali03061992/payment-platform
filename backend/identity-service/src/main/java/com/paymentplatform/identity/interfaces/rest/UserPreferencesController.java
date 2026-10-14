@@ -6,6 +6,7 @@ import com.paymentplatform.identity.application.usecase.UserPreferencesUseCase;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,6 +20,12 @@ public class UserPreferencesController {
 
     public UserPreferencesController(UserPreferencesUseCase preferences) {
         this.preferences = preferences;
+    }
+
+    @GetMapping("/me/preferences")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<UserResponse> getMyPreferences() {
+        return ResponseEntity.ok(preferences.getMyPreferences());
     }
 
     @PatchMapping("/me/preferences")

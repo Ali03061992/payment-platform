@@ -13,6 +13,8 @@ export class ThemeService {
   private themeSubject = new BehaviorSubject<Theme>(this.getInitialTheme());
   private accent1Subject = new BehaviorSubject<string>(this.DEFAULT_ACCENT1);
   private accent2Subject = new BehaviorSubject<string>(this.DEFAULT_ACCENT2);
+  /** Évite de relire le backend à chaque émission (une fois par utilisateur et par session). */
+  private backendPulledFor: string | null = null;
 
   theme$: Observable<Theme> = this.themeSubject.asObservable();
   accent1$: Observable<string> = this.accent1Subject.asObservable();
@@ -203,6 +205,7 @@ export class ThemeService {
   private applyUserAccents(user: any): void {
     try {
       if (!user) return;
+      this.pullBackendAccents(user);
       if (this.isHex6(user.accentColor1) && this.isHex6(user.accentColor2)) {
         this.accent1Subject.next((user.accentColor1 as string).toLowerCase());
         this.accent2Subject.next((user.accentColor2 as string).toLowerCase());
@@ -221,6 +224,30 @@ export class ThemeService {
           }
         }
       }
+    } catch {}
+  }
+
+  /** Relit les accents depuis la base (une fois par utilisateur/session) : corrige les refresh sans stockage local. */
+  private pullBackendAccents(user: any): void {
+    try {
+      const id = user?.id !== undefined && user?.id !== null ? String(user.id) : null;
+      if (!id || this.backendPulledFor === id) return;
+      this.backendPulledFor = id;
+      const prefs = this.prefs;
+      if (!prefs || typeof prefs.get !== 'function') return;
+      prefs.get().subscribe({
+        next: (p: any) => {
+          try {
+            if (this.isHex6(p?.accentColor1) && this.isHex6(p?.accentColor2)) {
+              this.accent1Subject.next((p.accentColor1 as string).toLowerCase());
+              this.accent2Subject.next((p.accentColor2 as string).toLowerCase());
+              this.writeStyle(this.accent1Subject.getValue(), this.accent2Subject.getValue());
+              this.persistAccents(this.accent1Subject.getValue(), this.accent2Subject.getValue());
+            }
+          } catch {}
+        },
+        error: () => {}
+      });
     } catch {}
   }
 

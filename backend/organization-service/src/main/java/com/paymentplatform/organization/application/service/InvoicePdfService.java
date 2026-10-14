@@ -59,15 +59,31 @@ public class InvoicePdfService {
 
     public byte[] generateInvoicePdf(Order order, List<OrderItem> items,
                                      InvoiceParty supplier, InvoiceParty buyer) {
+        return generatePdf(order, items, supplier, buyer, "FACTURE", "Facture n°: ",
+                order.getReference(), "Payment Platform - Facture ");
+    }
+
+    /** Devis fournisseur : même mise en page que la facture, intitulés adaptés. */
+    public byte[] generateQuotePdf(Order order, List<OrderItem> items,
+                                   InvoiceParty supplier, InvoiceParty buyer, int version,
+                                   String orderReference) {
+        return generatePdf(order, items, supplier, buyer, "DEVIS N°" + version,
+                "Devis n°" + version + " — Commande : ", orderReference,
+                "Payment Platform - Devis ");
+    }
+
+    private byte[] generatePdf(Order order, List<OrderItem> items,
+                               InvoiceParty supplier, InvoiceParty buyer,
+                               String title, String refLabel, String refValue, String footerLabel) {
         Document document = new Document(PageSize.A4, 36, 36, 44, 36);
         ByteArrayOutputStream out = new ByteArrayOutputStream();
 
         try {
             PdfWriter writer = PdfWriter.getInstance(document, out);
-            writer.setPageEvent(new FooterEvent());
+            writer.setPageEvent(new FooterEvent(footerLabel));
             document.open();
 
-            addHeader(document, order, supplier, buyer);
+            addHeader(document, order, supplier, buyer, title, refLabel, refValue);
             addItemsTable(document, items, order);
             addTotals(document, order);
             addFiscalMention(document, order);
@@ -84,11 +100,17 @@ public class InvoicePdfService {
 
     /** Pied de page sur chaque page : plateforme + pagination. */
     private static class FooterEvent extends com.lowagie.text.pdf.PdfPageEventHelper {
+        private final String label;
+
+        FooterEvent(String label) {
+            this.label = label;
+        }
+
         @Override
         public void onEndPage(com.lowagie.text.pdf.PdfWriter writer, Document document) {
             try {
                 com.lowagie.text.pdf.PdfContentByte cb = writer.getDirectContent();
-                Phrase footer = new Phrase("Payment Platform - Facture " + writer.getPageNumber(),
+                Phrase footer = new Phrase(label + writer.getPageNumber(),
                         SMALL_FONT);
                 com.lowagie.text.pdf.ColumnText.showTextAligned(cb, Element.ALIGN_CENTER, footer,
                         (document.right() + document.left()) / 2, document.bottom() - 18, 0);
@@ -98,11 +120,12 @@ public class InvoicePdfService {
         }
     }
 
-    private void addHeader(Document document, Order order, InvoiceParty supplier, InvoiceParty buyer)
+    private void addHeader(Document document, Order order, InvoiceParty supplier, InvoiceParty buyer,
+                           String title, String refLabel, String refValue)
             throws DocumentException {
-        Paragraph title = new Paragraph("FACTURE", TITLE_FONT);
-        title.setAlignment(Element.ALIGN_LEFT);
-        document.add(title);
+        Paragraph titlePara = new Paragraph(title, TITLE_FONT);
+        titlePara.setAlignment(Element.ALIGN_LEFT);
+        document.add(titlePara);
 
         document.add(new Paragraph(" "));
 
@@ -112,7 +135,7 @@ public class InvoicePdfService {
 
         PdfPCell leftCell = new PdfPCell();
         leftCell.setBorder(Rectangle.NO_BORDER);
-        leftCell.addElement(new Paragraph("Facture n°: " + order.getReference(), BOLD_FONT));
+        leftCell.addElement(new Paragraph(refLabel + refValue, BOLD_FONT));
         leftCell.addElement(new Paragraph("Date d'opération: " + formatDate(order.getCreatedAt()), NORMAL_FONT));
         if (order.getDeliveredAt() != null) {
             leftCell.addElement(new Paragraph("Date de livraison: " + formatDate(order.getDeliveredAt()), NORMAL_FONT));

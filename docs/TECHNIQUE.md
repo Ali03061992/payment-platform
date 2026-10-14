@@ -48,8 +48,7 @@ Consommateur principal : notification-service (SSE + push FCM).
 | Auth (`/auth`) | `POST /login|/refresh|/logout|/register`, `GET /me`, `POST /change-password`, reset (`/request|/validate|/confirm`), setup (`/validate|/complete`) |
 | Utilisateurs (`/users`) | CRUD, `PATCH /{id}/activate|/disable`, agents (`/agents`), `PATCH /me/preferences` |
 | Admin orgs (`/admin`) | CRUD fournisseurs/boutiques, `PATCH …/activate|/disable|/fiscal-profile`, `GET /stats` |
-| Commandes (`/orders`) | CRUD, cycle `confirm→prepare→ready→assign→accept-delivery→confirm-delivery→deliver→accept`, `reorder`, `reject`, géolocalisation, commentaires, `export/csv`, `/{id}/invoice` (PDF), `/{id}/teif.xml` (TEIF v1.8.8), `PATCH /{id}/external-reference`, certificats RAS (`GET|/pdf|/xml`, `PATCH …/deposit`, `/batch`, `/due`, `/monthly-summary`) |
-| Stocks (`/stock`, `/catalog`) | produits CRUD + image, mouvements, `low-stock-alerts`, optimisation (`GET|/configure`), familles/catégories |
+| Commandes (`/orders`) | CRUD, cycle `confirm→prepare→ready→assign→accept-delivery→confirm-delivery→deliver→accept`, `reorder`, `reject`, géolocalisation, commentaires, `export/csv`, `/{id}/invoice` (PDF), `/{id}/teif.xml` (TEIF v1.8.8), `PATCH /{id}/external-reference`, certificats RAS (`GET|/pdf|/xml`, `PATCH …/deposit`, `/batch`, `/due`, `/monthly-summary`) || Stocks (`/stock`, `/catalog`) | produits CRUD + image, mouvements, `low-stock-alerts`, optimisation (`GET|/configure`), familles/catégories |
 | Soldes (`/balances`) | soldes fournisseur/boutique, par couple, `POST /adjust` |
 | Paiements (`/payments`) | CRUD, `confirm|reject|cancel`, `/stats`, `/overdue`, `/agent-summary`, `/supplier-summary`, exports, facture, auto-création interne |
 | Litiges (`/disputes`) | création, par commande, messages, résolution |
