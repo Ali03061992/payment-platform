@@ -38,7 +38,6 @@ export class CreateOrderComponent implements OnInit {
   loadingProducts = false;
   errorSuppliers: string | null = null;
   errorProducts: string | null = null;
-  protected globalDiscount = 0;
 
   constructor(
     private orderService: OrderService,
@@ -177,17 +176,18 @@ export class CreateOrderComponent implements OnInit {
     this.orderLines.splice(index, 1);
   }
 
-  /** Aperçu fiscal (TVA par produit 19/13/7, FODEC, timbre) — le backend recalcule. */
+  /** Aperçu fiscal (TVA par produit 19/13/7, FODEC, timbre) — le backend recalcule.
+   * La boutique ne saisit AUCUNE remise (remises = devis fournisseur). */
   private get fiscalPreview() {
     return previewFiscal(
       this.orderLines.map(l => ({
         unitPrice: l.product.unitPrice,
         quantity: l.quantity,
-        discountPct: l.discount,
+        discountPct: 0,
         vatRate: l.product.vatRate,
         fodecApplicable: l.product.fodecApplicable
       })),
-      this.globalDiscount
+      0
     );
   }
 
@@ -236,12 +236,12 @@ export class CreateOrderComponent implements OnInit {
       asapPayment: this.asapPayment,
       paymentTerms: this.paymentTerms,
       currency: this.currency,
-      globalDiscount: this.globalDiscount,
+      globalDiscount: 0,
       notes: this.notes,
       items: this.orderLines.map(l => ({
         productId: l.product.id,
         quantity: l.quantity,
-        discount: l.discount
+        discount: 0
       }))
     };
     this.orderService.create(request).subscribe({

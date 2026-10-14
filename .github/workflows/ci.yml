@@ -1,17 +1,31 @@
 name: CI
 
+# Stratégie de branching :
+#   release/**            → build + tests → déploiement AUTO vers TEST
+#   master                → build + tests → déploiement AUTO vers PROD
+#   develop (et autres)   → build + tests uniquement, AUCUN déploiement
+#   manuel (Actions → Run workflow) → publication vers TEST ou PROD au choix
+# Branche de production : `master`.
 on:
   push:
-    branches: [main, develop]
+    branches: [master, develop, 'release/**']
   pull_request:
-    branches: [main, develop]
+    branches: [master, develop, 'release/**']
   workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environnement de publication manuelle'
+        required: true
+        default: 'test'
+        type: choice
+        options: [test, prod]
 
-# Needed for SonarCloud PR decoration & quality gate
+# Needed for SonarCloud PR decoration & quality gate + GHCR push
 permissions:
   contents: read
   pull-requests: write
   checks: write
+  packages: write
 
 env:
   JAVA_VERSION: '26-ea'
@@ -25,7 +39,7 @@ jobs:
   # ──────────────────────────────────────────────────────────────
   cleanup:
     name: Cleanup old artifacts & runs
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Delete old artifacts (older than 1 day)
         uses: geekyeggo/delete-artifact@v5
@@ -35,7 +49,6 @@ jobs:
             backend-jars
             frontend-coverage
             frontend-dist
-            docker-images
           failOnError: false
 
       - name: Delete old workflow runs (older than 7 days)
@@ -53,7 +66,7 @@ jobs:
   build-backend:
     name: Backend – Build & Tests (JaCoCo)
     needs: [cleanup]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
         with:
@@ -128,7 +141,7 @@ jobs:
   build-frontend:
     name: Frontend – Tests & Build (lcov)
     needs: [cleanup]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     defaults:
       run:
         working-directory: payment-platform-ui
@@ -186,7 +199,7 @@ jobs:
   # ──────────────────────────────────────────────────────────────
   sonar-backend:
     name: SonarQube – Backend
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [build-backend]
     steps:
       - name: Check Sonar token availability
@@ -252,7 +265,7 @@ jobs:
   # ──────────────────────────────────────────────────────────────
   sonar-frontend:
     name: SonarQube – Frontend
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [build-frontend]
     steps:
       - name: Check Sonar token availability
@@ -306,119 +319,273 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
   # ──────────────────────────────────────────────────────────────
-  # Docker images – dépend du build (pas bloqué par Sonar)
+  # Images Docker : build + push GHCR (pas de tests/sonar ici, déjà faits).
+  # Tags : <ref-slug> toujours ; test-latest sur release/** ;
+  # prod-latest sur master/tags. La VM ne fait que `pull` (jamais de build).
   # ──────────────────────────────────────────────────────────────
   build-images:
-    name: Build Docker Images
-    runs-on: ubuntu-latest
+    name: Build & Push Images (GHCR)
+    runs-on: ubuntu-24.04
     needs: [build-backend, build-frontend]
     steps:
       - uses: actions/checkout@v4
 
-      - name: Download backend jars
-        uses: actions/download-artifact@v4
+      - name: Login to GHCR (si publication prévue)
+        if: startsWith(github.ref, 'refs/heads/release/') || github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/')
+        uses: docker/login-action@v3
         with:
-          name: backend-jars
-          path: /tmp/jars
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Download frontend dist
-        uses: actions/download-artifact@v4
-        with:
-          name: frontend-dist
-          path: /tmp/frontend-dist
+      - name: Compute image tags
+        id: tags
+        run: |
+          OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          SLUG=$(echo "${{ github.ref_name }}" | tr '/' '-' | tr '[:upper:]' '[:lower:]')
+          ENV_TAG=""
+          if [[ "${{ github.ref }}" == refs/heads/release/* ]]; then ENV_TAG="test-latest"; fi
+          if [[ "${{ github.ref }}" == refs/heads/master ]] || [[ "${{ github.ref }}" == refs/tags/* ]]; then ENV_TAG="prod-latest"; fi
+          echo "owner=$OWNER" >> "$GITHUB_OUTPUT"
+          echo "slug=$SLUG" >> "$GITHUB_OUTPUT"
+          echo "env_tag=$ENV_TAG" >> "$GITHUB_OUTPUT"
+          echo "owner=$OWNER slug=$SLUG env_tag=$ENV_TAG"
 
-      - name: Build backend images
+      - name: Build backend images (+ push si release/master/tag)
         working-directory: backend
         run: |
+          REG="ghcr.io/${{ steps.tags.outputs.owner }}/payment-platform"
+          SLUG="${{ steps.tags.outputs.slug }}"
+          ENV_TAG="${{ steps.tags.outputs.env_tag }}"
           for service in identity-service organization-service payment-service notification-service api-gateway; do
-            docker build -t payment-platform/$service:latest \
-              --build-arg SERVICE_NAME=$service .
+            for attempt in 1 2 3; do
+              echo "Build $service (tentative $attempt/3)..."
+              if docker build -t "$REG/$service:$SLUG" \
+                --build-arg SERVICE_NAME=$service .; then
+                break
+              fi
+              echo "Echec tentative $attempt (souvent un 500 transitoire du registre Docker Hub), pause 30s..."
+              sleep 30
+              if [ "$attempt" = "3" ]; then echo "Build $service en echec apres 3 tentatives."; exit 1; fi
+            done
+            if [ -n "$ENV_TAG" ]; then
+              docker tag "$REG/$service:$SLUG" "$REG/$service:$ENV_TAG"
+              docker push "$REG/$service:$SLUG"
+              docker push "$REG/$service:$ENV_TAG"
+            fi
           done
 
-      - name: Build frontend image
+      - name: Build frontend image (+ push si release/master/tag)
         working-directory: .
-        run: docker build -t payment-platform/angular:latest -f Dockerfile .
-
-      - name: Save Docker images
         run: |
-          docker save payment-platform/{identity-service,organization-service,payment-service,notification-service,api-gateway,angular}:latest \
-            | gzip > docker-images.tar.gz
-
-      - name: Upload Docker images
-        uses: actions/upload-artifact@v4
-        with:
-          name: docker-images
-          path: docker-images.tar.gz
-          retention-days: 1
+          REG="ghcr.io/${{ steps.tags.outputs.owner }}/payment-platform"
+          SLUG="${{ steps.tags.outputs.slug }}"
+          ENV_TAG="${{ steps.tags.outputs.env_tag }}"
+          for attempt in 1 2 3; do
+            echo "Build angular (tentative $attempt/3)..."
+            if docker build -t "$REG/angular:$SLUG" -f Dockerfile .; then
+              break
+            fi
+            echo "Echec tentative $attempt, pause 30s..."
+            sleep 30
+            if [ "$attempt" = "3" ]; then echo "Build angular en echec apres 3 tentatives."; exit 1; fi
+          done
+          if [ -n "$ENV_TAG" ]; then
+            docker tag "$REG/angular:$SLUG" "$REG/angular:$ENV_TAG"
+            docker push "$REG/angular:$SLUG"
+            docker push "$REG/angular:$ENV_TAG"
+          fi
 
   # ──────────────────────────────────────────────────────────────
-  # E2E (Cypress) – lance le stack via docker-compose
+  # Publication TEST – auto sur release/**, ou manuelle
+  # Déploiement SSH vers la VM OVH de test : git pull + pull images GHCR + up.
+  # Secrets requis : OVH_TEST_HOST, OVH_TEST_USER, OVH_TEST_SSH_KEY
+  # (optionnels : OVH_TEST_PORT=22, OVH_TEST_DIR=/opt/payment-platform,
+  #  OVH_TEST_URL pour le health check). Le fichier deploy/.env doit
+  # exister sur la VM (modèle : deploy/.env.example).
   # ──────────────────────────────────────────────────────────────
-  e2e-tests:
-    name: E2E Tests (Cypress)
-    runs-on: ubuntu-latest
+  deploy-test:
+    name: Publish → TEST (VM OVH)
+    runs-on: ubuntu-24.04
     needs: [build-images]
+    if: |
+      (github.event_name == 'push' && startsWith(github.ref, 'refs/heads/release/'))
+      || (github.event_name == 'workflow_dispatch' && inputs.environment == 'test')
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: npm
-          cache-dependency-path: payment-platform-ui/package-lock.json
-
-      - name: Download Docker images
-        uses: actions/download-artifact@v4
-        with:
-          name: docker-images
-
-      - name: Load Docker images
-        run: docker load < docker-images.tar.gz
-
-      - name: Install Cypress deps
-        working-directory: payment-platform-ui
-        run: npm ci --legacy-peer-deps
-
-      - name: Start services
-        working-directory: .
-        run: docker compose -f deploy/docker-compose.yml up -d --wait
-        env:
-          MYSQL_ROOT_PASSWORD: test_root_pw
-          MYSQL_USER: test_user
-          MYSQL_PASSWORD: test_password
-          RABBITMQ_USER: guest
-          RABBITMQ_PASSWORD: guest
-          JWT_SECRET: test-secret-key-for-ci-must-be-at-least-64-chars-long-for-hs512
-          JWT_EXPIRATION: 86400000
-          CORS_ALLOWED_ORIGINS: http://localhost:8080
-          RATE_LIMIT_PER_MINUTE: 100
-          # Suite E2E = ~70 logins depuis une seule IP : budget auth assoupli pour la CI.
-          # La prod garde le défaut strict (10/min). Le 429 est couvert par RateLimitFilterTest.
-          RATE_LIMIT_AUTH_PER_MINUTE: 1000
-          INTERNAL_SECRET: test-internal-secret
-
-      - name: Wait for gateway & frontend
+      - name: Check OVH test config (real / fake / missing)
+        id: check
         run: |
+          HOST="${{ secrets.OVH_TEST_HOST }}"
+          if [ -z "$HOST" ] || [ -z "${{ secrets.OVH_TEST_USER }}" ] || [ -z "${{ secrets.OVH_TEST_SSH_KEY }}" ]; then
+            echo "mode=missing" >> "$GITHUB_OUTPUT"
+            echo "::warning::Secrets OVH TEST absents : déploiement simulé."
+          elif [[ "$HOST" == *.invalid ]]; then
+            echo "mode=fake" >> "$GITHUB_OUTPUT"
+            echo "Hôte fake détecté ($HOST) : déploiement simulé."
+          else
+            echo "mode=real" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Debug SSH key format (secret jamais affiché)
+        if: steps.check.outputs.mode == 'real'
+        run: |
+          KEY="${{ secrets.OVH_TEST_SSH_KEY }}"
+          echo "longueur: ${#KEY} chars"
+          echo "$KEY" | head -n 1 | grep -q "BEGIN OPENSSH PRIVATE KEY" && echo "header OK" || echo "header BAD"
+          echo "$KEY" | tail -n 1 | grep -q "END OPENSSH PRIVATE KEY" && echo "footer OK" || echo "footer BAD"
+          if echo "$KEY" | grep -q "$(printf '\r')"; then echo "CRLF DETECTE - PROBLEM (recopier en LF)"; else echo "LF only OK"; fi
+          echo "lignes: $(echo "$KEY" | wc -l)"
+          echo "$KEY" > /tmp/ci_key && chmod 600 /tmp/ci_key
+          ssh-keygen -y -f /tmp/ci_key > /tmp/ci_key.pub 2>/dev/null && ssh-keygen -lf /tmp/ci_key.pub || echo "CLE ILLISIBLE"
+          rm -f /tmp/ci_key /tmp/ci_key.pub
+          U="${{ secrets.OVH_TEST_USER }}"; H="${{ secrets.OVH_TEST_HOST }}"
+          echo "user len: ${#U} (attendu 6), host len: ${#H} (attendu 11)"
+          echo "user hex: $(echo -n "$U" | od -An -tx1 | tr -d ' \n')"
+          echo "host hex: $(echo -n "$H" | od -An -tx1 | tr -d ' \n')"
+
+      - name: Deploy to OVH test VM
+        if: steps.check.outputs.mode == 'real'
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.OVH_TEST_HOST }}
+          username: ${{ secrets.OVH_TEST_USER }}
+          key: ${{ secrets.OVH_TEST_SSH_KEY }}
+          port: ${{ secrets.OVH_TEST_PORT || '22' }}
+          script: |
+            sudo -i <<'ROOT_EOF'
+            set -e
+            APP_DIR="${{ secrets.OVH_TEST_DIR || '/opt/payment-platform' }}"
+            BRANCH="${{ github.ref_name }}"
+            if [ ! -d "$APP_DIR/.git" ]; then
+              git clone "${{ github.server_url }}/${{ github.repository }}.git" "$APP_DIR"
+            fi
+            cd "$APP_DIR"
+            git fetch origin
+            git checkout "$BRANCH"
+            git pull origin "$BRANCH"
+            # Images prébuildées en CI (jamais de build sur la petite VM).
+            export IMAGE_TAG="test-latest"
+            docker compose -f deploy/docker-compose.yml pull
+            docker compose -f deploy/docker-compose.yml up -d
+            docker compose -f deploy/docker-compose.yml ps
+            # Ménage : images pendantes + cache de build (plus aucun build ici).
+            docker image prune -f
+            docker builder prune -af
+            chown -R "${SUDO_USER:-root}:${SUDO_USER:-root}" "$APP_DIR"
+            ROOT_EOF
+
+      - name: Fake deploy TEST (simulation, run vert)
+        if: steps.check.outputs.mode != 'real'
+        run: |
+          echo "=============================================="
+          echo " FAKE deploy TEST (mode: ${{ steps.check.outputs.mode }})"
+          echo " Branche : ${{ github.ref_name }}"
+          echo " Hote    : ${{ secrets.OVH_TEST_HOST || 'vm-test.invalid (non defini)' }}"
+          echo " Simule (root) : git pull + pull GHCR + up -d + prune"
+          echo "=============================================="
+
+      - name: Health check TEST (si URL configurée)
+        run: |
+          if [ -z "${{ secrets.OVH_TEST_URL }}" ]; then
+            echo "OVH_TEST_URL non configurée : health check ignoré."
+            exit 0
+          fi
           for i in $(seq 1 30); do
-            curl -sf http://localhost:8081/actuator/health && echo "gateway up" && break || sleep 4
+            curl -sf "${{ secrets.OVH_TEST_URL }}/actuator/health" && echo "TEST up" && break || sleep 10
           done
+
+  # ──────────────────────────────────────────────────────────────
+  # Publication PROD – auto sur master, ou manuelle
+  # Secrets requis : OVH_PROD_HOST, OVH_PROD_USER, OVH_PROD_SSH_KEY
+  # (optionnels : OVH_PROD_PORT, OVH_PROD_DIR, OVH_PROD_URL).
+  # ──────────────────────────────────────────────────────────────
+  deploy-prod:
+    name: Publish → PROD (VM OVH)
+    runs-on: ubuntu-24.04
+    needs: [build-images]
+    if: |
+      (github.event_name == 'push' && github.ref == 'refs/heads/master')
+      || (github.event_name == 'workflow_dispatch' && inputs.environment == 'prod')
+    steps:
+      - name: Check OVH prod config (real / fake / missing)
+        id: check
+        run: |
+          HOST="${{ secrets.OVH_PROD_HOST }}"
+          if [ -z "$HOST" ] || [ -z "${{ secrets.OVH_PROD_USER }}" ] || [ -z "${{ secrets.OVH_PROD_SSH_KEY }}" ]; then
+            echo "mode=missing" >> "$GITHUB_OUTPUT"
+            echo "::warning::Secrets OVH PROD absents : déploiement simulé."
+          elif [[ "$HOST" == *.invalid ]]; then
+            echo "mode=fake" >> "$GITHUB_OUTPUT"
+            echo "Hôte fake détecté ($HOST) : déploiement simulé."
+          else
+            echo "mode=real" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Backup PROD database before release
+        if: steps.check.outputs.mode == 'real'
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.OVH_PROD_HOST }}
+          username: ${{ secrets.OVH_PROD_USER }}
+          key: ${{ secrets.OVH_PROD_SSH_KEY }}
+          port: ${{ secrets.OVH_PROD_PORT || '22' }}
+          script: |
+            sudo -i <<'ROOT_EOF'
+            set -e
+            APP_DIR="${{ secrets.OVH_PROD_DIR || '/opt/payment-platform' }}"
+            cd "$APP_DIR"
+            git fetch origin
+            git checkout master
+            git pull origin master
+            docker compose -f deploy/docker-compose.yml --profile backup up -d db-backup
+            docker compose -f deploy/docker-compose.yml exec -T db-backup /scripts/backup-now.sh "pre-prod-$(date +%Y%m%d-%H%M%S)"
+            chown -R "${SUDO_USER:-root}:${SUDO_USER:-root}" "$APP_DIR"
+            ROOT_EOF
+
+      - name: Deploy to OVH prod VM
+        if: steps.check.outputs.mode == 'real'
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.OVH_PROD_HOST }}
+          username: ${{ secrets.OVH_PROD_USER }}
+          key: ${{ secrets.OVH_PROD_SSH_KEY }}
+          port: ${{ secrets.OVH_PROD_PORT || '22' }}
+          script: |
+            sudo -i <<'ROOT_EOF'
+            set -e
+            APP_DIR="${{ secrets.OVH_PROD_DIR || '/opt/payment-platform' }}"
+            if [ ! -d "$APP_DIR/.git" ]; then
+              git clone "${{ github.server_url }}/${{ github.repository }}.git" "$APP_DIR"
+            fi
+            cd "$APP_DIR"
+            git fetch origin
+            git checkout master
+            git pull origin master
+            export IMAGE_TAG="prod-latest"
+            docker compose -f deploy/docker-compose.yml pull
+            docker compose -f deploy/docker-compose.yml --profile backup up -d
+            docker compose -f deploy/docker-compose.yml ps
+            docker image prune -f
+            docker builder prune -af
+            chown -R "${SUDO_USER:-root}:${SUDO_USER:-root}" "$APP_DIR"
+            ROOT_EOF
+
+      - name: Fake deploy PROD (simulation, run vert)
+        if: steps.check.outputs.mode != 'real'
+        run: |
+          echo "=============================================="
+          echo " FAKE deploy PROD (mode: ${{ steps.check.outputs.mode }})"
+          echo " Branche : master"
+          echo " Hote    : ${{ secrets.OVH_PROD_HOST || 'vm-prod.invalid (non defini)' }}"
+          echo " Simule (root) : backup pre-prod + git pull + pull GHCR + up -d + prune"
+          echo "=============================================="
+
+      - name: Health check PROD (si URL configurée)
+        run: |
+          if [ -z "${{ secrets.OVH_PROD_URL }}" ]; then
+            echo "OVH_PROD_URL non configurée : health check ignoré."
+            exit 0
+          fi
           for i in $(seq 1 30); do
-            curl -sf http://localhost:8080 && echo "frontend up" && break || sleep 2
+            curl -sf "${{ secrets.OVH_PROD_URL }}/actuator/health" && echo "PROD up" && break || sleep 10
           done
-
-      - name: Run Cypress tests
-        working-directory: payment-platform-ui
-        # Config dev impérative : baseUrl 8080 (nginx déployé) + apiUrl 8081.
-        # cypress.config.ts par défaut pointe 4200 (ng serve local), inexistant en CI.
-        run: npx cypress run --config-file cypress.config.dev.ts --browser chrome --headless
-
-      - name: Tear down
-        if: always()
-        working-directory: .
-        run: docker compose -f deploy/docker-compose.yml down -v
-
-      - name: Collect E2E logs on failure
-        if: failure()
-        run: docker compose -f deploy/docker-compose.yml logs --tail=200
-        working-directory: .

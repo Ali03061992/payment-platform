@@ -24,5 +24,6 @@
     <include file="V13__org_tej_identifier.sql" relativeToChangelogFile="true"/>
     <include file="V14__withholding_and_price_ttc.sql" relativeToChangelogFile="true"/>
     <include file="V15__order_external_ref_supplier_nature.sql" relativeToChangelogFile="true"/>
+    <include file="V16__order_quotes.sql" relativeToChangelogFile="true"/>
 
 </databaseChangeLog>

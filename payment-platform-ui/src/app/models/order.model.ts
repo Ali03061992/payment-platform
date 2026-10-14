@@ -109,6 +109,44 @@ export interface WithholdingCertificate {
   createdAt: string;
 }
 
+/** Synthèse mensuelle des retenues d'un débiteur (réconciliation déclaration TEJ). */
+export interface WithholdingMonthlySummary {
+  month: string;
+  certificateCount: number;
+  grossTotal: number;
+  withholdingTotal: number;
+  byNature: Record<string, number>;
+}
+
+/** Devis fournisseur versionné (demande boutique chiffrée, remises %). */
+export interface OrderQuote {
+  id: string;
+  orderId: string;
+  orderReference: string;
+  supplierId: string;
+  version: number;
+  globalDiscount: number;
+  subtotal: number;
+  taxAmount: number;
+  total: number;
+  stampAmount: number;
+  currency: string;
+  linesJson: string;
+  createdBy: string | null;
+  createdAt: string;
+}
+
+export interface QuoteLine {
+  ref: string;
+  name: string;
+  qty: number;
+  unitPrice: number;
+  discountPct: number;
+  discount: number;
+  lineTotal: number;
+  vatRate: number;
+}
+
 export interface OrderEvent {
   id: string;
   orderId: string;

@@ -41,9 +41,10 @@ describe('OrderManagementComponent', () => {
     sessionStorage.setItem('user', JSON.stringify({ organizationId: '1' }));
     const orderSpy = jasmine.createSpyObj('OrderService',
       ['list', 'listPaged', 'getById', 'getByReference', 'confirm', 'prepare', 'readyForDelivery',
-       'assignDelivery', 'deliveryReject', 'cancel', 'listDeliveries', 'update', 'downloadInvoice', 'printInvoice', 'getComments',
-       'addComment', 'search', 'exportCsv', 'getWithholdingCertificate', 'downloadWithholdingCertificatePdf',
-       'downloadWithholdingCertificateXml', 'markCertificateDeposited', 'updateExternalReference']);
+       'assignDelivery', 'deliveryReject', 'cancel', 'listDeliveries', 'update', 'downloadInvoice', 'downloadTeif', 'printInvoice', 'getComments',
+        'addComment', 'search', 'exportCsv', 'getWithholdingCertificate', 'downloadWithholdingCertificatePdf',
+        'downloadWithholdingCertificateXml', 'markCertificateDeposited', 'updateExternalReference',
+        'sendQuote', 'getQuotes', 'downloadQuotePdf']);
     const agentSpy = jasmine.createSpyObj('SupplierAgentService', ['listAgents']);
     const stockSpy = jasmine.createSpyObj('StockService', ['getProducts']);
     const toastSpy = jasmine.createSpyObj('ToastService', ['success', 'error']);
@@ -209,6 +210,47 @@ describe('OrderManagementComponent', () => {
     });
   });
 
+  describe('quote', () => {
+    const quotedOrder = { ...mockOrder, id: 'ord-1', status: 'CONFIRMED', globalDiscount: 5, items: [{ productId: 'p1', productName: 'Widget', quantity: 2, unitPrice: 100, discount: 20 }] } as any;
+
+    it('should allow quote on DRAFT and CONFIRMED only', () => {
+      expect(component.canQuote({ status: 'DRAFT' } as any)).toBeTrue();
+      expect(component.canQuote({ status: 'CONFIRMED' } as any)).toBeTrue();
+      expect(component.canQuote({ status: 'PREPARING' } as any)).toBeFalse();
+      expect(component.canQuote({ status: 'DELIVERED' } as any)).toBeFalse();
+    });
+
+    it('should open quote modal with prefilled lines', () => {
+      component.openQuote(quotedOrder);
+      expect(component.showQuoteModal).toBeTrue();
+      expect(component.quoteOrderId).toBe('ord-1');
+      expect(component.quoteGlobalDiscount).toBe(5);
+      expect(component.quoteLines.length).toBe(1);
+      expect(component.quoteLines[0].discount).toBe(10);
+    });
+
+    it('should send quote and reload', () => {
+      orderService.sendQuote.and.returnValue(of({ version: 2 } as any));
+      component.quoteOrderId = 'ord-1';
+      component.quoteLines = [{ productId: 'p1', productName: 'Widget', quantity: 2, discount: 10, unitPrice: 100 }];
+      component.quoteGlobalDiscount = 5;
+      component.submitQuote();
+      expect(orderService.sendQuote).toHaveBeenCalledWith('ord-1',
+        [{ productId: 'p1', quantity: 2, discount: 10 }], 5);
+      expect(component.showQuoteModal).toBeFalse();
+    });
+
+    it('should reject out-of-range discounts', () => {
+      component.quoteOrderId = 'ord-1';
+      component.quoteLines = [{ productId: 'p1', productName: 'Widget', quantity: 0, discount: 10, unitPrice: 100 }];
+      component.quoteGlobalDiscount = 0;
+      expect(component.canSubmitQuote()).toBeFalse();
+      expect(orderService.sendQuote).not.toHaveBeenCalled();
+      component.submitQuote();
+      expect(orderService.sendQuote).not.toHaveBeenCalled();
+    });
+  });
+
   describe('withholding certificate', () => {
     it('should load certificate when detail order is DELIVERED', () => {
       orderService.getByReference.and.returnValue(of({ ...mockOrder, status: 'DELIVERED' }));
@@ -227,6 +269,8 @@ describe('OrderManagementComponent', () => {
       expect(orderService.downloadWithholdingCertificateXml).toHaveBeenCalledWith('ord-1');
       component.printDetailInvoice();
       expect(orderService.printInvoice).toHaveBeenCalledWith('ord-1');
+      component.downloadDetailTeif();
+      expect(orderService.downloadTeif).toHaveBeenCalledWith('ord-1');
     });
 
     it('should save deposit reference', () => {

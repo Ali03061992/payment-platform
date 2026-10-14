@@ -15,6 +15,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 import java.util.UUID;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -99,5 +100,30 @@ class InternalPaymentControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body(UUID.randomUUID())))
                 .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void supplierSummary_missingToken_returns401() throws Exception {
+        mockMvc.perform(get("/api/internal/payments/supplier-summary")
+                        .param("supplierId", "00000000-0000-0000-0000-000000000020"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void supplierSummary_wrongToken_returns401() throws Exception {
+        mockMvc.perform(get("/api/internal/payments/supplier-summary")
+                        .header("X-Internal-Token", "wrong-token")
+                        .param("supplierId", "00000000-0000-0000-0000-000000000020"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void supplierSummary_validToken_returnsSummaryShape() throws Exception {
+        mockMvc.perform(get("/api/internal/payments/supplier-summary")
+                        .header("X-Internal-Token", INTERNAL_TOKEN)
+                        .param("supplierId", "00000000-0000-0000-0000-000000000020"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.confirmedCount").value(0))
+                .andExpect(jsonPath("$.confirmedTotal").value(0));
     }
 }

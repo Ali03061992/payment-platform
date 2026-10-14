@@ -43,6 +43,10 @@ public class SharedSecurityConfig {
                                 "/api/auth/password-reset/**",
                                 "/api/organizations/internal/**",
                                 "/api/internal/**",
+                                // SSE : nginx contourne le gateway (pas de header possible via
+                                // EventSource) ; le contrôleur valide lui-même le JWT signé
+                                // en query (?token=, signature HMAC + expiry).
+                                "/api/notifications/stream",
                                 "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html", "/actuator/health").permitAll()
                         .anyRequest().authenticated())
                 .exceptionHandling(ex -> ex

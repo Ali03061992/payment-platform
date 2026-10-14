@@ -278,13 +278,25 @@ describe('CreateOrderComponent (shop)', () => {
   });
 
   describe('subtotal / taxAmount / total', () => {
-    it('should compute with discount', () => {
+    it('should ignore line discounts (remises = devis fournisseur)', () => {
       component.orderLines = [
         { product: { id: 1, unitPrice: 100 } as any, quantity: 1, discount: 10 }
       ];
-      expect(component.subtotal).toBe(90);
-      expect(component.taxAmount).toBeCloseTo(17.1);
-      expect(component.total).toBeCloseTo(107.1);
+      expect(component.subtotal).toBe(100);
+      expect(component.taxAmount).toBeCloseTo(19);
+      expect(component.total).toBeCloseTo(119);
+    });
+
+    it('should send zero discounts on submit', () => {
+      orderService.create.and.returnValue(of({} as any));
+      component.selectedSupplierId = 1;
+      component.shopId = 2;
+      component.orderLines = [{ product: { id: 1, unitPrice: 10 } as any, quantity: 2, discount: 10 }];
+      component.submit();
+      expect(orderService.create).toHaveBeenCalledWith(jasmine.objectContaining({
+        globalDiscount: 0,
+        items: [jasmine.objectContaining({ discount: 0 })]
+      }));
     });
 
     it('should handle empty order lines', () => {

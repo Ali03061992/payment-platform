@@ -3,7 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { OrderService } from '../../services/order.service';
 import { DisputeService } from '../../services/dispute.service';
-import { Order, OrderComment, WithholdingCertificate } from '../../models/order.model';
+import { Order, OrderComment, OrderQuote, WithholdingCertificate } from '../../models/order.model';
 import { Dispute } from '../../models/dispute.model';
 import { ToastService } from '../../services/toast.service';
 import { ConfirmDialogService } from '../../components/confirm-dialog/confirm-dialog.service';
@@ -29,6 +29,7 @@ export class ShopOrderDetailComponent implements OnInit, OnDestroy {
   submittingComment = false;
 
   certificate: WithholdingCertificate | null = null;
+  quotes: OrderQuote[] = [];
   showDepositForm = false;
   tejReference = '';
   savingDeposit = false;
@@ -64,6 +65,7 @@ export class ShopOrderDetailComponent implements OnInit, OnDestroy {
         this.loading = false;
         this.loadDisputes(data.id);
         this.loadComments(data.id);
+        this.loadQuotes(data.id);
         this.startCountdown();
         if (data.status === 'DELIVERED' || data.status === 'ACCEPTED') this.loadCertificate(data.id);
       },
@@ -76,6 +78,18 @@ export class ShopOrderDetailComponent implements OnInit, OnDestroy {
       next: (cert) => { this.certificate = cert; },
       error: () => { this.certificate = null; }
     }));
+  }
+
+  loadQuotes(orderId: string): void {
+    this.subscriptions.add(this.orderService.getQuotes(orderId).subscribe({
+      next: (quotes) => { this.quotes = quotes || []; },
+      error: () => { this.quotes = []; }
+    }));
+  }
+
+  downloadQuote(quote: OrderQuote): void {
+    if (!this.order) return;
+    this.orderService.downloadQuotePdf(this.order.id, quote.version, this.order.reference);
   }
 
   toggleDepositForm(): void {
@@ -293,6 +307,11 @@ export class ShopOrderDetailComponent implements OnInit, OnDestroy {
   downloadInvoice(): void {
     if (!this.order) return;
     this.orderService.downloadInvoice(this.order.id);
+  }
+
+  downloadTeif(): void {
+    if (!this.order) return;
+    this.orderService.downloadTeif(this.order.id);
   }
 
   paymentTermsLabel(terms: string): string {

@@ -39,9 +39,7 @@
 
     <div class="form-row">
       <div class="form-group">
-        <label for="globalDiscount">{{ 'ORDER_CREATE.GLOBAL_DISCOUNT' | translate }}</label>
-        <input type="number" [(ngModel)]="globalDiscount" name="globalDiscount" id="globalDiscount" class="form-control"
-          min="0" max="100" placeholder="0">
+        <span class="text-muted">{{ 'ORDER_CREATE.NO_DISCOUNT_HINT' | translate }}</span>
       </div>
     </div>
 
@@ -136,7 +134,6 @@
                 <th>{{ 'ORDER_CREATE.COL_PRODUCT' | translate }}</th>
                 <th>{{ 'ORDER_CREATE.COL_QTY' | translate }}</th>
                 <th>{{ 'ORDER_CREATE.COL_UNIT_PRICE' | translate }}</th>
-                <th>{{ 'ORDER_CREATE.COL_DISCOUNT' | translate }}</th>
                 <th>{{ 'ORDER_CREATE.COL_VAT' | translate }}</th>
                 <th>{{ 'ORDER_CREATE.COL_TOTAL' | translate }}</th>
                 <th></th>
@@ -152,13 +149,8 @@
                       [attr.aria-label]="('ORDER_CREATE.QTY_ARIA' | translate:{name: line.product.name})">
                   </td>
                   <td>{{ line.product.unitPrice | number:'1.2-2' }}</td>
-                  <td>
-                    <input type="number" [(ngModel)]="line.discount" [name]="'discount_' + i"
-                      class="form-control" min="0" max="100" style="width:80px;"
-                      [attr.aria-label]="('ORDER_CREATE.DISCOUNT_ARIA' | translate:{name: line.product.name})">
-                  </td>
                   <td>{{ line.product.vatRate ?? 19 }} % @if (line.product.priceTtc) { <small style="color:#2e7d32;">TTC</small> }</td>
-                  <td>{{ (line.product.unitPrice * line.quantity * (1 - line.discount / 100)) | number:'1.2-2' }}</td>
+                  <td>{{ (line.product.unitPrice * line.quantity) | number:'1.2-2' }}</td>
                   <td>
                     <button class="btn btn-sm btn-danger" type="button" (click)="removeLine(i)"
                       [attr.aria-label]="('ORDER_CREATE.REMOVE_ARIA' | translate:{name: line.product.name})">{{ 'ORDER_CREATE.REMOVE' | translate }}</button>
@@ -177,12 +169,6 @@
           <span>{{ 'ORDER_CREATE.SUBTOTAL' | translate }}</span>
           <span>{{ subtotal | number:'1.2-2' }} {{ currency }}</span>
         </div>
-        @if (globalDiscount > 0) {
-          <div class="summary-row">
-            <span>{{ 'ORDER_CREATE.GLOBAL_DISCOUNT_LINE' | translate:{discount: globalDiscount} }}</span>
-            <span>-{{ discountAmount | number:'1.2-2' }} {{ currency }}</span>
-          </div>
-        }
         @if (fodecAmount > 0) {
           <div class="summary-row">
             <span>{{ 'ORDER_CREATE.FODEC' | translate }}</span>

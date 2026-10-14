@@ -133,6 +133,71 @@ describe('OrderService', () => {
     });
   });
 
+  describe('downloadTeif', () => {
+    it('should GET teif.xml as blob and save it', () => {
+      const blob = new Blob(['<TEIF/>'], { type: 'application/xml' });
+      spyOn(window.URL, 'createObjectURL').and.returnValue('blob:test');
+      spyOn(window.URL, 'revokeObjectURL');
+      spyOn(HTMLAnchorElement.prototype, 'click');
+      service.downloadTeif('ord-1');
+      const req = httpMock.expectOne('/api/orders/ord-1/teif.xml');
+      expect(req.request.method).toBe('GET');
+      expect(req.request.responseType).toBe('blob');
+      req.flush(blob, {
+        headers: { 'Content-Disposition': 'attachment; filename="teif-ORD-001.xml"' }
+      });
+    });
+  });
+
+  describe('withholdingMonthlySummary', () => {
+    it('should GET monthly summary with debtor and month params', () => {
+      service.withholdingMonthlySummary('shop-1', '2026-10').subscribe(s => {
+        expect(s.certificateCount).toBe(2);
+        expect(s.withholdingTotal).toBe(178.5);
+      });
+      const req = httpMock.expectOne(r => r.url === '/api/orders/withholding-certificates/monthly-summary');
+      expect(req.request.method).toBe('GET');
+      expect(req.request.params.get('debtorId')).toBe('shop-1');
+      expect(req.request.params.get('month')).toBe('2026-10');
+      req.flush({ month: '2026-10', certificateCount: 2, grossTotal: 11900, withholdingTotal: 178.5, byNature: { MARCHANDISES: 178.5 } } as any);
+    });
+  });
+
+  describe('quotes', () => {
+    it('should POST quote with items and global discount', () => {
+      service.sendQuote('ord-1', [{ productId: 'p1', quantity: 2, discount: 10 }], 5).subscribe(q => {
+        expect(q.version).toBe(1);
+      });
+      const req = httpMock.expectOne('/api/orders/ord-1/quote');
+      expect(req.request.method).toBe('POST');
+      expect(req.request.body).toEqual({ items: [{ productId: 'p1', quantity: 2, discount: 10 }], globalDiscount: 5 });
+      req.flush({ version: 1 } as any);
+    });
+
+    it('should GET quotes history', () => {
+      service.getQuotes('ord-1').subscribe(list => {
+        expect(list.length).toBe(2);
+      });
+      const req = httpMock.expectOne('/api/orders/ord-1/quotes');
+      expect(req.request.method).toBe('GET');
+      req.flush([{ version: 1 }, { version: 2 }] as any);
+    });
+
+    it('should download quote PDF as blob', () => {
+      const blob = new Blob(['%PDF-1.4'], { type: 'application/pdf' });
+      spyOn(window.URL, 'createObjectURL').and.returnValue('blob:test');
+      spyOn(window.URL, 'revokeObjectURL');
+      spyOn(HTMLAnchorElement.prototype, 'click');
+      service.downloadQuotePdf('ord-1', 2, 'ORD-001');
+      const req = httpMock.expectOne('/api/orders/ord-1/quotes/2/pdf');
+      expect(req.request.method).toBe('GET');
+      expect(req.request.responseType).toBe('blob');
+      req.flush(blob, {
+        headers: { 'Content-Disposition': 'attachment; filename="devis-ORD-001-v2.pdf"' }
+      });
+    });
+  });
+
   describe('exportCsv', () => {
     it('should GET CSV as blob and save it', () => {
       const blob = new Blob(['ref,status'], { type: 'text/csv' });

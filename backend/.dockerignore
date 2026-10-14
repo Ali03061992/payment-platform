@@ -1,7 +1,6 @@
+# Contexte de build backend/ : exclure les artefacts locaux
+# (sinon renvoyés à chaque build pour rien).
 **/target/
-**/.git
-**/.idea
-**/.settings
-**/.project
-**/.classpath
-**/node_modules
+**/.idea/
+**/.vscode/
+*.log

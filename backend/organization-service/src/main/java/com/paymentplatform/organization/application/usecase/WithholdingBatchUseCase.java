@@ -84,6 +84,32 @@ public class WithholdingBatchUseCase {
                 .toList();
     }
 
+    /** Synthèse mensuelle d'un débiteur : totaux + ventilation par nature (réconciliation déclaration). */
+    @Transactional(readOnly = true)
+    public WithholdingMonthlySummary monthlySummary(UUID debtorId, YearMonth month,
+                                                   UUID organizationId, boolean systemAdmin) {
+        checkDebtorScope(debtorId, organizationId, systemAdmin);
+        LocalDate from = month.atDay(1);
+        LocalDate to = month.atEndOfMonth();
+        var list = certificates.findByDebtorId(debtorId).stream()
+                .filter(c -> c.status() != com.paymentplatform.organization.domain.model.WithholdingCertificateStatus.CANCELLED)
+                .filter(c -> !c.orderDate().isBefore(from) && !c.orderDate().isAfter(to))
+                .toList();
+        var byNature = list.stream()
+                .collect(java.util.stream.Collectors.groupingBy(
+                        c -> c.nature().name(),
+                        java.util.stream.Collectors.reducing(
+                                java.math.BigDecimal.ZERO,
+                                WithholdingCertificate::withholdingAmount,
+                                java.math.BigDecimal::add)));
+        java.math.BigDecimal grossTotal = list.stream()
+                .map(WithholdingCertificate::grossAmount)
+                .reduce(java.math.BigDecimal.ZERO, java.math.BigDecimal::add);
+        java.math.BigDecimal withholdingTotal = byNature.values().stream()
+                .reduce(java.math.BigDecimal.ZERO, java.math.BigDecimal::add);
+        return new WithholdingMonthlySummary(month.toString(), list.size(), grossTotal, withholdingTotal, byNature);
+    }
+
     /** Identifiant TEJ du débiteur (déposant), si renseigné sur son profil fiscal. */
     @Transactional(readOnly = true)
     public String depositorTejIdentifier(UUID debtorId) {
