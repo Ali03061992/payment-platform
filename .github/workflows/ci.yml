@@ -403,6 +403,9 @@ jobs:
           echo "$KEY" | tail -n 1 | grep -q "END OPENSSH PRIVATE KEY" && echo "footer OK" || echo "footer BAD"
           if echo "$KEY" | grep -q "$(printf '\r')"; then echo "CRLF DETECTE - PROBLEM (recopier en LF)"; else echo "LF only OK"; fi
           echo "lignes: $(echo "$KEY" | wc -l)"
+          echo "$KEY" > /tmp/ci_key && chmod 600 /tmp/ci_key
+          ssh-keygen -y -f /tmp/ci_key > /tmp/ci_key.pub 2>/dev/null && ssh-keygen -lf /tmp/ci_key.pub || echo "CLE ILLISIBLE"
+          rm -f /tmp/ci_key /tmp/ci_key.pub
 
       - name: Deploy to OVH test VM
         if: steps.check.outputs.mode == 'real'
