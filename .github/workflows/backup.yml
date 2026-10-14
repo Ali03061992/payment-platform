@@ -47,7 +47,7 @@ jobs:
             sudo -i <<'ROOT_EOF'
             set -e
             cd "${{ secrets.OVH_TEST_DIR || '/opt/payment-platform' }}"
-            docker compose -f deploy/docker-compose.yml up -d db-backup
+            docker compose -f deploy/docker-compose.yml --profile backup up -d db-backup
             docker compose -f deploy/docker-compose.yml exec -T db-backup /scripts/backup-now.sh "${{ inputs.tag }}"
             ROOT_EOF
 
@@ -85,7 +85,7 @@ jobs:
             sudo -i <<'ROOT_EOF'
             set -e
             cd "${{ secrets.OVH_PROD_DIR || '/opt/payment-platform' }}"
-            docker compose -f deploy/docker-compose.yml up -d db-backup
+            docker compose -f deploy/docker-compose.yml --profile backup up -d db-backup
             docker compose -f deploy/docker-compose.yml exec -T db-backup /scripts/backup-now.sh "${{ inputs.tag }}"
             ROOT_EOF
 

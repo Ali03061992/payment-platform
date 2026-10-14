@@ -90,6 +90,7 @@ Consommateur principal : notification-service (SSE + push FCM).
 - Local : `deploy/` (compose + `.env` + scripts `e2e-local/e2e-dev/stop`) ; dev direct : Angular `:4200`, services `:8081-:8085`.
 - CI (`.github/workflows/ci.yml`) : build, tests backend/frontend, Sonar, images Docker, budgets CSS (16 ko). **Pas d'e2e en CI** (lancé uniquement en local sur feu vert).
 - Branching : `release/**` → publication **auto vers TEST** ; `master` → publication **auto vers PROD** ; `develop` → build + tests **sans déploiement**. Publication **manuelle** : Actions → Run workflow → `test` ou `prod` (déploie la branche sélectionnée).
+- Déploiement : images **prébuildées en CI et poussées sur GHCR** (`test-latest` / `prod-latest`) ; les VM ne font que `pull` + `up -d` (**jamais de build**, pas de tests/sonar hors CI). Exécution root via `sudo -i`, `prune` auto (images pendantes + cache build) en fin de run, droits rendus à l'utilisateur SSH. Plafond heap JVM (`-Xmx384m`) pour la petite VM. Paquets GHCR publics (sinon `docker login ghcr.io` sur la VM).
 ### Mise en route déploiement (VM OVH) — pas à pas
 
 VM TEST : `ubuntu@51.222.6.2` — **en service** (Docker 29, clone à jour, `.env` renseigné, clé CI installée). Déploiements CI exécutés **root** via `sudo -i` (droits rendus à l'utilisateur SSH en fin de run). Même procédure pour la PROD avec les secrets `OVH_PROD_*`.
@@ -117,20 +118,21 @@ VM TEST : `ubuntu@51.222.6.2` — **en service** (Docker 29, clone à jour, `.en
 5. **Vérifier** : tout push sur `release/**` déclenche build + tests + déploiement auto sur la VM (suivi dans l'onglet Actions). Hôte en `.invalid` ou secrets absents = simulation verte (mode fake), jamais d'échec bloquant.
 6. **Backup manuel** : Actions → workflow `Backup` → `test`/`prod` + tag. Restauration sur VM : `sh deploy/backup/restore.sh <fichier.sql.gz>` (confirmation `RESTORE`).
 
-### Backups MySQL
+### Backups MySQL (PROD uniquement — pas de backup sur TEST)
 
-- Service `db-backup` (image `mysql:8.4`, dans `deploy/docker-compose.yml`) : dump des 4 bases (`identity/organization/payment/notification_db`, `--single-transaction`, routines+events) **toutes les 8 h** (`BACKUP_INTERVAL_SECONDS`, défaut 28800), fichiers `AAAAMMJJ-HHMMSS-<tag>.sql.gz` dans `./backups/` (**gitignoré**), **rotation : suppression au-delà de 3 j** (`BACKUP_RETENTION_DAYS`).
+- Service `db-backup` (image `mysql:8.4`, profil compose `backup` activé uniquement en PROD) : dump des 4 bases (`identity/organization/payment/notification_db`, `--single-transaction`, routines+events) **toutes les 8 h** (`BACKUP_INTERVAL_SECONDS`, défaut 28800), fichiers `AAAAMMJJ-HHMMSS-<tag>.sql.gz` dans `./backups/` (**gitignoré**), **rotation : suppression au-delà de 3 j** (`BACKUP_RETENTION_DAYS`).
 - **Backup pré-prod automatique** : avant chaque déploiement PROD, la CI sauvegarde la base (`pre-prod-<timestamp>`) puis déploie.
-- **Backup manuel** : workflow `Backup` (Actions → Run workflow → `test`/`prod` + tag), ou sur la VM : `docker compose exec db-backup /scripts/backup-now.sh [tag]`.
-- **Commandes toutes prêtes** (sur la VM, depuis la racine du repo) :
+- **Backup manuel** : workflow `Backup` (Actions → Run workflow → `test`/`prod` + tag, via `--profile backup`), ou sur la VM PROD : `docker compose --profile backup exec db-backup /scripts/backup-now.sh [tag]`.
+- **Commandes toutes prêtes** (VM PROD, depuis la racine du repo) :
   - Backup database daté : `sh deploy/backup/backup.sh db` → tag `db-AAAAMMJJ-HHMMSS`
   - Backup release : `sh deploy/backup/backup.sh release 1.1.0` → tag `release-1.1.0`
-- **Restauration** (sur la VM, depuis la racine du repo) : `sh deploy/backup/restore.sh <fichier.sql.gz>` (confirmation `RESTORE` requise, écrase les données). Scripts : `deploy/backup/` (`backup-now.sh`, `backup-loop.sh`, `restore.sh`).
+- **Restauration** (sur la VM, depuis la racine du repo) : `sh deploy/backup/restore.sh <fichier.sql.gz>` (confirmation `RESTORE` requise, écrase les données). Scripts : `deploy/backup/` (`backup-now.sh`, `backup-loop.sh`, `restore.sh`, `backup.sh`).
+- Ménage manuel VM : `docker image prune -a -f`, `docker builder prune -af`, `docker system df`. **Jamais** `prune --volumes` (données MySQL).
 
 ## 9. Versioning (SemVer)
 
 - Format `MAJEUR.MINEUR.PATCH` (ex. `1.2.0`) : MAJEUR = rupture, MINEUR = fonctionnalité, PATCH = correctif.
-- Sources uniques, bumpées **ensemble** à chaque release : `backend/pom.xml` (`<version>`), `payment-platform-ui/package.json` (`"version"`), `sonar.projectVersion` (`sonar-project.properties`). Version actuelle : `1.0.0`.
+- Sources uniques, bumpées **ensemble** à chaque release : `backend/pom.xml` (`<version>`), `payment-platform-ui/package.json` (`"version"`), `sonar.projectVersion` (`sonar-project.properties`). Version actuelle : `1.1.0` (release en cours).
 - Branches :
   - `master` : production, toujours déployable. Chaque merge de release = **tag `vX.Y.Z`** (ex. `git tag v1.1.0`).
   - `develop` : intégration (build + tests, jamais déployée). Après une release, elle porte la version suivante en `-SNAPSHOT` côté backend (ex. `1.2.0-SNAPSHOT`).

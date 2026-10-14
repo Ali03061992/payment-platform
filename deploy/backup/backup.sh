@@ -20,5 +20,5 @@ case "$MODE" in
     exit 1
     ;;
 esac
-docker compose -f deploy/docker-compose.yml up -d db-backup
+docker compose -f deploy/docker-compose.yml --profile backup up -d db-backup
 docker compose -f deploy/docker-compose.yml exec -T db-backup /scripts/backup-now.sh "$TAG"

@@ -20,11 +20,12 @@ on:
         type: choice
         options: [test, prod]
 
-# Needed for SonarCloud PR decoration & quality gate
+# Needed for SonarCloud PR decoration & quality gate + GHCR push
 permissions:
   contents: read
   pull-requests: write
   checks: write
+  packages: write
 
 env:
   JAVA_VERSION: '26-ea'
@@ -48,7 +49,6 @@ jobs:
             backend-jars
             frontend-coverage
             frontend-dist
-            docker-images
           failOnError: false
 
       - name: Delete old workflow runs (older than 7 days)
@@ -319,34 +319,48 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
   # ──────────────────────────────────────────────────────────────
-  # Docker images – dépend du build (pas bloqué par Sonar)
+  # Images Docker : build + push GHCR (pas de tests/sonar ici, déjà faits).
+  # Tags : <ref-slug> toujours ; test-latest sur release/** ;
+  # prod-latest sur master/tags. La VM ne fait que `pull` (jamais de build).
   # ──────────────────────────────────────────────────────────────
   build-images:
-    name: Build Docker Images
+    name: Build & Push Images (GHCR)
     runs-on: ubuntu-24.04
     needs: [build-backend, build-frontend]
     steps:
       - uses: actions/checkout@v4
 
-      - name: Download backend jars
-        uses: actions/download-artifact@v4
+      - name: Login to GHCR (si publication prévue)
+        if: startsWith(github.ref, 'refs/heads/release/') || github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/')
+        uses: docker/login-action@v3
         with:
-          name: backend-jars
-          path: /tmp/jars
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Download frontend dist
-        uses: actions/download-artifact@v4
-        with:
-          name: frontend-dist
-          path: /tmp/frontend-dist
+      - name: Compute image tags
+        id: tags
+        run: |
+          OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          SLUG=$(echo "${{ github.ref_name }}" | tr '/' '-' | tr '[:upper:]' '[:lower:]')
+          ENV_TAG=""
+          if [[ "${{ github.ref }}" == refs/heads/release/* ]]; then ENV_TAG="test-latest"; fi
+          if [[ "${{ github.ref }}" == refs/heads/master ]] || [[ "${{ github.ref }}" == refs/tags/* ]]; then ENV_TAG="prod-latest"; fi
+          echo "owner=$OWNER" >> "$GITHUB_OUTPUT"
+          echo "slug=$SLUG" >> "$GITHUB_OUTPUT"
+          echo "env_tag=$ENV_TAG" >> "$GITHUB_OUTPUT"
+          echo "owner=$OWNER slug=$SLUG env_tag=$ENV_TAG"
 
-      - name: Build backend images
+      - name: Build backend images (+ push si release/master/tag)
         working-directory: backend
         run: |
+          REG="ghcr.io/${{ steps.tags.outputs.owner }}/payment-platform"
+          SLUG="${{ steps.tags.outputs.slug }}"
+          ENV_TAG="${{ steps.tags.outputs.env_tag }}"
           for service in identity-service organization-service payment-service notification-service api-gateway; do
             for attempt in 1 2 3; do
               echo "Build $service (tentative $attempt/3)..."
-              if docker build -t payment-platform/$service:latest \
+              if docker build -t "$REG/$service:$SLUG" \
                 --build-arg SERVICE_NAME=$service .; then
                 break
               fi
@@ -354,36 +368,37 @@ jobs:
               sleep 30
               if [ "$attempt" = "3" ]; then echo "Build $service en echec apres 3 tentatives."; exit 1; fi
             done
+            if [ -n "$ENV_TAG" ]; then
+              docker tag "$REG/$service:$SLUG" "$REG/$service:$ENV_TAG"
+              docker push "$REG/$service:$SLUG"
+              docker push "$REG/$service:$ENV_TAG"
+            fi
           done
 
-      - name: Build frontend image
+      - name: Build frontend image (+ push si release/master/tag)
         working-directory: .
         run: |
+          REG="ghcr.io/${{ steps.tags.outputs.owner }}/payment-platform"
+          SLUG="${{ steps.tags.outputs.slug }}"
+          ENV_TAG="${{ steps.tags.outputs.env_tag }}"
           for attempt in 1 2 3; do
             echo "Build angular (tentative $attempt/3)..."
-            if docker build -t payment-platform/angular:latest -f Dockerfile .; then
+            if docker build -t "$REG/angular:$SLUG" -f Dockerfile .; then
               break
             fi
             echo "Echec tentative $attempt, pause 30s..."
             sleep 30
             if [ "$attempt" = "3" ]; then echo "Build angular en echec apres 3 tentatives."; exit 1; fi
           done
-
-      - name: Save Docker images
-        run: |
-          docker save payment-platform/{identity-service,organization-service,payment-service,notification-service,api-gateway,angular}:latest \
-            | gzip > docker-images.tar.gz
-
-      - name: Upload Docker images
-        uses: actions/upload-artifact@v4
-        with:
-          name: docker-images
-          path: docker-images.tar.gz
-          retention-days: 1
+          if [ -n "$ENV_TAG" ]; then
+            docker tag "$REG/angular:$SLUG" "$REG/angular:$ENV_TAG"
+            docker push "$REG/angular:$SLUG"
+            docker push "$REG/angular:$ENV_TAG"
+          fi
 
   # ──────────────────────────────────────────────────────────────
   # Publication TEST – auto sur release/**, ou manuelle
-  # Déploiement SSH vers la VM OVH de test : git pull + compose build.
+  # Déploiement SSH vers la VM OVH de test : git pull + pull images GHCR + up.
   # Secrets requis : OVH_TEST_HOST, OVH_TEST_USER, OVH_TEST_SSH_KEY
   # (optionnels : OVH_TEST_PORT=22, OVH_TEST_DIR=/opt/payment-platform,
   #  OVH_TEST_URL pour le health check). Le fichier deploy/.env doit
@@ -448,8 +463,14 @@ jobs:
             git fetch origin
             git checkout "$BRANCH"
             git pull origin "$BRANCH"
-            docker compose -f deploy/docker-compose.yml up -d --build
+            # Images prébuildées en CI (jamais de build sur la petite VM).
+            export IMAGE_TAG="test-latest"
+            docker compose -f deploy/docker-compose.yml pull
+            docker compose -f deploy/docker-compose.yml up -d
             docker compose -f deploy/docker-compose.yml ps
+            # Ménage : images pendantes + cache de build (plus aucun build ici).
+            docker image prune -f
+            docker builder prune -af
             chown -R "${SUDO_USER:-root}:${SUDO_USER:-root}" "$APP_DIR"
             ROOT_EOF
 
@@ -460,7 +481,7 @@ jobs:
           echo " FAKE deploy TEST (mode: ${{ steps.check.outputs.mode }})"
           echo " Branche : ${{ github.ref_name }}"
           echo " Hote    : ${{ secrets.OVH_TEST_HOST || 'vm-test.invalid (non defini)' }}"
-          echo " Simule (root) : git pull + docker compose up -d --build"
+          echo " Simule (root) : git pull + pull GHCR + up -d + prune"
           echo "=============================================="
 
       - name: Health check TEST (si URL configurée)
@@ -516,7 +537,7 @@ jobs:
             git fetch origin
             git checkout master
             git pull origin master
-            docker compose -f deploy/docker-compose.yml up -d db-backup
+            docker compose -f deploy/docker-compose.yml --profile backup up -d db-backup
             docker compose -f deploy/docker-compose.yml exec -T db-backup /scripts/backup-now.sh "pre-prod-$(date +%Y%m%d-%H%M%S)"
             chown -R "${SUDO_USER:-root}:${SUDO_USER:-root}" "$APP_DIR"
             ROOT_EOF
@@ -540,8 +561,12 @@ jobs:
             git fetch origin
             git checkout master
             git pull origin master
-            docker compose -f deploy/docker-compose.yml up -d --build
+            export IMAGE_TAG="prod-latest"
+            docker compose -f deploy/docker-compose.yml pull
+            docker compose -f deploy/docker-compose.yml --profile backup up -d
             docker compose -f deploy/docker-compose.yml ps
+            docker image prune -f
+            docker builder prune -af
             chown -R "${SUDO_USER:-root}:${SUDO_USER:-root}" "$APP_DIR"
             ROOT_EOF
 
@@ -552,7 +577,7 @@ jobs:
           echo " FAKE deploy PROD (mode: ${{ steps.check.outputs.mode }})"
           echo " Branche : master"
           echo " Hote    : ${{ secrets.OVH_PROD_HOST || 'vm-prod.invalid (non defini)' }}"
-          echo " Simule (root) : backup pre-prod + git pull + docker compose up -d --build"
+          echo " Simule (root) : backup pre-prod + git pull + pull GHCR + up -d + prune"
           echo "=============================================="
 
       - name: Health check PROD (si URL configurée)
