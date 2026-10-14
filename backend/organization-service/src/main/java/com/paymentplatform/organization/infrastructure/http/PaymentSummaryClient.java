@@ -25,14 +25,19 @@ public class PaymentSummaryClient {
     @Value("${PAYMENT_SERVICE_PORT:8084}")
     private String paymentPort;
 
+    @Value("${app.internal-secret}")
+    private String internalSecret;
+
     public SupplierFinancialReportResponse.PaymentSummary getSupplierPaymentSummary(UUID supplierId) {
         try {
+            // Endpoint interne (secret partagé) : l'ancien appel anonyme recevait
+            // 401 et le rapport tombait à zéro (cf. B3).
             String targetUri = "http://" + paymentUrl + ":" + paymentPort
-                    + "/api/payments/supplier-summary?supplierId=" + supplierId;
+                    + "/api/internal/payments/supplier-summary?supplierId=" + supplierId;
 
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(targetUri))
-                    .header("X-System-Admin", "true")
+                    .header("X-Internal-Token", internalSecret)
                     .GET()
                     .build();
 
