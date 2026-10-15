@@ -1610,7 +1610,17 @@
     "COUNT": "{{count}} demande(s)",
     "LOAD_ERROR": "Erreur de chargement des demandes",
     "QUOTE": "Chiffrer",
-    "QUOTE_ARIA": "Chiffrer un devis pour"
+    "QUOTE_ARIA": "Chiffrer un devis pour",
+    "COL_NEED": "Besoin",
+    "COL_QTY": "Qté",
+    "COL_PRICE": "PU",
+    "MODAL_TITLE": "Devis — demande {{ref}}",
+    "MODAL_HINT": "Ajustez les quantités, posez les remises lignes (%) et la remise globale (%). L'envoi notifie la boutique.",
+    "GLOBAL_DISCOUNT": "Remise globale (%)",
+    "SEND": "Envoyer le devis",
+    "SENT_TITLE": "Devis envoyés",
+    "QUOTE_SENT": "Devis n°{{version}} envoyé à la boutique",
+    "QUOTE_ERROR": "Erreur lors de l'envoi du devis"
   },
   "MY_QUOTES": {
     "TITLE": "Mes devis",

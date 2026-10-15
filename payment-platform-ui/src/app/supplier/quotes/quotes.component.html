@@ -33,20 +33,22 @@
 
     <div class="table-wrapper">
       <table>
-        <thead>
-          <tr>
-            <th>{{ 'QUOTES.COL_NEED' | translate }}</th>
-            <th>{{ 'QUOTES.COL_QTY' | translate }}</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (l of linesOf(d); track $index) {
+          <thead>
             <tr>
-              <td>{{ l.name }} <small class="text-muted">{{ l.ref }}</small></td>
-              <td>{{ l.qty }}</td>
+              <th>{{ 'QUOTES.COL_NEED' | translate }}</th>
+              <th>{{ 'QUOTES.COL_PRICE' | translate }}</th>
+              <th>{{ 'QUOTES.COL_QTY' | translate }}</th>
             </tr>
-          }
-        </tbody>
+          </thead>
+          <tbody>
+            @for (l of linesOf(d); track $index) {
+              <tr>
+                <td>{{ l.name }} <small class="text-muted">{{ l.ref }}</small></td>
+                <td>{{ l.unitPrice | number:'1.2-2' }}</td>
+                <td>{{ l.qty }}</td>
+              </tr>
+            }
+          </tbody>
       </table>
     </div>
 
@@ -98,6 +100,7 @@
                 <thead>
                   <tr>
                     <th>{{ 'SUPPLIER_ORDERS.PRODUCT' | translate }}</th>
+                    <th>{{ 'QUOTES.COL_PRICE' | translate }}</th>
                     <th>{{ 'SUPPLIER_ORDERS.QUANTITY' | translate }}</th>
                     <th>{{ 'SUPPLIER_ORDERS.DISCOUNT_PCT' | translate }}</th>
                   </tr>
@@ -106,6 +109,7 @@
                   @for (line of quoteLines; track line; let i = $index) {
                     <tr>
                       <td>{{ line.productName }}</td>
+                      <td>{{ line.unitPrice | number:'1.2-2' }}</td>
                       <td>
                         <input type="number" [(ngModel)]="line.quantity" [name]="'quoteQty_' + i"
                           class="form-control" min="1" style="width:80px;" required>

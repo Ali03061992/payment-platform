@@ -1610,7 +1610,17 @@
     "COUNT": "{{count}} request(s)",
     "LOAD_ERROR": "Error loading requests",
     "QUOTE": "Price",
-    "QUOTE_ARIA": "Price a quote for"
+    "QUOTE_ARIA": "Price a quote for",
+    "COL_NEED": "Need",
+    "COL_QTY": "Qty",
+    "COL_PRICE": "Unit price",
+    "MODAL_TITLE": "Quote — request {{ref}}",
+    "MODAL_HINT": "Adjust quantities, set line discounts (%) and the overall discount (%). Sending notifies the shop.",
+    "GLOBAL_DISCOUNT": "Overall discount (%)",
+    "SEND": "Send quote",
+    "SENT_TITLE": "Quotes sent",
+    "QUOTE_SENT": "Quote #{{version}} sent to the shop",
+    "QUOTE_ERROR": "Error sending the quote"
   },
   "MY_QUOTES": {
     "TITLE": "My quotes",
