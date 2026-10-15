@@ -59,6 +59,9 @@ public class QuotePdfService {
                     item.setUnitPrice(num(n, "unitPrice"));
                     item.setDiscount(num(n, "discount"));
                     item.setVatRate(num(n, "vatRate"));
+                    item.setFodecApplicable(n.has("fodec") && n.get("fodec").asBoolean(false));
+                    item.setPriceTtc(n.has("priceTtc") && n.get("priceTtc").asBoolean(false));
+                    item.setLineTotal(num(n, "lineTotal"));
                     items.add(item);
                 }
             }

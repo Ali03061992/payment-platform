@@ -93,4 +93,18 @@ describe('ShopQuotesComponent', () => {
     const d = { quotes: [{ version: 1 }, { version: 3 }, { version: 2 }] } as any;
     expect(component.latestQuote(d).version).toBe(2);
   });
+
+  it('should flatten all quotes with their demande, newest first', () => {
+    const d1 = { id: 'd1', reference: 'DEV-1', quotes: [
+      { id: 'q1', version: 1, createdAt: '2026-01-01T10:00:00' },
+      { id: 'q2', version: 2, createdAt: '2026-01-02T10:00:00' }
+    ] } as any;
+    const d2 = { id: 'd2', reference: 'DEV-2', quotes: [] } as any;
+    component.demandes = [d1, d2];
+    const rows = component.allQuotes;
+    expect(rows.length).toBe(2);
+    expect(rows[0].quote.id).toBe('q2');
+    expect(rows[0].demande.reference).toBe('DEV-1');
+    expect(rows[1].quote.id).toBe('q1');
+  });
 });

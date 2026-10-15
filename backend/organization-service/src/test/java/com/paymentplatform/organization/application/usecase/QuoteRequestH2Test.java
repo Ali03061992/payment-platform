@@ -111,6 +111,25 @@ class QuoteRequestH2Test {
     }
 
     @Test
+    @DisplayName("PDF devis : binaire valide, totaux du snapshot (HT 1710.00)")
+    void pdfDevis_totauxSnapshot() {
+        UUID requestId = demande();
+        sendQuote.execute(requestId,
+                new SendQuoteRequest(List.of(new OrderItemRequest(productId, 2, new BigDecimal("10"))),
+                        new BigDecimal("5")),
+                supplierId, actor);
+        var domain = quotes.findByRequestId(requestId).get(0);
+        assertThat(domain.linesJson()).contains("\"lineTotal\":1800.0000");
+        byte[] pdf = new com.paymentplatform.organization.application.service.QuotePdfService()
+                .generateQuotePdf(domain,
+                        com.paymentplatform.organization.application.service.InvoicePdfService.InvoiceParty.named("Fournisseur"),
+                        com.paymentplatform.organization.application.service.InvoicePdfService.InvoiceParty.named("Boutique"),
+                        shopId, "Demande", "DEV-TEST");
+        assertThat(pdf).isNotEmpty();
+        assertThat(new String(pdf, 0, 4, java.nio.charset.StandardCharsets.UTF_8)).isEqualTo("%PDF");
+    }
+
+    @Test
     @DisplayName("Acceptation : commande CONFIRMÉE aux conditions du devis")
     void acceptation_creeCommandeConfirmee() {
         UUID requestId = demande();

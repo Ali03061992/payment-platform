@@ -17,6 +17,47 @@
   <div class="empty-state">{{ 'MY_QUOTES.EMPTY' | translate }}</div>
 }
 
+@if (!loading && allQuotes.length > 0) {
+  <div class="table-card" style="margin-bottom:16px;">
+    <h3 style="padding:16px 20px 0;">{{ 'MY_QUOTES.QUOTES_RECEIVED' | translate }} ({{ allQuotes.length }})</h3>
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>{{ 'MY_QUOTES.COL_REQUEST' | translate }}</th>
+            <th>{{ 'ORDER_DETAIL.QUOTE_VERSION' | translate }}</th>
+            <th>{{ 'MY_QUOTES.COL_SUPPLIER' | translate }}</th>
+            <th>{{ 'ORDER_DETAIL.QUOTE_TOTAL' | translate }}</th>
+            <th>{{ 'MY_QUOTES.COL_DISCOUNT' | translate }}</th>
+            <th>{{ 'ORDER_DETAIL.QUOTE_DATE' | translate }}</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of allQuotes; track row.quote.id) {
+            <tr>
+              <td><strong>{{ row.demande.reference }}</strong></td>
+              <td>{{ 'ORDER_DETAIL.QUOTE_N' | translate:{version: row.quote.version} }}</td>
+              <td>{{ row.demande.supplierName || row.demande.supplierId }}</td>
+              <td><strong>{{ row.quote.total | number:'1.2-2' }} {{ row.quote.currency }}</strong></td>
+              <td>@if (row.quote.globalDiscount > 0) { -{{ row.quote.globalDiscount }}% } @else { — }</td>
+              <td>{{ row.quote.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
+              <td class="actions">
+                <button class="btn btn-sm btn-secondary" type="button" (click)="download(row.quote)">{{ 'ORDER_DETAIL.QUOTE_DOWNLOAD' | translate }}</button>
+                @if (row.demande.status === 'QUOTED') {
+                  <button class="btn btn-sm btn-primary" type="button" (click)="accept(row.quote)" [disabled]="acceptingId === row.quote.id">
+                    {{ acceptingId === row.quote.id ? ('COMMON.SAVING' | translate) : ('MY_QUOTES.ACCEPT' | translate) }}
+                  </button>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+}
+
 @for (d of demandes; track d.id) {
   <div class="table-card" style="margin-bottom:16px;">
     <div class="demande-head">
@@ -54,38 +95,7 @@
       </table>
     </div>
 
-    @if ((d.quotes || []).length > 0) {
-      <h4 style="padding:12px 20px 0;">{{ 'MY_QUOTES.QUOTES_RECEIVED' | translate }}</h4>
-      <div class="table-wrapper">
-        <table>
-          <thead>
-            <tr>
-              <th>{{ 'ORDER_DETAIL.QUOTE_VERSION' | translate }}</th>
-              <th>{{ 'ORDER_DETAIL.QUOTE_TOTAL' | translate }}</th>
-              <th>{{ 'ORDER_DETAIL.QUOTE_DATE' | translate }}</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (q of d.quotes; track q.id) {
-              <tr>
-                <td>{{ 'ORDER_DETAIL.QUOTE_N' | translate:{version: q.version} }}</td>
-                <td>{{ q.total | number:'1.2-2' }} {{ q.currency }}</td>
-                <td>{{ q.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
-                <td class="actions">
-                  <button class="btn btn-sm btn-secondary" type="button" (click)="download(q)">{{ 'ORDER_DETAIL.QUOTE_DOWNLOAD' | translate }}</button>
-                  @if (d.status === 'QUOTED') {
-                    <button class="btn btn-sm btn-primary" type="button" (click)="accept(q)" [disabled]="acceptingId === q.id">
-                      {{ acceptingId === q.id ? ('COMMON.SAVING' | translate) : ('MY_QUOTES.ACCEPT' | translate) }}
-                    </button>
-                  }
-                </td>
-              </tr>
-            }
-          </tbody>
-        </table>
-      </div>
-    } @else {
+    @if ((d.quotes || []).length === 0) {
       <div class="empty-state" style="padding:16px;">{{ 'MY_QUOTES.WAITING' | translate }}</div>
     }
   </div>

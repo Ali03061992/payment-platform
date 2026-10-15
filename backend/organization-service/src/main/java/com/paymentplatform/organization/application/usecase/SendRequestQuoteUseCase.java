@@ -108,6 +108,8 @@ public class SendRequestQuoteUseCase {
             item.setQuantity(itemReq.quantity());
             item.setUnitPrice(product.getUnitPrice());
             item.setDiscount(discountAmount);
+            item.setFodecApplicable(product.isFodecApplicable());
+            item.setPriceTtc(product.isPriceTtc());
             CreateOrderUseCase.snapshotFiscalFields(item, product);
             priced.add(item);
             discountPcts.add(pct);
@@ -168,8 +170,10 @@ public class SendRequestQuoteUseCase {
                     .append(",\"unitPrice\":").append(n(it.getUnitPrice()))
                     .append(",\"discountPct\":").append(pct.stripTrailingZeros().toPlainString())
                     .append(",\"discount\":").append(n(it.getDiscount()))
-                    .append(",\"lineTotal\":").append(n(it.getLineTotal()))
+                    .append(",\"lineTotal\":").append(frozenTotal.toPlainString())
                     .append(",\"vatRate\":").append(n(it.getVatRate()))
+                    .append(",\"fodec\":").append(it.isFodecApplicable())
+                    .append(",\"priceTtc\":").append(it.isPriceTtc())
                     .append("}");
         }
         return sb.append("]").toString();
