@@ -70,10 +70,6 @@ public class SendRequestQuoteUseCase {
                 && quoteRequest.status() != QuoteRequestStatus.QUOTED) {
             throw new ConflictException("Demande déjà clôturée : " + quoteRequest.status());
         }
-        BigDecimal globalDiscount = request.globalDiscount() != null ? request.globalDiscount() : BigDecimal.ZERO;
-        if (globalDiscount.signum() < 0 || globalDiscount.compareTo(new BigDecimal("100")) > 0) {
-            throw new ConflictException("La remise globale doit être entre 0 et 100 %");
-        }
 
         Organization shop = organizations.findById(
                         new com.paymentplatform.organization.domain.valueobject.OrganizationId(quoteRequest.shopId()))
@@ -118,7 +114,6 @@ public class SendRequestQuoteUseCase {
         Order transientOrder = Order.create(quoteRequest.supplierId(), quoteRequest.shopId(),
                 actorUserId, "SUPPLIER_ADMIN", "QUOTE", false, "TND",
                 com.paymentplatform.organization.domain.model.PaymentTerms.IMMEDIATE);
-        transientOrder.setGlobalDiscount(globalDiscount);
         OrderFiscalizer.apply(transientOrder, priced, shop);
 
         int version = quotes.findByRequestId(requestId).stream()
@@ -129,7 +124,6 @@ public class SendRequestQuoteUseCase {
                 .requestReference(quoteRequest.reference())
                 .supplierId(quoteRequest.supplierId())
                 .version(version)
-                .globalDiscount(transientOrder.getGlobalDiscount())
                 .subtotal(transientOrder.getSubtotal())
                 .taxAmount(transientOrder.getTaxAmount())
                 .total(transientOrder.getTotal())

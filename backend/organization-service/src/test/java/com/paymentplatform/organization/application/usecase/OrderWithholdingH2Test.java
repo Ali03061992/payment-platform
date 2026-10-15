@@ -75,7 +75,7 @@ class OrderWithholdingH2Test {
 
     private UUID deliver(String price, String vatRate, boolean ttc, String nature) {
         UUID pid = product("W-" + System.nanoTime(), price, vatRate, ttc);
-        var request = new CreateOrderRequest(supplierId, shopId, false, null, "TND", null, null, null,
+        var request = new CreateOrderRequest(supplierId, shopId, false, null, "TND", null, null,
                 List.of(new OrderItemRequest(pid, 1, null)));
         var order = createOrder.execute(request, actor, "SHOP");
         confirmOrder.execute(order.id(), actor);
@@ -124,7 +124,7 @@ class OrderWithholdingH2Test {
     @Test
     void priceTtc_noVatAdded() {
         UUID pid = product("TTC-" + System.nanoTime(), "1190.00", "19", true);
-        var request = new CreateOrderRequest(supplierId, shopId, false, null, "TND", null, null, null,
+        var request = new CreateOrderRequest(supplierId, shopId, false, null, "TND", null, null,
                 List.of(new OrderItemRequest(pid, 1, null)));
         var response = createOrder.execute(request, actor, "SHOP");
         // 1190 TTC → HT 1000, TVA 190, TTC 1190 : rien n'est ajouté.
@@ -137,7 +137,7 @@ class OrderWithholdingH2Test {
     @Test
     void accept_withoutPriorCertificate_issuesOnCatchUp() {
         UUID pid = product("C-" + System.nanoTime(), "2000.00", "19", false);
-        var request = new CreateOrderRequest(supplierId, shopId, false, null, "TND", null, null, null,
+        var request = new CreateOrderRequest(supplierId, shopId, false, null, "TND", null, null,
                 List.of(new OrderItemRequest(pid, 1, null)));
         var order = createOrder.execute(request, actor, "SHOP");
         confirmOrder.execute(order.id(), actor);

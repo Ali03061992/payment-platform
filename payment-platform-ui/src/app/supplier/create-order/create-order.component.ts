@@ -32,7 +32,6 @@ export class SupplierCreateOrderComponent implements OnInit, OnDestroy {
   asapPayment = false;
   currency = 'TND';
   paymentTerms = 'IMMEDIATE';
-  globalDiscount = 0;
   notes = '';
   creating = false;
   supplierId = '';
@@ -157,7 +156,8 @@ export class SupplierCreateOrderComponent implements OnInit, OnDestroy {
     this.orderLines.splice(index, 1);
   }
 
-  /** Aperçu fiscal (TVA par produit 19/13/7, FODEC, timbre) — le backend recalcule. */
+  /** Aperçu fiscal (TVA par produit 19/13/7, FODEC, timbre) — le backend recalcule.
+   * Remise ligne en % convertie en montant à l'envoi (formule : PU × Qté × % / 100). */
   private get fiscalPreview() {
     return previewFiscal(
       this.orderLines.map(l => ({
@@ -166,8 +166,7 @@ export class SupplierCreateOrderComponent implements OnInit, OnDestroy {
         discountPct: l.discount,
         vatRate: l.product.vatRate,
         fodecApplicable: l.product.fodecApplicable
-      })),
-      this.globalDiscount
+      }))
     );
   }
 
@@ -177,10 +176,6 @@ export class SupplierCreateOrderComponent implements OnInit, OnDestroy {
 
   get taxAmount(): number {
     return this.fiscalPreview.vatTotal;
-  }
-
-  get discountAmount(): number {
-    return this.fiscalPreview.discountAmount;
   }
 
   get fodecAmount(): number {
@@ -216,12 +211,11 @@ export class SupplierCreateOrderComponent implements OnInit, OnDestroy {
       asapPayment: this.asapPayment,
       currency: this.currency,
       paymentTerms: this.paymentTerms,
-      globalDiscount: this.globalDiscount,
       notes: this.notes,
       items: this.orderLines.map(l => ({
         productId: l.product.id,
         quantity: l.quantity,
-        discount: l.discount
+        discount: Math.round(l.product.unitPrice * l.quantity * (l.discount / 100) * 10000) / 10000
       }))
     };
     this.subscriptions.add(this.orderService.create(request).subscribe({

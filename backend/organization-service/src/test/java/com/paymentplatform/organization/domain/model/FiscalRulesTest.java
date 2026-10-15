@@ -29,8 +29,7 @@ class FiscalRulesTest {
     @Test
     @DisplayName("TVA 19% standard sur HT net")
     void computeLine_standard19() {
-        var r = FiscalRules.computeLine(new BigDecimal("1000"), 1, BigDecimal.ZERO,
-                BigDecimal.ZERO, new BigDecimal("19"), false, false);
+        var r = FiscalRules.computeLine(new BigDecimal("1000"), 1, BigDecimal.ZERO, new BigDecimal("19"), false, false);
         assertThat(r.netHt()).isEqualByComparingTo("1000.0000");
         assertThat(r.fodec()).isEqualByComparingTo("0");
         assertThat(r.base()).isEqualByComparingTo("1000.0000");
@@ -41,8 +40,7 @@ class FiscalRulesTest {
     @Test
     @DisplayName("FODEC 1% intégré dans la base TVA (pas sur le HT seul)")
     void computeLine_fodecInVatBase() {
-        var r = FiscalRules.computeLine(new BigDecimal("1000"), 1, BigDecimal.ZERO,
-                BigDecimal.ZERO, new BigDecimal("19"), true, false);
+        var r = FiscalRules.computeLine(new BigDecimal("1000"), 1, BigDecimal.ZERO, new BigDecimal("19"), true, false);
         assertThat(r.fodec()).isEqualByComparingTo("10.0000");
         assertThat(r.base()).isEqualByComparingTo("1010.0000");
         assertThat(r.vat()).isEqualByComparingTo("191.9000");
@@ -50,20 +48,19 @@ class FiscalRulesTest {
     }
 
     @Test
-    @DisplayName("Remise globale imputée AVANT la TVA (exemple 10 000 - 5%)")
-    void computeLine_globalDiscountBeforeVat() {
-        var r = FiscalRules.computeLine(new BigDecimal("10000"), 1, BigDecimal.ZERO,
-                new BigDecimal("5"), new BigDecimal("19"), false, false);
-        assertThat(r.netHt()).isEqualByComparingTo("9500.0000");
-        assertThat(r.vat()).isEqualByComparingTo("1805.0000");
-        assertThat(r.ttc()).isEqualByComparingTo("11305.0000");
+    @DisplayName("Remise ligne déduite AVANT TVA, sans remise globale (2000 - 200, TVA 19%)")
+    void computeLine_lineDiscountBeforeVat() {
+        var r = FiscalRules.computeLine(new BigDecimal("1000"), 2, new BigDecimal("200"),
+                new BigDecimal("19"), false, false);
+        assertThat(r.netHt()).isEqualByComparingTo("1800.0000");
+        assertThat(r.vat()).isEqualByComparingTo("342.0000");
+        assertThat(r.ttc()).isEqualByComparingTo("2142.0000");
     }
 
     @Test
     @DisplayName("Prix TTC : TVA déduite, rien ajouté (1190 TTC 19% → HT 1000)")
     void computeLine_priceTtc() {
-        var r = FiscalRules.computeLine(new BigDecimal("1190"), 1, BigDecimal.ZERO,
-                BigDecimal.ZERO, new BigDecimal("19"), false, true);
+        var r = FiscalRules.computeLine(new BigDecimal("1190"), 1, BigDecimal.ZERO, new BigDecimal("19"), false, true);
         assertThat(r.netHt()).isEqualByComparingTo("1000.0000");
         assertThat(r.vat()).isEqualByComparingTo("190.0000");
         assertThat(r.ttc()).isEqualByComparingTo("1190.0000");
@@ -73,8 +70,7 @@ class FiscalRulesTest {
     @Test
     @DisplayName("Prix TTC 7% : 107 → HT 100 + TVA 7")
     void computeLine_priceTtcReduced() {
-        var r = FiscalRules.computeLine(new BigDecimal("107"), 2, BigDecimal.ZERO,
-                BigDecimal.ZERO, new BigDecimal("7"), false, true);
+        var r = FiscalRules.computeLine(new BigDecimal("107"), 2, BigDecimal.ZERO, new BigDecimal("7"), false, true);
         assertThat(r.netHt()).isEqualByComparingTo("200.0000");
         assertThat(r.vat()).isEqualByComparingTo("14.0000");
     }
@@ -82,11 +78,9 @@ class FiscalRulesTest {
     @Test
     @DisplayName("Taux réduits 7% et 13%")
     void computeLine_reducedRates() {
-        var seven = FiscalRules.computeLine(new BigDecimal("500"), 1, BigDecimal.ZERO,
-                BigDecimal.ZERO, new BigDecimal("7"), false, false);
+        var seven = FiscalRules.computeLine(new BigDecimal("500"), 1, BigDecimal.ZERO, new BigDecimal("7"), false, false);
         assertThat(seven.vat()).isEqualByComparingTo("35.0000");
-        var thirteen = FiscalRules.computeLine(new BigDecimal("1000"), 1, BigDecimal.ZERO,
-                BigDecimal.ZERO, new BigDecimal("13"), false, false);
+        var thirteen = FiscalRules.computeLine(new BigDecimal("1000"), 1, BigDecimal.ZERO, new BigDecimal("13"), false, false);
         assertThat(thirteen.vat()).isEqualByComparingTo("130.0000");
     }
 
@@ -181,7 +175,6 @@ class FiscalRulesTest {
     @DisplayName("Commande mixte 19% + 7% avec FODEC : totaux recomposés au millime")
     void order_mixedRates_withFodec() {
         Order order = order();
-        order.setGlobalDiscount(BigDecimal.ZERO);
         List<OrderItem> items = List.of(
                 item("Conseil", "1000", 1, "19", false),
                 item("Alimentaire", "500", 1, "7", false),

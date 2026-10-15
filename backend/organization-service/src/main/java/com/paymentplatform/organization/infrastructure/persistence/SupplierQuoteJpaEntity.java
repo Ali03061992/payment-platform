@@ -28,9 +28,6 @@ public class SupplierQuoteJpaEntity {
     @Column(name = "version", nullable = false)
     private int version;
 
-    @Column(name = "global_discount", nullable = false, precision = 5, scale = 2)
-    private BigDecimal globalDiscount;
-
     @Column(name = "subtotal", nullable = false, precision = 19, scale = 3)
     private BigDecimal subtotal;
 
@@ -65,8 +62,6 @@ public class SupplierQuoteJpaEntity {
     public void setSupplierId(UUID supplierId) { this.supplierId = supplierId; }
     public int getVersion() { return version; }
     public void setVersion(int version) { this.version = version; }
-    public BigDecimal getGlobalDiscount() { return globalDiscount; }
-    public void setGlobalDiscount(BigDecimal globalDiscount) { this.globalDiscount = globalDiscount; }
     public BigDecimal getSubtotal() { return subtotal; }
     public void setSubtotal(BigDecimal subtotal) { this.subtotal = subtotal; }
     public BigDecimal getTaxAmount() { return taxAmount; }

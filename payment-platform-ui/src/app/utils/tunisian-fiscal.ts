@@ -1,4 +1,4 @@
-/** Aperçu fiscal tunisien côté frontend (estimation — le backend recalcule). Ordre légal : remise → FODEC → base TVA → TVA par taux → timbre. */
+/** Aperçu fiscal tunisien côté frontend (estimation — le backend recalcule). Ordre légal : remise ligne → FODEC → base TVA → TVA par taux → timbre. Aucune remise globale. */
 
 export interface FiscalLineInput {
   unitPrice: number;
@@ -37,10 +37,8 @@ function round4(n: number): number {
 
 export function previewFiscal(
   lines: FiscalLineInput[],
-  globalDiscountPct: number,
   stamp = 1
 ): FiscalPreview {
-  const g = Math.min(100, Math.max(0, globalDiscountPct || 0));
   let subtotal = 0;
   let discountAmount = 0;
   let netHt = 0;
@@ -49,14 +47,16 @@ export function previewFiscal(
 
   for (const l of lines) {
     const rate = l.vatRate ?? 19;
-    const lineGross = l.unitPrice * l.quantity * (1 - (l.discountPct || 0) / 100);
-    const netEntered = lineGross * (1 - g / 100);
+    // Montant remise = (PU × Qté) × remise% / 100 ; net = brut − remise.
+    const lineGross = l.unitPrice * l.quantity;
+    const lineDiscount = lineGross * ((l.discountPct || 0) / 100);
+    const netEntered = lineGross - lineDiscount;
     const net = l.priceTtc && rate > 0 ? netEntered / (1 + rate / 100) : netEntered;
     const lineFodec = l.fodecApplicable ? net * 0.01 : 0;
     const base = net + lineFodec;
     const vat = base * (rate / 100);
-    subtotal += lineGross;
-    discountAmount += lineGross - net;
+    subtotal += net;
+    discountAmount += lineDiscount;
     netHt += net;
     fodec += lineFodec;
     const prev = byRate.get(rate) || { base: 0, amount: 0 };

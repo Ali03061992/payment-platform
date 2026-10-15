@@ -22,7 +22,6 @@ export class QuotesComponent implements OnInit, OnDestroy {
   showQuoteModal = false;
   quoteRequestId = '';
   quoteReference = '';
-  quoteGlobalDiscount = 0;
   quoteLines: { productId: string; productName: string; quantity: number; discount: number; unitPrice: number }[] = [];
   sendingQuote = false;
 
@@ -67,7 +66,6 @@ export class QuotesComponent implements OnInit, OnDestroy {
   openQuote(d: QuoteRequest): void {
     this.quoteRequestId = d.id;
     this.quoteReference = d.reference;
-    this.quoteGlobalDiscount = 0;
     this.quoteLines = this.linesOf(d).map((l: any) => ({
       productId: l.productId,
       productName: l.name,
@@ -83,12 +81,10 @@ export class QuotesComponent implements OnInit, OnDestroy {
     this.showQuoteModal = false;
     this.quoteRequestId = '';
     this.quoteLines = [];
-    this.quoteGlobalDiscount = 0;
   }
 
   canSubmitQuote(): boolean {
     return this.quoteLines.length > 0 && !this.sendingQuote
-      && this.quoteGlobalDiscount >= 0 && this.quoteGlobalDiscount <= 100
       && this.quoteLines.every(l => l.quantity >= 1 && l.discount >= 0 && l.discount <= 100);
   }
 
@@ -97,8 +93,7 @@ export class QuotesComponent implements OnInit, OnDestroy {
     this.sendingQuote = true;
     this.subscriptions.add(this.quoteService.sendQuote(
       this.quoteRequestId,
-      this.quoteLines.map(l => ({ productId: l.productId, quantity: l.quantity, discount: l.discount })),
-      this.quoteGlobalDiscount
+      this.quoteLines.map(l => ({ productId: l.productId, quantity: l.quantity, discount: l.discount }))
     ).subscribe({
       next: (quote) => {
         this.toast.success(this.translate.instant('QUOTES.QUOTE_SENT', { version: quote.version }));

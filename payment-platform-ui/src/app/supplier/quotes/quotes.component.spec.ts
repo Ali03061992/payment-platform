@@ -75,17 +75,15 @@ describe('QuotesComponent', () => {
     quoteService.sendQuote.and.returnValue(of({ version: 1 } as any));
     component.quoteRequestId = 'd1';
     component.quoteLines = [{ productId: 'p1', productName: 'Widget', quantity: 2, discount: 10 }];
-    component.quoteGlobalDiscount = 5;
     component.submitQuote();
     expect(quoteService.sendQuote).toHaveBeenCalledWith('d1',
-      [{ productId: 'p1', quantity: 2, discount: 10 }], 5);
+      [{ productId: 'p1', quantity: 2, discount: 10 }]);
     expect(component.showQuoteModal).toBeFalse();
   });
 
   it('should reject invalid discounts', () => {
     component.quoteRequestId = 'd1';
     component.quoteLines = [{ productId: 'p1', productName: 'W', quantity: 1, discount: 120 }];
-    component.quoteGlobalDiscount = 0;
     expect(component.canSubmitQuote()).toBeFalse();
     component.submitQuote();
     expect(quoteService.sendQuote).not.toHaveBeenCalled();

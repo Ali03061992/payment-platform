@@ -38,7 +38,6 @@ public class QuotePdfService {
         Order display = Order.create(quote.supplierId(), shopId,
                 quote.createdBy(), "SUPPLIER_ADMIN", "MANUAL", false, quote.currency(),
                 PaymentTerms.IMMEDIATE);
-        display.setGlobalDiscount(quote.globalDiscount() != null ? quote.globalDiscount() : BigDecimal.ZERO);
         display.recalculateTotals(items);
         display.setStampAmount(quote.stampAmount() != null ? quote.stampAmount() : BigDecimal.ZERO);
         return invoicePdfService.generateQuotePdf(display, items, supplier, buyer,

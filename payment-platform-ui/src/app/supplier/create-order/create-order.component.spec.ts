@@ -199,7 +199,6 @@ describe('SupplierCreateOrderComponent', () => {
     });
 
     it('should ventilate mixed VAT rates with FODEC and stamp', () => {
-      component.globalDiscount = 0;
       component.orderLines = [
         { product: { id: 1, unitPrice: 1000, vatRate: 19, fodecApplicable: false } as any, quantity: 1, discount: 0 },
         { product: { id: 2, unitPrice: 500, vatRate: 7, fodecApplicable: false } as any, quantity: 1, discount: 0 },
@@ -215,14 +214,26 @@ describe('SupplierCreateOrderComponent', () => {
       expect(component.vatByRate[0].rate).toBe(19);
     });
 
-    it('should deduct global discount before VAT', () => {
-      component.globalDiscount = 5;
+    it('should deduct line discount before VAT, no global discount', () => {
       component.orderLines = [
-        { product: { id: 1, unitPrice: 10000, vatRate: 19, fodecApplicable: false } as any, quantity: 1, discount: 0 }
+        { product: { id: 1, unitPrice: 1000, vatRate: 19, fodecApplicable: false } as any, quantity: 2, discount: 10 }
       ];
-      expect(component.discountAmount).toBeCloseTo(500, 4);
-      expect(component.taxAmount).toBeCloseTo(1805, 4);
-      expect(component.total).toBeCloseTo(11305, 4);
+      expect(component.subtotal).toBeCloseTo(1800, 4);
+      expect(component.taxAmount).toBeCloseTo(342, 4);
+      expect(component.total).toBeCloseTo(2142, 4);
+    });
+
+    it('should convert line % to amount in payload', () => {
+      orderService.create.and.returnValue(of({ id: 1 } as any));
+      component.supplierId = 1;
+      component.selectedShopId = 10;
+      component.orderLines = [{ product: { id: 5, unitPrice: 1000 } as any, quantity: 2, discount: 10 }];
+      component.submit();
+      expect(orderService.create).toHaveBeenCalledWith(jasmine.objectContaining({
+        items: [{ productId: 5, quantity: 2, discount: 200 }]
+      }));
+      const payload = orderService.create.calls.mostRecent().args[0];
+      expect('globalDiscount' in payload).toBeFalse();
     });
   });
 

@@ -28,7 +28,6 @@
             <th>{{ 'ORDER_DETAIL.QUOTE_VERSION' | translate }}</th>
             <th>{{ 'MY_QUOTES.COL_SUPPLIER' | translate }}</th>
             <th>{{ 'ORDER_DETAIL.QUOTE_TOTAL' | translate }}</th>
-            <th>{{ 'MY_QUOTES.COL_DISCOUNT' | translate }}</th>
             <th>{{ 'ORDER_DETAIL.QUOTE_DATE' | translate }}</th>
             <th></th>
           </tr>
@@ -40,7 +39,6 @@
               <td>{{ 'ORDER_DETAIL.QUOTE_N' | translate:{version: row.quote.version} }}</td>
               <td>{{ row.demande.supplierName || row.demande.supplierId }}</td>
               <td><strong>{{ row.quote.total | number:'1.2-2' }} {{ row.quote.currency }}</strong></td>
-              <td>@if (row.quote.globalDiscount > 0) { -{{ row.quote.globalDiscount }}% } @else { — }</td>
               <td>{{ row.quote.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
               <td class="actions">
                 <button class="btn btn-sm btn-secondary" type="button" (click)="download(row.quote)">{{ 'ORDER_DETAIL.QUOTE_DOWNLOAD' | translate }}</button>

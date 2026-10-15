@@ -49,9 +49,6 @@ public class Order {
     @Column(nullable = false, precision = 19, scale = 4)
     private BigDecimal total;
 
-    @Column(name = "global_discount", nullable = false, precision = 5, scale = 2)
-    private BigDecimal globalDiscount;
-
     /** Total FODEC de la commande (1% du HT net des lignes concernées). */
     @Column(name = "fodec_total", nullable = false, precision = 19, scale = 4)
     private BigDecimal fodecTotal;
@@ -155,7 +152,6 @@ public class Order {
         if (subtotal == null) subtotal = BigDecimal.ZERO;
         if (taxRate == null) taxRate = new BigDecimal("19");
         if (taxAmount == null) taxAmount = BigDecimal.ZERO;
-        if (globalDiscount == null) globalDiscount = BigDecimal.ZERO;
         if (fodecTotal == null) fodecTotal = BigDecimal.ZERO;
         if (stampAmount == null) stampAmount = FiscalRules.STAMP_AMOUNT;
         if (buyerRegime == null) buyerRegime = FiscalRegime.ASSUJETTI.name();
@@ -193,7 +189,6 @@ public class Order {
         order.subtotal = BigDecimal.ZERO;
         order.taxRate = new BigDecimal("19");
         order.taxAmount = BigDecimal.ZERO;
-        order.globalDiscount = BigDecimal.ZERO;
         order.fodecTotal = BigDecimal.ZERO;
         order.stampAmount = FiscalRules.STAMP_AMOUNT;
         order.buyerRegime = FiscalRegime.ASSUJETTI.name();
@@ -280,8 +275,8 @@ public class Order {
     }
 
     /**
-     * Recalcule les totaux selon l'ordre fiscal tunisien légal : remise globale
-     * AVANT TVA, FODEC dans la base TVA, TVA ventilée par taux de ligne.
+     * Recalcule les totaux selon l'ordre fiscal tunisien légal : remises lignes,
+     * FODEC dans la base TVA, TVA ventilée par taux de ligne.
      * Met à jour chaque ligne (fodecAmount, vatBase, vatAmount) et les totaux.
      * {@code total} = TTC hors timbre ; net à payer = {@link #getNetPayable()}.
      */
@@ -296,7 +291,7 @@ public class Order {
             for (OrderItem item : items) {
                 FiscalRules.LineResult r = FiscalRules.computeLine(
                         item.getUnitPrice(), item.getQuantity(), item.getDiscount(),
-                        this.globalDiscount, item.getVatRate(), item.isFodecApplicable(),
+                        item.getVatRate(), item.isFodecApplicable(),
                         item.isPriceTtc());
                 item.setFodecAmount(r.fodec());
                 item.setVatBase(r.base());
@@ -360,7 +355,6 @@ public class Order {
     public Long getVersion() { return version; }
     public Instant getCreatedAt() { return createdAt; }
     public Instant getUpdatedAt() { return updatedAt; }
-    public BigDecimal getGlobalDiscount() { return globalDiscount; }
 
     public void setSubtotal(BigDecimal subtotal) { this.subtotal = subtotal; }
     /**
@@ -381,7 +375,6 @@ public class Order {
     public void setBuyerRegime(String buyerRegime) { this.buyerRegime = buyerRegime; }
     public String getExternalReference() { return externalReference; }
     public void setExternalReference(String externalReference) { this.externalReference = externalReference; }
-    public void setGlobalDiscount(BigDecimal globalDiscount) { this.globalDiscount = globalDiscount; }
     public void setPlannedDeliveryDate(LocalDate plannedDeliveryDate) { this.plannedDeliveryDate = plannedDeliveryDate; }
     public void setNotes(String notes) { this.notes = notes; }
     public void setReturnReason(String returnReason) { this.returnReason = returnReason; }

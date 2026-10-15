@@ -70,7 +70,6 @@ describe('23 - Interfaces dédiées devis', () => {
         cy.contains('button', 'Chiffrer').first().click();
         cy.get('#quote-modal-title', { timeout: 15000 }).should('exist');
         cy.get('input[name="quoteDiscount_0"]').clear().type('10');
-        cy.get('#quoteGlobalDiscount').clear().type('5');
         cy.contains('button', 'Envoyer le devis').click();
         cy.get('#quote-modal-title').should('not.exist');
       });
@@ -92,7 +91,7 @@ describe('23 - Interfaces dédiées devis', () => {
         method: 'POST',
         url: `${API()}/api/quotes/requests/${d.body.id}/quotes`,
         headers: { Authorization: `Bearer ${ctx.supplierToken}` },
-        body: { items: [{ productId: ctx.productId, quantity: 1, discount: 20 }], globalDiscount: 0 },
+        body: { items: [{ productId: ctx.productId, quantity: 1, discount: 20 }] },
         failOnStatusCode: false,
       })).then(() => {
         cy.loginAsShopAdmin();

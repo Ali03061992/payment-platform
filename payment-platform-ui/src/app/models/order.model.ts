@@ -13,7 +13,6 @@ export interface Order {
   subtotal: number;
   taxRate: number;
   taxAmount: number;
-  globalDiscount: number;
   fodecTotal: number;
   stampAmount: number;
   netPayable: number;
@@ -141,7 +140,6 @@ export interface SupplierQuote {
   requestReference: string;
   supplierId: string;
   version: number;
-  globalDiscount: number;
   subtotal: number;
   taxAmount: number;
   total: number;
@@ -180,7 +178,6 @@ export interface CreateOrderRequest {
   asapPayment: boolean;
   paymentTerms: string;
   currency: string;
-  globalDiscount: number;
   taxRate?: number;
   notes: string;
   items: { productId: string; quantity: number; discount: number }[];

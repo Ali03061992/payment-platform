@@ -91,7 +91,6 @@ public class AcceptQuoteUseCase {
         Order order = Order.create(request.supplierId(), request.shopId(), actorUserId,
                 "SHOP_ADMIN", "QUOTE", false, quote.currency(), PaymentTerms.IMMEDIATE);
         order.setNotes("Devis " + request.reference() + " n°" + quote.version() + " accepté");
-        order.setGlobalDiscount(quote.globalDiscount() != null ? quote.globalDiscount() : BigDecimal.ZERO);
         Order savedOrder = orders.save(order);
 
         List<OrderItem> items = new ArrayList<>();

@@ -244,12 +244,6 @@ public class InvoicePdfService {
         }
 
         document.add(table);
-        if (order.getGlobalDiscount() != null && order.getGlobalDiscount().signum() > 0) {
-            Paragraph discount = new Paragraph("Remise globale : " + formatRate(order.getGlobalDiscount()),
-                    SMALL_FONT);
-            discount.setAlignment(Element.ALIGN_RIGHT);
-            document.add(discount);
-        }
     }
 
     private void addBodyCell(PdfPTable table, String text, int alignment, Font font) {

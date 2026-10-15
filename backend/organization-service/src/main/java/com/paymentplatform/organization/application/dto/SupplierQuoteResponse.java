@@ -12,7 +12,6 @@ public record SupplierQuoteResponse(
         String requestReference,
         UUID supplierId,
         int version,
-        BigDecimal globalDiscount,
         BigDecimal subtotal,
         BigDecimal taxAmount,
         BigDecimal total,
@@ -24,7 +23,7 @@ public record SupplierQuoteResponse(
 
     public static SupplierQuoteResponse from(SupplierQuote q) {
         return new SupplierQuoteResponse(q.id(), q.requestId(), q.requestReference(), q.supplierId(),
-                q.version(), q.globalDiscount(), q.subtotal(), q.taxAmount(), q.total(),
+                q.version(), q.subtotal(), q.taxAmount(), q.total(),
                 q.stampAmount(), q.currency(), q.linesJson(), q.createdBy(), q.createdAt());
     }
 }

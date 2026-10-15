@@ -16,7 +16,7 @@ import java.util.List;
  * </ul>
  *
  * La TVA par ligne et le flag FODEC doivent être snapshotés depuis la fiche
- * produit AVANT cet appel. La remise globale, le FODEC dans la base TVA et la
+ * produit AVANT cet appel. Le FODEC dans la base TVA et la
  * ventilation par taux sont calculés par {@link Order#recalculateTotals(List)}.
  */
 public final class OrderFiscalizer {

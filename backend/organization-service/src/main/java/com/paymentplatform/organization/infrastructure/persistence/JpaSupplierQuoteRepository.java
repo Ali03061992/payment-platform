@@ -43,7 +43,6 @@ public class JpaSupplierQuoteRepository implements SupplierQuoteRepository {
         e.setRequestReference(q.requestReference());
         e.setSupplierId(q.supplierId());
         e.setVersion(q.version());
-        e.setGlobalDiscount(q.globalDiscount());
         e.setSubtotal(q.subtotal());
         e.setTaxAmount(q.taxAmount());
         e.setTotal(q.total());
@@ -59,7 +58,7 @@ public class JpaSupplierQuoteRepository implements SupplierQuoteRepository {
         return SupplierQuote.builder()
                 .id(e.getId()).requestId(e.getRequestId()).requestReference(e.getRequestReference())
                 .supplierId(e.getSupplierId()).version(e.getVersion())
-                .globalDiscount(e.getGlobalDiscount()).subtotal(e.getSubtotal())
+                .subtotal(e.getSubtotal())
                 .taxAmount(e.getTaxAmount()).total(e.getTotal()).stampAmount(e.getStampAmount())
                 .currency(e.getCurrency()).linesJson(e.getLinesJson())
                 .createdBy(e.getCreatedBy()).createdAt(e.getCreatedAt())

@@ -94,8 +94,7 @@ describe('ShopQuotesComponent', () => {
     expect(component.latestQuote(d).version).toBe(2);
   });
 
-  it('should flatten all quotes with their demande, newest first', () => {
-    const d1 = { id: 'd1', reference: 'DEV-1', quotes: [
+  it('should flatten all quotes with their demande, newest first', () => {    const d1 = { id: 'd1', reference: 'DEV-1', quotes: [
       { id: 'q1', version: 1, createdAt: '2026-01-01T10:00:00' },
       { id: 'q2', version: 2, createdAt: '2026-01-02T10:00:00' }
     ] } as any;
