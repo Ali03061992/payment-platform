@@ -75,13 +75,13 @@ class OrderUseCaseH2Test {
     }
 
     private OrderResponse createShopOrder() {
-        var request = new CreateOrderRequest(supplierId, shopId, false, null, "TND", null, null, "Test order",
+        var request = new CreateOrderRequest(supplierId, shopId, false, null, "TND", null, "Test order",
                 List.of(new OrderItemRequest(productId, 5, null)));
         return createOrder.execute(request, UUID.fromString("00000000-0000-0000-0000-000000000010"), "SHOP");
     }
 
     private OrderResponse createSupplierOrder() {
-        var request = new CreateOrderRequest(supplierId, shopId, false, null, "TND", null, null, "Test order",
+        var request = new CreateOrderRequest(supplierId, shopId, false, null, "TND", null, "Test order",
                 List.of(new OrderItemRequest(productId, 5, null)));
         return createOrder.execute(request, UUID.fromString("00000000-0000-0000-0000-000000000010"), "SUPPLIER");
     }
@@ -102,14 +102,14 @@ class OrderUseCaseH2Test {
 
     @Test
     void createOrder_emptyItems_throwsConflict() {
-        var request = new CreateOrderRequest(supplierId, shopId, false, null, "TND", null, null, null, List.of());
+        var request = new CreateOrderRequest(supplierId, shopId, false, null, "TND", null, null, List.of());
         assertThatThrownBy(() -> createOrder.execute(request, UUID.fromString("00000000-0000-0000-0000-000000000010"), "SHOP"))
                 .isInstanceOf(ConflictException.class);
     }
 
     @Test
     void createOrder_sameSupplierAndShop_throws() {
-        var request = new CreateOrderRequest(supplierId, supplierId, false, null, "TND", null, null, null,
+        var request = new CreateOrderRequest(supplierId, supplierId, false, null, "TND", null, null,
                 List.of(new OrderItemRequest(productId, 5, null)));
         assertThatThrownBy(() -> createOrder.execute(request, UUID.fromString("00000000-0000-0000-0000-000000000010"), "SHOP"))
                 .isInstanceOf(ConflictException.class);
@@ -117,7 +117,7 @@ class OrderUseCaseH2Test {
 
     @Test
     void createOrder_unknownProduct_throwsNotFound() {
-        var request = new CreateOrderRequest(supplierId, shopId, false, null, "TND", null, null, null,
+        var request = new CreateOrderRequest(supplierId, shopId, false, null, "TND", null, null,
                 List.of(new OrderItemRequest(UUID.fromString("00000000-0000-0000-0000-000000000999"), 5, null)));
         assertThatThrownBy(() -> createOrder.execute(request, UUID.fromString("00000000-0000-0000-0000-000000000010"), "SHOP"))
                 .isInstanceOf(NotFoundException.class);
@@ -125,7 +125,7 @@ class OrderUseCaseH2Test {
 
     @Test
     void createOrder_insufficientStock_throwsConflict() {
-        var request = new CreateOrderRequest(supplierId, shopId, false, null, "TND", null, null, null,
+        var request = new CreateOrderRequest(supplierId, shopId, false, null, "TND", null, null,
                 List.of(new OrderItemRequest(productId, 999, null)));
         assertThatThrownBy(() -> createOrder.execute(request, UUID.fromString("00000000-0000-0000-0000-000000000010"), "SHOP"))
                 .isInstanceOf(ConflictException.class)
@@ -302,7 +302,7 @@ class OrderUseCaseH2Test {
 
     @Test
     void createOrder_withNotes_succeeds() {
-        var request = new CreateOrderRequest(supplierId, shopId, false, null, "TND", null, null, "Special instructions",
+        var request = new CreateOrderRequest(supplierId, shopId, false, null, "TND", null, "Special instructions",
                 List.of(new OrderItemRequest(productId, 3, null)));
         var response = createOrder.execute(request, UUID.fromString("00000000-0000-0000-0000-000000000010"), "SHOP");
         assertThat(response.status()).isEqualTo("DRAFT");
@@ -310,7 +310,7 @@ class OrderUseCaseH2Test {
 
     @Test
     void createOrder_withDiscount_succeeds() {
-        var request = new CreateOrderRequest(supplierId, shopId, false, null, "TND", null, null, null,
+        var request = new CreateOrderRequest(supplierId, shopId, false, null, "TND", null, null,
                 List.of(new OrderItemRequest(productId, 3, new BigDecimal("2.00"))));
         var response = createOrder.execute(request, UUID.fromString("00000000-0000-0000-0000-000000000010"), "SHOP");
         assertThat(response.items()).hasSize(1);
@@ -428,7 +428,7 @@ class OrderUseCaseH2Test {
     void createOrder_mixedVatRates_computesVentilatedTotals() {
         UUID p19 = createProductWithVat("MIX-19", "10.00", "19", false);
         UUID p7 = createProductWithVat("MIX-7", "100.00", "7", false);
-        var request = new CreateOrderRequest(supplierId, shopId, false, null, "TND", null, null, null,
+        var request = new CreateOrderRequest(supplierId, shopId, false, null, "TND", null, null,
                 List.of(new OrderItemRequest(p19, 5, null), new OrderItemRequest(p7, 2, null)));
         var response = createOrder.execute(request, UUID.fromString("00000000-0000-0000-0000-000000000010"), "SHOP");
         // HT = 50 + 200 = 250 ; TVA = 9.5 + 14 = 23.5 ; TTC = 273.5 ; timbre 1 ; net 274.5
@@ -446,7 +446,7 @@ class OrderUseCaseH2Test {
     @Test
     void createOrder_fodecProduct_includedInVatBase() {
         UUID p = createProductWithVat("FOD-1", "1000.00", "19", true);
-        var request = new CreateOrderRequest(supplierId, shopId, false, null, "TND", null, null, null,
+        var request = new CreateOrderRequest(supplierId, shopId, false, null, "TND", null, null,
                 List.of(new OrderItemRequest(p, 1, null)));
         var response = createOrder.execute(request, UUID.fromString("00000000-0000-0000-0000-000000000010"), "SHOP");
         // FODEC = 10 ; base = 1010 ; TVA = 191.9 ; TTC = 1201.9
@@ -458,7 +458,7 @@ class OrderUseCaseH2Test {
     @Test
     void createOrder_suspendedBuyer_zeroVatWithMention() {
         setShopFiscalProfile("1111111C/A/M/000", "SUSPENDU", "ATT-H2-001");
-        var request = new CreateOrderRequest(supplierId, shopId, false, null, "TND", null, null, null,
+        var request = new CreateOrderRequest(supplierId, shopId, false, null, "TND", null, null,
                 List.of(new OrderItemRequest(productId, 5, null)));
         var response = createOrder.execute(request, UUID.fromString("00000000-0000-0000-0000-000000000010"), "SHOP");
         assertThat(response.taxAmount()).isEqualByComparingTo("0");
@@ -475,7 +475,7 @@ class OrderUseCaseH2Test {
         org.springframework.test.util.ReflectionTestUtils.setField(shopOrg, "fiscalRegime",
                 com.paymentplatform.organization.domain.model.FiscalRegime.SUSPENDU);
         organizations.save(shopOrg);
-        var request = new CreateOrderRequest(supplierId, shopId, false, null, "TND", null, null, null,
+        var request = new CreateOrderRequest(supplierId, shopId, false, null, "TND", null, null,
                 List.of(new OrderItemRequest(productId, 1, null)));
         assertThatThrownBy(() -> createOrder.execute(request, UUID.fromString("00000000-0000-0000-0000-000000000010"), "SHOP"))
                 .isInstanceOf(ConflictException.class)
@@ -495,7 +495,7 @@ class OrderUseCaseH2Test {
         product.setReservedQty(0);
         product.setVatRate(BigDecimal.ZERO);
         UUID zeroId = products.save(product).getId();
-        var request = new CreateOrderRequest(supplierId, shopId, false, null, "TND", null, null, null,
+        var request = new CreateOrderRequest(supplierId, shopId, false, null, "TND", null, null,
                 List.of(new OrderItemRequest(zeroId, 1, null)));
         assertThatThrownBy(() -> createOrder.execute(request, UUID.fromString("00000000-0000-0000-0000-000000000010"), "SHOP"))
                 .isInstanceOf(ConflictException.class)

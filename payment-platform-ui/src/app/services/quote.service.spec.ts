@@ -49,13 +49,13 @@ describe('QuoteService', () => {
     httpMock.expectOne('/api/quotes/requests/d1').flush({ id: 'd1' } as any);
   });
 
-  it('should POST quote with discounts', () => {
-    service.sendQuote('d1', [{ productId: 'p1', quantity: 2, discount: 10 }], 5).subscribe(q => {
+  it('should POST quote with line discounts only', () => {
+    service.sendQuote('d1', [{ productId: 'p1', quantity: 2, discount: 10 }]).subscribe(q => {
       expect(q.version).toBe(1);
     });
     const req = httpMock.expectOne('/api/quotes/requests/d1/quotes');
     expect(req.request.method).toBe('POST');
-    expect(req.request.body).toEqual({ items: [{ productId: 'p1', quantity: 2, discount: 10 }], globalDiscount: 5 });
+    expect(req.request.body).toEqual({ items: [{ productId: 'p1', quantity: 2, discount: 10 }] });
     req.flush({ version: 1 } as any);
   });
 

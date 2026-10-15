@@ -66,6 +66,17 @@ export class ShopQuotesComponent implements OnInit, OnDestroy {
     return demande.status === 'QUOTED' && (demande.quotes || []).length > 0;
   }
 
+  /** Tous les devis reçus, à plat pour le tableau (avec leur demande). */
+  get allQuotes(): { demande: QuoteRequest; quote: SupplierQuote }[] {
+    const rows: { demande: QuoteRequest; quote: SupplierQuote }[] = [];
+    for (const d of this.demandes) {
+      for (const q of d.quotes || []) {
+        rows.push({ demande: d, quote: q });
+      }
+    }
+    return rows.sort((a, b) => (b.quote.createdAt || '').localeCompare(a.quote.createdAt || ''));
+  }
+
   latestQuote(demande: QuoteRequest): SupplierQuote | null {
     const qs = demande.quotes || [];
     return qs.length > 0 ? qs[qs.length - 1] : null;

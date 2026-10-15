@@ -49,7 +49,7 @@ Payment Platform est une plateforme B2B qui relie **fournisseurs** et **boutique
 
 ### Commandes et livraisons
 - Liste, recherche, fiche détail (articles, événements, commentaires).
-- **Devis** : sur demande boutique (brouillon/confirmée), modification des lignes et quantités, remises lignes (%) + remise globale (%), envoi versionné avec notification à la boutique.
+- **Devis** : sur demande boutique (brouillon/confirmée), modification des lignes et quantités, remises lignes (%) uniquement (aucune remise globale), envoi versionné avec notification à la boutique.
 - Cycle complet : confirmation → préparation → prêt → affectation d'un livreur → livraison → réception confirmée par la boutique → **réception acceptée** (avec paiement automatique créé et certificat de retenue émis, avec rattrapage si manqué).
 - Annulation, rejet, **recommande** (reorder), rejet de livraison, commentaires par commande.
 - Suivi GPS : positions des livraisons, livraisons du jour, « mes livraisons » (livreur), agents boutique.

@@ -40,8 +40,8 @@ public class OrderItem {
 
     /**
      * Snapshot fiscal au moment de la commande (le taux produit peut changer après).
-     * vatRate : taux appliqué à la ligne ; fodecAmount : FODEC de la ligne (HT net + remise
-     * globale) ; vatBase : base TVA = net + FODEC ; vatAmount : TVA de la ligne.
+     * vatRate : taux appliqué à la ligne ; fodecAmount : FODEC de la ligne (HT net) ;
+     * vatBase : base TVA = net + FODEC ; vatAmount : TVA de la ligne.
      */
     @Column(name = "vat_rate", nullable = false, precision = 5, scale = 2)
     private BigDecimal vatRate;

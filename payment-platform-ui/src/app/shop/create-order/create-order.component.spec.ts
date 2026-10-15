@@ -294,7 +294,6 @@ describe('CreateOrderComponent (shop)', () => {
       component.orderLines = [{ product: { id: 1, unitPrice: 10 } as any, quantity: 2, discount: 10 }];
       component.submit();
       expect(orderService.create).toHaveBeenCalledWith(jasmine.objectContaining({
-        globalDiscount: 0,
         items: [jasmine.objectContaining({ discount: 0 })]
       }));
     });

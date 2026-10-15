@@ -15,7 +15,6 @@ public final class SupplierQuote {
     private final String requestReference;
     private final UUID supplierId;
     private final int version;
-    private final BigDecimal globalDiscount;
     private final BigDecimal subtotal;
     private final BigDecimal taxAmount;
     private final BigDecimal total;
@@ -31,7 +30,6 @@ public final class SupplierQuote {
         this.requestReference = b.requestReference;
         this.supplierId = b.supplierId;
         this.version = b.version;
-        this.globalDiscount = b.globalDiscount;
         this.subtotal = b.subtotal;
         this.taxAmount = b.taxAmount;
         this.total = b.total;
@@ -47,7 +45,6 @@ public final class SupplierQuote {
     public String requestReference() { return requestReference; }
     public UUID supplierId() { return supplierId; }
     public int version() { return version; }
-    public BigDecimal globalDiscount() { return globalDiscount; }
     public BigDecimal subtotal() { return subtotal; }
     public BigDecimal taxAmount() { return taxAmount; }
     public BigDecimal total() { return total; }
@@ -65,7 +62,6 @@ public final class SupplierQuote {
         private String requestReference;
         private UUID supplierId;
         private int version;
-        private BigDecimal globalDiscount = BigDecimal.ZERO;
         private BigDecimal subtotal = BigDecimal.ZERO;
         private BigDecimal taxAmount = BigDecimal.ZERO;
         private BigDecimal total = BigDecimal.ZERO;
@@ -80,7 +76,6 @@ public final class SupplierQuote {
         public Builder requestReference(String v) { this.requestReference = v; return this; }
         public Builder supplierId(UUID v) { this.supplierId = v; return this; }
         public Builder version(int v) { this.version = v; return this; }
-        public Builder globalDiscount(BigDecimal v) { this.globalDiscount = v; return this; }
         public Builder subtotal(BigDecimal v) { this.subtotal = v; return this; }
         public Builder taxAmount(BigDecimal v) { this.taxAmount = v; return this; }
         public Builder total(BigDecimal v) { this.total = v; return this; }

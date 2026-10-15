@@ -38,7 +38,6 @@ public class QuotePdfService {
         Order display = Order.create(quote.supplierId(), shopId,
                 quote.createdBy(), "SUPPLIER_ADMIN", "MANUAL", false, quote.currency(),
                 PaymentTerms.IMMEDIATE);
-        display.setGlobalDiscount(quote.globalDiscount() != null ? quote.globalDiscount() : BigDecimal.ZERO);
         display.recalculateTotals(items);
         display.setStampAmount(quote.stampAmount() != null ? quote.stampAmount() : BigDecimal.ZERO);
         return invoicePdfService.generateQuotePdf(display, items, supplier, buyer,
@@ -59,6 +58,9 @@ public class QuotePdfService {
                     item.setUnitPrice(num(n, "unitPrice"));
                     item.setDiscount(num(n, "discount"));
                     item.setVatRate(num(n, "vatRate"));
+                    item.setFodecApplicable(n.has("fodec") && n.get("fodec").asBoolean(false));
+                    item.setPriceTtc(n.has("priceTtc") && n.get("priceTtc").asBoolean(false));
+                    item.setLineTotal(num(n, "lineTotal"));
                     items.add(item);
                 }
             }

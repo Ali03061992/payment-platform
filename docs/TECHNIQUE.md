@@ -72,7 +72,7 @@ Consommateur principal : notification-service (SSE + push FCM).
 
 ## 6. Fiscalité — points d'implémentation
 
-- `FiscalRules` : ordre remise → FODEC 1 % dans base TVA → TVA par taux → TTC → timbre 1,000 DT ; miroir frontend `tunisian-fiscal.ts`.
+- `FiscalRules` : ordre remise ligne (montant = PU × Qté × % / 100) → FODEC 1 % dans base TVA → TVA par taux → TTC → timbre 1,000 DT ; aucune remise globale ; miroir frontend `tunisian-fiscal.ts`.
 - `TeifGeneratorService` : TEIF v1.8.8 (MF 13 chars, jjMMAA, codes I-*, timbre séparé, `RefTtnVal`), `GET /{id}/teif.xml`.
 - `Withholding*` : certificats rattachés aux factures, XML/loo PDF+QR, lot mensuel, J-7 planifié (`WithholdingDueScheduler`), synthèse mensuelle.
 - Référence e-facture : `docs/SPEC_EFACTURE_TTN.md` (archivé dans `archive-docs/`).

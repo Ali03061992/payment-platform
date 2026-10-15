@@ -70,10 +70,6 @@ public class SendRequestQuoteUseCase {
                 && quoteRequest.status() != QuoteRequestStatus.QUOTED) {
             throw new ConflictException("Demande déjà clôturée : " + quoteRequest.status());
         }
-        BigDecimal globalDiscount = request.globalDiscount() != null ? request.globalDiscount() : BigDecimal.ZERO;
-        if (globalDiscount.signum() < 0 || globalDiscount.compareTo(new BigDecimal("100")) > 0) {
-            throw new ConflictException("La remise globale doit être entre 0 et 100 %");
-        }
 
         Organization shop = organizations.findById(
                         new com.paymentplatform.organization.domain.valueobject.OrganizationId(quoteRequest.shopId()))
@@ -108,6 +104,8 @@ public class SendRequestQuoteUseCase {
             item.setQuantity(itemReq.quantity());
             item.setUnitPrice(product.getUnitPrice());
             item.setDiscount(discountAmount);
+            item.setFodecApplicable(product.isFodecApplicable());
+            item.setPriceTtc(product.isPriceTtc());
             CreateOrderUseCase.snapshotFiscalFields(item, product);
             priced.add(item);
             discountPcts.add(pct);
@@ -116,7 +114,6 @@ public class SendRequestQuoteUseCase {
         Order transientOrder = Order.create(quoteRequest.supplierId(), quoteRequest.shopId(),
                 actorUserId, "SUPPLIER_ADMIN", "QUOTE", false, "TND",
                 com.paymentplatform.organization.domain.model.PaymentTerms.IMMEDIATE);
-        transientOrder.setGlobalDiscount(globalDiscount);
         OrderFiscalizer.apply(transientOrder, priced, shop);
 
         int version = quotes.findByRequestId(requestId).stream()
@@ -127,7 +124,6 @@ public class SendRequestQuoteUseCase {
                 .requestReference(quoteRequest.reference())
                 .supplierId(quoteRequest.supplierId())
                 .version(version)
-                .globalDiscount(transientOrder.getGlobalDiscount())
                 .subtotal(transientOrder.getSubtotal())
                 .taxAmount(transientOrder.getTaxAmount())
                 .total(transientOrder.getTotal())
@@ -168,8 +164,10 @@ public class SendRequestQuoteUseCase {
                     .append(",\"unitPrice\":").append(n(it.getUnitPrice()))
                     .append(",\"discountPct\":").append(pct.stripTrailingZeros().toPlainString())
                     .append(",\"discount\":").append(n(it.getDiscount()))
-                    .append(",\"lineTotal\":").append(n(it.getLineTotal()))
+                    .append(",\"lineTotal\":").append(frozenTotal.toPlainString())
                     .append(",\"vatRate\":").append(n(it.getVatRate()))
+                    .append(",\"fodec\":").append(it.isFodecApplicable())
+                    .append(",\"priceTtc\":").append(it.isPriceTtc())
                     .append("}");
         }
         return sb.append("]").toString();

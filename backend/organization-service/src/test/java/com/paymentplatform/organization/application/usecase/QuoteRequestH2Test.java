@@ -95,19 +95,36 @@ class QuoteRequestH2Test {
     }
 
     @Test
-    @DisplayName("Chiffrage : version 1, remises appliquées, demande QUOTED")
+    @DisplayName("Chiffrage : version 1, remise ligne seule, demande QUOTED")
     void chiffrage_versionne() {
         UUID requestId = demande();
         var quote = sendQuote.execute(requestId,
-                new SendQuoteRequest(List.of(new OrderItemRequest(productId, 2, new BigDecimal("10"))),
-                        new BigDecimal("5")),
+                new SendQuoteRequest(List.of(new OrderItemRequest(productId, 2, new BigDecimal("10")))),
                 supplierId, actor);
         assertThat(quote.version()).isEqualTo(1);
-        assertThat(quote.subtotal()).isEqualByComparingTo(new BigDecimal("1710.00"));
-        assertThat(quote.total()).isEqualByComparingTo(new BigDecimal("2034.90"));
+        assertThat(quote.subtotal()).isEqualByComparingTo(new BigDecimal("1800.00"));
+        assertThat(quote.total()).isEqualByComparingTo(new BigDecimal("2142.00"));
         assertThat(requests.findById(requestId).orElseThrow().status())
                 .isEqualTo(QuoteRequestStatus.QUOTED);
         assertThat(quotes.findByRequestId(requestId)).hasSize(1);
+    }
+
+    @Test
+    @DisplayName("PDF devis : binaire valide, totaux du snapshot (HT 1800.00)")
+    void pdfDevis_totauxSnapshot() {
+        UUID requestId = demande();
+        sendQuote.execute(requestId,
+                new SendQuoteRequest(List.of(new OrderItemRequest(productId, 2, new BigDecimal("10")))),
+                supplierId, actor);
+        var domain = quotes.findByRequestId(requestId).get(0);
+        assertThat(domain.linesJson()).contains("\"lineTotal\":1800.0000");
+        byte[] pdf = new com.paymentplatform.organization.application.service.QuotePdfService()
+                .generateQuotePdf(domain,
+                        com.paymentplatform.organization.application.service.InvoicePdfService.InvoiceParty.named("Fournisseur"),
+                        com.paymentplatform.organization.application.service.InvoicePdfService.InvoiceParty.named("Boutique"),
+                        shopId, "Demande", "DEV-TEST");
+        assertThat(pdf).isNotEmpty();
+        assertThat(new String(pdf, 0, 4, java.nio.charset.StandardCharsets.UTF_8)).isEqualTo("%PDF");
     }
 
     @Test
@@ -115,13 +132,11 @@ class QuoteRequestH2Test {
     void acceptation_creeCommandeConfirmee() {
         UUID requestId = demande();
         var quote = sendQuote.execute(requestId,
-                new SendQuoteRequest(List.of(new OrderItemRequest(productId, 2, new BigDecimal("10"))),
-                        new BigDecimal("5")),
+                new SendQuoteRequest(List.of(new OrderItemRequest(productId, 2, new BigDecimal("10")))),
                 supplierId, actor);
         var order = acceptQuote.execute(quote.id(), shopId, actor);
         assertThat(order.status()).isEqualTo("CONFIRMED");
-        assertThat(order.total()).isEqualByComparingTo(new BigDecimal("2034.90"));
-        assertThat(order.globalDiscount()).isEqualByComparingTo(new BigDecimal("5"));
+        assertThat(order.total()).isEqualByComparingTo(new BigDecimal("2142.00"));
         assertThat(requests.findById(requestId).orElseThrow().status())
                 .isEqualTo(QuoteRequestStatus.ACCEPTED);
     }
@@ -131,7 +146,7 @@ class QuoteRequestH2Test {
     void acceptation_tiersRefusee() {
         UUID requestId = demande();
         var quote = sendQuote.execute(requestId,
-                new SendQuoteRequest(List.of(new OrderItemRequest(productId, 1, null)), null),
+                new SendQuoteRequest(List.of(new OrderItemRequest(productId, 1, null))),
                 supplierId, actor);
         assertThatThrownBy(() -> acceptQuote.execute(quote.id(), UUID.randomUUID(), actor))
                 .hasMessageContaining("boutique");
@@ -153,7 +168,7 @@ class QuoteRequestH2Test {
         var cancelled = cancelRequest.execute(requestId, shopId);
         assertThat(cancelled.status()).isEqualTo(QuoteRequestStatus.CANCELLED.name());
         assertThatThrownBy(() -> sendQuote.execute(requestId,
-                new SendQuoteRequest(List.of(new OrderItemRequest(productId, 1, null)), null),
+                new SendQuoteRequest(List.of(new OrderItemRequest(productId, 1, null))),
                 supplierId, actor))
                 .hasMessageContaining("clôturée");
     }

@@ -77,9 +77,6 @@ public class CreateOrderUseCase {
         if (request.notes() != null) {
             order.setNotes(request.notes());
         }
-        if (request.globalDiscount() != null) {
-            order.setGlobalDiscount(request.globalDiscount());
-        }
         // request.taxRate() global IGNORÉ : la TVA est portée par chaque produit
         // (art. 18 Code TVA — ventilation par taux). Champ conservé pour compatibilité.
 

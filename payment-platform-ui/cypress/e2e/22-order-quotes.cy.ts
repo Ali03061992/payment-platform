@@ -52,12 +52,12 @@ function createDemande(ctx: any) {
   });
 }
 
-function sendDevis(ctx: any, requestId: string, discount: number, globalDiscount: number) {
+function sendDevis(ctx: any, requestId: string, discount: number) {
   return cy.request({
     method: 'POST',
     url: `${API()}/api/quotes/requests/${requestId}/quotes`,
     headers: hdr(ctx.supplierToken),
-    body: { items: [{ productId: ctx.productId, quantity: 2, discount }], globalDiscount },
+    body: { items: [{ productId: ctx.productId, quantity: 2, discount }] },
     failOnStatusCode: false,
   });
 }
@@ -77,14 +77,14 @@ describe('22 - Demandes de devis découplées', () => {
     }));
   });
 
-  it('fournisseur chiffre v1 (lignes % + globale %), demande QUOTED', () => {
+  it('fournisseur chiffre v1 (remise ligne 10 %, sans remise globale), demande QUOTED', () => {
     setupCtx().then((ctx) => createDemande(ctx).then((d: any) =>
-      sendDevis(ctx, d.id, 10, 5).then((r) => {
+      sendDevis(ctx, d.id, 10).then((r) => {
         expect(r.status).to.eq(200, JSON.stringify(r.body));
         expect(r.body.version).to.eq(1);
-        // 2x1000=2000, -10% ligne=1800, -5% global=1710 HT, TVA 19%=324.90
-        expect(r.body.subtotal).to.eq(1710);
-        expect(r.body.total).to.eq(2034.9);
+        // 2x1000=2000, -10% ligne=1800 HT, TVA 19%=342
+        expect(r.body.subtotal).to.eq(1800);
+        expect(r.body.total).to.eq(2142);
         return cy.apiGet(ctx.shopToken, `/api/quotes/requests/${d.id}`);
       }).then((g: any) => {
         expect(g.body.status).to.eq('QUOTED');
@@ -94,7 +94,7 @@ describe('22 - Demandes de devis découplées', () => {
 
   it('deuxième devis incrémente, boutique accepte → commande CONFIRMÉE', () => {
     setupCtx().then((ctx) => createDemande(ctx).then((d: any) =>
-      sendDevis(ctx, d.id, 0, 0).then(() => sendDevis(ctx, d.id, 50, 0)).then((r) => {
+      sendDevis(ctx, d.id, 0).then(() => sendDevis(ctx, d.id, 50)).then((r) => {
         expect(r.body.version).to.eq(2);
         return cy.request({
           method: 'POST',
@@ -114,7 +114,7 @@ describe('22 - Demandes de devis découplées', () => {
 
   it('boutique tierce : acceptation refusée (403)', () => {
     setupCtx().then((ctx) => createDemande(ctx).then((d: any) =>
-      sendDevis(ctx, d.id, 0, 0).then((r) =>
+      sendDevis(ctx, d.id, 0).then((r) =>
         cy.apiLogin('ali.e2e').then((aliToken) => cy.request({
           method: 'POST',
           url: `${API()}/api/quotes/quotes/${r.body.id}/accept`,
@@ -127,7 +127,7 @@ describe('22 - Demandes de devis découplées', () => {
 
   it('remise hors borne refusée (400/409)', () => {
     setupCtx().then((ctx) => createDemande(ctx).then((d: any) =>
-      sendDevis(ctx, d.id, 120, 0).then((r) => {
+      sendDevis(ctx, d.id, 120).then((r) => {
         expect(r.status).to.be.oneOf([400, 409]);
       })));
   });

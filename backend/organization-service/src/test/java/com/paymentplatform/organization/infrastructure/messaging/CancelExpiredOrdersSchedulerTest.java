@@ -97,7 +97,7 @@ class CancelExpiredOrdersSchedulerTest {
     }
 
     private OrderResponse creerBrouillon() {
-        var requete = new CreateOrderRequest(supplierId, shopId, false, null, "TND", null, null, "Brouillon à expirer",
+        var requete = new CreateOrderRequest(supplierId, shopId, false, null, "TND", null, "Brouillon à expirer",
                 List.of(new OrderItemRequest(productId, 2, null)));
         return createOrder.execute(requete, UUID.fromString("00000000-0000-0000-0000-000000000010"), "SHOP");
     }

@@ -649,7 +649,8 @@ export class OrderManagementComponent implements OnInit, OnDestroy {
       items: this.editOrderLines.map(l => ({
         productId: l.productId,
         quantity: l.quantity,
-        discount: l.discount
+        // Saisie en % → montant (PU × Qté × % / 100), comme le moteur l'exige.
+        discount: Math.round(l.unitPrice * l.quantity * (l.discount / 100) * 10000) / 10000
       }))
     };
     this.subscriptions.add(this.orderService.update(this.editOrderId, request).subscribe({
