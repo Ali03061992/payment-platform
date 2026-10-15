@@ -14,8 +14,7 @@ import java.util.Map;
  *
  * <ol>
  *   <li>Brut = quantité × prix unitaire HT</li>
- *   <li>Remise ligne (montant) → total ligne HT</li>
- *   <li>Remise globale (%) → HT net (la remise s'impute AVANT la TVA)</li>
+ *   <li>Remise ligne (montant) → total ligne HT net (aucune remise globale)</li>
  *   <li>FODEC 1% du HT net, lignes concernées uniquement</li>
  *   <li>Base TVA = HT net + FODEC (le FODEC entre dans la base TVA)</li>
  *   <li>TVA par taux (19 / 13 / 7 / 0 avec motif)</li>
@@ -34,7 +33,7 @@ public final class FiscalRules {
     public static final BigDecimal STAMP_EXPORT = BigDecimal.ZERO;
     public static final int SCALE = 4;
 
-    /** Résultat fiscal d'une ligne après imputation de la remise globale. */
+    /** Résultat fiscal d'une ligne (remise ligne seule, sans remise globale). */
     public record LineResult(BigDecimal netHt, BigDecimal fodec, BigDecimal base, BigDecimal vat, BigDecimal ttc,
                              BigDecimal htUnitPrice) {}
 
@@ -42,11 +41,10 @@ public final class FiscalRules {
     public record VatLine(BigDecimal rate, BigDecimal base, BigDecimal amount) {}
 
     public static LineResult computeLine(BigDecimal unitPrice, int quantity, BigDecimal lineDiscount,
-                                         BigDecimal globalDiscountPct, BigDecimal vatRate,
+                                         BigDecimal vatRate,
                                          boolean fodecApplicable, boolean priceTtc) {
         BigDecimal price = unitPrice != null ? unitPrice : BigDecimal.ZERO;
         BigDecimal discount = lineDiscount != null ? lineDiscount : BigDecimal.ZERO;
-        BigDecimal globalPct = globalDiscountPct != null ? globalDiscountPct : BigDecimal.ZERO;
         BigDecimal rate = vatRate != null ? vatRate : new BigDecimal("19");
 
         // Prix saisi (HT ou TTC selon la fiche produit) après remise ligne.
@@ -54,7 +52,7 @@ public final class FiscalRules {
         if (lineGross.signum() < 0) {
             lineGross = BigDecimal.ZERO;
         }
-        BigDecimal netEntered = applyPct(lineGross, BigDecimal.valueOf(100).subtract(globalPct));
+        BigDecimal netEntered = lineGross;
         // Prix TTC : la TVA est INCLUSE, on la déduit au lieu de l'ajouter.
         BigDecimal netHt = priceTtc && rate.signum() > 0
                 ? netEntered.divide(BigDecimal.ONE.add(rate.divide(new BigDecimal("100"), SCALE + 2,

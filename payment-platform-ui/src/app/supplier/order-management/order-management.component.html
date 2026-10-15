@@ -90,9 +90,6 @@
                 @if (canEdit(o)) {
                   <button class="btn btn-sm btn-info" (click)="openEdit(o)" [attr.aria-label]="('SUPPLIER_ORDERS.EDIT_ARIA' | translate) + ' ' + o.reference">{{ 'SUPPLIER_ORDERS.EDIT' | translate }}</button>
                 }
-                @if (canQuote(o)) {
-                  <button class="btn btn-sm btn-warning" (click)="openQuote(o)" [attr.aria-label]="('SUPPLIER_ORDERS.QUOTE_ARIA' | translate) + ' ' + o.reference">{{ 'SUPPLIER_ORDERS.QUOTE' | translate }}</button>
-                }
                 @if (canConfirm(o)) {
                   <button class="btn btn-sm btn-success" (click)="confirm(o)" [attr.aria-label]="('SUPPLIER_ORDERS.CONFIRM_ARIA' | translate) + ' ' + o.reference">{{ 'SUPPLIER_ORDERS.CONFIRM' | translate }}</button>
                 }
@@ -649,63 +646,6 @@
           <button type="submit" class="btn btn-primary" [disabled]="!canSubmitEdit()"
             [attr.aria-label]="editing ? ('SUPPLIER_ORDERS.SAVING_ARIA' | translate) : ('SUPPLIER_ORDERS.SAVE_ARIA' | translate)">
             {{ editing ? ('SUPPLIER_ORDERS.SAVING' | translate) : ('SUPPLIER_ORDERS.SAVE' | translate) }}
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
-}
-@if (showQuoteModal) {
-  <div class="modal-overlay" (click)="closeQuote()" role="dialog" aria-modal="true" aria-labelledby="quote-modal-title">
-    <div class="modal-content modal-lg" (click)="$event.stopPropagation()">
-      <div class="modal-header">
-        <h3 id="quote-modal-title">{{ 'SUPPLIER_ORDERS.QUOTE_TITLE' | translate:{ref: quoteOrderReference} }}</h3>
-        <button class="btn-close" (click)="closeQuote()" [attr.aria-label]="'SUPPLIER_ORDERS.CLOSE' | translate">&times;</button>
-      </div>
-      <form (ngSubmit)="submitQuote()">
-        <p class="text-muted" style="padding:0 4px 12px;">{{ 'SUPPLIER_ORDERS.QUOTE_HINT' | translate }}</p>
-        @if (quoteLines.length > 0) {
-          <div class="table-card" style="margin-bottom:16px;">
-            <div class="table-wrapper">
-              <table>
-                <thead>
-                  <tr>
-                    <th>{{ 'SUPPLIER_ORDERS.PRODUCT' | translate }}</th>
-                    <th>{{ 'SUPPLIER_ORDERS.QUANTITY' | translate }}</th>
-                    <th>{{ 'SUPPLIER_ORDERS.DISCOUNT_PCT' | translate }}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  @for (line of quoteLines; track line; let i = $index) {
-                    <tr>
-                      <td>{{ line.productName }}</td>
-                      <td>
-                        <input type="number" [(ngModel)]="line.quantity" [name]="'quoteQty_' + i"
-                          class="form-control" min="1" style="width:80px;" required
-                          [attr.aria-label]="('SUPPLIER_ORDERS.QTY_ARIA' | translate) + ' ' + line.productName">
-                      </td>
-                      <td>
-                        <input type="number" [(ngModel)]="line.discount" [name]="'quoteDiscount_' + i"
-                          class="form-control" min="0" max="100" style="width:80px;"
-                          [attr.aria-label]="('SUPPLIER_ORDERS.DISCOUNT_ARIA' | translate) + ' ' + line.productName">
-                      </td>
-                    </tr>
-                  }
-                </tbody>
-              </table>
-            </div>
-          </div>
-        }
-        <div class="form-group">
-          <label for="quoteGlobalDiscount">{{ 'SUPPLIER_ORDERS.QUOTE_GLOBAL_DISCOUNT' | translate }}</label>
-          <input type="number" [(ngModel)]="quoteGlobalDiscount" name="quoteGlobalDiscount" id="quoteGlobalDiscount" class="form-control"
-            min="0" max="100" placeholder="0" style="max-width:160px;">
-        </div>
-        <div class="form-actions">
-          <button type="button" class="btn btn-secondary" (click)="closeQuote()" [attr.aria-label]="'SUPPLIER_ORDERS.CANCEL_EDIT_ARIA' | translate">{{ 'ORDERS.CANCEL_BTN' | translate }}</button>
-          <button type="submit" class="btn btn-primary" [disabled]="!canSubmitQuote()"
-            [attr.aria-label]="'SUPPLIER_ORDERS.QUOTE_SEND_ARIA' | translate">
-            {{ sendingQuote ? ('SUPPLIER_ORDERS.SENDING' | translate) : ('SUPPLIER_ORDERS.QUOTE_SEND' | translate) }}
           </button>
         </div>
       </form>

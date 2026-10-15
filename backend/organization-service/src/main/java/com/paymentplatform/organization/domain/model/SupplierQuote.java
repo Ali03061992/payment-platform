@@ -5,19 +5,16 @@ import java.time.Instant;
 import java.util.UUID;
 
 /**
- * Devis versionné d'une commande (demande boutique → chiffrage fournisseur).
- * La boutique ne saisit aucune remise ; le fournisseur modifie les lignes,
- * pose les remises (lignes + globale %) et envoie le devis (notification shop).
- * Chaque envoi incrémente la version ; le contenu est figé en JSON.
+ * Devis fournisseur versionné rattaché à une DEMANDE (pas à une commande).
+ * Contenu figé en JSON ; l'acceptation crée la commande aux conditions figées.
  */
-public final class OrderQuote {
+public final class SupplierQuote {
 
     private final UUID id;
-    private final UUID orderId;
-    private final String orderReference;
+    private final UUID requestId;
+    private final String requestReference;
     private final UUID supplierId;
     private final int version;
-    private final BigDecimal globalDiscount;
     private final BigDecimal subtotal;
     private final BigDecimal taxAmount;
     private final BigDecimal total;
@@ -27,13 +24,12 @@ public final class OrderQuote {
     private final UUID createdBy;
     private final Instant createdAt;
 
-    private OrderQuote(Builder b) {
+    private SupplierQuote(Builder b) {
         this.id = b.id;
-        this.orderId = b.orderId;
-        this.orderReference = b.orderReference;
+        this.requestId = b.requestId;
+        this.requestReference = b.requestReference;
         this.supplierId = b.supplierId;
         this.version = b.version;
-        this.globalDiscount = b.globalDiscount;
         this.subtotal = b.subtotal;
         this.taxAmount = b.taxAmount;
         this.total = b.total;
@@ -45,11 +41,10 @@ public final class OrderQuote {
     }
 
     public UUID id() { return id; }
-    public UUID orderId() { return orderId; }
-    public String orderReference() { return orderReference; }
+    public UUID requestId() { return requestId; }
+    public String requestReference() { return requestReference; }
     public UUID supplierId() { return supplierId; }
     public int version() { return version; }
-    public BigDecimal globalDiscount() { return globalDiscount; }
     public BigDecimal subtotal() { return subtotal; }
     public BigDecimal taxAmount() { return taxAmount; }
     public BigDecimal total() { return total; }
@@ -63,11 +58,10 @@ public final class OrderQuote {
 
     public static final class Builder {
         private UUID id;
-        private UUID orderId;
-        private String orderReference;
+        private UUID requestId;
+        private String requestReference;
         private UUID supplierId;
         private int version;
-        private BigDecimal globalDiscount = BigDecimal.ZERO;
         private BigDecimal subtotal = BigDecimal.ZERO;
         private BigDecimal taxAmount = BigDecimal.ZERO;
         private BigDecimal total = BigDecimal.ZERO;
@@ -78,11 +72,10 @@ public final class OrderQuote {
         private Instant createdAt;
 
         public Builder id(UUID v) { this.id = v; return this; }
-        public Builder orderId(UUID v) { this.orderId = v; return this; }
-        public Builder orderReference(String v) { this.orderReference = v; return this; }
+        public Builder requestId(UUID v) { this.requestId = v; return this; }
+        public Builder requestReference(String v) { this.requestReference = v; return this; }
         public Builder supplierId(UUID v) { this.supplierId = v; return this; }
         public Builder version(int v) { this.version = v; return this; }
-        public Builder globalDiscount(BigDecimal v) { this.globalDiscount = v; return this; }
         public Builder subtotal(BigDecimal v) { this.subtotal = v; return this; }
         public Builder taxAmount(BigDecimal v) { this.taxAmount = v; return this; }
         public Builder total(BigDecimal v) { this.total = v; return this; }
@@ -92,14 +85,14 @@ public final class OrderQuote {
         public Builder createdBy(UUID v) { this.createdBy = v; return this; }
         public Builder createdAt(Instant v) { this.createdAt = v; return this; }
 
-        public OrderQuote build() {
-            if (id == null || orderId == null || supplierId == null || createdBy == null) {
-                throw new IllegalStateException("Devis incomplet : id, commande, fournisseur et auteur requis");
+        public SupplierQuote build() {
+            if (id == null || requestId == null || supplierId == null || createdBy == null) {
+                throw new IllegalStateException("Devis incomplet");
             }
             if (createdAt == null) {
                 createdAt = Instant.now();
             }
-            return new OrderQuote(this);
+            return new SupplierQuote(this);
         }
     }
 }

@@ -309,6 +309,20 @@ describe('LayoutComponent', () => {
       expect(component.showNotifications).toBeFalse();
     });
 
+    it('should navigate shop user to mes devis for QUOTE entity', () => {
+      component.user = { roles: ['SHOP_ADMIN'] } as any;
+      component.navigateNotification({ relatedEntityType: 'QUOTE', relatedEntityId: 'DEV-1' } as any);
+      expect(router.navigate).toHaveBeenCalledWith(['/dashboard/shop/quotes']);
+      expect(component.showNotifications).toBeFalse();
+    });
+
+    it('should navigate supplier to devis page for QUOTE entity', () => {
+      component.user = { roles: ['SUPPLIER_ADMIN'] } as any;
+      component.navigateNotification({ relatedEntityType: 'QUOTE', relatedEntityId: 'DEV-1' } as any);
+      expect(router.navigate).toHaveBeenCalledWith(['/dashboard/supplier/quotes']);
+      expect(component.showNotifications).toBeFalse();
+    });
+
     it('should not navigate for unknown entity type', () => {
       component.navigateNotification({ relatedEntityType: 'OTHER', relatedEntityId: 1 } as any);
       expect(router.navigate).not.toHaveBeenCalled();

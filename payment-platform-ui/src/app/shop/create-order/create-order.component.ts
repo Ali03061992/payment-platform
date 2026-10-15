@@ -186,8 +186,7 @@ export class CreateOrderComponent implements OnInit {
         discountPct: 0,
         vatRate: l.product.vatRate,
         fodecApplicable: l.product.fodecApplicable
-      })),
-      0
+      }))
     );
   }
 
@@ -236,7 +235,6 @@ export class CreateOrderComponent implements OnInit {
       asapPayment: this.asapPayment,
       paymentTerms: this.paymentTerms,
       currency: this.currency,
-      globalDiscount: 0,
       notes: this.notes,
       items: this.orderLines.map(l => ({
         productId: l.product.id,

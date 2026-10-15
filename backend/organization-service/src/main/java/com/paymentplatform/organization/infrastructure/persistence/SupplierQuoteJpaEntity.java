@@ -7,29 +7,26 @@ import java.time.Instant;
 import java.util.UUID;
 
 @Entity
-@Table(name = "order_quotes",
-        uniqueConstraints = @UniqueConstraint(name = "uq_quote_order_version",
-                columnNames = {"order_id", "version"}))
-public class OrderQuoteJpaEntity {
+@Table(name = "supplier_quotes",
+        uniqueConstraints = @UniqueConstraint(name = "uq_supplier_quote_request_version",
+                columnNames = {"request_id", "version"}))
+public class SupplierQuoteJpaEntity {
 
     @Id
     @Column(columnDefinition = "VARCHAR(36)")
     private UUID id;
 
-    @Column(name = "order_id", nullable = false, columnDefinition = "VARCHAR(36)")
-    private UUID orderId;
+    @Column(name = "request_id", nullable = false, columnDefinition = "VARCHAR(36)")
+    private UUID requestId;
 
-    @Column(name = "order_reference", nullable = false, length = 64)
-    private String orderReference;
+    @Column(name = "request_reference", nullable = false, length = 64)
+    private String requestReference;
 
     @Column(name = "supplier_id", nullable = false, columnDefinition = "VARCHAR(36)")
     private UUID supplierId;
 
     @Column(name = "version", nullable = false)
     private int version;
-
-    @Column(name = "global_discount", nullable = false, precision = 5, scale = 2)
-    private BigDecimal globalDiscount;
 
     @Column(name = "subtotal", nullable = false, precision = 19, scale = 3)
     private BigDecimal subtotal;
@@ -57,16 +54,14 @@ public class OrderQuoteJpaEntity {
 
     public UUID getId() { return id; }
     public void setId(UUID id) { this.id = id; }
-    public UUID getOrderId() { return orderId; }
-    public void setOrderId(UUID orderId) { this.orderId = orderId; }
-    public String getOrderReference() { return orderReference; }
-    public void setOrderReference(String orderReference) { this.orderReference = orderReference; }
+    public UUID getRequestId() { return requestId; }
+    public void setRequestId(UUID requestId) { this.requestId = requestId; }
+    public String getRequestReference() { return requestReference; }
+    public void setRequestReference(String requestReference) { this.requestReference = requestReference; }
     public UUID getSupplierId() { return supplierId; }
     public void setSupplierId(UUID supplierId) { this.supplierId = supplierId; }
     public int getVersion() { return version; }
     public void setVersion(int version) { this.version = version; }
-    public BigDecimal getGlobalDiscount() { return globalDiscount; }
-    public void setGlobalDiscount(BigDecimal globalDiscount) { this.globalDiscount = globalDiscount; }
     public BigDecimal getSubtotal() { return subtotal; }
     public void setSubtotal(BigDecimal subtotal) { this.subtotal = subtotal; }
     public BigDecimal getTaxAmount() { return taxAmount; }

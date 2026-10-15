@@ -1,4 +1,4 @@
-ï»¿<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
@@ -7,12 +7,12 @@
   <parent>
     <groupId>com.paymentplatform</groupId>
     <artifactId>payment-platform</artifactId>
-    <version>1.1.1</version>
+    <version>1.2.0</version>
   </parent>
 
   <artifactId>notification-service</artifactId>
   <name>Notification Service</name>
-  <description>Notifications persistÃ©es, temps rÃ©el (SSE), consommation des domain events</description>
+  <description>Notifications persistées, temps réel (SSE), consommation des domain events</description>
 
   <dependencies>
     <dependency>

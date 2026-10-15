@@ -37,11 +37,6 @@
     </div>
     <div class="form-row">
       <div class="form-group">
-        <label>{{ 'SUPPLIER_ORDERS.GLOBAL_DISCOUNT' | translate }}</label>
-        <input type="number" [(ngModel)]="globalDiscount" name="globalDiscount" class="form-control"
-          min="0" max="100" placeholder="0">
-      </div>
-      <div class="form-group">
         <label>{{ 'SUPPLIER_ORDERS.VAT_RATE' | translate }}</label>
         <div class="form-control" style="background:#f4f6fa;">{{ 'SUPPLIER_ORDERS.VAT_PER_PRODUCT' | translate }}</div>
         <small class="text-muted">{{ 'SUPPLIER_ORDERS.VAT_HINT' | translate }}</small>
@@ -143,12 +138,6 @@
           <span>{{ 'SUPPLIER_ORDERS.SUBTOTAL' | translate }}</span>
           <span>{{ subtotal | number:'1.2-2' }} {{ currency }}</span>
         </div>
-        @if (globalDiscount > 0) {
-          <div class="summary-row">
-            <span>{{ 'SUPPLIER_ORDERS.GLOBAL_DISCOUNT_LABEL' | translate }} ({{ globalDiscount }}%)</span>
-            <span>-{{ discountAmount | number:'1.2-2' }} {{ currency }}</span>
-          </div>
-        }
         @if (fodecAmount > 0) {
           <div class="summary-row">
             <span>{{ 'SUPPLIER_ORDERS.FODEC' | translate }}</span>

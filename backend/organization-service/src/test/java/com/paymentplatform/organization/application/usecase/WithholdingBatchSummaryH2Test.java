@@ -75,7 +75,7 @@ class WithholdingBatchSummaryH2Test {
         product.setReservedQty(0);
         product.setVatRate(new BigDecimal("19"));
         UUID pid = products.save(product).getId();
-        var request = new CreateOrderRequest(supplierId, shopId, false, null, "TND", null, null, null,
+        var request = new CreateOrderRequest(supplierId, shopId, false, null, "TND", null, null,
                 List.of(new OrderItemRequest(pid, 1, null)));
         var order = createOrder.execute(request, actor, "SHOP");
         confirmOrder.execute(order.id(), actor);

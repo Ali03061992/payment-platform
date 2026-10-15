@@ -1,0 +1,3 @@
+/* Reprend les styles partagés (form-card, table-card, form-actions). */
+.text-muted { color: var(--text-muted, #8896ab); }
+.error { color: #c62828; padding: 8px 0; }

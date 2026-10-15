@@ -43,7 +43,6 @@ public class ReorderUseCase {
                 order.isAsapPayment(),
                 order.getPaymentTerms(),
                 order.getCurrency(),
-                order.getGlobalDiscount(),
                 order.getTaxRate(),
                 "Recommandé depuis " + order.getReference(),
                 itemRequests

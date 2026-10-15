@@ -64,10 +64,13 @@ export class LayoutComponent implements OnInit, OnDestroy {
     { label: 'NAV.LOW_STOCK_ALERTS', icon: 'alert', route: 'supplier/low-stock-alerts', roles: ['SUPPLIER_ADMIN'], group: 'NAV.GROUP_STOCK' },
     { label: 'NAV.OPTIMIZATION', icon: 'cpu', route: 'supplier/optimization', roles: ['SUPPLIER_ADMIN'], group: 'NAV.GROUP_STOCK' },
     { label: 'NAV.ORDERS', icon: 'cart', route: 'supplier/orders', roles: ['SUPPLIER_ADMIN'], group: 'NAV.GROUP_SALES' },
+    { label: 'NAV.QUOTES', icon: 'file-text', route: 'supplier/quotes', roles: ['SUPPLIER_ADMIN'], group: 'NAV.GROUP_SALES' },
     { label: 'NAV.FINANCE', icon: 'wallet', route: 'supplier/financial', roles: ['SUPPLIER_ADMIN'], group: 'NAV.GROUP_FINANCE' },
     { label: 'NAV.BALANCE', icon: 'scale', route: 'supplier/balance', roles: ['SUPPLIER_ADMIN'], group: 'NAV.GROUP_FINANCE' },
     { label: 'NAV.DELIVERIES', icon: 'truck', route: 'supplier/deliveries', roles: ['SUPPLIER_ADMIN', 'SUPPLIER_AGENT'], group: 'NAV.GROUP_SALES' },
     { label: 'NAV.MY_ORDERS', icon: 'cart', route: 'shop/orders', roles: ['SHOP_ADMIN', 'SHOP_AGENT'], group: 'NAV.GROUP_SHOP' },
+    { label: 'NAV.MY_QUOTES', icon: 'file-text', route: 'shop/quotes', roles: ['SHOP_ADMIN'], group: 'NAV.GROUP_SHOP' },
+    { label: 'NAV.QUOTE_REQUEST', icon: 'file-plus', route: 'shop/quotes/request', roles: ['SHOP_ADMIN'], group: 'NAV.GROUP_SHOP' },
     { label: 'NAV.DELIVERIES', icon: 'truck', route: 'shop/deliveries', roles: ['SHOP_ADMIN', 'SHOP_AGENT'], group: 'NAV.GROUP_SHOP' },
     { label: 'NAV.NEW_ORDER', icon: 'plus', route: 'shop/orders/create', roles: ['SHOP_ADMIN'], group: 'NAV.GROUP_SHOP' },
     { label: 'NAV.BALANCE', icon: 'scale', route: 'shop/balance', roles: ['SHOP_ADMIN'], group: 'NAV.GROUP_SHOP' },
@@ -290,6 +293,13 @@ export class LayoutComponent implements OnInit, OnDestroy {
       this.router.navigate([target], { queryParams: { orderId: notif.relatedEntityId } });
     } else if (notif.relatedEntityType === 'SHOP_ORDER' && notif.relatedEntityId) {
       this.router.navigate(['/dashboard/shop/orders', notif.relatedEntityId]);
+    } else if (notif.relatedEntityType === 'QUOTE' && notif.relatedEntityId) {
+      // Devis : « Mes devis » boutique, page devis fournisseur.
+      if (this.isShopUser()) {
+        this.router.navigate(['/dashboard/shop/quotes']);
+      } else {
+        this.router.navigate(['/dashboard/supplier/quotes']);
+      }
     } else if (notif.relatedEntityType === 'DISPUTE' && notif.relatedEntityId) {
       // Réclamation : détail admin pour SYSTEM_ADMIN, détail boutique pour les
       // boutiques, liste commandes pour les fournisseurs (pas de page dédiée).

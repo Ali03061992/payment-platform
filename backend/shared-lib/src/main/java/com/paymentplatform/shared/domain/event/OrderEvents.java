@@ -153,13 +153,34 @@ public final class OrderEvents {
         @Override public String aggregateId() { return String.valueOf(certificateId); }
     }
 
-    public record QuoteSentEvent(UUID eventId, Instant occurredAt, UUID orderId, String reference,
+    public record QuoteSentEvent(UUID eventId, Instant occurredAt, UUID requestId, String reference,
                                  UUID shopId, UUID supplierId, int version, String total)
             implements DomainEvent {
         public static final String EVENT_TYPE = "order.quote_sent";
 
         @Override public String eventType() { return EVENT_TYPE; }
         @Override public int eventVersion() { return 1; }
-        @Override public String aggregateId() { return String.valueOf(orderId); }
+        @Override public String aggregateId() { return String.valueOf(requestId); }
+    }
+
+    public record QuoteRequestedEvent(UUID eventId, Instant occurredAt, UUID requestId, String reference,
+                                      UUID shopId, UUID supplierId, String shopName)
+            implements DomainEvent {
+        public static final String EVENT_TYPE = "order.quote_requested";
+
+        @Override public String eventType() { return EVENT_TYPE; }
+        @Override public int eventVersion() { return 1; }
+        @Override public String aggregateId() { return String.valueOf(requestId); }
+    }
+
+    public record QuoteAcceptedEvent(UUID eventId, Instant occurredAt, UUID requestId, String reference,
+                                     UUID shopId, UUID supplierId, UUID orderId, String orderReference,
+                                     String total)
+            implements DomainEvent {
+        public static final String EVENT_TYPE = "order.quote_accepted";
+
+        @Override public String eventType() { return EVENT_TYPE; }
+        @Override public int eventVersion() { return 1; }
+        @Override public String aggregateId() { return String.valueOf(requestId); }
     }
 }

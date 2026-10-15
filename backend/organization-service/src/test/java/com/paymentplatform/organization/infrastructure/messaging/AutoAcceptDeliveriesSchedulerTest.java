@@ -119,7 +119,7 @@ class AutoAcceptDeliveriesSchedulerTest {
     private OrderResponse livrerCommande() {
         UUID acteur = UUID.fromString("00000000-0000-0000-0000-000000000010");
         UUID livreur = UUID.fromString("00000000-0000-0000-0000-000000000004");
-        var requete = new CreateOrderRequest(supplierId, shopId, false, null, "TND", null, null, "Commande scheduler",
+        var requete = new CreateOrderRequest(supplierId, shopId, false, null, "TND", null, "Commande scheduler",
                 List.of(new OrderItemRequest(productId, 5, null)));
         OrderResponse commande = createOrder.execute(requete, acteur, "SHOP");
         confirmOrder.execute(commande.id(), acteur);

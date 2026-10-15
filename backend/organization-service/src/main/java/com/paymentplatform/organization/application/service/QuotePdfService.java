@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.paymentplatform.organization.application.service.InvoicePdfService.InvoiceParty;
 import com.paymentplatform.organization.domain.model.Order;
 import com.paymentplatform.organization.domain.model.OrderItem;
-import com.paymentplatform.organization.domain.model.OrderQuote;
+import com.paymentplatform.organization.domain.model.SupplierQuote;
 import com.paymentplatform.organization.domain.model.PaymentTerms;
 
 import java.math.BigDecimal;
@@ -32,33 +32,35 @@ public class QuotePdfService {
         this.invoicePdfService = invoicePdfService;
     }
 
-    public byte[] generateQuotePdf(OrderQuote quote, InvoiceParty supplier, InvoiceParty buyer,
-                                   UUID shopId) {
+    public byte[] generateQuotePdf(SupplierQuote quote, InvoiceParty supplier, InvoiceParty buyer,
+                                   UUID shopId, String refKind, String refValue) {
         List<OrderItem> items = rebuildItems(quote);
         Order display = Order.create(quote.supplierId(), shopId,
                 quote.createdBy(), "SUPPLIER_ADMIN", "MANUAL", false, quote.currency(),
                 PaymentTerms.IMMEDIATE);
-        display.setGlobalDiscount(quote.globalDiscount() != null ? quote.globalDiscount() : BigDecimal.ZERO);
         display.recalculateTotals(items);
         display.setStampAmount(quote.stampAmount() != null ? quote.stampAmount() : BigDecimal.ZERO);
         return invoicePdfService.generateQuotePdf(display, items, supplier, buyer,
-                quote.version(), quote.orderReference());
+                quote.version(), refKind, refValue);
     }
 
-    private List<OrderItem> rebuildItems(OrderQuote quote) {
+    private List<OrderItem> rebuildItems(SupplierQuote quote) {
         List<OrderItem> items = new ArrayList<>();
         try {
             JsonNode root = MAPPER.readTree(quote.linesJson() != null ? quote.linesJson() : "[]");
             if (root.isArray()) {
                 for (JsonNode n : root) {
                     OrderItem item = new OrderItem();
-                    item.setOrderId(quote.orderId());
+                    item.setOrderId(quote.requestId());
                     item.setProductRef(text(n, "ref"));
                     item.setProductName(text(n, "name"));
                     item.setQuantity(n.has("qty") ? n.get("qty").asInt(1) : 1);
                     item.setUnitPrice(num(n, "unitPrice"));
                     item.setDiscount(num(n, "discount"));
                     item.setVatRate(num(n, "vatRate"));
+                    item.setFodecApplicable(n.has("fodec") && n.get("fodec").asBoolean(false));
+                    item.setPriceTtc(n.has("priceTtc") && n.get("priceTtc").asBoolean(false));
+                    item.setLineTotal(num(n, "lineTotal"));
                     items.add(item);
                 }
             }

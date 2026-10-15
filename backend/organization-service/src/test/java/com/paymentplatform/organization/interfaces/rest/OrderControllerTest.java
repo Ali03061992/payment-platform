@@ -192,7 +192,7 @@ class OrderControllerTest {
     void createOrder_withoutAuth_returns401() throws Exception {
         String body = objectMapper.writeValueAsString(
                 new com.paymentplatform.organization.application.dto.CreateOrderRequest(
-                        UUID.fromString("00000000-0000-0000-0000-000000000020"), UUID.fromString("00000000-0000-0000-0000-000000000010"), false, null, "TND", null, null, null,
+                        UUID.fromString("00000000-0000-0000-0000-000000000020"), UUID.fromString("00000000-0000-0000-0000-000000000010"), false, null, "TND", null, null,
                         List.of(new com.paymentplatform.organization.application.dto.OrderItemRequest(UUID.fromString("00000000-0000-0000-0000-000000000001"), 5, null))));
 
         mockMvc.perform(post("/api/orders")
@@ -252,7 +252,7 @@ class OrderControllerTest {
     void createOrder_asShopAdmin_returns201or400() throws Exception {
         String body = objectMapper.writeValueAsString(
                 new com.paymentplatform.organization.application.dto.CreateOrderRequest(
-                        UUID.fromString("00000000-0000-0000-0000-000000000020"), UUID.fromString("00000000-0000-0000-0000-000000000010"), false, null, "TND", null, null, null,
+                        UUID.fromString("00000000-0000-0000-0000-000000000020"), UUID.fromString("00000000-0000-0000-0000-000000000010"), false, null, "TND", null, null,
                         List.of(new com.paymentplatform.organization.application.dto.OrderItemRequest(UUID.fromString("00000000-0000-0000-0000-000000000001"), 2, null))));
         // This will likely fail due to product not found, but tests 403/400 handling
         mockMvc.perform(post("/api/orders")
@@ -266,7 +266,7 @@ class OrderControllerTest {
     void createOrder_asSupplierAdmin_returnsCreatedOrError() throws Exception {
         String body = objectMapper.writeValueAsString(
                 new com.paymentplatform.organization.application.dto.CreateOrderRequest(
-                        UUID.fromString("00000000-0000-0000-0000-000000000020"), UUID.fromString("00000000-0000-0000-0000-000000000010"), false, null, "TND", null, null, null,
+                        UUID.fromString("00000000-0000-0000-0000-000000000020"), UUID.fromString("00000000-0000-0000-0000-000000000010"), false, null, "TND", null, null,
                         List.of(new com.paymentplatform.organization.application.dto.OrderItemRequest(UUID.fromString("00000000-0000-0000-0000-000000000001"), 1, null))));
         mockMvc.perform(post("/api/orders")
                         .with(SecurityMockMvcRequestPostProcessors.authentication(supplierAdmin()))
