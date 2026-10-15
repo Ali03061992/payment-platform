@@ -65,7 +65,9 @@ public class OrderEventConsumer {
                 case "order.rejected" -> handleOrderRejected(event);
                 case "order.delivery_confirmed" -> handleOrderDeliveryConfirmed(event);
                 case "order.delivery_rejected" -> handleOrderDeliveryRejected(event);
+                case "order.quote_requested" -> handleOrderQuoteRequested(event);
                 case "order.quote_sent" -> handleOrderQuoteSent(event);
+                case "order.quote_accepted" -> handleOrderQuoteAccepted(event);
                 case "order.low_stock_alert" -> handleLowStockAlert(event);
                 case "order.comment_created" -> handleOrderCommentCreated(event);
                 default -> log.warn("Unknown order routing key: {}", routingKey);
@@ -236,6 +238,22 @@ public class OrderEventConsumer {
         )));
     }
 
+    private void handleOrderQuoteRequested(JsonNode event) {
+        UUID supplierId = UUID.fromString(event.get("supplierId").asText());
+        String reference = event.get("reference").asText();
+        String shopName = event.has("shopName") ? event.get("shopName").asText("") : "";
+
+        broadcaster.broadcastNotification(notifications.save(new Notification(null, supplierId,
+                "QUOTE_REQUESTED",
+                "Nouvelle demande de devis " + reference
+                        + (shopName.isEmpty() ? "" : " de " + shopName),
+                "QUOTE", reference
+        )));
+
+        pushService.sendToUser(supplierId, "Demande de devis",
+                "Nouvelle demande " + reference + " à chiffrer", "QUOTE_REQUESTED", "/dashboard/supplier/quotes");
+    }
+
     private void handleOrderQuoteSent(JsonNode event) {
         UUID shopId = UUID.fromString(event.get("shopId").asText());
         String reference = event.get("reference").asText();
@@ -244,13 +262,29 @@ public class OrderEventConsumer {
 
         broadcaster.broadcastNotification(notifications.save(new Notification(null, shopId,
                 "ORDER_QUOTE",
-                "Devis n°" + version + " reçu pour la commande " + reference
+                "Devis n°" + version + " reçu pour la demande " + reference
                         + (total.isEmpty() ? "" : " — total " + total + " TND"),
-                "ORDER", reference
+                "QUOTE", reference
         )));
 
         pushService.sendToUser(shopId, "Devis reçu",
-                "Devis n°" + version + " pour la commande " + reference, "ORDER_QUOTE", "/dashboard/shop/orders");
+                "Devis n°" + version + " pour la demande " + reference, "ORDER_QUOTE", "/dashboard/shop/quotes");
+    }
+
+    private void handleOrderQuoteAccepted(JsonNode event) {
+        UUID supplierId = UUID.fromString(event.get("supplierId").asText());
+        String reference = event.get("reference").asText();
+        String orderReference = event.has("orderReference") ? event.get("orderReference").asText("") : "";
+
+        broadcaster.broadcastNotification(notifications.save(new Notification(null, supplierId,
+                "QUOTE_ACCEPTED",
+                "Devis " + reference + " accepté par la boutique"
+                        + (orderReference.isEmpty() ? "" : " — commande " + orderReference + " créée"),
+                "QUOTE", reference
+        )));
+
+        pushService.sendToUser(supplierId, "Devis accepté",
+                "Devis " + reference + " accepté", "QUOTE_ACCEPTED", "/dashboard/supplier/quotes");
     }
 
     private void handleOrderCommentCreated(JsonNode event) {

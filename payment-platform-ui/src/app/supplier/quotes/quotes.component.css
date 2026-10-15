@@ -1,0 +1,6 @@
+/* Reprend les styles partagés (page-header, table-card, payment-badge). */
+.text-muted { color: var(--text-muted, #8896ab); }
+.empty-state { padding: 32px; text-align: center; color: var(--text-muted, #8896ab); }
+.result-count { padding: 12px 20px; color: var(--text-muted, #8896ab); }
+.badge-draft { background: #eceff1; color: #546e7a; }
+.badge-confirmed { background: #e3f2fd; color: #1565c0; }

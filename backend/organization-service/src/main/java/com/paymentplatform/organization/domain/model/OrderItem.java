@@ -112,6 +112,8 @@ public class OrderItem {
     public BigDecimal getDiscount() { return discount; }
     public void setDiscount(BigDecimal discount) { this.discount = discount; }
     public BigDecimal getLineTotal() { return lineTotal; }
+    /** Reconstruction d'affichage (PDF devis) : total figé du snapshot. */
+    public void setLineTotal(BigDecimal lineTotal) { this.lineTotal = lineTotal; }
     public BigDecimal getVatRate() { return vatRate; }
     public void setVatRate(BigDecimal vatRate) { this.vatRate = vatRate; }
     public BigDecimal getFodecAmount() { return fodecAmount; }

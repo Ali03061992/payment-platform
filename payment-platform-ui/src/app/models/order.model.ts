@@ -118,11 +118,27 @@ export interface WithholdingMonthlySummary {
   byNature: Record<string, number>;
 }
 
-/** Devis fournisseur versionné (demande boutique chiffrée, remises %). */
-export interface OrderQuote {
+/** Demande de devis boutique (entité dédiée, séparée des commandes). */
+export interface QuoteRequest {
   id: string;
-  orderId: string;
-  orderReference: string;
+  reference: string;
+  supplierId: string;
+  supplierName: string | null;
+  shopId: string;
+  shopName: string | null;
+  notes: string | null;
+  status: 'PENDING' | 'QUOTED' | 'ACCEPTED' | 'CANCELLED';
+  linesJson: string;
+  createdBy: string | null;
+  createdAt: string;
+  quotes: SupplierQuote[];
+}
+
+/** Devis fournisseur versionné rattaché à une demande. */
+export interface SupplierQuote {
+  id: string;
+  requestId: string;
+  requestReference: string;
   supplierId: string;
   version: number;
   globalDiscount: number;
@@ -137,9 +153,11 @@ export interface OrderQuote {
 }
 
 export interface QuoteLine {
+  productId?: string;
   ref: string;
   name: string;
   qty: number;
+  quantity?: number;
   unitPrice: number;
   discountPct: number;
   discount: number;

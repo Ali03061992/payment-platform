@@ -63,12 +63,12 @@ public class InvoicePdfService {
                 order.getReference(), "Payment Platform - Facture ");
     }
 
-    /** Devis fournisseur : même mise en page que la facture, intitulés adaptés. */
+    /** Devis : même mise en page que la facture, intitulés adaptés. */
     public byte[] generateQuotePdf(Order order, List<OrderItem> items,
                                    InvoiceParty supplier, InvoiceParty buyer, int version,
-                                   String orderReference) {
+                                   String refKind, String refValue) {
         return generatePdf(order, items, supplier, buyer, "DEVIS N°" + version,
-                "Devis n°" + version + " — Commande : ", orderReference,
+                "Devis n°" + version + " — " + refKind + " : ", refValue,
                 "Payment Platform - Devis ");
     }
 

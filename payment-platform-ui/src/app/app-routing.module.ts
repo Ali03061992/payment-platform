@@ -40,6 +40,9 @@ import { DeliveryManagementComponent } from './supplier/delivery-management/deli
 import { SupplierCreateOrderComponent } from './supplier/create-order/create-order.component';
 import { OrderListComponent } from './shop/order-list/order-list.component';
 import { CreateOrderComponent } from './shop/create-order/create-order.component';
+import { QuoteRequestComponent } from './shop/quote-request/quote-request.component';
+import { ShopQuotesComponent } from './shop/quotes/shop-quotes.component';
+import { QuotesComponent } from './supplier/quotes/quotes.component';
 import { ShopOrderDetailComponent } from './shop/order-detail/order-detail.component';
 import { DisputeDetailComponent } from './shop/dispute-detail/dispute-detail.component';
 import { DisputeListComponent } from './shop/dispute-list/dispute-list.component';
@@ -103,11 +106,14 @@ const routes: Routes = [
       { path: 'supplier/dashboard', component: StockDashboardComponent, canActivate: [RoleGuard], data: { roles: supplierRoles } },
       { path: 'supplier/low-stock-alerts', component: LowStockAlertsComponent, canActivate: [RoleGuard], data: { roles: ['SUPPLIER_ADMIN'] } },
       { path: 'supplier/orders', component: OrderManagementComponent, canActivate: [RoleGuard], data: { roles: supplierRoles } },
+      { path: 'supplier/quotes', component: QuotesComponent, canActivate: [RoleGuard], data: { roles: ['SUPPLIER_ADMIN'] } },
       { path: 'supplier/orders/create', component: SupplierCreateOrderComponent, canActivate: [RoleGuard], data: { roles: ['SUPPLIER_ADMIN'] } },
       { path: 'supplier/deliveries', component: DeliveryManagementComponent, canActivate: [RoleGuard], data: { roles: ['SUPPLIER_ADMIN', 'SUPPLIER_AGENT'] } },
       { path: 'shop/deliveries', component: DeliveryManagementComponent, canActivate: [RoleGuard], data: { roles: shopRoles } },
       { path: 'shop/orders', component: OrderListComponent, canActivate: [RoleGuard], data: { roles: shopRoles } },
       { path: 'shop/orders/create', component: CreateOrderComponent, canActivate: [RoleGuard], data: { roles: shopRoles } },
+      { path: 'shop/quotes', component: ShopQuotesComponent, canActivate: [RoleGuard], data: { roles: shopRoles } },
+      { path: 'shop/quotes/request', component: QuoteRequestComponent, canActivate: [RoleGuard], data: { roles: shopRoles } },
       { path: 'shop/orders/:id', component: ShopOrderDetailComponent, canActivate: [RoleGuard], data: { roles: shopRoles } },
       { path: 'shop/disputes', component: DisputeListComponent, canActivate: [RoleGuard], data: { roles: shopRoles } },
       { path: 'shop/disputes/:id', component: DisputeDetailComponent, canActivate: [RoleGuard], data: { roles: shopRoles } },

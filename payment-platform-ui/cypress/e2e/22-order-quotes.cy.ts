@@ -1,6 +1,6 @@
-// Parcours 22-order-quotes.cy.ts : 22 - Devis fournisseur versionné.
-// La boutique demande SANS remise ; le fournisseur modifie les lignes, pose les
-// remises (lignes % + globale %) et envoie le devis (notification shop).
+// Parcours 22-order-quotes.cy.ts : 22 - Demandes de devis découplées.
+// La boutique crée une DEMANDE (zéro remise, pas une commande) ; le fournisseur
+// chiffre via l'application (versions) ; la boutique accepte (crée la commande).
 // Prérequis : services live, utilisateurs seedés via cy.ensureTestUsers(), API live.
 // Ne pas lancer sans go explicite : suite e2e live uniquement.
 // @ts-nocheck
@@ -26,8 +26,8 @@ function setupCtx() {
       ctx.shopAbdelslamId = list.find((s: any) => s.name === 'Abdelslam Tunis E2E')?.id;
     })
     .then(() => cy.apiPost(ctx.supplierToken, `/api/suppliers/${ctx.covaleId}/products`, {
-      name: `Produit Devis ${Date.now()}`, sku: `DEV-E2E-${Date.now()}`,
-      description: 'E2E devis', unitPrice: 1000, currency: 'TND',
+      name: `Produit Demande ${Date.now()}`, sku: `DEM-E2E-${Date.now()}`,
+      description: 'E2E demande devis', unitPrice: 1000, currency: 'TND',
       quantity: 100, minQuantity: 1, vatRate: 19,
     })).then((r) => {
       expect(r.status).to.be.oneOf([200, 201]);
@@ -36,95 +36,112 @@ function setupCtx() {
     .then(() => cy.wrap(ctx));
 }
 
-function draftOrder(ctx: any) {
-  return cy.apiPost(ctx.shopToken, '/api/orders', {
-    supplierId: ctx.covaleId, shopId: ctx.shopAbdelslamId,
-    asapPayment: false, currency: 'TND', notes: 'E2E devis sans remise',
-    items: [{ productId: ctx.productId, quantity: 2, discount: 0 }],
+function createDemande(ctx: any) {
+  return cy.request({
+    method: 'POST',
+    url: `${API()}/api/quotes/requests`,
+    headers: hdr(ctx.shopToken),
+    body: {
+      supplierId: ctx.covaleId, notes: 'E2E demande sans remise',
+      items: [{ productId: ctx.productId, quantity: 2 }],
+    },
+    failOnStatusCode: false,
   }).then((r) => {
-    expect(r.status).to.be.oneOf([200, 201]);
-    return cy.wrap(r.body.id as string);
+    expect(r.status).to.be.oneOf([200, 201], JSON.stringify(r.body));
+    return cy.wrap(r.body);
   });
 }
 
-function postQuote(token: string, orderId: string, body: any) {
+function sendDevis(ctx: any, requestId: string, discount: number, globalDiscount: number) {
   return cy.request({
     method: 'POST',
-    url: `${API()}/api/orders/${orderId}/quote`,
-    headers: hdr(token),
-    body,
+    url: `${API()}/api/quotes/requests/${requestId}/quotes`,
+    headers: hdr(ctx.supplierToken),
+    body: { items: [{ productId: ctx.productId, quantity: 2, discount }], globalDiscount },
     failOnStatusCode: false,
   });
 }
 
-describe('22 - Devis fournisseur', () => {
+describe('22 - Demandes de devis découplées', () => {
   before(() => cy.ensureTestUsers());
 
-  it('fournisseur envoie un devis v1 avec remises (lignes % + globale %)', () => {
-    setupCtx().then((ctx) => draftOrder(ctx).then((id) =>
-      postQuote(ctx.supplierToken, id, {
-        items: [{ productId: ctx.productId, quantity: 2, discount: 10 }],
-        globalDiscount: 5,
-      }).then((r) => {
+  it('boutique crée une demande SANS remise (pas de commande)', () => {
+    setupCtx().then((ctx) => createDemande(ctx).then((d: any) => {
+      expect(d.reference).to.match(/^DEV-/);
+      expect(d.status).to.eq('PENDING');
+      // Aucune commande créée : la liste boutique ne contient pas de brouillon lié.
+      cy.apiGet(ctx.shopToken, '/api/orders').then((o: any) => {
+        const items = Array.isArray(o.body) ? o.body : (o.body?.items || o.body?.content || []);
+        expect(items.find((x: any) => x.notes === 'E2E demande sans remise')).to.be.undefined;
+      });
+    }));
+  });
+
+  it('fournisseur chiffre v1 (lignes % + globale %), demande QUOTED', () => {
+    setupCtx().then((ctx) => createDemande(ctx).then((d: any) =>
+      sendDevis(ctx, d.id, 10, 5).then((r) => {
         expect(r.status).to.eq(200, JSON.stringify(r.body));
         expect(r.body.version).to.eq(1);
-        expect(r.body.globalDiscount).to.eq(5);
         // 2x1000=2000, -10% ligne=1800, -5% global=1710 HT, TVA 19%=324.90
         expect(r.body.subtotal).to.eq(1710);
         expect(r.body.total).to.eq(2034.9);
+        return cy.apiGet(ctx.shopToken, `/api/quotes/requests/${d.id}`);
+      }).then((g: any) => {
+        expect(g.body.status).to.eq('QUOTED');
+        expect(g.body.quotes.length).to.eq(1);
       })));
   });
 
-  it('deuxième devis incrémente la version, historique complet', () => {
-    setupCtx().then((ctx) => draftOrder(ctx).then((id) =>
-      postQuote(ctx.supplierToken, id, {
-        items: [{ productId: ctx.productId, quantity: 1, discount: 0 }],
-        globalDiscount: 0,
-      }).then(() => postQuote(ctx.supplierToken, id, {
-        items: [{ productId: ctx.productId, quantity: 1, discount: 50 }],
-        globalDiscount: 0,
-      })).then((r) => {
+  it('deuxième devis incrémente, boutique accepte → commande CONFIRMÉE', () => {
+    setupCtx().then((ctx) => createDemande(ctx).then((d: any) =>
+      sendDevis(ctx, d.id, 0, 0).then(() => sendDevis(ctx, d.id, 50, 0)).then((r) => {
         expect(r.body.version).to.eq(2);
-        return cy.apiGet(ctx.shopToken, `/api/orders/${id}/quotes`);
-      }).then((h) => {
-        expect(h.status).to.eq(200);
-        expect(h.body.length).to.eq(2);
-        expect(h.body[0].version).to.eq(1);
-        expect(h.body[1].version).to.eq(2);
+        return cy.request({
+          method: 'POST',
+          url: `${API()}/api/quotes/quotes/${r.body.id}/accept`,
+          headers: hdr(ctx.shopToken),
+          failOnStatusCode: false,
+        });
+      }).then((a: any) => {
+        expect(a.status).to.eq(200, JSON.stringify(a.body));
+        expect(a.body.status).to.eq('CONFIRMED');
+        expect(a.body.total).to.eq(1190);
+        return cy.apiGet(ctx.shopToken, `/api/quotes/requests/${d.id}`);
+      }).then((g: any) => {
+        expect(g.body.status).to.eq('ACCEPTED');
       })));
   });
 
-  it('boutique ne peut pas envoyer de devis (403)', () => {
-    setupCtx().then((ctx) => draftOrder(ctx).then((id) =>
-      postQuote(ctx.shopToken, id, {
-        items: [{ productId: ctx.productId, quantity: 1, discount: 0 }],
-        globalDiscount: 0,
-      }).then((r) => {
-        expect(r.status).to.eq(403);
-      })));
+  it('boutique tierce : acceptation refusée (403)', () => {
+    setupCtx().then((ctx) => createDemande(ctx).then((d: any) =>
+      sendDevis(ctx, d.id, 0, 0).then((r) =>
+        cy.apiLogin('ali.e2e').then((aliToken) => cy.request({
+          method: 'POST',
+          url: `${API()}/api/quotes/quotes/${r.body.id}/accept`,
+          headers: hdr(aliToken),
+          failOnStatusCode: false,
+        })).then((a: any) => {
+          expect(a.status).to.eq(403);
+        }))));
   });
 
   it('remise hors borne refusée (400/409)', () => {
-    setupCtx().then((ctx) => draftOrder(ctx).then((id) =>
-      postQuote(ctx.supplierToken, id, {
-        items: [{ productId: ctx.productId, quantity: 1, discount: 120 }],
-        globalDiscount: 0,
-      }).then((r) => {
+    setupCtx().then((ctx) => createDemande(ctx).then((d: any) =>
+      sendDevis(ctx, d.id, 120, 0).then((r) => {
         expect(r.status).to.be.oneOf([400, 409]);
       })));
   });
 
-  it('boutique voit ses devis sur le détail commande', () => {
-    setupCtx().then((ctx) => draftOrder(ctx).then((id) =>
-      postQuote(ctx.supplierToken, id, {
-        items: [{ productId: ctx.productId, quantity: 1, discount: 0 }],
-        globalDiscount: 0,
-      }).then(() => {
-        cy.loginAsShopAdmin();
-        cy.visit(`/dashboard/shop/orders/${id}`);
-        cy.dismissOverlays();
-        cy.contains('Devis reçus', { timeout: 15000 }).should('exist');
-        cy.contains('Devis n°1').should('exist');
+  it('boutique annule sa demande', () => {
+    setupCtx().then((ctx) => createDemande(ctx).then((d: any) =>
+      cy.request({
+        method: 'PATCH',
+        url: `${API()}/api/quotes/requests/${d.id}/cancel`,
+        headers: hdr(ctx.shopToken),
+        failOnStatusCode: false,
+      }).then((r) => {
+        expect(r.status).to.eq(200);
+        expect(r.body.status).to.eq('CANCELLED');
       })));
   });
 });

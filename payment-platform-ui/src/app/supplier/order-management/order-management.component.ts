@@ -69,13 +69,6 @@ export class OrderManagementComponent implements OnInit, OnDestroy {
   editing = false;
   loadingEditProducts = false;
 
-  showQuoteModal = false;
-  quoteOrderId = '';
-  quoteOrderReference = '';
-  quoteGlobalDiscount = 0;
-  quoteLines: { productId: string; productName: string; quantity: number; discount: number; unitPrice: number }[] = [];
-  sendingQuote = false;
-
   detailComments: OrderComment[] = [];
   detailNewComment = '';
   detailSubmittingComment = false;
@@ -578,63 +571,6 @@ export class OrderManagementComponent implements OnInit, OnDestroy {
 
   canEdit(order: Order): boolean {
     return order.status === 'DRAFT';
-  }
-
-  canQuote(order: Order): boolean {
-    return order.status === 'DRAFT' || order.status === 'CONFIRMED';
-  }
-
-  openQuote(order: Order): void {
-    this.quoteOrderId = order.id;
-    this.quoteOrderReference = order.reference;
-    this.quoteGlobalDiscount = order.globalDiscount || 0;
-    this.quoteLines = (order.items || []).map(item => {
-      const base = (item.unitPrice || 0) * item.quantity;
-      const pct = base > 0 && item.discount ? Math.round((item.discount / base) * 10000) / 100 : 0;
-      return {
-        productId: item.productId,
-        productName: item.productName,
-        quantity: item.quantity,
-        discount: pct,
-        unitPrice: item.unitPrice
-      };
-    });
-    this.sendingQuote = false;
-    this.showQuoteModal = true;
-  }
-
-  closeQuote(): void {
-    this.showQuoteModal = false;
-    this.quoteOrderId = '';
-    this.quoteLines = [];
-    this.quoteGlobalDiscount = 0;
-  }
-
-  canSubmitQuote(): boolean {
-    return this.quoteLines.length > 0 && !this.sendingQuote
-      && this.quoteGlobalDiscount >= 0 && this.quoteGlobalDiscount <= 100
-      && this.quoteLines.every(l => l.quantity >= 1 && l.discount >= 0 && l.discount <= 100);
-  }
-
-  submitQuote(): void {
-    if (!this.canSubmitQuote()) return;
-    this.sendingQuote = true;
-    this.subscriptions.add(this.orderService.sendQuote(
-      this.quoteOrderId,
-      this.quoteLines.map(l => ({ productId: l.productId, quantity: l.quantity, discount: l.discount })),
-      this.quoteGlobalDiscount
-    ).subscribe({
-      next: (quote) => {
-        this.toast.success(this.translate.instant('SUPPLIER_ORDERS.QUOTE_SENT', { version: quote.version }));
-        this.closeQuote();
-        this.sendingQuote = false;
-        this.loadOrders();
-      },
-      error: (err: { error?: { message?: string } }) => {
-        this.toast.error(err.error?.message || this.translate.instant('SUPPLIER_ORDERS.QUOTE_ERROR'));
-        this.sendingQuote = false;
-      }
-    }));
   }
 
   openEdit(order: Order): void {
