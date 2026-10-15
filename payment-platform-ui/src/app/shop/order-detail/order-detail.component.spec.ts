@@ -36,7 +36,7 @@ describe('ShopOrderDetailComponent', () => {
   };
 
   beforeEach(() => {
-    const orderSpy = jasmine.createSpyObj('OrderService', ['getById', 'getByReference', 'accept', 'acceptAsap', 'reject', 'cancel', 'downloadInvoice', 'downloadTeif', 'printInvoice', 'getComments', 'addComment', 'getWithholdingCertificate', 'downloadWithholdingCertificatePdf', 'downloadWithholdingCertificateXml', 'markCertificateDeposited', 'updateExternalReference', 'getQuotes', 'downloadQuotePdf']);
+    const orderSpy = jasmine.createSpyObj('OrderService', ['getById', 'getByReference', 'accept', 'acceptAsap', 'reject', 'cancel', 'downloadInvoice', 'downloadTeif', 'printInvoice', 'getComments', 'addComment', 'getWithholdingCertificate', 'downloadWithholdingCertificatePdf', 'downloadWithholdingCertificateXml', 'markCertificateDeposited', 'updateExternalReference']);
     const disputeSpy = jasmine.createSpyObj('DisputeService', ['getByOrder', 'create']);
     const toastSpy = jasmine.createSpyObj('ToastService', ['success', 'error']);
     const confirmSpy = jasmine.createSpyObj('ConfirmDialogService', ['confirm']);
@@ -45,7 +45,6 @@ describe('ShopOrderDetailComponent', () => {
     orderSpy.getById.and.returnValue(of(mockOrder));
     orderSpy.getByReference.and.returnValue(of(mockOrder));
     orderSpy.getComments.and.returnValue(of([]));
-    orderSpy.getQuotes.and.returnValue(of([]));
     disputeSpy.getByOrder.and.returnValue(of([]));
 
     TestBed.configureTestingModule({
@@ -124,21 +123,6 @@ describe('ShopOrderDetailComponent', () => {
       component.downloadTeif();
       expect(orderService.downloadTeif).toHaveBeenCalledWith('ord-1');
     });
-
-  describe('quotes', () => {
-    it('should load quotes on init', () => {
-      orderService.getQuotes.and.returnValue(of([{ version: 1 }, { version: 2 }] as any));
-      component.ngOnInit();
-      expect(orderService.getQuotes).toHaveBeenCalled();
-      expect(component.quotes.length).toBe(2);
-    });
-
-    it('should download quote PDF', () => {
-      component.order = { ...mockOrder, id: 'ord-1', reference: 'ORD-001' } as any;
-      component.downloadQuote({ version: 3 } as any);
-      expect(orderService.downloadQuotePdf).toHaveBeenCalledWith('ord-1', 3, 'ORD-001');
-    });
-  });
 
     it('should mark certificate deposited', () => {
       orderService.markCertificateDeposited.and.returnValue(of({ number: 'CRT-1', status: 'DEPOSITED' } as any));

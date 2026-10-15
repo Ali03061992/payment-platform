@@ -1,0 +1,11 @@
+/* Reprend les styles partagés (page-header, table-card, payment-badge). */
+.text-muted { color: var(--text-muted, #8896ab); }
+.empty-state { padding: 32px; text-align: center; color: var(--text-muted, #8896ab); }
+.demande-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; padding: 16px 20px 0; }
+.demande-actions { display: flex; gap: 8px; }
+td.actions { white-space: nowrap; }
+td.actions .btn { margin-right: 8px; }
+.badge-pending { background: #eceff1; color: #546e7a; }
+.badge-quoted { background: #e3f2fd; color: #1565c0; }
+.badge-accepted { background: #e8f5e9; color: #2e7d32; }
+.badge-cancelled { background: #fce4ec; color: #c62828; }

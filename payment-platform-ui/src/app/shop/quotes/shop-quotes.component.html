@@ -1,0 +1,92 @@
+<div class="page-header">
+  <h2>{{ 'MY_QUOTES.TITLE' | translate }}</h2>
+  <div class="page-header-actions">
+    <button class="btn btn-primary" (click)="newRequest()">{{ 'MY_QUOTES.NEW_REQUEST' | translate }}</button>
+  </div>
+</div>
+<p class="text-muted">{{ 'MY_QUOTES.SUBTITLE' | translate }}</p>
+
+@if (loading) {
+  <div class="loading">
+    <div class="spinner"></div>
+    <span>{{ 'ORDERS.LOADING' | translate }}</span>
+  </div>
+}
+
+@if (!loading && demandes.length === 0) {
+  <div class="empty-state">{{ 'MY_QUOTES.EMPTY' | translate }}</div>
+}
+
+@for (d of demandes; track d.id) {
+  <div class="table-card" style="margin-bottom:16px;">
+    <div class="demande-head">
+      <div>
+        <strong>{{ d.reference }}</strong>
+        <span class="payment-badge" [ngClass]="'badge-' + d.status.toLowerCase()">{{ d.status | statusLabel }}</span>
+        <div class="text-muted">{{ d.supplierName || d.supplierId }} — {{ d.createdAt | date:'dd/MM/yyyy HH:mm' }}</div>
+        @if (d.notes) {
+          <div class="text-muted">{{ d.notes }}</div>
+        }
+      </div>
+      <div class="demande-actions">
+        @if (d.status === 'PENDING' || d.status === 'QUOTED') {
+          <button class="btn btn-sm btn-secondary" type="button" (click)="cancel(d)">{{ 'MY_QUOTES.CANCEL' | translate }}</button>
+        }
+      </div>
+    </div>
+
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>{{ 'MY_QUOTES.COL_NEED' | translate }}</th>
+            <th>{{ 'MY_QUOTES.COL_QTY' | translate }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (l of linesOf(d); track $index) {
+            <tr>
+              <td>{{ l.name }} <small class="text-muted">{{ l.ref }}</small></td>
+              <td>{{ l.qty }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    @if ((d.quotes || []).length > 0) {
+      <h4 style="padding:12px 20px 0;">{{ 'MY_QUOTES.QUOTES_RECEIVED' | translate }}</h4>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>{{ 'ORDER_DETAIL.QUOTE_VERSION' | translate }}</th>
+              <th>{{ 'ORDER_DETAIL.QUOTE_TOTAL' | translate }}</th>
+              <th>{{ 'ORDER_DETAIL.QUOTE_DATE' | translate }}</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (q of d.quotes; track q.id) {
+              <tr>
+                <td>{{ 'ORDER_DETAIL.QUOTE_N' | translate:{version: q.version} }}</td>
+                <td>{{ q.total | number:'1.2-2' }} {{ q.currency }}</td>
+                <td>{{ q.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
+                <td class="actions">
+                  <button class="btn btn-sm btn-secondary" type="button" (click)="download(q)">{{ 'ORDER_DETAIL.QUOTE_DOWNLOAD' | translate }}</button>
+                  @if (d.status === 'QUOTED') {
+                    <button class="btn btn-sm btn-primary" type="button" (click)="accept(q)" [disabled]="acceptingId === q.id">
+                      {{ acceptingId === q.id ? ('COMMON.SAVING' | translate) : ('MY_QUOTES.ACCEPT' | translate) }}
+                    </button>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    } @else {
+      <div class="empty-state" style="padding:16px;">{{ 'MY_QUOTES.WAITING' | translate }}</div>
+    }
+  </div>
+}

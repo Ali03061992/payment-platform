@@ -1,39 +1,46 @@
 package com.paymentplatform.organization.infrastructure.persistence;
 
-import com.paymentplatform.organization.domain.model.OrderQuote;
-import com.paymentplatform.organization.domain.repository.OrderQuoteRepository;
+import com.paymentplatform.organization.domain.model.SupplierQuote;
+import com.paymentplatform.organization.domain.repository.SupplierQuoteRepository;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Component
-public class JpaOrderQuoteRepository implements OrderQuoteRepository {
+public class JpaSupplierQuoteRepository implements SupplierQuoteRepository {
 
-    private final OrderQuoteJpaRepository jpa;
+    private final SupplierQuoteJpaRepository jpa;
 
-    public JpaOrderQuoteRepository(OrderQuoteJpaRepository jpa) {
+    public JpaSupplierQuoteRepository(SupplierQuoteJpaRepository jpa) {
         this.jpa = jpa;
     }
 
     @Override
     @Transactional
-    public OrderQuote save(OrderQuote quote) {
+    public SupplierQuote save(SupplierQuote quote) {
         return toDomain(jpa.save(toEntity(quote)));
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<OrderQuote> findByOrderId(UUID orderId) {
-        return jpa.findByOrderIdOrderByVersionAsc(orderId).stream().map(this::toDomain).toList();
+    public Optional<SupplierQuote> findById(UUID id) {
+        return jpa.findById(id).map(this::toDomain);
     }
 
-    private OrderQuoteJpaEntity toEntity(OrderQuote q) {
-        OrderQuoteJpaEntity e = new OrderQuoteJpaEntity();
+    @Override
+    @Transactional(readOnly = true)
+    public List<SupplierQuote> findByRequestId(UUID requestId) {
+        return jpa.findByRequestIdOrderByVersionAsc(requestId).stream().map(this::toDomain).toList();
+    }
+
+    private SupplierQuoteJpaEntity toEntity(SupplierQuote q) {
+        SupplierQuoteJpaEntity e = new SupplierQuoteJpaEntity();
         e.setId(q.id());
-        e.setOrderId(q.orderId());
-        e.setOrderReference(q.orderReference());
+        e.setRequestId(q.requestId());
+        e.setRequestReference(q.requestReference());
         e.setSupplierId(q.supplierId());
         e.setVersion(q.version());
         e.setGlobalDiscount(q.globalDiscount());
@@ -48,9 +55,9 @@ public class JpaOrderQuoteRepository implements OrderQuoteRepository {
         return e;
     }
 
-    private OrderQuote toDomain(OrderQuoteJpaEntity e) {
-        return OrderQuote.builder()
-                .id(e.getId()).orderId(e.getOrderId()).orderReference(e.getOrderReference())
+    private SupplierQuote toDomain(SupplierQuoteJpaEntity e) {
+        return SupplierQuote.builder()
+                .id(e.getId()).requestId(e.getRequestId()).requestReference(e.getRequestReference())
                 .supplierId(e.getSupplierId()).version(e.getVersion())
                 .globalDiscount(e.getGlobalDiscount()).subtotal(e.getSubtotal())
                 .taxAmount(e.getTaxAmount()).total(e.getTotal()).stampAmount(e.getStampAmount())

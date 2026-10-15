@@ -3,6 +3,7 @@ import { TranslateService } from '@ngx-translate/core';
 
 export const STATUS_LABELS: Record<string, string> = {
   'PENDING': 'En attente',
+  'QUOTED': 'Chiffré',
   'DRAFT': 'Brouillon',
   'CONFIRMED': 'Confirmé',
   'PREPARING': 'En préparation',

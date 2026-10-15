@@ -1,0 +1,114 @@
+<div class="page-header">
+  <h2>{{ 'QUOTE_REQ.TITLE' | translate }}</h2>
+  <p class="text-muted">{{ 'QUOTE_REQ.SUBTITLE' | translate }}</p>
+</div>
+
+<div class="form-card">
+  <form (ngSubmit)="submit()">
+    <div class="form-group">
+      <label for="supplier">{{ 'QUOTE_REQ.SUPPLIER' | translate }}</label>
+      <select [(ngModel)]="selectedSupplierId" name="supplier" id="supplier" class="form-control"
+        (change)="onSupplierChange()" required [attr.aria-label]="'QUOTE_REQ.SUPPLIER_ARIA' | translate">
+        <option value="">{{ 'QUOTE_REQ.SELECT_SUPPLIER' | translate }}</option>
+        @for (s of suppliers; track s.id) {
+          <option [value]="s.id">{{ s.name }}</option>
+        }
+      </select>
+      @if (errorSuppliers) {
+        <div class="error" role="alert">{{ errorSuppliers }}</div>
+      }
+    </div>
+
+    @if (selectedSupplierId) {
+      <div class="form-group">
+        <label for="searchQuery">{{ 'QUOTE_REQ.SEARCH_LABEL' | translate }}</label>
+        <input type="text" [(ngModel)]="searchQuery" name="search" id="searchQuery" class="form-control"
+          [placeholder]="'QUOTE_REQ.SEARCH_PLACEHOLDER' | translate">
+      </div>
+      @if (loadingProducts) {
+        <div class="text-muted" style="padding:12px;" role="status" aria-live="polite">{{ 'QUOTE_REQ.LOADING_PRODUCTS' | translate }}</div>
+      }
+      @if (errorProducts) {
+        <div class="error" role="alert">{{ errorProducts }}</div>
+      }
+      @if (!loadingProducts && filteredProducts.length > 0) {
+        <div class="table-card" style="margin-bottom:16px;">
+          <div class="table-wrapper" style="max-height:240px;overflow-y:auto;">
+            <table>
+              <thead>
+                <tr>
+                  <th>{{ 'QUOTE_REQ.COL_PRODUCT' | translate }}</th>
+                  <th>{{ 'QUOTE_REQ.COL_PRICE' | translate }}</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (p of filteredProducts; track p.id) {
+                  <tr>
+                    <td>{{ p.name }} <small class="text-muted">{{ p.sku }}</small></td>
+                    <td>{{ p.unitPrice | number:'1.2-2' }} TND</td>
+                    <td>
+                      <button class="btn btn-sm btn-primary" type="button" (click)="addProduct(p)" [disabled]="!hasStock(p)">
+                        {{ 'QUOTE_REQ.ADD' | translate }}
+                      </button>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      }
+    }
+
+    @if (lines.length > 0) {
+      <div class="table-card" style="margin-bottom:16px;">
+        <h3 style="padding:16px 20px 0;">{{ 'QUOTE_REQ.NEED' | translate }}</h3>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>{{ 'QUOTE_REQ.COL_PRODUCT' | translate }}</th>
+                <th>{{ 'QUOTE_REQ.COL_QTY' | translate }}</th>
+                <th>{{ 'QUOTE_REQ.COL_TOTAL' | translate }}</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (line of lines; track line; let i = $index) {
+                <tr>
+                  <td>{{ line.product.name }}</td>
+                  <td>
+                    <input type="number" [(ngModel)]="line.quantity" [name]="'qty_' + i"
+                      class="form-control" min="1" style="width:80px;" required>
+                  </td>
+                  <td>{{ (line.product.unitPrice * line.quantity) | number:'1.2-2' }}</td>
+                  <td>
+                    <button class="btn btn-sm btn-danger" type="button" (click)="removeLine(i)">{{ 'QUOTE_REQ.REMOVE' | translate }}</button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        <div style="padding:12px 20px;" class="text-muted">
+          {{ 'QUOTE_REQ.ESTIMATED' | translate }} : <strong>{{ estimatedTotal | number:'1.2-2' }} TND</strong>
+          ({{ 'QUOTE_REQ.NO_DISCOUNT' | translate }})
+        </div>
+      </div>
+    }
+
+    <div class="form-group">
+      <label for="notes">{{ 'QUOTE_REQ.NOTES' | translate }}</label>
+      <textarea [(ngModel)]="notes" name="notes" id="notes" class="form-control" rows="3"
+        [placeholder]="'QUOTE_REQ.NOTES_PLACEHOLDER' | translate"></textarea>
+    </div>
+
+    <div class="form-actions">
+      <a class="btn btn-secondary" routerLink="/dashboard/shop/orders">{{ 'ORDERS.CANCEL_BTN' | translate }}</a>
+      <button class="btn btn-primary" [disabled]="!canSubmit()">
+        {{ creating ? ('QUOTE_REQ.SENDING' | translate) : ('QUOTE_REQ.SEND' | translate) }}
+      </button>
+    </div>
+  </form>
+</div>

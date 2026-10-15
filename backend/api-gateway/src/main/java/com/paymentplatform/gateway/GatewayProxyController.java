@@ -60,7 +60,7 @@ public class GatewayProxyController {
     }
 
     @RequestMapping(value = {"/admin/**", "/organizations/**",
-            "/supplier/catalog/**", "/orders/**", "/disputes/**", "/balances/**", "/reports/**",
+            "/supplier/catalog/**", "/orders/**", "/quotes/**", "/disputes/**", "/balances/**", "/reports/**",
             "/suppliers/{supplierId}/products/**", "/suppliers/{supplierId}/movements/**",
             "/suppliers/{supplierId}/low-stock-alerts", "/suppliers/{supplierId}/stocks/**",
             "/suppliers/{supplierId}/optimization/**", "/categories/**"}, method = {

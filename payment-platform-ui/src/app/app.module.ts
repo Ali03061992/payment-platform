@@ -45,6 +45,9 @@ import { DeliveryManagementComponent } from './supplier/delivery-management/deli
 import { SupplierCreateOrderComponent } from './supplier/create-order/create-order.component';
 import { OrderListComponent } from './shop/order-list/order-list.component';
 import { CreateOrderComponent } from './shop/create-order/create-order.component';
+import { QuoteRequestComponent } from './shop/quote-request/quote-request.component';
+import { ShopQuotesComponent } from './shop/quotes/shop-quotes.component';
+import { QuotesComponent } from './supplier/quotes/quotes.component';
 import { ShopOrderDetailComponent } from './shop/order-detail/order-detail.component';
 import { DisputeDetailComponent } from './shop/dispute-detail/dispute-detail.component';
 import { DisputeListComponent } from './shop/dispute-list/dispute-list.component';
@@ -158,6 +161,9 @@ export function initAppTranslations(translate: TranslateService, loginService: L
         SupplierCreateOrderComponent,
         OrderListComponent,
         CreateOrderComponent,
+        QuoteRequestComponent,
+        ShopQuotesComponent,
+        QuotesComponent,
         ShopOrderDetailComponent,
         DisputeDetailComponent,
         DisputeListComponent,
