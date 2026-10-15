@@ -23,7 +23,7 @@ export class QuotesComponent implements OnInit, OnDestroy {
   quoteRequestId = '';
   quoteReference = '';
   quoteGlobalDiscount = 0;
-  quoteLines: { productId: string; productName: string; quantity: number; discount: number }[] = [];
+  quoteLines: { productId: string; productName: string; quantity: number; discount: number; unitPrice: number }[] = [];
   sendingQuote = false;
 
   private subscriptions = new Subscription();
@@ -72,7 +72,8 @@ export class QuotesComponent implements OnInit, OnDestroy {
       productId: l.productId,
       productName: l.name,
       quantity: l.qty || l.quantity || 1,
-      discount: 0
+      discount: 0,
+      unitPrice: l.unitPrice || 0
     }));
     this.sendingQuote = false;
     this.showQuoteModal = true;
