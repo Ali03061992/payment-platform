@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { LoginService } from '../../services/login.service';
 import { NotificationService } from '../../services/notification.service';
+import { NotificationSoundService } from '../../services/notification-sound.service';
 import { Notification, NotificationPage } from '../../models/notification.model';
 import { Subscription } from 'rxjs';
 import { timeAgo } from '../../pipes/time-ago.pipe';
@@ -36,8 +37,17 @@ export class NotificationsComponent implements OnInit, OnDestroy {
     private notificationService: NotificationService,
     private router: Router,
     private translate: TranslateService,
-    private loginService: LoginService
+    private loginService: LoginService,
+    private sound: NotificationSoundService
   ) {}
+
+  get soundOn(): boolean {
+    return this.sound.isEnabled();
+  }
+
+  toggleSound(): void {
+    this.sound.setEnabled(!this.sound.isEnabled());
+  }
 
   /** Boutique (admin/agent) : les pages fournisseur rendraient 403. */
   isShopUser(): boolean {

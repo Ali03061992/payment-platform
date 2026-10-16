@@ -1301,6 +1301,9 @@
   "NOTIFICATIONS": {
     "TITLE": "Notifications",
     "MARK_ALL_READ": "Tout marquer lu",
+    "SOUND_ON": "Son activé",
+    "SOUND_OFF": "Son coupé",
+    "SOUND_ARIA": "Activer ou couper le son des notifications",
     "ALL_TYPES": "Tous les types",
     "TYPE_ORDER": "Commandes",
     "TYPE_PAYMENT": "Paiements",

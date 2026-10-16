@@ -494,15 +494,14 @@
                   <p style="margin:0;font-size:14px;white-space:pre-wrap;">{{ c.content }}</p>
                 </div>
               }
-              <div style="margin-top:12px;display:flex;gap:8px;">
+              <div class="comment-form">
                 <textarea
                   [(ngModel)]="detailNewComment"
                   [placeholder]="'SUPPLIER_ORDERS.ADD_COMMENT_PLACEHOLDER' | translate"
                   rows="2"
-                  style="flex:1;padding:10px;border:1px solid #ddd;border-radius:8px;font-family:inherit;font-size:14px;resize:vertical;"
                   [disabled]="detailSubmittingComment"
                   [attr.aria-label]="'SUPPLIER_ORDERS.ADD_COMMENT_ARIA' | translate"></textarea>
-                <button class="btn btn-primary" style="align-self:flex-end;" (click)="addDetailComment()"
+                <button class="btn btn-primary" (click)="addDetailComment()"
                   [disabled]="detailSubmittingComment || !detailNewComment.trim()"
                   [attr.aria-label]="'SUPPLIER_ORDERS.SEND_ARIA' | translate">
                   {{ detailSubmittingComment ? ('SUPPLIER_ORDERS.SENDING' | translate) : ('SUPPLIER_ORDERS.SEND' | translate) }}
