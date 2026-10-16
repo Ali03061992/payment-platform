@@ -1,6 +1,94 @@
-/* Reprend les styles partagés (page-header, table-card, payment-badge). */
-.text-muted { color: var(--text-muted, #8896ab); }
-.empty-state { padding: 32px; text-align: center; color: var(--text-muted, #8896ab); }
-.result-count { padding: 12px 20px; color: var(--text-muted, #8896ab); }
-.badge-draft { background: #eceff1; color: #546e7a; }
-.badge-confirmed { background: #e3f2fd; color: #1565c0; }
+.table-card {
+  margin-bottom: 1rem;
+}
+.demande-head strong {
+  font-size: 0.9375rem;
+  color: var(--text-primary);
+  margin-right: 0.5rem;
+}
+.demande-head .payment-badge {
+  vertical-align: middle;
+}
+.demande-head .text-muted {
+  margin-top: 0.25rem;
+  font-size: 0.8125rem;
+}
+.table-card h4 {
+  margin: 0;
+  padding: 0.75rem 1.25rem 0;
+  font-size: 0.9375rem;
+  color: var(--text-primary);
+}
+.table-wrapper table {
+  min-width: 32rem;
+}
+td .form-control,
+.table-wrapper .form-control {
+  width: 5rem;
+  max-width: 100%;
+  padding: 0.5rem 0.625rem;
+  font-size: 1rem;
+}
+.modal-content form .table-card {
+  margin-bottom: 1rem;
+}
+.modal-content .text-muted {
+  font-size: 0.8125rem;
+}
+[dir="rtl"] .demande-head strong {
+  margin-right: 0;
+  margin-left: 0.5rem;
+}
+[dir="rtl"] td .form-control,
+[dir="rtl"] .table-wrapper .form-control {
+  text-align: right;
+}
+@media (max-width: 768px) {
+  .table-card {
+    border-radius: 0.5rem;
+  }
+  .demande-head {
+    padding: 0.875rem 1rem 0;
+  }
+  .table-card h4 {
+    padding: 0.75rem 1rem 0;
+  }
+  th,
+  td {
+    padding: 0.625rem 0.5rem;
+    font-size: 0.8125rem;
+  }
+  .demande-actions .btn {
+    min-height: 2.75rem;
+  }
+  td .btn {
+    min-height: 2.75rem;
+  }
+}
+@media (max-width: 480px) {
+  .demande-head strong {
+    display: inline-block;
+    margin-bottom: 0.25rem;
+  }
+  .demande-head .payment-badge {
+    display: inline-block;
+    margin-bottom: 0.25rem;
+  }
+  .table-card h4 {
+    font-size: 0.875rem;
+  }
+  td .form-control,
+  .table-wrapper .form-control {
+    width: 100%;
+    min-height: 2.75rem;
+  }
+  .form-actions .btn {
+    width: 100%;
+    min-height: 2.75rem;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .table-card {
+    transition: none;
+  }
+}

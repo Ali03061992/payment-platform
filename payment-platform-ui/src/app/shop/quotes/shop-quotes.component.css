@@ -1,11 +1,95 @@
-/* Reprend les styles partagés (page-header, table-card, payment-badge). */
-.text-muted { color: var(--text-muted, #8896ab); }
-.empty-state { padding: 32px; text-align: center; color: var(--text-muted, #8896ab); }
-.demande-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; padding: 16px 20px 0; }
-.demande-actions { display: flex; gap: 8px; }
-td.actions { white-space: nowrap; }
-td.actions .btn { margin-right: 8px; }
-.badge-pending { background: #eceff1; color: #546e7a; }
-.badge-quoted { background: #e3f2fd; color: #1565c0; }
-.badge-accepted { background: #e8f5e9; color: #2e7d32; }
-.badge-cancelled { background: #fce4ec; color: #c62828; }
+.table-card {
+  margin-bottom: 1rem;
+}
+.table-card h3 {
+  margin: 0;
+  padding: 1rem 1.25rem 0;
+  font-size: 1rem;
+  color: var(--text-primary);
+}
+.demande-head strong {
+  font-size: 0.9375rem;
+  color: var(--text-primary);
+  margin-right: 0.5rem;
+}
+.demande-head .payment-badge {
+  vertical-align: middle;
+}
+.demande-head .text-muted {
+  margin-top: 0.25rem;
+  font-size: 0.8125rem;
+}
+td.actions .btn {
+  margin-right: 0.5rem;
+  min-height: 2.25rem;
+}
+td.actions .btn:last-child {
+  margin-right: 0;
+}
+.empty-state {
+  padding: 1rem;
+}
+[dir="rtl"] .demande-head strong {
+  margin-right: 0;
+  margin-left: 0.5rem;
+}
+[dir="rtl"] td.actions .btn {
+  margin-right: 0;
+  margin-left: 0.5rem;
+}
+[dir="rtl"] td.actions .btn:last-child {
+  margin-left: 0;
+}
+@media (max-width: 768px) {
+  .table-card {
+    border-radius: 0.5rem;
+  }
+  .table-card h3 {
+    padding: 0.875rem 1rem 0;
+    font-size: 0.9375rem;
+  }
+  .demande-head {
+    padding: 0.875rem 1rem 0;
+  }
+  th,
+  td {
+    padding: 0.625rem 0.5rem;
+    font-size: 0.8125rem;
+  }
+  td.actions {
+    white-space: normal;
+  }
+  td.actions .btn {
+    margin-bottom: 0.375rem;
+    min-height: 2.75rem;
+  }
+  .demande-actions .btn {
+    min-height: 2.75rem;
+  }
+  .page-header-actions .btn {
+    min-height: 2.75rem;
+  }
+}
+@media (max-width: 480px) {
+  .demande-head strong {
+    display: inline-block;
+    margin-bottom: 0.25rem;
+  }
+  .demande-head .payment-badge {
+    display: inline-block;
+    margin-bottom: 0.25rem;
+  }
+  td.actions .btn {
+    width: 100%;
+    margin-right: 0;
+    margin-left: 0;
+  }
+  [dir="rtl"] td.actions .btn {
+    margin-left: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .table-card {
+    transition: none;
+  }
+}
