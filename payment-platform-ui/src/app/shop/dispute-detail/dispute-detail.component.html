@@ -56,7 +56,7 @@
         }
       </div>
       @if (dispute.status !== 'CLOSED' && dispute.status !== 'RESOLVED') {
-        <div class="message-input no-print">
+        <div class="message-input comment-form no-print">
           <textarea
             [(ngModel)]="newMessage"
             [placeholder]="'DISPUTES.MESSAGE_PLACEHOLDER' | translate"

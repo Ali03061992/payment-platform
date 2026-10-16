@@ -1,8 +1,14 @@
 <div class="page-header">
   <h2>{{ 'NOTIFICATIONS.TITLE' | translate }}</h2>
-  @if (unreadCount > 0) {
-    <button class="btn btn-primary" (click)="markAllRead()">{{ 'NOTIFICATIONS.MARK_ALL_READ' | translate }}</button>
-  }
+  <div class="page-header-actions">
+    <button class="btn btn-secondary" type="button" (click)="toggleSound()"
+      [attr.aria-label]="'NOTIFICATIONS.SOUND_ARIA' | translate">
+      {{ soundOn ? ('NOTIFICATIONS.SOUND_ON' | translate) : ('NOTIFICATIONS.SOUND_OFF' | translate) }}
+    </button>
+    @if (unreadCount > 0) {
+      <button class="btn btn-primary" (click)="markAllRead()">{{ 'NOTIFICATIONS.MARK_ALL_READ' | translate }}</button>
+    }
+  </div>
 </div>
 
 <div class="filters">

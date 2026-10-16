@@ -1301,6 +1301,9 @@
   "NOTIFICATIONS": {
     "TITLE": "Notifications",
     "MARK_ALL_READ": "Mark all read",
+    "SOUND_ON": "Sound on",
+    "SOUND_OFF": "Sound off",
+    "SOUND_ARIA": "Toggle notification sound",
     "ALL_TYPES": "All types",
     "TYPE_ORDER": "Orders",
     "TYPE_PAYMENT": "Payments",

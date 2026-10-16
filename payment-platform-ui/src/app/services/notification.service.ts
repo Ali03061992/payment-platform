@@ -3,6 +3,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { BehaviorSubject, Observable, interval, Subscription } from 'rxjs';
 import { switchMap, tap, map } from 'rxjs/operators';
 import { Notification, NotificationPage } from '../models/notification.model';
+import { NotificationSoundService } from './notification-sound.service';
 
 @Injectable({ providedIn: 'root' })
 export class NotificationService {
@@ -18,7 +19,7 @@ export class NotificationService {
   notifications$ = this.notificationsSubject.asObservable();
   unreadCount$ = this.unreadCountSubject.asObservable();
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private sound: NotificationSoundService) {}
 
   startPolling(intervalMs = 30000): void {
     this.stopPolling();
@@ -89,6 +90,7 @@ export class NotificationService {
     if (!exists) {
       this.notificationsSubject.next([notification, ...current]);
       this.unreadCountSubject.next(this.unreadCountSubject.getValue() + 1);
+      this.sound.play();
       this.showBrowserNotification(notification);
     }
   }
