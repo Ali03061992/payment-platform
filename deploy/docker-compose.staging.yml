@@ -50,6 +50,12 @@ services:
       JWT_SECRET: ${JWT_SECRET}
       INTERNAL_SECRET: ${INTERNAL_SECRET}
       LIQUIBASE_CONTEXTS: seed,dev,local,test,staging
+      # Passkeys / WebAuthn — RP ID = domaine hébergeant la PWA (sans schéma ni port).
+      WEBAUTHN_RP_ID: ${WEBAUTHN_RP_ID:-localhost}
+      WEBAUTHN_RP_NAME: ${WEBAUTHN_RP_NAME:-Payment Platform}
+      WEBAUTHN_ALLOWED_ORIGINS: ${WEBAUTHN_ALLOWED_ORIGINS:-http://localhost:8080}
+      WEBAUTHN_CHALLENGE_TTL_SECONDS: ${WEBAUTHN_CHALLENGE_TTL_SECONDS:-300}
+      WEBAUTHN_TIMEOUT_SECONDS: ${WEBAUTHN_TIMEOUT_SECONDS:-60}
     depends_on:
       mysql:
         condition: service_healthy
@@ -103,6 +109,11 @@ services:
       MYSQL_HOST: mysql
       INTERNAL_SECRET: ${INTERNAL_SECRET}
       JWT_SECRET: ${JWT_SECRET}
+      # Web Push (PWA) — VAPID ; vides = paire auto-générée et persistée.
+      WEBPUSH_ENABLED: ${WEBPUSH_ENABLED:-true}
+      VAPID_PUBLIC_KEY: ${VAPID_PUBLIC_KEY:-}
+      VAPID_PRIVATE_KEY: ${VAPID_PRIVATE_KEY:-}
+      VAPID_SUBJECT: ${VAPID_SUBJECT:-mailto:admin@paymentplatform.tn}
     depends_on:
       mysql:
         condition: service_healthy

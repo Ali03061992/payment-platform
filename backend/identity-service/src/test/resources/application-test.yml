@@ -52,6 +52,12 @@ app:
     token-expiry-hours: 24
   seed:
     enabled: false
+  webauthn:
+    rp-id: localhost
+    rp-name: Payment Platform Test
+    allowed-origins: http://localhost:4200
+    challenge-ttl-seconds: 300
+    timeout-seconds: 60
 
 springdoc:
   swagger-ui:

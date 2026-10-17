@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.paymentplatform.notification.domain.model.Notification;
 import com.paymentplatform.notification.domain.model.NotificationRepository;
 import com.paymentplatform.notification.infrastructure.http.IdentityAdminClient;
+import com.paymentplatform.notification.infrastructure.push.WebPushSender;
 import com.paymentplatform.shared.infrastructure.eventing.EventDeduplicator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,17 +25,20 @@ public class DisputeEventConsumer {
     private final ObjectMapper objectMapper;
     private final NotificationBroadcaster broadcaster;
     private final IdentityAdminClient adminClient;
+    private final WebPushSender webPushSender;
 
     public DisputeEventConsumer(NotificationRepository notifications,
                                  EventDeduplicator deduplicator,
                                  ObjectMapper objectMapper,
                                  NotificationBroadcaster broadcaster,
-                                 IdentityAdminClient adminClient) {
+                                 IdentityAdminClient adminClient,
+                                 WebPushSender webPushSender) {
         this.notifications = notifications;
         this.deduplicator = deduplicator;
         this.objectMapper = objectMapper;
         this.broadcaster = broadcaster;
         this.adminClient = adminClient;
+        this.webPushSender = webPushSender;
     }
 
     @RabbitListener(queues = "notification.disputes")
@@ -78,6 +82,13 @@ public class DisputeEventConsumer {
                 "Litige ouvert pour la commande " + reference,
                 "DISPUTE", event.get("disputeId").asText()
         )));
+
+        webPushSender.sendToUser(supplierId, "Nouveau litige",
+                "Litige ouvert pour la commande " + reference, "DISPUTE_CREATED",
+                "/dashboard/disputes");
+        webPushSender.sendToUser(shopId, "Nouveau litige",
+                "Litige ouvert pour la commande " + reference, "DISPUTE_CREATED",
+                "/dashboard/disputes");
 
         notifyAdmins("DISPUTE_CREATED",
                 "Nouvelle réclamation (commande " + reference + ") : " + reason,
@@ -130,6 +141,11 @@ public class DisputeEventConsumer {
                 "Le litige a été résolu",
                 "DISPUTE", event.get("disputeId").asText()
         )));
+
+        webPushSender.sendToUser(shopId, "Litige résolu",
+                "Le litige a été résolu", "DISPUTE_RESOLVED", "/dashboard/disputes");
+        webPushSender.sendToUser(supplierId, "Litige résolu",
+                "Le litige a été résolu", "DISPUTE_RESOLVED", "/dashboard/disputes");
     }
 
     /**

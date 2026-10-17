@@ -1,0 +1,152 @@
+<div class="security-container">
+  <div class="security-card">
+    <h2>{{ 'SECURITY.TITLE' | translate }}</h2>
+    <p class="subtitle">{{ 'SECURITY.SUBTITLE' | translate }}</p>
+
+    @if (error) {
+      <div class="error-message" role="alert" aria-live="assertive">{{ error }}</div>
+    }
+
+    <!-- Passkeys -->
+    <section class="security-section">
+      <div class="section-header">
+        <div class="section-heading">
+          <app-icon name="key" [size]="20"></app-icon>
+          <div>
+            <h3>{{ 'SECURITY.PASSKEYS_TITLE' | translate }}</h3>
+            <p class="section-subtitle">{{ 'SECURITY.PASSKEYS_SUBTITLE' | translate }}</p>
+          </div>
+        </div>
+        @if (passkeySupported) {
+          <button type="button" class="btn-secondary" (click)="showAddForm()" [disabled]="addVisible">
+            <app-icon name="plus" [size]="16"></app-icon>
+            {{ 'SECURITY.ADD_PASSKEY' | translate }}
+          </button>
+        }
+      </div>
+
+      @if (!passkeySupported) {
+        <p class="hint">{{ 'SECURITY.UNSUPPORTED' | translate }}</p>
+      }
+
+      @if (addVisible) {
+        <div class="add-form">
+          <label for="passkeyLabel">{{ 'SECURITY.ADD_LABEL_LABEL' | translate }}</label>
+          <input id="passkeyLabel" type="text" [(ngModel)]="newLabel" name="newLabel"
+                 [placeholder]="'SECURITY.ADD_LABEL_PLACEHOLDER' | translate"
+                 (keyup.enter)="addPasskey()" [disabled]="registering" autofocus aria-required="true" />
+          <div class="add-actions">
+            <button type="button" class="btn-primary" (click)="addPasskey()" [disabled]="registering">
+              @if (registering) {
+                {{ 'SECURITY.ADD_LOADING' | translate }}
+              } @else {
+                {{ 'SECURITY.ADD_CONFIRM' | translate }}
+              }
+            </button>
+            <button type="button" class="btn-ghost" (click)="cancelAdd()" [disabled]="registering">
+              {{ 'COMMON.CANCEL' | translate }}
+            </button>
+          </div>
+        </div>
+      }
+
+      @if (credentialsLoading) {
+        <p class="hint">{{ 'COMMON.LOADING' | translate }}</p>
+      } @else if (credentials.length === 0 && passkeySupported) {
+        <p class="hint">{{ 'SECURITY.PASSKEY_EMPTY' | translate }}</p>
+      } @else if (credentials.length > 0) {
+        <ul class="credential-list">
+          @for (credential of credentials; track credential.id) {
+            <li class="credential-item" [class.revoked]="credential.status === 'REVOKED'">
+              <div class="credential-icon">
+                <app-icon name="lock" [size]="20"></app-icon>
+              </div>
+              <div class="credential-info">
+                @if (renamingId === credential.id) {
+                  <div class="rename-row">
+                    <input type="text" [(ngModel)]="renameValue" [attr.aria-label]="'SECURITY.LABEL' | translate"
+                           (keyup.enter)="saveRename(credential)" [disabled]="renaming" />
+                    <button type="button" class="btn-primary btn-sm" (click)="saveRename(credential)" [disabled]="renaming">
+                      {{ 'COMMON.SAVE' | translate }}
+                    </button>
+                    <button type="button" class="btn-ghost btn-sm" (click)="cancelRename()" [disabled]="renaming">
+                      {{ 'COMMON.CANCEL' | translate }}
+                    </button>
+                  </div>
+                } @else {
+                  <strong class="credential-label">{{ credential.label }}</strong>
+                }
+                <span class="credential-meta">
+                  {{ 'SECURITY.CREATED_AT' | translate }}: {{ credential.createdAt | date:'short' }}
+                  @if (credential.lastUsedAt) {
+                    &nbsp;· {{ 'SECURITY.LAST_USED' | translate }}: {{ credential.lastUsedAt | date:'short' }}
+                  }
+                  @if (credential.transports.length > 0) {
+                    &nbsp;· {{ credential.transports.join(', ') }}
+                  }
+                </span>
+              </div>
+              <div class="credential-actions">
+                <span class="status-badge" [class.revoked]="credential.status === 'REVOKED'">
+                  {{ credential.status === 'REVOKED' ? ('SECURITY.STATUS_REVOKED' | translate) : ('SECURITY.STATUS_ACTIVE' | translate) }}
+                </span>
+                @if (credential.status === 'ACTIVE' && renamingId !== credential.id) {
+                  <button type="button" class="btn-ghost btn-sm" (click)="startRename(credential)">
+                    {{ 'SECURITY.RENAME' | translate }}
+                  </button>
+                  <button type="button" class="btn-danger btn-sm" (click)="revoke(credential)">
+                    {{ 'SECURITY.REVOKE' | translate }}
+                  </button>
+                }
+              </div>
+            </li>
+          }
+        </ul>
+      }
+    </section>
+
+    <!-- Push -->
+    <section class="security-section">
+      <div class="section-header">
+        <div class="section-heading">
+          <app-icon name="bell" [size]="20"></app-icon>
+          <div>
+            <h3>{{ 'SECURITY.PUSH_TITLE' | translate }}</h3>
+            <p class="section-subtitle">{{ 'SECURITY.PUSH_SUBTITLE' | translate }}</p>
+          </div>
+        </div>
+        @if (pushSupported) {
+          <button type="button" class="btn-secondary" [class.active]="pushEnabled"
+                  (click)="togglePush()" [disabled]="pushLoading"
+                  [attr.aria-pressed]="pushEnabled">
+            @if (pushLoading) {
+              {{ 'COMMON.LOADING' | translate }}
+            } @else if (pushEnabled) {
+              {{ 'SECURITY.PUSH_DISABLE' | translate }}
+            } @else {
+              {{ 'SECURITY.PUSH_ENABLE' | translate }}
+            }
+          </button>
+        }
+      </div>
+
+      @if (!pushSupported) {
+        <p class="hint">{{ 'SECURITY.PUSH_UNSUPPORTED' | translate }}</p>
+      }
+
+      <div class="preferences">
+        <label class="toggle-row">
+          <input type="checkbox" [(ngModel)]="preferences.pushEnabled" name="prefPush" />
+          <span>{{ 'SECURITY.PREF_PUSH' | translate }}</span>
+        </label>
+        <label class="toggle-row">
+          <input type="checkbox" [(ngModel)]="preferences.emailEnabled" name="prefEmail" />
+          <span>{{ 'SECURITY.PREF_EMAIL' | translate }}</span>
+        </label>
+        <button type="button" class="btn-primary btn-sm" (click)="savePreferences()" [disabled]="preferencesSaving">
+          {{ preferencesSaving ? ('COMMON.SAVING' | translate) : ('COMMON.SAVE' | translate) }}
+        </button>
+      </div>
+    </section>
+  </div>
+</div>

@@ -100,6 +100,12 @@ services:
       FRONTEND_URL: http://localhost:8080
       ORGANIZATION_SERVICE_URL: organization-service
       ORGANIZATION_SERVICE_PORT: 8083
+      # Passkeys / WebAuthn — RP ID = domaine hébergeant la PWA (sans schéma ni port).
+      WEBAUTHN_RP_ID: ${WEBAUTHN_RP_ID:-localhost}
+      WEBAUTHN_RP_NAME: ${WEBAUTHN_RP_NAME:-Payment Platform}
+      WEBAUTHN_ALLOWED_ORIGINS: ${WEBAUTHN_ALLOWED_ORIGINS:-http://localhost:8080,http://localhost:4200}
+      WEBAUTHN_CHALLENGE_TTL_SECONDS: ${WEBAUTHN_CHALLENGE_TTL_SECONDS:-300}
+      WEBAUTHN_TIMEOUT_SECONDS: ${WEBAUTHN_TIMEOUT_SECONDS:-60}
     depends_on:
       mysql:
         condition: service_healthy
@@ -210,6 +216,11 @@ services:
       INTERNAL_SECRET: ${INTERNAL_SECRET}
       API_GATEWAY_URL: http://api-gateway:8081
       REDIS_HOST: redis
+      # Web Push (PWA) — VAPID ; vides = paire auto-générée et persistée (dev).
+      WEBPUSH_ENABLED: ${WEBPUSH_ENABLED:-true}
+      VAPID_PUBLIC_KEY: ${VAPID_PUBLIC_KEY:-}
+      VAPID_PRIVATE_KEY: ${VAPID_PRIVATE_KEY:-}
+      VAPID_SUBJECT: ${VAPID_SUBJECT:-mailto:admin@paymentplatform.tn}
     depends_on:
       mysql:
         condition: service_healthy
