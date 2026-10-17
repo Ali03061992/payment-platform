@@ -10,6 +10,7 @@ import { PasswordSetupComponent } from './password-setup/password-setup.componen
 import { ForgotPasswordComponent } from './forgot-password/forgot-password.component';
 import { ResetPasswordComponent } from './reset-password/reset-password.component';
 import { ChangePasswordComponent } from './change-password/change-password.component';
+import { SecurityComponent } from './security/security.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { DashboardAdminComponent } from './dashboard/dashboard-admin/dashboard-admin.component';
 import { DashboardSupplierComponent } from './dashboard/dashboard-supplier/dashboard-supplier.component';
@@ -121,7 +122,8 @@ const routes: Routes = [
       { path: 'admin/disputes/:id', component: DisputeDetailComponent, canActivate: [RoleGuard], data: { roles: adminRoles } },
       { path: 'shop/balance', component: BalanceViewComponent, canActivate: [RoleGuard], data: { roles: shopRoles } },
       { path: 'notifications', component: NotificationsComponent, canActivate: [RoleGuard], data: { roles: allRoles } },
-      { path: 'change-password', component: ChangePasswordComponent }
+      { path: 'change-password', component: ChangePasswordComponent },
+      { path: 'security', component: SecurityComponent, canActivate: [RoleGuard], data: { roles: allRoles } }
     ]
   },
   { path: '**', redirectTo: '/404' }

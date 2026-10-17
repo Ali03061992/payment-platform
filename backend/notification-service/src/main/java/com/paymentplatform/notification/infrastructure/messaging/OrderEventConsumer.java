@@ -6,6 +6,7 @@ import com.paymentplatform.notification.domain.model.Notification;
 import com.paymentplatform.notification.domain.model.NotificationRepository;
 import com.paymentplatform.notification.infrastructure.email.EmailNotificationService;
 import com.paymentplatform.notification.infrastructure.push.PushNotificationService;
+import com.paymentplatform.notification.infrastructure.push.WebPushSender;
 import com.paymentplatform.shared.infrastructure.eventing.EventDeduplicator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,19 +27,22 @@ public class OrderEventConsumer {
     private final NotificationBroadcaster broadcaster;
     private final EmailNotificationService emailService;
     private final PushNotificationService pushService;
+    private final WebPushSender webPushSender;
 
     public OrderEventConsumer(NotificationRepository notifications,
                                EventDeduplicator deduplicator,
                                ObjectMapper objectMapper,
                                NotificationBroadcaster broadcaster,
                                EmailNotificationService emailService,
-                               PushNotificationService pushService) {
+                               PushNotificationService pushService,
+                               WebPushSender webPushSender) {
         this.notifications = notifications;
         this.deduplicator = deduplicator;
         this.objectMapper = objectMapper;
         this.broadcaster = broadcaster;
         this.emailService = emailService;
         this.pushService = pushService;
+        this.webPushSender = webPushSender;
     }
 
     @RabbitListener(queues = "notification.orders")
@@ -97,6 +101,8 @@ public class OrderEventConsumer {
 
         pushService.sendToUser(supplierId, "Nouvelle commande",
                 "Nouvelle commande " + reference + " reçue", "ORDER_CREATED", "/dashboard/supplier/orders");
+        webPushSender.sendToUser(supplierId, "Nouvelle commande",
+                "Nouvelle commande " + reference + " reçue", "ORDER_CREATED", "/dashboard/supplier/orders");
     }
 
     private void handleOrderConfirmed(JsonNode event) {
@@ -148,6 +154,8 @@ public class OrderEventConsumer {
 
         pushService.sendToUser(shopId, "Commande livrée",
                 "La commande " + reference + " est prête à être acceptée", "ORDER_DELIVERED", "/dashboard/shop/orders");
+        webPushSender.sendToUser(shopId, "Commande livrée",
+                "La commande " + reference + " est prête à être acceptée", "ORDER_DELIVERED", "/dashboard/shop/orders");
     }
 
     private void handleOrderAccepted(JsonNode event) {
@@ -161,6 +169,8 @@ public class OrderEventConsumer {
         )));
 
         pushService.sendToUser(supplierId, "Commande acceptée",
+                "La commande " + reference + " a été acceptée par la boutique", "ORDER_ACCEPTED", "/dashboard/supplier/orders");
+        webPushSender.sendToUser(supplierId, "Commande acceptée",
                 "La commande " + reference + " a été acceptée par la boutique", "ORDER_ACCEPTED", "/dashboard/supplier/orders");
     }
 
@@ -252,6 +262,8 @@ public class OrderEventConsumer {
 
         pushService.sendToUser(supplierId, "Demande de devis",
                 "Nouvelle demande " + reference + " à chiffrer", "QUOTE_REQUESTED", "/dashboard/supplier/quotes");
+        webPushSender.sendToUser(supplierId, "Demande de devis",
+                "Nouvelle demande " + reference + " à chiffrer", "QUOTE_REQUESTED", "/dashboard/supplier/quotes");
     }
 
     private void handleOrderQuoteSent(JsonNode event) {
@@ -269,6 +281,8 @@ public class OrderEventConsumer {
 
         pushService.sendToUser(shopId, "Devis reçu",
                 "Devis n°" + version + " pour la demande " + reference, "ORDER_QUOTE", "/dashboard/shop/quotes");
+        webPushSender.sendToUser(shopId, "Devis reçu",
+                "Devis n°" + version + " pour la demande " + reference, "ORDER_QUOTE", "/dashboard/shop/quotes");
     }
 
     private void handleOrderQuoteAccepted(JsonNode event) {
@@ -284,6 +298,8 @@ public class OrderEventConsumer {
         )));
 
         pushService.sendToUser(supplierId, "Devis accepté",
+                "Devis " + reference + " accepté", "QUOTE_ACCEPTED", "/dashboard/supplier/quotes");
+        webPushSender.sendToUser(supplierId, "Devis accepté",
                 "Devis " + reference + " accepté", "QUOTE_ACCEPTED", "/dashboard/supplier/quotes");
     }
 

@@ -95,6 +95,49 @@
 
 .btn-block { width: 100%; margin-top: 8px; }
 
+.passkey-separator {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 16px;
+  color: var(--text-muted);
+}
+
+.passkey-separator span {
+  flex: 1;
+  height: 1px;
+  background: var(--border-input);
+}
+
+.passkey-separator small {
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.login-card .btn-passkey {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: transparent;
+  color: var(--text-primary);
+  border: 2px solid var(--border-input);
+  font-weight: 600;
+}
+
+.login-card .btn-passkey:hover:not(:disabled) {
+  border-color: var(--accent);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(15, 52, 96, 0.15);
+}
+
+.login-card .btn-passkey:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+
 .error-message {
   background: var(--badge-disabled-bg);
   color: var(--badge-disabled-text);

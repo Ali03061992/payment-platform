@@ -98,7 +98,9 @@ public class RateLimitFilter extends OncePerRequestFilter {
         return path.startsWith("/api/auth/login")
                 || path.startsWith("/api/auth/register")
                 || path.startsWith("/api/auth/refresh")
-                || path.startsWith("/api/auth/logout");
+                || path.startsWith("/api/auth/logout")
+                // WebAuthn : login/options + login sont publics (rate-limit strict)
+                || path.startsWith("/api/auth/webauthn/login");
     }
 
     private boolean isExcludedPath(String path) {

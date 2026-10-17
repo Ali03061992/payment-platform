@@ -8,5 +8,8 @@
     <include file="V1__schema.sql" relativeToChangelogFile="true"/>
     <include file="V2__fcm_tokens.sql" relativeToChangelogFile="true"/>
     <include file="V3__push_tokens.sql" relativeToChangelogFile="true"/>
+    <include file="V4__web_push_subscriptions.sql" relativeToChangelogFile="true"/>
+    <include file="V5__notification_preferences.sql" relativeToChangelogFile="true"/>
+    <include file="V6__vapid_keypairs.sql" relativeToChangelogFile="true"/>
 
 </databaseChangeLog>

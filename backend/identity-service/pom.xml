@@ -12,7 +12,7 @@
 
   <artifactId>identity-service</artifactId>
   <name>Identity Service</name>
-  <description>Utilisateurs, rôles, JWT, RBAC, cascade de désactivation</description>
+  <description>Utilisateurs, rï¿½les, JWT, RBAC, cascade de dï¿½sactivation</description>
 
   <dependencies>
     <dependency>
@@ -48,10 +48,10 @@
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-data-redis</artifactId>
     </dependency>
-    <!-- spring-boot-data-redis amène spring-boot-netty en scope runtime uniquement.
-         L'AOT (process-aot/test-aot) génère des __BeanDefinitions référençant
-         NettyAutoConfiguration : la dépendance explicite en scope compile permet
-         de compiler ces sources générées. Aucun changement au runtime. -->
+    <!-- spring-boot-data-redis amï¿½ne spring-boot-netty en scope runtime uniquement.
+         L'AOT (process-aot/test-aot) gï¿½nï¿½re des __BeanDefinitions rï¿½fï¿½renï¿½ant
+         NettyAutoConfiguration : la dï¿½pendance explicite en scope compile permet
+         de compiler ces sources gï¿½nï¿½rï¿½es. Aucun changement au runtime. -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-netty</artifactId>
@@ -81,6 +81,12 @@
     <dependency>
       <groupId>org.springdoc</groupId>
       <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+    </dependency>
+    <!-- WebAuthn / Passkeys : validation des attestations et assertions via
+         webauthn4j (aucune cryptographie du protocole implÃ©mentÃ©e Ã  la main). -->
+    <dependency>
+      <groupId>org.springframework.security</groupId>
+      <artifactId>spring-security-webauthn</artifactId>
     </dependency>
 
     <dependency>

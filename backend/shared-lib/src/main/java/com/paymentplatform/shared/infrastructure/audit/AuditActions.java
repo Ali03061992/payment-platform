@@ -28,6 +28,11 @@ public final class AuditActions {
     public static final String USER_TOKEN_REFRESH = "USER_TOKEN_REFRESH";
     public static final String USER_PASSWORD_CHANGE = "USER_PASSWORD_CHANGE";
 
+    public static final String WEBAUTHN_CREDENTIAL_REGISTERED = "WEBAUTHN_CREDENTIAL_REGISTERED";
+    public static final String WEBAUTHN_CREDENTIAL_RENAMED = "WEBAUTHN_CREDENTIAL_RENAMED";
+    public static final String WEBAUTHN_CREDENTIAL_REVOKED = "WEBAUTHN_CREDENTIAL_REVOKED";
+    public static final String WEBAUTHN_LOGIN = "WEBAUTHN_LOGIN";
+
     public static final String CATEGORY_DELETED = "CATEGORY_DELETED";
     public static final String FAMILY_DELETED = "FAMILY_DELETED";
 }

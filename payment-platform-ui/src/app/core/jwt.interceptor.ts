@@ -22,6 +22,7 @@ export class JwtInterceptor implements HttpInterceptor {
     '/api/auth/refresh',
     '/api/auth/logout',
     '/api/auth/password-setup',
+    '/api/auth/webauthn/login',
   ];
 
   /** Refresh en cours partagé (single-flight) entre les 401 concurrents. */

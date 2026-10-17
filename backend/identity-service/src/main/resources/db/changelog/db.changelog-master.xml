@@ -14,5 +14,7 @@
     <include file="V6__refresh_tokens.sql" relativeToChangelogFile="true"/>
     <include file="V7__password_reset_tokens.sql" relativeToChangelogFile="true"/>
     <include file="V8__user_preferences.sql" relativeToChangelogFile="true"/>
+    <include file="V9__webauthn_credentials.sql" relativeToChangelogFile="true"/>
+    <include file="V10__webauthn_challenges.sql" relativeToChangelogFile="true"/>
 
 </databaseChangeLog>
