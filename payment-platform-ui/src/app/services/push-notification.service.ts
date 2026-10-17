@@ -5,6 +5,7 @@ import { tap, catchError } from 'rxjs/operators';
 import { initializeApp, FirebaseApp } from 'firebase/app';
 import { getMessaging, getToken, onMessage, Messaging } from 'firebase/messaging';
 import { environment } from '../../environments/environment';
+import { NotificationSoundService } from './notification-sound.service';
 
 @Injectable({ providedIn: 'root' })
 export class PushNotificationService {
@@ -17,7 +18,8 @@ export class PushNotificationService {
 
   constructor(
     private http: HttpClient,
-    private ngZone: NgZone
+    private ngZone: NgZone,
+    private sound: NotificationSoundService
   ) {
     // M7 : sans clés configurées (env), le push est désactivé proprement
     // au lieu d'initialiser Firebase avec des placeholders.
@@ -77,6 +79,19 @@ export class PushNotificationService {
     this.ngZone.runOutsideAngular(() => {
       onMessage(this.messaging!, (payload) => {
         this.ngZone.run(() => {
+          this.sound.play();
+          try {
+            if ('Notification' in window && Notification.permission === 'granted') {
+              const title = (payload.notification?.title as string) || 'Payment Platform';
+              const body = (payload.notification?.body as string) || '';
+              new window.Notification(title, {
+                body,
+                icon: 'assets/icons/icon-192x192.png',
+                tag: 'payment-notification',
+                renotify: true
+              } as NotificationOptions);
+            }
+          } catch {}
         });
       });
     });

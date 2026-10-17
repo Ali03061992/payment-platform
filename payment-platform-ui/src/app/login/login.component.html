@@ -21,10 +21,30 @@
         <div class="error-message" role="alert" aria-live="assertive">{{ error }}</div>
       }
 
-      <button type="submit" class="btn btn-primary btn-block" [disabled]="loading"
+      <button type="submit" class="btn btn-primary btn-block" [disabled]="loading || passkeyLoading"
         [attr.aria-label]="loading ? ('AUTH.LOGIN_LOADING' | translate) : ('AUTH.LOGIN_BUTTON' | translate)">
         {{ loading ? ('AUTH.LOGIN_LOADING' | translate) : ('AUTH.LOGIN_BUTTON' | translate) }}
       </button>
+
+      @if (passkeySupported) {
+        <div class="passkey-separator" aria-hidden="true">
+          <span></span>
+          <small>{{ 'AUTH.PASSKEY_SEPARATOR' | translate }}</small>
+          <span></span>
+        </div>
+        <button type="button" class="btn btn-passkey btn-block" (click)="onPasskeyLogin()"
+          [disabled]="loading || passkeyLoading"
+          [attr.aria-label]="passkeyLoading ? ('AUTH.PASSKEY_LOGIN_LOADING' | translate) : ('AUTH.PASSKEY_LOGIN_BUTTON' | translate)">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"
+               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="8" cy="15" r="4"/>
+            <path d="M10.85 12.15L19 4"/>
+            <path d="M18 5l2 2"/>
+            <path d="M15 8l2 2"/>
+          </svg>
+          {{ passkeyLoading ? ('AUTH.PASSKEY_LOGIN_LOADING' | translate) : ('AUTH.PASSKEY_LOGIN_BUTTON' | translate) }}
+        </button>
+      }
     </form>
 
     <p class="register-link">

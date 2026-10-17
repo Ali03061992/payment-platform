@@ -1301,6 +1301,9 @@
   "NOTIFICATIONS": {
     "TITLE": "الإشعارات",
     "MARK_ALL_READ": "تعليم الكل كمقروء",
+    "SOUND_ON": "الصوت مفعّل",
+    "SOUND_OFF": "الصوت متوقف",
+    "SOUND_ARIA": "تفعيل أو إيقاف صوت الإشعارات",
     "ALL_TYPES": "كل الأنواع",
     "TYPE_ORDER": "الطلبات",
     "TYPE_PAYMENT": "المدفوعات",

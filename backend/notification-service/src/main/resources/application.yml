@@ -43,6 +43,12 @@ app:
   push:
     enabled: ${PUSH_ENABLED:false}
     credentials-path: ${FIREBASE_CREDENTIALS_PATH:}
+  webpush:
+    enabled: ${WEBPUSH_ENABLED:true}
+    # Property-first ; si vides, une paire est générée et persistée (dev).
+    vapid-public-key: ${VAPID_PUBLIC_KEY:}
+    vapid-private-key: ${VAPID_PRIVATE_KEY:}
+    vapid-subject: ${VAPID_SUBJECT:mailto:admin@paymentplatform.tn}
 
 springdoc:
   swagger-ui:

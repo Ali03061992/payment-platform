@@ -12,7 +12,7 @@
 
   <artifactId>notification-service</artifactId>
   <name>Notification Service</name>
-  <description>Notifications persistées, temps réel (SSE), consommation des domain events</description>
+  <description>Notifications persistï¿½es, temps rï¿½el (SSE), consommation des domain events</description>
 
   <dependencies>
     <dependency>
@@ -65,6 +65,23 @@
       <groupId>com.google.firebase</groupId>
       <artifactId>firebase-admin</artifactId>
       <version>9.2.0</version>
+    </dependency>
+    <!-- Web Push (VAPID) â€” FCM reste pour mobile, ce canal sert la PWA -->
+    <dependency>
+      <groupId>nl.martijndwars</groupId>
+      <artifactId>web-push</artifactId>
+      <version>5.1.2</version>
+    </dependency>
+    <!-- Scope runtime chez web-push mais JoseException est dans la signature de send() -->
+    <dependency>
+      <groupId>org.bitbucket.b_c</groupId>
+      <artifactId>jose4j</artifactId>
+      <version>0.7.9</version>
+    </dependency>
+    <dependency>
+      <groupId>org.bouncycastle</groupId>
+      <artifactId>bcprov-jdk18on</artifactId>
+      <version>1.81.1</version>
     </dependency>
 
     <dependency>

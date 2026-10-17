@@ -51,6 +51,17 @@ describe('NotificationsComponent', () => {
     expect(component).toBeTruthy();
   });
 
+  describe('sound toggle', () => {
+    it('should reflect and flip sound preference', () => {
+      setupRoles(['SHOP_ADMIN']);
+      expect(component.soundOn).toBeTrue();
+      component.toggleSound();
+      expect(component.soundOn).toBeFalse();
+      component.toggleSound();
+      expect(component.soundOn).toBeTrue();
+    });
+  });
+
   describe('isShopUser', () => {
     it('should return true for SHOP_ADMIN', () => {
       setupRoles(['SHOP_ADMIN']);

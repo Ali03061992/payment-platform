@@ -41,6 +41,10 @@ public class SharedSecurityConfig {
                                 "/api/auth/logout",
                                 "/api/auth/password-setup/**",
                                 "/api/auth/password-reset/**",
+                                // WebAuthn : la demande d'options et la connexion passkey sont
+                                // publiques (rate-limitées au gateway) ; l'enregistrement et la
+                                // gestion des appareils restent protégés par le JWT.
+                                "/api/auth/webauthn/login", "/api/auth/webauthn/login/options",
                                 "/api/organizations/internal/**",
                                 "/api/internal/**",
                                 // SSE : nginx contourne le gateway (pas de header possible via

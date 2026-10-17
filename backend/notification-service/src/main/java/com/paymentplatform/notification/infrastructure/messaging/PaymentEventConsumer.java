@@ -6,6 +6,7 @@ import com.paymentplatform.notification.domain.model.Notification;
 import com.paymentplatform.notification.domain.model.NotificationRepository;
 import com.paymentplatform.notification.infrastructure.email.EmailNotificationService;
 import com.paymentplatform.notification.infrastructure.push.PushNotificationService;
+import com.paymentplatform.notification.infrastructure.push.WebPushSender;
 import com.paymentplatform.shared.infrastructure.eventing.EventDeduplicator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,19 +27,22 @@ public class PaymentEventConsumer {
     private final NotificationBroadcaster broadcaster;
     private final EmailNotificationService emailService;
     private final PushNotificationService pushService;
+    private final WebPushSender webPushSender;
 
     public PaymentEventConsumer(NotificationRepository notifications,
                                  EventDeduplicator deduplicator,
                                  ObjectMapper objectMapper,
                                  NotificationBroadcaster broadcaster,
                                  EmailNotificationService emailService,
-                                 PushNotificationService pushService) {
+                                 PushNotificationService pushService,
+                                 WebPushSender webPushSender) {
         this.notifications = notifications;
         this.deduplicator = deduplicator;
         this.objectMapper = objectMapper;
         this.broadcaster = broadcaster;
         this.emailService = emailService;
         this.pushService = pushService;
+        this.webPushSender = webPushSender;
     }
 
     @RabbitListener(queues = "notification.payments")
@@ -108,8 +112,10 @@ public class PaymentEventConsumer {
 
         emailService.sendPaymentReceipt(null, "la boutique", reference, "", "", reference);
 
-        pushService.sendToUser(supplierId, "Paiement confirm\u00e9",
-                "Le paiement " + reference + " a \u00e9t\u00e9 confirm\u00e9", "PAYMENT_CONFIRMED", "/dashboard/payments");
+        pushService.sendToUser(supplierId, "Paiement confirmé",
+                "Le paiement " + reference + " a été confirmé", "PAYMENT_CONFIRMED", "/dashboard/payments");
+        webPushSender.sendToUser(supplierId, "Paiement confirmé",
+                "Le paiement " + reference + " a été confirmé", "PAYMENT_CONFIRMED", "/dashboard/payments");
     }
 
     private void handlePaymentRejected(JsonNode event) {

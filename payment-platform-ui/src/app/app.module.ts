@@ -13,6 +13,7 @@ import { PasswordSetupComponent } from './password-setup/password-setup.componen
 import { ForgotPasswordComponent } from './forgot-password/forgot-password.component';
 import { ResetPasswordComponent } from './reset-password/reset-password.component';
 import { ChangePasswordComponent } from './change-password/change-password.component';
+import { SecurityComponent } from './security/security.component';
 import { LayoutComponent } from './layout/layout.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { DashboardAdminComponent } from './dashboard/dashboard-admin/dashboard-admin.component';
@@ -129,6 +130,7 @@ export function initAppTranslations(translate: TranslateService, loginService: L
         ForgotPasswordComponent,
         ResetPasswordComponent,
         ChangePasswordComponent,
+        SecurityComponent,
         LayoutComponent,
         DashboardComponent,
         DashboardAdminComponent,

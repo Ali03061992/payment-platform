@@ -87,7 +87,7 @@ public class GatewayProxyController {
         return proxy(request, "http", paymentUrl, paymentPort, body);
     }
 
-    @RequestMapping(value = {"/notifications/**", "/fcm-tokens/**"}, method = {
+    @RequestMapping(value = {"/notifications/**", "/fcm-tokens/**", "/push/**"}, method = {
             org.springframework.web.bind.annotation.RequestMethod.GET,
             org.springframework.web.bind.annotation.RequestMethod.POST,
             org.springframework.web.bind.annotation.RequestMethod.PUT,
