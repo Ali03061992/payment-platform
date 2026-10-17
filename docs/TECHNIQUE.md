@@ -119,16 +119,17 @@ VM TEST : `ubuntu@51.222.6.2` — **en service** (Docker 29, clone à jour, `.en
 
 ### HTTPS (443) sur les VMs OVH
 
-- **Override dédié** : `deploy/docker-compose.https.yml` — monte `deploy/nginx/default-ssl.conf` par-dessus la conf baked dans l'image, plus le volume des certificats ; expose `80:80` + `443:443` (le `8080:80` d'origine reste, il redirige aussi). La CI l'applique **automatiquement** aux déploiements TEST et PROD (`docker compose -f deploy/docker-compose.yml -f deploy/docker-compose.https.yml ...`). Le dev local/e2e (`localhost:8080`) n'utilise **pas** cet override : rien ne change en local.
-- **Comportement nginx** : port `80` → `301 https://$host$request_uri` ; port `443` → TLS (TLS 1.2/1.3, HSTS, mêmes proxys API/SSE/SPA que `default.conf`).
-- **Certificats (déjà présents sur la VM)** — renseigner dans `deploy/.env` :
+- **Architecture** : TLS terminé par le **nginx hôte de la VM** (systemd), qui reverse-proxy vers le conteneur `angular` (`127.0.0.1:8080`, mapping de base `8080:80`). Le conteneur reste en HTTP pur : aucun port 80/443 exposé par Docker (pas de conflit), renouvellement Let's Encrypt conservé sur l'hôte.
+- **Vhosts** (repo → VM) : `deploy/nginx/host/default` → `/etc/nginx/sites-available/default` (port 80 → `301 https://$host$request_uri`) et `deploy/nginx/host/ip-https` → `/etc/nginx/sites-available/ip-https` (port 443 TLS → proxy app, HSTS, proxy sans buffering pour le SSE) :
   ```bash
-  NGINX_CERTS_DIR=/etc/letsencrypt/live/<domaine>  # dossier contenant fullchain.pem + privkey.pem
+  sudo cp deploy/nginx/host/default /etc/nginx/sites-available/default
+  sudo cp deploy/nginx/host/ip-https /etc/nginx/sites-available/ip-https
+  sudo nginx -t && sudo systemctl reload nginx
   ```
-  Défaut `./nginx/certs` (relatif à `deploy/`) si non défini. Fichiers manquants → `angular` redémarre en boucle (diagnostic : `docker compose -f deploy/docker-compose.yml -f deploy/docker-compose.https.yml logs angular`).
-- **Origines applicatives à passer en https** dans le même `.env` : `CORS_ALLOWED_ORIGINS=https://<domaine>`, `WEBAUTHN_ALLOWED_ORIGINS=https://<domaine>`, `WEBAUTHN_RP_ID=<domaine>` (sans schéma), `FRONTEND_URL=https://<domaine>`.
-- **Renouvellement** : le port 80 ne fait que rediriger (pas de location ACME) — renouveler en `standalone` (port 80 libéré) ou en DNS-01.
-- **Vérification** : `curl -I http://<vm>/` → `301`, `curl -I https://<vm>/` → `200` (auto-signé : `curl -k`).
+  Adapter `server_name` et `ssl_certificate` (`/etc/letsencrypt/live/<identifiant>/`) si besoin (PROD, domaine).
+- **Origines applicatives en https** dans `deploy/.env` (puis redéployer) : `CORS_ALLOWED_ORIGINS=https://<ip-ou-domaine>`, `WEBAUTHN_ALLOWED_ORIGINS=...`, `FRONTEND_URL=...`. Passkeys : `WEBAUTHN_RP_ID` exige un domaine réel (pas une IP — les passkeys ne fonctionneront donc pas en accès par IP).
+- **Renouvellement** : inchangé côté hôte (`certbot renew`), le nginx hôte reste propriétaire des ports 80/443.
+- **Vérification** : `curl -I http://<vm>/` → `301` ; `curl -I https://<vm>/` → `200` (page app) ; `curl -s https://<vm>/api/auth/me` → réponse JSON (401), pas le `index.html`.
 
 ### Backups MySQL (PROD uniquement — pas de backup sur TEST)
 
