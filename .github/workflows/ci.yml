@@ -465,9 +465,9 @@ jobs:
             git pull origin "$BRANCH"
             # Images prébuildées en CI (jamais de build sur la petite VM).
             export IMAGE_TAG="test-latest"
-            docker compose -f deploy/docker-compose.yml pull
-            docker compose -f deploy/docker-compose.yml up -d
-            docker compose -f deploy/docker-compose.yml ps
+            docker compose -f deploy/docker-compose.yml -f deploy/docker-compose.https.yml pull
+            docker compose -f deploy/docker-compose.yml -f deploy/docker-compose.https.yml up -d
+            docker compose -f deploy/docker-compose.yml -f deploy/docker-compose.https.yml ps
             # Ménage : images pendantes + cache de build (plus aucun build ici).
             docker image prune -f
             docker builder prune -af
@@ -562,9 +562,9 @@ jobs:
             git checkout master
             git pull origin master
             export IMAGE_TAG="prod-latest"
-            docker compose -f deploy/docker-compose.yml pull
-            docker compose -f deploy/docker-compose.yml --profile backup up -d
-            docker compose -f deploy/docker-compose.yml ps
+            docker compose -f deploy/docker-compose.yml -f deploy/docker-compose.https.yml pull
+            docker compose -f deploy/docker-compose.yml -f deploy/docker-compose.https.yml --profile backup up -d
+            docker compose -f deploy/docker-compose.yml -f deploy/docker-compose.https.yml ps
             docker image prune -f
             docker builder prune -af
             chown -R "${SUDO_USER:-root}:${SUDO_USER:-root}" "$APP_DIR"

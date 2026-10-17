@@ -117,6 +117,19 @@ VM TEST : `ubuntu@51.222.6.2` — **en service** (Docker 29, clone à jour, `.en
 5. **Vérifier** : tout push sur `release/**` déclenche build + tests + déploiement auto sur la VM (suivi dans l'onglet Actions). Hôte en `.invalid` ou secrets absents = simulation verte (mode fake), jamais d'échec bloquant.
 6. **Backup manuel** : Actions → workflow `Backup` → `test`/`prod` + tag. Restauration sur VM : `sh deploy/backup/restore.sh <fichier.sql.gz>` (confirmation `RESTORE`).
 
+### HTTPS (443) sur les VMs OVH
+
+- **Override dédié** : `deploy/docker-compose.https.yml` — monte `deploy/nginx/default-ssl.conf` par-dessus la conf baked dans l'image, plus le volume des certificats ; expose `80:80` + `443:443` (le `8080:80` d'origine reste, il redirige aussi). La CI l'applique **automatiquement** aux déploiements TEST et PROD (`docker compose -f deploy/docker-compose.yml -f deploy/docker-compose.https.yml ...`). Le dev local/e2e (`localhost:8080`) n'utilise **pas** cet override : rien ne change en local.
+- **Comportement nginx** : port `80` → `301 https://$host$request_uri` ; port `443` → TLS (TLS 1.2/1.3, HSTS, mêmes proxys API/SSE/SPA que `default.conf`).
+- **Certificats (déjà présents sur la VM)** — renseigner dans `deploy/.env` :
+  ```bash
+  NGINX_CERTS_DIR=/etc/letsencrypt/live/<domaine>  # dossier contenant fullchain.pem + privkey.pem
+  ```
+  Défaut `./nginx/certs` (relatif à `deploy/`) si non défini. Fichiers manquants → `angular` redémarre en boucle (diagnostic : `docker compose -f deploy/docker-compose.yml -f deploy/docker-compose.https.yml logs angular`).
+- **Origines applicatives à passer en https** dans le même `.env` : `CORS_ALLOWED_ORIGINS=https://<domaine>`, `WEBAUTHN_ALLOWED_ORIGINS=https://<domaine>`, `WEBAUTHN_RP_ID=<domaine>` (sans schéma), `FRONTEND_URL=https://<domaine>`.
+- **Renouvellement** : le port 80 ne fait que rediriger (pas de location ACME) — renouveler en `standalone` (port 80 libéré) ou en DNS-01.
+- **Vérification** : `curl -I http://<vm>/` → `301`, `curl -I https://<vm>/` → `200` (auto-signé : `curl -k`).
+
 ### Backups MySQL (PROD uniquement — pas de backup sur TEST)
 
 - Service `db-backup` (image `mysql:8.4`, profil compose `backup` activé uniquement en PROD) : dump des 4 bases (`identity/organization/payment/notification_db`, `--single-transaction`, routines+events) **toutes les 8 h** (`BACKUP_INTERVAL_SECONDS`, défaut 28800), fichiers `AAAAMMJJ-HHMMSS-<tag>.sql.gz` dans `./backups/` (**gitignoré**), **rotation : suppression au-delà de 3 j** (`BACKUP_RETENTION_DAYS`).
