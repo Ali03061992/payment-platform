@@ -224,6 +224,11 @@ export class SecurityComponent implements OnInit {
     if (name === 'NotAllowedError') {
       return this.translate.instant('SECURITY.ACTION_CANCELLED');
     }
+    if (name === 'SecurityError' && typeof window !== 'undefined' && window.isSecureContext) {
+      // SecurityError sur contexte déjà HTTPS = RP ID refusé par le navigateur
+      // (notamment accès par IP : un nom de domaine réel est exigé, pas le HTTPS).
+      return this.translate.instant('SECURITY.ACTION_BLOCKED_DOMAIN');
+    }
     if (name === 'NotSupportedError' || name === 'SecurityError') {
       return this.translate.instant('SECURITY.ACTION_BLOCKED');
     }

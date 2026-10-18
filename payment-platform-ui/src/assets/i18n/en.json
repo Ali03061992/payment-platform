@@ -1654,6 +1654,7 @@
     "ERROR_GENERIC": "An error occurred. Please try again.",
     "ACTION_CANCELLED": "The request was cancelled in the browser.",
     "ACTION_BLOCKED": "This operation is not allowed in the current context (HTTPS required).",
+    "ACTION_BLOCKED_DOMAIN": "Passkey refused by the browser: a real domain name is required (IP addresses are not accepted for passkeys).",
     "PASSKEYS_TITLE": "Passkeys",
     "PASSKEYS_SUBTITLE": "Sign in with your device instead of a password",
     "PASSKEY_EMPTY": "No passkey registered yet.",

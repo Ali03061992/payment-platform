@@ -1654,6 +1654,7 @@
     "ERROR_GENERIC": "Une erreur est survenue. Veuillez réessayer.",
     "ACTION_CANCELLED": "La demande a été annulée dans le navigateur.",
     "ACTION_BLOCKED": "Cette opération n'est pas autorisée dans ce contexte (HTTPS requis).",
+    "ACTION_BLOCKED_DOMAIN": "Passkey refusée par le navigateur : un nom de domaine réel est requis (les adresses IP ne sont pas acceptées pour les passkeys).",
     "PASSKEYS_TITLE": "Passkeys",
     "PASSKEYS_SUBTITLE": "Connectez-vous avec votre appareil au lieu du mot de passe",
     "PASSKEY_EMPTY": "Aucune passkey enregistrée pour le moment.",
