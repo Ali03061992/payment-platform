@@ -41,11 +41,11 @@ export class LoginComponent {
     });
   }
 
-  /** Connexion par passkey : options -> navigator.credentials.get -> tokens. */
+  /** Connexion par passkey discoverable : l'empreinte/biométrie est demandée directement, sans saisie de username. */
   onPasskeyLogin(): void {
     this.error = '';
     this.passkeyLoading = true;
-    this.webAuthn.login(this.form.username).subscribe({
+    this.webAuthn.login().subscribe({
       next: (res) => {
         sessionStorage.setItem('token', res.accessToken);
         if (res.refreshToken) {

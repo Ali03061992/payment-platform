@@ -56,7 +56,10 @@
     {
       "name": "api-network",
       "urls": [
-        "/api/**"
+        "/api/**",
+        "!/api/notifications/stream",
+        "!/api/auth/**",
+        "!/api/push/**"
       ],
       "cacheConfig": {
         "strategy": "freshness",
