@@ -16,7 +16,7 @@
   <div class="filters">
     <div class="search-container">
       <input type="text" [(ngModel)]="searchQuery" (ngModelChange)="searchSubject.next($event)"
-        class="form-control" [placeholder]="'SUPPLIER_ORDERS.SEARCH_PLACEHOLDER' | translate" style="max-width:300px;"
+        class="form-control" [placeholder]="'SUPPLIER_ORDERS.SEARCH_PLACEHOLDER' | translate"
         [attr.aria-label]="'SUPPLIER_ORDERS.SEARCH_ORDERS_ARIA' | translate">
       @if (searching) {
         <div class="search-spinner" role="status" [attr.aria-label]="'SUPPLIER_ORDERS.SEARCHING' | translate"></div>
@@ -35,7 +35,7 @@
         </div>
       }
     </div>
-    <select [(ngModel)]="filterStatus" (change)="onOrdersFilterChange()" class="form-control" style="max-width:200px;" [attr.aria-label]="'SUPPLIER_ORDERS.FILTER_STATUS_ARIA' | translate">
+    <select [(ngModel)]="filterStatus" (change)="onOrdersFilterChange()" class="form-control filter-select" [attr.aria-label]="'SUPPLIER_ORDERS.FILTER_STATUS_ARIA' | translate">
       <option value="">{{ 'ORDERS.ALL_STATUSES' | translate }}</option>
       <option value="DRAFT">{{ 'ORDERS.DRAFT' | translate }}</option>
       <option value="CONFIRMED">{{ 'ORDERS.CONFIRMED' | translate }}</option>
@@ -49,18 +49,18 @@
       <option value="REJECTED">{{ 'ORDERS.REJECTED' | translate }}</option>
       <option value="DELIVERY_REJECTED">{{ 'ORDERS.DELIVERY_REJECTED' | translate }}</option>
     </select>
-    <select [(ngModel)]="filterShopId" (change)="onOrdersFilterChange()" class="form-control" style="max-width:200px;" [attr.aria-label]="'SUPPLIER_ORDERS.FILTER_SHOP_ARIA' | translate">
+    <select [(ngModel)]="filterShopId" (change)="onOrdersFilterChange()" class="form-control filter-select" [attr.aria-label]="'SUPPLIER_ORDERS.FILTER_SHOP_ARIA' | translate">
       <option value="">{{ 'SUPPLIER_ORDERS.ALL_SHOPS' | translate }}</option>
       @for (s of shops; track s.id) {
         <option [value]="s.id">{{ s.name }}</option>
       }
     </select>
     <span class="result-count" aria-live="polite">{{ 'ORDERS.RESULT_COUNT' | translate:{count: totalElements} }}</span>
-    <button class="btn btn-secondary" style="margin-left:auto;" (click)="exportCsv()" [attr.aria-label]="'SUPPLIER_ORDERS.EXPORT_CSV_ARIA' | translate">{{ 'SUPPLIER_ORDERS.EXPORT_CSV' | translate }}</button>
+    <button class="btn btn-secondary filters-export" (click)="exportCsv()" [attr.aria-label]="'SUPPLIER_ORDERS.EXPORT_CSV_ARIA' | translate">{{ 'SUPPLIER_ORDERS.EXPORT_CSV' | translate }}</button>
   </div>
 }
 @if (!loading && activeTab === 'orders') {
-  <div class="table-card">
+  <div class="table-card hide-mobile">
     <div class="table-wrapper">
       <table>
         <thead>
@@ -123,6 +123,70 @@
       </table>
     </div>
   </div>
+  <div class="list-cards show-mobile">
+    @for (o of filteredOrders; track o) {
+      <div class="list-card" (click)="viewDetail(o)">
+        <div class="list-card-head">
+          <span class="list-card-ref">
+            <app-icon name="box" [size]="20"></app-icon>
+            {{ o.reference }}
+          </span>
+          <span class="payment-badge" [ngClass]="statusClass(o.status)"
+            [attr.aria-label]="('SUPPLIER_ORDERS.STATUS_ARIA' | translate) + ' ' + (o.status | statusLabel)" role="status">
+            {{ o.status | statusLabel }}
+          </span>
+        </div>
+        <div class="list-card-party">
+          <app-icon name="store" [size]="16"></app-icon>
+          {{ o.shopName || o.shopId }}
+        </div>
+        <div class="list-card-amount">
+          <span class="amount-label">
+            <app-icon name="cash" [size]="16"></app-icon>
+            {{ 'ORDERS.TOTAL' | translate }}
+          </span>
+          <span class="amount-value">{{ o.total | number:'1.2-2' }} {{ o.currency }}</span>
+        </div>
+        <div class="list-card-row">
+          <span class="list-card-label">
+            <app-icon name="clock" [size]="16"></app-icon>
+            {{ 'ORDERS.DATE' | translate }}
+          </span>
+          <span class="list-card-value">{{ o.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
+        </div>
+        <div class="list-card-actions" (click)="$event.stopPropagation()">
+          <button class="btn btn-secondary" (click)="viewDetail(o)" [attr.aria-label]="('SUPPLIER_ORDERS.VIEW_DETAIL_ARIA' | translate) + ' ' + o.reference">{{ 'ORDERS.DETAIL' | translate }}</button>
+          @if (canEdit(o)) {
+            <button class="btn btn-info" (click)="openEdit(o)" [attr.aria-label]="('SUPPLIER_ORDERS.EDIT_ARIA' | translate) + ' ' + o.reference">{{ 'SUPPLIER_ORDERS.EDIT' | translate }}</button>
+          }
+          @if (canConfirm(o)) {
+            <button class="btn btn-success" (click)="confirm(o)" [attr.aria-label]="('SUPPLIER_ORDERS.CONFIRM_ARIA' | translate) + ' ' + o.reference">{{ 'SUPPLIER_ORDERS.CONFIRM' | translate }}</button>
+          }
+          @if (canPrepare(o)) {
+            <button class="btn btn-warning" (click)="prepare(o)" [attr.aria-label]="('SUPPLIER_ORDERS.PREPARE_ARIA' | translate) + ' ' + o.reference">{{ 'SUPPLIER_ORDERS.PREPARE' | translate }}</button>
+          }
+          @if (canReady(o)) {
+            <button class="btn btn-primary" (click)="ready(o)" [attr.aria-label]="'SUPPLIER_ORDERS.READY_ARIA' | translate:{ref: o.reference}">{{ 'SUPPLIER_ORDERS.READY' | translate }}</button>
+          }
+          @if (canAssign(o)) {
+            <button class="btn btn-secondary" (click)="openAssign(o)" [attr.aria-label]="('SUPPLIER_ORDERS.ASSIGN_ARIA' | translate) + ' ' + o.reference">{{ 'SUPPLIER_ORDERS.ASSIGN' | translate }}</button>
+          }
+          @if (canDeliveryReject(o)) {
+            <button class="btn btn-danger" (click)="deliveryReject(o)" [attr.aria-label]="('SUPPLIER_ORDERS.REJECT_DELIVERY_ARIA' | translate) + ' ' + o.reference">{{ 'SUPPLIER_ORDERS.REJECT_DELIVERY' | translate }}</button>
+          }
+          @if (o.status === 'DELIVERED' || o.status === 'ACCEPTED') {
+            <button class="btn btn-primary" (click)="downloadInvoice(o)" [attr.aria-label]="('SUPPLIER_ORDERS.INVOICE_ARIA' | translate) + ' ' + o.reference">{{ 'SUPPLIER_ORDERS.INVOICE' | translate }}</button>
+          }
+          @if (canCancel(o)) {
+            <button class="btn btn-danger" (click)="cancel(o)" [attr.aria-label]="('SUPPLIER_ORDERS.CANCEL_ARIA' | translate) + ' ' + o.reference">{{ 'ORDERS.CANCEL_BTN' | translate }}</button>
+          }
+        </div>
+      </div>
+    }
+    @if (filteredOrders.length === 0) {
+      <div class="list-card list-empty">{{ 'ORDERS.NO_ORDERS' | translate }}</div>
+    }
+  </div>
   @if (!loading && activeTab === 'orders') {
     <app-pagination [page]="currentPage" [size]="pageSize" [totalElements]="totalElements"
       (pageChange)="onPageChange($event)" (sizeChange)="onSizeChange($event)"></app-pagination>
@@ -132,7 +196,7 @@
   <div class="filters">
     <div class="search-container">
       <input type="text" [(ngModel)]="searchQuery" (ngModelChange)="searchSubject.next($event)"
-        class="form-control" [placeholder]="'SUPPLIER_ORDERS.SEARCH_PLACEHOLDER' | translate" style="max-width:300px;"
+        class="form-control" [placeholder]="'SUPPLIER_ORDERS.SEARCH_PLACEHOLDER' | translate"
         [attr.aria-label]="'SUPPLIER_ORDERS.SEARCH_DELIVERIES_ARIA' | translate">
       @if (searching) {
         <div class="search-spinner" role="status" [attr.aria-label]="'SUPPLIER_ORDERS.SEARCHING' | translate"></div>
@@ -151,13 +215,13 @@
         </div>
       }
     </div>
-    <select [(ngModel)]="filterAgentId" (change)="onAgentFilterChange()" class="form-control" style="max-width:250px;" [attr.aria-label]="'SUPPLIER_ORDERS.FILTER_AGENT_ARIA' | translate">
+    <select [(ngModel)]="filterAgentId" (change)="onAgentFilterChange()" class="form-control filter-select filter-select-wide" [attr.aria-label]="'SUPPLIER_ORDERS.FILTER_AGENT_ARIA' | translate">
       <option value="">{{ 'SUPPLIER_ORDERS.ALL_AGENTS' | translate }}</option>
       @for (a of agents; track a) {
         <option [value]="a.id">{{ a.firstName }} {{ a.lastName }}</option>
       }
     </select>
-    <select [(ngModel)]="filterStatus" (change)="onDeliveriesFilterChange()" class="form-control" style="max-width:200px;" [attr.aria-label]="'SUPPLIER_ORDERS.FILTER_DELIVERY_STATUS_ARIA' | translate">
+    <select [(ngModel)]="filterStatus" (change)="onDeliveriesFilterChange()" class="form-control filter-select" [attr.aria-label]="'SUPPLIER_ORDERS.FILTER_DELIVERY_STATUS_ARIA' | translate">
       <option value="">{{ 'ORDERS.ALL_STATUSES' | translate }}</option>
       <option value="READY_FOR_DELIVERY">{{ 'SUPPLIER_ORDERS.WAITING_ACCEPTANCE' | translate }}</option>
       <option value="DELIVERY_ACCEPTED">{{ 'SUPPLIER_ORDERS.ACCEPTED_FEM' | translate }}</option>
@@ -166,7 +230,7 @@
       <option value="ACCEPTED">{{ 'ORDERS.ACCEPTED' | translate }}</option>
       <option value="DELIVERY_REJECTED">{{ 'SUPPLIER_ORDERS.REJECTED_FEM' | translate }}</option>
     </select>
-    <select [(ngModel)]="filterShopId" (change)="onDeliveriesFilterChange()" class="form-control" style="max-width:200px;" [attr.aria-label]="'SUPPLIER_ORDERS.FILTER_SHOP_ARIA' | translate">
+    <select [(ngModel)]="filterShopId" (change)="onDeliveriesFilterChange()" class="form-control filter-select" [attr.aria-label]="'SUPPLIER_ORDERS.FILTER_SHOP_ARIA' | translate">
       <option value="">{{ 'SUPPLIER_ORDERS.ALL_SHOPS' | translate }}</option>
       @for (s of shops; track s.id) {
         <option [value]="s.id">{{ s.name }}</option>
@@ -174,7 +238,7 @@
     </select>
     <span class="result-count" aria-live="polite">{{ 'ORDERS.RESULT_COUNT' | translate:{count: deliveriesTotal} }}</span>
   </div>
-  <div class="table-card">
+  <div class="table-card hide-mobile">
     <div class="table-wrapper">
       <table>
         <thead>
@@ -215,6 +279,53 @@
         </tbody>
       </table>
     </div>
+  </div>
+  <div class="list-cards show-mobile">
+    @for (o of pagedDeliveries; track o) {
+      <div class="list-card" (click)="viewDetail(o)">
+        <div class="list-card-head">
+          <span class="list-card-ref">
+            <app-icon name="truck" [size]="20"></app-icon>
+            {{ o.reference }}
+          </span>
+          <span class="payment-badge" [ngClass]="statusClass(o.status)"
+            [attr.aria-label]="('SUPPLIER_ORDERS.DELIVERY_STATUS_ARIA' | translate) + ' ' + (o.status | statusLabel)" role="status">
+            {{ o.status | statusLabel }}
+          </span>
+        </div>
+        <div class="list-card-party">
+          <app-icon name="store" [size]="16"></app-icon>
+          {{ o.shopName || o.shopId }}
+        </div>
+        <div class="list-card-amount">
+          <span class="amount-label">
+            <app-icon name="cash" [size]="16"></app-icon>
+            {{ 'ORDERS.TOTAL' | translate }}
+          </span>
+          <span class="amount-value">{{ o.total | number:'1.2-2' }} {{ o.currency }}</span>
+        </div>
+        <div class="list-card-row">
+          <span class="list-card-label">
+            <app-icon name="users" [size]="16"></app-icon>
+            {{ 'ORDERS.DRIVER' | translate }}
+          </span>
+          <span class="list-card-value">{{ o.deliveryAgentName || '-' }}</span>
+        </div>
+        <div class="list-card-row">
+          <span class="list-card-label">
+            <app-icon name="clock" [size]="16"></app-icon>
+            {{ 'SUPPLIER_ORDERS.PLANNED_DATE' | translate }}
+          </span>
+          <span class="list-card-value">{{ o.plannedDeliveryDate || '-' }}</span>
+        </div>
+        <div class="list-card-actions" (click)="$event.stopPropagation()">
+          <button class="btn btn-secondary" (click)="viewDetail(o)" [attr.aria-label]="('SUPPLIER_ORDERS.VIEW_DETAIL_ARIA' | translate) + ' ' + o.reference">{{ 'ORDERS.DETAIL' | translate }}</button>
+        </div>
+      </div>
+    }
+    @if (deliveriesTotal === 0) {
+      <div class="list-card list-empty">{{ 'SUPPLIER_ORDERS.NO_DELIVERIES' | translate }}</div>
+    }
   </div>
   @if (!loading && activeTab === 'deliveries') {
     <app-pagination [page]="deliveriesPage" [size]="deliveriesSize" [totalElements]="deliveriesTotal"

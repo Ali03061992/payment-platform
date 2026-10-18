@@ -7,7 +7,7 @@
   <div class="filters">
     <div class="search-container">
       <input type="text" [(ngModel)]="searchQuery" (ngModelChange)="searchSubject.next($event)"
-        class="form-control" [placeholder]="'ORDERS.SEARCH_PLACEHOLDER' | translate" style="max-width:300px;">
+        class="form-control" [placeholder]="'ORDERS.SEARCH_PLACEHOLDER' | translate">
       @if (searching) {
         <div class="search-spinner"></div>
       }
@@ -25,7 +25,7 @@
         </div>
       }
     </div>
-    <select [(ngModel)]="filterStatus" (change)="onFilterChange()" class="form-control" style="max-width:200px;">
+    <select [(ngModel)]="filterStatus" (change)="onFilterChange()" class="form-control filter-select">
       <option value="">{{ 'ORDERS.ALL_STATUSES' | translate }}</option>
       <option value="DRAFT">{{ 'ORDERS.DRAFT' | translate }}</option>
       <option value="CONFIRMED">{{ 'ORDERS.CONFIRMED' | translate }}</option>
@@ -40,7 +40,7 @@
       <option value="DELIVERY_REJECTED">{{ 'ORDERS.DELIVERY_REJECTED' | translate }}</option>
     </select>
     <span class="result-count">{{ 'ORDERS.RESULT_COUNT' | translate:{count: totalElements} }}</span>
-    <button class="btn btn-secondary" style="margin-left:auto;" (click)="exportCsv()">{{ 'ORDERS.EXPORT_CSV' | translate }}</button>
+    <button class="btn btn-secondary filters-export" (click)="exportCsv()">{{ 'ORDERS.EXPORT_CSV' | translate }}</button>
   </div>
 }
 
@@ -107,45 +107,57 @@
 
 <!-- Mobile Card View -->
 @if (!loading) {
-  <div class="order-cards show-mobile">
+  <div class="list-cards show-mobile">
     @for (o of filteredOrders; track o) {
-      <div class="order-card" [routerLink]="['/dashboard/shop/orders', o.id]">
-        <div class="order-card-header">
-          <span class="order-reference">{{ o.reference }}</span>
+      <div class="list-card" [routerLink]="['/dashboard/shop/orders', o.id]">
+        <div class="list-card-head">
+          <span class="list-card-ref">
+            <app-icon name="box" [size]="20"></app-icon>
+            {{ o.reference }}
+          </span>
           <span class="payment-badge" [ngClass]="statusClass(o.status)">
             {{ o.status | statusLabel }}
           </span>
         </div>
-        <div class="order-card-body">
-          <div class="order-row">
-            <span class="order-label">{{ 'ORDERS.SUPPLIER' | translate }}</span>
-            <span class="order-value">{{ o.supplierName || o.supplierId }}</span>
-          </div>
-          <div class="order-row">
-            <span class="order-label">{{ 'ORDERS.DRIVER' | translate }}</span>
-            <span class="order-value">{{ o.deliveryAgentName || '-' }}</span>
-          </div>
-          <div class="order-row">
-            <span class="order-label">{{ 'ORDERS.TOTAL' | translate }}</span>
-            <span class="order-amount">{{ o.total | number:'1.2-2' }} {{ o.currency }}</span>
-          </div>
-          <div class="order-row">
-            <span class="order-label">{{ 'ORDERS.DATE' | translate }}</span>
-            <span class="order-value">{{ o.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
-          </div>
+        <div class="list-card-party">
+          <app-icon name="factory" [size]="16"></app-icon>
+          {{ o.supplierName || o.supplierId }}
         </div>
-        <div class="order-card-actions" (click)="$event.stopPropagation()">
+        <div class="list-card-amount">
+          <span class="amount-label">
+            <app-icon name="cash" [size]="16"></app-icon>
+            {{ 'ORDERS.TOTAL' | translate }}
+          </span>
+          <span class="amount-value">{{ o.total | number:'1.2-2' }} {{ o.currency }}</span>
+        </div>
+        <div class="list-card-row">
+          <span class="list-card-label">
+            <app-icon name="truck" [size]="16"></app-icon>
+            {{ 'ORDERS.DRIVER' | translate }}
+          </span>
+          <span class="list-card-value">{{ o.deliveryAgentName || '-' }}</span>
+        </div>
+        <div class="list-card-row">
+          <span class="list-card-label">
+            <app-icon name="clock" [size]="16"></app-icon>
+            {{ 'ORDERS.DATE' | translate }}
+          </span>
+          <span class="list-card-value">{{ o.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
+        </div>
+        <div class="list-card-actions" (click)="$event.stopPropagation()">
+          <a class="btn btn-secondary" [routerLink]="['/dashboard/shop/orders', o.id]">{{ 'ORDERS.DETAIL' | translate }}</a>
           @if (o.status === 'DELIVERED') {
-            <button class="btn btn-sm btn-success" (click)="accept(o.id)">{{ 'ORDERS.ACCEPT_BTN' | translate }}</button>
-          }
-          @if (o.status === 'DELIVERED') {
-            <button class="btn btn-sm btn-danger" (click)="reject(o.id)">{{ 'ORDERS.REJECT_BTN' | translate }}</button>
+            <button class="btn btn-success" (click)="accept(o.id)">{{ 'ORDERS.ACCEPT_BTN' | translate }}</button>
+            <button class="btn btn-danger" (click)="reject(o.id)">{{ 'ORDERS.REJECT_BTN' | translate }}</button>
           }
           @if (o.status === 'DRAFT' || o.status === 'CONFIRMED' || o.status === 'PREPARING') {
-            <button class="btn btn-sm btn-danger" (click)="cancel(o.id)">{{ 'ORDERS.CANCEL_BTN' | translate }}</button>
+            <button class="btn btn-danger" (click)="cancel(o.id)">{{ 'ORDERS.CANCEL_BTN' | translate }}</button>
           }
         </div>
       </div>
+    }
+    @if (filteredOrders.length === 0) {
+      <div class="list-card list-empty">{{ 'ORDERS.NO_ORDERS' | translate }}</div>
     }
   </div>
 }

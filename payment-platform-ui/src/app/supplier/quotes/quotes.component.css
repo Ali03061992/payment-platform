@@ -19,8 +19,10 @@
   font-size: 0.9375rem;
   color: var(--text-primary);
 }
-.table-wrapper table {
-  min-width: 32rem;
+@media (min-width: 769px) {
+  .table-wrapper table {
+    min-width: 32rem;
+  }
 }
 td .form-control,
 .table-wrapper .form-control {
@@ -85,10 +87,5 @@ td .form-control,
   .form-actions .btn {
     width: 100%;
     min-height: 2.75rem;
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .table-card {
-    transition: none;
   }
 }

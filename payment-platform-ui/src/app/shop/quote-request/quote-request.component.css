@@ -30,6 +30,10 @@ td .form-control,
 .estimated-total strong {
   color: var(--amount-color);
 }
+.picker-cards {
+  max-height: 60vh;
+  overflow-y: auto;
+}
 .error {
   font-size: 0.8125rem;
 }

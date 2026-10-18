@@ -15,7 +15,7 @@
 }
 
 @for (d of demandes; track d.id) {
-  <div class="table-card" style="margin-bottom:16px;">
+  <div class="table-card hide-mobile" style="margin-bottom:16px;">
     <div class="demande-head">
       <div>
         <strong>{{ d.reference }}</strong>
@@ -81,6 +81,62 @@
         </table>
       </div>
     }
+  </div>
+
+  <div class="list-cards show-mobile" style="margin-bottom:16px;">
+    <div class="list-card">
+      <div class="list-card-head">
+        <span class="list-card-ref">
+          <app-icon name="tag" [size]="20"></app-icon>
+          {{ d.reference }}
+        </span>
+        <span class="payment-badge" [ngClass]="'badge-' + d.status.toLowerCase()">{{ d.status | statusLabel }}</span>
+      </div>
+      <div class="list-card-party">
+        <app-icon name="store" [size]="16"></app-icon>
+        {{ d.shopName || d.shopId }}
+      </div>
+      <div class="list-card-row">
+        <span class="list-card-label">
+          <app-icon name="clock" [size]="16"></app-icon>
+          {{ 'ORDERS.DATE' | translate }}
+        </span>
+        <span class="list-card-value">{{ d.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
+      </div>
+      @if (d.notes) {
+        <p class="list-card-notes">{{ d.notes }}</p>
+      }
+      <div class="list-lines">
+        @for (l of linesOf(d); track $index) {
+          <div class="list-line">
+            <span class="list-line-name">{{ l.name }}<small>{{ l.ref }}</small></span>
+            <span class="list-line-qty">{{ l.qty }}</span>
+            <span class="list-line-total">{{ l.unitPrice | number:'1.2-2' }}</span>
+          </div>
+        }
+      </div>
+      @if (quotesOf(d).length > 0) {
+        <h4 class="list-section-title list-subtitle">{{ 'QUOTES.SENT_TITLE' | translate }}</h4>
+        <div class="list-lines">
+          @for (q of quotesOf(d); track q.id) {
+            <div class="list-line">
+              <span class="list-line-name">
+                {{ 'ORDER_DETAIL.QUOTE_N' | translate:{version: q.version} }}
+                <small>{{ q.createdAt | date:'dd/MM/yyyy HH:mm' }}</small>
+              </span>
+              <span class="list-line-total">{{ q.total | number:'1.2-2' }} {{ q.currency }}</span>
+              <button class="btn btn-secondary" type="button" (click)="download(d.id, q.version, d.reference)">
+                {{ 'ORDER_DETAIL.QUOTE_DOWNLOAD' | translate }}
+              </button>
+            </div>
+          }
+        </div>
+      }
+      <div class="list-card-actions">
+        <button class="btn btn-primary" type="button" (click)="openQuote(d)"
+          [attr.aria-label]="('QUOTES.QUOTE_ARIA' | translate) + ' ' + d.reference">{{ 'QUOTES.QUOTE' | translate }}</button>
+      </div>
+    </div>
   </div>
 }
 

@@ -18,7 +18,7 @@
 }
 
 @if (!loading && allQuotes.length > 0) {
-  <div class="table-card" style="margin-bottom:16px;">
+  <div class="table-card hide-mobile" style="margin-bottom:16px;">
     <h3 style="padding:16px 20px 0;">{{ 'MY_QUOTES.QUOTES_RECEIVED' | translate }} ({{ allQuotes.length }})</h3>
     <div class="table-wrapper">
       <table>
@@ -54,10 +54,50 @@
       </table>
     </div>
   </div>
+  <div class="list-cards show-mobile" style="margin-bottom:16px;">
+    <h3 class="list-section-title">{{ 'MY_QUOTES.QUOTES_RECEIVED' | translate }} ({{ allQuotes.length }})</h3>
+    @for (row of allQuotes; track row.quote.id) {
+      <div class="list-card">
+        <div class="list-card-head">
+          <span class="list-card-ref">
+            <app-icon name="tag" [size]="20"></app-icon>
+            {{ row.demande.reference }}
+          </span>
+          <span class="list-card-tag">{{ 'ORDER_DETAIL.QUOTE_N' | translate:{version: row.quote.version} }}</span>
+        </div>
+        <div class="list-card-party">
+          <app-icon name="factory" [size]="16"></app-icon>
+          {{ row.demande.supplierName || row.demande.supplierId }}
+        </div>
+        <div class="list-card-amount">
+          <span class="amount-label">
+            <app-icon name="cash" [size]="16"></app-icon>
+            {{ 'ORDER_DETAIL.QUOTE_TOTAL' | translate }}
+          </span>
+          <span class="amount-value">{{ row.quote.total | number:'1.2-2' }} {{ row.quote.currency }}</span>
+        </div>
+        <div class="list-card-row">
+          <span class="list-card-label">
+            <app-icon name="clock" [size]="16"></app-icon>
+            {{ 'ORDER_DETAIL.QUOTE_DATE' | translate }}
+          </span>
+          <span class="list-card-value">{{ row.quote.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
+        </div>
+        <div class="list-card-actions">
+          <button class="btn btn-secondary" type="button" (click)="download(row.quote)">{{ 'ORDER_DETAIL.QUOTE_DOWNLOAD' | translate }}</button>
+          @if (row.demande.status === 'QUOTED') {
+            <button class="btn btn-primary" type="button" (click)="accept(row.quote)" [disabled]="acceptingId === row.quote.id">
+              {{ acceptingId === row.quote.id ? ('COMMON.SAVING' | translate) : ('MY_QUOTES.ACCEPT' | translate) }}
+            </button>
+          }
+        </div>
+      </div>
+    }
+  </div>
 }
 
 @for (d of demandes; track d.id) {
-  <div class="table-card" style="margin-bottom:16px;">
+  <div class="table-card hide-mobile" style="margin-bottom:16px;">
     <div class="demande-head">
       <div>
         <strong>{{ d.reference }}</strong>
@@ -96,5 +136,56 @@
     @if ((d.quotes || []).length === 0) {
       <div class="empty-state" style="padding:16px;">{{ 'MY_QUOTES.WAITING' | translate }}</div>
     }
+  </div>
+
+  <div class="list-cards show-mobile" style="margin-bottom:16px;">
+    <div class="list-card">
+      <div class="list-card-head">
+        <span class="list-card-ref">
+          <app-icon name="tag" [size]="20"></app-icon>
+          {{ d.reference }}
+        </span>
+        <span class="payment-badge" [ngClass]="'badge-' + d.status.toLowerCase()">{{ d.status | statusLabel }}</span>
+      </div>
+      <div class="list-card-party">
+        <app-icon name="factory" [size]="16"></app-icon>
+        {{ d.supplierName || d.supplierId }}
+      </div>
+      @if (latestQuote(d); as q) {
+        <div class="list-card-amount">
+          <span class="amount-label">
+            <app-icon name="cash" [size]="16"></app-icon>
+            {{ 'ORDER_DETAIL.QUOTE_TOTAL' | translate }}
+          </span>
+          <span class="amount-value">{{ q.total | number:'1.2-2' }} {{ q.currency }}</span>
+        </div>
+      }
+      <div class="list-card-row">
+        <span class="list-card-label">
+          <app-icon name="clock" [size]="16"></app-icon>
+          {{ 'ORDERS.DATE' | translate }}
+        </span>
+        <span class="list-card-value">{{ d.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
+      </div>
+      @if (d.notes) {
+        <p class="list-card-notes">{{ d.notes }}</p>
+      }
+      <div class="list-lines">
+        @for (l of linesOf(d); track $index) {
+          <div class="list-line">
+            <span class="list-line-name">{{ l.name }}<small>{{ l.ref }}</small></span>
+            <span class="list-line-qty">{{ l.qty }}</span>
+          </div>
+        }
+      </div>
+      @if ((d.quotes || []).length === 0) {
+        <div class="list-empty">{{ 'MY_QUOTES.WAITING' | translate }}</div>
+      }
+      @if (d.status === 'PENDING' || d.status === 'QUOTED') {
+        <div class="list-card-actions">
+          <button class="btn btn-secondary" type="button" (click)="cancel(d)">{{ 'MY_QUOTES.CANCEL' | translate }}</button>
+        </div>
+      }
+    </div>
   </div>
 }
