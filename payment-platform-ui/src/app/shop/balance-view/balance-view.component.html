@@ -139,7 +139,7 @@
           </div>
         }
         @if (!loadingLedger) {
-          <div class="table-card">
+          <div class="table-card hide-mobile">
             <div class="table-wrapper">
               <table>
                 <thead>
@@ -175,6 +175,43 @@
                 </tbody>
               </table>
             </div>
+          </div>
+          <div class="list-cards show-mobile">
+            @for (e of pagedLedger; track e) {
+              <div class="list-card list-card-static">
+                <div class="list-card-head">
+                  <span class="list-card-ref">
+                    <app-icon name="list" [size]="20"></app-icon>
+                    {{ e.createdAt | date:'dd/MM/yyyy HH:mm' }}
+                  </span>
+                  <span class="status-badge" [ngClass]="typeClass(e.type)">{{ typeLabel(e.type) }}</span>
+                </div>
+                <div class="list-card-amount">
+                  <span class="amount-label">
+                    <app-icon name="cash" [size]="16"></app-icon>
+                    {{ 'SHOP_BALANCE.COL_AMOUNT' | translate }}
+                  </span>
+                  <span class="amount-value" [class.positive]="e.amount >= 0" [class.negative]="e.amount < 0">{{ e.amount >= 0 ? '+' : '' }}{{ e.amount | number:'1.2-2' }}</span>
+                </div>
+                <div class="list-card-row">
+                  <span class="list-card-label">
+                    <app-icon name="wallet" [size]="16"></app-icon>
+                    {{ 'SHOP_BALANCE.COL_BALANCE_AFTER' | translate }}
+                  </span>
+                  <span class="list-card-value">{{ e.balanceAfter | number:'1.2-2' }}</span>
+                </div>
+                <div class="list-card-row">
+                  <span class="list-card-label">
+                    <app-icon name="tag" [size]="16"></app-icon>
+                    {{ 'SHOP_BALANCE.COL_REF' | translate }}
+                  </span>
+                  <span class="list-card-value">{{ e.reference || '-' }}</span>
+                </div>
+              </div>
+            }
+            @if (ledgerEntries.length === 0) {
+              <div class="list-card list-empty">{{ 'SHOP_BALANCE.NO_MOVEMENTS' | translate }}</div>
+            }
           </div>
           @if (!loadingLedger && ledgerEntries.length > 0) {
             <app-pagination [page]="ledgerPage" [size]="ledgerSize" [totalElements]="ledgerEntries.length"
