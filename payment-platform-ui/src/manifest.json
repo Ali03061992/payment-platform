@@ -65,6 +65,7 @@
     }
   ],
   "categories": ["finance", "business"],
+  "permissions": ["camera", "notifications"],
   "lang": "fr",
   "prefer_related_applications": false
 }

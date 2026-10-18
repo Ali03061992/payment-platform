@@ -23,8 +23,19 @@ export class QrScannerComponent implements OnInit, OnDestroy {
 
   constructor(private router: Router, private toast: ToastService, private translate: TranslateService) {}
 
-  ngOnInit(): void {
+  async ngOnInit(): Promise<void> {
     this.isSecureContext = window.isSecureContext;
+    // Caméra forcée à l'ouverture : la permission navigateur est demandée
+    // immédiatement (sur iOS Safari la vérification user-gesture échoue proprement
+    // et le bouton Réessayer/Activer relance la demande dans un geste utilisateur).
+    if (this.isSecureContext && this.isCameraSupported()) {
+      await this.startCamera();
+    }
+  }
+
+  /** Relance la demande de permission caméra (bouton Réessayer). */
+  async retryCamera(): Promise<void> {
+    await this.startCamera();
   }
 
   ngOnDestroy(): void {

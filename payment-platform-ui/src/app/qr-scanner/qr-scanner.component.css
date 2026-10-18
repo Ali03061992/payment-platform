@@ -49,6 +49,13 @@
   flex-shrink: 0;
 }
 
+.camera-error .btn-retry {
+  margin-left: auto;
+  flex-shrink: 0;
+  padding: 6px 14px;
+  font-size: 12px;
+}
+
 .https-warning {
   background: linear-gradient(135deg, #e3f2fd, #f3e5f5);
   border: 1px solid #90caf9;

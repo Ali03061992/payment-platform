@@ -77,8 +77,8 @@
     "FORGOT_PASSWORD": "Mot de passe oublié ?",
     "REGISTER_PENDING_ACTIVATION": "Un administrateur doit encore le rattacher à votre organisation puis l'activer avant votre première connexion.",
     "ROLE_SYSTEM_ADMIN": "Administrateur système",
-    "PASSKEY_LOGIN_BUTTON": "Se connecter avec une passkey",
-    "PASSKEY_LOGIN_LOADING": "Recherche de la passkey...",
+    "PASSKEY_LOGIN_BUTTON": "Se connecter avec mon empreinte",
+    "PASSKEY_LOGIN_LOADING": "Vérification de l'empreinte...",
     "PASSKEY_LOGIN_ERROR": "Échec de la connexion par passkey",
     "PASSKEY_CANCELLED": "Connexion par passkey annulée",
     "PASSKEY_SEPARATOR": "ou"
@@ -1338,6 +1338,7 @@
     "MANUAL_WORD": "saisie manuelle",
     "TAP_TO_START": "Appuyez pour activer la caméra",
     "START_CAMERA": "Activer la caméra",
+    "RETRY": "Réessayer",
     "STOP_CAMERA": "Arrêter",
     "OR": "ou",
     "MANUAL_LINK_BTN": "Saisie manuelle du lien",

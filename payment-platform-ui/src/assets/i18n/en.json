@@ -77,8 +77,8 @@
     "FORGOT_PASSWORD": "Forgot password?",
     "REGISTER_PENDING_ACTIVATION": "An administrator still needs to attach it to your organization and activate it before your first login.",
     "ROLE_SYSTEM_ADMIN": "System administrator",
-    "PASSKEY_LOGIN_BUTTON": "Sign in with a passkey",
-    "PASSKEY_LOGIN_LOADING": "Waiting for passkey...",
+    "PASSKEY_LOGIN_BUTTON": "Sign in with my fingerprint",
+    "PASSKEY_LOGIN_LOADING": "Verifying fingerprint...",
     "PASSKEY_LOGIN_ERROR": "Passkey sign-in failed",
     "PASSKEY_CANCELLED": "Passkey sign-in cancelled",
     "PASSKEY_SEPARATOR": "or"
@@ -1338,6 +1338,7 @@
     "MANUAL_WORD": "manual entry",
     "TAP_TO_START": "Tap to start camera",
     "START_CAMERA": "Start camera",
+    "RETRY": "Retry",
     "STOP_CAMERA": "Stop",
     "OR": "or",
     "MANUAL_LINK_BTN": "Manual link entry",

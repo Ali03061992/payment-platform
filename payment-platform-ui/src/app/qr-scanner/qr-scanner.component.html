@@ -24,6 +24,9 @@
     <div class="camera-error">
         <span class="error-icon"><app-icon name="alert" [size]="20"></app-icon></span>
       <span>{{ cameraError }}</span>
+      <button type="button" class="btn btn-secondary btn-retry" (click)="retryCamera()">
+        {{ 'QR.RETRY' | translate }}
+      </button>
     </div>
   }
 
