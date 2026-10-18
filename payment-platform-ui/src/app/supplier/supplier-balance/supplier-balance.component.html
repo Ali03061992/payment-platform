@@ -56,7 +56,62 @@
         </div>
       </form>
     </div>
-    <div class="table-card">
+    <!-- Mobile Card View -->
+    <div class="list-cards show-mobile">
+      @for (b of pagedBalances; track b) {
+        <div class="list-card" (click)="viewLedger(b.supplierId, b.shopId)">
+          <div class="list-card-head">
+            <span class="list-card-ref">
+              <app-icon name="store" [size]="20"></app-icon>
+              {{ b.shopName || b.shopId }}
+            </span>
+          </div>
+          <div class="list-card-amount">
+            <span class="amount-label">
+              <app-icon name="cash" [size]="16"></app-icon>
+              {{ 'FINANCE.CURRENT_BALANCE' | translate }}
+            </span>
+            <span class="amount-value" [class.positive]="b.currentBalance >= 0" [class.negative]="b.currentBalance < 0">{{ b.currentBalance | number:'1.2-2' }}</span>
+          </div>
+          <div class="list-card-row">
+            <span class="list-card-label">
+              <app-icon name="box" [size]="16"></app-icon>
+              {{ 'FINANCE.TOTAL_ORDERS' | translate }}
+            </span>
+            <span class="list-card-value">{{ b.totalOrders | number:'1.2-2' }}</span>
+          </div>
+          <div class="list-card-row">
+            <span class="list-card-label">
+              <app-icon name="cash" [size]="16"></app-icon>
+              {{ 'FINANCE.TOTAL_PAYMENTS' | translate }}
+            </span>
+            <span class="list-card-value">{{ b.totalPayments | number:'1.2-2' }}</span>
+          </div>
+          <div class="list-card-row">
+            <span class="list-card-label">
+              <app-icon name="alert" [size]="16"></app-icon>
+              {{ 'FINANCE.REMAINING_DUE' | translate }}
+            </span>
+            <span class="list-card-value" [class.negative]="b.remainingDue > 0">{{ b.remainingDue | number:'1.2-2' }}</span>
+          </div>
+          <div class="list-card-row">
+            <span class="list-card-label">
+              <app-icon name="clock" [size]="16"></app-icon>
+              {{ 'FINANCE.LAST_TX' | translate }}
+            </span>
+            <span class="list-card-value">{{ b.lastTransaction ? (b.lastTransaction | date:'dd/MM/yyyy HH:mm') : '-' }}</span>
+          </div>
+          <div class="list-card-actions" (click)="$event.stopPropagation()">
+            <button class="btn btn-secondary" (click)="viewLedger(b.supplierId, b.shopId)">{{ 'FINANCE.VIEW_LEDGER' | translate }}</button>
+            <button class="btn btn-primary" (click)="creditShopId = b.shopId">{{ 'FINANCE.CREDIT' | translate }}</button>
+          </div>
+        </div>
+      }
+      @if (balances.length === 0) {
+        <div class="list-card list-empty">{{ 'FINANCE.NO_SHOPS' | translate }}</div>
+      }
+    </div>
+    <div class="table-card hide-mobile">
       <div class="table-wrapper">
         <table>
           <thead>
@@ -66,6 +121,7 @@
               <th class="sortable-th" (click)="onSort('totalOrders')" (keydown.enter)="onSort('totalOrders')" (keydown.space)="onSort('totalOrders'); $event.preventDefault()" tabindex="0" [attr.aria-sort]="ariaSort('totalOrders')" [title]="'FINANCE.SORT_ORDERS' | translate">{{ 'FINANCE.TOTAL_ORDERS' | translate }} <span class="sort-indicator" aria-hidden="true">{{ sortIndicator('totalOrders') }}</span></th>
               <th class="sortable-th" (click)="onSort('totalPayments')" (keydown.enter)="onSort('totalPayments')" (keydown.space)="onSort('totalPayments'); $event.preventDefault()" tabindex="0" [attr.aria-sort]="ariaSort('totalPayments')" [title]="'FINANCE.SORT_PAYMENTS' | translate">{{ 'FINANCE.TOTAL_PAYMENTS' | translate }} <span class="sort-indicator" aria-hidden="true">{{ sortIndicator('totalPayments') }}</span></th>
               <th class="sortable-th" (click)="onSort('remainingDue')" (keydown.enter)="onSort('remainingDue')" (keydown.space)="onSort('remainingDue'); $event.preventDefault()" tabindex="0" [attr.aria-sort]="ariaSort('remainingDue')" [title]="'FINANCE.SORT_DUE' | translate">{{ 'FINANCE.REMAINING_DUE' | translate }} <span class="sort-indicator" aria-hidden="true">{{ sortIndicator('remainingDue') }}</span></th>
+              <th>{{ 'FINANCE.LAST_TX' | translate }}</th>
               <th>{{ 'ORDERS.ACTIONS' | translate }}</th>
             </tr>
           </thead>
@@ -81,6 +137,7 @@
                 <td [class.negative]="b.remainingDue > 0">
                   {{ b.remainingDue | number:'1.2-2' }}
                 </td>
+                <td>{{ b.lastTransaction ? (b.lastTransaction | date:'dd/MM/yyyy HH:mm') : '-' }}</td>
                 <td class="actions" (click)="$event.stopPropagation()">
                   <button class="btn btn-sm btn-secondary" (click)="viewLedger(b.supplierId, b.shopId)">{{ 'FINANCE.VIEW_LEDGER' | translate }}</button>
                   <button class="btn btn-sm btn-primary" (click)="creditShopId = b.shopId">{{ 'FINANCE.CREDIT' | translate }}</button>
@@ -89,7 +146,7 @@
             }
             @if (balances.length === 0) {
               <tr>
-                <td colspan="6" class="empty">{{ 'FINANCE.NO_SHOPS' | translate }}</td>
+                <td colspan="7" class="empty">{{ 'FINANCE.NO_SHOPS' | translate }}</td>
               </tr>
             }
           </tbody>
