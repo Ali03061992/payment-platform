@@ -14,7 +14,7 @@
         <h3>{{ 'DELIVERY.PENDING_ACCEPTANCE' | translate }}</h3>
         <span class="result-count">{{ 'DELIVERY.COUNT' | translate:{count: pendingAcceptance.length} }}</span>
       </div>
-      <div class="table-card">
+      <div class="table-card hide-mobile">
         <div class="table-wrapper">
           <table>
             <thead>
@@ -49,13 +49,48 @@
           </table>
         </div>
       </div>
+      <div class="list-cards show-mobile">
+        @for (d of sorted(pendingAcceptance); track d.id) {
+          <div class="list-card" (click)="openDetail(d)">
+            <div class="list-card-head">
+              <span class="list-card-ref">
+                <app-icon name="truck" [size]="20"></app-icon>
+                {{ d.reference }}
+              </span>
+              <span class="payment-badge" [ngClass]="statusClass(d.status)">{{ d.status | statusLabel }}</span>
+            </div>
+            <div class="list-card-party">
+              <app-icon name="store" [size]="16"></app-icon>
+              {{ d.shopName || d.shopId }}
+            </div>
+            <div class="list-card-amount">
+              <span class="amount-label">
+                <app-icon name="cash" [size]="16"></app-icon>
+                {{ 'ORDERS.TOTAL' | translate }}
+              </span>
+              <span class="amount-value">{{ d.total | number:'1.2-2' }} {{ d.currency }}</span>
+            </div>
+            <div class="list-card-row">
+              <span class="list-card-label">
+                <app-icon name="clock" [size]="16"></app-icon>
+                {{ 'SUPPLIER_ORDERS.PLANNED_DATE' | translate }}
+              </span>
+              <span class="list-card-value">{{ d.plannedDeliveryDate || '-' }}</span>
+            </div>
+            <div class="list-card-actions" (click)="$event.stopPropagation()">
+              <button class="btn btn-success" (click)="acceptDelivery(d)">{{ 'ORDERS.ACCEPT_BTN' | translate }}</button>
+              <button class="btn btn-danger" (click)="openRejectModal(d)">{{ 'ORDERS.REJECT_BTN' | translate }}</button>
+            </div>
+          </div>
+        }
+      </div>
     }
     @if (activeDeliveries.length > 0) {
       <div class="section-header" style="margin-top: 32px;">
         <h3>{{ 'DELIVERY.ACTIVE' | translate }}</h3>
         <span class="result-count">{{ 'DELIVERY.COUNT' | translate:{count: activeDeliveries.length} }}</span>
       </div>
-      <div class="table-card">
+      <div class="table-card hide-mobile">
         <div class="table-wrapper">
           <table>
             <thead>
@@ -94,13 +129,52 @@
           </table>
         </div>
       </div>
+      <div class="list-cards show-mobile">
+        @for (d of sorted(activeDeliveries); track d.id) {
+          <div class="list-card" (click)="openDetail(d)">
+            <div class="list-card-head">
+              <span class="list-card-ref">
+                <app-icon name="truck" [size]="20"></app-icon>
+                {{ d.reference }}
+              </span>
+              <span class="payment-badge" [ngClass]="statusClass(d.status)">{{ d.status | statusLabel }}</span>
+            </div>
+            <div class="list-card-party">
+              <app-icon name="store" [size]="16"></app-icon>
+              {{ d.shopName || d.shopId }}
+            </div>
+            <div class="list-card-amount">
+              <span class="amount-label">
+                <app-icon name="cash" [size]="16"></app-icon>
+                {{ 'ORDERS.TOTAL' | translate }}
+              </span>
+              <span class="amount-value">{{ d.total | number:'1.2-2' }} {{ d.currency }}</span>
+            </div>
+            <div class="list-card-row">
+              <span class="list-card-label">
+                <app-icon name="clock" [size]="16"></app-icon>
+                {{ 'SUPPLIER_ORDERS.CONFIRMED_DATE' | translate }}
+              </span>
+              <span class="list-card-value">{{ d.confirmedDeliveryDate || '-' }}</span>
+            </div>
+            <div class="list-card-actions" (click)="$event.stopPropagation()">
+              @if (d.status === 'DELIVERY_ACCEPTED') {
+                <button class="btn btn-primary" (click)="openConfirmDate(d)">{{ 'DELIVERY.CONFIRM_DATE' | translate }}</button>
+              }
+              @if (d.status === 'IN_DELIVERY') {
+                <button class="btn btn-success" (click)="openDeliver(d)">{{ 'DELIVERY.MARK_DELIVERED' | translate }}</button>
+              }
+            </div>
+          </div>
+        }
+      </div>
     }
     @if (isShopUser() && pendingReception.length > 0) {
       <div class="section-header" style="margin-top: 32px;">
         <h3>{{ 'DELIVERY.PENDING_RECEPTION' | translate }}</h3>
         <span class="result-count">{{ 'DELIVERY.COUNT' | translate:{count: pendingReception.length} }}</span>
       </div>
-      <div class="table-card">
+      <div class="table-card hide-mobile">
         <div class="table-wrapper">
           <table>
             <thead>
@@ -135,13 +209,48 @@
           </table>
         </div>
       </div>
+      <div class="list-cards show-mobile">
+        @for (d of sorted(pendingReception); track d.id) {
+          <div class="list-card" (click)="openDetail(d)">
+            <div class="list-card-head">
+              <span class="list-card-ref">
+                <app-icon name="truck" [size]="20"></app-icon>
+                {{ d.reference }}
+              </span>
+              <span class="payment-badge" [ngClass]="statusClass(d.status)">{{ d.status | statusLabel }}</span>
+            </div>
+            <div class="list-card-party">
+              <app-icon name="factory" [size]="16"></app-icon>
+              {{ d.supplierName || d.supplierId }}
+            </div>
+            <div class="list-card-amount">
+              <span class="amount-label">
+                <app-icon name="cash" [size]="16"></app-icon>
+                {{ 'ORDERS.TOTAL' | translate }}
+              </span>
+              <span class="amount-value">{{ d.total | number:'1.2-2' }} {{ d.currency }}</span>
+            </div>
+            <div class="list-card-row">
+              <span class="list-card-label">
+                <app-icon name="clock" [size]="16"></app-icon>
+                {{ 'SUPPLIER_ORDERS.DELIVERED_AT' | translate }}
+              </span>
+              <span class="list-card-value">{{ d.deliveredAt | date:'dd/MM/yyyy HH:mm' }}</span>
+            </div>
+            <div class="list-card-actions" (click)="$event.stopPropagation()">
+              <button class="btn btn-success" (click)="acceptReception(d)" [attr.aria-label]="('DELIVERY.ACCEPT_RECEPTION_ARIA' | translate) + ' ' + d.reference">{{ 'ORDERS.ACCEPT_BTN' | translate }}</button>
+              <button class="btn btn-danger" (click)="rejectReception(d)" [attr.aria-label]="('DELIVERY.REJECT_RECEPTION_ARIA' | translate) + ' ' + d.reference">{{ 'ORDERS.REJECT_BTN' | translate }}</button>
+            </div>
+          </div>
+        }
+      </div>
     }
     @if (completedDeliveries.length > 0) {
       <div class="section-header" style="margin-top: 32px;">
         <h3>{{ 'DELIVERY.COMPLETED' | translate }}</h3>
         <span class="result-count">{{ 'DELIVERY.COUNT' | translate:{count: completedDeliveries.length} }}</span>
       </div>
-      <div class="table-card">
+      <div class="table-card hide-mobile">
         <div class="table-wrapper">
           <table>
             <thead>
@@ -173,13 +282,51 @@
           </table>
         </div>
       </div>
+      <div class="list-cards show-mobile">
+        @for (d of sorted(completedDeliveries); track d.id) {
+          <div class="list-card" (click)="openDetail(d)">
+            <div class="list-card-head">
+              <span class="list-card-ref">
+                <app-icon name="truck" [size]="20"></app-icon>
+                {{ d.reference }}
+              </span>
+              <span class="payment-badge" [ngClass]="statusClass(d.status)">{{ d.status | statusLabel }}</span>
+            </div>
+            <div class="list-card-party">
+              <app-icon name="store" [size]="16"></app-icon>
+              {{ d.shopName || d.shopId }}
+            </div>
+            <div class="list-card-amount">
+              <span class="amount-label">
+                <app-icon name="cash" [size]="16"></app-icon>
+                {{ 'ORDERS.TOTAL' | translate }}
+              </span>
+              <span class="amount-value">{{ d.total | number:'1.2-2' }} {{ d.currency }}</span>
+            </div>
+            <div class="list-card-row">
+              <span class="list-card-label">
+                <app-icon name="users" [size]="16"></app-icon>
+                {{ 'SUPPLIER_ORDERS.RECEIVED_BY' | translate }}
+              </span>
+              <span class="list-card-value">{{ d.receivedByName || '-' }}</span>
+            </div>
+            <div class="list-card-row">
+              <span class="list-card-label">
+                <app-icon name="clock" [size]="16"></app-icon>
+                {{ 'SUPPLIER_ORDERS.DELIVERED_AT' | translate }}
+              </span>
+              <span class="list-card-value">{{ d.deliveredAt | date:'dd/MM/yyyy HH:mm' }}</span>
+            </div>
+          </div>
+        }
+      </div>
     }
     @if (rejectedDeliveries.length > 0) {
       <div class="section-header" style="margin-top: 32px;">
         <h3>{{ 'DELIVERY.REJECTED' | translate }}</h3>
         <span class="result-count">{{ 'DELIVERY.COUNT' | translate:{count: rejectedDeliveries.length} }}</span>
       </div>
-      <div class="table-card">
+      <div class="table-card hide-mobile">
         <div class="table-wrapper">
           <table>
             <thead>
@@ -202,6 +349,37 @@
             </tbody>
           </table>
         </div>
+      </div>
+      <div class="list-cards show-mobile">
+        @for (d of sorted(rejectedDeliveries); track d.id) {
+          <div class="list-card" (click)="openDetail(d)">
+            <div class="list-card-head">
+              <span class="list-card-ref">
+                <app-icon name="truck" [size]="20"></app-icon>
+                {{ d.reference }}
+              </span>
+              <span class="payment-badge" [ngClass]="statusClass(d.status)">{{ d.status | statusLabel }}</span>
+            </div>
+            <div class="list-card-party">
+              <app-icon name="store" [size]="16"></app-icon>
+              {{ d.shopName || d.shopId }}
+            </div>
+            <div class="list-card-amount">
+              <span class="amount-label">
+                <app-icon name="cash" [size]="16"></app-icon>
+                {{ 'ORDERS.TOTAL' | translate }}
+              </span>
+              <span class="amount-value">{{ d.total | number:'1.2-2' }} {{ d.currency }}</span>
+            </div>
+            <div class="list-card-row">
+              <span class="list-card-label">
+                <app-icon name="alert" [size]="16"></app-icon>
+                {{ 'DELIVERY.REASON' | translate }}
+              </span>
+              <span class="list-card-value">{{ d.deliveryRejectionReason || '-' }}</span>
+            </div>
+          </div>
+        }
       </div>
     }
     @if (deliveries.length === 0) {

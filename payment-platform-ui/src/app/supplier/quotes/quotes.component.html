@@ -106,6 +106,7 @@
       @if (d.notes) {
         <p class="list-card-notes">{{ d.notes }}</p>
       }
+      <h4 class="list-section-title list-subtitle">{{ 'QUOTES.COL_NEED' | translate }}</h4>
       <div class="list-lines">
         @for (l of linesOf(d); track $index) {
           <div class="list-line">
@@ -119,15 +120,17 @@
         <h4 class="list-section-title list-subtitle">{{ 'QUOTES.SENT_TITLE' | translate }}</h4>
         <div class="list-lines">
           @for (q of quotesOf(d); track q.id) {
-            <div class="list-line">
-              <span class="list-line-name">
-                {{ 'ORDER_DETAIL.QUOTE_N' | translate:{version: q.version} }}
-                <small>{{ q.createdAt | date:'dd/MM/yyyy HH:mm' }}</small>
-              </span>
-              <span class="list-line-total">{{ q.total | number:'1.2-2' }} {{ q.currency }}</span>
-              <button class="btn btn-secondary" type="button" (click)="download(d.id, q.version, d.reference)">
-                {{ 'ORDER_DETAIL.QUOTE_DOWNLOAD' | translate }}
-              </button>
+            <div class="list-quote-item">
+              <div class="list-quote-top">
+                <span>{{ 'ORDER_DETAIL.QUOTE_N' | translate:{version: q.version} }}</span>
+                <span class="list-line-total">{{ q.total | number:'1.2-2' }} {{ q.currency }}</span>
+              </div>
+              <div class="list-quote-meta">
+                <span class="list-quote-date">{{ q.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
+                <button class="btn btn-secondary" type="button" (click)="download(d.id, q.version, d.reference)">
+                  {{ 'ORDER_DETAIL.QUOTE_DOWNLOAD' | translate }}
+                </button>
+              </div>
             </div>
           }
         </div>
