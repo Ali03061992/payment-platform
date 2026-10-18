@@ -866,14 +866,26 @@ body .modal-overlay .modal-content {
     gap: 12px;
   }
 
-  /* Filters stack and wrap */
+  /* Filters stack and stretch full width (align-items:center hérité
+     ci-dessus rétrécissait les enfants en column : cassait la recherche,
+     le select et le bouton export sur mobile) */
   .filters {
     flex-direction: column;
-    flex-wrap: wrap;
-    gap: 8px;
+    align-items: stretch;
+    gap: 10px;
   }
 
-  .filters .form-control {
+  .filters .form-control,
+  .filters .search-container {
+    width: 100%;
+  }
+
+  .filters .result-count {
+    align-self: flex-start;
+  }
+
+  .filters .filters-export,
+  .filters .btn {
     width: 100%;
   }
 
