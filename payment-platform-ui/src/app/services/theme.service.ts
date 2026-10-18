@@ -89,6 +89,14 @@ export class ThemeService {
     return this.accent2Subject.getValue();
   }
 
+  /** À appeler après une authentification : réapplique immédiatement les
+   *  accents de l'utilisateur (local synchrone, backend en réconciliation). */
+  refreshUserAccents(): void {
+    try {
+      this.applyUserAccents(this.loginService?.getCurrentUser?.() ?? null);
+    } catch {}
+  }
+
   private isHex6(value: unknown): value is string {
     return typeof value === 'string' && /^#[0-9a-fA-F]{6}$/.test(value);
   }
@@ -129,16 +137,18 @@ export class ThemeService {
   }
 
   private persistAccents(c1: string, c2: string): void {
+    const pair = JSON.stringify([c1, c2]);
+    try {
+      // Miroir global : lu par le script anti-FOUC d'index.html à chaque
+      // boot (reload) AVANT le bootstrap Angular — pas de flash défaut.
+      localStorage.setItem('pp-accents', pair);
+    } catch {}
     try {
       const svc = this.loginService;
       const user = svc && typeof svc.getCurrentUser === 'function' ? svc.getCurrentUser() : null;
       if (user?.id !== undefined && user?.id !== null) {
-        localStorage.setItem(`pp-accents-${user.id}`, JSON.stringify([c1, c2]));
-        return;
+        localStorage.setItem(`pp-accents-${user.id}`, pair);
       }
-    } catch {}
-    try {
-      localStorage.setItem('pp-accents', JSON.stringify([c1, c2]));
     } catch {}
   }
 

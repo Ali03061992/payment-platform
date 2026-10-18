@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { LoginService } from '../services/login.service';
 import { PushNotificationService } from '../services/push-notification.service';
+import { ThemeService } from '../services/theme.service';
 import { WebAuthnService } from '../services/web-authn.service';
 
 @Component({
@@ -23,7 +24,8 @@ export class LoginComponent {
     private router: Router,
     private pushNotificationService: PushNotificationService,
     private webAuthn: WebAuthnService,
-    private translate: TranslateService
+    private translate: TranslateService,
+    private themeService: ThemeService
   ) {}
 
   onSubmit(): void {
@@ -68,6 +70,9 @@ export class LoginComponent {
     this.loginService.getMe().subscribe({
       next: (user) => {
         sessionStorage.setItem('user', JSON.stringify(user));
+        // Applique immédiatement les 2 accents de l'utilisateur (sinon ils
+        // n'apparaissaient qu'au prochain reload).
+        this.themeService.refreshUserAccents();
         this.loading = false;
         this.passkeyLoading = false;
         this.router.navigate(['/dashboard']);
