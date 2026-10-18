@@ -88,3 +88,6 @@
   gap: 12px;
   justify-content: center;
 }
+
+[data-theme="dark"] .success-card h2 { color: #81c784; }
+[data-theme="dark"] .error-content h2 { color: #ef9a9a; }

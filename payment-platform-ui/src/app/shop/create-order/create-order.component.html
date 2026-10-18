@@ -149,7 +149,7 @@
                       [attr.aria-label]="('ORDER_CREATE.QTY_ARIA' | translate:{name: line.product.name})">
                   </td>
                   <td>{{ line.product.unitPrice | number:'1.2-2' }}</td>
-                  <td>{{ line.product.vatRate ?? 19 }} % @if (line.product.priceTtc) { <small style="color:#2e7d32;">TTC</small> }</td>
+                  <td>{{ line.product.vatRate ?? 19 }} % @if (line.product.priceTtc) { <small class="text-ok">TTC</small> }</td>
                   <td>{{ (line.product.unitPrice * line.quantity) | number:'1.2-2' }}</td>
                   <td>
                     <button class="btn btn-sm btn-danger" type="button" (click)="removeLine(i)"

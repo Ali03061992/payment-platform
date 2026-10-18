@@ -8,8 +8,8 @@
   border-radius: 12px;
   font-size: 12px;
   font-weight: 600;
-  background: #e3f2fd;
-  color: #1565c0;
+  background: var(--badge-info-bg);
+  color: var(--badge-info-text);
   white-space: nowrap;
 }
 
@@ -43,6 +43,11 @@
   background: #fce4ec;
   border-radius: 8px;
   margin-bottom: 16px;
+}
+
+[data-theme="dark"] .error-message {
+  color: #ef9a9a;
+  background: #3a1b1b;
 }
 
 @media (max-width: 768px) {

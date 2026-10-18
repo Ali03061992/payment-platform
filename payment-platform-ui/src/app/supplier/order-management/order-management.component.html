@@ -377,7 +377,7 @@
                   <strong>{{ selectedOrder.externalReference }}</strong>
                   <qrcode [qrdata]="'FACTURE:' + selectedOrder.externalReference + '|DOC:' + selectedOrder.reference" [width]="72" [margin]="1"></qrcode>
                 } @else {
-                  <span style="color:#8896ab;">—</span>
+                  <span class="text-placeholder">—</span>
                   <button class="btn btn-sm btn-secondary" style="margin-left:8px;" (click)="toggleDetailExtRefForm()">{{ 'ORDER_DETAIL.EXTREF_ADD' | translate }}</button>
                 }
               </div>
@@ -425,7 +425,7 @@
             @if (selectedOrder.estimatedArrival) {
               <div class="detail-card">
                 <div class="detail-label">{{ 'SUPPLIER_ORDERS.ESTIMATED_ARRIVAL' | translate }}</div>
-                <div class="detail-value" style="color:#e65100;font-weight:600;">{{ selectedOrder.estimatedArrival | date:'dd/MM/yyyy HH:mm' }}</div>
+                <div class="detail-value text-eta">{{ selectedOrder.estimatedArrival | date:'dd/MM/yyyy HH:mm' }}</div>
               </div>
             }
             @if (selectedOrder.deliveredAt) {
@@ -449,7 +449,7 @@
             @if (selectedOrder.deliveryRejectionReason) {
               <div class="detail-card" style="grid-column: 1 / -1;">
                 <div class="detail-label">{{ 'SUPPLIER_ORDERS.REJECT_REASON' | translate }}</div>
-                <div class="detail-value" style="color: #e53935;">{{ selectedOrder.deliveryRejectionReason }}</div>
+                <div class="detail-value text-reject">{{ selectedOrder.deliveryRejectionReason }}</div>
               </div>
             }
           </div>
@@ -470,7 +470,7 @@
                   <tbody>
                     @for (item of selectedOrder.items; track item) {
                       <tr>
-                        <td><strong>{{ item.productName }}</strong>@if (item.priceTtc) { <small style="color:#2e7d32;">TTC</small> }</td>
+                        <td><strong>{{ item.productName }}</strong>@if (item.priceTtc) { <small class="text-ok">TTC</small> }</td>
                         <td>{{ item.quantity }}</td>
                         <td>{{ item.unitPrice | number:'1.2-2' }}</td>
                         <td>{{ item.discount > 0 ? item.discount + '%' : '-' }}</td>
@@ -503,7 +503,7 @@
                     }
                     <tr>
                       <td colspan="4" style="text-align:right;font-weight:700;font-size:16px;">{{ 'ORDERS.TOTAL' | translate }}</td>
-                      <td><strong style="font-size:16px;color:#0f3460;">{{ selectedOrder.total | number:'1.2-2' }} {{ selectedOrder.currency }}</strong></td>
+                      <td><strong class="text-total" style="font-size:16px;">{{ selectedOrder.total | number:'1.2-2' }} {{ selectedOrder.currency }}</strong></td>
                     </tr>
                     <tr>
                       <td colspan="4" style="text-align:right;font-weight:600;">{{ 'SUPPLIER_ORDERS.STAMP' | translate }}</td>
@@ -511,7 +511,7 @@
                     </tr>
                     <tr>
                       <td colspan="4" style="text-align:right;font-weight:700;font-size:16px;">{{ 'SUPPLIER_ORDERS.NET_PAYABLE' | translate }}</td>
-                      <td><strong style="font-size:16px;color:#0f3460;">{{ selectedOrder.netPayable | number:'1.2-2' }} {{ selectedOrder.currency }}</strong></td>
+                      <td><strong class="text-total" style="font-size:16px;">{{ selectedOrder.netPayable | number:'1.2-2' }} {{ selectedOrder.currency }}</strong></td>
                     </tr>
                   </tfoot>
                 </table>
@@ -594,13 +594,13 @@
             <h4 style="padding: 16px 20px 0;">{{ 'SUPPLIER_ORDERS.COMMENTS' | translate }}</h4>
             <div style="padding: 16px 20px;">
               @if (detailComments.length === 0) {
-                <p style="color:#8896ab;font-size:14px;">{{ 'SUPPLIER_ORDERS.NO_COMMENTS' | translate }}</p>
+                <p class="text-placeholder" style="font-size:14px;">{{ 'SUPPLIER_ORDERS.NO_COMMENTS' | translate }}</p>
               }
               @for (c of detailComments; track c) {
                 <div style="border-bottom:1px solid #eee;padding:12px 0;">
                   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
                     <strong style="font-size:14px;">{{ c.authorName }}</strong>
-                    <small style="color:#8896ab;">{{ c.createdAt | date:'dd/MM/yyyy HH:mm' }}</small>
+                    <small class="text-placeholder">{{ c.createdAt | date:'dd/MM/yyyy HH:mm' }}</small>
                   </div>
                   <p style="margin:0;font-size:14px;white-space:pre-wrap;">{{ c.content }}</p>
                 </div>

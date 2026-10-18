@@ -466,7 +466,7 @@
             @if (selectedDetailOrder.deliveryRejectionReason) {
               <div class="detail-card" style="grid-column: 1 / -1;">
                 <div class="detail-label">{{ 'SUPPLIER_ORDERS.REJECT_REASON' | translate }}</div>
-                <div class="detail-value" style="color: #e53935;">{{ selectedDetailOrder.deliveryRejectionReason }}</div>
+                <div class="detail-value text-reject">{{ selectedDetailOrder.deliveryRejectionReason }}</div>
               </div>
             }
           </div>
@@ -520,7 +520,7 @@
                     }
                     <tr>
                       <td colspan="4" style="text-align:right;font-weight:700;font-size:16px;">{{ 'ORDERS.TOTAL' | translate }}</td>
-                      <td><strong style="font-size:16px;color:#0f3460;">{{ selectedDetailOrder.total | number:'1.2-2' }} {{ selectedDetailOrder.currency }}</strong></td>
+                      <td><strong class="text-total" style="font-size:16px;">{{ selectedDetailOrder.total | number:'1.2-2' }} {{ selectedDetailOrder.currency }}</strong></td>
                     </tr>
                     <tr>
                       <td colspan="4" style="text-align:right;font-weight:600;">{{ 'SUPPLIER_ORDERS.STAMP' | translate }}</td>
@@ -528,7 +528,7 @@
                     </tr>
                     <tr>
                       <td colspan="4" style="text-align:right;font-weight:700;font-size:16px;">{{ 'SUPPLIER_ORDERS.NET_PAYABLE' | translate }}</td>
-                      <td><strong style="font-size:16px;color:#0f3460;">{{ selectedDetailOrder.netPayable | number:'1.2-2' }} {{ selectedDetailOrder.currency }}</strong></td>
+                      <td><strong class="text-total" style="font-size:16px;">{{ selectedDetailOrder.netPayable | number:'1.2-2' }} {{ selectedDetailOrder.currency }}</strong></td>
                     </tr>
                   </tfoot>
                 </table>
@@ -549,7 +549,7 @@
       </div>
       @if (confirmDateOrder) {
         <div>
-          <p style="margin-bottom: 16px; color: #555;">
+          <p class="text-paragraph" style="margin-bottom: 16px;">
             {{ 'SUPPLIER_ORDERS.ORDER' | translate }} <strong>{{ confirmDateOrder.reference }}</strong> — {{ confirmDateOrder.total | number:'1.2-2' }} {{ confirmDateOrder.currency }}
           </p>
           <form (ngSubmit)="submitConfirmDate()">
@@ -579,11 +579,11 @@
       </div>
       @if (selectedOrder) {
         <div>
-          <p style="margin-bottom: 16px; color: #555;">
+          <p class="text-paragraph" style="margin-bottom: 16px;">
             {{ 'SUPPLIER_ORDERS.ORDER' | translate }} <strong>{{ selectedOrder.reference }}</strong> — {{ selectedOrder.total | number:'1.2-2' }} {{ selectedOrder.currency }}
           </p>
           @if (selectedOrder.asapPayment) {
-            <div class="info-box" style="margin-bottom: 16px; background: #e8f5e9; border: 1px solid #4caf50; padding: 12px; border-radius: 8px;">
+            <div class="info-box info-box-success" style="margin-bottom: 16px; padding: 12px; border-radius: 8px;">
               <strong>{{ 'SUPPLIER_ORDERS.ASAP_PAYMENT' | translate }} :</strong> {{ 'DELIVERY.ASAP_INFO' | translate }}
             </div>
           }
@@ -603,7 +603,7 @@
                   }
                 </select>
               } @else {
-                <div class="info-box" style="background: #fff3e0; border: 1px solid #ff9800;">
+                <div class="info-box info-box-warning">
                   {{ 'DELIVERY.NO_RECIPIENT' | translate }}
                 </div>
               }
@@ -629,7 +629,7 @@
       </div>
       @if (rejectOrder) {
         <div>
-          <p style="margin-bottom: 16px; color: #555;">
+          <p class="text-paragraph" style="margin-bottom: 16px;">
             {{ 'SUPPLIER_ORDERS.ORDER' | translate }} <strong>{{ rejectOrder.reference }}</strong> — {{ rejectOrder.total | number:'1.2-2' }} {{ rejectOrder.currency }}
           </p>
           <form (ngSubmit)="submitReject()">

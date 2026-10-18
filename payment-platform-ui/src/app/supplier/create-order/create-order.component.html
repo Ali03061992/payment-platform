@@ -38,7 +38,7 @@
     <div class="form-row">
       <div class="form-group">
         <label>{{ 'SUPPLIER_ORDERS.VAT_RATE' | translate }}</label>
-        <div class="form-control" style="background:#f4f6fa;">{{ 'SUPPLIER_ORDERS.VAT_PER_PRODUCT' | translate }}</div>
+        <div class="form-control form-control-soft">{{ 'SUPPLIER_ORDERS.VAT_PER_PRODUCT' | translate }}</div>
         <small class="text-muted">{{ 'SUPPLIER_ORDERS.VAT_HINT' | translate }}</small>
       </div>
     </div>
@@ -120,7 +120,7 @@
                     <input type="number" [(ngModel)]="line.discount" [name]="'discount_' + i"
                       class="form-control" min="0" max="100" style="width:80px;">
                   </td>
-                  <td>{{ line.product.vatRate ?? 19 }} % @if (line.product.priceTtc) { <small style="color:#2e7d32;">TTC</small> }</td>
+                  <td>{{ line.product.vatRate ?? 19 }} % @if (line.product.priceTtc) { <small class="text-ok">TTC</small> }</td>
                   <td>{{ (line.product.unitPrice * line.quantity * (1 - line.discount / 100)) | number:'1.2-2' }}</td>
                   <td>
                     <button class="btn btn-sm btn-danger" type="button" (click)="removeLine(i)">{{ 'SUPPLIER_ORDERS.REMOVE' | translate }}</button>

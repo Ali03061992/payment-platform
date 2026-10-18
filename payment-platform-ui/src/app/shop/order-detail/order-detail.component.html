@@ -50,7 +50,7 @@
             <strong>{{ order.externalReference }}</strong>
             <qrcode [qrdata]="'FACTURE:' + order.externalReference + '|DOC:' + order.reference" [width]="72" [margin]="1"></qrcode>
           } @else {
-            <span style="color:#8896ab;">—</span>
+            <span class="text-placeholder">—</span>
             <button class="btn btn-sm btn-secondary" style="margin-left:8px;" (click)="toggleExtRefForm()">{{ 'ORDER_DETAIL.EXTREF_ADD' | translate }}</button>
           }
         </div>
@@ -68,7 +68,7 @@
       @if (order.dueDate) {
         <div class="detail-card">
           <div class="detail-label">{{ 'ORDER_DETAIL.DUE_DATE' | translate }}</div>
-          <div class="detail-value" [style.color]="isOverdue() ? '#e53935' : '#0f3460'" [style.font-weight]="isOverdue() ? '700' : '400'">{{ order.dueDate }}</div>
+          <div class="detail-value" [class.text-reject]="isOverdue()" [class.text-total]="!isOverdue()" [style.font-weight]="isOverdue() ? '700' : '400'">{{ order.dueDate }}</div>
         </div>
       }
       <div class="detail-card">
@@ -96,13 +96,13 @@
       @if (order.estimatedArrival) {
         <div class="detail-card">
           <div class="detail-label">{{ 'ORDER_DETAIL.ETA' | translate }}</div>
-          <div class="detail-value" style="color:#e65100;font-weight:600;">{{ order.estimatedArrival | date:'dd/MM/yyyy HH:mm' }}</div>
+          <div class="detail-value text-eta">{{ order.estimatedArrival | date:'dd/MM/yyyy HH:mm' }}</div>
         </div>
       }
       @if (order.status === 'IN_DELIVERY' && countdown) {
         <div class="detail-card">
           <div class="detail-label">{{ 'ORDER_DETAIL.REMAINING' | translate }}</div>
-          <div class="detail-value" style="color:#2e7d32;font-weight:700;">{{ countdown }}</div>
+          <div class="detail-value text-ok" style="font-weight:700;">{{ countdown }}</div>
         </div>
       }
       @if (order.deliveredAt) {
@@ -132,7 +132,7 @@
       @if (order.deliveryRejectionReason) {
         <div class="detail-card" style="grid-column: 1 / -1;">
           <div class="detail-label">{{ 'ORDER_DETAIL.REJECT_REASON' | translate }}</div>
-          <div class="detail-value" style="color: #e53935;">{{ order.deliveryRejectionReason }}</div>
+          <div class="detail-value text-reject">{{ order.deliveryRejectionReason }}</div>
         </div>
       }
     </div>
@@ -216,9 +216,9 @@
             <tbody>
               @for (item of order.items; track item) {
                 <tr>
-                  <td><strong>{{ item.productName }}</strong><br><small style="color:#8896ab;">{{ item.productRef }}</small></td>
+                  <td><strong>{{ item.productName }}</strong><br><small class="text-placeholder">{{ item.productRef }}</small></td>
                   <td>{{ item.quantity }}</td>
-                  <td>{{ item.unitPrice | number:'1.2-2' }}@if (item.priceTtc) { <small style="color:#2e7d32;">TTC</small> }</td>
+                  <td>{{ item.unitPrice | number:'1.2-2' }}@if (item.priceTtc) { <small class="text-ok">TTC</small> }</td>
                   <td>{{ item.discount > 0 ? item.discount + '%' : '-' }}</td>
                   <td>{{ item.vatRate }} %</td>
                   <td><strong>{{ item.lineTotal | number:'1.2-2' }}</strong></td>
@@ -250,7 +250,7 @@
               }
               <tr>
                 <td colspan="5" style="text-align:right;font-weight:700;font-size:16px;">{{ 'ORDERS.TOTAL' | translate }}</td>
-                <td><strong style="font-size:16px;color:#0f3460;">{{ order.total | number:'1.2-2' }} {{ order.currency }}</strong></td>
+                <td><strong class="text-total" style="font-size:16px;">{{ order.total | number:'1.2-2' }} {{ order.currency }}</strong></td>
               </tr>
               <tr>
                 <td colspan="5" style="text-align:right;font-weight:600;">{{ 'ORDER_DETAIL.STAMP' | translate }}</td>
@@ -258,7 +258,7 @@
               </tr>
               <tr>
                 <td colspan="5" style="text-align:right;font-weight:700;font-size:16px;">{{ 'ORDER_DETAIL.NET_PAYABLE' | translate }}</td>
-                <td><strong style="font-size:16px;color:#0f3460;">{{ order.netPayable | number:'1.2-2' }} {{ order.currency }}</strong></td>
+                <td><strong class="text-total" style="font-size:16px;">{{ order.netPayable | number:'1.2-2' }} {{ order.currency }}</strong></td>
               </tr>
             </tfoot>
           </table>
@@ -355,13 +355,13 @@
       <h3 style="padding:16px 20px 0;">{{ 'ORDER_DETAIL.COMMENTS' | translate }}</h3>
       <div style="padding:16px 20px;">
         @if (comments.length === 0) {
-          <p style="color:#8896ab;font-size:14px;">{{ 'ORDER_DETAIL.NO_COMMENTS' | translate }}</p>
+          <p class="text-placeholder" style="font-size:14px;">{{ 'ORDER_DETAIL.NO_COMMENTS' | translate }}</p>
         }
         @for (c of comments; track c) {
           <div style="border-bottom:1px solid #eee;padding:12px 0;">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
               <strong style="font-size:14px;">{{ c.authorName }}</strong>
-              <small style="color:#8896ab;">{{ c.createdAt | date:'dd/MM/yyyy HH:mm' }}</small>
+              <small class="text-placeholder">{{ c.createdAt | date:'dd/MM/yyyy HH:mm' }}</small>
             </div>
             <p style="margin:0;font-size:14px;white-space:pre-wrap;">{{ c.content }}</p>
           </div>
