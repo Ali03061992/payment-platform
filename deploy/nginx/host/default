@@ -8,5 +8,10 @@ server {
 
 	server_name _;
 
+	# Defi HTTP-01 Let's Encrypt (webroot, avant la redirection)
+	location ^~ /.well-known/acme-challenge/ {
+		root /var/www/html;
+	}
+
 	return 301 https://$host$request_uri;
 }

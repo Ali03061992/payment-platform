@@ -20,6 +20,13 @@ server {
     add_header X-Frame-Options "DENY" always;
     add_header Referrer-Policy "strict-origin-when-cross-origin" always;
 
+    # Defi HTTP-01 Let's Encrypt (webroot) : la redirection du port 80
+    # renvoie les challenges vers https://, ils doivent donc etre servis
+    # ici aussi (ce vhost est le default_server 443).
+    location ^~ /.well-known/acme-challenge/ {
+        root /var/www/html;
+    }
+
     # Reverse proxy vers le conteneur angular (mapping de base 8080:80).
     # Buffering off + timeout long : SSE /api/notifications/stream traversa
     # ce proxy (le conteneur nginx gère ensuite le routage API/SSE/SPA).

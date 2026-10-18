@@ -1,0 +1,47 @@
+# TLS pour le domaine public (passkeys WebAuthn exigent un nom de domaine
+# reel : les navigateurs refusent un RP ID en adresse IP. Domaine nip.io
+# resolve vers l'IP de la VM sans inscription DNS).
+# Installe sur la VM :
+#   sudo cp deploy/nginx/host/domain-https /etc/nginx/sites-available/domain-https
+#   sudo ln -sf /etc/nginx/sites-available/domain-https /etc/nginx/sites-enabled/
+#   sudo nginx -t && sudo systemctl reload nginx
+
+server {
+    listen 443 ssl;
+    listen [::]:443 ssl;
+
+    server_name 51-222-6-2.nip.io;
+
+    ssl_certificate /etc/letsencrypt/live/51-222-6-2.nip.io/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/51-222-6-2.nip.io/privkey.pem;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_prefer_server_ciphers off;
+
+    add_header Strict-Transport-Security "max-age=31536000" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-Frame-Options "DENY" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+
+    # Defi HTTP-01 Let's Encrypt (webroot) : la redirection du port 80
+    # renvoie les challenges vers https://, ils doivent donc etre servis
+    # ici aussi (obligatoire pour le renouvellement).
+    location ^~ /.well-known/acme-challenge/ {
+        root /var/www/html;
+    }
+
+    # Reverse proxy vers le conteneur angular (mapping de base 8080:80).
+    # Buffering off + timeout long : SSE /api/notifications/stream traversa
+    # ce proxy (le conteneur nginx gère ensuite le routage API/SSE/SPA).
+    location / {
+        proxy_pass http://127.0.0.1:8080;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_http_version 1.1;
+        proxy_set_header Connection "";
+        proxy_buffering off;
+        proxy_read_timeout 86400s;
+        proxy_connect_timeout 10s;
+    }
+}

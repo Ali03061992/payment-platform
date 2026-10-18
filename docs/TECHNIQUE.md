@@ -120,7 +120,7 @@ VM TEST : `ubuntu@51.222.6.2` — **en service** (Docker 29, clone à jour, `.en
 ### HTTPS (443) sur les VMs OVH
 
 - **Architecture** : TLS terminé par le **nginx hôte de la VM** (systemd), qui reverse-proxy vers le conteneur `angular` (`127.0.0.1:8080`, mapping de base `8080:80`). Le conteneur reste en HTTP pur : aucun port 80/443 exposé par Docker (pas de conflit), renouvellement Let's Encrypt conservé sur l'hôte.
-- **Vhosts** (repo → VM) : `deploy/nginx/host/default` → `/etc/nginx/sites-available/default` (port 80 → `301 https://$host$request_uri`) et `deploy/nginx/host/ip-https` → `/etc/nginx/sites-available/ip-https` (port 443 TLS → proxy app, HSTS, proxy sans buffering pour le SSE) :
+- **Vhosts** (repo → VM) : `deploy/nginx/host/default` → `/etc/nginx/sites-available/default` (port 80 → `301 https://$host$request_uri` + webroot ACME), `deploy/nginx/host/ip-https` → `/etc/nginx/sites-available/ip-https` (port 443 TLS par défaut → proxy app, HSTS, proxy sans buffering pour le SSE) et `deploy/nginx/host/domain-https` → `/etc/nginx/sites-available/domain-https` (port 443 TLS pour le domaine public, voir passkeys) :
   ```bash
   sudo cp deploy/nginx/host/default /etc/nginx/sites-available/default
   sudo cp deploy/nginx/host/ip-https /etc/nginx/sites-available/ip-https
@@ -128,6 +128,7 @@ VM TEST : `ubuntu@51.222.6.2` — **en service** (Docker 29, clone à jour, `.en
   ```
   Adapter `server_name` et `ssl_certificate` (`/etc/letsencrypt/live/<identifiant>/`) si besoin (PROD, domaine).
 - **Origines applicatives en https** dans `deploy/.env` (puis redéployer) : `CORS_ALLOWED_ORIGINS=https://<ip-ou-domaine>`, `WEBAUTHN_ALLOWED_ORIGINS=...`, `FRONTEND_URL=...`. Passkeys : `WEBAUTHN_RP_ID` exige un domaine réel (pas une IP — les passkeys ne fonctionneront donc pas en accès par IP).
+- **Domaine public pour les passkeys (TEST)** : un domaine `nip.io`/`sslip.io` pointe vers l'IP de la VM sans inscription DNS (ex. `51-222-6-2.nip.io` → `51.222.6.2`). Procédure sur la VM : certificat Let's Encrypt via webroot (`sudo certbot certonly --webroot -w /var/www/html -d 51-222-6-2.nip.io` — les vhosts 80 **et** 443 servent `/.well-known/acme-challenge/` car la redirection 80 renvoie les challenges en https), vhost `domain-https` installé + `WEBAUTHN_RP_ID`, `WEBAUTHN_ALLOWED_ORIGINS`, `CORS_ALLOWED_ORIGINS`, `FRONTEND_URL` alignés sur le domaine dans `deploy/.env`, puis `docker compose up -d`. L'accès par IP reste fonctionnel (vhost `ip-https`, défaut 443) mais sans passkeys.
 - **Renouvellement** : inchangé côté hôte (`certbot renew`), le nginx hôte reste propriétaire des ports 80/443.
 - **Vérification** : `curl -I http://<vm>/` → `301` ; `curl -I https://<vm>/` → `200` (page app) ; `curl -s https://<vm>/api/auth/me` → réponse JSON (401), pas le `index.html`.
 
