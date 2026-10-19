@@ -966,6 +966,7 @@
     "CANCELLED_MSG": "Order cancelled",
     "CANCEL_ARIA": "Cancel order",
     "COL_DETAILS": "Details",
+    "COL_DISCOUNT": "Discount",
     "COL_PRICE": "Unit price",
     "COL_QTY": "Quantity",
     "COMMENT_ADDED": "Comment added",

@@ -959,6 +959,7 @@
     "CANCELLED_MSG": "تم إلغاء الطلب",
     "CANCEL_ARIA": "إلغاء الطلب",
     "COL_DETAILS": "التفاصيل",
+    "COL_DISCOUNT": "التخفيض",
     "COL_PRICE": "سعر الوحدة",
     "COL_QTY": "الكمية",
     "COMMENT_ADDED": "تمت إضافة التعليق",

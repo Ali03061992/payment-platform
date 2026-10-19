@@ -219,7 +219,7 @@
                   <td><strong>{{ item.productName }}</strong><br><small class="text-placeholder">{{ item.productRef }}</small></td>
                   <td>{{ item.quantity }}</td>
                   <td>{{ item.unitPrice | number:'1.2-2' }}@if (item.priceTtc) { <small class="text-ok">TTC</small> }</td>
-                  <td>{{ item.discount > 0 ? item.discount + '%' : '-' }}</td>
+                  <td>{{ item.discount > 0 ? (item.discount | number:'1.2-2') + ' ' + order.currency : '-' }}</td>
                   <td>{{ item.vatRate }} %</td>
                   <td><strong>{{ item.lineTotal | number:'1.2-2' }}</strong></td>
                 </tr>

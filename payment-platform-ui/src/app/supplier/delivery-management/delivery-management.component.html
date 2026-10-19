@@ -490,7 +490,7 @@
                         <td><strong>{{ item.productName }}</strong></td>
                         <td>{{ item.quantity }}</td>
                         <td>{{ item.unitPrice | number:'1.2-2' }}</td>
-                        <td>{{ item.discount > 0 ? item.discount + '%' : '-' }}</td>
+                        <td>{{ item.discount > 0 ? (item.discount | number:'1.2-2') + ' ' + selectedDetailOrder.currency : '-' }}</td>
                         <td>{{ item.lineTotal | number:'1.2-2' }}</td>
                       </tr>
                     }
