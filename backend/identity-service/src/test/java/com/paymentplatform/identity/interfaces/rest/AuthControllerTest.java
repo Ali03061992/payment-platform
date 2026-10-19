@@ -165,6 +165,79 @@ class AuthControllerTest {
     }
 
     @Test
+    void login_setsHttpOnlyRefreshCookie() throws Exception {
+        LoginRequest request = new LoginRequest(testUsername, testPassword);
+        mockMvc.perform(post("/api/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers
+                        .header().string("Set-Cookie", org.hamcrest.Matchers.containsString("pp_rt=")))
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers
+                        .header().string("Set-Cookie", org.hamcrest.Matchers.containsString("HttpOnly")))
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers
+                        .header().string("Set-Cookie", org.hamcrest.Matchers.containsString("Path=/api/auth")));
+    }
+
+    @Test
+    void refresh_viaCookie_withoutBody_rotates() throws Exception {
+        LoginRequest request = new LoginRequest(testUsername, testPassword);
+        String setCookie = mockMvc.perform(post("/api/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getHeader("Set-Cookie");
+        String cookieToken = setCookie.split("pp_rt=", 2)[1].split(";", 2)[0];
+
+        String refreshBody = mockMvc.perform(post("/api/auth/refresh")
+                        .cookie(new jakarta.servlet.http.Cookie("pp_rt", cookieToken)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.accessToken").isNotEmpty())
+                .andExpect(jsonPath("$.refreshToken").isNotEmpty())
+                .andReturn().getResponse().getContentAsString();
+        String rotated = objectMapper.readTree(refreshBody).get("refreshToken").asText();
+
+        // L'ancien cookie ne passe plus (rotation consommée).
+        mockMvc.perform(post("/api/auth/refresh")
+                        .cookie(new jakarta.servlet.http.Cookie("pp_rt", cookieToken)))
+                .andExpect(status().isUnauthorized());
+
+        // Le nouveau cookie fonctionne.
+        mockMvc.perform(post("/api/auth/refresh")
+                        .cookie(new jakarta.servlet.http.Cookie("pp_rt", rotated)))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void refresh_noTokenAnywhere_returns401() throws Exception {
+        mockMvc.perform(post("/api/auth/refresh")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void logout_viaCookie_revokesAndClearsCookie() throws Exception {
+        LoginRequest request = new LoginRequest(testUsername, testPassword);
+        String setCookie = mockMvc.perform(post("/api/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getHeader("Set-Cookie");
+        String cookieToken = setCookie.split("pp_rt=", 2)[1].split(";", 2)[0];
+
+        mockMvc.perform(post("/api/auth/logout")
+                        .cookie(new jakarta.servlet.http.Cookie("pp_rt", cookieToken)))
+                .andExpect(status().isNoContent())
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers
+                        .header().string("Set-Cookie", org.hamcrest.Matchers.containsString("Max-Age=0")));
+
+        mockMvc.perform(post("/api/auth/refresh")
+                        .cookie(new jakarta.servlet.http.Cookie("pp_rt", cookieToken)))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
     void register_validRequest_returns201() throws Exception {
         String uname = "reg." + System.nanoTime();
         com.paymentplatform.identity.application.dto.RegisterRequest request =

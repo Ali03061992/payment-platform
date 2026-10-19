@@ -181,7 +181,8 @@ public class GatewayProxyController {
             String name = headerNames.nextElement();
             String lower = name.toLowerCase();
             if (lower.startsWith("authorization") || lower.startsWith("accept")
-                    || lower.startsWith("x-") || lower.equals("user-agent")) {
+                    || lower.startsWith("x-") || lower.equals("user-agent")
+                    || lower.equals("cookie")) {
                 builder.header(name, request.getHeader(name));
             }
         }
@@ -195,9 +196,14 @@ public class GatewayProxyController {
         HttpResponse<byte[]> response = httpClient.send(builder.build(),
                 HttpResponse.BodyHandlers.ofByteArray());
 
-        String respContentType = response.headers().firstValue("Content-Type").orElse("application/octet-stream");
+        // Forward le Set-Cookie éventuel du service cible (refresh token HttpOnly).
+        var headers = new org.springframework.http.HttpHeaders();
+        headers.add("Content-Type", response.headers().firstValue("Content-Type").orElse("application/octet-stream"));
+        for (String setCookie : response.headers().allValues("Set-Cookie")) {
+            headers.add("Set-Cookie", setCookie);
+        }
         return ResponseEntity.status(response.statusCode())
-                .header("Content-Type", respContentType)
+                .headers(headers)
                 .body(response.body());
     }
 }

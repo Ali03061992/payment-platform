@@ -49,6 +49,9 @@ app:
   security:
     secret: ${JWT_SECRET:local-dev-jwt-secret-change-me-in-production-32bytes}
     expiration: ${JWT_EXPIRATION:30m}
+  auth:
+    refresh-token-ttl-days: ${REFRESH_TOKEN_TTL_DAYS:7}
+    cookie-secure: ${AUTH_COOKIE_SECURE:true}
   gateway:
     base-url: ${API_GATEWAY_URL:http://localhost:8081}
   internal-secret: ${INTERNAL_SECRET:dev-internal-secret-change-me}

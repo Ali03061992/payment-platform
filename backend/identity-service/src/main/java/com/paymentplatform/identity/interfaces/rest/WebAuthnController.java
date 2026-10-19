@@ -11,6 +11,7 @@ import com.paymentplatform.identity.application.usecase.WebAuthnLoginUseCase;
 import com.paymentplatform.identity.application.usecase.WebAuthnRegistrationUseCase;
 import com.paymentplatform.shared.infrastructure.security.CurrentUser;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.web.webauthn.api.PublicKeyCredentialCreationOptions;
 import org.springframework.security.web.webauthn.api.PublicKeyCredentialRequestOptions;
@@ -38,13 +39,16 @@ public class WebAuthnController {
     private final WebAuthnRegistrationUseCase registration;
     private final WebAuthnLoginUseCase login;
     private final WebAuthnCredentialManagementUseCase management;
+    private final RefreshCookieSupport cookies;
 
     public WebAuthnController(WebAuthnRegistrationUseCase registration,
                               WebAuthnLoginUseCase login,
-                              WebAuthnCredentialManagementUseCase management) {
+                              WebAuthnCredentialManagementUseCase management,
+                              RefreshCookieSupport cookies) {
         this.registration = registration;
         this.login = login;
         this.management = management;
+        this.cookies = cookies;
     }
 
     @PostMapping("/register/options")
@@ -84,6 +88,9 @@ public class WebAuthnController {
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@Valid @RequestBody WebAuthnLoginRequest request) {
-        return ResponseEntity.ok(login.finishLogin(request.credential()));
+        LoginResponse res = login.finishLogin(request.credential());
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, cookies.build(res.refreshToken(), res.refreshExpiresIn()).toString())
+                .body(res);
     }
 }
