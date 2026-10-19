@@ -67,16 +67,18 @@
         </div>
       } @else {
         <div class="product-counter" aria-live="polite">
-          <span class="counter-available">{{ availableProductsCount }}</span> {{ 'ORDER_CREATE.PRODUCTS_AVAILABLE_ON' | translate }} <span class="counter-total">{{ totalProductsCount }}</span>
+          <span class="counter-pill ok">{{ availableProductsCount }} {{ 'ORDER_CREATE.PILL_AVAILABLE' | translate }}</span>
+          <span class="counter-pill muted">{{ 'ORDER_CREATE.PILL_ON_TOTAL' | translate:{count: totalProductsCount} }}</span>
+          <span class="counter-hint">{{ 'ORDER_CREATE.OUT_OF_STOCK_HINT' | translate }}</span>
         </div>
         <div class="table-card" style="margin-bottom:24px;">
           <h3 style="padding:16px 20px 0;">{{ 'ORDER_CREATE.PRODUCTS' | translate }}</h3>
           <div class="table-wrapper">
-            <table>
+            <table class="catalog-table">
               <thead>
                 <tr>
                   <th>{{ 'ORDER_CREATE.COL_IMAGE' | translate }}</th>
-                  <th>{{ 'ORDER_CREATE.COL_NAME' | translate }}</th>
+                  <th class="col-name">{{ 'ORDER_CREATE.COL_NAME' | translate }}</th>
                   <th>{{ 'ORDER_CREATE.COL_SKU' | translate }}</th>
                   <th>{{ 'ORDER_CREATE.COL_PRICE' | translate }}</th>
                   <th>{{ 'ORDER_CREATE.COL_STOCK' | translate }}</th>
@@ -86,19 +88,19 @@
               <tbody>
                 @for (p of filteredProducts; track p) {
                   <tr [class.out-of-stock]="!hasStock(p)">
-                    <td>
+                    <td class="col-img">
                       @if (p.imageUrl) {
                         <img [src]="p.imageUrl" [alt]="p.name" class="product-thumb">
                       } @else {
                         <div class="product-placeholder"><app-icon name="box" [size]="28"></app-icon></div>
                       }
                     </td>
-                    <td>{{ p.name }}</td>
-                    <td>{{ p.sku }}</td>
-                    <td>{{ p.unitPrice | number:'1.2-2' }} {{ p.currency }}</td>
-                    <td>
+                    <td class="col-name" [attr.data-label]="'ORDER_CREATE.COL_NAME' | translate">{{ p.name }}</td>
+                    <td [attr.data-label]="'ORDER_CREATE.COL_SKU' | translate">{{ p.sku }}</td>
+                    <td class="col-num" [attr.data-label]="'ORDER_CREATE.COL_PRICE' | translate">{{ p.unitPrice | number:'1.2-2' }} {{ p.currency }}</td>
+                    <td [attr.data-label]="'ORDER_CREATE.COL_STOCK' | translate">
                       @if (hasStock(p)) {
-                        {{ p.quantity }}
+                        <span class="stock-qty">{{ p.quantity }}</span>
                       } @else {
                         <span class="stock-badge" role="status" [attr.aria-label]="p.name + ' : ' + ('ORDER_CREATE.OUT_OF_STOCK' | translate)">{{ 'ORDER_CREATE.OUT_OF_STOCK' | translate }}</span>
                       }
@@ -125,33 +127,33 @@
     }
 
     @if (orderLines.length > 0) {
-      <div class="table-card" style="margin-bottom:24px;">
+      <div class="table-card lines-card" style="margin-bottom:24px;">
         <h3 style="padding:16px 20px 0;">{{ 'ORDER_CREATE.ORDER_LINES' | translate }}</h3>
         <div class="table-wrapper">
-          <table>
+          <table class="lines-table">
             <thead>
               <tr>
-                <th>{{ 'ORDER_CREATE.COL_PRODUCT' | translate }}</th>
-                <th>{{ 'ORDER_CREATE.COL_QTY' | translate }}</th>
-                <th>{{ 'ORDER_CREATE.COL_UNIT_PRICE' | translate }}</th>
-                <th>{{ 'ORDER_CREATE.COL_VAT' | translate }}</th>
-                <th>{{ 'ORDER_CREATE.COL_TOTAL' | translate }}</th>
-                <th></th>
+                <th class="col-name">{{ 'ORDER_CREATE.COL_PRODUCT' | translate }}</th>
+                <th class="col-qty">{{ 'ORDER_CREATE.COL_QTY' | translate }}</th>
+                <th class="col-num">{{ 'ORDER_CREATE.COL_UNIT_PRICE' | translate }}</th>
+                <th class="col-vat">{{ 'ORDER_CREATE.COL_VAT' | translate }}</th>
+                <th class="col-num">{{ 'ORDER_CREATE.COL_TOTAL' | translate }}</th>
+                <th class="col-act"></th>
               </tr>
             </thead>
             <tbody>
               @for (line of orderLines; track line; let i = $index) {
                 <tr>
-                  <td>{{ line.product.name }}</td>
-                  <td>
+                  <td class="col-name" [attr.data-label]="'ORDER_CREATE.COL_PRODUCT' | translate">{{ line.product.name }}</td>
+                  <td class="col-qty" [attr.data-label]="'ORDER_CREATE.COL_QTY' | translate">
                     <input type="number" [(ngModel)]="line.quantity" [name]="'qty_' + i"
-                      class="form-control" min="1" style="width:80px;" required
+                      class="form-control qty-input" min="1" required
                       [attr.aria-label]="('ORDER_CREATE.QTY_ARIA' | translate:{name: line.product.name})">
                   </td>
-                  <td>{{ line.product.unitPrice | number:'1.2-2' }}</td>
-                  <td>{{ line.product.vatRate ?? 19 }} % @if (line.product.priceTtc) { <small class="text-ok">TTC</small> }</td>
-                  <td>{{ (line.product.unitPrice * line.quantity) | number:'1.2-2' }}</td>
-                  <td>
+                  <td class="col-num" [attr.data-label]="'ORDER_CREATE.COL_UNIT_PRICE' | translate">{{ line.product.unitPrice | number:'1.2-2' }} {{ currency }}</td>
+                  <td class="col-vat" [attr.data-label]="'ORDER_CREATE.COL_VAT' | translate">{{ line.product.vatRate ?? 19 }} % @if (line.product.priceTtc) { <small class="text-ok">TTC</small> }</td>
+                  <td class="col-num col-total" [attr.data-label]="'ORDER_CREATE.COL_TOTAL' | translate">{{ (line.product.unitPrice * line.quantity) | number:'1.2-2' }} {{ currency }}</td>
+                  <td class="col-act">
                     <button class="btn btn-sm btn-danger" type="button" (click)="removeLine(i)"
                       [attr.aria-label]="('ORDER_CREATE.REMOVE_ARIA' | translate:{name: line.product.name})">{{ 'ORDER_CREATE.REMOVE' | translate }}</button>
                   </td>

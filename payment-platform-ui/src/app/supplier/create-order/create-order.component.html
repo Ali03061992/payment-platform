@@ -59,10 +59,10 @@
       <div class="table-card" style="margin-bottom:24px;">
         <h3 style="padding:16px 20px 0;">{{ 'SUPPLIER_ORDERS.AVAILABLE_PRODUCTS_COUNT' | translate:{count: filteredProducts.length} }}</h3>
         <div class="table-wrapper">
-          <table>
+          <table class="catalog-table">
             <thead>
               <tr>
-                <th>{{ 'SUPPLIER_ORDERS.NAME' | translate }}</th>
+                <th class="col-name">{{ 'SUPPLIER_ORDERS.NAME' | translate }}</th>
                 <th>{{ 'SUPPLIER_ORDERS.SKU' | translate }}</th>
                 <th>{{ 'SUPPLIER_ORDERS.UNIT_PRICE' | translate }}</th>
                 <th>{{ 'SUPPLIER_ORDERS.STOCK' | translate }}</th>
@@ -72,10 +72,10 @@
             <tbody>
               @for (p of filteredProducts; track p) {
                 <tr>
-                  <td>{{ p.name }}</td>
-                  <td>{{ p.sku }}</td>
-                  <td>{{ p.unitPrice | number:'1.2-2' }} {{ p.currency }}</td>
-                  <td>{{ p.quantity }}</td>
+                  <td class="col-name" [attr.data-label]="'SUPPLIER_ORDERS.NAME' | translate">{{ p.name }}</td>
+                  <td [attr.data-label]="'SUPPLIER_ORDERS.SKU' | translate">{{ p.sku }}</td>
+                  <td class="col-num" [attr.data-label]="'SUPPLIER_ORDERS.UNIT_PRICE' | translate">{{ p.unitPrice | number:'1.2-2' }} {{ p.currency }}</td>
+                  <td [attr.data-label]="'SUPPLIER_ORDERS.STOCK' | translate"><span class="stock-qty">{{ p.quantity }}</span></td>
                   <td>
                     <button class="btn btn-sm btn-primary" type="button" (click)="addProduct(p)">{{ 'SUPPLIER_ORDERS.ADD' | translate }}</button>
                   </td>
@@ -92,37 +92,37 @@
       </div>
     }
     @if (orderLines.length > 0) {
-      <div class="table-card" style="margin-bottom:24px;">
+      <div class="table-card lines-card" style="margin-bottom:24px;">
         <h3 style="padding:16px 20px 0;">{{ 'SUPPLIER_ORDERS.ORDER_LINES' | translate }}</h3>
         <div class="table-wrapper">
-          <table>
+          <table class="lines-table">
             <thead>
               <tr>
-                <th>{{ 'SUPPLIER_ORDERS.PRODUCT' | translate }}</th>
-                <th>{{ 'SUPPLIER_ORDERS.QUANTITY' | translate }}</th>
-                <th>{{ 'SUPPLIER_ORDERS.UNIT_PRICE' | translate }}</th>
-                <th>{{ 'SUPPLIER_ORDERS.DISCOUNT_PCT' | translate }}</th>
-                <th>{{ 'SUPPLIER_ORDERS.VAT_COL' | translate }}</th>
-                <th>{{ 'ORDERS.TOTAL' | translate }}</th>
-                <th></th>
+                <th class="col-name">{{ 'SUPPLIER_ORDERS.PRODUCT' | translate }}</th>
+                <th class="col-qty">{{ 'SUPPLIER_ORDERS.QUANTITY' | translate }}</th>
+                <th class="col-num">{{ 'SUPPLIER_ORDERS.UNIT_PRICE' | translate }}</th>
+                <th class="col-qty">{{ 'SUPPLIER_ORDERS.DISCOUNT_PCT' | translate }}</th>
+                <th class="col-vat">{{ 'SUPPLIER_ORDERS.VAT_COL' | translate }}</th>
+                <th class="col-num">{{ 'ORDERS.TOTAL' | translate }}</th>
+                <th class="col-act"></th>
               </tr>
             </thead>
             <tbody>
               @for (line of orderLines; track line; let i = $index) {
                 <tr>
-                  <td>{{ line.product.name }}</td>
-                  <td>
+                  <td class="col-name" [attr.data-label]="'SUPPLIER_ORDERS.PRODUCT' | translate">{{ line.product.name }}</td>
+                  <td class="col-qty" [attr.data-label]="'SUPPLIER_ORDERS.QUANTITY' | translate">
                     <input type="number" [(ngModel)]="line.quantity" [name]="'qty_' + i"
-                      class="form-control" min="1" style="width:80px;" required>
+                      class="form-control qty-input" min="1" required>
                   </td>
-                  <td>{{ line.product.unitPrice | number:'1.2-2' }}</td>
-                  <td>
+                  <td class="col-num" [attr.data-label]="'SUPPLIER_ORDERS.UNIT_PRICE' | translate">{{ line.product.unitPrice | number:'1.2-2' }} {{ currency }}</td>
+                  <td class="col-qty" [attr.data-label]="'SUPPLIER_ORDERS.DISCOUNT_PCT' | translate">
                     <input type="number" [(ngModel)]="line.discount" [name]="'discount_' + i"
-                      class="form-control" min="0" max="100" style="width:80px;">
+                      class="form-control qty-input" min="0" max="100">
                   </td>
-                  <td>{{ line.product.vatRate ?? 19 }} % @if (line.product.priceTtc) { <small class="text-ok">TTC</small> }</td>
-                  <td>{{ (line.product.unitPrice * line.quantity * (1 - line.discount / 100)) | number:'1.2-2' }}</td>
-                  <td>
+                  <td class="col-vat" [attr.data-label]="'SUPPLIER_ORDERS.VAT_COL' | translate">{{ line.product.vatRate ?? 19 }} % @if (line.product.priceTtc) { <small class="text-ok">TTC</small> }</td>
+                  <td class="col-num col-total" [attr.data-label]="'ORDERS.TOTAL' | translate">{{ (line.product.unitPrice * line.quantity * (1 - line.discount / 100)) | number:'1.2-2' }} {{ currency }}</td>
+                  <td class="col-act">
                     <button class="btn btn-sm btn-danger" type="button" (click)="removeLine(i)">{{ 'SUPPLIER_ORDERS.REMOVE' | translate }}</button>
                   </td>
                 </tr>
