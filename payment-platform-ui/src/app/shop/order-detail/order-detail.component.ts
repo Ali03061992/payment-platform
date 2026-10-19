@@ -310,6 +310,13 @@ export class ShopOrderDetailComponent implements OnInit, OnDestroy {
     return this.translate.instant(map[terms] || terms);
   }
 
+  /** Facture disponible dès la commande prête pour livraison (émission avant livraison). */
+  canGenerateInvoice(): boolean {
+    const s = this.order?.status;
+    return s === 'READY_FOR_DELIVERY' || s === 'DELIVERY_ACCEPTED' || s === 'IN_DELIVERY'
+      || s === 'DELIVERED' || s === 'ACCEPTED';
+  }
+
   isOverdue(): boolean {
     if (!this.order?.dueDate || this.order.status === 'CANCELLED' || this.order.status === 'REJECTED') {
       return false;

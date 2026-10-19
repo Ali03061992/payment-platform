@@ -10,7 +10,7 @@
     <div class="page-header no-print">
       <h2>{{ 'ORDER_DETAIL.TITLE' | translate }} {{ order.reference }}</h2>
       <div class="page-header-actions">
-        @if (order.status === 'DELIVERED' || order.status === 'ACCEPTED') {
+        @if (canGenerateInvoice()) {
           <button class="btn btn-primary" (click)="downloadInvoice()" [attr.aria-label]="'ORDER_DETAIL.DOWNLOAD_ARIA' | translate">{{ 'ORDER_DETAIL.DOWNLOAD_INVOICE' | translate }}</button>
           <button class="btn btn-secondary" (click)="printInvoice()" [attr.aria-label]="'ORDER_DETAIL.PRINT_INVOICE_ARIA' | translate">{{ 'ORDER_DETAIL.PRINT_INVOICE' | translate }}</button>
           <button class="btn btn-secondary" (click)="downloadTeif()" [attr.aria-label]="'ORDER_DETAIL.DOWNLOAD_TEIF_ARIA' | translate">{{ 'ORDER_DETAIL.DOWNLOAD_TEIF' | translate }}</button>

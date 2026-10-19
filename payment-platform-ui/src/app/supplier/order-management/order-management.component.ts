@@ -573,6 +573,12 @@ export class OrderManagementComponent implements OnInit, OnDestroy {
     return order.status === 'DRAFT';
   }
 
+  /** Facture disponible dès la commande prête pour livraison (émission avant livraison). */
+  canGenerateInvoice(order: Order): boolean {
+    return order.status === 'READY_FOR_DELIVERY' || order.status === 'DELIVERY_ACCEPTED'
+      || order.status === 'IN_DELIVERY' || order.status === 'DELIVERED' || order.status === 'ACCEPTED';
+  }
+
   openEdit(order: Order): void {
     this.editOrderId = order.id;
     this.editNotes = order.notes || '';

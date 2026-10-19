@@ -35,6 +35,25 @@ public enum OrderStatus {
         return this == DRAFT || this == CONFIRMED || this == PREPARING;
     }
 
+    /**
+     * Facture (PDF/TEIF) disponible dès la commande prête pour livraison :
+     * une facture doit exister avant la livraison, elle suit la commande jusqu'à l'acceptation.
+     */
+    public boolean isInvoiceAvailable() {
+        return this == READY_FOR_DELIVERY || this == DELIVERY_ACCEPTED || this == IN_DELIVERY
+                || this == DELIVERED || this == ACCEPTED;
+    }
+
+    /** Variante sur String, tolérante aux statuts inconnus (retourne false). */
+    public static boolean isInvoiceAvailable(String status) {
+        for (OrderStatus s : values()) {
+            if (s.name().equals(status)) {
+                return s.isInvoiceAvailable();
+            }
+        }
+        return false;
+    }
+
     public void assertCanTransitionTo(OrderStatus target) {
         Set<OrderStatus> allowed = TRANSITIONS.getOrDefault(this, EnumSet.noneOf(OrderStatus.class));
         if (!allowed.contains(target)) {

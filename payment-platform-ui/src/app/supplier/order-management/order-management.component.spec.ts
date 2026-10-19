@@ -422,6 +422,17 @@ describe('OrderManagementComponent', () => {
     it('should return false for PREPARING', () => expect(component.canEdit({ status: 'PREPARING' } as any)).toBeFalse());
   });
 
+  describe('canGenerateInvoice', () => {
+    it('should return true for READY_FOR_DELIVERY (invoice before delivery)', () => expect(component.canGenerateInvoice({ status: 'READY_FOR_DELIVERY' } as any)).toBeTrue());
+    it('should return true for DELIVERY_ACCEPTED', () => expect(component.canGenerateInvoice({ status: 'DELIVERY_ACCEPTED' } as any)).toBeTrue());
+    it('should return true for IN_DELIVERY', () => expect(component.canGenerateInvoice({ status: 'IN_DELIVERY' } as any)).toBeTrue());
+    it('should return true for DELIVERED', () => expect(component.canGenerateInvoice({ status: 'DELIVERED' } as any)).toBeTrue());
+    it('should return true for ACCEPTED', () => expect(component.canGenerateInvoice({ status: 'ACCEPTED' } as any)).toBeTrue());
+    it('should return false for PREPARING', () => expect(component.canGenerateInvoice({ status: 'PREPARING' } as any)).toBeFalse());
+    it('should return false for CANCELLED', () => expect(component.canGenerateInvoice({ status: 'CANCELLED' } as any)).toBeFalse());
+    it('should return false for REJECTED', () => expect(component.canGenerateInvoice({ status: 'REJECTED' } as any)).toBeFalse());
+  });
+
   describe('openEdit / closeEdit', () => {
     it('should open edit modal with order data', () => {
       const orderWithItems = { ...mockOrder, items: [{ productId: 'p1', productName: 'Product 1', quantity: 5, discount: 0, unitPrice: 10 }] };

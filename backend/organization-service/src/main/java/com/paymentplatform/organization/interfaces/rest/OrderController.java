@@ -9,6 +9,7 @@ import com.paymentplatform.organization.application.usecase.*;
 import com.paymentplatform.organization.domain.model.WithholdingCertificateStatus;
 import com.paymentplatform.organization.domain.model.OrderComment;
 import com.paymentplatform.organization.domain.model.OrderEvent;
+import com.paymentplatform.organization.domain.model.OrderStatus;
 import com.paymentplatform.organization.domain.repository.OrderCommentRepository;
 import com.paymentplatform.organization.domain.repository.OrderEventRepository;
 import com.paymentplatform.organization.domain.repository.OrganizationRepository;
@@ -865,7 +866,8 @@ public class OrderController {
     }
 
     /**
-     * Télécharge la facture PDF d'une commande livrée ou acceptée, restreinte à son périmètre.
+     * Télécharge la facture PDF d'une commande, restreinte à son périmètre.
+     * Disponible dès la commande prête pour livraison (facture émise avant la livraison).
      *
      * @param id identifiant de la commande
      * @param response réponse HTTP recevant le PDF
@@ -895,9 +897,9 @@ public class OrderController {
         }
 
         String status = o.getStatus();
-        if (!"DELIVERED".equals(status) && !"ACCEPTED".equals(status)) {
+        if (!OrderStatus.isInvoiceAvailable(status)) {
             response.sendError(HttpServletResponse.SC_CONFLICT,
-                    "La facture est disponible uniquement pour les commandes livrées ou acceptées");
+                    "La facture est disponible uniquement à partir de la commande prête pour livraison");
             return;
         }
 
@@ -942,9 +944,9 @@ public class OrderController {
             }
         }
         String status = o.getStatus();
-        if (!"DELIVERED".equals(status) && !"ACCEPTED".equals(status)) {
+        if (!OrderStatus.isInvoiceAvailable(status)) {
             response.sendError(HttpServletResponse.SC_CONFLICT,
-                    "Le TEIF est disponible uniquement pour les commandes livrées ou acceptées");
+                    "Le TEIF est disponible uniquement à partir de la commande prête pour livraison");
             return;
         }
         var items = orderItemRepository.findByOrderId(id);

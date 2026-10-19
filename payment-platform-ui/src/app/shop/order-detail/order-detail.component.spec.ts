@@ -97,6 +97,35 @@ describe('ShopOrderDetailComponent', () => {
     });
   });
 
+  describe('canGenerateInvoice', () => {
+    it('should return true for READY_FOR_DELIVERY (invoice before delivery)', () => {
+      component.order = { ...mockOrder, status: 'READY_FOR_DELIVERY' } as any;
+      expect(component.canGenerateInvoice()).toBeTrue();
+    });
+    it('should return true for IN_DELIVERY', () => {
+      component.order = { ...mockOrder, status: 'IN_DELIVERY' } as any;
+      expect(component.canGenerateInvoice()).toBeTrue();
+    });
+    it('should return true for DELIVERED and ACCEPTED', () => {
+      component.order = { ...mockOrder, status: 'DELIVERED' } as any;
+      expect(component.canGenerateInvoice()).toBeTrue();
+      component.order = { ...mockOrder, status: 'ACCEPTED' } as any;
+      expect(component.canGenerateInvoice()).toBeTrue();
+    });
+    it('should return false before READY_FOR_DELIVERY', () => {
+      component.order = { ...mockOrder, status: 'DRAFT' } as any;
+      expect(component.canGenerateInvoice()).toBeFalse();
+      component.order = { ...mockOrder, status: 'PREPARING' } as any;
+      expect(component.canGenerateInvoice()).toBeFalse();
+    });
+    it('should return false for CANCELLED or REJECTED', () => {
+      component.order = { ...mockOrder, status: 'CANCELLED' } as any;
+      expect(component.canGenerateInvoice()).toBeFalse();
+      component.order = { ...mockOrder, status: 'REJECTED' } as any;
+      expect(component.canGenerateInvoice()).toBeFalse();
+    });
+  });
+
   describe('withholding certificate', () => {
     it('should load certificate when order is DELIVERED', () => {
       orderService.getByReference.and.returnValue(of({ ...mockOrder, status: 'DELIVERED' }));

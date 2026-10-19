@@ -105,7 +105,7 @@
                 @if (canDeliveryReject(o)) {
                   <button class="btn btn-sm btn-danger" (click)="deliveryReject(o)" [attr.aria-label]="('SUPPLIER_ORDERS.REJECT_DELIVERY_ARIA' | translate) + ' ' + o.reference">{{ 'SUPPLIER_ORDERS.REJECT_DELIVERY' | translate }}</button>
                 }
-                @if (o.status === 'DELIVERED' || o.status === 'ACCEPTED') {
+                @if (canGenerateInvoice(o)) {
                   <button class="btn btn-sm btn-primary" (click)="downloadInvoice(o)" [attr.aria-label]="('SUPPLIER_ORDERS.INVOICE_ARIA' | translate) + ' ' + o.reference">{{ 'SUPPLIER_ORDERS.INVOICE' | translate }}</button>
                 }
                 @if (canCancel(o)) {
@@ -174,7 +174,7 @@
           @if (canDeliveryReject(o)) {
             <button class="btn btn-danger" (click)="deliveryReject(o)" [attr.aria-label]="('SUPPLIER_ORDERS.REJECT_DELIVERY_ARIA' | translate) + ' ' + o.reference">{{ 'SUPPLIER_ORDERS.REJECT_DELIVERY' | translate }}</button>
           }
-          @if (o.status === 'DELIVERED' || o.status === 'ACCEPTED') {
+          @if (canGenerateInvoice(o)) {
             <button class="btn btn-primary" (click)="downloadInvoice(o)" [attr.aria-label]="('SUPPLIER_ORDERS.INVOICE_ARIA' | translate) + ' ' + o.reference">{{ 'SUPPLIER_ORDERS.INVOICE' | translate }}</button>
           }
           @if (canCancel(o)) {
@@ -338,7 +338,7 @@
       <div class="modal-header">
         <h3 id="detail-modal-title">{{ 'SUPPLIER_ORDERS.ORDER' | translate }} {{ selectedOrder?.reference }}</h3>
         <div>
-          @if (selectedOrder && (selectedOrder.status === 'DELIVERED' || selectedOrder.status === 'ACCEPTED')) {
+          @if (selectedOrder && canGenerateInvoice(selectedOrder)) {
             <button class="btn btn-sm btn-primary" style="margin-right:8px;" (click)="downloadInvoice(selectedOrder)" [attr.aria-label]="'SUPPLIER_ORDERS.DOWNLOAD_INVOICE_ARIA' | translate">{{ 'SUPPLIER_ORDERS.DOWNLOAD_INVOICE' | translate }}</button>
             <button class="btn btn-sm btn-secondary" style="margin-right:8px;" (click)="printDetailInvoice()" [attr.aria-label]="'SUPPLIER_ORDERS.PRINT_INVOICE_ARIA' | translate">{{ 'SUPPLIER_ORDERS.PRINT_INVOICE' | translate }}</button>
             <button class="btn btn-sm btn-secondary" style="margin-right:8px;" (click)="downloadDetailTeif()" [attr.aria-label]="'SUPPLIER_ORDERS.DOWNLOAD_TEIF_ARIA' | translate">{{ 'SUPPLIER_ORDERS.DOWNLOAD_TEIF' | translate }}</button>
