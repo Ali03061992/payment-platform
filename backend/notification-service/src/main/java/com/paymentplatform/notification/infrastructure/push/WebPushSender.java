@@ -92,14 +92,17 @@ public class WebPushSender {
      * Construit le payload JSON attendu par ngsw-worker.js :
      * { notification: { title, body, icon, tag, data: { url, onActionClick } } }
      * Le data.url est injecté tel quel dans onActionClick (deep-link après clic).
+     * openWindow (et non navigateLastFocusedOrOpen) : un client existant absorbe
+     * le clic à la place de la PWA installée avec navigateLastFocusedOrOpen ;
+     * openWindow ouvre toujours un nouveau contexte = lancement garanti de la WebAPK.
      */
-    private String buildPayload(String title, String body, String tag, String url,
-                                UUID organizationId) throws Exception {
+    String buildPayload(String title, String body, String tag, String url,
+                        UUID organizationId) throws Exception {
         Map<String, Object> data = new java.util.LinkedHashMap<>();
         data.put("url", url);
         data.put("organizationId", organizationId == null ? "" : organizationId.toString());
         data.put("onActionClick", Map.of("default", Map.of(
-                "operation", "navigateLastFocusedOrOpen",
+                "operation", "openWindow",
                 "url", url)));
 
         Map<String, Object> notification = new java.util.LinkedHashMap<>();
