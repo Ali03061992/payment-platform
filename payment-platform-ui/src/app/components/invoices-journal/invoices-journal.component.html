@@ -1,0 +1,105 @@
+<div class="page-header">
+  <h2>{{ 'INVOICE_JOURNAL.TITLE' | translate }}</h2>
+  <span class="result-count">{{ 'INVOICE_JOURNAL.RESULT_COUNT' | translate:{count: totalElements} }}</span>
+</div>
+
+<div class="filters">
+  <label class="year-label" for="journal-year">{{ 'INVOICE_JOURNAL.YEAR_FILTER' | translate }}</label>
+  <select id="journal-year" [(ngModel)]="selectedYear" (change)="onYearChange()"
+    class="form-control filter-select">
+    <option [ngValue]="null">{{ 'INVOICE_JOURNAL.ALL_YEARS' | translate }}</option>
+    @for (y of availableYears; track y) {
+      <option [ngValue]="y">{{ y }}</option>
+    }
+  </select>
+</div>
+
+@if (loading) {
+  <div class="loading">
+    <div class="spinner"></div>
+    <span>{{ 'INVOICE_JOURNAL.LOADING' | translate }}</span>
+  </div>
+}
+
+@if (!loading) {
+  <!-- Desktop Table View -->
+  <div class="table-card hide-mobile">
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>{{ 'INVOICE_JOURNAL.COL_NUMBER' | translate }}</th>
+            <th>{{ 'INVOICE_JOURNAL.COL_ORDER' | translate }}</th>
+            <th>{{ 'INVOICE_JOURNAL.COL_SUPPLIER' | translate }}</th>
+            <th>{{ 'INVOICE_JOURNAL.COL_SHOP' | translate }}</th>
+            <th>{{ 'INVOICE_JOURNAL.COL_DATE' | translate }}</th>
+            <th class="col-num">{{ 'INVOICE_JOURNAL.COL_TOTAL_TTC' | translate }}</th>
+            <th>{{ 'INVOICE_JOURNAL.COL_ACTIONS' | translate }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (e of entries; track e.id) {
+            <tr>
+              <td><strong>{{ e.invoiceNumber }}</strong></td>
+              <td>{{ e.orderReference }}</td>
+              <td>{{ e.supplierName || e.supplierId }}</td>
+              <td>{{ e.shopName || e.shopId }}</td>
+              <td>{{ e.issuedAt | date:'dd/MM/yyyy HH:mm' }}</td>
+              <td class="col-num">{{ e.totalTtc | number:'1.2-2' }} {{ e.currency }}</td>
+              <td class="actions">
+                <button class="btn btn-sm btn-secondary" (click)="downloadPdf(e)"
+                  [attr.aria-label]="'INVOICE_JOURNAL.PDF_ARIA' | translate:{number: e.invoiceNumber}">
+                  {{ 'INVOICE_JOURNAL.PDF' | translate }}
+                </button>
+              </td>
+            </tr>
+          }
+          @if (entries.length === 0) {
+            <tr>
+              <td colspan="7" class="empty">{{ 'INVOICE_JOURNAL.NO_ENTRIES' | translate }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Mobile Card View -->
+  <div class="list-cards show-mobile">
+    @for (e of entries; track e.id) {
+      <div class="list-card">
+        <div class="list-card-head">
+          <span class="list-card-ref">{{ e.invoiceNumber }}</span>
+          <span class="list-card-date">{{ e.issuedAt | date:'dd/MM/yyyy HH:mm' }}</span>
+        </div>
+        <div class="list-card-row">
+          <span class="list-card-label">{{ 'INVOICE_JOURNAL.COL_ORDER' | translate }}</span>
+          <span class="list-card-value">{{ e.orderReference }}</span>
+        </div>
+        <div class="list-card-row">
+          <span class="list-card-label">{{ 'INVOICE_JOURNAL.COL_SUPPLIER' | translate }}</span>
+          <span class="list-card-value">{{ e.supplierName || e.supplierId }}</span>
+        </div>
+        <div class="list-card-row">
+          <span class="list-card-label">{{ 'INVOICE_JOURNAL.COL_SHOP' | translate }}</span>
+          <span class="list-card-value">{{ e.shopName || e.shopId }}</span>
+        </div>
+        <div class="list-card-amount">
+          <span class="amount-label">{{ 'INVOICE_JOURNAL.COL_TOTAL_TTC' | translate }}</span>
+          <span class="amount-value">{{ e.totalTtc | number:'1.2-2' }} {{ e.currency }}</span>
+        </div>
+        <div class="list-card-actions">
+          <button class="btn btn-secondary" (click)="downloadPdf(e)">
+            {{ 'INVOICE_JOURNAL.PDF' | translate }}
+          </button>
+        </div>
+      </div>
+    }
+    @if (entries.length === 0) {
+      <div class="list-card list-empty">{{ 'INVOICE_JOURNAL.NO_ENTRIES' | translate }}</div>
+    }
+  </div>
+
+  <app-pagination [page]="currentPage" [size]="pageSize" [totalElements]="totalElements"
+    (pageChange)="onPageChange($event)" (sizeChange)="onSizeChange($event)"></app-pagination>
+}

@@ -22,6 +22,7 @@
     "QUOTE_REQUEST": "طلب عرض سعر",
     "QUOTES": "عروض الأسعار",
     "BALANCE": "الرصيد",
+    "INVOICE_JOURNAL": "سجل الفواتير",
     "PAYMENTS": "المدفوعات",
     "PAYMENT_STATS": "إحصائيات المدفوعات",
     "QR_SCANNER": "مسح QR",
@@ -1010,6 +1011,24 @@
     "EXTREF_SAVED": "تم حفظ المرجع",
     "EXTREF_PLACEHOLDER": "مرجع المنصة…",
     "EXTREF_HINT": "مرجع TTN (الفواتير) أو TEJ: يظهر مع QR أعلى الفاتورة."
+  },
+  "INVOICE_JOURNAL": {
+    "TITLE": "سجل الفواتير",
+    "COL_NUMBER": "رقم الفاتورة",
+    "COL_ORDER": "الطلب",
+    "COL_SUPPLIER": "المورّد",
+    "COL_SHOP": "المتجر",
+    "COL_DATE": "تاريخ الإصدار",
+    "COL_TOTAL_TTC": "الإجمالي مع الرسوم",
+    "COL_ACTIONS": "إجراءات",
+    "PDF": "PDF",
+    "PDF_ARIA": "تحميل الفاتورة {{number}}",
+    "NO_ENTRIES": "لا توجد فواتير مصدَّرة",
+    "LOADING": "جاري التحميل...",
+    "YEAR_FILTER": "السنة",
+    "ALL_YEARS": "كل السنوات",
+    "ERROR": "فشل تحميل سجل الفواتير",
+    "RESULT_COUNT": "{{count}} فاتورة"
   },
   "ORGS": {
     "CANCEL_CREATE_ARIA": "إلغاء الإنشاء",

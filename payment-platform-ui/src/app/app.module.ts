@@ -71,6 +71,7 @@ import { TourComponent } from './components/tour/tour.component';
 import { AppIconComponent } from './components/icon/icon.component';
 import { ConfirmDialogComponent } from './components/confirm-dialog/confirm-dialog.component';
 import { PaginationComponent } from './components/pagination/pagination.component';
+import { InvoicesJournalComponent } from './components/invoices-journal/invoices-journal.component';
 import { StatusLabelPipe } from './pipes/status-label.pipe';
 import { TimeAgoPipe } from './pipes/time-ago.pipe';
 
@@ -198,6 +199,7 @@ export function initApp(translate: TranslateService, loginService: LoginService)
         AppIconComponent,
         ConfirmDialogComponent,
         PaginationComponent,
+        InvoicesJournalComponent,
         StatusLabelPipe,
         TimeAgoPipe,
         LanguageSwitcherComponent,

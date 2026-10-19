@@ -22,6 +22,7 @@
     "QUOTE_REQUEST": "Demander un devis",
     "QUOTES": "Devis",
     "BALANCE": "Balance",
+    "INVOICE_JOURNAL": "Journal des factures",
     "PAYMENTS": "Paiements",
     "PAYMENT_STATS": "Stats paiements",
     "QR_SCANNER": "Scanner QR",
@@ -1017,6 +1018,24 @@
     "EXTREF_SAVED": "Référence électronique enregistrée",
     "EXTREF_PLACEHOLDER": "Référence unique de la plateforme…",
     "EXTREF_HINT": "Référence TTN/El Fatoora (factures) ou TEJ : affichée avec QR en haut à droite de la facture."
+  },
+  "INVOICE_JOURNAL": {
+    "TITLE": "Journal des factures",
+    "COL_NUMBER": "N° facture",
+    "COL_ORDER": "Commande",
+    "COL_SUPPLIER": "Fournisseur",
+    "COL_SHOP": "Boutique",
+    "COL_DATE": "Date d'émission",
+    "COL_TOTAL_TTC": "Total TTC",
+    "COL_ACTIONS": "Actions",
+    "PDF": "PDF",
+    "PDF_ARIA": "Télécharger la facture {{number}}",
+    "NO_ENTRIES": "Aucune facture émise",
+    "LOADING": "Chargement...",
+    "YEAR_FILTER": "Année",
+    "ALL_YEARS": "Toutes années",
+    "ERROR": "Erreur lors du chargement du journal",
+    "RESULT_COUNT": "{{count}} facture(s)"
   },
   "ORGS": {
     "CANCEL_CREATE_ARIA": "Annuler la création",

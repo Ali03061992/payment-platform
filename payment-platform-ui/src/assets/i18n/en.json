@@ -22,6 +22,7 @@
     "QUOTE_REQUEST": "Request a quote",
     "QUOTES": "Quotes",
     "BALANCE": "Balance",
+    "INVOICE_JOURNAL": "Invoice journal",
     "PAYMENTS": "Payments",
     "PAYMENT_STATS": "Payment Stats",
     "QR_SCANNER": "QR Scanner",
@@ -1017,6 +1018,24 @@
     "EXTREF_SAVED": "E-reference saved",
     "EXTREF_PLACEHOLDER": "Platform unique reference…",
     "EXTREF_HINT": "TTN/El Fatoora (invoices) or TEJ reference: shown with QR top-right on the invoice."
+  },
+  "INVOICE_JOURNAL": {
+    "TITLE": "Invoice journal",
+    "COL_NUMBER": "Invoice no.",
+    "COL_ORDER": "Order",
+    "COL_SUPPLIER": "Supplier",
+    "COL_SHOP": "Shop",
+    "COL_DATE": "Issued at",
+    "COL_TOTAL_TTC": "Total incl. tax",
+    "COL_ACTIONS": "Actions",
+    "PDF": "PDF",
+    "PDF_ARIA": "Download invoice {{number}}",
+    "NO_ENTRIES": "No invoice issued",
+    "LOADING": "Loading...",
+    "YEAR_FILTER": "Year",
+    "ALL_YEARS": "All years",
+    "ERROR": "Failed to load the invoice journal",
+    "RESULT_COUNT": "{{count}} invoice(s)"
   },
   "ORGS": {
     "CANCEL_CREATE_ARIA": "Cancel creation",

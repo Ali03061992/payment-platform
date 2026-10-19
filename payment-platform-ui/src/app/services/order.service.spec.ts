@@ -218,6 +218,35 @@ describe('OrderService', () => {
     });
   });
 
+  describe('getInvoicesJournal', () => {
+    it('should GET journal without year', () => {
+      service.getInvoicesJournal(0, 20).subscribe(page => {
+        expect(page.items.length).toBe(1);
+        expect(page.totalElements).toBe(1);
+      });
+      const req = httpMock.expectOne(r => r.url === '/api/orders/invoices/journal');
+      expect(req.request.method).toBe('GET');
+      expect(req.request.params.get('page')).toBe('0');
+      expect(req.request.params.get('size')).toBe('20');
+      expect(req.request.params.get('year')).toBeNull();
+      req.flush({
+        items: [{ id: 'j1', invoiceNumber: 'FA-2026-000001', orderId: 'ord-1', orderReference: 'ORD-001',
+                  supplierId: 's1', supplierName: 'F', shopId: 'sh1', shopName: 'B',
+                  totalTtc: 119, vatAmount: 19, currency: 'TND', issuedAt: '2026-10-19T10:00:00Z' }],
+        totalElements: 1, totalPages: 1, number: 0
+      });
+    });
+
+    it('should GET journal with year filter', () => {
+      service.getInvoicesJournal(1, 50, 2025).subscribe();
+      const req = httpMock.expectOne(r => r.url === '/api/orders/invoices/journal');
+      expect(req.request.params.get('page')).toBe('1');
+      expect(req.request.params.get('size')).toBe('50');
+      expect(req.request.params.get('year')).toBe('2025');
+      req.flush({ items: [], totalElements: 0, totalPages: 0, number: 1 });
+    });
+  });
+
   describe('confirm', () => {
     it('should POST confirm', () => {
       service.confirm(1).subscribe(data => {

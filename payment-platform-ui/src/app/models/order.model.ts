@@ -205,3 +205,27 @@ export interface OrderPage {
   totalPages: number;
   number: number;
 }
+
+/** Ligne du journal des factures (GET /api/orders/invoices/journal). */
+export interface InvoiceJournalEntry {
+  id: string;
+  invoiceNumber: string;
+  orderId: string;
+  orderReference: string;
+  supplierId: string;
+  supplierName: string | null;
+  shopId: string;
+  shopName: string | null;
+  totalTtc: number;
+  vatAmount: number | null;
+  currency: string;
+  issuedAt: string;
+}
+
+/** Page du journal des factures. */
+export interface InvoiceJournalPage {
+  items: InvoiceJournalEntry[];
+  totalElements: number;
+  totalPages: number;
+  number: number;
+}

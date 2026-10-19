@@ -58,6 +58,7 @@ import { NotificationsComponent } from './dashboard/notifications/notifications.
 import { AuditLogManagementComponent } from './admin/audit-log-management/audit-log-management.component';
 import { ForbiddenComponent } from './errors/forbidden/forbidden.component';
 import { NotFoundComponent } from './errors/not-found/not-found.component';
+import { InvoicesJournalComponent } from './components/invoices-journal/invoices-journal.component';
 
 export const adminRoles = ['SYSTEM_ADMIN'];
 export const supplierRoles = ['SUPPLIER_ADMIN', 'SUPPLIER_AGENT'];
@@ -98,6 +99,7 @@ const routes: Routes = [
       { path: 'supplier/agent-payments', component: AgentPaymentsComponent, canActivate: [RoleGuard], data: { roles: supplierRoles } },
       { path: 'supplier/financial', component: SupplierFinancialComponent, canActivate: [RoleGuard], data: { roles: ['SUPPLIER_ADMIN'] } },
       { path: 'supplier/balance', component: SupplierBalanceComponent, canActivate: [RoleGuard], data: { roles: ['SUPPLIER_ADMIN'] } },
+      { path: 'supplier/invoices', component: InvoicesJournalComponent, canActivate: [RoleGuard], data: { roles: ['SUPPLIER_ADMIN'] } },
       { path: 'supplier/stock', component: StockManagementComponent, canActivate: [RoleGuard], data: { roles: supplierRoles } },
       { path: 'supplier/optimization', component: StockOptimizationComponent, canActivate: [RoleGuard], data: { roles: ['SUPPLIER_ADMIN'] } },
       { path: 'supplier/stock/create', component: AddProductComponent, canActivate: [RoleGuard], data: { roles: ['SUPPLIER_ADMIN'] } },
@@ -121,6 +123,7 @@ const routes: Routes = [
       { path: 'admin/disputes', component: DisputeListComponent, canActivate: [RoleGuard], data: { roles: adminRoles, scope: 'all' } },
       { path: 'admin/disputes/:id', component: DisputeDetailComponent, canActivate: [RoleGuard], data: { roles: adminRoles } },
       { path: 'shop/balance', component: BalanceViewComponent, canActivate: [RoleGuard], data: { roles: shopRoles } },
+      { path: 'shop/invoices', component: InvoicesJournalComponent, canActivate: [RoleGuard], data: { roles: ['SHOP_ADMIN'] } },
       { path: 'notifications', component: NotificationsComponent, canActivate: [RoleGuard], data: { roles: allRoles } },
       { path: 'change-password', component: ChangePasswordComponent },
       { path: 'security', component: SecurityComponent, canActivate: [RoleGuard], data: { roles: allRoles } }

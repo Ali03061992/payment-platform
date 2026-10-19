@@ -2,7 +2,9 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { TranslateService } from '@ngx-translate/core';
 import { Observable } from 'rxjs';
-import { Order, CreateOrderRequest, UpdateOrderRequest, OrderComment, OrderPage, WithholdingCertificate, WithholdingMonthlySummary } from '../models/order.model';
+import { Order, CreateOrderRequest, UpdateOrderRequest, OrderComment, OrderPage,
+         WithholdingCertificate, WithholdingMonthlySummary,
+         InvoiceJournalPage } from '../models/order.model';
 import { ToastService } from './toast.service';
 import { filenameFromDisposition, saveBlob } from '../core/file-download';
 
@@ -179,6 +181,13 @@ export class OrderService {
     let params = new HttpParams().set('page', page).set('size', size);
     if (status) params = params.set('status', status);
     return this.http.get<OrderPage>(this.apiUrl, { params });
+  }
+
+  /** Journal des factures émises (numéro FA-AAAA-NNNNNN, scope forcé côté serveur). */
+  getInvoicesJournal(page = 0, size = 20, year?: number): Observable<InvoiceJournalPage> {
+    let params = new HttpParams().set('page', page).set('size', size);
+    if (year) params = params.set('year', year);
+    return this.http.get<InvoiceJournalPage>(`${this.apiUrl}/invoices/journal`, { params });
   }
 
   /** Récupère une commande par identifiant. */
