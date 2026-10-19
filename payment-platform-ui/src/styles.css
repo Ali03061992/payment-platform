@@ -880,6 +880,17 @@ body .modal-overlay .modal-content {
     width: 100%;
   }
 
+  /* Filet de sécurité design system : force la pleine largeur des champs
+     de filtre au-dessus des max-width/flex résiduels des CSS de composants
+     (qui sont injectés après ce fichier et gagnent à spécificité égale). */
+  .filters .form-control,
+  .filters .search-container,
+  .filters .filter-select {
+    width: 100% !important;
+    max-width: none !important;
+    flex: 0 0 auto !important;
+  }
+
   .filters .result-count {
     align-self: flex-start;
   }

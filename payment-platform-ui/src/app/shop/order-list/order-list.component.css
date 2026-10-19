@@ -99,8 +99,17 @@
 @media (max-width: 768px) {
   .filters .search-container,
   .filters .filter-select {
+    /* En flex-direction:column, flex:1 1 16rem (desktop) ferait une base
+       VERTICALE de 16rem : neutralisé pour des champs compacts empilés. */
+    flex: 0 0 auto;
     max-width: none;
     width: 100%;
+  }
+
+  .filters .search-container .form-control,
+  .filters .form-control {
+    width: 100%;
+    max-width: none;
   }
 
   .filters-export {
