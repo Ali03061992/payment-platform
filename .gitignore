@@ -68,3 +68,8 @@ deploy/backups/
 # Fichier local d'infos VM/credentials (personnel, ne jamais committer)
 INFOS_VM_TEST.local.txt
 karma-out.txt
+
+# IDE / outillage local (jamais committer)
+.idea/
+.opencode/
+.run/
