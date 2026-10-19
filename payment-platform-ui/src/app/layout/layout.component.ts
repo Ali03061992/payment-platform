@@ -100,8 +100,10 @@ export class LayoutComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.notificationService.fetchNotifications().subscribe();
-    this.notificationService.fetchUnreadCount().subscribe();
+    // Filet de sécurité : le polling (60s) garantit la mise à jour du badge
+    // même quand le SSE est mort (token expiré, app en arrière-plan, PWA
+    // gelée) — sinon l'utilisateur ne voit les notifs qu'après refresh.
+    this.notificationService.startPolling(60000);
     this.notificationService.startRealtime();
     this.subs.push(
       this.notificationService.notifications$.subscribe(n => this.notifications = n),
@@ -116,6 +118,7 @@ export class LayoutComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.notificationService.stopPolling();
     this.notificationService.stopRealtime();
     this.subs.forEach(s => s.unsubscribe());
   }

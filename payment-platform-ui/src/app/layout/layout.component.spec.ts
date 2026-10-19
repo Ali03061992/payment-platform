@@ -32,7 +32,7 @@ describe('LayoutComponent', () => {
     notificationsSubject = new Subject();
     unreadCountSubject = new Subject();
     const loginSpy = jasmine.createSpyObj('LoginService', ['getCurrentUser', 'logout']);
-    const notifSpy = jasmine.createSpyObj('NotificationService', ['fetchNotifications', 'fetchUnreadCount', 'startRealtime', 'stopRealtime', 'markAllAsRead']);
+    const notifSpy = jasmine.createSpyObj('NotificationService', ['startPolling', 'stopPolling', 'fetchNotifications', 'fetchUnreadCount', 'startRealtime', 'stopRealtime', 'markAllAsRead']);
     const routerSpy = jasmine.createSpyObj('Router', ['navigate']);
     notifSpy.notifications$ = notificationsSubject.asObservable();
     notifSpy.unreadCount$ = unreadCountSubject.asObservable();
@@ -72,13 +72,19 @@ describe('LayoutComponent', () => {
   describe('ngOnInit', () => {
     it('should start realtime and subscribe to notifications', () => {
       component.ngOnInit();
-      expect(notificationService.fetchNotifications).toHaveBeenCalled();
-      expect(notificationService.fetchUnreadCount).toHaveBeenCalled();
+      expect(notificationService.startPolling).toHaveBeenCalled();
       expect(notificationService.startRealtime).toHaveBeenCalled();
       notificationsSubject.next([{ id: 1 } as any]);
       unreadCountSubject.next(5);
       expect(component.notifications.length).toBe(1);
       expect(component.unreadCount).toBe(5);
+    });
+
+    it('should stop polling and realtime on destroy', () => {
+      component.ngOnInit();
+      component.ngOnDestroy();
+      expect(notificationService.stopPolling).toHaveBeenCalled();
+      expect(notificationService.stopRealtime).toHaveBeenCalled();
     });
   });
 

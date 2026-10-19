@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { BehaviorSubject, Observable, interval, Subscription } from 'rxjs';
-import { switchMap, tap, map } from 'rxjs/operators';
+import { BehaviorSubject, Observable, interval, Subscription, of } from 'rxjs';
+import { switchMap, tap, map, catchError } from 'rxjs/operators';
 import { Notification, NotificationPage } from '../models/notification.model';
 import { NotificationSoundService } from './notification-sound.service';
+import { LoginService } from './login.service';
 
 @Injectable({ providedIn: 'root' })
 export class NotificationService {
@@ -19,7 +20,11 @@ export class NotificationService {
   notifications$ = this.notificationsSubject.asObservable();
   unreadCount$ = this.unreadCountSubject.asObservable();
 
-  constructor(private http: HttpClient, private sound: NotificationSoundService) {}
+  constructor(
+    private http: HttpClient,
+    private sound: NotificationSoundService,
+    private login: LoginService
+  ) {}
 
   startPolling(intervalMs = 30000): void {
     this.stopPolling();
@@ -42,6 +47,42 @@ export class NotificationService {
   startRealtime(): void {
     this.stopRealtime();
 
+    if (!sessionStorage.getItem('token')) return;
+
+    // Le token transporté en query string de l'EventSource ne passe PAS par
+    // l'interceptor HTTP (pas de refresh silencieux sur 401) : sans fraîcheur
+    // explicite, le SSE part en boucle 401 dès expiration (30 min) jusqu'au
+    // prochain refresh de page.
+    this.ensureFreshToken().subscribe({
+      next: () => this.openEventSource(),
+      error: () => this.openEventSource()
+    });
+  }
+
+  /** Rafraîchit le token s'il est expiré/quasi expiré ; termine toujours. */
+  private ensureFreshToken(): Observable<unknown> {
+    if (!this.isTokenExpired()) return of(null);
+    if (!sessionStorage.getItem('refreshToken')) return of(null);
+    return this.login.refresh().pipe(
+      map(() => null),
+      catchError(() => of(null))
+    );
+  }
+
+  /** True si le JWT access est expiré (ou indéchiffrable) à moins de 5 s près. */
+  private isTokenExpired(): boolean {
+    const token = sessionStorage.getItem('token');
+    if (!token) return true;
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1] || ''));
+      if (!payload.exp) return false;
+      return payload.exp * 1000 < Date.now() + 5000;
+    } catch {
+      return false;
+    }
+  }
+
+  private openEventSource(): void {
     const token = sessionStorage.getItem('token');
     if (!token) return;
 
@@ -156,17 +197,40 @@ export class NotificationService {
 
   showBrowserNotification(notif?: Notification): void {
     if (!('Notification' in window)) return;
+    if (Notification.permission !== 'granted') return;
 
-    if (Notification.permission === 'granted') {
-      const n = notif || this.notificationsSubject.getValue()[0];
-      if (n) {
-        new window.Notification('Payment Platform', {
-          body: n.message,
-          icon: 'assets/icons/icon-192x192.png',
-          tag: 'payment-notification',
-          renotify: true
-        } as NotificationOptions);
-      }
+    const n = notif || this.notificationsSubject.getValue()[0];
+    if (!n) return;
+
+    const title = 'Payment Platform';
+    const options = {
+      body: n.message,
+      icon: 'assets/icons/icon-192x192.png',
+      badge: 'assets/icons/icon-72x72.png',
+      tag: 'payment-notification',
+      renotify: true
+    } as NotificationOptions;
+
+    // Chrome Android (onglet comme PWA) : le constructeur depuis la page
+    // lève un TypeError (« Illegal constructor »). Seule voie mobile fiable :
+    // ServiceWorkerRegistration.showNotification() quand un SW est actif.
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistration().then((reg) => {
+        if (reg && reg.active) {
+          reg.showNotification(title, options).catch(() => {});
+          return;
+        }
+        this.showViaConstructor(title, options);
+      }, () => this.showViaConstructor(title, options));
+      return;
     }
+    this.showViaConstructor(title, options);
+  }
+
+  /** Repli desktop/dev : constructeur natif, silencieux si refusé. */
+  private showViaConstructor(title: string, options: NotificationOptions): void {
+    try {
+      new window.Notification(title, options);
+    } catch {}
   }
 }
