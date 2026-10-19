@@ -59,8 +59,14 @@ public class InvoicePdfService {
 
     public byte[] generateInvoicePdf(Order order, List<OrderItem> items,
                                      InvoiceParty supplier, InvoiceParty buyer) {
+        return generateInvoicePdf(order, items, supplier, buyer, order.getReference());
+    }
+
+    /** Facture avec son numéro de journal (FA-AAAA-NNNNNN) en référence officielle. */
+    public byte[] generateInvoicePdf(Order order, List<OrderItem> items,
+                                     InvoiceParty supplier, InvoiceParty buyer, String invoiceNumber) {
         return generatePdf(order, items, supplier, buyer, "FACTURE", "Facture n°: ",
-                order.getReference(), "Payment Platform - Facture ");
+                invoiceNumber, "Payment Platform - Facture ");
     }
 
     /** Devis : même mise en page que la facture, intitulés adaptés. */

@@ -71,6 +71,8 @@ public class OrderController {
     private final GetWithholdingCertificateUseCase getWithholdingCertificate;
     private final WithholdingCertificatePdfService withholdingCertificatePdfService;
     private final WithholdingBatchUseCase withholdingBatch;
+    private final IssueInvoiceUseCase issueInvoice;
+    private final com.paymentplatform.organization.domain.repository.InvoiceJournalRepository invoiceJournalRepository;
 
     public OrderController(CreateOrderUseCase createOrder,
                            ConfirmOrderUseCase confirmOrder,
@@ -95,9 +97,11 @@ public class OrderController {
                             OrderCommentRepository orderCommentRepository,
                             OutboxEventStore outbox,
                             UpdateOrderExternalReferenceUseCase updateExternalReference,
-                            GetWithholdingCertificateUseCase getWithholdingCertificate,
+                             GetWithholdingCertificateUseCase getWithholdingCertificate,
                              WithholdingCertificatePdfService withholdingCertificatePdfService,
-                             WithholdingBatchUseCase withholdingBatch) {
+                             WithholdingBatchUseCase withholdingBatch,
+                             IssueInvoiceUseCase issueInvoice,
+                             com.paymentplatform.organization.domain.repository.InvoiceJournalRepository invoiceJournalRepository) {
         this.createOrder = createOrder;
         this.confirmOrder = confirmOrder;
         this.prepareOrder = prepareOrder;
@@ -124,6 +128,8 @@ public class OrderController {
         this.getWithholdingCertificate = getWithholdingCertificate;
         this.withholdingCertificatePdfService = withholdingCertificatePdfService;
         this.withholdingBatch = withholdingBatch;
+        this.issueInvoice = issueInvoice;
+        this.invoiceJournalRepository = invoiceJournalRepository;
     }
 
     private String resolveOrgName(UUID orgId) {
@@ -866,6 +872,45 @@ public class OrderController {
     }
 
     /**
+     * Journal des factures émises (numéro FA-AAAA-NNNNNN, date, parties, montants).
+     * Scope forcé côté serveur : fournisseur = ses factures, boutique = factures
+     * de ses commandes, SYSTEM_ADMIN = tout. Filtre année optionnel.
+     */
+    @GetMapping("/invoices/journal")
+    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SHOP_ADMIN', 'SHOP_MANAGER', 'SYSTEM_ADMIN')")
+    public ResponseEntity<PageResponse<InvoiceJournalResponse>> listInvoiceJournal(
+            @RequestParam(required = false) Integer year,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        var current = CurrentUser.get();
+        UUID supplierScope = null;
+        UUID shopScope = null;
+        if (!current.roles().contains("SYSTEM_ADMIN")) {
+            if (current.organizationId() == null) {
+                return ResponseEntity.status(org.springframework.http.HttpStatus.FORBIDDEN).build();
+            }
+            boolean isSupplier = current.roles().stream().anyMatch(r -> r.startsWith("SUPPLIER"));
+            if (isSupplier) {
+                supplierScope = current.organizationId();
+            } else {
+                shopScope = current.organizationId();
+            }
+        }
+        int pageSize = Math.min(Math.max(1, size), 100);
+        var result = invoiceJournalRepository.search(supplierScope, shopScope, year,
+                Math.max(0, page), pageSize);
+        List<InvoiceJournalResponse> responses = result.items().stream()
+                .map(e -> new InvoiceJournalResponse(
+                        e.id(), e.invoiceNumber(), e.orderId(), e.orderReference(),
+                        e.supplierId(), resolveOrgName(e.supplierId()),
+                        e.shopId(), resolveOrgName(e.shopId()),
+                        e.totalTtc(), e.vatAmount(), e.currency(), e.issuedAt()))
+                .toList();
+        int totalPages = (int) ((result.totalElements() + pageSize - 1) / pageSize);
+        return ResponseEntity.ok(new PageResponse<>(responses, result.totalElements(), totalPages, page));
+    }
+
+    /**
      * Télécharge la facture PDF d'une commande, restreinte à son périmètre.
      * Disponible dès la commande prête pour livraison (facture émise avant la livraison).
      *
@@ -904,9 +949,10 @@ public class OrderController {
         }
 
         var items = orderItemRepository.findByOrderId(id);
+        var journalEntry = issueInvoice.issueIfNeeded(o);
         var supplier = toInvoiceParty(o.getSupplierId());
         var buyer = toInvoiceParty(o.getShopId());
-        byte[] pdf = invoicePdfService.generateInvoicePdf(o, items, supplier, buyer);
+        byte[] pdf = invoicePdfService.generateInvoicePdf(o, items, supplier, buyer, journalEntry.invoiceNumber());
 
         response.setContentType("application/pdf");
         response.setHeader(HttpHeaders.CONTENT_DISPOSITION,
@@ -950,13 +996,15 @@ public class OrderController {
             return;
         }
         var items = orderItemRepository.findByOrderId(id);
+        var journalEntry = issueInvoice.issueIfNeeded(o);
         var supplier = toInvoiceParty(o.getSupplierId());
         var buyer = toInvoiceParty(o.getShopId());
         String xml;
         try {
             xml = TeifGeneratorService.buildInvoice(o, items,
                     new TeifGeneratorService.TeifParty(supplier.name(), supplier.matriculeFiscal(), supplier.address()),
-                    new TeifGeneratorService.TeifParty(buyer.name(), buyer.matriculeFiscal(), buyer.address()));
+                    new TeifGeneratorService.TeifParty(buyer.name(), buyer.matriculeFiscal(), buyer.address()),
+                    journalEntry.invoiceNumber());
         } catch (IllegalArgumentException e) {
             response.sendError(HttpServletResponse.SC_CONFLICT, e.getMessage());
             return;

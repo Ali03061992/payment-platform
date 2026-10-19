@@ -27,5 +27,6 @@
     <include file="V16__order_quotes.sql" relativeToChangelogFile="true"/>
     <include file="V17__quote_requests.sql" relativeToChangelogFile="true"/>
     <include file="V18__drop_global_discount.sql" relativeToChangelogFile="true"/>
+    <include file="V19__invoice_journal.sql" relativeToChangelogFile="true"/>
 
 </databaseChangeLog>

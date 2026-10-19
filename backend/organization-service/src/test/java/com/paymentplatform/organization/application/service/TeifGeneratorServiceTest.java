@@ -101,6 +101,15 @@ class TeifGeneratorServiceTest {
     }
 
     @Test
+    @DisplayName("Numéro de journal (FA-AAAA-NNNNNN) en DocumentIdentifier")
+    void invoiceNumber_overridesDocumentIdentifier() {
+        String xml = TeifGeneratorService.buildInvoice(order(), List.of(item(UUID.randomUUID())),
+                supplier(), buyer(), "FA-2026-000007");
+        assertThat(xml).contains("<DocumentIdentifier>FA-2026-000007</DocumentIdentifier>");
+        assertThat(xml).doesNotContain("<DocumentIdentifier>" + order().getReference() + "</DocumentIdentifier>");
+    }
+
+    @Test
     @DisplayName("MF non convertible => erreur explicite (pas de XML invalide)")
     void invalidMf_throws() {
         var bad = new TeifGeneratorService.TeifParty("X", "ABC", "Tunis");

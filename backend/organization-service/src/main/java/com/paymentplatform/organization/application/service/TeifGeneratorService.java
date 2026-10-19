@@ -41,6 +41,12 @@ public final class TeifGeneratorService {
 
     public static String buildInvoice(Order order, List<OrderItem> items,
                                       TeifParty supplier, TeifParty buyer) {
+        return buildInvoice(order, items, supplier, buyer, order.getReference());
+    }
+
+    /** Facture TEIF portant son numéro de journal (FA-AAAA-NNNNNN) en identifiant de document. */
+    public static String buildInvoice(Order order, List<OrderItem> items,
+                                      TeifParty supplier, TeifParty buyer, String invoiceNumber) {
         StringBuilder sb = new StringBuilder();
         sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
         sb.append("<TEIF version=\"1.8.8\" controlingAgency=\"TTN\">\n");
@@ -52,7 +58,7 @@ public final class TeifGeneratorService {
         sb.append("  </InvoiceHeader>\n");
         sb.append("  <InvoiceBody>\n");
         sb.append("    <Bgm>\n");
-        sb.append("      <DocumentIdentifier>").append(esc(order.getReference())).append("</DocumentIdentifier>\n");
+        sb.append("      <DocumentIdentifier>").append(esc(invoiceNumber)).append("</DocumentIdentifier>\n");
         sb.append("      <DocumentType code=\"I-11\">Facture</DocumentType>\n");
         sb.append("    </Bgm>\n");
         sb.append("    <Dtm>\n");
