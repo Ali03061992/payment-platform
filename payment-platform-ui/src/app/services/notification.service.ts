@@ -47,12 +47,15 @@ export class NotificationService {
   startRealtime(): void {
     this.stopRealtime();
 
-    if (!sessionStorage.getItem('token')) return;
+    // Présence du token (même expiré) : ensureFreshToken le régénère ensuite
+    // via le refresh single-flight (cookie HttpOnly).
+    if (!this.login.getToken()) return;
 
     // Le token transporté en query string de l'EventSource ne passe PAS par
     // l'interceptor HTTP (pas de refresh silencieux sur 401) : sans fraîcheur
     // explicite, le SSE part en boucle 401 dès expiration (30 min) jusqu'au
-    // prochain refresh de page.
+    // prochain refresh de page. Le refresh est single-flight partagé avec
+    // l'interceptor (cookie HttpOnly) — pas de rotation concurrente.
     this.ensureFreshToken().subscribe({
       next: () => this.openEventSource(),
       error: () => this.openEventSource()
@@ -62,7 +65,6 @@ export class NotificationService {
   /** Rafraîchit le token s'il est expiré/quasi expiré ; termine toujours. */
   private ensureFreshToken(): Observable<unknown> {
     if (!this.isTokenExpired()) return of(null);
-    if (!sessionStorage.getItem('refreshToken')) return of(null);
     return this.login.refresh().pipe(
       map(() => null),
       catchError(() => of(null))
@@ -71,7 +73,7 @@ export class NotificationService {
 
   /** True si le JWT access est expiré (ou indéchiffrable) à moins de 5 s près. */
   private isTokenExpired(): boolean {
-    const token = sessionStorage.getItem('token');
+    const token = this.login.getToken();
     if (!token) return true;
     try {
       const payload = JSON.parse(atob(token.split('.')[1] || ''));
@@ -83,11 +85,10 @@ export class NotificationService {
   }
 
   private openEventSource(): void {
-    const token = sessionStorage.getItem('token');
+    const token = this.login.getToken();
     if (!token) return;
 
-    const userJson = sessionStorage.getItem('user');
-    const user = userJson ? JSON.parse(userJson) : null;
+    const user = this.login.getCurrentUser();
     const params = new URLSearchParams();
     params.set('token', token);
 

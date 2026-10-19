@@ -1,7 +1,7 @@
 // @ts-nocheck
 /**
  * Tests du intercepteur JwtInterceptor.
- * Perimetre : instanciation et blocs intercept (voir blocs describe/it).
+ * Perimetre : instanciation et blocs intercept (token mémoire + refresh cookie single-flight).
  * Moyens : TestBed, stubs jasmine, observables RxJS mockes.
  */
 import { TestBed } from '@angular/core/testing';
@@ -20,7 +20,7 @@ describe('JwtInterceptor', () => {
   beforeEach(() => {
     const routerSpy = jasmine.createSpyObj('Router', ['navigate']);
     const nextSpy = jasmine.createSpyObj('HttpHandler', ['handle']);
-    const loginSpy = jasmine.createSpyObj('LoginService', ['refresh']);
+    const loginSpy = jasmine.createSpyObj('LoginService', ['getToken', 'refresh', 'purgeSession']);
     TestBed.configureTestingModule({
       providers: [
         JwtInterceptor,
@@ -33,11 +33,7 @@ describe('JwtInterceptor', () => {
     router = TestBed.inject(Router) as jasmine.SpyObj<Router>;
     next = TestBed.inject(HttpHandler) as jasmine.SpyObj<HttpHandler>;
     loginService = TestBed.inject(LoginService) as jasmine.SpyObj<LoginService>;
-    sessionStorage.clear();
-  });
-
-  afterEach(() => {
-    sessionStorage.clear();
+    loginService.getToken.and.returnValue(null);
   });
 
   it('should be created', () => {
@@ -54,7 +50,7 @@ describe('JwtInterceptor', () => {
     });
 
     it('should add Authorization header when token exists', () => {
-      sessionStorage.setItem('token', 'test-jwt-token');
+      loginService.getToken.and.returnValue('test-jwt-token');
       const req = new HttpRequest('GET', '/api/test');
       next.handle.and.returnValue(of({} as any));
       interceptor.intercept(req, next);
@@ -73,49 +69,41 @@ describe('JwtInterceptor', () => {
       });
     });
 
-    it('should clear token and redirect for 401 error on login call', () => {
-      sessionStorage.setItem('token', 'expired-token');
-      sessionStorage.setItem('user', '{"id":1}');
+    it('should purge session and redirect for 401 error on login call', () => {
+      loginService.getToken.and.returnValue('expired-token');
       const error = new HttpErrorResponse({ status: 401, statusText: 'Unauthorized' });
       const req = new HttpRequest('GET', '/api/auth/login');
       next.handle.and.returnValue(throwError(() => error));
       interceptor.intercept(req, next).subscribe({
         error: (e) => {
           expect(e.status).toBe(401);
-          expect(sessionStorage.getItem('token')).toBeNull();
-          expect(sessionStorage.getItem('user')).toBeNull();
+          expect(loginService.purgeSession).toHaveBeenCalled();
           expect(router.navigate).toHaveBeenCalledWith(['/login']);
         }
       });
     });
 
-    it('should clear session and redirect for 401 without refresh token', () => {
-      sessionStorage.setItem('token', 'valid-token');
-      sessionStorage.setItem('user', '{"id":1}');
+    it('should logout when silent refresh fails (cookie absent/expiré)', () => {
+      loginService.getToken.and.returnValue('valid-token');
       const error = new HttpErrorResponse({ status: 401, statusText: 'Unauthorized' });
       const req = new HttpRequest('GET', '/api/test');
       next.handle.and.returnValue(throwError(() => error));
+      loginService.refresh.and.returnValue(throwError(() => new HttpErrorResponse({ status: 401 })));
       interceptor.intercept(req, next).subscribe({
         error: (e) => {
           expect(e.status).toBe(401);
-          expect(sessionStorage.getItem('token')).toBeNull();
-          expect(sessionStorage.getItem('user')).toBeNull();
+          expect(loginService.purgeSession).toHaveBeenCalled();
           expect(router.navigate).toHaveBeenCalledWith(['/login']);
-          expect(loginService.refresh).not.toHaveBeenCalled();
         }
       });
     });
 
     it('should silently refresh and retry the request on 401', () => {
-      sessionStorage.setItem('token', 'expired-token');
-      sessionStorage.setItem('refreshToken', 'stored-refresh');
+      loginService.getToken.and.returnValue('expired-token');
       const error = new HttpErrorResponse({ status: 401, statusText: 'Unauthorized' });
       const req = new HttpRequest('GET', '/api/test');
       next.handle.and.returnValues(throwError(() => error), of({ retried: true } as any));
-      loginService.refresh.and.callFake(() => {
-        sessionStorage.setItem('token', 'fresh-token');
-        return of({ accessToken: 'fresh-token' } as any);
-      });
+      loginService.refresh.and.returnValue(of('fresh-token'));
       interceptor.intercept(req, next).subscribe({
         next: (event: any) => {
           expect(event.retried).toBeTrue();
@@ -127,28 +115,10 @@ describe('JwtInterceptor', () => {
       expect(router.navigate).not.toHaveBeenCalled();
     });
 
-    it('should logout when silent refresh fails', () => {
-      sessionStorage.setItem('token', 'expired-token');
-      sessionStorage.setItem('refreshToken', 'revoked-refresh');
-      sessionStorage.setItem('user', '{"id":1}');
-      const error = new HttpErrorResponse({ status: 401, statusText: 'Unauthorized' });
-      const req = new HttpRequest('GET', '/api/test');
-      next.handle.and.returnValue(throwError(() => error));
-      loginService.refresh.and.returnValue(throwError(() => new HttpErrorResponse({ status: 401 })));
-      interceptor.intercept(req, next).subscribe({
-        error: (e) => {
-          expect(e.status).toBe(401);
-          expect(sessionStorage.getItem('token')).toBeNull();
-          expect(router.navigate).toHaveBeenCalledWith(['/login']);
-        }
-      });
-    });
-
     it('should not attempt refresh for auth endpoints', () => {
-      sessionStorage.setItem('token', 't');
-      sessionStorage.setItem('refreshToken', 'r');
+      loginService.getToken.and.returnValue('t');
       const error = new HttpErrorResponse({ status: 401, statusText: 'Unauthorized' });
-      const req = new HttpRequest('POST', '/api/auth/refresh', { refreshToken: 'r' });
+      const req = new HttpRequest('POST', '/api/auth/refresh', {});
       next.handle.and.returnValue(throwError(() => error));
       interceptor.intercept(req, next).subscribe({
         error: (e) => {

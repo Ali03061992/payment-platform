@@ -9,7 +9,7 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { NotificationService } from './notification.service';
 import { Notification } from '../models/notification.model';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 
 describe('NotificationService', () => {
   let service: NotificationService;
@@ -207,10 +207,11 @@ describe('NotificationService', () => {
       return `${btoa('{"alg":"HS256","typ":"JWT"}')}.${btoa(JSON.stringify({ exp: expSec, username: 'ali' }))}.sig`;
     }
 
-    beforeEach(() => sessionStorage.clear());
-    afterEach(() => sessionStorage.clear());
+    beforeEach(() => {
+      spyOn(service['login'], 'getToken').and.returnValue(null);
+    });
 
-    it('sans token en session : ni refresh ni ouverture de flux', () => {
+    it('sans token en mémoire : ni refresh ni ouverture de flux', () => {
       const refreshSpy = spyOn(service['login'], 'refresh');
       const openSpy = spyOn(service as any, 'openEventSource');
       service.startRealtime();
@@ -219,8 +220,7 @@ describe('NotificationService', () => {
     });
 
     it('token frais : ouvre le flux sans passer par le refresh', () => {
-      sessionStorage.setItem('token', makeJwt(Math.floor(Date.now() / 1000) + 3600));
-      sessionStorage.setItem('refreshToken', 'ref-1');
+      (service['login'].getToken as jasmine.Spy).and.returnValue(makeJwt(Math.floor(Date.now() / 1000) + 3600));
       const refreshSpy = spyOn(service['login'], 'refresh');
       const openSpy = spyOn(service as any, 'openEventSource');
       service.startRealtime();
@@ -228,29 +228,26 @@ describe('NotificationService', () => {
       expect(openSpy).toHaveBeenCalled();
     });
 
-    it('token expire : refresh silencieux puis ouverture du flux', () => {
-      sessionStorage.setItem('token', makeJwt(Math.floor(Date.now() / 1000) - 60));
-      sessionStorage.setItem('refreshToken', 'ref-1');
-      const refreshSpy = spyOn(service['login'], 'refresh')
-        .and.returnValue(of({ accessToken: 'a', refreshToken: 'b' } as any));
+    it('token expire : refresh silencieux (cookie) puis ouverture du flux', () => {
+      (service['login'].getToken as jasmine.Spy).and.returnValue(makeJwt(Math.floor(Date.now() / 1000) - 60));
+      const refreshSpy = spyOn(service['login'], 'refresh').and.returnValue(of('fresh-token' as any));
       const openSpy = spyOn(service as any, 'openEventSource');
       service.startRealtime();
       expect(refreshSpy).toHaveBeenCalled();
       expect(openSpy).toHaveBeenCalled();
     });
 
-    it('token expire sans refreshToken : ouverture sans tentative de refresh', () => {
-      sessionStorage.setItem('token', makeJwt(Math.floor(Date.now() / 1000) - 60));
-      const refreshSpy = spyOn(service['login'], 'refresh');
+    it('token expire et refresh refuse : ouverture quand même (best-effort)', () => {
+      (service['login'].getToken as jasmine.Spy).and.returnValue(makeJwt(Math.floor(Date.now() / 1000) - 60));
+      const refreshSpy = spyOn(service['login'], 'refresh').and.returnValue(throwError(() => new Error('401')));
       const openSpy = spyOn(service as any, 'openEventSource');
       service.startRealtime();
-      expect(refreshSpy).not.toHaveBeenCalled();
+      expect(refreshSpy).toHaveBeenCalled();
       expect(openSpy).toHaveBeenCalled();
     });
 
     it('token expirable indéchiffrable : ouverture directe sans refresh', () => {
-      sessionStorage.setItem('token', 'not-a-jwt');
-      sessionStorage.setItem('refreshToken', 'ref-1');
+      (service['login'].getToken as jasmine.Spy).and.returnValue('not-a-jwt');
       const refreshSpy = spyOn(service['login'], 'refresh');
       const openSpy = spyOn(service as any, 'openEventSource');
       service.startRealtime();

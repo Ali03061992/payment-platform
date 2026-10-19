@@ -1,12 +1,12 @@
 // @ts-nocheck
 /**
  * Tests du composant LoginComponent.
- * Perimetre : instanciation et blocs onSubmit (voir blocs describe/it).
+ * Perimetre : instanciation et blocs onSubmit (login adopte la session, returnUrl, purge).
  * Moyens : TestBed + fixture, stubs jasmine, client HTTP de test, observables RxJS mockes.
  */
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { of, throwError } from 'rxjs';
 import { LoginComponent } from './login.component';
@@ -19,12 +19,14 @@ describe('LoginComponent', () => {
   let component: LoginComponent;
   let fixture: ComponentFixture<LoginComponent>;
   let loginService: jasmine.SpyObj<LoginService>;
-  let notificationService: jasmine.SpyObj<NotificationService>;
+  let router: jasmine.SpyObj<Router>;
 
   beforeEach(() => {
-    const loginSpy = jasmine.createSpyObj('LoginService', ['login', 'getMe', 'logout']);
+    const loginSpy = jasmine.createSpyObj('LoginService',
+      ['login', 'getMe', 'adoptSession', 'setCurrentUser', 'purgeSession']);
     const notifSpy = jasmine.createSpyObj('NotificationService', ['requestPermission']);
-    const routerSpy = jasmine.createSpyObj('Router', ['navigate']);
+    const routerSpy = jasmine.createSpyObj('Router', ['navigate', 'navigateByUrl']);
+    const routeStub = { snapshot: { queryParamMap: { get: () => null } } };
 
     TestBed.configureTestingModule({
     declarations: [LoginComponent, TranslateStubPipe],
@@ -34,6 +36,7 @@ describe('LoginComponent', () => {
         { provide: LoginService, useValue: loginSpy },
         { provide: NotificationService, useValue: notifSpy },
         { provide: Router, useValue: routerSpy },
+        { provide: ActivatedRoute, useValue: routeStub },
         provideHttpClient(withInterceptorsFromDi()),
         provideHttpClientTesting()
     ]
@@ -41,7 +44,7 @@ describe('LoginComponent', () => {
     fixture = TestBed.createComponent(LoginComponent);
     component = fixture.componentInstance;
     loginService = TestBed.inject(LoginService) as jasmine.SpyObj<LoginService>;
-    notificationService = TestBed.inject(NotificationService) as jasmine.SpyObj<NotificationService>;
+    router = TestBed.inject(Router) as jasmine.SpyObj<Router>;
   });
 
   it('should create', () => {
@@ -56,14 +59,15 @@ describe('LoginComponent', () => {
   });
 
   describe('onSubmit', () => {
-    it('should call login and getMe on success', () => {
+    it('should call login then getMe and navigate to dashboard', () => {
       loginService.login.and.returnValue(of({ accessToken: 'token123' }));
       loginService.getMe.and.returnValue(of({ id: 1, username: 'admin', roles: ['SYSTEM_ADMIN'] } as any));
 
       component.onSubmit();
       expect(component.loading).toBeFalse();
       expect(loginService.login).toHaveBeenCalledWith({ username: '', password: '' });
-      expect(sessionStorage.getItem('token')).toBe('token123');
+      expect(loginService.setCurrentUser).toHaveBeenCalled();
+      expect(router.navigateByUrl).toHaveBeenCalledWith('/dashboard');
     });
 
     it('should set error on login failure', () => {
@@ -82,13 +86,14 @@ describe('LoginComponent', () => {
       expect(component.error).toBe('AUTH.INVALID_CREDENTIALS');
     });
 
-    it('should handle getMe failure', () => {
+    it('should handle getMe failure and purge session', () => {
       loginService.login.and.returnValue(of({ accessToken: 'token123' }));
       loginService.getMe.and.returnValue(throwError(() => ({ error: {} })));
 
       component.onSubmit();
       expect(component.error).toBe('AUTH.USER_FETCH_ERROR');
-      expect(sessionStorage.getItem('token')).toBeNull();
+      expect(loginService.purgeSession).toHaveBeenCalled();
+      expect(router.navigateByUrl).not.toHaveBeenCalled();
     });
   });
 });

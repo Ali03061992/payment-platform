@@ -22,7 +22,8 @@ describe('StockService', () => {
 
   beforeEach(() => {
     sessionStorage.clear();
-    sessionStorage.setItem('user', JSON.stringify({ organizationId: 1 }));
+    localStorage.clear();
+    localStorage.setItem('user', JSON.stringify({ organizationId: 1 }));
     TestBed.configureTestingModule({
     imports: [],
     providers: [StockService, provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()]
@@ -34,6 +35,7 @@ describe('StockService', () => {
   afterEach(() => {
     httpMock.verify();
     sessionStorage.clear();
+    localStorage.clear();
   });
 
   it('should be created', () => {
@@ -136,6 +138,7 @@ describe('StockService', () => {
   describe('getSupplierId', () => {
     it('should return empty string when no user in session', () => {
       sessionStorage.clear();
+      localStorage.clear();
       service.getProducts().subscribe();
       const req = httpMock.expectOne(r => r.url === '/api/suppliers//products');
       req.flush([]);

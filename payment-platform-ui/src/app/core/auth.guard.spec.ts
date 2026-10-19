@@ -1,32 +1,33 @@
 // @ts-nocheck
 /**
  * Tests du garde AuthGuard.
- * Perimetre : instanciation et blocs canActivate (voir blocs describe/it).
+ * Perimetre : instanciation et blocs canActivate (session LoginService + returnUrl).
  * Moyens : TestBed, stubs jasmine.
  */
 import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { AuthGuard } from './auth.guard';
+import { LoginService } from '../services/login.service';
 
 describe('AuthGuard', () => {
   let guard: AuthGuard;
   let router: jasmine.SpyObj<Router>;
+  let login: jasmine.SpyObj<LoginService>;
+  const state = { url: '/dashboard/shop/orders' } as any;
 
   beforeEach(() => {
     const routerSpy = jasmine.createSpyObj('Router', ['navigate']);
+    const loginSpy = jasmine.createSpyObj('LoginService', ['isLoggedIn', 'purgeSession']);
     TestBed.configureTestingModule({
       providers: [
         AuthGuard,
-        { provide: Router, useValue: routerSpy }
+        { provide: Router, useValue: routerSpy },
+        { provide: LoginService, useValue: loginSpy }
       ]
     });
     guard = TestBed.inject(AuthGuard);
     router = TestBed.inject(Router) as jasmine.SpyObj<Router>;
-    sessionStorage.clear();
-  });
-
-  afterEach(() => {
-    sessionStorage.clear();
+    login = TestBed.inject(LoginService) as jasmine.SpyObj<LoginService>;
   });
 
   it('should be created', () => {
@@ -34,40 +35,19 @@ describe('AuthGuard', () => {
   });
 
   describe('canActivate', () => {
-    it('should return false and redirect to /login when no token', () => {
-      const result = guard.canActivate();
+    it('should return false and redirect to /login with returnUrl when no session', () => {
+      login.isLoggedIn.and.returnValue(false);
+      const result = guard.canActivate({} as any, state);
       expect(result).toBeFalse();
-      expect(router.navigate).toHaveBeenCalledWith(['/login']);
+      expect(login.purgeSession).toHaveBeenCalled();
+      expect(router.navigate).toHaveBeenCalledWith(['/login'], { queryParams: { returnUrl: '/dashboard/shop/orders' } });
     });
 
-    it('should return true when valid token exists', () => {
-      const futureExp = Math.floor(Date.now() / 1000) + 3600;
-      const payload = btoa(JSON.stringify({ exp: futureExp }));
-      const token = `header.${payload}.signature`;
-      sessionStorage.setItem('token', token);
-
-      const result = guard.canActivate();
+    it('should return true when in-memory token is valid', () => {
+      login.isLoggedIn.and.returnValue(true);
+      const result = guard.canActivate({} as any, state);
       expect(result).toBeTrue();
-    });
-
-    it('should return false when token is expired', () => {
-      const pastExp = Math.floor(Date.now() / 1000) - 3600;
-      const payload = btoa(JSON.stringify({ exp: pastExp }));
-      const token = `header.${payload}.signature`;
-      sessionStorage.setItem('token', token);
-
-      const result = guard.canActivate();
-      expect(result).toBeFalse();
-      expect(sessionStorage.getItem('token')).toBeNull();
-      expect(sessionStorage.getItem('user')).toBeNull();
-      expect(router.navigate).toHaveBeenCalledWith(['/login']);
-    });
-
-    it('should return false for malformed token', () => {
-      sessionStorage.setItem('token', 'invalid-token');
-      const result = guard.canActivate();
-      expect(result).toBeFalse();
-      expect(router.navigate).toHaveBeenCalledWith(['/login']);
+      expect(router.navigate).not.toHaveBeenCalled();
     });
   });
 });

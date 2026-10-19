@@ -2,20 +2,16 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Product, ProductCreateRequest, ProductUpdateRequest, StockMovement, StockMovementRequest } from '../models/stock.model';
+import { LoginService } from './login.service';
 
 @Injectable({ providedIn: 'root' })
 export class StockService {
   private apiUrl = '/api/suppliers';
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private login: LoginService) {}
 
   private getSupplierId(): string {
-    const userJson = sessionStorage.getItem('user');
-    if (userJson) {
-      const user = JSON.parse(userJson);
-      return user.organizationId || '';
-    }
-    return '';
+    return this.login.getCurrentUser()?.organizationId || '';
   }
 
   getLowStockAlerts(): Observable<Product[]> {

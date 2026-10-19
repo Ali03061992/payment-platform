@@ -41,24 +41,7 @@ export class OnboardingService {
       this.prefs.update({ tourSeen: true }).subscribe({ error: () => {} });
     } catch {}
     try {
-      const svc = this.loginService as any;
-      const patch = { tourSeen: true };
-      if (typeof svc.updateCurrentUser === 'function') {
-        svc.updateCurrentUser(patch);
-      } else if (typeof svc.setCurrentUser === 'function') {
-        const current = typeof svc.getCurrentUser === 'function' ? svc.getCurrentUser() : user;
-        svc.setCurrentUser({ ...(current || {}), ...patch });
-      } else if (typeof svc.updateCachedUser === 'function') {
-        svc.updateCachedUser(patch);
-      } else if (typeof svc.saveUser === 'function') {
-        const current = typeof svc.getCurrentUser === 'function' ? svc.getCurrentUser() : user;
-        svc.saveUser({ ...(current || {}), ...patch });
-      } else if (user) {
-        const merged = { ...user, ...patch };
-        try {
-          sessionStorage.setItem('user', JSON.stringify(merged));
-        } catch {}
-      }
+      this.loginService.updateCurrentUser({ tourSeen: true } as any);
     } catch {}
   }
 

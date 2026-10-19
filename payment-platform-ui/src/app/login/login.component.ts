@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { LoginService } from '../services/login.service';
 import { PushNotificationService } from '../services/push-notification.service';
@@ -22,6 +22,7 @@ export class LoginComponent {
   constructor(
     private loginService: LoginService,
     private router: Router,
+    private route: ActivatedRoute,
     private pushNotificationService: PushNotificationService,
     private webAuthn: WebAuthnService,
     private translate: TranslateService,
@@ -31,11 +32,9 @@ export class LoginComponent {
   onSubmit(): void {
     this.error = '';
     this.loading = true;
+    // login() adopte la session (access token mémoire, cookie HttpOnly côté serveur).
     this.loginService.login(this.form).subscribe({
-      next: (res) => {
-        sessionStorage.setItem('token', res.accessToken);
-        this.afterLogin();
-      },
+      next: () => this.afterLogin(),
       error: (err) => {
         this.error = err.error?.message || this.translate.instant('AUTH.INVALID_CREDENTIALS');
         this.loading = false;
@@ -49,10 +48,7 @@ export class LoginComponent {
     this.passkeyLoading = true;
     this.webAuthn.login().subscribe({
       next: (res) => {
-        sessionStorage.setItem('token', res.accessToken);
-        if (res.refreshToken) {
-          sessionStorage.setItem('refreshToken', res.refreshToken);
-        }
+        this.loginService.adoptSession(res);
         this.afterLogin();
       },
       error: (err) => {
@@ -69,23 +65,34 @@ export class LoginComponent {
   private afterLogin(): void {
     this.loginService.getMe().subscribe({
       next: (user) => {
-        sessionStorage.setItem('user', JSON.stringify(user));
+        this.loginService.setCurrentUser(user);
         // Applique immédiatement les 2 accents de l'utilisateur (sinon ils
         // n'apparaissaient qu'au prochain reload).
         this.themeService.refreshUserAccents();
         this.loading = false;
         this.passkeyLoading = false;
-        this.router.navigate(['/dashboard']);
+        this.router.navigateByUrl(this.safeReturnUrl() || '/dashboard');
         // Opt-in push explicite (page Sécurité) : plus aucune demande de permission
         // automatique au login. On se contente d'écouter les messages au premier plan.
         this.pushNotificationService.listenToMessages();
       },
       error: () => {
-        sessionStorage.removeItem('token');
+        this.loginService.purgeSession();
         this.error = this.translate.instant('AUTH.USER_FETCH_ERROR');
         this.loading = false;
         this.passkeyLoading = false;
       }
     });
+  }
+
+  /**
+   * Destination demandée avant redirection login (deep-link après notif) :
+   * uniquement les chemins internes (pas de // ni de schéma) — anti open-redirect.
+   */
+  private safeReturnUrl(): string | null {
+    const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
+    if (!returnUrl) return null;
+    if (!returnUrl.startsWith('/') || returnUrl.startsWith('//')) return null;
+    return returnUrl;
   }
 }

@@ -2,16 +2,16 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { StockOptimizationResponse } from '../models/stock-optimization.model';
+import { LoginService } from './login.service';
 
 @Injectable({ providedIn: 'root' })
 export class StockOptimizationService {
   private apiUrl = '/api/suppliers';
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private login: LoginService) {}
 
   private getSupplierId(): string {
-    const u = sessionStorage.getItem('user');
-    return u ? JSON.parse(u).organizationId || '' : '';
+    return this.login.getCurrentUser()?.organizationId || '';
   }
 
   optimize(): Observable<StockOptimizationResponse> {

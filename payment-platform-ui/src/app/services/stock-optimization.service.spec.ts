@@ -16,7 +16,8 @@ describe('StockOptimizationService', () => {
 
   beforeEach(() => {
     sessionStorage.clear();
-    sessionStorage.setItem('user', JSON.stringify({ organizationId: 1 }));
+    localStorage.clear();
+    localStorage.setItem('user', JSON.stringify({ organizationId: 1 }));
     TestBed.configureTestingModule({
     imports: [],
     providers: [StockOptimizationService, provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()]
@@ -28,6 +29,7 @@ describe('StockOptimizationService', () => {
   afterEach(() => {
     httpMock.verify();
     sessionStorage.clear();
+    localStorage.clear();
   });
 
   it('should be created', () => {
@@ -74,13 +76,14 @@ describe('StockOptimizationService', () => {
   describe('getSupplierId', () => {
     it('should return empty string when no user in session', () => {
       sessionStorage.clear();
+      localStorage.clear();
       service.optimize().subscribe();
       const req = httpMock.expectOne(r => r.url === '/api/suppliers//optimization');
       req.flush({ summary: '' });
     });
 
     it('should return empty string when user has no organizationId', () => {
-      sessionStorage.setItem('user', JSON.stringify({}));
+      localStorage.setItem('user', JSON.stringify({}));
       service.optimize().subscribe();
       const req = httpMock.expectOne(r => r.url === '/api/suppliers//optimization');
       req.flush({ summary: '' });
