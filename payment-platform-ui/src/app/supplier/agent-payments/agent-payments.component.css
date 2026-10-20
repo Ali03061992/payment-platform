@@ -314,7 +314,16 @@
 
   .filter-row {
     flex-direction: column;
+    align-items: stretch;
     gap: 12px;
+  }
+
+  .filter-row .form-group,
+  .filter-row .filter-status {
+    flex: 0 0 auto;
+    width: 100%;
+    max-width: none;
+    margin-bottom: 0;
   }
 
   .filter-status {

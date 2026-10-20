@@ -1058,6 +1058,7 @@ input[type="number"],
 input[type="tel"],
 input[type="url"],
 input[type="search"],
+input[type="date"],
 select,
 textarea {
   font-size: 16px;
@@ -1275,6 +1276,7 @@ html[data-theme="dark"] body .empty-state,
 html[data-theme="dark"] body .config-panel,
 html[data-theme="dark"] body .search-dropdown,
 html[data-theme="dark"] body .filter-bar,
+html[data-theme="dark"] body .filter-card,
 html[data-theme="dark"] body .tour-tooltip {
   background-color: var(--card-bg);
   color: var(--text-primary);
