@@ -5,6 +5,7 @@ import { switchMap, tap, map, catchError } from 'rxjs/operators';
 import { Notification, NotificationPage } from '../models/notification.model';
 import { NotificationSoundService } from './notification-sound.service';
 import { LoginService } from './login.service';
+import { BRAND } from '../core/brand.config';
 
 @Injectable({ providedIn: 'root' })
 export class NotificationService {
@@ -203,7 +204,7 @@ export class NotificationService {
     const n = notif || this.notificationsSubject.getValue()[0];
     if (!n) return;
 
-    const title = 'Payment Platform';
+    const title = BRAND.name;
     const options = {
       body: n.message,
       icon: 'assets/icons/icon-192x192.png',

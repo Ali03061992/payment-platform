@@ -16,9 +16,9 @@
   --sidebar-bg: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
   --topbar-bg: #fff;
   --topbar-border: #e8ecf1;
-  --accent: #0f3460;
-  --accent-hover: #1a1a2e;
-  --accent-light: #e3f2fd;
+  --accent: #12243a;
+  --accent-hover: #0d1a2b;
+  --accent-light: #e6f6f3;
   --hover-bg: #fafbfc;
   --input-bg: #fff;
   --input-disabled-bg: #f5f7fa;
@@ -48,8 +48,8 @@
   --quick-action-bg: #f5f7fa;
   --quick-action-hover-bg: #e3f2fd;
   --spinner-border: #e0e0e0;
-  --spinner-top: #0284c7;
-  --amount-color: #0f3460;
+  --spinner-top: #12243a;
+  --amount-color: #12243a;
   /* Bleu ciel : actions / info (sobre, décliné clair/sombre via [data-theme]). */
   --sky: #38bdf0;
   --sky-dark: #0284c7;
@@ -75,16 +75,16 @@
   --glow-rouge: 0 4px 18px rgba(230, 57, 70, 0.3);
   --glass-bg: rgba(255, 255, 255, 0.72);
   --glass-blur: blur(14px);
-  /* Theme utilisateur : primaire + secondaire (defaut = ciel/rouge).
+  /* Theme utilisateur : primaire + secondaire (defaut = marine/turquoise NEXTERA).
      Seuls les headers/fonds/layout suivent ces variables ;
      les boutons gardent leurs couleurs statiques d'action. */
-  --theme-primary: #0284c7;
-  --theme-primary-dark: #0369a1;
-  --theme-primary-soft: rgba(2, 132, 199, 0.12);
-  --theme-secondary: #e63946;
-  --theme-secondary-dark: #c1121f;
-  --theme-secondary-soft: rgba(230, 57, 70, 0.12);
-  --grad-theme: linear-gradient(135deg, #0284c7 0%, #e63946 100%);
+  --theme-primary: #12243a;
+  --theme-primary-dark: #0f1e30;
+  --theme-primary-soft: rgba(18, 36, 58, 0.12);
+  --theme-secondary: #18a999;
+  --theme-secondary-dark: #148b7d;
+  --theme-secondary-soft: rgba(24, 169, 153, 0.12);
+  --grad-theme: linear-gradient(135deg, #12243a 0%, #18a999 100%);
 }
 
 /* ===========================
@@ -104,9 +104,9 @@
   --sidebar-bg: linear-gradient(180deg, #0d0d1a 0%, #0a0a15 100%);
   --topbar-bg: #1a1a2e;
   --topbar-border: #2a2a3a;
-  --accent: #4fc3f7;
-  --accent-hover: #81d4fa;
-  --accent-light: #1a2a3a;
+  --accent: #5cd6c8;
+  --accent-hover: #7fe3d7;
+  --accent-light: #14332f;
   --hover-bg: #222238;
   --input-bg: #222238;
   --input-disabled-bg: #1a1a28;
@@ -136,8 +136,8 @@
   --quick-action-bg: #222238;
   --quick-action-hover-bg: #1a2a3a;
   --spinner-border: #333;
-  --spinner-top: #38bdf0;
-  --amount-color: #4fc3f7;
+  --spinner-top: #5cd6c8;
+  --amount-color: #5cd6c8;
   /* Bleu ciel en thème sombre : même teinte, texte éclairci pour le contraste. */
   --sky: #38bdf0;
   --sky-dark: #0284c7;
@@ -163,13 +163,13 @@
   --glow-rouge: 0 4px 20px rgba(230, 57, 70, 0.35);
   --glass-bg: rgba(26, 26, 46, 0.72);
   --glass-blur: blur(14px);
-  --theme-primary: #0284c7;
-  --theme-primary-dark: #0369a1;
-  --theme-primary-soft: rgba(2, 132, 199, 0.16);
-  --theme-secondary: #e63946;
-  --theme-secondary-dark: #c1121f;
-  --theme-secondary-soft: rgba(230, 57, 70, 0.16);
-  --grad-theme: linear-gradient(135deg, #0284c7 0%, #e63946 100%);
+  --theme-primary: #12243a;
+  --theme-primary-dark: #0f1e30;
+  --theme-primary-soft: rgba(18, 36, 58, 0.16);
+  --theme-secondary: #18a999;
+  --theme-secondary-dark: #148b7d;
+  --theme-secondary-soft: rgba(24, 169, 153, 0.16);
+  --grad-theme: linear-gradient(135deg, #12243a 0%, #18a999 100%);
 }
 
 /* ===========================
@@ -440,14 +440,14 @@ textarea.form-control {
 }
 
 .btn:focus-visible {
-  outline: 2px solid var(--sky);
+  outline: 2px solid var(--theme-secondary);
   outline-offset: 2px;
 }
 
 /* Contrastes renforcés en mode sombre : on éclaircit au survol
    (assombrir réduirait le contraste sur fond sombre). */
-[data-theme="dark"] .btn-primary { background: #0284c7; color: #fff; }
-[data-theme="dark"] .btn-primary:hover:not(:disabled) { background: #38bdf0; box-shadow: 0 2px 8px rgba(56,189,240,0.35); }
+[data-theme="dark"] .btn-primary { background: #18a999; color: #12243a; }
+[data-theme="dark"] .btn-primary:hover:not(:disabled) { background: #2bc4b2; box-shadow: 0 2px 8px rgba(24,169,153,0.35); }
 [data-theme="dark"] .btn-success { background: #43a047; }
 [data-theme="dark"] .btn-success:hover:not(:disabled) { background: #66bb6a; }
 [data-theme="dark"] .btn-danger { background: #e53935; }
@@ -1449,17 +1449,17 @@ app-icon svg {
    VOLETS 3+5+6+7+8 — THÈMES + TABLES + MODALES + ACTIONS (additif)
    =========================== */
 
-/* Volet 3 : en-têtes #9FCBED (opaque) en clair, bleu profond en sombre. */
+/* Volet 3 : en-têtes teintés turquoise (marque NEXTERA) en clair, vert profond en sombre. */
 :root,
 [data-theme="light"] {
-  --table-header-bg: #9FCBED;
-  --table-header-text: #0f3460;
-  --table-border: #c9d6e3;
+  --table-header-bg: #e6f6f3;
+  --table-header-text: #12243a;
+  --table-border: #c9e3de;
 }
 [data-theme="dark"] {
-  --table-header-bg: #0c4a6e;
-  --table-header-text: #e0f2fe;
-  --table-border: #33506b;
+  --table-header-bg: #14332f;
+  --table-header-text: #d5f5f0;
+  --table-border: #2b5b54;
 }
 
 /* Volet 8 : bordures visibles + contenu centré (gauche via .text-left). */
@@ -2232,11 +2232,11 @@ td.actions {
 }
 
 .text-total {
-  color: #0f3460;
+  color: #12243a;
 }
 
 [data-theme="dark"] .text-total {
-  color: #90caf9;
+  color: #5cd6c8;
 }
 
 .text-paragraph {

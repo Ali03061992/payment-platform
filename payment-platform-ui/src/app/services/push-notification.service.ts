@@ -6,6 +6,7 @@ import { initializeApp, FirebaseApp } from 'firebase/app';
 import { getMessaging, getToken, onMessage, Messaging } from 'firebase/messaging';
 import { environment } from '../../environments/environment';
 import { NotificationSoundService } from './notification-sound.service';
+import { BRAND } from '../core/brand.config';
 
 @Injectable({ providedIn: 'root' })
 export class PushNotificationService {
@@ -82,7 +83,7 @@ export class PushNotificationService {
           this.sound.play();
           try {
             if ('Notification' in window && Notification.permission === 'granted') {
-              const title = (payload.notification?.title as string) || 'Payment Platform';
+              const title = (payload.notification?.title as string) || BRAND.name;
               const body = (payload.notification?.body as string) || '';
               new window.Notification(title, {
                 body,

@@ -129,4 +129,4 @@ cy.contains('Expected Data').should('exist');
 
 ---
 
-*Generated for Payment Platform v1.0.0 • Angular 16 → 17 migration pending*
+*Generated for NEXTERA v1.0.0 • Angular 16 → 17 migration pending*

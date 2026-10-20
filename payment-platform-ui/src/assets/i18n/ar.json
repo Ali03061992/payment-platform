@@ -1,5 +1,5 @@
 {
-  "APP_TITLE": "منصة الدفع",
+  "APP_TITLE": "NEXTERA",
   "NAV": {
     "DASHBOARD": "لوحة القيادة",
     "USER_MANAGEMENT": "إدارة المستخدمين",
@@ -56,7 +56,7 @@
     "INVALID_CREDENTIALS": "بيانات الدخول غير صحيحة",
     "USER_FETCH_ERROR": "تعذّر استرجاع معلومات المستخدم",
     "REGISTER_TITLE": "إنشاء حساب",
-    "REGISTER_SUBTITLE": "انضم إلى منصة الدفع",
+    "REGISTER_SUBTITLE": "انضمّ إلى NEXTERA",
     "LAST_NAME": "اللقب",
     "FIRST_NAME": "الاسم",
     "EMAIL": "البريد الإلكتروني",
@@ -1389,7 +1389,7 @@
     "NEXT_ARIA": "الخطوة التالية",
     "FINISH": "إنهاء",
     "FINISH_ARIA": "إنهاء الدليل",
-    "STEP_WELCOME_TITLE": "مرحبًا بك في منصة الدفع",
+    "STEP_WELCOME_TITLE": "مرحبًا بك في NEXTERA",
     "STEP_WELCOME_SUP_DESC": "كمزوّد، يمكنك إدارة المخزون والمنتجات وتتبع الطلبات.",
     "STEP_WELCOME_SHOP_DESC": "كمتجر، يمكنك تقديم الطلبات وتتبع المدفوعات.",
     "STEP_WELCOME_DEF_DESC": "استكشف الميزات المتاحة لدورك.",
@@ -1581,7 +1581,17 @@
   },
   "SETTINGS": {
     "CUSTOM_COLOR": "لون مخصص (رمز hex)",
-    "HEX_PLACEHOLDER": "#rrggbb"
+    "HEX_PLACEHOLDER": "#rrggbb",
+    "COLOR_MARINE": "كحلي",
+    "COLOR_TURQUOISE": "فيروزي",
+    "COLOR_SKY": "أزرق سماوي",
+    "COLOR_ROUGE": "أحمر",
+    "COLOR_NOIR": "أسود",
+    "COLOR_VERT": "أخضر",
+    "COLOR_VIOLET": "بنفسجي",
+    "COLOR_ORANGE": "برتقالي",
+    "COLOR_SARCELLE": "أزرق مخضر",
+    "COLOR_ROSE": "وردي"
   },
   "QUOTE_REQ": {
     "TITLE": "طلب عرض سعر",

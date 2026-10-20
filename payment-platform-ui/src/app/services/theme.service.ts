@@ -8,8 +8,8 @@ export type Theme = 'light' | 'dark';
 @Injectable({ providedIn: 'root' })
 export class ThemeService {
   private readonly STORAGE_KEY = 'pp-theme';
-  private readonly DEFAULT_ACCENT1 = '#0284c7';
-  private readonly DEFAULT_ACCENT2 = '#e63946';
+  private readonly DEFAULT_ACCENT1 = '#12243a';
+  private readonly DEFAULT_ACCENT2 = '#18a999';
   private themeSubject = new BehaviorSubject<Theme>(this.getInitialTheme());
   private accent1Subject = new BehaviorSubject<string>(this.DEFAULT_ACCENT1);
   private accent2Subject = new BehaviorSubject<string>(this.DEFAULT_ACCENT2);

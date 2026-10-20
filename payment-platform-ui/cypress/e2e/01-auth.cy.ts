@@ -118,7 +118,7 @@ describe('01 - Auth: Register Page', () => {
 describe('01 - Auth: Password Setup Page', () => {
   it('should display password setup page', () => {
     cy.visit('/setup-password');
-    cy.get('body').should('contain.text', 'Payment Platform');
+    cy.get('body').should('contain.text', 'NEXTERA');
   });
 });
 

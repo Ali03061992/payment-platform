@@ -2,28 +2,28 @@
 <html lang="fr">
 <head>
   <meta charset="utf-8">
-  <title>Payment Platform</title>
+  <title>NEXTERA</title>
   <base href="/">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes">
-  <meta name="theme-color" content="#1976d2">
-  <meta name="description" content="Payment Platform - Gestion B2B fournisseurs et boutiques">
+  <meta name="theme-color" content="#12243A">
+  <meta name="description" content="NEXTERA - Gestion B2B fournisseurs et boutiques">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="PayPlatform">
-  <meta name="application-name" content="Payment Platform">
-  <meta name="msapplication-TileColor" content="#1976d2">
+  <meta name="apple-mobile-web-app-title" content="NEXTERA">
+  <meta name="application-name" content="NEXTERA">
+  <meta name="msapplication-TileColor" content="#12243A">
   <meta name="msapplication-tap-highlight" content="no">
   <meta name="format-detection" content="telephone=no">
-  <link rel="icon" type="image/png" href="assets/icon-app.png">
+  <link rel="icon" type="image/png" href="assets/icon.png">
   <link rel="manifest" href="manifest.json">
-  <link rel="apple-touch-icon" href="assets/icon-app.png">
-  <!-- M7 : config runtime (clés push via env, jamais committées). Généré en
-       déploiement depuis assets/env.template.js (envsubst). -->
+  <link rel="apple-touch-icon" href="assets/icon.png">
+  <!-- M7 : config runtime (clÃ©s push via env, jamais committÃ©es). GÃ©nÃ©rÃ© en
+       dÃ©ploiement depuis assets/env.template.js (envsubst). -->
   <script src="assets/env.js"></script>
-  <!-- Anti-FOUC : thème + 2 accents appliqués avant le premier paint (le
-       bootstrap Angular est trop tard : les couleurs "flashaient" défaut
-       puis utilisateur à chaque authentification et reload). -->
+  <!-- Anti-FOUC : thÃ¨me + 2 accents appliquÃ©s avant le premier paint (le
+       bootstrap Angular est trop tard : les couleurs "flashaient" dÃ©faut
+       puis utilisateur Ã  chaque authentification et reload). -->
   <script>
     (function () {
       try {
@@ -34,7 +34,7 @@
         }
         document.documentElement.setAttribute('data-theme', t);
         var meta = document.querySelector('meta[name="theme-color"]');
-        if (meta) meta.setAttribute('content', t === 'dark' ? '#0f172a' : '#0284c7');
+        if (meta) meta.setAttribute('content', t === 'dark' ? '#0f172a' : '#12243A');
         var raw = null;
         try { raw = localStorage.getItem('pp-accents'); } catch (e) {}
         if (raw) {

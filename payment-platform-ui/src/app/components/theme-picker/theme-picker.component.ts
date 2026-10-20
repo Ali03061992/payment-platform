@@ -89,11 +89,13 @@ interface ThemeColor {
   standalone: false
 })
 export class ThemePickerComponent implements OnInit, OnDestroy {
-  accent1 = '#0284c7';
-  accent2 = '#e63946';
+  accent1 = '#12243a';
+  accent2 = '#18a999';
   customPrimary = '';
   customSecondary = '';
   readonly colors: ThemeColor[] = [
+    { id: 'marine', hex: '#12243a', labelKey: 'SETTINGS.COLOR_MARINE' },
+    { id: 'turquoise', hex: '#18a999', labelKey: 'SETTINGS.COLOR_TURQUOISE' },
     { id: 'ciel', hex: '#0284c7', labelKey: 'SETTINGS.COLOR_SKY' },
     { id: 'rouge', hex: '#e63946', labelKey: 'SETTINGS.COLOR_ROUGE' },
     { id: 'noir', hex: '#1a1a2e', labelKey: 'SETTINGS.COLOR_NOIR' },

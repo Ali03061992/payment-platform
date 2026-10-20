@@ -8,6 +8,7 @@ import { Notification } from '../models/notification.model';
 import { User } from '../models/user.model';
 import { Subscription } from 'rxjs';
 import { timeAgo } from '../pipes/time-ago.pipe';
+import { BRAND } from '../core/brand.config';
 
 interface NavItem {
   label: string;
@@ -29,6 +30,7 @@ interface NavGroup {
     standalone: false
 })
 export class LayoutComponent implements OnInit, OnDestroy {
+  readonly brand = BRAND;
   user: User | null = null;
   sidebarOpen = false;
   isMobile = false;

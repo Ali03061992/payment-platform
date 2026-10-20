@@ -1,4 +1,4 @@
-# PaymentPlatformUi
+# NEXTERA UI
 
 > Générique Angular CLI — pour le run local réel voir `npm run start:local` (port 4200),
 > `../deploy/LOCAL_DEV.md`, `../deploy/run-local.ps1` et [CYPRESS_E2E_GUIDE.md](CYPRESS_E2E_GUIDE.md).

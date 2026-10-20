@@ -1,5 +1,5 @@
 {
-  "APP_TITLE": "Payment Platform",
+  "APP_TITLE": "NEXTERA",
   "NAV": {
     "DASHBOARD": "Dashboard",
     "USER_MANAGEMENT": "User Management",
@@ -57,7 +57,7 @@
     "INVALID_CREDENTIALS": "Invalid credentials",
     "USER_FETCH_ERROR": "Unable to retrieve user information",
     "REGISTER_TITLE": "Create Account",
-    "REGISTER_SUBTITLE": "Join the payment platform",
+    "REGISTER_SUBTITLE": "Join NEXTERA",
     "LAST_NAME": "Last Name",
     "FIRST_NAME": "First Name",
     "EMAIL": "Email",
@@ -1398,7 +1398,7 @@
     "NEXT_ARIA": "Next step",
     "FINISH": "Finish",
     "FINISH_ARIA": "Finish guide",
-    "STEP_WELCOME_TITLE": "Welcome to Payment Platform",
+    "STEP_WELCOME_TITLE": "Welcome to NEXTERA",
     "STEP_WELCOME_SUP_DESC": "Manage your catalog and stock, process shop orders and track your agents' payments.",
     "STEP_WELCOME_SHOP_DESC": "Order from your suppliers, track your balance in TND and pay via QR code.",
     "STEP_WELCOME_DEF_DESC": "Find your payments and the QR scanner from the side menu.",
@@ -1440,6 +1440,8 @@
     "PRESET_SKY": "Sky",
     "PRESET_ROUGE": "Red",
     "PRESET_NOIR": "Black",
+    "COLOR_MARINE": "Navy",
+    "COLOR_TURQUOISE": "Turquoise",
     "COLOR_SKY": "Sky blue",
     "COLOR_ROUGE": "Red",
     "COLOR_NOIR": "Black",

@@ -5,6 +5,7 @@ import { LoginService } from '../services/login.service';
 import { PushNotificationService } from '../services/push-notification.service';
 import { ThemeService } from '../services/theme.service';
 import { WebAuthnService } from '../services/web-authn.service';
+import { BRAND } from '../core/brand.config';
 
 @Component({
     selector: 'app-login',
@@ -13,6 +14,7 @@ import { WebAuthnService } from '../services/web-authn.service';
     standalone: false
 })
 export class LoginComponent {
+  readonly brand = BRAND;
   form = { username: '', password: '' };
   error = '';
   loading = false;

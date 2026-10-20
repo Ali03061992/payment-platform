@@ -1,7 +1,7 @@
 <div class="login-container">
   <div class="login-card">
     <div class="login-logo">
-      <img src="assets/icon-app.png" class="logo-img" alt="Payment Platform">
+      <img [src]="brand.logoPath" class="logo-img" [alt]="brand.name">
     </div>
     <h1>{{ 'AUTH.LOGIN_TITLE' | translate }}</h1>
     <p class="subtitle">{{ 'AUTH.LOGIN_SUBTITLE' | translate }}</p>

@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { ThemeService } from './services/theme.service';
+import { BRAND } from './core/brand.config';
 
 @Component({
     selector: 'app-root',
@@ -8,7 +9,7 @@ import { ThemeService } from './services/theme.service';
     standalone: false
 })
 export class AppComponent {
-  title = 'payment-platform-ui';
+  title = BRAND.name;
 
   constructor(private themeService: ThemeService) {}
 }

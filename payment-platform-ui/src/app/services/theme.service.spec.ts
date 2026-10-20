@@ -51,7 +51,7 @@ describe('ThemeService backend accents', () => {
 
   it('should keep defaults when backend has no accents', () => {
     httpMock.expectOne('/api/users/me/preferences').flush({});
-    expect(service.currentAccent1).toBe('#0284c7');
-    expect(service.currentAccent2).toBe('#e63946');
+    expect(service.currentAccent1).toBe('#12243a');
+    expect(service.currentAccent2).toBe('#18a999');
   });
 });

@@ -23,7 +23,7 @@ var messaging = __messaging;
 
 if (messaging) {
   messaging.onBackgroundMessage(function(payload) {
-    const notificationTitle = payload.notification?.title || 'Payment Platform';
+    const notificationTitle = payload.notification?.title || 'NEXTERA';
     const notificationOptions = {
       body: payload.notification?.body || '',
       icon: '/assets/icons/icon-192x192.png',

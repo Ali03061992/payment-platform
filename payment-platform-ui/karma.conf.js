@@ -1,6 +1,6 @@
 // Karma configuration for SonarQube coverage (ChromeHeadless, lcov)
 // @see https://karma-runner.github.io/
-// Generated for Payment Platform UI – Angular 21 + Karma 6
+// Generated for NEXTERA UI – Angular 21 + Karma 6
 module.exports = function (config) {
   config.set({
     basePath: '',
