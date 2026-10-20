@@ -14,7 +14,7 @@ public class OpenApiConfig {
     @Bean
     public OpenAPI paymentOpenApi() {
         return new OpenAPI()
-                .info(new Info().title("Payment Service API")
+                .info(new Info().title("NEXTERA - Payment Service API")
                         .description("Paiements unitaires, machine à états").version("1.0.0"))
                 .components(new Components().addSecuritySchemes("bearerAuth", new SecurityScheme()
                         .type(SecurityScheme.Type.HTTP).scheme("bearer").bearerFormat("JWT")))

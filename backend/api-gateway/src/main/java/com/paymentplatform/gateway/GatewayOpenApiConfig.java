@@ -14,7 +14,7 @@ public class GatewayOpenApiConfig {
     @Bean
     public OpenAPI gatewayOpenApi() {
         return new OpenAPI()
-                .info(new Info().title("Payment Platform API Gateway")
+                .info(new Info().title("NEXTERA API Gateway")
                         .description("Point d'entrée unique - Routing vers les microservices").version("1.0.0"))
                 .components(new Components().addSecuritySchemes("bearerAuth", new SecurityScheme()
                         .type(SecurityScheme.Type.HTTP).scheme("bearer").bearerFormat("JWT")))

@@ -23,7 +23,7 @@ class EmailTemplateServiceTests {
         assertThat(html).contains("Amina");
         assertThat(html).contains("ORD-2026-001");
         assertThat(html).contains("2 × Huile d'olive");
-        assertThat(html).contains("Payment Platform");
+        assertThat(html).contains("NEXTERA");
     }
 
     @Test

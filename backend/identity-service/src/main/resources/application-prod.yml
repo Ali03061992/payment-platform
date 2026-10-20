@@ -34,7 +34,7 @@ app:
   internal-secret: ${INTERNAL_SECRET}
   webauthn:
     rp-id: ${WEBAUTHN_RP_ID}
-    rp-name: ${WEBAUTHN_RP_NAME:Payment Platform}
+    rp-name: ${WEBAUTHN_RP_NAME:NEXTERA}
     allowed-origins: ${WEBAUTHN_ALLOWED_ORIGINS}
     challenge-ttl-seconds: ${WEBAUTHN_CHALLENGE_TTL_SECONDS:300}
     timeout-seconds: ${WEBAUTHN_TIMEOUT_SECONDS:60}

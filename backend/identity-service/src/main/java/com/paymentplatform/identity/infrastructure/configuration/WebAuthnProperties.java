@@ -13,7 +13,7 @@ import java.util.List;
 @ConfigurationProperties(prefix = "app.webauthn")
 public record WebAuthnProperties(
         @DefaultValue("localhost") String rpId,
-        @DefaultValue("Payment Platform") String rpName,
+        @DefaultValue("NEXTERA") String rpName,
         @DefaultValue("http://localhost:4200,http://localhost:8080") List<String> allowedOrigins,
         @DefaultValue("300") long challengeTtlSeconds,
         @DefaultValue("60") long timeoutSeconds) {

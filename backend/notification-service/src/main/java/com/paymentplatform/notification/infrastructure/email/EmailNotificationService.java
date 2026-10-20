@@ -38,7 +38,7 @@ public class EmailNotificationService {
             log.debug("Mail disabled, skipping order confirmation to {}", to);
             return;
         }
-        String subject = "Payment Platform - Commande " + orderReference + " confirmée";
+        String subject = "NEXTERA - Commande " + orderReference + " confirmée";
         String htmlBody = templateService.buildOrderConfirmation(recipientName, orderReference, orderDetails);
         sendHtmlEmail(to, subject, htmlBody);
     }
@@ -49,7 +49,7 @@ public class EmailNotificationService {
             log.debug("Mail disabled, skipping delivery notification to {}", to);
             return;
         }
-        String subject = "Payment Platform - Commande " + orderReference + " en livraison";
+        String subject = "NEXTERA - Commande " + orderReference + " en livraison";
         String htmlBody = templateService.buildDeliveryNotification(recipientName, orderReference, deliveryInfo);
         sendHtmlEmail(to, subject, htmlBody);
     }
@@ -60,7 +60,7 @@ public class EmailNotificationService {
             log.debug("Mail disabled, skipping payment receipt to {}", to);
             return;
         }
-        String subject = "Payment Platform - Reçu de paiement " + paymentReference;
+        String subject = "NEXTERA - Reçu de paiement " + paymentReference;
         String htmlBody = templateService.buildPaymentReceipt(recipientName, paymentReference, amount, currency, orderReference);
         sendHtmlEmail(to, subject, htmlBody);
     }
@@ -72,7 +72,7 @@ public class EmailNotificationService {
             return;
         }
         String invitationLink = frontendUrl + "/accept-invitation?email=" + to;
-        String subject = "Payment Platform - Invitation en tant qu'agent livreur";
+        String subject = "NEXTERA - Invitation en tant qu'agent livreur";
         String htmlBody = templateService.buildAgentInvitation(recipientName, organizationName, invitationLink);
         sendHtmlEmail(to, subject, htmlBody);
     }

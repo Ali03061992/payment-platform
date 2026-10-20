@@ -14,7 +14,7 @@ public class OpenApiConfig {
     @Bean
     public OpenAPI organizationOpenApi() {
         return new OpenAPI()
-                .info(new Info().title("Organization Service API")
+                .info(new Info().title("NEXTERA - Organization Service API")
                         .description("Fournisseurs, boutiques, relations").version("1.0.0"))
                 .components(new Components().addSecuritySchemes("bearerAuth", new SecurityScheme()
                         .type(SecurityScheme.Type.HTTP).scheme("bearer").bearerFormat("JWT")))

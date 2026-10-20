@@ -14,7 +14,7 @@ public class OpenApiConfig {
     @Bean
     public OpenAPI identityOpenApi() {
         return new OpenAPI()
-                .info(new Info().title("Identity Service API")
+                .info(new Info().title("NEXTERA - Identity Service API")
                         .description("Utilisateurs, rôles, JWT, RBAC").version("1.0.0"))
                 .components(new Components().addSecuritySchemes("bearerAuth", new SecurityScheme()
                         .type(SecurityScheme.Type.HTTP).scheme("bearer").bearerFormat("JWT")))

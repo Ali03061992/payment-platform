@@ -14,7 +14,7 @@ public class OpenApiConfig {
     @Bean
     public OpenAPI notificationOpenApi() {
         return new OpenAPI()
-                .info(new Info().title("Notification Service API")
+                .info(new Info().title("NEXTERA - Notification Service API")
                         .description("Notifications persistées et temps réel (SSE)").version("1.0.0"))
                 .components(new Components().addSecuritySchemes("bearerAuth", new SecurityScheme()
                         .type(SecurityScheme.Type.HTTP).scheme("bearer").bearerFormat("JWT")))

@@ -73,7 +73,7 @@ public class IdentityEventConsumer {
                             "USER", userId.toString()
                     )));
 
-                    emailService.sendAgentInvitation(null, "l'agent", "Payment Platform");
+                    emailService.sendAgentInvitation(null, "l'agent", "NEXTERA");
                     return;
                 }
             }

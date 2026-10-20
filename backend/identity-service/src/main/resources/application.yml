@@ -58,7 +58,7 @@ app:
   webauthn:
     # RP ID = domaine hébergeant la PWA (sans schéma ni port). En prod : domaine HTTPS.
     rp-id: ${WEBAUTHN_RP_ID:localhost}
-    rp-name: ${WEBAUTHN_RP_NAME:Payment Platform}
+    rp-name: ${WEBAUTHN_RP_NAME:NEXTERA}
     allowed-origins: ${WEBAUTHN_ALLOWED_ORIGINS:http://localhost:4200,http://localhost:8080}
     challenge-ttl-seconds: ${WEBAUTHN_CHALLENGE_TTL_SECONDS:300}
     timeout-seconds: ${WEBAUTHN_TIMEOUT_SECONDS:60}

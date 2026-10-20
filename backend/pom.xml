@@ -16,8 +16,8 @@
   <version>1.2.0</version>
   <packaging>pom</packaging>
 
-  <name>Payment Platform</name>
-  <description>Plateforme de gestion des paiements unitaires entre fournisseurs et boutiques</description>
+  <name>NEXTERA</name>
+  <description>NEXTERA - plateforme B2B fournisseurs et boutiques : commandes, livraisons, facturation et paiements</description>
 
   <modules>
     <module>shared-lib</module>
@@ -45,7 +45,7 @@
     <!-- SonarQube / SonarCloud properties — overridable via -D or env SONAR_HOST_URL/SONAR_TOKEN -->
     <sonar.host.url>http://localhost:9000</sonar.host.url>
     <sonar.projectKey>payment-platform-backend</sonar.projectKey>
-    <sonar.projectName>Payment Platform :: Backend</sonar.projectName>
+    <sonar.projectName>NEXTERA :: Backend</sonar.projectName>
     <sonar.sourceEncoding>UTF-8</sonar.sourceEncoding>
     <sonar.java.source>26</sonar.java.source>
     <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>

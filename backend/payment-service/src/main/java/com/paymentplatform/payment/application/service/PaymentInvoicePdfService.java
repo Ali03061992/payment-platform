@@ -21,12 +21,12 @@ import static com.paymentplatform.payment.domain.model.PaymentStatus.*;
 @Service
 public class PaymentInvoicePdfService {
 
-    private static final Font TITLE_FONT = new Font(Font.HELVETICA, 18, Font.BOLD, new Color(15, 52, 96));
+    private static final Font TITLE_FONT = new Font(Font.HELVETICA, 18, Font.BOLD, new Color(18, 36, 58));
     private static final Font HEADER_FONT = new Font(Font.HELVETICA, 11, Font.BOLD, Color.WHITE);
     private static final Font NORMAL_FONT = new Font(Font.HELVETICA, 10, Font.NORMAL);
     private static final Font BOLD_FONT = new Font(Font.HELVETICA, 10, Font.BOLD);
     private static final Font SMALL_FONT = new Font(Font.HELVETICA, 8, Font.NORMAL, Color.GRAY);
-    private static final Font TOTAL_FONT = new Font(Font.HELVETICA, 14, Font.BOLD, new Color(15, 52, 96));
+    private static final Font TOTAL_FONT = new Font(Font.HELVETICA, 14, Font.BOLD, new Color(18, 36, 58));
 
     public byte[] generateInvoicePdf(PaymentResponse payment) {
         Document document = new Document(PageSize.A4, 36, 36, 36, 36);
@@ -141,7 +141,7 @@ public class PaymentInvoicePdfService {
         amountCell.setHorizontalAlignment(Element.ALIGN_RIGHT);
         amountCell.setPadding(8f);
         amountCell.setBorderWidthTop(2f);
-        amountCell.setBorderColorTop(new Color(15, 52, 96));
+        amountCell.setBorderColorTop(new Color(18, 36, 58));
         amountTable.addCell(amountCell);
 
         document.add(amountTable);
@@ -155,7 +155,7 @@ public class PaymentInvoicePdfService {
         legal.setAlignment(Element.ALIGN_LEFT);
         document.add(legal);
 
-        String legalText = "Facture générée automatiquement par la plateforme Payment Platform. " +
+        String legalText = "Facture générée automatiquement par la plateforme NEXTERA. " +
                 "Ce document fait foi de la transaction entre les parties. " +
                 "En cas de question, veuillez contacter votre fournisseur ou la boutique concernée. " +
                 "Les montants indiqués sont exprimés dans la devise spécifiée sur cette facture.";
@@ -164,7 +164,7 @@ public class PaymentInvoicePdfService {
         legalContent.setAlignment(Element.ALIGN_JUSTIFIED);
         document.add(legalContent);
 
-        Paragraph footer = new Paragraph("Payment Platform - Plateforme de gestion des commandes et paiements", SMALL_FONT);
+        Paragraph footer = new Paragraph("NEXTERA - Plateforme de gestion des commandes et paiements", SMALL_FONT);
         footer.setAlignment(Element.ALIGN_CENTER);
         footer.setSpacingBefore(20f);
         document.add(footer);

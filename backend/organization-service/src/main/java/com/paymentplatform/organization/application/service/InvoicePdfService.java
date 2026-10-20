@@ -29,12 +29,12 @@ import java.util.List;
 @Service
 public class InvoicePdfService {
 
-    private static final Font TITLE_FONT = new Font(Font.HELVETICA, 18, Font.BOLD, new Color(15, 52, 96));
+    private static final Font TITLE_FONT = new Font(Font.HELVETICA, 18, Font.BOLD, new Color(18, 36, 58));
     private static final Font HEADER_FONT = new Font(Font.HELVETICA, 11, Font.BOLD, Color.WHITE);
     private static final Font NORMAL_FONT = new Font(Font.HELVETICA, 10, Font.NORMAL);
     private static final Font BOLD_FONT = new Font(Font.HELVETICA, 10, Font.BOLD);
     private static final Font SMALL_FONT = new Font(Font.HELVETICA, 8, Font.NORMAL, Color.GRAY);
-    private static final Font TOTAL_FONT = new Font(Font.HELVETICA, 12, Font.BOLD, new Color(15, 52, 96));
+    private static final Font TOTAL_FONT = new Font(Font.HELVETICA, 12, Font.BOLD, new Color(18, 36, 58));
     private static final Font MENTION_FONT = new Font(Font.HELVETICA, 9, Font.BOLDITALIC, new Color(120, 30, 30));
 
     /**
@@ -66,7 +66,7 @@ public class InvoicePdfService {
     public byte[] generateInvoicePdf(Order order, List<OrderItem> items,
                                      InvoiceParty supplier, InvoiceParty buyer, String invoiceNumber) {
         return generatePdf(order, items, supplier, buyer, "FACTURE", "Facture n°: ",
-                invoiceNumber, "Payment Platform - Facture ");
+                invoiceNumber, "NEXTERA - Facture ");
     }
 
     /** Devis : même mise en page que la facture, intitulés adaptés. */
@@ -75,7 +75,7 @@ public class InvoicePdfService {
                                    String refKind, String refValue) {
         return generatePdf(order, items, supplier, buyer, "DEVIS N°" + version,
                 "Devis n°" + version + " — " + refKind + " : ", refValue,
-                "Payment Platform - Devis ");
+                "NEXTERA - Devis ");
     }
 
     private byte[] generatePdf(Order order, List<OrderItem> items,
@@ -263,7 +263,7 @@ public class InvoicePdfService {
 
     private void addTableHeader(PdfPTable table, String text) {
         PdfPCell header = new PdfPCell(new Phrase(text, HEADER_FONT));
-        header.setBackgroundColor(new Color(15, 52, 96));
+        header.setBackgroundColor(new Color(18, 36, 58));
         header.setPadding(6f);
         header.setHorizontalAlignment(Element.ALIGN_CENTER);
         table.addCell(header);
@@ -330,7 +330,7 @@ public class InvoicePdfService {
         valueCell.setPadding(4f);
         if (isBold) {
             valueCell.setBorderWidthTop(1f);
-            valueCell.setBorderColorTop(new Color(15, 52, 96));
+            valueCell.setBorderColorTop(new Color(18, 36, 58));
         }
         table.addCell(valueCell);
     }

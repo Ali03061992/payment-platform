@@ -14,7 +14,7 @@ public class EmailTemplateService {
                     <style>
                         body { font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 20px; }
                         .container { max-width: 600px; margin: 0 auto; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-                        .header { background: linear-gradient(135deg, #667eea 0%%, #764ba2 100%%); padding: 30px; text-align: center; }
+                        .header { background: linear-gradient(135deg, #12243A 0%%, #18A999 100%%); padding: 30px; text-align: center; }
                         .header h1 { color: white; margin: 0; font-size: 24px; }
                         .content { padding: 30px; color: #333; line-height: 1.6; }
                         .order-box { background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 6px; padding: 16px; margin: 15px 0; }
@@ -25,7 +25,7 @@ public class EmailTemplateService {
                 <body>
                     <div class="container">
                         <div class="header">
-                            <h1>Payment Platform</h1>
+                            <h1>NEXTERA</h1>
                         </div>
                         <div class="content">
                             <h2>Bonjour %s,</h2>
@@ -38,7 +38,7 @@ public class EmailTemplateService {
                             <p>Vous recevrez une notification d&egrave;s que la commande passera en pr&eacute;paration.</p>
                         </div>
                         <div class="footer">
-                            <p>&copy; 2026 Payment Platform. Tous droits r&eacute;serv&eacute;s.</p>
+                            <p>&copy; 2026 NEXTERA. Tous droits r&eacute;serv&eacute;s.</p>
                         </div>
                     </div>
                 </body>
@@ -55,7 +55,7 @@ public class EmailTemplateService {
                     <style>
                         body { font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 20px; }
                         .container { max-width: 600px; margin: 0 auto; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-                        .header { background: linear-gradient(135deg, #11998e 0%%, #38ef7d 100%%); padding: 30px; text-align: center; }
+                        .header { background: linear-gradient(135deg, #12243A 0%%, #18A999 100%%); padding: 30px; text-align: center; }
                         .header h1 { color: white; margin: 0; font-size: 24px; }
                         .content { padding: 30px; color: #333; line-height: 1.6; }
                         .delivery-box { background: #fff3cd; border: 1px solid #ffc107; border-radius: 6px; padding: 16px; margin: 15px 0; }
@@ -66,7 +66,7 @@ public class EmailTemplateService {
                 <body>
                     <div class="container">
                         <div class="header">
-                            <h1>Payment Platform</h1>
+                            <h1>NEXTERA</h1>
                         </div>
                         <div class="content">
                             <h2>Bonjour %s,</h2>
@@ -79,7 +79,7 @@ public class EmailTemplateService {
                             <p>Un livreur a &eacute;t&eacute; assign&eacute;. Vous recevrez une confirmation d&egrave;s que la livraison sera termin&eacute;e.</p>
                         </div>
                         <div class="footer">
-                            <p>&copy; 2026 Payment Platform. Tous droits r&eacute;serv&eacute;s.</p>
+                            <p>&copy; 2026 NEXTERA. Tous droits r&eacute;serv&eacute;s.</p>
                         </div>
                     </div>
                 </body>
@@ -96,7 +96,7 @@ public class EmailTemplateService {
                     <style>
                         body { font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 20px; }
                         .container { max-width: 600px; margin: 0 auto; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-                        .header { background: linear-gradient(135deg, #667eea 0%%, #764ba2 100%%); padding: 30px; text-align: center; }
+                        .header { background: linear-gradient(135deg, #12243A 0%%, #18A999 100%%); padding: 30px; text-align: center; }
                         .header h1 { color: white; margin: 0; font-size: 24px; }
                         .content { padding: 30px; color: #333; line-height: 1.6; }
                         .receipt-box { background: #d4edda; border: 1px solid #28a745; border-radius: 6px; padding: 16px; margin: 15px 0; }
@@ -109,7 +109,7 @@ public class EmailTemplateService {
                 <body>
                     <div class="container">
                         <div class="header">
-                            <h1>Payment Platform</h1>
+                            <h1>NEXTERA</h1>
                         </div>
                         <div class="content">
                             <h2>Bonjour %s,</h2>
@@ -123,7 +123,7 @@ public class EmailTemplateService {
                             <p>Ce re&ccedil;u atteste du paiement valid&eacute;. Conservez-le pour vos archives.</p>
                         </div>
                         <div class="footer">
-                            <p>&copy; 2026 Payment Platform. Tous droits r&eacute;serv&eacute;s.</p>
+                            <p>&copy; 2026 NEXTERA. Tous droits r&eacute;serv&eacute;s.</p>
                         </div>
                     </div>
                 </body>
@@ -140,10 +140,10 @@ public class EmailTemplateService {
                     <style>
                         body { font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 20px; }
                         .container { max-width: 600px; margin: 0 auto; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-                        .header { background: linear-gradient(135deg, #667eea 0%%, #764ba2 100%%); padding: 30px; text-align: center; }
+                        .header { background: linear-gradient(135deg, #12243A 0%%, #18A999 100%%); padding: 30px; text-align: center; }
                         .header h1 { color: white; margin: 0; font-size: 24px; }
                         .content { padding: 30px; color: #333; line-height: 1.6; }
-                        .button { display: inline-block; background: linear-gradient(135deg, #667eea 0%%, #764ba2 100%%); color: white; text-decoration: none; padding: 14px 32px; border-radius: 6px; font-weight: bold; margin: 20px 0; }
+                        .button { display: inline-block; background: linear-gradient(135deg, #12243A 0%%, #18A999 100%%); color: white; text-decoration: none; padding: 14px 32px; border-radius: 6px; font-weight: bold; margin: 20px 0; }
                         .warning { background: #fff3cd; border: 1px solid #ffc107; border-radius: 4px; padding: 12px; margin: 15px 0; color: #856404; }
                         .footer { background: #f8f9fa; padding: 20px; text-align: center; color: #666; font-size: 12px; }
                     </style>
@@ -151,11 +151,11 @@ public class EmailTemplateService {
                 <body>
                     <div class="container">
                         <div class="header">
-                            <h1>Payment Platform</h1>
+                            <h1>NEXTERA</h1>
                         </div>
                         <div class="content">
                             <h2>Bonjour %s,</h2>
-                            <p>Vous &ecirc;tes invit&eacute; &agrave; rejoindre <strong>%s</strong> en tant qu'agent livreur sur Payment Platform.</p>
+                            <p>Vous &ecirc;tes invit&eacute; &agrave; rejoindre <strong>%s</strong> en tant qu'agent livreur sur NEXTERA.</p>
                             <p style="text-align: center;">
                                 <a href="%s" class="button">Accepter l'invitation</a>
                             </p>
@@ -165,7 +165,7 @@ public class EmailTemplateService {
                             <p>Si vous n'avez pas demand&eacute; cette invitation, veuillez ignorer cet email.</p>
                         </div>
                         <div class="footer">
-                            <p>&copy; 2026 Payment Platform. Tous droits r&eacute;serv&eacute;s.</p>
+                            <p>&copy; 2026 NEXTERA. Tous droits r&eacute;serv&eacute;s.</p>
                         </div>
                     </div>
                 </body>

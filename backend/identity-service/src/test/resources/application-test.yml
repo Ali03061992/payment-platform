@@ -54,7 +54,7 @@ app:
     enabled: false
   webauthn:
     rp-id: localhost
-    rp-name: Payment Platform Test
+    rp-name: NEXTERA Test
     allowed-origins: http://localhost:4200
     challenge-ttl-seconds: 300
     timeout-seconds: 60
