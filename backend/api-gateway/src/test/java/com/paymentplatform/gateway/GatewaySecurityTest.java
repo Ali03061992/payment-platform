@@ -60,4 +60,11 @@ class GatewaySecurityTest {
         mockMvc.perform(get("/actuator/health"))
                 .andExpect(status().isOk());
     }
+
+    @Test
+    void webauthnLoginRoutes_arePublic() {
+        org.assertj.core.api.Assertions.assertThat(JwtValidationFilter.isPublicPath("/api/auth/webauthn/login/options")).isTrue();
+        org.assertj.core.api.Assertions.assertThat(JwtValidationFilter.isPublicPath("/api/auth/webauthn/login")).isTrue();
+        org.assertj.core.api.Assertions.assertThat(JwtValidationFilter.isPublicPath("/api/payments")).isFalse();
+    }
 }

@@ -58,6 +58,8 @@ public class GatewaySecurityConfig {
                                 "/api/auth/refresh",
                                 "/api/auth/logout",
                                 "/api/auth/password-setup/**",
+                                "/api/auth/webauthn/login",
+                                "/api/auth/webauthn/login/options",
                                 "/actuator/health",
                                 "/actuator/info",
                                 "/swagger-ui.html",
