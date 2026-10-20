@@ -78,7 +78,7 @@ export class OnboardingService {
         title: this.translate.instant('TOUR.STEP_ADMIN_USERS_TITLE'),
         description: this.translate.instant('TOUR.STEP_ADMIN_USERS_DESC'),
         icon: 'users',
-        targetSelector: '.sidebar-nav',
+        targetSelector: '.sidebar-nav, [data-tour="menu"]',
       },
       {
         title: this.translate.instant('TOUR.STEP_ADMIN_ORGS_TITLE'),
@@ -90,7 +90,7 @@ export class OnboardingService {
         title: this.translate.instant('TOUR.STEP_ADMIN_PAY_TITLE'),
         description: this.translate.instant('TOUR.STEP_ADMIN_PAY_DESC'),
         icon: 'card',
-        targetSelector: '.header-actions',
+        targetSelector: '.header-actions, [data-tour="qr-scan"]',
       },
     ];
   }
@@ -106,7 +106,7 @@ export class OnboardingService {
         title: this.translate.instant('TOUR.STEP_SUP_STOCK_TITLE'),
         description: this.translate.instant('TOUR.STEP_SUP_STOCK_DESC'),
         icon: 'box',
-        targetSelector: '.sidebar-nav',
+        targetSelector: '.sidebar-nav, [data-tour="menu"]',
       },
       {
         title: this.translate.instant('TOUR.STEP_SUP_OPTIM_TITLE'),
@@ -118,7 +118,7 @@ export class OnboardingService {
         title: this.translate.instant('TOUR.STEP_SUP_ORDERS_TITLE'),
         description: this.translate.instant('TOUR.STEP_SUP_ORDERS_DESC'),
         icon: 'cart',
-        targetSelector: '.header-actions',
+        targetSelector: '.sidebar-nav, [data-tour="menu"]',
       },
     ];
   }
@@ -134,7 +134,7 @@ export class OnboardingService {
         title: this.translate.instant('TOUR.STEP_SHOP_ORDERS_TITLE'),
         description: this.translate.instant('TOUR.STEP_SHOP_ORDERS_DESC'),
         icon: 'cart',
-        targetSelector: '.sidebar-nav',
+        targetSelector: '.sidebar-nav, [data-tour="menu"]',
       },
       {
         title: this.translate.instant('TOUR.STEP_SHOP_BALANCE_TITLE'),
@@ -146,7 +146,7 @@ export class OnboardingService {
         title: this.translate.instant('TOUR.STEP_SHOP_QR_TITLE'),
         description: this.translate.instant('TOUR.STEP_SHOP_QR_DESC'),
         icon: 'scan',
-        targetSelector: '.header-actions',
+        targetSelector: '[data-tour="qr-scan"]',
       },
     ];
   }
@@ -162,13 +162,13 @@ export class OnboardingService {
         title: this.translate.instant('TOUR.STEP_DEF_PAY_TITLE'),
         description: this.translate.instant('TOUR.STEP_DEF_PAY_DESC'),
         icon: 'card',
-        targetSelector: '.sidebar-nav',
+        targetSelector: '.sidebar-nav, [data-tour="menu"]',
       },
       {
         title: this.translate.instant('TOUR.STEP_DEF_QR_TITLE'),
         description: this.translate.instant('TOUR.STEP_DEF_QR_DESC'),
         icon: 'scan',
-        targetSelector: '.header-actions',
+        targetSelector: '[data-tour="qr-scan"]',
       },
     ];
   }

@@ -11,7 +11,7 @@
   (touchend)="onTouchEnd($event)">
   <!-- Mobile header -->
   <div class="mobile-header" role="banner">
-    <button class="mobile-menu-btn" (click)="toggleSidebar()" aria-label="Ouvrir le menu de navigation">
+    <button class="mobile-menu-btn" data-tour="menu" (click)="toggleSidebar()" aria-label="Ouvrir le menu de navigation">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <line x1="3" y1="12" x2="21" y2="12"></line>
         <line x1="3" y1="6" x2="21" y2="6"></line>
@@ -49,6 +49,9 @@
           </svg>
         }
       </button>
+      <a class="theme-toggle-mobile" data-tour="qr-scan" routerLink="/dashboard/scan" [attr.aria-label]="'NAV.QR_SCANNER' | translate" [title]="'NAV.QR_SCANNER' | translate">
+        <app-icon name="scan" [size]="20"></app-icon>
+      </a>
       <button class="notif-bell-mobile" (click)="toggleNotifications()" [attr.aria-label]="'LAYOUT.NOTIFICATIONS' | translate">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
@@ -241,6 +244,9 @@
             </svg>
           }
         </button>
+        <a class="theme-toggle" data-tour="qr-scan" routerLink="/dashboard/scan" [attr.aria-label]="'NAV.QR_SCANNER' | translate" [title]="'NAV.QR_SCANNER' | translate">
+          <app-icon name="scan" [size]="20"></app-icon>
+        </a>
         <button class="notif-bell" (click)="toggleNotifications()" [attr.aria-label]="'LAYOUT.NOTIFICATIONS' | translate">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>

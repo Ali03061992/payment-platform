@@ -64,7 +64,7 @@ export class TourComponent implements OnInit {
   private positionTooltip(): void {
     const step = this.steps[this.currentStep];
     if (step?.targetSelector) {
-      const target = document.querySelector(step.targetSelector) as HTMLElement;
+      const target = this.findVisibleTarget(step.targetSelector);
       if (target) {
         target.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         const rect = target.getBoundingClientRect();
@@ -91,6 +91,22 @@ export class TourComponent implements OnInit {
     }
     this.showHighlight = false;
     this.tooltipPosition = { top: window.innerHeight / 2, left: window.innerWidth / 2 };
+  }
+
+  /**
+   * Plusieurs éléments peuvent correspondre (header desktop/mobile).
+   * On privilégie le premier réellement visible dans le viewport.
+   */
+  private findVisibleTarget(selector: string): HTMLElement | null {
+    const candidates = Array.from(document.querySelectorAll<HTMLElement>(selector));
+    for (const candidate of candidates) {
+      const rect = candidate.getBoundingClientRect();
+      const visible = rect.width > 0 && rect.height > 0
+        && rect.right > 0 && rect.bottom > 0
+        && rect.left < window.innerWidth && rect.top < window.innerHeight;
+      if (visible) return candidate;
+    }
+    return null;
   }
 
   @HostListener('window:resize')
