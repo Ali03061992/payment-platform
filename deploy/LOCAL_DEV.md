@@ -44,7 +44,7 @@
 
 | Service | URL | Description |
 |---------|-----|-------------|
-| **Angular App** | [http://localhost:8080](http://localhost:8080) | SPA frontend (Angular 16) |
+| **Angular App** | [http://localhost:8080](http://localhost:8080) | SPA frontend (Angular 21) |
 
 ### Backend
 
@@ -164,7 +164,8 @@ Front : `cd payment-platform-ui && npm run start:local` → `ng serve --port 420
 
 Env local : `RATE_LIMIT_AUTH_PER_MINUTE=1000` (`application-local.yml`, `.run/5_API_Gateway`)
 pour ne pas flaker les ~70 logins E2E ; prod = 10.
-Rebuild ciblé : `./mvnw -pl backend/<service> -am package -DskipTests`
+Rebuild ciblé : `cd backend && ./mvnw -pl <service> -am package -DskipTests`
+(Windows : `cd backend; .\mvnw.cmd -pl <service> -am package -DskipTests`)
 ou `docker compose up --build -d <service>` ; restart simple : `docker compose restart <service>`.
 
 ---
@@ -257,8 +258,8 @@ Defined in `deploy/.env`:
 | Spring Boot | 4.1.0 |
 | Spring Framework | 7.0.8 |
 | Spring Cloud | 2025.1.2 |
-| Angular | 16 |
-| Node.js | 18 (build only) |
+| Angular | 21 |
+| Node.js | 22 (build only) |
 | MySQL | 8.4 |
 | RabbitMQ | 4 |
 | Flyway | 12.4.0 |
@@ -280,9 +281,8 @@ payment-platform/
 │   ├── payment-service/                 # Payment processing, outbox
 │   ├── notification-service/            # Notifications
 │   └── Dockerfile                       # Multi-stage Maven build
-├── payment-platform-ui/                 # Angular 16 source
-├── frontend/
-│   └── Dockerfile                       # Node build + Nginx
+├── payment-platform-ui/                 # Angular 21 source
+├── Dockerfile                           # Build Node 22 + Nginx (front)
 ├── deploy/
 │   ├── docker-compose.yml               # Full stack orchestration
 │   ├── .env                             # Environment variables
