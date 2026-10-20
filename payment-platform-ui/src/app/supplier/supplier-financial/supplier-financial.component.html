@@ -30,7 +30,70 @@
       <div class="stat-label">{{ 'FINANCE.REJECTED_PAYMENTS' | translate }}</div>
       <div class="stat-sub">{{ report.paymentSummary.rejectedTotal | number:'1.2-2' }} TND</div>
     </div>
+    <div class="stat-card stat-balance">
+      <div class="stat-value">{{ totalDueByShops | number:'1.2-2' }} TND</div>
+      <div class="stat-label">{{ 'FINANCE.ENCOURS_CLIENTS' | translate }}</div>
+      <div class="stat-sub">{{ 'FINANCE.ACTIVE_SHOPS' | translate }} : {{ activeShopCount }}</div>
+    </div>
   </div>
+  @if (shopBalances.length > 0) {
+    <div class="table-card">
+      <h3>{{ 'FINANCE.BALANCE_BY_SHOP' | translate }}</h3>
+      <div class="table-wrapper hide-mobile">
+        <table>
+          <thead>
+            <tr>
+              <th>{{ 'FINANCE.SHOP_COL' | translate }}</th>
+              <th>{{ 'FINANCE.CURRENT_BALANCE' | translate }}</th>
+              <th>{{ 'FINANCE.REMAINING_DUE' | translate }}</th>
+              <th>{{ 'FINANCE.TOTAL_ORDERS' | translate }}</th>
+              <th>{{ 'FINANCE.TOTAL_PAYMENTS' | translate }}</th>
+              <th>{{ 'FINANCE.LAST_TX' | translate }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (b of shopBalances; track b.shopId) {
+              <tr>
+                <td><strong>{{ b.shopName }}</strong></td>
+                <td>{{ b.currentBalance | number:'1.2-2' }} TND</td>
+                <td [class.due-positive]="b.remainingDue > 0">{{ b.remainingDue | number:'1.2-2' }} TND</td>
+                <td>{{ b.totalOrders }}</td>
+                <td>{{ b.totalPayments }}</td>
+                <td>{{ b.lastTransaction | date:'dd/MM/yyyy' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      <div class="balance-cards show-mobile">
+        @for (b of shopBalances; track b.shopId) {
+          <div class="balance-card">
+            <div class="balance-shop">{{ b.shopName }}</div>
+            <div class="balance-row">
+              <span>{{ 'FINANCE.CURRENT_BALANCE' | translate }}</span>
+              <strong>{{ b.currentBalance | number:'1.2-2' }} TND</strong>
+            </div>
+            <div class="balance-row">
+              <span>{{ 'FINANCE.REMAINING_DUE' | translate }}</span>
+              <strong [class.due-positive]="b.remainingDue > 0">{{ b.remainingDue | number:'1.2-2' }} TND</strong>
+            </div>
+            <div class="balance-row">
+              <span>{{ 'FINANCE.TOTAL_ORDERS' | translate }}</span>
+              <strong>{{ b.totalOrders }}</strong>
+            </div>
+            <div class="balance-row">
+              <span>{{ 'FINANCE.TOTAL_PAYMENTS' | translate }}</span>
+              <strong>{{ b.totalPayments }}</strong>
+            </div>
+            <div class="balance-row">
+              <span>{{ 'FINANCE.LAST_TX' | translate }}</span>
+              <strong>{{ b.lastTransaction | date:'dd/MM/yyyy' }}</strong>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  }
   <div class="chart-card">
     <h3>{{ 'FINANCE.MONTHLY_REVENUE' | translate }}</h3>
     @if (report.monthlyRevenue && report.monthlyRevenue.length > 0) {

@@ -179,7 +179,11 @@
     "RECEIVED_ORDERS": "طلبات مستلمة",
     "REORDER": "إعادة الطلب",
     "VIEW_BALANCE": "عرض رصيدي",
-    "VIEW_MY_ORDERS": "عرض طلباتي"
+    "VIEW_MY_ORDERS": "عرض طلباتي",
+    "ACTIVE_RELATIONS": "العلاقات النشطة",
+    "BALANCE_DUE": "الرصيد المستحق",
+    "OPEN_DISPUTES": "النزاعات المفتوحة",
+    "PENDING_QUOTES": "العروض المعلقة"
   },
   "LAYOUT": {
     "WELCOME": "مرحباً",
@@ -840,7 +844,11 @@
     "TOTAL_BALANCE": "الرصيد الإجمالي",
     "TOTAL_REVENUE": "إجمالي الإيرادات",
     "TYPE_REFUND": "استرداد",
-    "VIEW_LEDGER": "عرض السجل"
+    "VIEW_LEDGER": "عرض السجل",
+    "ACTIVE_SHOPS": "المحلات النشطة",
+    "BALANCE_BY_SHOP": "أرصدة المحلات",
+    "ENCOURS_CLIENTS": "مستحقات العملاء",
+    "SHOP_COL": "المحل"
   },
   "ORDER_CREATE": {
     "ASAP": "الدفع الفوري",

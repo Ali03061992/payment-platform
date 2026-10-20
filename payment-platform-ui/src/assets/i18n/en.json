@@ -185,7 +185,11 @@
     "RECEIVED_ORDERS": "Received orders",
     "REORDER": "Reorder",
     "VIEW_BALANCE": "View my balance",
-    "VIEW_MY_ORDERS": "View my orders"
+    "VIEW_MY_ORDERS": "View my orders",
+    "ACTIVE_RELATIONS": "Active relations",
+    "BALANCE_DUE": "Amount owed",
+    "OPEN_DISPUTES": "Open disputes",
+    "PENDING_QUOTES": "Pending quotes"
   },
   "LAYOUT": {
     "WELCOME": "Welcome",
@@ -847,7 +851,11 @@
     "TOTAL_BALANCE": "Total balance",
     "TOTAL_REVENUE": "Total revenue",
     "TYPE_REFUND": "Refund",
-    "VIEW_LEDGER": "View ledger"
+    "VIEW_LEDGER": "View ledger",
+    "ACTIVE_SHOPS": "Active shops",
+    "BALANCE_BY_SHOP": "Balances by shop",
+    "ENCOURS_CLIENTS": "Customer outstanding",
+    "SHOP_COL": "Shop"
   },
   "ORDER_CREATE": {
     "ASAP": "ASAP payment",

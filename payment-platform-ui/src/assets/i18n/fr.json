@@ -185,7 +185,11 @@
     "RECEIVED_ORDERS": "Commandes reçues",
     "REORDER": "Recommander",
     "VIEW_BALANCE": "Voir ma balance",
-    "VIEW_MY_ORDERS": "Voir mes commandes"
+    "VIEW_MY_ORDERS": "Voir mes commandes",
+    "ACTIVE_RELATIONS": "Relations actives",
+    "BALANCE_DUE": "Solde dû",
+    "OPEN_DISPUTES": "Litiges ouverts",
+    "PENDING_QUOTES": "Devis en attente"
   },
   "LAYOUT": {
     "WELCOME": "Bienvenue",
@@ -847,7 +851,11 @@
     "TOTAL_BALANCE": "Solde total",
     "TOTAL_REVENUE": "Revenu total",
     "TYPE_REFUND": "Remboursement",
-    "VIEW_LEDGER": "Voir le journal"
+    "VIEW_LEDGER": "Voir le journal",
+    "ACTIVE_SHOPS": "Boutiques actives",
+    "BALANCE_BY_SHOP": "Soldes par boutique",
+    "ENCOURS_CLIENTS": "Encours clients",
+    "SHOP_COL": "Boutique"
   },
   "ORDER_CREATE": {
     "ASAP": "Paiement ASAP",

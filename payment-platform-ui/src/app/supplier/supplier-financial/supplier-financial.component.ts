@@ -4,6 +4,9 @@ import { ReportService } from '../../services/report.service';
 import { SupplierFinancialReport } from '../../models/supplier-financial.model';
 import { ToastService } from '../../services/toast.service';
 import { ThemeService } from '../../services/theme.service';
+import { LoginService } from '../../services/login.service';
+import { BalanceService } from '../../services/balance.service';
+import { BalanceSummary } from '../../models/balance.model';
 import { Subscription } from 'rxjs';
 import type { ECharts, EChartsCoreOption } from 'echarts/core';
 import { statusLabelFr } from '../../pipes/status-label.pipe';
@@ -18,6 +21,8 @@ export class SupplierFinancialComponent implements OnInit, AfterViewInit, OnDest
   report: SupplierFinancialReport | null = null;
   loading = true;
   loadError: string | null = null;
+  shopBalances: BalanceSummary[] = [];
+  balancesLoading = false;
 
   @ViewChild('revenueChart') revenueChartRef!: ElementRef<HTMLDivElement>;
   @ViewChild('statusChart') statusChartRef!: ElementRef<HTMLDivElement>;
@@ -57,7 +62,9 @@ export class SupplierFinancialComponent implements OnInit, AfterViewInit, OnDest
     private toast: ToastService,
     private cdr: ChangeDetectorRef,
     private themeService: ThemeService,
-    private translate: TranslateService
+    private translate: TranslateService,
+    private loginService: LoginService,
+    private balanceService: BalanceService
   ) {}
 
   ngOnInit(): void {
@@ -86,6 +93,7 @@ export class SupplierFinancialComponent implements OnInit, AfterViewInit, OnDest
   loadReport(): void {
     this.loading = true;
     this.loadError = null;
+    this.loadShopBalances();
     this.reportService.getSupplierFinancialReport().subscribe({
       next: (data) => {
         if (!this.alive) return;
@@ -105,6 +113,41 @@ export class SupplierFinancialComponent implements OnInit, AfterViewInit, OnDest
         this.loading = false;
       }
     });
+  }
+
+  /**
+   * Soldes par boutique (GET /api/balances/supplier/{id}) : indicateur annexé
+   * au rapport. Échec silencieux — ne doit jamais bloquer l'affichage du rapport.
+   */
+  private loadShopBalances(): void {
+    const supplierId = this.loginService.getCurrentUser()?.organizationId;
+    if (!supplierId) {
+      this.shopBalances = [];
+      return;
+    }
+    this.balancesLoading = true;
+    this.balanceService.listBySupplier(String(supplierId)).subscribe({
+      next: (balances) => {
+        if (!this.alive) return;
+        this.shopBalances = balances;
+        this.balancesLoading = false;
+      },
+      error: () => {
+        if (!this.alive) return;
+        this.shopBalances = [];
+        this.balancesLoading = false;
+      }
+    });
+  }
+
+  /** Encours total dû par les boutiques (Σ remainingDue). */
+  get totalDueByShops(): number {
+    return this.shopBalances.reduce((sum, b) => sum + Number(b.remainingDue || 0), 0);
+  }
+
+  /** Nombre de boutiques avec un solde actif. */
+  get activeShopCount(): number {
+    return this.shopBalances.length;
   }
 
   private destroyCharts(): void {
