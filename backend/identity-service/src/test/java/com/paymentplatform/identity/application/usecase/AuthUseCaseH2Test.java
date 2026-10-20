@@ -12,6 +12,8 @@ import com.paymentplatform.shared.domain.exception.UnauthorizedException;
 import com.paymentplatform.shared.domain.model.OrganizationId;
 import com.paymentplatform.shared.domain.model.RoleCode;
 import com.paymentplatform.shared.domain.model.UserId;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,8 +49,17 @@ class AuthUseCaseH2Test {
     @Autowired
     private TestOrganizationStatusPort organizationStatus;
 
+    @PersistenceContext
+    private EntityManager em;
+
     @BeforeEach
     void setUp() {
+        // Isolation : OrganizationCascadeUseCaseH2Test (non transactionnel) commite un
+        // 'shop.agent' residuel dans la H2 partagee — nettoye avant insertion selon
+        // l'ordre d'execution des classes (variable entre machines/CI).
+        em.createNativeQuery("DELETE FROM user_roles WHERE user_id IN (SELECT id FROM users WHERE username = 'shop.agent')").executeUpdate();
+        em.createNativeQuery("DELETE FROM users WHERE username = 'shop.agent'").executeUpdate();
+
         User agent = User.create(new UserId(null), Username.of("shop.agent"),
                 Email.of("shop.agent@example.com"), PasswordHash.of(passwordEncoder.encode("Secret@1")),
                 "Amine", "Trabelsi", new PhoneNumber(null),
