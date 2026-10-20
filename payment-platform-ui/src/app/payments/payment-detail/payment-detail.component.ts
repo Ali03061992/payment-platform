@@ -42,7 +42,7 @@ export class PaymentDetailComponent implements OnInit, OnDestroy {
     this.subscriptions.add(request$.subscribe({
       next: (data: Payment) => {
         this.payment = data;
-        this.qrData = `${environment.appUrl}/dashboard/payments/${data.id}`;
+        this.qrData = `${environment.appUrl}/dashboard/payments/${data.reference}`;
         this.loading = false;
       },
       error: () => { this.loading = false; this.router.navigate(['/dashboard/payments']); }

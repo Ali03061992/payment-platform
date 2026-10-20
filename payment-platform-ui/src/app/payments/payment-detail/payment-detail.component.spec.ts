@@ -77,9 +77,9 @@ describe('PaymentDetailComponent', () => {
       expect(component.loading).toBeFalse();
     });
 
-    it('should set qrData', () => {
+    it('should set qrData with the payment reference', () => {
       component.ngOnInit();
-      expect(component.qrData).toContain('/dashboard/payments/1');
+      expect(component.qrData).toContain('/dashboard/payments/REF1');
     });
 
     it('should handle load error and navigate', () => {
