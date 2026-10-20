@@ -43,6 +43,21 @@
           <div class="stat-label">{{ 'DASHBOARD.PENDING_PAYMENTS' | translate }}</div>
         </div>
       </div>
+      <div class="stat-card">
+        <div class="stat-icon blue"><app-icon name="list" [size]="26"></app-icon></div>
+        <div class="stat-info">
+          <div class="stat-value">{{ totalOrders }}</div>
+          <div class="stat-label">{{ 'DASHBOARD.TOTAL_ORDERS' | translate }}</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon green"><app-icon name="wallet" [size]="26"></app-icon></div>
+        <div class="stat-info">
+          <div class="stat-value">{{ totalDueByShops | number:'1.2-2' }}</div>
+          <div class="stat-label">{{ 'FINANCE.ENCOURS_CLIENTS' | translate }}</div>
+          <div class="stat-sub">{{ activeShopCount }} {{ 'FINANCE.ACTIVE_SHOPS' | translate }}</div>
+        </div>
+      </div>
     </div>
 
     <div class="info-cards">
@@ -84,6 +99,7 @@
         <a routerLink="supplier/stock/create" class="quick-action"><app-icon name="plus" [size]="18"></app-icon> {{ 'DASHBOARD.ADD_PRODUCT' | translate }}</a>
         <a routerLink="supplier/orders" class="quick-action"><app-icon name="cart" [size]="18"></app-icon> {{ 'DASHBOARD.VIEW_ORDERS' | translate }}</a>
         <a routerLink="supplier/optimization" class="quick-action"><app-icon name="cpu" [size]="18"></app-icon> {{ 'DASHBOARD.OPTIMIZE_STOCK' | translate }}</a>
+        <a routerLink="supplier/financial" class="quick-action"><app-icon name="wallet" [size]="18"></app-icon> {{ 'NAV.FINANCE' | translate }}</a>
       </div>
 
       <div class="info-card alert-card">

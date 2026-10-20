@@ -4,6 +4,7 @@ import { UserService } from '../../services/user.service';
 import { OrganizationService } from '../../services/organization.service';
 import { PaymentService } from '../../services/payment.service';
 import { OrderService } from '../../services/order.service';
+import { DisputeService } from '../../services/dispute.service';
 import { User } from '../../models/user.model';
 import { OrganizationStats } from '../../models/organization.model';
 import { PaymentStats } from '../../models/payment.model';
@@ -21,6 +22,8 @@ export class DashboardAdminComponent implements OnInit {
   orgStats: OrganizationStats = { suppliers: 0, shops: 0 };
   paymentStats: PaymentStats = { total: 0, pending: 0, confirmed: 0, rejected: 0, cancelled: 0 };
   recentOrdersCount = 0;
+  openDisputesCount = 0;
+  relationsCount = 0;
   loading = true;
 
   constructor(
@@ -29,6 +32,7 @@ export class DashboardAdminComponent implements OnInit {
     private organizationService: OrganizationService,
     private paymentService: PaymentService,
     private orderService: OrderService,
+    private disputeService: DisputeService,
     private translate: TranslateService
   ) {}
 
@@ -40,7 +44,7 @@ export class DashboardAdminComponent implements OnInit {
   loadStats(): void {
     this.loading = true;
     let completed = 0;
-    const total = 4;
+    const total = 6;
 
     const checkDone = () => {
       completed++;
@@ -72,14 +76,26 @@ export class DashboardAdminComponent implements OnInit {
       error: () => checkDone()
     });
 
-    this.orderService.list().subscribe({
-      next: (orders) => {
+    this.orderService.listPaged(0, 1).subscribe({
+      next: (page) => {
         try {
-          this.recentOrdersCount = orders.length;
+          // totalElements = vrai total serveur (l'ancienne valeur orders.length
+          // était plafonnée à la taille de page, 50).
+          this.recentOrdersCount = page.totalElements;
         } finally {
           checkDone();
         }
       },
+      error: () => checkDone()
+    });
+
+    this.disputeService.list('OPEN').subscribe({
+      next: (disputes) => { this.openDisputesCount = disputes.length; checkDone(); },
+      error: () => checkDone()
+    });
+
+    this.organizationService.listRelations().subscribe({
+      next: (relations) => { this.relationsCount = relations.length; checkDone(); },
       error: () => checkDone()
     });
   }

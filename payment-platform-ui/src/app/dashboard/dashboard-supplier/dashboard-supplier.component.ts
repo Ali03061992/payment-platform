@@ -3,10 +3,12 @@ import { LoginService } from '../../services/login.service';
 import { StockService } from '../../services/stock.service';
 import { OrderService } from '../../services/order.service';
 import { PaymentService } from '../../services/payment.service';
+import { BalanceService } from '../../services/balance.service';
 import { User } from '../../models/user.model';
 import { Product } from '../../models/stock.model';
 import { Order } from '../../models/order.model';
 import { PaymentStats } from '../../models/payment.model';
+import { BalanceSummary } from '../../models/balance.model';
 import { statusLabelFr } from '../../pipes/status-label.pipe';
 import { TranslateService } from '@ngx-translate/core';
 
@@ -25,6 +27,8 @@ export class DashboardSupplierComponent implements OnInit {
   lowStockCount = 0;
   outOfStockCount = 0;
   pendingOrdersCount = 0;
+  totalOrders = 0;
+  shopBalances: BalanceSummary[] = [];
   loading = true;
 
   constructor(
@@ -32,8 +36,19 @@ export class DashboardSupplierComponent implements OnInit {
     private stockService: StockService,
     private orderService: OrderService,
     private paymentService: PaymentService,
+    private balanceService: BalanceService,
     private translate: TranslateService
   ) {}
+
+  /** Encours total dû par les boutiques (Σ remainingDue). */
+  get totalDueByShops(): number {
+    return this.shopBalances.reduce((sum, b) => sum + Number(b.remainingDue || 0), 0);
+  }
+
+  /** Nombre de boutiques actives (avec un solde). */
+  get activeShopCount(): number {
+    return this.shopBalances.length;
+  }
 
   ngOnInit(): void {
     this.user = this.loginService.getCurrentUser();
@@ -43,7 +58,7 @@ export class DashboardSupplierComponent implements OnInit {
   loadStats(): void {
     this.loading = true;
     let completed = 0;
-    const total = 4;
+    const total = 5;
 
     const checkDone = () => {
       completed++;
@@ -68,11 +83,14 @@ export class DashboardSupplierComponent implements OnInit {
       error: () => checkDone()
     });
 
-    this.orderService.list().subscribe({
-      next: (orders) => {
+    this.orderService.listPaged(0, 100).subscribe({
+      next: (page) => {
         try {
-          this.recentOrders = orders.slice(0, 5);
-          this.pendingOrdersCount = orders.filter(o => ['PENDING', 'CONFIRMED', 'PREPARING'].includes(o.status)).length;
+          this.recentOrders = page.items.slice(0, 5);
+          // totalElements est le vrai total serveur (items est plafonné à 100).
+          this.totalOrders = page.totalElements;
+          // Statuts réels du cycle de commande (PENDING n'existe pas, c'est DRAFT).
+          this.pendingOrdersCount = page.items.filter(o => ['DRAFT', 'CONFIRMED', 'PREPARING'].includes(o.status)).length;
         } finally {
           checkDone();
         }
@@ -84,6 +102,16 @@ export class DashboardSupplierComponent implements OnInit {
       next: (s) => { this.paymentStats = s; checkDone(); },
       error: () => checkDone()
     });
+
+    const supplierId = this.loginService.getCurrentUser()?.organizationId;
+    if (supplierId) {
+      this.balanceService.listBySupplier(String(supplierId)).subscribe({
+        next: (balances) => { this.shopBalances = balances; checkDone(); },
+        error: () => checkDone()
+      });
+    } else {
+      checkDone();
+    }
   }
 
   getGreeting(): string {
@@ -99,12 +127,17 @@ export class DashboardSupplierComponent implements OnInit {
 
   getStatusClass(status: string): string {
     const classes: Record<string, string> = {
-      'PENDING': 'badge-warning',
+      'DRAFT': 'badge-warning',
       'CONFIRMED': 'badge-info',
       'PREPARING': 'badge-info',
-      'READY': 'badge-success',
+      'READY_FOR_DELIVERY': 'badge-info',
+      'DELIVERY_ACCEPTED': 'badge-info',
+      'IN_DELIVERY': 'badge-info',
+      'DELIVERY_REJECTED': 'badge-danger',
       'DELIVERED': 'badge-success',
-      'CANCELLED': 'badge-danger'
+      'ACCEPTED': 'badge-success',
+      'CANCELLED': 'badge-danger',
+      'REJECTED': 'badge-danger'
     };
     return classes[status] || '';
   }

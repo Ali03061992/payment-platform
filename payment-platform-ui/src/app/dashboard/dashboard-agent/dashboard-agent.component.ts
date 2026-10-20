@@ -38,18 +38,21 @@ export class DashboardAgentComponent implements OnInit {
     this.orderService.myDeliveries().subscribe({
       next: (orders) => {
         const today = new Date().toISOString().split('T')[0];
-
-        this.assignedOrders = orders.filter(o => o.status === 'ASSIGNED').slice(0, 5);
-        this.inProgressOrders = orders.filter(o => ['READY', 'CONFIRMED'].includes(o.status)).slice(0, 5);
-        this.completedToday = orders.filter(o =>
+        // Statuts réels du cycle de livraison (OrderStatus) :
+        // assignée = prête pour livraison, en cours = acceptée/parcours, livrée = DELIVERED.
+        const assigned = orders.filter(o => o.status === 'READY_FOR_DELIVERY');
+        const inProgress = orders.filter(o => ['DELIVERY_ACCEPTED', 'IN_DELIVERY'].includes(o.status));
+        const doneToday = orders.filter(o =>
           o.status === 'DELIVERED' && o.deliveredAt && o.deliveredAt.startsWith(today)
-        ).slice(0, 5);
+        );
 
-        this.assignedCount = orders.filter(o => o.status === 'ASSIGNED').length;
-        this.inProgressCount = orders.filter(o => ['READY', 'CONFIRMED'].includes(o.status)).length;
-        this.completedTodayCount = orders.filter(o =>
-          o.status === 'DELIVERED' && o.deliveredAt && o.deliveredAt.startsWith(today)
-        ).length;
+        this.assignedOrders = assigned.slice(0, 5);
+        this.inProgressOrders = inProgress.slice(0, 5);
+        this.completedToday = doneToday.slice(0, 5);
+
+        this.assignedCount = assigned.length;
+        this.inProgressCount = inProgress.length;
+        this.completedTodayCount = doneToday.length;
 
         this.loading = false;
       },
@@ -72,13 +75,14 @@ export class DashboardAgentComponent implements OnInit {
 
   getStatusClass(status: string): string {
     const classes: Record<string, string> = {
-      'PENDING': 'badge-warning',
-      'CONFIRMED': 'badge-info',
-      'PREPARING': 'badge-info',
-      'READY': 'badge-info',
-      'ASSIGNED': 'badge-warning',
+      'READY_FOR_DELIVERY': 'badge-warning',
+      'DELIVERY_ACCEPTED': 'badge-info',
+      'IN_DELIVERY': 'badge-info',
+      'DELIVERY_REJECTED': 'badge-danger',
       'DELIVERED': 'badge-success',
-      'CANCELLED': 'badge-danger'
+      'ACCEPTED': 'badge-success',
+      'CANCELLED': 'badge-danger',
+      'REJECTED': 'badge-danger'
     };
     return classes[status] || '';
   }

@@ -2,9 +2,12 @@ import { Component, OnInit } from '@angular/core';
 import { LoginService } from '../../services/login.service';
 import { OrderService } from '../../services/order.service';
 import { PaymentService } from '../../services/payment.service';
+import { BalanceService } from '../../services/balance.service';
+import { QuoteService } from '../../services/quote.service';
 import { User } from '../../models/user.model';
 import { Order } from '../../models/order.model';
 import { Payment, PaymentStats } from '../../models/payment.model';
+import { BalanceSummary } from '../../models/balance.model';
 import { statusLabelFr } from '../../pipes/status-label.pipe';
 import { TranslateService } from '@ngx-translate/core';
 
@@ -23,6 +26,8 @@ export class DashboardShopComponent implements OnInit {
   pendingOrdersCount = 0;
   deliveredOrdersCount = 0;
   inTransitCount = 0;
+  pendingQuotesCount = 0;
+  supplierBalances: BalanceSummary[] = [];
   loading = true;
   reorderLoading: Record<string, boolean> = {};
 
@@ -30,8 +35,20 @@ export class DashboardShopComponent implements OnInit {
     private loginService: LoginService,
     private orderService: OrderService,
     private paymentService: PaymentService,
+    private balanceService: BalanceService,
+    private quoteService: QuoteService,
     private translate: TranslateService
   ) {}
+
+  /** Encours total dû aux fournisseurs (Σ remainingDue). */
+  get totalDueToSuppliers(): number {
+    return this.supplierBalances.reduce((sum, b) => sum + Number(b.remainingDue || 0), 0);
+  }
+
+  /** Nombre de fournisseurs avec un solde actif. */
+  get supplierCount(): number {
+    return this.supplierBalances.length;
+  }
 
   ngOnInit(): void {
     this.user = this.loginService.getCurrentUser();
@@ -41,7 +58,7 @@ export class DashboardShopComponent implements OnInit {
   loadStats(): void {
     this.loading = true;
     let completed = 0;
-    const total = 4;
+    const total = 6;
 
     const checkDone = () => {
       completed++;
@@ -56,13 +73,16 @@ export class DashboardShopComponent implements OnInit {
       error: () => checkDone()
     });
 
-    this.orderService.list().subscribe({
-      next: (orders) => {
+    this.orderService.listPaged(0, 100).subscribe({
+      next: (page) => {
         try {
-          this.totalOrders = orders.length;
-          this.pendingOrdersCount = orders.filter(o => ['PENDING', 'CONFIRMED', 'PREPARING'].includes(o.status)).length;
-          this.deliveredOrdersCount = orders.filter(o => o.status === 'DELIVERED').length;
-          this.inTransitCount = orders.filter(o => ['READY', 'ASSIGNED'].includes(o.status)).length;
+          // totalElements est le vrai total serveur (items est plafonné à 100).
+          this.totalOrders = page.totalElements;
+          const orders = page.items;
+          // Statuts réels du cycle de commande (PENDING/READY/ASSIGNED n'existent pas).
+          this.pendingOrdersCount = orders.filter(o => ['DRAFT', 'CONFIRMED', 'PREPARING'].includes(o.status)).length;
+          this.deliveredOrdersCount = orders.filter(o => ['DELIVERED', 'ACCEPTED'].includes(o.status)).length;
+          this.inTransitCount = orders.filter(o => ['READY_FOR_DELIVERY', 'DELIVERY_ACCEPTED', 'IN_DELIVERY'].includes(o.status)).length;
         } finally {
           checkDone();
         }
@@ -82,6 +102,25 @@ export class DashboardShopComponent implements OnInit {
       next: (s) => { this.paymentStats = s; checkDone(); },
       error: () => checkDone()
     });
+
+    const shopId = this.loginService.getCurrentUser()?.organizationId;
+    if (shopId) {
+      this.balanceService.listByShop(String(shopId)).subscribe({
+        next: (balances) => { this.supplierBalances = balances; checkDone(); },
+        error: () => checkDone()
+      });
+    } else {
+      checkDone();
+    }
+
+    this.quoteService.myRequests().subscribe({
+      next: (requests) => {
+        // QUOTED = fournisseur a répondu, en attente de décision de la boutique.
+        this.pendingQuotesCount = requests.filter(q => q.status === 'QUOTED').length;
+        checkDone();
+      },
+      error: () => checkDone()
+    });
   }
 
   getGreeting(): string {
@@ -97,13 +136,17 @@ export class DashboardShopComponent implements OnInit {
 
   getStatusClass(status: string): string {
     const classes: Record<string, string> = {
-      'PENDING': 'badge-warning',
+      'DRAFT': 'badge-warning',
       'CONFIRMED': 'badge-info',
       'PREPARING': 'badge-info',
-      'READY': 'badge-info',
-      'ASSIGNED': 'badge-info',
+      'READY_FOR_DELIVERY': 'badge-info',
+      'DELIVERY_ACCEPTED': 'badge-info',
+      'IN_DELIVERY': 'badge-info',
+      'DELIVERY_REJECTED': 'badge-danger',
       'DELIVERED': 'badge-success',
-      'CANCELLED': 'badge-danger'
+      'ACCEPTED': 'badge-success',
+      'CANCELLED': 'badge-danger',
+      'REJECTED': 'badge-danger'
     };
     return classes[status] || '';
   }
