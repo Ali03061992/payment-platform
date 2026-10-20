@@ -1,5 +1,5 @@
 name: payment_platform_mobile
-description: Payment Platform mobile — fournisseurs & boutiques (SUPPLIER_ADMIN, SUPPLIER_AGENT, SHOP_ADMIN, SHOP_AGENT). Parite Angular, push FCM prioritaire.
+description: NEXTERA mobile — fournisseurs & boutiques (SUPPLIER_ADMIN, SUPPLIER_AGENT, SHOP_ADMIN, SHOP_AGENT). Parite Angular, push FCM prioritaire.
 publish_to: "none"
 version: 1.0.0+1
 

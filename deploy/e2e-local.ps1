@@ -1,4 +1,4 @@
-# Payment Platform - E2E Tests (Local)
+# NEXTERA - E2E Tests (Local)
 # Run Cypress tests against local environment (localhost:4200)
 #
 # Prerequisites:

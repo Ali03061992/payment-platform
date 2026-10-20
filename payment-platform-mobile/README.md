@@ -1,4 +1,4 @@
-# payment-platform-mobile
+# payment-platform-mobile (NEXTERA)
 
 App Flutter multi-rôles : **SUPPLIER_ADMIN, SUPPLIER_AGENT, SHOP_ADMIN, SHOP_AGENT**. SYSTEM_ADMIN exclu → front Angular desktop.
 

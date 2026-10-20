@@ -272,7 +272,7 @@ class AppScaffold extends ConsumerWidget {
           ];
     return Scaffold(
       backgroundColor: Ds.pageBg,
-      appBar: AppBar(title: const Text('Payment Platform')),
+        appBar: AppBar(title: const Text('NEXTERA')),
       drawer: Drawer(
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.only(

@@ -1,4 +1,4 @@
-# Payment Platform - E2E Tests (Dev)
+# NEXTERA - E2E Tests (Dev)
 # Run Cypress tests against dev environment (localhost:8080)
 #
 # Prerequisites:

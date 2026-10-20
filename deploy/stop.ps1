@@ -1,4 +1,4 @@
-# Payment Platform - Stop Script
+# NEXTERA - Stop Script
 # Usage:
 #   .\stop.ps1          Stop all services (keeps data)
 #   .\stop.ps1 -Clean   Stop and remove volumes (full reset)
@@ -10,7 +10,7 @@ param(
 Set-Location $PSScriptRoot
 
 Write-Host "========================================" -ForegroundColor Cyan
-Write-Host "  Payment Platform - Stopping..." -ForegroundColor Cyan
+Write-Host "  NEXTERA - Stopping..." -ForegroundColor Cyan
 Write-Host "========================================" -ForegroundColor Cyan
 
 if ($Clean) {

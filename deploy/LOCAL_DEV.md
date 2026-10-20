@@ -1,4 +1,4 @@
-# Payment Platform - Local Development Guide
+# NEXTERA - Local Development Guide
 
 ## Architecture Overview
 

@@ -56,7 +56,7 @@ class FcmService {
   Future<void> _onForeground(RemoteMessage msg) async {
     final data = msg.data;
     final route = mapBackendUrlToMobileRoute(data['url'], tag: data['tag']);
-    final title = msg.notification?.title ?? 'Payment Platform';
+    final title = msg.notification?.title ?? 'NEXTERA';
     final body = msg.notification?.body ?? '';
     await local.show(
       msg.hashCode,

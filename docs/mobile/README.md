@@ -1,6 +1,6 @@
 # Mobile — README
 
-Socle mobile Flutter Payment Platform. Cible : **SUPPLIER_ADMIN, SUPPLIER_AGENT, SHOP_ADMIN, SHOP_AGENT**. SYSTEM_ADMIN exclu (reste Angular).
+Socle mobile Flutter NEXTERA. Cible : **SUPPLIER_ADMIN, SUPPLIER_AGENT, SHOP_ADMIN, SHOP_AGENT**. SYSTEM_ADMIN exclu (reste Angular).
 
 ## Docs
 

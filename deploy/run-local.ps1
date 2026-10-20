@@ -1,4 +1,4 @@
-# Payment Platform - Local Runner
+# NEXTERA - Local Runner
 # Run infrastructure in Docker, backend/frontend in IDE
 #
 # Usage:
@@ -21,7 +21,7 @@ Set-Location $PSScriptRoot
 
 if ($Stop) {
     Write-Host "========================================" -ForegroundColor Cyan
-    Write-Host "  Payment Platform - Stopping infra..." -ForegroundColor Cyan
+    Write-Host "  NEXTERA - Stopping infra..." -ForegroundColor Cyan
     Write-Host "========================================" -ForegroundColor Cyan
     docker compose -f docker-compose.dev.yml down
     Write-Host "Infrastructure stopped." -ForegroundColor Green
@@ -29,7 +29,7 @@ if ($Stop) {
 }
 
 Write-Host "========================================" -ForegroundColor Cyan
-Write-Host "  Payment Platform - Local Dev Mode" -ForegroundColor Cyan
+Write-Host "  NEXTERA - Local Dev Mode" -ForegroundColor Cyan
 Write-Host "  Infrastructure only (Docker)" -ForegroundColor Cyan
 Write-Host "========================================" -ForegroundColor Cyan
 Write-Host ""

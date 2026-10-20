@@ -1,4 +1,4 @@
-# Payment Platform - Dev Runner
+# NEXTERA - Dev Runner
 # Full stack with Docker (infrastructure + backend + frontend)
 #
 # Usage:
@@ -24,7 +24,7 @@ Set-Location $PSScriptRoot
 
 if ($Stop) {
     Write-Host "========================================" -ForegroundColor Cyan
-    Write-Host "  Payment Platform - Stopping..." -ForegroundColor Cyan
+    Write-Host "  NEXTERA - Stopping..." -ForegroundColor Cyan
     Write-Host "========================================" -ForegroundColor Cyan
     docker compose down
     Write-Host "All services stopped. Data preserved." -ForegroundColor Green
@@ -37,7 +37,7 @@ if ($Logs) {
 }
 
 Write-Host "========================================" -ForegroundColor Cyan
-Write-Host "  Payment Platform - Dev Mode (Full)" -ForegroundColor Cyan
+Write-Host "  NEXTERA - Dev Mode (Full)" -ForegroundColor Cyan
 Write-Host "  All services in Docker" -ForegroundColor Cyan
 Write-Host "========================================" -ForegroundColor Cyan
 Write-Host ""

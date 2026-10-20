@@ -1,4 +1,4 @@
-# Payment Platform - Start/Stop Scripts
+# NEXTERA - Start/Stop Scripts
 # Usage:
 #   .\run.ps1          Start all services
 #   .\run.ps1 -Build   Rebuild images and start
@@ -12,7 +12,7 @@ param(
 Set-Location $PSScriptRoot
 
 Write-Host "========================================" -ForegroundColor Cyan
-Write-Host "  Payment Platform - Starting..." -ForegroundColor Cyan
+Write-Host "  NEXTERA - Starting..." -ForegroundColor Cyan
 Write-Host "========================================" -ForegroundColor Cyan
 
 if ($Build) {

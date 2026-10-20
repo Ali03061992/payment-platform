@@ -38,7 +38,7 @@ Le défi est stocké côté serveur (challenge TTL par défaut 300 s), lié à l
 | Variable | Profil | Défaut | Description |
 |---|---|---|---|
 | `WEBAUTHN_RP_ID` | tous / **prod requis** | `localhost` | **RP ID** = domaine hébergeant la PWA, **sans schéma ni port** (ex. `pay.example.tn`). Doit être un suffixe de domaine de l'origine (eTLD+1 recommandé). |
-| `WEBAUTHN_RP_NAME` | tous | `Payment Platform` | Nom affiché dans le dialogue du navigateur. |
+| `WEBAUTHN_RP_NAME` | tous | `NEXTERA` | Nom affiché dans le dialogue du navigateur. |
 | `WEBAUTHN_ALLOWED_ORIGINS` | tous / **prod requis** | `http://localhost:4200,http://localhost:8080` | Origines autorisées (RFC 6454), séparées par des virgules, **avec schéma**. |
 | `WEBAUTHN_CHALLENGE_TTL_SECONDS` | tous | `300` | Durée de validité d'un défi. |
 | `WEBAUTHN_TIMEOUT_SECONDS` | tous | `60` | Timeout renvoyé aux options. |
@@ -131,7 +131,7 @@ npx web-push generate-vapid-keys
 ```dotenv
 # Passkeys
 WEBAUTHN_RP_ID=pay.example.tn
-WEBAUTHN_RP_NAME=Payment Platform
+WEBAUTHN_RP_NAME=NEXTERA
 WEBAUTHN_ALLOWED_ORIGINS=https://pay.example.tn
 
 # Web Push

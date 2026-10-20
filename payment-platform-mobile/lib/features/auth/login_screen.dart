@@ -97,7 +97,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       const SizedBox(height: 18),
                       _rise(
                         1,
-                        Text('Payment Platform', style: Tx.h1(color: Colors.white, size: 26)),
+                        Text('NEXTERA', style: Tx.h1(color: Colors.white, size: 26)),
                       ),
                       _rise(
                         2,

@@ -11,7 +11,7 @@ class PaymentApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final router = AppRouter.build(ref);
     return MaterialApp.router(
-      title: 'Payment Platform',
+      title: 'NEXTERA',
       theme: appTheme,
       routerConfig: router,
       debugShowCheckedModeBanner: false,

@@ -1,8 +1,8 @@
-# Payment Platform — Fonctionnalités de l'application
+# NEXTERA — Fonctionnalités de l'application
 
 > Inventaire complet de l'état implémenté (web + API). La partie mobile (`payment-platform-mobile/`) est volontairement exclue de ce document.
 
-Payment Platform est une plateforme B2B qui relie **fournisseurs** et **boutiques** : catalogue, stocks, commandes, livraisons, paiements, facturation conforme au droit tunisien, retenues à la source TEJ et notifications temps réel.
+NEXTERA est une plateforme B2B qui relie **fournisseurs** et **boutiques** : catalogue, stocks, commandes, livraisons, paiements, facturation conforme au droit tunisien, retenues à la source TEJ et notifications temps réel.
 
 ## 1. Rôles et comptes
 

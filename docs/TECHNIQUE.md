@@ -1,4 +1,4 @@
-# Payment Platform — Dossier technique
+# NEXTERA — Dossier technique
 
 > Référence technique unique du projet (consolidation des anciens docs `docs/`).
 > Le fonctionnel est décrit dans [FONCTIONNALITES.md](FONCTIONNALITES.md).

@@ -6,7 +6,7 @@ param([switch]$Logs)
 $ErrorActionPreference = "Stop"
 $compose = "deploy/docker-compose.sonar.yml"
 
-Write-Host "== Payment Platform – SonarQube local (monorepo) ==" -ForegroundColor Cyan
+Write-Host "== NEXTERA – SonarQube local (monorepo) ==" -ForegroundColor Cyan
 Write-Host "Compose : $compose"
 
 docker compose -f $compose up -d
