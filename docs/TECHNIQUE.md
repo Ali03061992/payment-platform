@@ -32,7 +32,7 @@ RabbitMQ (amqp 5673 / mgmt 15673), MySQL (hôte 3307), Redis, Mailpit, Adminer
 ### Principes
 - **Une base par service**, aucun accès croisé aux tables.
 - Synchrone : REST uniquement via le Gateway (ex. Payment → Organization pour valider une relation).
-- Asynchrone : **domain events** + outbox idempotent (pas de transaction distribuée).
+- Asynchrone : **domain events** + outbox idempotent (pas de transaction distribuée). `OutboxRelay` relit toutes les secondes (`app.outbox.relay-interval-ms`, défaut 1000 ms) les 100 premiers événements non traités et les publie vers `payment.events`, `organization.events` ou `identity.events` ; l'`eventId` unique assure l'idempotence côté consommateur.
 - DDD par service : `domain` (modèle, règles) / `application` (usecases, DTO) / `infrastructure` (JPA, messaging, HTTP) / `interfaces` (REST).
 - Le Gateway n'est pas une frontière de confiance : chaque service **re-valide le JWT et l'état du compte**.
 
@@ -48,7 +48,8 @@ Consommateur principal : notification-service (SSE + push FCM).
 | Auth (`/auth`) | `POST /login|/refresh|/logout|/register`, `GET /me`, `POST /change-password`, reset (`/request|/validate|/confirm`), setup (`/validate|/complete`) |
 | Utilisateurs (`/users`) | CRUD, `PATCH /{id}/activate|/disable`, agents (`/agents`), `PATCH /me/preferences` |
 | Admin orgs (`/admin`) | CRUD fournisseurs/boutiques, `PATCH …/activate|/disable|/fiscal-profile`, `GET /stats` |
-| Commandes (`/orders`) | CRUD, cycle `confirm→prepare→ready→assign→accept-delivery→confirm-delivery→deliver→accept`, `reorder`, `reject`, géolocalisation, commentaires, `export/csv`, `/{id}/invoice` (PDF), `/{id}/teif.xml` (TEIF v1.8.8), `PATCH /{id}/external-reference`, certificats RAS (`GET|/pdf|/xml`, `PATCH …/deposit`, `/batch`, `/due`, `/monthly-summary`) || Stocks (`/stock`, `/catalog`) | produits CRUD + image, mouvements, `low-stock-alerts`, optimisation (`GET|/configure`), familles/catégories |
+| Commandes (`/orders`) | CRUD, cycle `confirm→prepare→ready→assign→accept-delivery→confirm-delivery→deliver→accept`, `reorder`, `reject`, géolocalisation, commentaires, `export/csv`, `/{id}/invoice` (PDF), `/{id}/teif.xml` (TEIF v1.8.8), `PATCH /{id}/external-reference`, certificats RAS (`GET|/pdf|/xml`, `PATCH …/deposit`, `/batch`, `/due`, `/monthly-summary`) |
+| Stocks (`/stock`, `/catalog`) | produits CRUD + image, mouvements, `low-stock-alerts`, optimisation (`GET /api/suppliers/{supplierId}/optimization`, `POST …/configure`), familles/catégories |
 | Soldes (`/balances`) | soldes fournisseur/boutique, par couple, `POST /adjust` |
 | Paiements (`/payments`) | CRUD, `confirm|reject|cancel`, `/stats`, `/overdue`, `/agent-summary`, `/supplier-summary`, exports, facture, auto-création interne |
 | Litiges (`/disputes`) | création, par commande, messages, résolution |
@@ -57,21 +58,26 @@ Consommateur principal : notification-service (SSE + push FCM).
 
 ## 4. Données (MySQL, migrations versionnées)
 
-- **identity_db** : utilisateurs, rôles, agents, préférences, tokens reset/setup.
+- **identity_db** : utilisateurs, rôles, agents, préférences, tokens reset/setup, refresh tokens (hash SHA-256 uniquement), credentials et challenges WebAuthn.
 - **organization_db** : organisations (+ profil fiscal : MF, patente, identifiant TEJ, nature de retenue par défaut, adresse, régime, attestation), relations, produits (+ TVA/FODEC/TTC), stocks + mouvements, commandes + articles (snapshots fiscaux, ventilation TVA, timbre, référence externe), certificats de retenue, litiges + messages, soldes, audit.
 - **payment_db** : paiements (+ ASAP, échéances), factures de paiement.
 - **notification_db** : notifications, tokens FCM.
 - Règles : montants **3 décimales**, MF format `1234567A/A/M/000`, statuts par chaîne contrôlée, records Java = constructeurs positionnels.
 
+### Optimisation des stocks
+`StockOptimizationService` (organization-service) produit, par fournisseur, une classification ABC/XYZ, des prévisions de demande, le stock de sécurité, le point de commande, l'EOQ, les risques, anomalies et recommandations. La demande est dérivée des mouvements `OUT` ; les paramètres (délai fournisseur 7 j, coût de commande 50, coût de possession 25 %) sont modifiables via `POST …/optimization/configure` et conservés **en mémoire** (perdus au redémarrage, non partagés entre instances).
+
 ## 5. Sécurité
 
-- JWT HS256 (secret via env, expiration 30 min), re-validation par service, contrôle RBAC par endpoint (`@PreAuthorize`).
+- JWT HS256 (secret via env, expiration 30 min), claims `sub`, `username`, `roles`, `organizationId`, `jti` ; re-validation par service, contrôle RBAC par endpoint (`@PreAuthorize`). En prod, `JWT_SECRET` est obligatoire (échec au démarrage si absent) et une valeur de dev connue est refusée.
+- Refresh tokens opaques 256 bits : seul le SHA-256 est stocké, rotation à chaque usage (ancien révoqué avec traçabilité `replaced_by`), TTL 7 j, révocation au logout ou si le compte est désactivé. Le web utilise le cookie `pp_rt` (HttpOnly, Secure par défaut, SameSite=Strict, Path=`/api/auth`) ; le mobile envoie le token dans le body.
 - SSE (`/api/notifications/stream`) : nginx contourne le gateway (EventSource sans header) ; le JWT signé en query (`?token=`, HMAC + expiry vérifiés dans le contrôleur) fait foi, pas de session.
 - Gateway : `JwtValidationFilter`, `IpWhitelistFilter` (CIDR, `172.16.0.0/12` en dev), `RateLimitFilter` (quotas stricts sur l'auth).
 - Isolation inter-organisations vérifiée (tests d'accès croisés), journal d'audit, secrets jamais commités (voir `deploy/.env`).
 
 ## 6. Fiscalité — points d'implémentation
 
+- Création/édition d'organisation (`CreateOrganizationRequest`) : `matriculeFiscal` obligatoire sauf particulier/export (format `1234567A/A/M/000`), `fiscalRegime` parmi ASSUJETTI (défaut), FORFAITAIRE, SUSPENDU, EXPORT, NON_ASSUJETTI, ETAT_PUBLIC ; attestation de suspension obligatoire si SUSPENDU ; `tejIdentifier` et `defaultWithholdingNature` (ex. HONORAIRES_REEL).
 - `FiscalRules` : ordre remise ligne (montant = PU × Qté × % / 100) → FODEC 1 % dans base TVA → TVA par taux → TTC → timbre 1,000 DT ; aucune remise globale ; miroir frontend `tunisian-fiscal.ts`.
 - `TeifGeneratorService` : TEIF v1.8.8 (MF 13 chars, jjMMAA, codes I-*, timbre séparé, `RefTtnVal`), `GET /{id}/teif.xml`.
 - `Withholding*` : certificats rattachés aux factures, XML/loo PDF+QR, lot mensuel, J-7 planifié (`WithholdingDueScheduler`), synthèse mensuelle.
