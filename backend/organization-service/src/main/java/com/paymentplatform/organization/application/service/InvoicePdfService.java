@@ -66,7 +66,7 @@ public class InvoicePdfService {
     public byte[] generateInvoicePdf(Order order, List<OrderItem> items,
                                      InvoiceParty supplier, InvoiceParty buyer, String invoiceNumber) {
         return generatePdf(order, items, supplier, buyer, "FACTURE", "Facture n°: ",
-                invoiceNumber, "NEXTERA - Facture ", null);
+                invoiceNumber, "NEXTERA - Facture ", null, true);
     }
 
     /**
@@ -76,7 +76,7 @@ public class InvoicePdfService {
     public byte[] generatePurchaseOrderPdf(Order order, List<OrderItem> items,
                                            InvoiceParty supplier, InvoiceParty buyer, String detailsUrl) {
         return generatePdf(order, items, supplier, buyer, "BON DE COMMANDE", "Commande n°: ",
-                order.getReference(), "NEXTERA - Bon de commande ", detailsUrl);
+                order.getReference(), "NEXTERA - Bon de commande ", detailsUrl, false);
     }
 
     /** Devis : même mise en page que la facture, intitulés adaptés. */
@@ -85,13 +85,13 @@ public class InvoicePdfService {
                                    String refKind, String refValue) {
         return generatePdf(order, items, supplier, buyer, "DEVIS N°" + version,
                 "Devis n°" + version + " — " + refKind + " : ", refValue,
-                "NEXTERA - Devis ", null);
+                "NEXTERA - Devis ", null, true);
     }
 
     private byte[] generatePdf(Order order, List<OrderItem> items,
                                InvoiceParty supplier, InvoiceParty buyer,
                                String title, String refLabel, String refValue, String footerLabel,
-                               String detailsUrl) {
+                               String detailsUrl, boolean includeSignatures) {
         Document document = new Document(PageSize.A4, 36, 36, 44, 36);
         ByteArrayOutputStream out = new ByteArrayOutputStream();
 
@@ -108,7 +108,9 @@ public class InvoicePdfService {
             addTotals(document, order);
             addFiscalMention(document, order);
             addLegalMentions(document, order);
-            addSignatures(document);
+            if (includeSignatures) {
+                addSignatures(document);
+            }
 
             document.close();
         } catch (DocumentException e) {

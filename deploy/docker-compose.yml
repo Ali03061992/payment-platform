@@ -144,6 +144,7 @@ services:
       API_GATEWAY_URL: http://api-gateway:8081
       INTERNAL_SECRET: ${INTERNAL_SECRET}
       REDIS_HOST: redis
+      FRONTEND_URL: ${FRONTEND_URL:-https://nextera.payment.tn}
       PAYMENT_SERVICE_URL: payment-service
       PAYMENT_SERVICE_PORT: 8084
     depends_on:
