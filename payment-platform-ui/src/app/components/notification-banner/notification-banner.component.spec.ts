@@ -5,9 +5,11 @@
  * Moyens : TestBed + fixture, stubs jasmine.
  */
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { of } from 'rxjs';
 import { NotificationBannerComponent } from './notification-banner.component';
 import { NotificationService } from '../../services/notification.service';
 import { PushNotificationService } from '../../services/push-notification.service';
+import { WebPushService } from '../../services/web-push.service';
 import { TranslateStubPipe } from '../../testing/translate-stubs';
 
 describe('NotificationBannerComponent', () => {
@@ -15,25 +17,31 @@ describe('NotificationBannerComponent', () => {
   let fixture: ComponentFixture<NotificationBannerComponent>;
   let notificationService: jasmine.SpyObj<NotificationService>;
   let pushService: jasmine.SpyObj<PushNotificationService>;
+  let webPushService: jasmine.SpyObj<WebPushService>;
 
   beforeEach(() => {
     const notifSpy = jasmine.createSpyObj('NotificationService', ['getPermissionStatus', 'requestPermission', 'showBrowserNotification']);
     notifSpy.getPermissionStatus.and.returnValue('default');
     const pushSpy = jasmine.createSpyObj('PushNotificationService', ['requestPermissionAndGetToken', 'listenToMessages']);
     pushSpy.requestPermissionAndGetToken.and.returnValue(Promise.resolve('fcm-token'));
+    const webPushSpy = jasmine.createSpyObj('WebPushService', ['isSupported', 'enable']);
+    webPushSpy.isSupported.and.returnValue(false);
+    webPushSpy.enable.and.returnValue(of(void 0));
     localStorage.clear();
 
     TestBed.configureTestingModule({
       declarations: [NotificationBannerComponent, TranslateStubPipe],
       providers: [
         { provide: NotificationService, useValue: notifSpy },
-        { provide: PushNotificationService, useValue: pushSpy }
+        { provide: PushNotificationService, useValue: pushSpy },
+        { provide: WebPushService, useValue: webPushSpy }
       ]
     });
     fixture = TestBed.createComponent(NotificationBannerComponent);
     component = fixture.componentInstance;
     notificationService = TestBed.inject(NotificationService) as jasmine.SpyObj<NotificationService>;
     pushService = TestBed.inject(PushNotificationService) as jasmine.SpyObj<PushNotificationService>;
+    webPushService = TestBed.inject(WebPushService) as jasmine.SpyObj<WebPushService>;
   });
 
   afterEach(() => {
@@ -80,8 +88,18 @@ describe('NotificationBannerComponent', () => {
       expect(localStorage.getItem('notification_choice')).toBe('accepted');
     });
 
-    it('should register FCM token when permission granted', async () => {
+    it('should subscribe Web Push when supported', async () => {
       notificationService.requestPermission.and.returnValue(Promise.resolve('granted'));
+      webPushService.isSupported.and.returnValue(true);
+      component.showBanner = true;
+      await component.acceptNotifications();
+      expect(webPushService.enable).toHaveBeenCalled();
+      expect(pushService.requestPermissionAndGetToken).not.toHaveBeenCalled();
+    });
+
+    it('should fall back to FCM when Web Push is unsupported', async () => {
+      notificationService.requestPermission.and.returnValue(Promise.resolve('granted'));
+      webPushService.isSupported.and.returnValue(false);
       component.showBanner = true;
       await component.acceptNotifications();
       expect(pushService.requestPermissionAndGetToken).toHaveBeenCalled();
