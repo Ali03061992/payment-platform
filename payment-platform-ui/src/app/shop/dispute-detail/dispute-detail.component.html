@@ -9,9 +9,7 @@
   <div>
     <div class="page-header no-print">
       <h2>{{ 'DISPUTES.DETAIL_TITLE' | translate }} #{{ dispute.id | slice:0:8 }}</h2>
-      <div class="page-header-actions">
-        <a class="btn btn-secondary" (click)="backToOrder()">{{ 'DISPUTES.BACK_TO_ORDER' | translate }}</a>
-      </div>
+      <button class="btn-close" (click)="backToOrder()" [attr.aria-label]="'COMMON.CLOSE' | translate" [attr.title]="'COMMON.CLOSE' | translate">&times;</button>
     </div>
     <div class="detail-grid">
       <div class="detail-card">

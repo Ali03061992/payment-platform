@@ -394,7 +394,7 @@
     <div class="modal-content modal-lg" (click)="$event.stopPropagation()">
       <div class="modal-header">
         <h3>{{ 'DELIVERY.DETAIL_TITLE' | translate }} {{ selectedDetailOrder?.reference }}</h3>
-        <button class="btn-close" (click)="closeDetail()">&times;</button>
+        <button class="btn-close" (click)="closeDetail()" [attr.aria-label]="'COMMON.CLOSE' | translate" [attr.title]="'COMMON.CLOSE' | translate">&times;</button>
       </div>
       @if (selectedDetailOrder) {
         <div>
@@ -553,7 +553,7 @@
     <div class="modal-content" (click)="$event.stopPropagation()">
       <div class="modal-header">
         <h3>{{ 'DELIVERY.CONFIRM_DATE_TITLE' | translate }}</h3>
-        <button class="btn-close" (click)="closeConfirmDate()">&times;</button>
+        <button class="btn-close" (click)="closeConfirmDate()" [attr.aria-label]="'COMMON.CLOSE' | translate" [attr.title]="'COMMON.CLOSE' | translate">&times;</button>
       </div>
       @if (confirmDateOrder) {
         <div>
@@ -583,7 +583,7 @@
     <div class="modal-content" (click)="$event.stopPropagation()">
       <div class="modal-header">
         <h3>{{ 'DELIVERY.CONFIRM_DELIVERY_TITLE' | translate }}</h3>
-        <button class="btn-close" (click)="closeDeliver()">&times;</button>
+        <button class="btn-close" (click)="closeDeliver()" [attr.aria-label]="'COMMON.CLOSE' | translate" [attr.title]="'COMMON.CLOSE' | translate">&times;</button>
       </div>
       @if (selectedOrder) {
         <div>
@@ -633,7 +633,7 @@
     <div class="modal-content" (click)="$event.stopPropagation()">
       <div class="modal-header">
         <h3>{{ 'SUPPLIER_ORDERS.REJECT_DELIVERY_TITLE' | translate }}</h3>
-        <button class="btn-close" (click)="closeRejectModal()">&times;</button>
+        <button class="btn-close" (click)="closeRejectModal()" [attr.aria-label]="'COMMON.CLOSE' | translate" [attr.title]="'COMMON.CLOSE' | translate">&times;</button>
       </div>
       @if (rejectOrder) {
         <div>

@@ -67,3 +67,9 @@
 .payment-badge.in-progress { background: #e3f2fd; color: #1565c0; }
 .payment-badge.resolved { background: #e8f5e9; color: #2e7d32; }
 .payment-badge.closed { background: #eceff1; color: #546e7a; }
+
+@media (max-width: 768px) {
+  .page-header .btn-close {
+    align-self: flex-end;
+  }
+}

@@ -1,5 +1,17 @@
 /* Component-specific styles only — global design system in styles.css */
 
+.page-header h2 {
+  order: 0;
+}
+
+.page-header .btn-close {
+  order: 2;
+}
+
+.page-header-actions {
+  order: 1;
+}
+
 .status-timeline h3 {
   margin-bottom: 16px;
   font-size: 18px;
@@ -85,6 +97,34 @@
 .payment-badge.in-progress { background: #e3f2fd; color: #1565c0; }
 .payment-badge.resolved { background: #e8f5e9; color: #2e7d32; }
 .payment-badge.closed { background: #eceff1; color: #546e7a; }
+
+@media (max-width: 768px) {
+  .page-header {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .page-header h2 {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .page-header .btn-close {
+    order: 1;
+  }
+
+  .page-header-actions {
+    order: 2;
+    flex: 1 0 100%;
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .page-header-actions .btn {
+    width: 100%;
+  }
+}
 
 @media print {
   .no-print,

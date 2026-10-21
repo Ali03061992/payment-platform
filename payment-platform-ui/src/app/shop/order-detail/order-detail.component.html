@@ -9,6 +9,7 @@
   <div>
     <div class="page-header no-print">
       <h2>{{ 'ORDER_DETAIL.TITLE' | translate }} {{ order.reference }}</h2>
+      <a class="btn-close" routerLink="/dashboard/shop/orders" [attr.aria-label]="'COMMON.CLOSE' | translate" [attr.title]="'COMMON.CLOSE' | translate">&times;</a>
       <div class="page-header-actions">
         <button class="btn btn-primary" (click)="downloadPurchaseOrder()" [attr.aria-label]="'ORDER_DETAIL.DOWNLOAD_PURCHASE_ORDER_ARIA' | translate">{{ 'ORDER_DETAIL.DOWNLOAD_PURCHASE_ORDER' | translate }}</button>
         @if (canGenerateInvoice()) {
@@ -21,7 +22,6 @@
           }
         }
         <button class="btn btn-primary" (click)="printOrder()" [attr.aria-label]="'ORDER_DETAIL.PRINT_ARIA' | translate">{{ 'ORDER_DETAIL.PRINT' | translate }}</button>
-        <a class="btn btn-secondary" routerLink="/dashboard/shop/orders" [attr.aria-label]="'ORDER_DETAIL.BACK_ARIA' | translate">{{ 'ORDER_DETAIL.BACK' | translate }}</a>
       </div>
     </div>
     <div class="detail-grid">

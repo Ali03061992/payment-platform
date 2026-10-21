@@ -1,6 +1,15 @@
 .header-actions {
   display: flex;
   gap: 8px;
+  order: 1;
+}
+
+.page-header h2 {
+  order: 0;
+}
+
+.page-header .btn-close {
+  order: 2;
 }
 
 .qr-section {
@@ -59,11 +68,28 @@
 }
 
 @media (max-width: 768px) {
+  .page-header {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .page-header h2 {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .page-header .btn-close {
+    order: 1;
+  }
+
   .qr-card {
     padding: 24px 16px;
   }
 
   .header-actions {
+    order: 2;
+    flex: 1 0 100%;
     flex-direction: column;
     width: 100%;
   }
