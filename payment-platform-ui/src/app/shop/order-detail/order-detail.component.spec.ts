@@ -36,7 +36,7 @@ describe('ShopOrderDetailComponent', () => {
   };
 
   beforeEach(() => {
-    const orderSpy = jasmine.createSpyObj('OrderService', ['getById', 'getByReference', 'accept', 'acceptAsap', 'reject', 'cancel', 'downloadInvoice', 'downloadTeif', 'printInvoice', 'getComments', 'addComment', 'getWithholdingCertificate', 'downloadWithholdingCertificatePdf', 'downloadWithholdingCertificateXml', 'markCertificateDeposited', 'updateExternalReference']);
+    const orderSpy = jasmine.createSpyObj('OrderService', ['getById', 'getByReference', 'accept', 'acceptAsap', 'reject', 'cancel', 'downloadInvoice', 'downloadTeif', 'printInvoice', 'getComments', 'addComment', 'getWithholdingCertificate', 'downloadWithholdingCertificatePdf', 'downloadWithholdingCertificateXml', 'markCertificateDeposited', 'updateExternalReference', 'downloadPurchaseOrder']);
     const disputeSpy = jasmine.createSpyObj('DisputeService', ['getByOrder', 'create']);
     const toastSpy = jasmine.createSpyObj('ToastService', ['success', 'error']);
     const confirmSpy = jasmine.createSpyObj('ConfirmDialogService', ['confirm']);

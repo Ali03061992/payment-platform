@@ -61,6 +61,28 @@ describe('OrderService', () => {
     });
   });
 
+  describe('downloadPurchaseOrder', () => {
+    it('should GET purchase order as blob and save it', () => {
+      const blob = new Blob(['%PDF-1.4'], { type: 'application/pdf' });
+      const createSpy = spyOn(window.URL, 'createObjectURL').and.returnValue('blob:test');
+      const revokeSpy = spyOn(window.URL, 'revokeObjectURL');
+      const clickSpy = spyOn(HTMLAnchorElement.prototype, 'click');
+
+      service.downloadPurchaseOrder('ord-1');
+
+      const req = httpMock.expectOne('/api/orders/ord-1/purchase-order');
+      expect(req.request.method).toBe('GET');
+      expect(req.request.responseType).toBe('blob');
+      req.flush(blob, {
+        headers: { 'Content-Disposition': 'attachment; filename="bon-commande-ORD-001.pdf"' }
+      });
+
+      expect(createSpy).toHaveBeenCalled();
+      expect(clickSpy).toHaveBeenCalled();
+      expect(revokeSpy).toHaveBeenCalled();
+    });
+  });
+
   describe('printInvoice', () => {
     it('should open PDF blob in new window for printing', () => {
       const blob = new Blob(['%PDF-1.4'], { type: 'application/pdf' });

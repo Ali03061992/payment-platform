@@ -6,6 +6,7 @@ import { SupplierAgentService } from '../../services/supplier-agent.service';
 import { StockService } from '../../services/stock.service';
 import { Order, OrderComment, OrderPage, WithholdingCertificate } from '../../models/order.model';
 import { paginateItems, sortItems, toggleSortState, ariaSortFor, sortIndicatorFor, SortState } from '../../models/page.model';
+import { environment } from '../../../environments/environment';
 import { ToastService } from '../../services/toast.service';
 import { ConfirmDialogService } from '../../components/confirm-dialog/confirm-dialog.service';
 import { Subscription, Subject, debounceTime, distinctUntilChanged, switchMap, of } from 'rxjs';
@@ -37,6 +38,8 @@ export class OrderManagementComponent implements OnInit, OnDestroy {
 
   showDetail = false;
   selectedOrder: Order | null = null;
+  /** QR de la fiche : scanné, il réouvre directement ce détail de commande. */
+  detailQrData = '';
   loadingDetail = false;
   detailCertificate: WithholdingCertificate | null = null;
   showDetailDepositForm = false;
@@ -340,6 +343,7 @@ export class OrderManagementComponent implements OnInit, OnDestroy {
     this.showSearchDropdown = false;
     this.loadingDetail = true;
     this.showDetail = true;
+    this.detailQrData = `${environment.appUrl}/dashboard/supplier/orders?ref=${encodeURIComponent(order.reference || order.id)}`;
     this.detailComments = [];
     this.detailNewComment = '';
     const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(order.id);
@@ -539,6 +543,11 @@ export class OrderManagementComponent implements OnInit, OnDestroy {
 
   downloadInvoice(order: Order): void {
     this.orderService.downloadInvoice(order.id);
+  }
+
+  downloadDetailPurchaseOrder(): void {
+    if (!this.selectedOrder) return;
+    this.orderService.downloadPurchaseOrder(this.selectedOrder.id);
   }
 
   exportCsv(): void {

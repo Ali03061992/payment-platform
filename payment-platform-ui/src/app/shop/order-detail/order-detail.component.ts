@@ -7,6 +7,7 @@ import { Order, OrderComment, WithholdingCertificate } from '../../models/order.
 import { Dispute } from '../../models/dispute.model';
 import { ToastService } from '../../services/toast.service';
 import { ConfirmDialogService } from '../../components/confirm-dialog/confirm-dialog.service';
+import { environment } from '../../../environments/environment';
 import { Subscription } from 'rxjs';
 import { statusLabelFr } from '../../pipes/status-label.pipe';
 
@@ -19,6 +20,8 @@ import { statusLabelFr } from '../../pipes/status-label.pipe';
 export class ShopOrderDetailComponent implements OnInit, OnDestroy {
   order: Order | null = null;
   loading = true;
+  /** QR de la page : scanné, il ouvre directement ce détail de commande. */
+  qrData = '';
   disputes: Dispute[] = [];
   showDisputeForm = false;
   disputeReason = '';
@@ -61,6 +64,7 @@ export class ShopOrderDetailComponent implements OnInit, OnDestroy {
     this.subscriptions.add(request$.subscribe({
       next: (data: Order) => {
         this.order = data;
+        this.qrData = `${environment.appUrl}/dashboard/shop/orders/${data.reference}`;
         this.loading = false;
         this.loadDisputes(data.id);
         this.loadComments(data.id);
@@ -293,6 +297,11 @@ export class ShopOrderDetailComponent implements OnInit, OnDestroy {
   downloadInvoice(): void {
     if (!this.order) return;
     this.orderService.downloadInvoice(this.order.id);
+  }
+
+  downloadPurchaseOrder(): void {
+    if (!this.order) return;
+    this.orderService.downloadPurchaseOrder(this.order.id);
   }
 
   downloadTeif(): void {

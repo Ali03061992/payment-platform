@@ -483,7 +483,8 @@
     "ERROR": "Error",
     "SELECT": "-- Select --",
     "SAVE": "Save",
-    "SAVING": "Saving…"
+    "SAVING": "Saving…",
+    "SCAN_TO_OPEN": "Scan to open this page"
   },
   "STATUS": {
     "PENDING": "Pending",
@@ -949,6 +950,8 @@
     "DOWNLOAD_INVOICE": "Download invoice",
     "DOWNLOAD_TEIF": "E-invoice (TEIF)",
     "DOWNLOAD_TEIF_ARIA": "Download the TEIF e-invoice",
+    "DOWNLOAD_PURCHASE_ORDER": "Generate purchase order",
+    "DOWNLOAD_PURCHASE_ORDER_ARIA": "Generate and download the purchase order",
     "QUOTES_TITLE": "Received quotes",
     "QUOTE_VERSION": "Quote",
     "QUOTE_TOTAL": "Total",
@@ -1200,6 +1203,8 @@
     "DOWNLOAD_INVOICE_ARIA": "Download invoice",
     "DOWNLOAD_TEIF": "E-invoice (TEIF)",
     "DOWNLOAD_TEIF_ARIA": "Download the TEIF e-invoice",
+    "DOWNLOAD_PURCHASE_ORDER": "Generate purchase order",
+    "DOWNLOAD_PURCHASE_ORDER_ARIA": "Generate and download the purchase order",
     "QUOTE": "Quote",
     "QUOTE_ARIA": "Price a quote for",
     "QUOTE_TITLE": "Quote — order {{ref}}",

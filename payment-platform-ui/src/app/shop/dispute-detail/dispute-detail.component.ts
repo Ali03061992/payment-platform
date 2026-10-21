@@ -4,6 +4,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { DisputeService } from '../../services/dispute.service';
 import { LoginService } from '../../services/login.service';
 import { Dispute } from '../../models/dispute.model';
+import { environment } from '../../../environments/environment';
 import { ToastService } from '../../services/toast.service';
 import { ConfirmDialogService } from '../../components/confirm-dialog/confirm-dialog.service';
 import { Subscription } from 'rxjs';
@@ -18,6 +19,8 @@ import { statusLabelFr } from '../../pipes/status-label.pipe';
 export class DisputeDetailComponent implements OnInit, OnDestroy {
   dispute: Dispute | null = null;
   loading = true;
+  /** QR de la page : scanné, il réouvre directement ce détail de litige. */
+  qrData = '';
   newMessage = '';
   submitting = false;
 
@@ -35,6 +38,7 @@ export class DisputeDetailComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id')!;
+    this.qrData = `${environment.appUrl}${this.router.url}`;
     this.subscriptions.add(this.disputeService.getById(id).subscribe({
       next: (data: Dispute) => { this.dispute = data; this.loading = false; },
       error: () => { this.loading = false; this.router.navigate(['/dashboard/shop/orders']); }

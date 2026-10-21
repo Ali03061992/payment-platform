@@ -32,6 +32,14 @@
         <div class="detail-label">{{ 'DISPUTES.UPDATED_LABEL' | translate }}</div>
         <div class="detail-value">{{ dispute.updatedAt | date:'dd/MM/yyyy HH:mm:ss' }}</div>
       </div>
+      @if (qrData) {
+        <div class="detail-card">
+          <div class="detail-label">{{ 'COMMON.SCAN_TO_OPEN' | translate }}</div>
+          <div class="detail-value">
+            <qrcode [qrdata]="qrData" [width]="72" [margin]="1"></qrcode>
+          </div>
+        </div>
+      }
     </div>
     @if (dispute.status !== 'CLOSED' && dispute.status !== 'RESOLVED') {
       <div class="action-bar no-print">

@@ -71,6 +71,18 @@ class InvoicePdfServiceTest {
     }
 
     @Test
+    void generatePurchaseOrderPdf_validOrder_returnsPdfBytes() {
+        Order order = order();
+
+        byte[] pdf = service.generatePurchaseOrderPdf(order, List.of(item(order)),
+                InvoicePdfService.InvoiceParty.named("Fournisseur Test"), InvoicePdfService.InvoiceParty.named("Boutique Test"),
+                "https://nextera.payment.tn/dashboard/shop/orders/CMD-2026-001");
+
+        assertThat(pdf).isNotEmpty();
+        assertThat(new String(pdf, 0, 4)).isEqualTo("%PDF");
+    }
+
+    @Test
     void generateInvoicePdf_withPartiesAndBreakdown_returnsPdfBytes() {
         Order order = order();
         org.springframework.test.util.ReflectionTestUtils.setField(order, "vatBreakdown", "19|1000|190;7|500|35");

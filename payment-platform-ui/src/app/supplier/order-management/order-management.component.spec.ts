@@ -41,7 +41,7 @@ describe('OrderManagementComponent', () => {
     sessionStorage.setItem('user', JSON.stringify({ organizationId: '1' }));
     const orderSpy = jasmine.createSpyObj('OrderService',
       ['list', 'listPaged', 'getById', 'getByReference', 'confirm', 'prepare', 'readyForDelivery',
-       'assignDelivery', 'deliveryReject', 'cancel', 'listDeliveries', 'update', 'downloadInvoice', 'downloadTeif', 'printInvoice', 'getComments',
+       'assignDelivery', 'deliveryReject', 'cancel', 'listDeliveries', 'update', 'downloadInvoice', 'downloadPurchaseOrder', 'downloadTeif', 'printInvoice', 'getComments',
         'addComment', 'search', 'exportCsv', 'getWithholdingCertificate', 'downloadWithholdingCertificatePdf',
         'downloadWithholdingCertificateXml', 'markCertificateDeposited', 'updateExternalReference']);
     const agentSpy = jasmine.createSpyObj('SupplierAgentService', ['listAgents']);

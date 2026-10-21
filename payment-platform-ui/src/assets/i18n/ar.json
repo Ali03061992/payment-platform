@@ -477,7 +477,8 @@
     "ERROR": "خطأ",
     "SELECT": "-- اختر --",
     "SAVE": "حفظ",
-    "SAVING": "جارٍ الحفظ…"
+    "SAVING": "جارٍ الحفظ…",
+    "SCAN_TO_OPEN": "امسح الرمز لفتح هذه الصفحة"
   },
   "STATUS": {
     "PENDING": "في الانتظار",
@@ -942,6 +943,8 @@
     "DOWNLOAD_INVOICE": "تحميل الفاتورة",
     "DOWNLOAD_TEIF": "الفاتورة الإلكترونية (TEIF)",
     "DOWNLOAD_TEIF_ARIA": "تحميل الفاتورة الإلكترونية TEIF",
+    "DOWNLOAD_PURCHASE_ORDER": "توليد أمر الشراء",
+    "DOWNLOAD_PURCHASE_ORDER_ARIA": "توليد وتحميل أمر الشراء",
     "QUOTES_TITLE": "عروض الأسعار المستلمة",
     "QUOTE_VERSION": "عرض سعر",
     "QUOTE_TOTAL": "المجموع",
@@ -1192,6 +1195,8 @@
     "DOWNLOAD_INVOICE_ARIA": "تحميل الفاتورة",
     "DOWNLOAD_TEIF": "الفاتورة الإلكترونية (TEIF)",
     "DOWNLOAD_TEIF_ARIA": "تحميل الفاتورة الإلكترونية TEIF",
+    "DOWNLOAD_PURCHASE_ORDER": "توليد أمر الشراء",
+    "DOWNLOAD_PURCHASE_ORDER_ARIA": "توليد وتحميل أمر الشراء",
     "QUOTE": "عرض سعر",
     "QUOTE_ARIA": "تسعير عرض لـ",
     "QUOTE_TITLE": "عرض سعر — طلب {{ref}}",

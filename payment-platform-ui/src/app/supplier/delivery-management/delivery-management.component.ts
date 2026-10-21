@@ -1,9 +1,10 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { OrderService } from '../../services/order.service';
 import { Order } from '../../models/order.model';
 import { paginateItems, sortItems, toggleSortState, ariaSortFor, sortIndicatorFor, SortState } from '../../models/page.model';
+import { environment } from '../../../environments/environment';
 import { ToastService } from '../../services/toast.service';
 import { LoginService } from '../../services/login.service';
 import { ConfirmDialogService } from '../../components/confirm-dialog/confirm-dialog.service';
@@ -49,7 +50,12 @@ export class DeliveryManagementComponent implements OnInit {
 
   showDetail = false;
   selectedDetailOrder: Order | null = null;
+  /** QR de la fiche : scanné, il réouvre directement ce détail de livraison. */
+  detailQrData = '';
   loadingDetail = false;
+
+  /** Référence à ouvrir automatiquement à l'arrivée (paramètre ?ref=). */
+  private pendingDeliveryRef: string | null = null;
 
   /** Pagination par section (endpoints livraisons non paginés côté serveur). */
   sectionPages: { [key: string]: number } = {};
@@ -59,6 +65,7 @@ export class DeliveryManagementComponent implements OnInit {
   constructor(
     private orderService: OrderService,
     private route: ActivatedRoute,
+    private router: Router,
     private toast: ToastService,
     private loginService: LoginService,
     private confirmDialog: ConfirmDialogService,
@@ -75,6 +82,9 @@ export class DeliveryManagementComponent implements OnInit {
   ngOnInit(): void {
     this.route.queryParams.subscribe(params => {
       this.highlightedOrderId = params['orderId'] || null;
+      if (params['ref']) {
+        this.pendingDeliveryRef = params['ref'];
+      }
     });
     this.loadDeliveries();
   }
@@ -87,6 +97,14 @@ export class DeliveryManagementComponent implements OnInit {
         this.deliveries = data;
         this.sectionPages = {};
         this.loading = false;
+        if (this.pendingDeliveryRef) {
+          const ref = this.pendingDeliveryRef;
+          this.pendingDeliveryRef = null;
+          const match = this.deliveries.find(d => d.reference === ref || d.id === ref);
+          if (match) {
+            this.openDetail(match);
+          }
+        }
         if (this.highlightedOrderId) {
           const id = this.highlightedOrderId;
           this.highlightedOrderId = null;
@@ -302,6 +320,7 @@ export class DeliveryManagementComponent implements OnInit {
     this.selectedDetailOrder = null;
     this.loadingDetail = true;
     this.showDetail = true;
+    this.detailQrData = `${environment.appUrl}${this.router.url.split('?')[0]}?ref=${encodeURIComponent(order.reference || order.id)}`;
     this.orderService.getById(order.id).subscribe({
       next: (data: Order) => { this.selectedDetailOrder = data; this.loadingDetail = false; },
       error: () => { this.selectedDetailOrder = order; this.loadingDetail = false; }

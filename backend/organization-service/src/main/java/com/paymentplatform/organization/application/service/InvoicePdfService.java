@@ -66,7 +66,17 @@ public class InvoicePdfService {
     public byte[] generateInvoicePdf(Order order, List<OrderItem> items,
                                      InvoiceParty supplier, InvoiceParty buyer, String invoiceNumber) {
         return generatePdf(order, items, supplier, buyer, "FACTURE", "Facture n°: ",
-                invoiceNumber, "NEXTERA - Facture ");
+                invoiceNumber, "NEXTERA - Facture ", null);
+    }
+
+    /**
+     * Bon de commande : même mise en page que la facture, intitulés adaptés,
+     * avec un bandeau QR d'accès direct au détail de la commande en ligne.
+     */
+    public byte[] generatePurchaseOrderPdf(Order order, List<OrderItem> items,
+                                           InvoiceParty supplier, InvoiceParty buyer, String detailsUrl) {
+        return generatePdf(order, items, supplier, buyer, "BON DE COMMANDE", "Commande n°: ",
+                order.getReference(), "NEXTERA - Bon de commande ", detailsUrl);
     }
 
     /** Devis : même mise en page que la facture, intitulés adaptés. */
@@ -75,12 +85,13 @@ public class InvoicePdfService {
                                    String refKind, String refValue) {
         return generatePdf(order, items, supplier, buyer, "DEVIS N°" + version,
                 "Devis n°" + version + " — " + refKind + " : ", refValue,
-                "NEXTERA - Devis ");
+                "NEXTERA - Devis ", null);
     }
 
     private byte[] generatePdf(Order order, List<OrderItem> items,
                                InvoiceParty supplier, InvoiceParty buyer,
-                               String title, String refLabel, String refValue, String footerLabel) {
+                               String title, String refLabel, String refValue, String footerLabel,
+                               String detailsUrl) {
         Document document = new Document(PageSize.A4, 36, 36, 44, 36);
         ByteArrayOutputStream out = new ByteArrayOutputStream();
 
@@ -90,6 +101,9 @@ public class InvoicePdfService {
             document.open();
 
             addHeader(document, order, supplier, buyer, title, refLabel, refValue);
+            if (detailsUrl != null && !detailsUrl.isBlank()) {
+                addOnlineAccessBanner(document, order, detailsUrl);
+            }
             addItemsTable(document, items, order);
             addTotals(document, order);
             addFiscalMention(document, order);
@@ -192,6 +206,61 @@ public class InvoicePdfService {
         Paragraph ref = new Paragraph("Réf. électronique: " + order.getExternalReference(), BOLD_FONT);
         ref.setAlignment(Element.ALIGN_RIGHT);
         cell.addElement(ref);
+    }
+
+    /**
+     * Bandeau d'accès en ligne (bon de commande) : encadré arrondi aux couleurs
+     * de la plateforme avec QR code à gauche et texte de suivi à droite.
+     */
+    private void addOnlineAccessBanner(Document document, Order order, String detailsUrl)
+            throws DocumentException {
+        Color panel = new Color(240, 244, 251);
+        Color border = new Color(206, 216, 232);
+        Color accent = new Color(18, 36, 58);
+
+        PdfPTable banner = new PdfPTable(2);
+        banner.setWidthPercentage(100);
+        banner.setWidths(new float[]{16, 84});
+        banner.setSpacingBefore(2f);
+        banner.setSpacingAfter(10f);
+
+        PdfPCell qrCell = new PdfPCell();
+        qrCell.setBackgroundColor(panel);
+        qrCell.setBorderColor(border);
+        qrCell.setPadding(8f);
+        qrCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
+        qrCell.setHorizontalAlignment(Element.ALIGN_CENTER);
+        try {
+            com.google.zxing.common.BitMatrix matrix = new com.google.zxing.qrcode.QRCodeWriter().encode(
+                    detailsUrl, com.google.zxing.BarcodeFormat.QR_CODE, 96, 96);
+            java.awt.image.BufferedImage image =
+                    new java.awt.image.BufferedImage(96, 96, java.awt.image.BufferedImage.TYPE_INT_RGB);
+            for (int x = 0; x < 96; x++) {
+                for (int y = 0; y < 96; y++) {
+                    image.setRGB(x, y, matrix.get(x, y)
+                            ? java.awt.Color.BLACK.getRGB() : java.awt.Color.WHITE.getRGB());
+                }
+            }
+            com.lowagie.text.Image qr = com.lowagie.text.Image.getInstance(image, null);
+            qrCell.addElement(qr);
+        } catch (Exception ignored) {
+            // Le QR ne doit jamais faire échouer le bon de commande.
+        }
+        banner.addCell(qrCell);
+
+        PdfPCell textCell = new PdfPCell();
+        textCell.setBackgroundColor(panel);
+        textCell.setBorderColor(border);
+        textCell.setPadding(10f);
+        textCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
+        textCell.addElement(new Paragraph("Retrouvez votre commande en ligne",
+                new Font(Font.HELVETICA, 11, Font.BOLD, accent)));
+        textCell.addElement(new Paragraph("Scannez ce QR code pour ouvrir la commande "
+                + order.getReference() + " et suivre sa livraison sur la plateforme NEXTERA.", NORMAL_FONT));
+        textCell.addElement(new Paragraph(detailsUrl, SMALL_FONT));
+        banner.addCell(textCell);
+
+        document.add(banner);
     }
 
     private void addPartyLines(PdfPCell cell, InvoiceParty party) {

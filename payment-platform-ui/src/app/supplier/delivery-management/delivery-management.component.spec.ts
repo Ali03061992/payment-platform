@@ -6,7 +6,7 @@
  */
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { of, throwError, Subject } from 'rxjs';
 import { DeliveryManagementComponent } from './delivery-management.component';
@@ -54,6 +54,7 @@ describe('DeliveryManagementComponent', () => {
         { provide: LoginService, useValue: loginSpy },
         { provide: ConfirmDialogService, useValue: confirmSpy },
         { provide: ActivatedRoute, useValue: { queryParams: of({}) } },
+        { provide: Router, useValue: { url: '/dashboard/supplier/deliveries' } },
         provideHttpClient(withInterceptorsFromDi()),
         provideHttpClientTesting()
     ]

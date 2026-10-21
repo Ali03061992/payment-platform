@@ -338,8 +338,11 @@
       <div class="modal-header">
         <h3 id="detail-modal-title">{{ 'SUPPLIER_ORDERS.ORDER' | translate }} {{ selectedOrder?.reference }}</h3>
         <div>
+          @if (selectedOrder) {
+            <button class="btn btn-sm btn-primary" style="margin-right:8px;" (click)="downloadDetailPurchaseOrder()" [attr.aria-label]="'SUPPLIER_ORDERS.DOWNLOAD_PURCHASE_ORDER_ARIA' | translate">{{ 'SUPPLIER_ORDERS.DOWNLOAD_PURCHASE_ORDER' | translate }}</button>
+          }
           @if (selectedOrder && canGenerateInvoice(selectedOrder)) {
-            <button class="btn btn-sm btn-primary" style="margin-right:8px;" (click)="downloadInvoice(selectedOrder)" [attr.aria-label]="'SUPPLIER_ORDERS.DOWNLOAD_INVOICE_ARIA' | translate">{{ 'SUPPLIER_ORDERS.DOWNLOAD_INVOICE' | translate }}</button>
+            <button class="btn btn-sm btn-secondary" style="margin-right:8px;" (click)="downloadInvoice(selectedOrder)" [attr.aria-label]="'SUPPLIER_ORDERS.DOWNLOAD_INVOICE_ARIA' | translate">{{ 'SUPPLIER_ORDERS.DOWNLOAD_INVOICE' | translate }}</button>
             <button class="btn btn-sm btn-secondary" style="margin-right:8px;" (click)="printDetailInvoice()" [attr.aria-label]="'SUPPLIER_ORDERS.PRINT_INVOICE_ARIA' | translate">{{ 'SUPPLIER_ORDERS.PRINT_INVOICE' | translate }}</button>
             <button class="btn btn-sm btn-secondary" style="margin-right:8px;" (click)="downloadDetailTeif()" [attr.aria-label]="'SUPPLIER_ORDERS.DOWNLOAD_TEIF_ARIA' | translate">{{ 'SUPPLIER_ORDERS.DOWNLOAD_TEIF' | translate }}</button>
             @if (detailCertificate) {
@@ -375,10 +378,15 @@
               <div class="detail-value">
                 @if (selectedOrder.externalReference) {
                   <strong>{{ selectedOrder.externalReference }}</strong>
-                  <qrcode [qrdata]="'FACTURE:' + selectedOrder.externalReference + '|DOC:' + selectedOrder.reference" [width]="72" [margin]="1"></qrcode>
                 } @else {
                   <span class="text-placeholder">—</span>
                   <button class="btn btn-sm btn-secondary" style="margin-left:8px;" (click)="toggleDetailExtRefForm()">{{ 'ORDER_DETAIL.EXTREF_ADD' | translate }}</button>
+                }
+                @if (detailQrData) {
+                  <div style="margin-top:6px;">
+                    <qrcode [qrdata]="detailQrData" [width]="72" [margin]="1"></qrcode>
+                    <div style="margin-top:4px; font-size:11px; color:#64748b;">{{ 'COMMON.SCAN_TO_OPEN' | translate }}</div>
+                  </div>
                 }
               </div>
             </div>

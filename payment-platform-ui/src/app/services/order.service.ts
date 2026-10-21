@@ -36,6 +36,24 @@ export class OrderService {
     });
   }
 
+  /** Télécharge le bon de commande PDF d'une commande et le sauvegarde localement. */
+  downloadPurchaseOrder(id: string): void {
+    this.http.get(`${this.apiUrl}/${id}/purchase-order`, { observe: 'response', responseType: 'blob' }).subscribe({
+      next: (res) => {
+        if (!res.body) {
+          this.toast.error(this.translate.instant('PAYMENTS.INVOICE_DOWNLOAD_ERROR'));
+          return;
+        }
+        const filename = filenameFromDisposition(
+          res.headers.get('Content-Disposition'),
+          `bon-commande-${id}.pdf`
+        );
+        saveBlob(res.body, filename);
+      },
+      error: () => this.toast.error(this.translate.instant('PAYMENTS.INVOICE_DOWNLOAD_ERROR'))
+    });
+  }
+
   /** Imprime la facture PDF d'une commande (nouvel onglet + dialogue d'impression). */
   printInvoice(id: string): void {
     this.http.get(`${this.apiUrl}/${id}/invoice`, { observe: 'response', responseType: 'blob' }).subscribe({

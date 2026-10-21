@@ -405,6 +405,14 @@
                 <span class="payment-badge" [ngClass]="statusClass(selectedDetailOrder.status)">{{ selectedDetailOrder.status | statusLabel }}</span>
               </div>
             </div>
+            @if (detailQrData) {
+              <div class="detail-card">
+                <div class="detail-label">{{ 'COMMON.SCAN_TO_OPEN' | translate }}</div>
+                <div class="detail-value">
+                  <qrcode [qrdata]="detailQrData" [width]="72" [margin]="1"></qrcode>
+                </div>
+              </div>
+            }
             <div class="detail-card">
               <div class="detail-label">{{ 'ORDERS.TOTAL' | translate }}</div>
               <div class="detail-value amount">{{ selectedDetailOrder.total | number:'1.2-2' }} {{ selectedDetailOrder.currency }}</div>

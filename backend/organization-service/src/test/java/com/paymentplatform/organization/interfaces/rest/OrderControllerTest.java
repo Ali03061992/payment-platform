@@ -128,6 +128,19 @@ class OrderControllerTest {
     }
 
     @Test
+    void downloadPurchaseOrder_nonExistent_returns404() throws Exception {
+        mockMvc.perform(get("/api/orders/00000000-0000-0000-0000-000000099999/purchase-order")
+                        .with(SecurityMockMvcRequestPostProcessors.authentication(systemAdmin())))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void downloadPurchaseOrder_withoutAuth_returns401() throws Exception {
+        mockMvc.perform(get("/api/orders/00000000-0000-0000-0000-000000000001/purchase-order"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
     void myDeliveries_asDeliveryAgent_returnsOk() throws Exception {
         mockMvc.perform(get("/api/orders/my-deliveries")
                         .with(SecurityMockMvcRequestPostProcessors.authentication(deliveryAgent())))

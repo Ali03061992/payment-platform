@@ -10,6 +10,7 @@
     <div class="page-header no-print">
       <h2>{{ 'ORDER_DETAIL.TITLE' | translate }} {{ order.reference }}</h2>
       <div class="page-header-actions">
+        <button class="btn btn-primary" (click)="downloadPurchaseOrder()" [attr.aria-label]="'ORDER_DETAIL.DOWNLOAD_PURCHASE_ORDER_ARIA' | translate">{{ 'ORDER_DETAIL.DOWNLOAD_PURCHASE_ORDER' | translate }}</button>
         @if (canGenerateInvoice()) {
           <button class="btn btn-primary" (click)="downloadInvoice()" [attr.aria-label]="'ORDER_DETAIL.DOWNLOAD_ARIA' | translate">{{ 'ORDER_DETAIL.DOWNLOAD_INVOICE' | translate }}</button>
           <button class="btn btn-secondary" (click)="printInvoice()" [attr.aria-label]="'ORDER_DETAIL.PRINT_INVOICE_ARIA' | translate">{{ 'ORDER_DETAIL.PRINT_INVOICE' | translate }}</button>
@@ -48,10 +49,15 @@
         <div class="detail-value">
           @if (order.externalReference) {
             <strong>{{ order.externalReference }}</strong>
-            <qrcode [qrdata]="'FACTURE:' + order.externalReference + '|DOC:' + order.reference" [width]="72" [margin]="1"></qrcode>
           } @else {
             <span class="text-placeholder">—</span>
             <button class="btn btn-sm btn-secondary" style="margin-left:8px;" (click)="toggleExtRefForm()">{{ 'ORDER_DETAIL.EXTREF_ADD' | translate }}</button>
+          }
+          @if (qrData) {
+            <div style="margin-top:6px;">
+              <qrcode [qrdata]="qrData" [width]="72" [margin]="1"></qrcode>
+              <div style="margin-top:4px; font-size:11px; color:#64748b;">{{ 'COMMON.SCAN_TO_OPEN' | translate }}</div>
+            </div>
           }
         </div>
       </div>

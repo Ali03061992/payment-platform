@@ -483,7 +483,8 @@
     "ERROR": "Erreur",
     "SELECT": "-- Sélectionner --",
     "SAVE": "Enregistrer",
-    "SAVING": "Enregistrement…"
+    "SAVING": "Enregistrement…",
+    "SCAN_TO_OPEN": "Scannez pour ouvrir cette page"
   },
   "STATUS": {
     "PENDING": "En attente",
@@ -949,6 +950,8 @@
     "DOWNLOAD_INVOICE": "Télécharger facture",
     "DOWNLOAD_TEIF": "Facture électronique (TEIF)",
     "DOWNLOAD_TEIF_ARIA": "Télécharger la facture électronique TEIF",
+    "DOWNLOAD_PURCHASE_ORDER": "Générer bon de commande",
+    "DOWNLOAD_PURCHASE_ORDER_ARIA": "Générer et télécharger le bon de commande",
     "QUOTES_TITLE": "Devis reçus",
     "QUOTE_VERSION": "Devis",
     "QUOTE_TOTAL": "Total",
@@ -1200,6 +1203,8 @@
     "DOWNLOAD_INVOICE_ARIA": "Télécharger la facture",
     "DOWNLOAD_TEIF": "Facture électronique (TEIF)",
     "DOWNLOAD_TEIF_ARIA": "Télécharger la facture électronique TEIF",
+    "DOWNLOAD_PURCHASE_ORDER": "Générer bon de commande",
+    "DOWNLOAD_PURCHASE_ORDER_ARIA": "Générer et télécharger le bon de commande",
     "QUOTE": "Devis",
     "QUOTE_ARIA": "Chiffrer un devis pour",
     "QUOTE_TITLE": "Devis — commande {{ref}}",

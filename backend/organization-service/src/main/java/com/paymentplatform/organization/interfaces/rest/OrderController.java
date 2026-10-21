@@ -18,9 +18,11 @@ import com.paymentplatform.organization.infrastructure.http.IdentityClient;
 import com.paymentplatform.organization.infrastructure.http.PaymentClient;
 import com.paymentplatform.shared.domain.event.OrderEvents;
 import com.paymentplatform.shared.infrastructure.outbox.OutboxEventStore;
+import com.paymentplatform.shared.infrastructure.security.AuthenticatedUser;
 import com.paymentplatform.shared.infrastructure.security.CurrentUser;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -73,6 +75,10 @@ public class OrderController {
     private final WithholdingBatchUseCase withholdingBatch;
     private final IssueInvoiceUseCase issueInvoice;
     private final com.paymentplatform.organization.domain.repository.InvoiceJournalRepository invoiceJournalRepository;
+
+    /** URL publique du frontend, utilisée pour les QR d'accès aux détails. */
+    @Value("${app.frontend.base-url:http://localhost:4200}")
+    private String frontendBaseUrl;
 
     public OrderController(CreateOrderUseCase createOrder,
                            ConfirmOrderUseCase confirmOrder,
@@ -960,6 +966,60 @@ public class OrderController {
         response.setContentLength(pdf.length);
         response.getOutputStream().write(pdf);
         response.getOutputStream().flush();
+    }
+
+    /**
+     * Télécharge le bon de commande PDF, accessible aux deux parties
+     * quel que soit le statut de la commande.
+     */
+    @GetMapping("/{id}/purchase-order")
+    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_MANAGER', 'SYSTEM_ADMIN')")
+    public void downloadPurchaseOrder(@PathVariable UUID id, HttpServletResponse response) throws Exception {
+        var current = CurrentUser.get();
+        var order = orderRepository.findById(id);
+        if (order.isEmpty()) {
+            response.sendError(HttpServletResponse.SC_NOT_FOUND, "Commande non trouvée");
+            return;
+        }
+        var o = order.get();
+        if (!current.roles().contains("SYSTEM_ADMIN")) {
+            if (current.organizationId() == null) {
+                response.sendError(HttpServletResponse.SC_FORBIDDEN, "Accès refusé");
+                return;
+            }
+            boolean isSupplier = o.getSupplierId() != null && o.getSupplierId().equals(current.organizationId());
+            boolean isShop = o.getShopId() != null && o.getShopId().equals(current.organizationId());
+            boolean isDeliveryAgent = o.getDeliveryAgentId() != null && o.getDeliveryAgentId().equals(current.userId());
+            if (!isSupplier && !isShop && !isDeliveryAgent) {
+                response.sendError(HttpServletResponse.SC_FORBIDDEN, "Accès refusé");
+                return;
+            }
+        }
+
+        var items = orderItemRepository.findByOrderId(id);
+        var supplier = toInvoiceParty(o.getSupplierId());
+        var buyer = toInvoiceParty(o.getShopId());
+        byte[] pdf = invoicePdfService.generatePurchaseOrderPdf(o, items, supplier, buyer,
+                orderDetailsUrl(current, o));
+
+        response.setContentType("application/pdf");
+        response.setHeader(HttpHeaders.CONTENT_DISPOSITION,
+                "attachment; filename=\"bon-commande-" + o.getReference() + ".pdf\"");
+        response.setContentLength(pdf.length);
+        response.getOutputStream().write(pdf);
+        response.getOutputStream().flush();
+    }
+
+    /** URL du détail de commande côté frontend, adaptée au profil (fournisseur ou boutique). */
+    private String orderDetailsUrl(AuthenticatedUser current, com.paymentplatform.organization.domain.model.Order o) {
+        String base = frontendBaseUrl.endsWith("/")
+                ? frontendBaseUrl.substring(0, frontendBaseUrl.length() - 1)
+                : frontendBaseUrl;
+        boolean supplierSide = current.roles().contains("SUPPLIER_ADMIN")
+                || current.roles().contains("SUPPLIER_AGENT");
+        return supplierSide
+                ? base + "/dashboard/supplier/orders?ref=" + o.getReference()
+                : base + "/dashboard/shop/orders/" + o.getReference();
     }
 
     /**
