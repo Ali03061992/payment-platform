@@ -104,14 +104,48 @@ export class QrScannerComponent implements OnInit, OnDestroy {
 
   handleResult(data: string): void {
     this.stopCamera();
-    if (data) {
-      const paymentId = this.extractPaymentId(data);
-      if (paymentId) {
-        this.router.navigate(['/dashboard/payments', paymentId]);
-      } else {
-        this.toast.error(this.translate.instant('QR.ERR_NOT_RECOGNIZED'));
+    if (!data || !data.trim()) return;
+    const route = this.resolveRoute(data);
+    if (route) {
+      void this.router.navigateByUrl(route);
+    } else {
+      this.toast.error(this.translate.instant('QR.ERR_NOT_RECOGNIZED'));
+    }
+  }
+
+  /**
+   * Résout un QR/lien vers une route interne. Accepte les liens NEXTERA
+   * (paiement, facture, commande, litige…) et les références de paiement.
+   * Une URL externe est réduite à son chemin : seules les routes de l'app
+   * sont ouvertes (pas d'open-redirect).
+   */
+  resolveRoute(data: string): string | null {
+    const raw = (data || '').trim();
+    if (!raw) return null;
+
+    const paymentId = this.extractPaymentId(raw);
+    if (paymentId !== null) return `/dashboard/payments/${paymentId}`;
+    if (/^PAY-[A-Za-z0-9-]+$/i.test(raw)) {
+      return `/dashboard/payments/${encodeURIComponent(raw)}`;
+    }
+
+    let path = raw;
+    if (!path.startsWith('/')) {
+      try {
+        const parsed = new URL(path);
+        if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') return null;
+        path = `${parsed.pathname}${parsed.search}${parsed.hash}`;
+      } catch {
+        return null;
       }
     }
+
+    if (path.startsWith('/payments/')) {
+      path = `/dashboard${path}`;
+    }
+    const isDashboard = path === '/dashboard' || path.startsWith('/dashboard/')
+      || path.startsWith('/dashboard?') || path.startsWith('/dashboard#');
+    return isDashboard ? path : null;
   }
 
   extractPaymentId(data: string): number | null {
@@ -133,10 +167,12 @@ export class QrScannerComponent implements OnInit, OnDestroy {
   }
 
   submitManual(): void {
-    if (!this.manualUrl.trim()) return;
-    const paymentId = this.extractPaymentId(this.manualUrl.trim());
-    if (paymentId) {
-      this.router.navigate(['/dashboard/payments', paymentId]);
+    const raw = this.manualUrl.trim();
+    if (!raw) return;
+    const route = this.resolveRoute(raw);
+    if (route) {
+      this.stopCamera();
+      void this.router.navigateByUrl(route);
     } else {
       this.toast.error(this.translate.instant('QR.ERR_UNRECOGNIZED'));
     }

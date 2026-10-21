@@ -32,6 +32,12 @@ export class LoginComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    // PWA relancée / notification cliquée : la session a déjà été restaurée
+    // par APP_INITIALIZER (cookie HttpOnly). On ne réaffiche pas le login.
+    if (this.loginService.isLoggedIn()) {
+      void this.router.navigateByUrl(this.safeReturnUrl() || '/dashboard');
+      return;
+    }
     void WebAuthnService.isAvailable().then((available) => this.passkeySupported = available);
   }
 

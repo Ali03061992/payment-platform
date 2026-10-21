@@ -45,14 +45,14 @@ class WebPushSenderTest {
     }
 
     @Test
-    void buildPayload_usesOpenWindowOperation() throws Exception {
+    void buildPayload_usesNavigateLastFocusedOrOpenOperation() throws Exception {
         WebPushSender sender = new WebPushSender(null, null, null, false, "mailto:test@example.com");
         UUID orgId = UUID.randomUUID();
         String json = sender.buildPayload("Title", "Body", "tag-1", "/orders/42", orgId);
 
         JsonNode root = new ObjectMapper().readTree(json);
         JsonNode data = root.at("/notification/data");
-        assertThat(data.at("/onActionClick/default/operation").asText()).isEqualTo("openWindow");
+        assertThat(data.at("/onActionClick/default/operation").asText()).isEqualTo("navigateLastFocusedOrOpen");
         assertThat(data.at("/onActionClick/default/url").asText()).isEqualTo("/orders/42");
         assertThat(data.at("/url").asText()).isEqualTo("/orders/42");
         assertThat(data.at("/organizationId").asText()).isEqualTo(orgId.toString());

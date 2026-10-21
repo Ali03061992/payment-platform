@@ -6,8 +6,9 @@
   "background_color": "#FFFFFF",
   "display": "standalone",
   "orientation": "any",
+  "id": "/",
   "scope": "/",
-  "start_url": "/login",
+  "start_url": "/dashboard",
   "icons": [
     {
       "src": "assets/icon-app.png",

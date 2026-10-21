@@ -7,6 +7,7 @@
 import { TestBed } from '@angular/core/testing';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { provideRouter } from '@angular/router';
 import { PushNotificationService } from './push-notification.service';
 
 describe('PushNotificationService', () => {
@@ -16,7 +17,7 @@ describe('PushNotificationService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [],
-      providers: [PushNotificationService, provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()]
+      providers: [PushNotificationService, provideRouter([]), provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()]
     });
     service = TestBed.inject(PushNotificationService);
     httpMock = TestBed.inject(HttpTestingController);

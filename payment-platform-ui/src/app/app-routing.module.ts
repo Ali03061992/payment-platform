@@ -66,7 +66,7 @@ export const shopRoles = ['SHOP_ADMIN', 'SHOP_AGENT'];
 export const allRoles = [...adminRoles, ...supplierRoles, ...shopRoles];
 
 const routes: Routes = [
-  { path: '', redirectTo: '/login', pathMatch: 'full' },
+  { path: '', redirectTo: '/dashboard', pathMatch: 'full' },
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
   { path: 'setup-password', component: PasswordSetupComponent },

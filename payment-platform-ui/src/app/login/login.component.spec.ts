@@ -23,7 +23,7 @@ describe('LoginComponent', () => {
 
   beforeEach(() => {
     const loginSpy = jasmine.createSpyObj('LoginService',
-      ['login', 'getMe', 'adoptSession', 'setCurrentUser', 'purgeSession']);
+      ['login', 'getMe', 'adoptSession', 'setCurrentUser', 'purgeSession', 'isLoggedIn']);
     const notifSpy = jasmine.createSpyObj('NotificationService', ['requestPermission']);
     const routerSpy = jasmine.createSpyObj('Router', ['navigate', 'navigateByUrl']);
     const routeStub = { snapshot: { queryParamMap: { get: () => null } } };
@@ -45,10 +45,17 @@ describe('LoginComponent', () => {
     component = fixture.componentInstance;
     loginService = TestBed.inject(LoginService) as jasmine.SpyObj<LoginService>;
     router = TestBed.inject(Router) as jasmine.SpyObj<Router>;
+    loginService.isLoggedIn.and.returnValue(false);
   });
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('should skip login when the PWA session is already restored', () => {
+    loginService.isLoggedIn.and.returnValue(true);
+    component.ngOnInit();
+    expect(router.navigateByUrl).toHaveBeenCalledWith('/dashboard');
   });
 
   it('should have initial state', () => {

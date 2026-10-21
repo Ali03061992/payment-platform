@@ -1,5 +1,6 @@
 import { Injectable, NgZone } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { Router } from '@angular/router';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { tap, catchError } from 'rxjs/operators';
 import { initializeApp, FirebaseApp } from 'firebase/app';
@@ -20,6 +21,7 @@ export class PushNotificationService {
   constructor(
     private http: HttpClient,
     private ngZone: NgZone,
+    private router: Router,
     private sound: NotificationSoundService
   ) {
     // M7 : sans clés configurées (env), le push est désactivé proprement
@@ -85,12 +87,24 @@ export class PushNotificationService {
             if ('Notification' in window && Notification.permission === 'granted') {
               const title = (payload.notification?.title as string) || BRAND.name;
               const body = (payload.notification?.body as string) || '';
-              new window.Notification(title, {
+              const targetUrl = (payload.data as Record<string, string> | undefined)?.['url'];
+              const notification = new window.Notification(title, {
                 body,
                 icon: 'assets/icons/icon-192x192.png',
                 tag: 'payment-notification',
                 renotify: true
               } as NotificationOptions);
+              notification.onclick = () => {
+                window.focus();
+                if (!targetUrl) return;
+                this.ngZone.run(() => {
+                  if (targetUrl.startsWith('/')) {
+                    void this.router.navigateByUrl(targetUrl);
+                  } else {
+                    window.open(targetUrl, '_blank', 'noopener');
+                  }
+                });
+              };
             }
           } catch {}
         });

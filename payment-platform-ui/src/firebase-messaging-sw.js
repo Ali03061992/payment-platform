@@ -36,17 +36,29 @@ if (messaging) {
   });
 }
 
+function resolveTargetUrl(data) {
+  try {
+    return new URL((data && data.url) || '/dashboard', self.registration.scope).href;
+  } catch (e) {
+    return new URL('/dashboard', self.registration.scope).href;
+  }
+}
+
 self.addEventListener('notificationclick', function(event) {
   event.notification.close();
-  const urlToOpen = event.notification.data?.url || '/';
-  event.waitUntil(
-    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function(clientList) {
-      for (const client of clientList) {
-        if (client.url.includes(self.location.origin) && 'focus' in client) {
-          return client.focus();
-        }
+  const targetUrl = resolveTargetUrl(event.notification.data || {});
+
+  event.waitUntil((async function() {
+    const clientList = await clients.matchAll({ type: 'window', includeUncontrolled: true });
+    for (const client of clientList) {
+      if (new URL(client.url).origin !== self.location.origin) continue;
+      // PWA déjà ouverte : naviguer vers le deep-link puis focus (sinon le clic
+      // ne faisait que ramener l'app sur l'écran courant).
+      if ('navigate' in client) {
+        try { await client.navigate(targetUrl); } catch (e) {}
       }
-      return clients.openWindow(urlToOpen);
-    })
-  );
+      if ('focus' in client) return client.focus();
+    }
+    return clients.openWindow(targetUrl);
+  })());
 });

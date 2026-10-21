@@ -5,7 +5,8 @@
  * Moyens : TestBed, stubs jasmine.
  */
 import { TestBed } from '@angular/core/testing';
-import { Router } from '@angular/router';
+import { Router, UrlTree } from '@angular/router';
+import { Observable, firstValueFrom, of } from 'rxjs';
 import { AuthGuard } from './auth.guard';
 import { LoginService } from '../services/login.service';
 
@@ -13,11 +14,17 @@ describe('AuthGuard', () => {
   let guard: AuthGuard;
   let router: jasmine.SpyObj<Router>;
   let login: jasmine.SpyObj<LoginService>;
+  let loginTree: UrlTree;
   const state = { url: '/dashboard/shop/orders' } as any;
 
+  const activate = (): Promise<boolean | UrlTree> =>
+    firstValueFrom(guard.canActivate({} as any, state) as Observable<boolean | UrlTree>);
+
   beforeEach(() => {
-    const routerSpy = jasmine.createSpyObj('Router', ['navigate']);
-    const loginSpy = jasmine.createSpyObj('LoginService', ['isLoggedIn', 'purgeSession']);
+    loginTree = {} as UrlTree;
+    const routerSpy = jasmine.createSpyObj('Router', ['navigate', 'createUrlTree']);
+    routerSpy.createUrlTree.and.returnValue(loginTree);
+    const loginSpy = jasmine.createSpyObj('LoginService', ['isLoggedIn', 'restoreSession', 'purgeSession']);
     TestBed.configureTestingModule({
       providers: [
         AuthGuard,
@@ -35,19 +42,31 @@ describe('AuthGuard', () => {
   });
 
   describe('canActivate', () => {
-    it('should return false and redirect to /login with returnUrl when no session', () => {
+    it('should silently refresh then redirect to /login with returnUrl when no session', async () => {
       login.isLoggedIn.and.returnValue(false);
-      const result = guard.canActivate({} as any, state);
-      expect(result).toBeFalse();
-      expect(login.purgeSession).toHaveBeenCalled();
-      expect(router.navigate).toHaveBeenCalledWith(['/login'], { queryParams: { returnUrl: '/dashboard/shop/orders' } });
+      login.restoreSession.and.returnValue(of(false));
+
+      const result = await activate();
+
+      expect(result).toBe(loginTree);
+      expect(login.restoreSession).toHaveBeenCalled();
+      expect(login.purgeSession).not.toHaveBeenCalled();
+      expect(router.createUrlTree).toHaveBeenCalledWith(
+        ['/login'], { queryParams: { returnUrl: '/dashboard/shop/orders' } });
     });
 
-    it('should return true when in-memory token is valid', () => {
+    it('should allow navigation after a successful silent refresh', async () => {
+      login.isLoggedIn.and.returnValue(false);
+      login.restoreSession.and.returnValue(of(true));
+
+      await expectAsync(activate()).toBeResolvedTo(true);
+    });
+
+    it('should return true without refresh when in-memory token is valid', async () => {
       login.isLoggedIn.and.returnValue(true);
-      const result = guard.canActivate({} as any, state);
-      expect(result).toBeTrue();
-      expect(router.navigate).not.toHaveBeenCalled();
+
+      await expectAsync(activate()).toBeResolvedTo(true);
+      expect(login.restoreSession).not.toHaveBeenCalled();
     });
   });
 });

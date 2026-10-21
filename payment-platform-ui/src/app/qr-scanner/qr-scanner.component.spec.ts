@@ -18,7 +18,7 @@ describe('QrScannerComponent', () => {
 
   beforeEach(() => {
     const toastSpy = jasmine.createSpyObj('ToastService', ['error', 'success']);
-    const routerSpy = jasmine.createSpyObj('Router', ['navigate']);
+    const routerSpy = jasmine.createSpyObj('Router', ['navigate', 'navigateByUrl']);
     TestBed.configureTestingModule({
       declarations: [QrScannerComponent, TranslateStubPipe],
       providers: [
@@ -132,23 +132,54 @@ describe('QrScannerComponent', () => {
     });
   });
 
+  describe('resolveRoute', () => {
+    it('should resolve an alphanumeric payment reference', () => {
+      expect(component.resolveRoute('PAY-1712345678901-123456'))
+        .toBe('/dashboard/payments/PAY-1712345678901-123456');
+    });
+
+    it('should resolve a relative payment link', () => {
+      expect(component.resolveRoute('/payments/PAY-42')).toBe('/dashboard/payments/PAY-42');
+    });
+
+    it('should keep any in-app deep link (order, invoice, dispute)', () => {
+      expect(component.resolveRoute('/dashboard/shop/orders/42?tab=invoice'))
+        .toBe('/dashboard/shop/orders/42?tab=invoice');
+      expect(component.resolveRoute('/dashboard/invoices/INV-9#lines'))
+        .toBe('/dashboard/invoices/INV-9#lines');
+    });
+
+    it('should reduce an absolute app URL to its path', () => {
+      expect(component.resolveRoute('https://payement.tn/dashboard/payments/PAY-7'))
+        .toBe('/dashboard/payments/PAY-7');
+    });
+
+    it('should never open an external origin', () => {
+      expect(component.resolveRoute('https://evil.example/dashboard/payments/1'))
+        .toBe('/dashboard/payments/1');
+      expect(component.resolveRoute('https://evil.example/other')).toBeNull();
+      expect(component.resolveRoute('javascript:alert(1)')).toBeNull();
+      expect(component.resolveRoute('hello world')).toBeNull();
+    });
+  });
+
   describe('submitManual', () => {
     it('should navigate for valid payment id in dashboard URL', () => {
       component.manualUrl = '/dashboard/payments/123';
       component.submitManual();
-      expect(router.navigate).toHaveBeenCalledWith(['/dashboard/payments', 123]);
+      expect(router.navigateByUrl).toHaveBeenCalledWith('/dashboard/payments/123');
     });
 
     it('should navigate for plain number', () => {
       component.manualUrl = '456';
       component.submitManual();
-      expect(router.navigate).toHaveBeenCalledWith(['/dashboard/payments', 456]);
+      expect(router.navigateByUrl).toHaveBeenCalledWith('/dashboard/payments/456');
     });
 
     it('should navigate for payment_id param', () => {
       component.manualUrl = 'payment_id=789';
       component.submitManual();
-      expect(router.navigate).toHaveBeenCalledWith(['/dashboard/payments', 789]);
+      expect(router.navigateByUrl).toHaveBeenCalledWith('/dashboard/payments/789');
     });
 
     it('should show error for invalid input', () => {
@@ -161,14 +192,14 @@ describe('QrScannerComponent', () => {
       component.manualUrl = '';
       component.submitManual();
       expect(toast.error).not.toHaveBeenCalled();
-      expect(router.navigate).not.toHaveBeenCalled();
+      expect(router.navigateByUrl).not.toHaveBeenCalled();
     });
 
     it('should do nothing for whitespace-only input', () => {
       component.manualUrl = '   ';
       component.submitManual();
       expect(toast.error).not.toHaveBeenCalled();
-      expect(router.navigate).not.toHaveBeenCalled();
+      expect(router.navigateByUrl).not.toHaveBeenCalled();
     });
   });
 
@@ -201,7 +232,7 @@ describe('QrScannerComponent', () => {
   describe('handleResult', () => {
     it('should navigate when valid payment id in data', () => {
       component.handleResult('/dashboard/payments/42');
-      expect(router.navigate).toHaveBeenCalledWith(['/dashboard/payments', 42]);
+      expect(router.navigateByUrl).toHaveBeenCalledWith('/dashboard/payments/42');
     });
 
     it('should show error when data is not valid', () => {
@@ -219,23 +250,23 @@ describe('QrScannerComponent', () => {
 
     it('should do nothing for empty data', () => {
       component.handleResult('');
-      expect(router.navigate).not.toHaveBeenCalled();
+      expect(router.navigateByUrl).not.toHaveBeenCalled();
       expect(toast.error).not.toHaveBeenCalled();
     });
 
     it('should navigate for plain number data', () => {
       component.handleResult('99');
-      expect(router.navigate).toHaveBeenCalledWith(['/dashboard/payments', 99]);
+      expect(router.navigateByUrl).toHaveBeenCalledWith('/dashboard/payments/99');
     });
 
     it('should navigate for facture param data', () => {
       component.handleResult('facture=55');
-      expect(router.navigate).toHaveBeenCalledWith(['/dashboard/payments', 55]);
+      expect(router.navigateByUrl).toHaveBeenCalledWith('/dashboard/payments/55');
     });
 
     it('should navigate for payment_id param data', () => {
       component.handleResult('payment-id=33');
-      expect(router.navigate).toHaveBeenCalledWith(['/dashboard/payments', 33]);
+      expect(router.navigateByUrl).toHaveBeenCalledWith('/dashboard/payments/33');
     });
   });
 });

@@ -1364,7 +1364,7 @@
   "QR": {
     "BACK": "← Back",
     "TITLE": "Scan QR Code",
-    "SUBTITLE": "Point your camera at the invoice QR code",
+    "SUBTITLE": "Point your camera at a NEXTERA QR code (payment, invoice, order…)",
     "HTTPS_TITLE": "HTTPS required for camera",
     "HTTPS_MSG": "Camera only works over HTTPS or localhost.",
     "HTTPS_HINT": "Go via {{domain}} or use {{manual}} below.",
@@ -1376,16 +1376,16 @@
     "OR": "or",
     "MANUAL_LINK_BTN": "Manual link entry",
     "MANUAL_TITLE": "Manual entry",
-    "MANUAL_SUBTITLE": "Paste the invoice link or enter the number",
+    "MANUAL_SUBTITLE": "Paste a NEXTERA link or enter a payment reference",
     "BACK_CAMERA": "Back to camera",
-    "OPEN_INVOICE": "Open invoice",
+    "OPEN_INVOICE": "Open link",
     "ERR_HTTPS": "Camera requires HTTPS. Use https:// or manual entry.",
     "ERR_UNSUPPORTED": "Camera not supported by this browser.",
     "ERR_NO_CAMERA": "No camera detected.",
     "ERR_PERMISSION": "Camera permission denied. Allow access in browser settings.",
     "ERR_GENERIC": "Camera error: {{msg}}",
-    "ERR_UNRECOGNIZED": "Unrecognized link or ID. Try an invoice number.",
-    "ERR_NOT_RECOGNIZED": "QR code not recognized as a valid invoice."
+    "ERR_UNRECOGNIZED": "Unrecognized link or reference.",
+    "ERR_NOT_RECOGNIZED": "QR code not recognized. Scan a NEXTERA link."
   },
   "TOUR": {
     "GUIDE_ARIA": "Navigation guide",

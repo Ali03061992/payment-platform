@@ -1364,7 +1364,7 @@
   "QR": {
     "BACK": "← Retour",
     "TITLE": "Scanner QR Code",
-    "SUBTITLE": "Pointez votre caméra vers le QR code de la facture",
+    "SUBTITLE": "Pointez votre caméra vers un QR code NEXTERA (paiement, facture, commande…)",
     "HTTPS_TITLE": "HTTPS requis pour la caméra",
     "HTTPS_MSG": "La caméra fonctionne uniquement sur HTTPS ou localhost.",
     "HTTPS_HINT": "Accédez via {{domain}} ou utilisez la {{manual}} ci-dessous.",
@@ -1376,16 +1376,16 @@
     "OR": "ou",
     "MANUAL_LINK_BTN": "Saisie manuelle du lien",
     "MANUAL_TITLE": "Saisie manuelle",
-    "MANUAL_SUBTITLE": "Collez le lien de la facture ou entrez le numéro",
+    "MANUAL_SUBTITLE": "Collez un lien NEXTERA ou saisissez une référence de paiement",
     "BACK_CAMERA": "Retour caméra",
-    "OPEN_INVOICE": "Accéder à la facture",
+    "OPEN_INVOICE": "Ouvrir le lien",
     "ERR_HTTPS": "La caméra nécessite HTTPS. Accédez via https:// ou utilisez la saisie manuelle.",
     "ERR_UNSUPPORTED": "Caméra non supportée par ce navigateur.",
     "ERR_NO_CAMERA": "Aucune caméra détectée.",
     "ERR_PERMISSION": "Permission caméra refusée. Autorisez l'accès dans les paramètres du navigateur.",
     "ERR_GENERIC": "Erreur caméra: {{msg}}",
-    "ERR_UNRECOGNIZED": "Lien ou ID non reconnu. Essayez un numéro de facture.",
-    "ERR_NOT_RECOGNIZED": "QR Code non reconnu comme facture valide."
+    "ERR_UNRECOGNIZED": "Lien ou référence non reconnu.",
+    "ERR_NOT_RECOGNIZED": "QR code non reconnu. Scannez un lien NEXTERA."
   },
   "TOUR": {
     "GUIDE_ARIA": "Guide de navigation",

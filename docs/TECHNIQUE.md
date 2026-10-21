@@ -126,15 +126,35 @@ VM TEST : `ubuntu@51.222.6.2` — **en service** (Docker 29, clone à jour, `.en
 ### HTTPS (443) sur les VMs OVH
 
 - **Architecture** : TLS terminé par le **nginx hôte de la VM** (systemd), qui reverse-proxy vers le conteneur `angular` (`127.0.0.1:8080`, mapping de base `8080:80`). Le conteneur reste en HTTP pur : aucun port 80/443 exposé par Docker (pas de conflit), renouvellement Let's Encrypt conservé sur l'hôte.
-- **Vhosts** (repo → VM) : `deploy/nginx/host/default` → `/etc/nginx/sites-available/default` (port 80 → `301 https://$host$request_uri` + webroot ACME), `deploy/nginx/host/ip-https` → `/etc/nginx/sites-available/ip-https` (port 443 TLS par défaut → proxy app, HSTS, proxy sans buffering pour le SSE) et `deploy/nginx/host/domain-https` → `/etc/nginx/sites-available/domain-https` (port 443 TLS pour le domaine public, voir passkeys) :
+- **Vhosts** (repo → VM) : `deploy/nginx/host/default` → `/etc/nginx/sites-available/default` (port 80 → `301 https://$host$request_uri` + webroot ACME), `deploy/nginx/host/ip-https` → `/etc/nginx/sites-available/ip-https` (port 443 TLS par défaut → proxy app, HSTS, proxy sans buffering pour le SSE), `deploy/nginx/host/domain-https` (domaine de test `51-222-6-2.nip.io`) et `deploy/nginx/host/payment.tn-https` (domaine public `payment.tn` + `www.payment.tn` + `nextera.payment.tn`, voir passkeys) :
   ```bash
   sudo cp deploy/nginx/host/default /etc/nginx/sites-available/default
   sudo cp deploy/nginx/host/ip-https /etc/nginx/sites-available/ip-https
+  sudo cp deploy/nginx/host/payment.tn-https /etc/nginx/sites-available/payment.tn-https
+  sudo ln -sf /etc/nginx/sites-available/payment.tn-https /etc/nginx/sites-enabled/
   sudo nginx -t && sudo systemctl reload nginx
   ```
   Adapter `server_name` et `ssl_certificate` (`/etc/letsencrypt/live/<identifiant>/`) si besoin (PROD, domaine).
 - **Origines applicatives en https** dans `deploy/.env` (puis redéployer) : `CORS_ALLOWED_ORIGINS=https://<ip-ou-domaine>`, `WEBAUTHN_ALLOWED_ORIGINS=...`, `FRONTEND_URL=...`. Passkeys : `WEBAUTHN_RP_ID` exige un domaine réel (pas une IP — les passkeys ne fonctionneront donc pas en accès par IP).
-- **Domaine public pour les passkeys (TEST)** : un domaine `nip.io`/`sslip.io` pointe vers l'IP de la VM sans inscription DNS (ex. `51-222-6-2.nip.io` → `51.222.6.2`). Procédure sur la VM : certificat Let's Encrypt via webroot (`sudo certbot certonly --webroot -w /var/www/html -d 51-222-6-2.nip.io` — les vhosts 80 **et** 443 servent `/.well-known/acme-challenge/` car la redirection 80 renvoie les challenges en https), vhost `domain-https` installé + `WEBAUTHN_RP_ID`, `WEBAUTHN_ALLOWED_ORIGINS`, `CORS_ALLOWED_ORIGINS`, `FRONTEND_URL` alignés sur le domaine dans `deploy/.env`, puis `docker compose up -d`. L'accès par IP reste fonctionnel (vhost `ip-https`, défaut 443) mais sans passkeys.
+- **Domaine public `payment.tn` + sous-domaine `nextera.payment.tn` (PWA + passkeys)** : les DNS A de `payment.tn`, `www.payment.tn` et `nextera.payment.tn` doivent pointer vers l'IP de la VM (`51.222.6.2`). Vérifier avant certificat : `nslookup payment.tn` doit renvoyer `51.222.6.2` (sinon le challenge ACME échoue). Sur la VM :
+  ```bash
+  sudo certbot certonly --webroot -w /var/www/html \
+    -d payment.tn -d www.payment.tn -d nextera.payment.tn
+  sudo cp deploy/nginx/host/payment.tn-https /etc/nginx/sites-available/payment.tn-https
+  sudo ln -sf /etc/nginx/sites-available/payment.tn-https /etc/nginx/sites-enabled/
+  sudo nginx -t && sudo systemctl reload nginx
+  ```
+  Puis dans `deploy/.env` :
+  ```bash
+  CORS_ALLOWED_ORIGINS=https://payment.tn,https://www.payment.tn,https://nextera.payment.tn
+  WEBAUTHN_ALLOWED_ORIGINS=https://payment.tn,https://www.payment.tn,https://nextera.payment.tn
+  WEBAUTHN_RP_ID=payment.tn   # RP ID racine : couvre aussi les sous-domaines
+  FRONTEND_URL=https://nextera.payment.tn   # ou https://payment.tn (liens emails)
+  AUTH_COOKIE_SECURE=true
+  ```
+  Redémarrer : `docker compose up -d`. Les trois hôtes servent l'app sans redirection ; le cookie `pp_rt` est host-only donc **une session par hôte** (se reconnecter une fois par domaine) et chaque origine installée crée une PWA distincte — réinstaller depuis chaque domaine utilisé. Les vhosts 80 **et** 443 servent `/.well-known/acme-challenge/` car la redirection 80 renvoie les challenges en https.
+  **IPv6** : supprimer les AAAA de `payment.tn` et `www.payment.tn` (actuellement `2001:41d0:301::29`, parking OVH) — sinon certains clients IPv6 tombent sur le parking avec une erreur de certificat ; `nextera.payment.tn` n'a pas d'AAAA et force l'IPv4 de la VM.
+- **Domaine de test nip.io** : `deploy/nginx/host/domain-https` reste disponible pour `51-222-6-2.nip.io` (mêmes étapes avec ce nom) ; l'accès par IP reste fonctionnel (vhost `ip-https`, défaut 443) mais sans passkeys.
 - **Renouvellement** : inchangé côté hôte (`certbot renew`), le nginx hôte reste propriétaire des ports 80/443.
 - **Vérification** : `curl -I http://<vm>/` → `301` ; `curl -I https://<vm>/` → `200` (page app) ; `curl -s https://<vm>/api/auth/me` → réponse JSON (401), pas le `index.html`.
 
