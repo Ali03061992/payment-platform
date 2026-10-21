@@ -46,11 +46,11 @@ export class SecurityComponent implements OnInit {
     private dialogs: ConfirmDialogService,
     private translate: TranslateService
   ) {
-    this.passkeySupported = WebAuthnService.isSupported();
     this.pushSupported = this.webPush.isSupported();
   }
 
   ngOnInit(): void {
+    void WebAuthnService.isAvailable().then((available) => this.passkeySupported = available);
     this.loadCredentials();
     if (this.pushSupported) {
       this.loadPushState();

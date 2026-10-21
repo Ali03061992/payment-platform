@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { LoginService } from '../services/login.service';
@@ -13,13 +13,13 @@ import { BRAND } from '../core/brand.config';
     styleUrls: ['./login.component.css'],
     standalone: false
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit {
   readonly brand = BRAND;
   form = { username: '', password: '' };
   error = '';
   loading = false;
   passkeyLoading = false;
-  readonly passkeySupported = WebAuthnService.isSupported();
+  passkeySupported = false;
 
   constructor(
     private loginService: LoginService,
@@ -30,6 +30,10 @@ export class LoginComponent {
     private translate: TranslateService,
     private themeService: ThemeService
   ) {}
+
+  ngOnInit(): void {
+    void WebAuthnService.isAvailable().then((available) => this.passkeySupported = available);
+  }
 
   onSubmit(): void {
     this.error = '';

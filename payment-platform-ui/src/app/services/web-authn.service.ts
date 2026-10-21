@@ -111,6 +111,24 @@ export class WebAuthnService {
       && !!navigator.credentials;
   }
 
+  static async isAvailable(): Promise<boolean> {
+    if (!this.isSupported() || !window.isSecureContext) return false;
+    try {
+      const pk = window.PublicKeyCredential as typeof PublicKeyCredential & {
+        isConditionalMediationAvailable?: () => Promise<boolean>;
+      };
+      const platform = typeof pk.isUserVerifyingPlatformAuthenticatorAvailable === 'function'
+        ? await pk.isUserVerifyingPlatformAuthenticatorAvailable()
+        : true;
+      const conditional = typeof pk.isConditionalMediationAvailable === 'function'
+        ? await pk.isConditionalMediationAvailable()
+        : true;
+      return platform || conditional;
+    } catch {
+      return true;
+    }
+  }
+
   /** Démarre l'enregistrement : renvoie les options à passer à navigator.credentials.create. */
   registerStart(): Observable<PublicKeyCredentialCreationOptionsJSON> {
     return this.http.post<PublicKeyCredentialCreationOptionsJSON>(`${this.apiUrl}/register/options`, {});

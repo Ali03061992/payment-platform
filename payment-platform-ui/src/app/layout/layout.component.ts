@@ -50,6 +50,7 @@ export class LayoutComponent implements OnInit, OnDestroy {
 
   navItems: NavItem[] = [
     { label: 'NAV.DASHBOARD', icon: 'dashboard', route: '/dashboard', roles: ['SYSTEM_ADMIN', 'SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_AGENT'], group: 'NAV.GROUP_MAIN' },
+    { label: 'NAV.SECURITY', icon: 'key', route: 'security', roles: ['SYSTEM_ADMIN', 'SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_AGENT'], group: 'NAV.GROUP_MAIN' },
     { label: 'NAV.USER_MANAGEMENT', icon: 'users', route: 'admin/users', roles: ['SYSTEM_ADMIN'], group: 'NAV.GROUP_ADMIN' },
     { label: 'NAV.CREATE_ACCOUNT', icon: 'user-plus', route: 'admin/users/create', roles: ['SYSTEM_ADMIN'], group: 'NAV.GROUP_ADMIN' },
     { label: 'NAV.ACCOUNT_ACTIVATION', icon: 'key', route: 'sales/accounts', roles: ['SYSTEM_ADMIN'], group: 'NAV.GROUP_ADMIN' },
@@ -85,7 +86,6 @@ export class LayoutComponent implements OnInit, OnDestroy {
     { label: 'NAV.AGENT_PAYMENTS', icon: 'users', route: 'supplier/agent-payments', roles: ['SUPPLIER_ADMIN', 'SUPPLIER_AGENT'], group: 'NAV.GROUP_SALES' },
     { label: 'LAYOUT.NOTIFICATIONS', icon: 'bell', route: 'notifications', roles: ['SYSTEM_ADMIN', 'SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_AGENT'], group: 'NAV.GROUP_TOOLS' },
     { label: 'NAV.CHANGE_PASSWORD', icon: 'lock', route: 'change-password', roles: ['SYSTEM_ADMIN', 'SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_AGENT'], group: 'NAV.GROUP_ACCOUNT' },
-    { label: 'NAV.SECURITY', icon: 'key', route: 'security', roles: ['SYSTEM_ADMIN', 'SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_AGENT'], group: 'NAV.GROUP_ACCOUNT' },
   ];
 
   /** Groupes repliés (persistés, tous ouverts par défaut). */
