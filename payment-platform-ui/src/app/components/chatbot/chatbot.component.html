@@ -11,6 +11,12 @@
           <strong>{{ 'CHATBOT.TITLE' | translate }}</strong>
           <span class="chatbot-status">{{ 'CHATBOT.ONLINE' | translate }}</span>
         </div>
+        <button class="chatbot-close" (click)="restart()" [attr.aria-label]="'CHATBOT.RESTART' | translate" [attr.title]="'CHATBOT.RESTART' | translate">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M3 12a9 9 0 1 0 3-6.7"></path>
+            <polyline points="3 3 3 9 9 9"></polyline>
+          </svg>
+        </button>
         <button class="chatbot-close" (click)="toggle()" [attr.aria-label]="'CHATBOT.CLOSE' | translate">✕</button>
       </div>
 

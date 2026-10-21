@@ -1,0 +1,53 @@
+@if (loading) {
+  <div class="loading"><div class="spinner"></div><span>{{ 'DOCUMENTS.LOADING' | translate }}</span></div>
+}
+@if (error) {
+  <div class="info-box">{{ error | translate }}</div>
+}
+@if (invoice && !loading) {
+  <div class="page-header">
+    <h2>{{ 'DOCUMENTS.INVOICE_TITLE' | translate }} {{ invoice.invoiceNumber }}</h2>
+    <div class="page-header-actions">
+      <button class="btn btn-primary" (click)="downloadInvoice()">{{ 'DOCUMENTS.DOWNLOAD_INVOICE' | translate }}</button>
+      @if (order) {
+        <a class="btn btn-secondary" [routerLink]="['/dashboard/orders', order.reference]">{{ 'DOCUMENTS.OPEN_ORDER' | translate }}</a>
+      }
+    </div>
+  </div>
+  <div class="detail-grid">
+    <div class="detail-card">
+      <div class="detail-label">{{ 'DOCUMENTS.REFERENCE' | translate }}</div>
+      <div class="detail-value">{{ invoice.invoiceNumber }}</div>
+    </div>
+    <div class="detail-card">
+      <div class="detail-label">{{ 'DOCUMENTS.ORDER' | translate }}</div>
+      <div class="detail-value">{{ invoice.orderReference }}</div>
+    </div>
+    <div class="detail-card">
+      <div class="detail-label">{{ 'DOCUMENTS.SUPPLIER' | translate }}</div>
+      <div class="detail-value">{{ invoice.supplierName || invoice.supplierId }}</div>
+    </div>
+    <div class="detail-card">
+      <div class="detail-label">{{ 'DOCUMENTS.SHOP' | translate }}</div>
+      <div class="detail-value">{{ invoice.shopName || invoice.shopId }}</div>
+    </div>
+    <div class="detail-card">
+      <div class="detail-label">{{ 'DOCUMENTS.TOTAL_TTC' | translate }}</div>
+      <div class="detail-value amount">{{ invoice.totalTtc | number:'1.2-2' }} {{ invoice.currency }}</div>
+    </div>
+    <div class="detail-card">
+      <div class="detail-label">{{ 'DOCUMENTS.VAT' | translate }}</div>
+      <div class="detail-value">{{ invoice.vatAmount | number:'1.2-2' }} {{ invoice.currency }}</div>
+    </div>
+    <div class="detail-card">
+      <div class="detail-label">{{ 'DOCUMENTS.CREATED_AT' | translate }}</div>
+      <div class="detail-value">{{ invoice.issuedAt | date:'dd/MM/yyyy HH:mm' }}</div>
+    </div>
+    @if (order) {
+      <div class="detail-card">
+        <div class="detail-label">{{ 'DOCUMENTS.STATUS' | translate }}</div>
+        <div class="detail-value"><span class="payment-badge">{{ order.status | statusLabel }}</span></div>
+      </div>
+    }
+  </div>
+}

@@ -3,7 +3,6 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { Subscription } from 'rxjs';
 import { DisputeService } from '../../services/dispute.service';
-import { LoginService } from '../../services/login.service';
 import { ToastService } from '../../services/toast.service';
 import { Dispute } from '../../models/dispute.model';
 import { statusLabelFr } from '../../pipes/status-label.pipe';
@@ -26,7 +25,6 @@ export class DisputeListComponent implements OnInit, OnDestroy {
 
   constructor(
     private disputeService: DisputeService,
-    private loginService: LoginService,
     private toast: ToastService,
     private router: Router,
     private route: ActivatedRoute,
@@ -49,8 +47,7 @@ export class DisputeListComponent implements OnInit, OnDestroy {
     this.loading = true;
     this.subscriptions.add(this.disputeService.list().subscribe({
       next: (all) => {
-        const orgId = this.loginService.getCurrentUser()?.organizationId;
-        this.disputes = (all || []).filter((d) => this.scope === 'all' || !orgId || d.shopId === orgId);
+        this.disputes = all || [];
         this.loading = false;
       },
       error: (err: { error?: { message?: string }; status?: number; statusText?: string; message?: string }) => {
@@ -78,12 +75,7 @@ export class DisputeListComponent implements OnInit, OnDestroy {
   }
 
   openDispute(id: string): void {
-    const roles = this.loginService.getCurrentUser()?.roles || [];
-    if (roles.includes('SYSTEM_ADMIN')) {
-      this.router.navigate(['/dashboard/admin/disputes', id]);
-    } else {
-      this.router.navigate(['/dashboard/shop/disputes', id]);
-    }
+    this.router.navigate(['/dashboard/disputes', id]);
   }
 
   statusLabel(s: string): string {

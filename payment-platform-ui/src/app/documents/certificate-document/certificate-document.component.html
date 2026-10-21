@@ -1,0 +1,61 @@
+@if (loading) {
+  <div class="loading"><div class="spinner"></div><span>{{ 'DOCUMENTS.LOADING' | translate }}</span></div>
+}
+@if (error) {
+  <div class="info-box">{{ error | translate }}</div>
+}
+@if (certificate && !loading) {
+  <div class="page-header">
+    <h2>{{ 'DOCUMENTS.CERTIFICATE_TITLE' | translate }} {{ certificate.number }}</h2>
+    <div class="page-header-actions">
+      <button class="btn btn-primary" (click)="downloadPdf()">{{ 'DOCUMENTS.DOWNLOAD_CERTIFICATE' | translate }}</button>
+      <button class="btn btn-secondary" (click)="downloadXml()">{{ 'DOCUMENTS.DOWNLOAD_CERTIFICATE_XML' | translate }}</button>
+    </div>
+  </div>
+  <div class="detail-grid">
+    <div class="detail-card">
+      <div class="detail-label">{{ 'DOCUMENTS.CERT_NUMBER' | translate }}</div>
+      <div class="detail-value">{{ certificate.number }}</div>
+    </div>
+    <div class="detail-card">
+      <div class="detail-label">{{ 'DOCUMENTS.ORDER' | translate }}</div>
+      <div class="detail-value">{{ certificate.orderReference }}</div>
+    </div>
+    <div class="detail-card">
+      <div class="detail-label">{{ 'DOCUMENTS.DEBTOR' | translate }}</div>
+      <div class="detail-value">{{ certificate.debtorName }}</div>
+    </div>
+    <div class="detail-card">
+      <div class="detail-label">{{ 'DOCUMENTS.BENEFICIARY' | translate }}</div>
+      <div class="detail-value">{{ certificate.beneficiaryName }}</div>
+    </div>
+    <div class="detail-card">
+      <div class="detail-label">{{ 'DOCUMENTS.CERT_GROSS' | translate }}</div>
+      <div class="detail-value">{{ certificate.grossAmount | number:'1.2-2' }} {{ certificate.currency }}</div>
+    </div>
+    <div class="detail-card">
+      <div class="detail-label">{{ 'DOCUMENTS.CERT_RATE' | translate }}</div>
+      <div class="detail-value">{{ certificate.rate }} %</div>
+    </div>
+    <div class="detail-card">
+      <div class="detail-label">{{ 'DOCUMENTS.CERT_WITHHOLDING' | translate }}</div>
+      <div class="detail-value">{{ certificate.withholdingAmount | number:'1.2-2' }} {{ certificate.currency }}</div>
+    </div>
+    <div class="detail-card">
+      <div class="detail-label">{{ 'DOCUMENTS.CERT_NET' | translate }}</div>
+      <div class="detail-value amount">{{ certificate.netAmount | number:'1.2-2' }} {{ certificate.currency }}</div>
+    </div>
+    <div class="detail-card">
+      <div class="detail-label">{{ 'DOCUMENTS.CERT_DUE' | translate }}</div>
+      <div class="detail-value">{{ certificate.dueDate }}</div>
+    </div>
+    <div class="detail-card">
+      <div class="detail-label">{{ 'DOCUMENTS.CERT_TEJ' | translate }}</div>
+      <div class="detail-value">{{ certificate.tejReference || '-' }}</div>
+    </div>
+    <div class="detail-card">
+      <div class="detail-label">{{ 'DOCUMENTS.STATUS' | translate }}</div>
+      <div class="detail-value"><span class="payment-badge">{{ certificate.status | statusLabel }}</span></div>
+    </div>
+  </div>
+}

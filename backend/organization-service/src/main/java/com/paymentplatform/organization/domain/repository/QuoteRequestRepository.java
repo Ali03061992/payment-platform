@@ -9,6 +9,7 @@ import java.util.UUID;
 public interface QuoteRequestRepository {
     QuoteRequest save(QuoteRequest request);
     Optional<QuoteRequest> findById(UUID id);
+    Optional<QuoteRequest> findByReference(String reference);
     List<QuoteRequest> findByShopId(UUID shopId);
     List<QuoteRequest> findBySupplierId(UUID supplierId);
 }

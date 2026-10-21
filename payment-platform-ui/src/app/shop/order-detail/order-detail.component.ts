@@ -9,6 +9,7 @@ import { ToastService } from '../../services/toast.service';
 import { ConfirmDialogService } from '../../components/confirm-dialog/confirm-dialog.service';
 import { Subscription } from 'rxjs';
 import { statusLabelFr } from '../../pipes/status-label.pipe';
+import { documentQrData } from '../../core/document-qr';
 
 @Component({
     selector: 'app-order-detail',
@@ -293,6 +294,15 @@ export class ShopOrderDetailComponent implements OnInit, OnDestroy {
   downloadInvoice(): void {
     if (!this.order) return;
     this.orderService.downloadInvoice(this.order.id);
+  }
+
+  downloadPurchaseOrder(): void {
+    if (!this.order) return;
+    this.orderService.downloadPurchaseOrder(this.order.id);
+  }
+
+  orderQrData(): string {
+    return this.order ? documentQrData('ORDER', this.order.reference) : '';
   }
 
   downloadTeif(): void {

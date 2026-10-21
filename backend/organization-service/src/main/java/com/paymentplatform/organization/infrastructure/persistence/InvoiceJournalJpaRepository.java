@@ -13,6 +13,8 @@ public interface InvoiceJournalJpaRepository extends JpaRepository<InvoiceJourna
 
     Optional<InvoiceJournalJpaEntity> findByOrderId(UUID orderId);
 
+    java.util.List<InvoiceJournalJpaEntity> findByInvoiceNumber(String invoiceNumber);
+
     @Query("""
             select e from InvoiceJournalJpaEntity e
             where (:supplierId is null or e.supplierId = :supplierId)

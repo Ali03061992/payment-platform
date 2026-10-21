@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { ToastService } from '../services/toast.service';
 import { BrowserMultiFormatReader } from '@zxing/library';
+import { documentQrRoute, parseDocumentQr } from '../core/document-qr';
 
 @Component({
     selector: 'app-qr-scanner',
@@ -122,6 +123,20 @@ export class QrScannerComponent implements OnInit, OnDestroy {
   resolveRoute(data: string): string | null {
     const raw = (data || '').trim();
     if (!raw) return null;
+
+    const documentPayload = parseDocumentQr(raw);
+    if (documentPayload) {
+      return documentQrRoute(documentPayload);
+    }
+
+    const legacyInvoice = raw.match(/^FACTURE:(.+?)\|DOC:(.+)$/i);
+    if (legacyInvoice) {
+      return `/dashboard/orders/${encodeURIComponent(legacyInvoice[2].trim())}`;
+    }
+    const legacyCertificate = raw.match(/^TEJ:CERT:(.+?)(?:\|.*)?$/i);
+    if (legacyCertificate) {
+      return `/dashboard/certificates/${encodeURIComponent(legacyCertificate[1].trim())}`;
+    }
 
     const paymentId = this.extractPaymentId(raw);
     if (paymentId !== null) return `/dashboard/payments/${paymentId}`;

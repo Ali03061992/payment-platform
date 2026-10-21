@@ -40,7 +40,7 @@
         <tbody>
           @for (e of entries; track e.id) {
             <tr>
-              <td><strong>{{ e.invoiceNumber }}</strong></td>
+              <td><a [routerLink]="['/dashboard/invoices', e.invoiceNumber]"><strong>{{ e.invoiceNumber }}</strong></a></td>
               <td>{{ e.orderReference }}</td>
               <td>{{ e.supplierName || e.supplierId }}</td>
               <td>{{ e.shopName || e.shopId }}</td>

@@ -1,0 +1,85 @@
+@if (loading) {
+  <div class="loading"><div class="spinner"></div><span>{{ 'DOCUMENTS.LOADING' | translate }}</span></div>
+}
+@if (error) {
+  <div class="info-box">{{ error | translate }}</div>
+}
+@if (request && !loading) {
+  <div class="page-header">
+    <h2>{{ 'DOCUMENTS.QUOTE_TITLE' | translate }} {{ request.reference }}</h2>
+  </div>
+  <div class="detail-grid">
+    <div class="detail-card">
+      <div class="detail-label">{{ 'DOCUMENTS.SUPPLIER' | translate }}</div>
+      <div class="detail-value">{{ request.supplierName || request.supplierId }}</div>
+    </div>
+    <div class="detail-card">
+      <div class="detail-label">{{ 'DOCUMENTS.SHOP' | translate }}</div>
+      <div class="detail-value">{{ request.shopName || request.shopId }}</div>
+    </div>
+    <div class="detail-card">
+      <div class="detail-label">{{ 'DOCUMENTS.STATUS' | translate }}</div>
+      <div class="detail-value"><span class="payment-badge">{{ request.status | statusLabel }}</span></div>
+    </div>
+    <div class="detail-card">
+      <div class="detail-label">{{ 'DOCUMENTS.CREATED_AT' | translate }}</div>
+      <div class="detail-value">{{ request.createdAt | date:'dd/MM/yyyy HH:mm' }}</div>
+    </div>
+    @if (request.notes) {
+      <div class="detail-card" style="grid-column: 1 / -1;">
+        <div class="detail-label">{{ 'DOCUMENTS.NOTES' | translate }}</div>
+        <div class="detail-value">{{ request.notes }}</div>
+      </div>
+    }
+  </div>
+  @if (lines.length) {
+    <div class="table-card" style="margin-top:24px;">
+      <h3 style="padding:16px 20px 0;">{{ 'DOCUMENTS.ITEMS' | translate }}</h3>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>{{ 'DOCUMENTS.PRODUCT' | translate }}</th>
+              <th>{{ 'DOCUMENTS.QUANTITY' | translate }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (line of lines; track line) {
+              <tr>
+                <td><strong>{{ line.name || line.ref }}</strong><br><small class="text-placeholder">{{ line.ref }}</small></td>
+                <td>{{ line.quantity || line.qty }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+  <div class="table-card" style="margin-top:24px;">
+    <h3 style="padding:16px 20px 0;">{{ 'DOCUMENTS.QUOTE_VERSIONS' | translate }}</h3>
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>{{ 'DOCUMENTS.VERSION' | translate }}</th>
+            <th>{{ 'DOCUMENTS.TOTAL' | translate }}</th>
+            <th>{{ 'DOCUMENTS.CREATED_AT' | translate }}</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (quote of request.quotes; track quote.id) {
+            <tr>
+              <td>v{{ quote.version }}</td>
+              <td>{{ quote.total | number:'1.2-2' }} {{ quote.currency }}</td>
+              <td>{{ quote.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
+              <td><button class="btn btn-sm btn-secondary" (click)="download(quote.version)">{{ 'DOCUMENTS.DOWNLOAD_QUOTE' | translate }}</button></td>
+            </tr>
+          } @empty {
+            <tr><td colspan="4" class="text-placeholder">{{ 'DOCUMENTS.NO_QUOTES' | translate }}</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+}

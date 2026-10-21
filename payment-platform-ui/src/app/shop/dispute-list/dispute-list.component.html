@@ -38,7 +38,7 @@
           @for (d of filtered; track d.id) {
             <tr class="clickable-row" (click)="openDispute(d.id)">
               <td><strong>{{ d.id | slice:0:8 }}</strong></td>
-              <td>{{ d.orderId | slice:0:8 }}</td>
+              <td><strong>{{ d.orderReference || (d.orderId | slice:0:8) }}</strong></td>
               <td>{{ d.reason }}</td>
               <td><span class="payment-badge" [ngClass]="statusClass(d.status)">{{ d.status | statusLabel }}</span></td>
               <td>{{ d.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
@@ -65,6 +65,10 @@
           <span class="payment-badge" [ngClass]="statusClass(d.status)">{{ d.status | statusLabel }}</span>
         </div>
         <div class="dispute-card-body">
+          <div class="dispute-row">
+            <span class="dispute-label">{{ 'DISPUTES.COL_ORDER' | translate }}</span>
+            <span class="dispute-value">{{ d.orderReference || (d.orderId | slice:0:8) }}</span>
+          </div>
           <div class="dispute-row">
             <span class="dispute-label">{{ 'DISPUTES.COL_REASON' | translate }}</span>
             <span class="dispute-value">{{ d.reason }}</span>

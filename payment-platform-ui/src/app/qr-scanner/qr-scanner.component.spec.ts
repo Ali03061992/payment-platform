@@ -133,6 +133,20 @@ describe('QrScannerComponent', () => {
   });
 
   describe('resolveRoute', () => {
+    it('should resolve a JSON document QR to its detail page', () => {
+      expect(component.resolveRoute('{"v":1,"type":"ORDER","reference":"CMD-42"}'))
+        .toBe('/dashboard/orders/CMD-42');
+      expect(component.resolveRoute('{"v":1,"type":"INVOICE","reference":"INV-9"}'))
+        .toBe('/dashboard/invoices/INV-9');
+      expect(component.resolveRoute('{"v":1,"type":"WITHHOLDING_CERTIFICATE","reference":"CRT-1"}'))
+        .toBe('/dashboard/certificates/CRT-1');
+    });
+
+    it('should fall back to legacy document QR formats', () => {
+      expect(component.resolveRoute('FACTURE:EXT-1|DOC:CMD-7')).toBe('/dashboard/orders/CMD-7');
+      expect(component.resolveRoute('TEJ:CERT:CRT-7|X')).toBe('/dashboard/certificates/CRT-7');
+    });
+
     it('should resolve an alphanumeric payment reference', () => {
       expect(component.resolveRoute('PAY-1712345678901-123456'))
         .toBe('/dashboard/payments/PAY-1712345678901-123456');

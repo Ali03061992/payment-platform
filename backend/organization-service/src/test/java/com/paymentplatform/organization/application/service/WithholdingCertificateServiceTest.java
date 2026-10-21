@@ -59,6 +59,8 @@ class WithholdingCertificateServiceTest {
         byte[] pdf = new WithholdingCertificatePdfService().generateCertificatePdf(cert());
         assertThat(pdf).isNotEmpty();
         assertThat(new String(pdf, 0, 4)).isEqualTo("%PDF");
-        assertThat(WithholdingCertificatePdfService.qrPayload(cert())).startsWith("TEJ:CERT:CRT-202610-AB12CD34");
+        assertThat(WithholdingCertificatePdfService.qrPayload(cert()))
+                .contains("\"type\":\"WITHHOLDING_CERTIFICATE\"")
+                .contains("\"reference\":\"CRT-202610-AB12CD34\"");
     }
 }

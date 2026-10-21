@@ -71,6 +71,8 @@ export class LayoutComponent implements OnInit, OnDestroy {
     { label: 'NAV.FINANCE', icon: 'wallet', route: 'supplier/financial', roles: ['SUPPLIER_ADMIN'], group: 'NAV.GROUP_FINANCE' },
     { label: 'NAV.BALANCE', icon: 'scale', route: 'supplier/balance', roles: ['SUPPLIER_ADMIN'], group: 'NAV.GROUP_FINANCE' },
     { label: 'NAV.INVOICE_JOURNAL', icon: 'file-text', route: 'supplier/invoices', roles: ['SUPPLIER_ADMIN'], group: 'NAV.GROUP_FINANCE' },
+    { label: 'NAV.DISPUTES', icon: 'alert', route: 'disputes', roles: ['SUPPLIER_ADMIN', 'SUPPLIER_AGENT'], group: 'NAV.GROUP_SALES' },
+    { label: 'NAV.FISCAL_SETTINGS', icon: 'shield', route: 'supplier/settings', roles: ['SUPPLIER_ADMIN'], group: 'NAV.GROUP_ACCOUNT' },
     { label: 'NAV.DELIVERIES', icon: 'truck', route: 'supplier/deliveries', roles: ['SUPPLIER_ADMIN', 'SUPPLIER_AGENT'], group: 'NAV.GROUP_SALES' },
     { label: 'NAV.MY_ORDERS', icon: 'cart', route: 'shop/orders', roles: ['SHOP_ADMIN', 'SHOP_AGENT'], group: 'NAV.GROUP_SHOP' },
     { label: 'NAV.MY_QUOTES', icon: 'file-text', route: 'shop/quotes', roles: ['SHOP_ADMIN'], group: 'NAV.GROUP_SHOP' },

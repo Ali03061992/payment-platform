@@ -10,6 +10,7 @@ import { ToastService } from '../../services/toast.service';
 import { ConfirmDialogService } from '../../components/confirm-dialog/confirm-dialog.service';
 import { Subscription, Subject, debounceTime, distinctUntilChanged, switchMap, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
+import { documentQrData } from '../../core/document-qr';
 import { statusLabelFr } from '../../pipes/status-label.pipe';
 
 @Component({
@@ -406,6 +407,15 @@ export class OrderManagementComponent implements OnInit, OnDestroy {
   downloadDetailTeif(): void {
     if (!this.selectedOrder) return;
     this.orderService.downloadTeif(this.selectedOrder.id);
+  }
+
+  downloadDetailPurchaseOrder(): void {
+    if (!this.selectedOrder) return;
+    this.orderService.downloadPurchaseOrder(this.selectedOrder.id);
+  }
+
+  detailOrderQrData(): string {
+    return this.selectedOrder ? documentQrData('ORDER', this.selectedOrder.reference) : '';
   }
 
   toggleDetailExtRefForm(): void {

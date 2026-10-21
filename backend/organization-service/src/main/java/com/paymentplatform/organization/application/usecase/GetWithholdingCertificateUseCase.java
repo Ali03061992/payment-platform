@@ -38,4 +38,22 @@ public class GetWithholdingCertificateUseCase {
                 .orElseThrow(() -> new NotFoundException(
                         "Aucun certificat de retenue pour la commande : " + orderId));
     }
+
+    @Transactional(readOnly = true)
+    public WithholdingCertificateResponse executeByNumber(String number, UUID organizationId,
+                                                          boolean systemAdmin) {
+        var certificate = certificates.findByNumber(number)
+                .orElseThrow(() -> new NotFoundException(
+                        "Aucun certificat de retenue avec le numéro : " + number));
+        Order order = orders.findById(certificate.orderId())
+                .orElseThrow(() -> new NotFoundException(
+                        "Commande non trouvée : " + certificate.orderId()));
+        if (!systemAdmin) {
+            if (organizationId == null || (!organizationId.equals(order.getSupplierId())
+                    && !organizationId.equals(order.getShopId()))) {
+                throw new ForbiddenException("Accès refusé au certificat de retenue");
+            }
+        }
+        return WithholdingCertificateResponse.from(certificate);
+    }
 }

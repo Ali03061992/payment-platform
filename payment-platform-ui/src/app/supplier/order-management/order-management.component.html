@@ -341,8 +341,11 @@
           @if (selectedOrder && canGenerateInvoice(selectedOrder)) {
             <button class="btn btn-sm btn-primary" style="margin-right:8px;" (click)="downloadInvoice(selectedOrder)" [attr.aria-label]="'SUPPLIER_ORDERS.DOWNLOAD_INVOICE_ARIA' | translate">{{ 'SUPPLIER_ORDERS.DOWNLOAD_INVOICE' | translate }}</button>
             <button class="btn btn-sm btn-secondary" style="margin-right:8px;" (click)="printDetailInvoice()" [attr.aria-label]="'SUPPLIER_ORDERS.PRINT_INVOICE_ARIA' | translate">{{ 'SUPPLIER_ORDERS.PRINT_INVOICE' | translate }}</button>
-            <button class="btn btn-sm btn-secondary" style="margin-right:8px;" (click)="downloadDetailTeif()" [attr.aria-label]="'SUPPLIER_ORDERS.DOWNLOAD_TEIF_ARIA' | translate">{{ 'SUPPLIER_ORDERS.DOWNLOAD_TEIF' | translate }}</button>
-            @if (detailCertificate) {
+            <button class="btn btn-sm btn-secondary" style="margin-right:8px;" (click)="downloadDetailPurchaseOrder()">{{ 'DOCUMENTS.DOWNLOAD_PURCHASE_ORDER' | translate }}</button>
+            @if (selectedOrder.supplierTeifEnabled !== false) {
+              <button class="btn btn-sm btn-secondary" style="margin-right:8px;" (click)="downloadDetailTeif()" [attr.aria-label]="'SUPPLIER_ORDERS.DOWNLOAD_TEIF_ARIA' | translate">{{ 'SUPPLIER_ORDERS.DOWNLOAD_TEIF' | translate }}</button>
+            }
+            @if (detailCertificate && selectedOrder.supplierTejEnabled !== false) {
               <button class="btn btn-sm btn-secondary" style="margin-right:8px;" (click)="downloadDetailCertificatePdf()">{{ 'PAYMENT_DETAIL.DOWNLOAD_CERT_PDF' | translate }}</button>
               <button class="btn btn-sm btn-secondary" style="margin-right:8px;" (click)="downloadDetailCertificateXml()">{{ 'PAYMENT_DETAIL.DOWNLOAD_CERT_XML' | translate }}</button>
             }
@@ -373,11 +376,10 @@
             <div class="detail-card">
               <div class="detail-label">{{ 'ORDER_DETAIL.EXTREF' | translate }}</div>
               <div class="detail-value">
+                <qrcode [qrdata]="detailOrderQrData()" [width]="72" [margin]="1"></qrcode>
                 @if (selectedOrder.externalReference) {
                   <strong>{{ selectedOrder.externalReference }}</strong>
-                  <qrcode [qrdata]="'FACTURE:' + selectedOrder.externalReference + '|DOC:' + selectedOrder.reference" [width]="72" [margin]="1"></qrcode>
                 } @else {
-                  <span class="text-placeholder">—</span>
                   <button class="btn btn-sm btn-secondary" style="margin-left:8px;" (click)="toggleDetailExtRefForm()">{{ 'ORDER_DETAIL.EXTREF_ADD' | translate }}</button>
                 }
               </div>

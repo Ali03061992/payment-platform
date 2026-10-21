@@ -59,6 +59,11 @@ import { AuditLogManagementComponent } from './admin/audit-log-management/audit-
 import { ForbiddenComponent } from './errors/forbidden/forbidden.component';
 import { NotFoundComponent } from './errors/not-found/not-found.component';
 import { InvoicesJournalComponent } from './components/invoices-journal/invoices-journal.component';
+import { OrderDocumentComponent } from './documents/order-document/order-document.component';
+import { InvoiceDocumentComponent } from './documents/invoice-document/invoice-document.component';
+import { QuoteDocumentComponent } from './documents/quote-document/quote-document.component';
+import { CertificateDocumentComponent } from './documents/certificate-document/certificate-document.component';
+import { SupplierFiscalSettingsComponent } from './supplier/fiscal-settings/fiscal-settings.component';
 
 export const adminRoles = ['SYSTEM_ADMIN'];
 export const supplierRoles = ['SUPPLIER_ADMIN', 'SUPPLIER_AGENT'];
@@ -95,9 +100,16 @@ const routes: Routes = [
       { path: 'payments-help/tej', component: TejGuideComponent, canActivate: [RoleGuard], data: { roles: allRoles } },
       { path: 'payments-help/tej-prepare', component: WithholdingPrepareComponent, canActivate: [RoleGuard], data: { roles: allRoles } },
       { path: 'scan', component: QrScannerComponent, canActivate: [RoleGuard], data: { roles: allRoles } },
+      { path: 'orders/:reference', component: OrderDocumentComponent, canActivate: [RoleGuard], data: { roles: allRoles } },
+      { path: 'invoices/:invoiceNumber', component: InvoiceDocumentComponent, canActivate: [RoleGuard], data: { roles: allRoles } },
+      { path: 'quotes/:reference', component: QuoteDocumentComponent, canActivate: [RoleGuard], data: { roles: [...adminRoles, ...supplierRoles, ...shopRoles] } },
+      { path: 'certificates/:number', component: CertificateDocumentComponent, canActivate: [RoleGuard], data: { roles: allRoles } },
+      { path: 'disputes', component: DisputeListComponent, canActivate: [RoleGuard], data: { roles: [...adminRoles, ...supplierRoles, ...shopRoles], scope: 'own' } },
+      { path: 'disputes/:id', component: DisputeDetailComponent, canActivate: [RoleGuard], data: { roles: [...adminRoles, ...supplierRoles, ...shopRoles] } },
       { path: 'export', component: ExportComponent, canActivate: [RoleGuard], data: { roles: allRoles } },
       { path: 'supplier/agent-payments', component: AgentPaymentsComponent, canActivate: [RoleGuard], data: { roles: supplierRoles } },
       { path: 'supplier/financial', component: SupplierFinancialComponent, canActivate: [RoleGuard], data: { roles: ['SUPPLIER_ADMIN'] } },
+      { path: 'supplier/settings', component: SupplierFiscalSettingsComponent, canActivate: [RoleGuard], data: { roles: ['SUPPLIER_ADMIN'] } },
       { path: 'supplier/balance', component: SupplierBalanceComponent, canActivate: [RoleGuard], data: { roles: ['SUPPLIER_ADMIN'] } },
       { path: 'supplier/invoices', component: InvoicesJournalComponent, canActivate: [RoleGuard], data: { roles: ['SUPPLIER_ADMIN'] } },
       { path: 'supplier/stock', component: StockManagementComponent, canActivate: [RoleGuard], data: { roles: supplierRoles } },

@@ -7,6 +7,9 @@ export interface Dispute {
   status: 'OPEN' | 'IN_PROGRESS' | 'RESOLVED' | 'CLOSED';
   reason: string;
   messages: DisputeMessage[];
+  orderReference?: string | null;
+  supplierName?: string | null;
+  shopName?: string | null;
   version: number;
   createdAt: string;
   updatedAt: string;

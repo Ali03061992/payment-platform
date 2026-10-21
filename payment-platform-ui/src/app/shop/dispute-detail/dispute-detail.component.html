@@ -10,10 +10,31 @@
     <div class="page-header no-print">
       <h2>{{ 'DISPUTES.DETAIL_TITLE' | translate }} #{{ dispute.id | slice:0:8 }}</h2>
       <div class="page-header-actions">
+        <a class="btn btn-secondary" routerLink="/dashboard/disputes">{{ 'DISPUTES.BACK_TO_LIST' | translate }}</a>
         <a class="btn btn-secondary" (click)="backToOrder()">{{ 'DISPUTES.BACK_TO_ORDER' | translate }}</a>
       </div>
     </div>
     <div class="detail-grid">
+      @if (dispute.orderReference) {
+        <div class="detail-card">
+          <div class="detail-label">{{ 'DISPUTES.COL_ORDER' | translate }}</div>
+          <div class="detail-value">
+            <a [routerLink]="['/dashboard/orders', dispute.orderReference]"><strong>{{ dispute.orderReference }}</strong></a>
+          </div>
+        </div>
+      }
+      @if (dispute.shopName) {
+        <div class="detail-card">
+          <div class="detail-label">{{ 'DOCUMENTS.SHOP' | translate }}</div>
+          <div class="detail-value">{{ dispute.shopName }}</div>
+        </div>
+      }
+      @if (dispute.supplierName) {
+        <div class="detail-card">
+          <div class="detail-label">{{ 'DOCUMENTS.SUPPLIER' | translate }}</div>
+          <div class="detail-value">{{ dispute.supplierName }}</div>
+        </div>
+      }
       <div class="detail-card">
         <div class="detail-label">{{ 'DISPUTES.COL_STATUS' | translate }}</div>
         <div class="detail-value">

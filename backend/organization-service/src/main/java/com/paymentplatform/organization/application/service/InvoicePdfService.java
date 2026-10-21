@@ -34,6 +34,8 @@ public class InvoicePdfService {
     private static final Font NORMAL_FONT = new Font(Font.HELVETICA, 10, Font.NORMAL);
     private static final Font BOLD_FONT = new Font(Font.HELVETICA, 10, Font.BOLD);
     private static final Font SMALL_FONT = new Font(Font.HELVETICA, 8, Font.NORMAL, Color.GRAY);
+    private static final Font LEGAL_FONT = new Font(Font.HELVETICA, 7, Font.NORMAL, Color.GRAY);
+    private static final Font LEGAL_BOLD_FONT = new Font(Font.HELVETICA, 7, Font.BOLD, Color.GRAY);
     private static final Font TOTAL_FONT = new Font(Font.HELVETICA, 12, Font.BOLD, new Color(18, 36, 58));
     private static final Font MENTION_FONT = new Font(Font.HELVETICA, 9, Font.BOLDITALIC, new Color(120, 30, 30));
 
@@ -42,7 +44,7 @@ public class InvoicePdfService {
      * document même à une seule ligne, tout en tenant avec totaux, mentions et
      * signatures sur UNE page (les totaux restent insécables via setKeepTogether).
      */
-    private static final int MIN_ITEM_ROWS = 5;
+    private static final int MIN_ITEM_ROWS = 4;
 
     /** Partie à la facture (fournisseur ou client) avec son profil fiscal. */
     public record InvoiceParty(String name, String address, String matriculeFiscal, String patente,
@@ -66,7 +68,16 @@ public class InvoicePdfService {
     public byte[] generateInvoicePdf(Order order, List<OrderItem> items,
                                      InvoiceParty supplier, InvoiceParty buyer, String invoiceNumber) {
         return generatePdf(order, items, supplier, buyer, "FACTURE", "Facture n°: ",
-                invoiceNumber, "NEXTERA - Facture ");
+                invoiceNumber, "NEXTERA - Facture ", DocumentQrPayload.TYPE_INVOICE,
+                invoiceNumber, "Facture");
+    }
+
+    /** Bon de commande : même mise en page que la facture, intitulés adaptés. */
+    public byte[] generatePurchaseOrderPdf(Order order, List<OrderItem> items,
+                                           InvoiceParty supplier, InvoiceParty buyer) {
+        return generatePdf(order, items, supplier, buyer, "BON DE COMMANDE", "Commande n°: ",
+                order.getReference(), "NEXTERA - Bon de commande ", DocumentQrPayload.TYPE_ORDER,
+                order.getReference(), "Bon de commande");
     }
 
     /** Devis : même mise en page que la facture, intitulés adaptés. */
@@ -75,12 +86,13 @@ public class InvoicePdfService {
                                    String refKind, String refValue) {
         return generatePdf(order, items, supplier, buyer, "DEVIS N°" + version,
                 "Devis n°" + version + " — " + refKind + " : ", refValue,
-                "NEXTERA - Devis ");
+                "NEXTERA - Devis ", DocumentQrPayload.TYPE_QUOTE, refValue, "Devis");
     }
 
     private byte[] generatePdf(Order order, List<OrderItem> items,
                                InvoiceParty supplier, InvoiceParty buyer,
-                               String title, String refLabel, String refValue, String footerLabel) {
+                               String title, String refLabel, String refValue, String footerLabel,
+                               String qrType, String qrReference, String docLabel) {
         Document document = new Document(PageSize.A4, 36, 36, 44, 36);
         ByteArrayOutputStream out = new ByteArrayOutputStream();
 
@@ -89,11 +101,12 @@ public class InvoicePdfService {
             writer.setPageEvent(new FooterEvent(footerLabel));
             document.open();
 
-            addHeader(document, order, supplier, buyer, title, refLabel, refValue);
+            addHeader(document, order, supplier, buyer, title, refLabel, refValue,
+                    DocumentQrPayload.of(qrType, qrReference));
             addItemsTable(document, items, order);
             addTotals(document, order);
             addFiscalMention(document, order);
-            addLegalMentions(document, order);
+            addLegalMentions(document, order, docLabel);
             addSignatures(document);
 
             document.close();
@@ -127,7 +140,7 @@ public class InvoicePdfService {
     }
 
     private void addHeader(Document document, Order order, InvoiceParty supplier, InvoiceParty buyer,
-                           String title, String refLabel, String refValue)
+                           String title, String refLabel, String refValue, String qrPayload)
             throws DocumentException {
         Paragraph titlePara = new Paragraph(title, TITLE_FONT);
         titlePara.setAlignment(Element.ALIGN_LEFT);
@@ -150,7 +163,7 @@ public class InvoicePdfService {
 
         PdfPCell rightCell = new PdfPCell();
         rightCell.setBorder(Rectangle.NO_BORDER);
-        addElectronicReference(rightCell, order);
+        addElectronicReference(rightCell, order, qrPayload);
         rightCell.addElement(new Paragraph("Fournisseur:", BOLD_FONT));
         addPartyLines(rightCell, supplier);
         rightCell.addElement(new Paragraph(" ", NORMAL_FONT));
@@ -165,21 +178,17 @@ public class InvoicePdfService {
     }
 
     /**
-     * Référence électronique externe (TTN/El Fatoora, TEJ) avec QR en haut à droite,
-     * comme les outils tunisiens (référence unique + QR de validation).
+     * QR de reconnaissance du document (JSON type/référence, lu par le scanner de
+     * l'application) puis référence électronique externe optionnelle (TTN, TEJ).
      */
-    private void addElectronicReference(PdfPCell cell, Order order) {
-        if (order.getExternalReference() == null || order.getExternalReference().isBlank()) {
-            return;
-        }
+    private void addElectronicReference(PdfPCell cell, Order order, String qrPayload) {
         try {
             com.google.zxing.common.BitMatrix matrix = new com.google.zxing.qrcode.QRCodeWriter().encode(
-                    "FACTURE:" + order.getExternalReference() + "|DOC:" + order.getReference(),
-                    com.google.zxing.BarcodeFormat.QR_CODE, 90, 90);
+                    qrPayload, com.google.zxing.BarcodeFormat.QR_CODE, 72, 72);
             java.awt.image.BufferedImage image =
-                    new java.awt.image.BufferedImage(90, 90, java.awt.image.BufferedImage.TYPE_INT_RGB);
-            for (int x = 0; x < 90; x++) {
-                for (int y = 0; y < 90; y++) {
+                    new java.awt.image.BufferedImage(72, 72, java.awt.image.BufferedImage.TYPE_INT_RGB);
+            for (int x = 0; x < 72; x++) {
+                for (int y = 0; y < 72; y++) {
                     image.setRGB(x, y, matrix.get(x, y) ? Color.BLACK.getRGB() : Color.WHITE.getRGB());
                 }
             }
@@ -189,9 +198,11 @@ public class InvoicePdfService {
         } catch (Exception ignored) {
             // Le QR ne doit jamais faire échouer la facture.
         }
-        Paragraph ref = new Paragraph("Réf. électronique: " + order.getExternalReference(), BOLD_FONT);
-        ref.setAlignment(Element.ALIGN_RIGHT);
-        cell.addElement(ref);
+        if (order.getExternalReference() != null && !order.getExternalReference().isBlank()) {
+            Paragraph ref = new Paragraph("Réf. électronique: " + order.getExternalReference(), BOLD_FONT);
+            ref.setAlignment(Element.ALIGN_RIGHT);
+            cell.addElement(ref);
+        }
     }
 
     private void addPartyLines(PdfPCell cell, InvoiceParty party) {
@@ -335,38 +346,26 @@ public class InvoicePdfService {
         table.addCell(valueCell);
     }
 
-    private void addLegalMentions(Document document, Order order) throws DocumentException {
-        document.add(new Paragraph(" "));
-        document.add(new Paragraph(" "));
-
-        Paragraph legal = new Paragraph("Mentions légales", BOLD_FONT);
-        legal.setAlignment(Element.ALIGN_LEFT);
-        document.add(legal);
-
-        StringBuilder legalText = new StringBuilder(
-                "Facture établie conformément à l'article 18 du Code de la TVA : taux et montants de TVA "
-                + "ventilés par ligne, droit de timbre fiscal sur ligne distincte. "
-                + "TVA calculée sur HT net de remise, FODEC inclus dans la base ; "
-                + "les prix marqués TTC incluent la TVA (déduite, non ajoutée). ");
+    private void addLegalMentions(Document document, Order order, String docLabel) throws DocumentException {
+        Paragraph legal = new Paragraph("Mentions légales : ", LEGAL_BOLD_FONT);
+        legal.setAlignment(Element.ALIGN_JUSTIFIED);
+        legal.setSpacingBefore(4f);
+        legal.add(new Chunk(docLabel + " établi(e) conformément à l'article 18 du Code de la TVA : "
+                + "TVA ventilée par ligne, timbre fiscal sur ligne distincte, FODEC inclus dans la base, "
+                + "prix TTC TVA incluse. ", LEGAL_FONT));
         if (order.getFiscalMention() != null && !order.getFiscalMention().isBlank()) {
-            legalText.append("Opération sous régime spécial : ").append(order.getFiscalMention()).append(". ");
+            legal.add(new Chunk("Régime spécial : " + order.getFiscalMention() + ". ", LEGAL_FONT));
         }
-        legalText.append("Numérotation du document : ").append(order.getReference()).append(". "
-                + "En cas de question, veuillez contacter votre fournisseur. "
-                + "Les montants sont exprimés en ").append(order.getCurrency()).append(" (millimes).");
-
-        Paragraph legalContent = new Paragraph(legalText.toString(), SMALL_FONT);
-        legalContent.setAlignment(Element.ALIGN_JUSTIFIED);
-        document.add(legalContent);
+        legal.add(new Chunk("Document n° " + order.getReference() + " — montants en "
+                + order.getCurrency() + " (millimes).", LEGAL_FONT));
+        document.add(legal);
     }
 
     private void addSignatures(Document document) throws DocumentException {
-        document.add(new Paragraph(" "));
-
         PdfPTable table = new PdfPTable(2);
         table.setWidthPercentage(100);
         table.setWidths(new float[]{50, 50});
-        table.setSpacingBefore(10f);
+        table.setSpacingBefore(6f);
         table.setKeepTogether(true);
 
         PdfPCell left = signatureCell("Signature du fournisseur", "Nom, qualité, cachet et date");
@@ -383,7 +382,7 @@ public class InvoicePdfService {
         cell.addElement(new Paragraph(" ", NORMAL_FONT));
         cell.addElement(new Paragraph(" ", NORMAL_FONT));
         cell.addElement(new Paragraph(hint, SMALL_FONT));
-        cell.setMinimumHeight(62f);
+        cell.setMinimumHeight(52f);
         return cell;
     }
 

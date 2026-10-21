@@ -172,7 +172,7 @@ export class ChatbotService {
         this.state = 'idle';
         const detailRoute = this.isShop()
           ? `/dashboard/shop/orders/${o.id}`
-          : `/dashboard/supplier/orders`;
+          : `/dashboard/orders/${o.reference}`;
         this.say(this.translate.instant('CHATBOT.ORDER_FOUND', { ref: o.reference, status: this.orderStatusLabel(o.status), total: Number(o.total).toFixed(2), currency: o.currency || 'TND' }),
           [{ label: this.translate.instant('CHATBOT.LINK_DETAIL'), route: detailRoute }],
           [this.translate.instant('CHATBOT.OPT_TRACK'), this.translate.instant('CHATBOT.OPT_COMPLAINT')]);
@@ -245,9 +245,7 @@ export class ChatbotService {
       next: (d: any) => {
         this.state = 'idle';
         this.pendingOrderId = this.pendingReason = this.pendingOrderRef = null;
-        const detailRoute = this.isShop()
-          ? `/dashboard/shop/disputes/${d.id}`
-          : `/dashboard/shop/orders`;
+        const detailRoute = `/dashboard/disputes/${d.id}`;
         this.say(this.translate.instant('CHATBOT.DISPUTE_CREATED', { ref, reason }),
           [{ label: this.translate.instant('CHATBOT.LINK_DISPUTE'), route: detailRoute }],
           [this.translate.instant('CHATBOT.OPT_TRACK'), this.translate.instant('CHATBOT.OPT_COMPLAINT')]);

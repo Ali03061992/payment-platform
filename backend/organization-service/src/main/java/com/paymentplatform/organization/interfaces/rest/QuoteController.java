@@ -130,6 +130,28 @@ public class QuoteController {
     }
 
     /**
+     * Détail d'une demande par sa référence (QR du devis / scanner).
+     */
+    @GetMapping("/requests/reference/{reference}")
+    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_AGENT', 'SHOP_MANAGER', 'SYSTEM_ADMIN')")
+    public ResponseEntity<QuoteRequestResponse> getRequestByReference(@PathVariable String reference) {
+        var request = requestRepository.findByReference(reference);
+        if (request.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        var r = request.get();
+        var current = CurrentUser.get();
+        if (!isAdmin() && current.organizationId() != null
+                && !current.organizationId().equals(r.shopId())
+                && !current.organizationId().equals(r.supplierId())) {
+            return ResponseEntity.status(403).build();
+        }
+        var quotes = quoteRepository.findByRequestId(r.id()).stream()
+                .map(SupplierQuoteResponse::from).toList();
+        return ResponseEntity.ok(QuoteRequestResponse.from(r, quotes));
+    }
+
+    /**
      * Chiffre et envoie un devis versionné (fournisseur, via l'application).
      */
     @PostMapping("/requests/{id}/quotes")
