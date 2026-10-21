@@ -89,6 +89,13 @@ public class PaymentEventConsumer {
                 "Paiement " + reference + " de " + amount + " " + currency + " soumis",
                 "PAYMENT", reference
         )));
+
+        webPushSender.sendToOrganization(supplierId, "Nouveau paiement",
+                "Paiement " + reference + " de " + amount + " " + currency,
+                "PAYMENT_CREATED", "/dashboard/payments");
+        webPushSender.sendToOrganization(shopId, "Paiement soumis",
+                "Paiement " + reference + " de " + amount + " " + currency + " soumis",
+                "PAYMENT_CREATED", "/dashboard/payments");
     }
 
     private void handlePaymentConfirmed(JsonNode event) {
@@ -114,7 +121,7 @@ public class PaymentEventConsumer {
 
         pushService.sendToUser(supplierId, "Paiement confirmé",
                 "Le paiement " + reference + " a été confirmé", "PAYMENT_CONFIRMED", "/dashboard/payments");
-        webPushSender.sendToUser(supplierId, "Paiement confirmé",
+        webPushSender.sendToOrganization(supplierId, "Paiement confirmé",
                 "Le paiement " + reference + " a été confirmé", "PAYMENT_CONFIRMED", "/dashboard/payments");
     }
 
@@ -128,6 +135,11 @@ public class PaymentEventConsumer {
                 "Paiement " + reference + " rejet\u00e9" + (reason.isEmpty() ? "" : " : " + reason),
                 "PAYMENT", reference
         )));
+
+        webPushSender.sendToOrganization(shopId, "Paiement rejet\u00e9",
+                "Le paiement " + reference + " a \u00e9t\u00e9 rejet\u00e9"
+                        + (reason.isEmpty() ? "" : " : " + reason),
+                "PAYMENT_REJECTED", "/dashboard/payments");
     }
 
     private void handlePaymentCancelled(JsonNode event) {
@@ -148,5 +160,9 @@ public class PaymentEventConsumer {
                 "Paiement " + reference + " annul\u00e9",
                 "PAYMENT", reference
         )));
+
+        webPushSender.sendToOrganization(supplierId, "Paiement annul\u00e9",
+                "Le paiement " + reference + " a \u00e9t\u00e9 annul\u00e9 par la boutique",
+                "PAYMENT_CANCELLED", "/dashboard/payments");
     }
 }

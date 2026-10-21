@@ -83,10 +83,10 @@ public class DisputeEventConsumer {
                 "DISPUTE", event.get("disputeId").asText()
         )));
 
-        webPushSender.sendToUser(supplierId, "Nouveau litige",
+        webPushSender.sendToOrganization(supplierId, "Nouveau litige",
                 "Litige ouvert pour la commande " + reference, "DISPUTE_CREATED",
                 "/dashboard/disputes");
-        webPushSender.sendToUser(shopId, "Nouveau litige",
+        webPushSender.sendToOrganization(shopId, "Nouveau litige",
                 "Litige ouvert pour la commande " + reference, "DISPUTE_CREATED",
                 "/dashboard/disputes");
 
@@ -121,6 +121,17 @@ public class DisputeEventConsumer {
             )));
         }
 
+        if (notifyShop != null) {
+            webPushSender.sendToOrganization(notifyShop, "Nouveau message",
+                    senderLabel + " a ajouté un message au litige",
+                    "DISPUTE_MESSAGE", "/dashboard/disputes");
+        }
+        if (notifySupplier != null) {
+            webPushSender.sendToOrganization(notifySupplier, "Nouveau message",
+                    senderLabel + " a ajouté un message au litige",
+                    "DISPUTE_MESSAGE", "/dashboard/disputes");
+        }
+
         notifyAdmins("DISPUTE_MESSAGE",
                 senderLabel + " a ajouté un message à une réclamation",
                 event.get("disputeId").asText());
@@ -142,9 +153,9 @@ public class DisputeEventConsumer {
                 "DISPUTE", event.get("disputeId").asText()
         )));
 
-        webPushSender.sendToUser(shopId, "Litige résolu",
+        webPushSender.sendToOrganization(shopId, "Litige résolu",
                 "Le litige a été résolu", "DISPUTE_RESOLVED", "/dashboard/disputes");
-        webPushSender.sendToUser(supplierId, "Litige résolu",
+        webPushSender.sendToOrganization(supplierId, "Litige résolu",
                 "Le litige a été résolu", "DISPUTE_RESOLVED", "/dashboard/disputes");
     }
 
@@ -157,6 +168,8 @@ public class DisputeEventConsumer {
             for (UUID adminId : adminClient.systemAdminIds()) {
                 broadcaster.broadcastNotification(notifications.save(
                         new Notification(adminId, null, type, message, "DISPUTE", disputeId)));
+                webPushSender.sendToUser(adminId, "Réclamation",
+                        message, type, "/dashboard/disputes");
             }
         } catch (Exception e) {
             log.error("Notification des admins impossible", e);
@@ -177,5 +190,10 @@ public class DisputeEventConsumer {
                 "Le litige a été fermé",
                 "DISPUTE", event.get("disputeId").asText()
         )));
+
+        webPushSender.sendToOrganization(shopId, "Litige fermé",
+                "Le litige a été fermé", "DISPUTE_CLOSED", "/dashboard/disputes");
+        webPushSender.sendToOrganization(supplierId, "Litige fermé",
+                "Le litige a été fermé", "DISPUTE_CLOSED", "/dashboard/disputes");
     }
 }

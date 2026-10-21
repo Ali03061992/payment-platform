@@ -57,6 +57,11 @@ public class WebPushSubscriptionService {
         return repository.findByUserId(userId);
     }
 
+    @Transactional(readOnly = true)
+    public List<WebPushSubscription> listByOrganization(UUID organizationId) {
+        return repository.findByOrganizationId(organizationId);
+    }
+
     @Transactional
     public void removeByEndpoint(String endpoint) {
         repository.deleteByEndpoint(endpoint);

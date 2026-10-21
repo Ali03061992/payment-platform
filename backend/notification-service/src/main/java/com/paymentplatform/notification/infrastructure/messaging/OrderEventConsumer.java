@@ -101,7 +101,7 @@ public class OrderEventConsumer {
 
         pushService.sendToUser(supplierId, "Nouvelle commande",
                 "Nouvelle commande " + reference + " reçue", "ORDER_CREATED", "/dashboard/supplier/orders");
-        webPushSender.sendToUser(supplierId, "Nouvelle commande",
+        webPushSender.sendToOrganization(supplierId, "Nouvelle commande",
                 "Nouvelle commande " + reference + " reçue", "ORDER_CREATED", "/dashboard/supplier/orders");
     }
 
@@ -116,6 +116,10 @@ public class OrderEventConsumer {
         )));
 
         emailService.sendOrderConfirmation(null, "la boutique", reference, "");
+
+        webPushSender.sendToOrganization(shopId, "Commande confirmée",
+                "La commande " + reference + " a été confirmée par le fournisseur",
+                "ORDER_CONFIRMED", "/dashboard/shop/orders");
     }
 
     private void handleOrderPreparing(JsonNode event) {
@@ -127,6 +131,10 @@ public class OrderEventConsumer {
                 "Commande " + reference + " en préparation",
                 "ORDER", reference
         )));
+
+        webPushSender.sendToOrganization(shopId, "Commande en préparation",
+                "La commande " + reference + " est en préparation",
+                "ORDER_PREPARING", "/dashboard/shop/orders");
     }
 
     private void handleOrderReadyForDelivery(JsonNode event) {
@@ -138,6 +146,10 @@ public class OrderEventConsumer {
                 "Commande " + reference + " prête pour livraison",
                 "ORDER", reference
         )));
+
+        webPushSender.sendToOrganization(shopId, "Commande prête",
+                "La commande " + reference + " est prête pour livraison",
+                "ORDER_READY", "/dashboard/shop/orders");
     }
 
     private void handleOrderDelivered(JsonNode event) {
@@ -154,7 +166,7 @@ public class OrderEventConsumer {
 
         pushService.sendToUser(shopId, "Commande livrée",
                 "La commande " + reference + " est prête à être acceptée", "ORDER_DELIVERED", "/dashboard/shop/orders");
-        webPushSender.sendToUser(shopId, "Commande livrée",
+        webPushSender.sendToOrganization(shopId, "Commande livrée",
                 "La commande " + reference + " est prête à être acceptée", "ORDER_DELIVERED", "/dashboard/shop/orders");
     }
 
@@ -170,7 +182,7 @@ public class OrderEventConsumer {
 
         pushService.sendToUser(supplierId, "Commande acceptée",
                 "La commande " + reference + " a été acceptée par la boutique", "ORDER_ACCEPTED", "/dashboard/supplier/orders");
-        webPushSender.sendToUser(supplierId, "Commande acceptée",
+        webPushSender.sendToOrganization(supplierId, "Commande acceptée",
                 "La commande " + reference + " a été acceptée par la boutique", "ORDER_ACCEPTED", "/dashboard/supplier/orders");
     }
 
@@ -190,6 +202,13 @@ public class OrderEventConsumer {
                 "Commande " + reference + " annulée",
                 "ORDER", reference
         )));
+
+        webPushSender.sendToOrganization(supplierId, "Commande annulée",
+                "La commande " + reference + " a été annulée",
+                "ORDER_CANCELLED", "/dashboard/supplier/orders");
+        webPushSender.sendToOrganization(shopId, "Commande annulée",
+                "La commande " + reference + " a été annulée",
+                "ORDER_CANCELLED", "/dashboard/shop/orders");
     }
 
     private void handleOrderAutoCancelled(JsonNode event) {
@@ -203,6 +222,10 @@ public class OrderEventConsumer {
                 "Commande " + reference + " annulée automatiquement : " + reason,
                 "ORDER", reference
         )));
+
+        webPushSender.sendToOrganization(shopId, "Commande annulée",
+                "La commande " + reference + " a été annulée automatiquement : " + reason,
+                "ORDER_AUTO_CANCELLED", "/dashboard/shop/orders");
     }
 
     private void handleOrderRejected(JsonNode event) {
@@ -214,6 +237,10 @@ public class OrderEventConsumer {
                 "Commande " + reference + " rejetée par la boutique",
                 "ORDER", reference
         )));
+
+        webPushSender.sendToOrganization(supplierId, "Commande rejetée",
+                "La commande " + reference + " a été rejetée par la boutique",
+                "ORDER_REJECTED", "/dashboard/supplier/orders");
     }
 
     private void handleOrderDeliveryConfirmed(JsonNode event) {
@@ -233,6 +260,13 @@ public class OrderEventConsumer {
                 "Livraison de la commande " + reference + " confirmée pour le " + confirmedDate,
                 "ORDER", reference
         )));
+
+        webPushSender.sendToOrganization(shopId, "Livraison confirmée",
+                "Livraison de la commande " + reference + " confirmée pour le " + confirmedDate,
+                "ORDER_DELIVERY_CONFIRMED", "/dashboard/shop/orders");
+        webPushSender.sendToOrganization(supplierId, "Livraison confirmée",
+                "Livraison de la commande " + reference + " confirmée pour le " + confirmedDate,
+                "ORDER_DELIVERY_CONFIRMED", "/dashboard/supplier/orders");
     }
 
     private void handleOrderDeliveryRejected(JsonNode event) {
@@ -246,6 +280,11 @@ public class OrderEventConsumer {
                         + (reason.isEmpty() ? "" : " : " + reason),
                 "ORDER", reference
         )));
+
+        webPushSender.sendToOrganization(shopId, "Livraison rejetée",
+                "La livraison de la commande " + reference + " a été rejetée"
+                        + (reason.isEmpty() ? "" : " : " + reason),
+                "ORDER_DELIVERY_REJECTED", "/dashboard/shop/orders");
     }
 
     private void handleOrderQuoteRequested(JsonNode event) {
@@ -262,7 +301,7 @@ public class OrderEventConsumer {
 
         pushService.sendToUser(supplierId, "Demande de devis",
                 "Nouvelle demande " + reference + " à chiffrer", "QUOTE_REQUESTED", "/dashboard/supplier/quotes");
-        webPushSender.sendToUser(supplierId, "Demande de devis",
+        webPushSender.sendToOrganization(supplierId, "Demande de devis",
                 "Nouvelle demande " + reference + " à chiffrer", "QUOTE_REQUESTED", "/dashboard/supplier/quotes");
     }
 
@@ -281,7 +320,7 @@ public class OrderEventConsumer {
 
         pushService.sendToUser(shopId, "Devis reçu",
                 "Devis n°" + version + " pour la demande " + reference, "ORDER_QUOTE", "/dashboard/shop/quotes");
-        webPushSender.sendToUser(shopId, "Devis reçu",
+        webPushSender.sendToOrganization(shopId, "Devis reçu",
                 "Devis n°" + version + " pour la demande " + reference, "ORDER_QUOTE", "/dashboard/shop/quotes");
     }
 
@@ -299,7 +338,7 @@ public class OrderEventConsumer {
 
         pushService.sendToUser(supplierId, "Devis accepté",
                 "Devis " + reference + " accepté", "QUOTE_ACCEPTED", "/dashboard/supplier/quotes");
-        webPushSender.sendToUser(supplierId, "Devis accepté",
+        webPushSender.sendToOrganization(supplierId, "Devis accepté",
                 "Devis " + reference + " accepté", "QUOTE_ACCEPTED", "/dashboard/supplier/quotes");
     }
 
@@ -320,6 +359,9 @@ public class OrderEventConsumer {
                 message,
                 "ORDER", reference
         )));
+
+        webPushSender.sendToOrganization(recipientOrgId, "Nouveau commentaire",
+                message, "ORDER_COMMENT", "/dashboard/orders");
     }
 
     private void handleLowStockAlert(JsonNode event) {
@@ -335,5 +377,10 @@ public class OrderEventConsumer {
                         + availableQty + " disponible(s), minimum requis: " + minQuantity,
                 "PRODUCT", sku
         )));
+
+        webPushSender.sendToOrganization(supplierId, "Stock bas",
+                productName + " (" + sku + ") : " + availableQty
+                        + " disponible(s), minimum requis " + minQuantity,
+                "LOW_STOCK_ALERT", "/dashboard/supplier/products");
     }
 }

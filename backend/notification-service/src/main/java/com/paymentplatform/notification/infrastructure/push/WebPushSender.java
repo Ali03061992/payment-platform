@@ -62,6 +62,27 @@ public class WebPushSender {
         }
     }
 
+    /**
+     * Envoie aux appareils abonnes d'une organisation (les evenements
+     * metier transportent des identifiants d'organisation, pas d'utilisateur).
+     * Chaque abonnement reste filtre par la preference de son proprietaire.
+     */
+    @Async
+    public void sendToOrganization(UUID organizationId, String title, String body, String tag, String url) {
+        if (!enabled || organizationId == null) {
+            return;
+        }
+        try {
+            for (WebPushSubscription subscription : subscriptions.listByOrganization(organizationId)) {
+                if (preferences.isPushEnabled(subscription.userId())) {
+                    send(subscription, title, body, tag, url);
+                }
+            }
+        } catch (Exception e) {
+            log.error("Web Push send failed for organization {}: {}", organizationId, e.getMessage());
+        }
+    }
+
     private void send(WebPushSubscription subscription, String title, String body, String tag, String url) {
         try {
             PushService pushService = new PushService(vapidKeys.getKeyPair(), vapidSubject);
