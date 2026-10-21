@@ -32,12 +32,6 @@ public class JpaQuoteRequestRepository implements QuoteRequestRepository {
 
     @Override
     @Transactional(readOnly = true)
-    public Optional<QuoteRequest> findByReference(String reference) {
-        return jpa.findByReference(reference).map(this::toDomain);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
     public List<QuoteRequest> findByShopId(UUID shopId) {
         return jpa.findByShopIdOrderByCreatedAtDesc(shopId).stream().map(this::toDomain).toList();
     }

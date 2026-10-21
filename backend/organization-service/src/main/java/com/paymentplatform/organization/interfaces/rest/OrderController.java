@@ -139,13 +139,6 @@ public class OrderController {
                 .orElse(null);
     }
 
-    private boolean isSupplierTejEnabled(UUID orderId) {
-        return orderRepository.findById(orderId)
-                .flatMap(order -> organizationRepository.findById(OrganizationId.of(order.getSupplierId())))
-                .map(org -> org.tejEnabled())
-                .orElse(true);
-    }
-
     /** Partie fiscale pour la facture (nom, adresse, MF, régime, attestation). */
     private com.paymentplatform.organization.application.service.InvoicePdfService.InvoiceParty toInvoiceParty(
             UUID orgId) {
@@ -201,9 +194,6 @@ public class OrderController {
                 .findFirst()
                 .map(e -> userName.apply(e.getUserId()))
                 .orElse(null);
-        var supplierOrg = o.getSupplierId() != null
-                ? organizationRepository.findById(OrganizationId.of(o.getSupplierId())).orElse(null)
-                : null;
 
         return OrderResponse.from(o, items,
                 orgName.apply(o.getSupplierId()),
@@ -217,9 +207,7 @@ public class OrderController {
                 eventActor.apply("ORDER_DELIVERY_ASSIGNED"),
                 eventActor.apply("ORDER_DELIVERY_ACCEPTED"),
                 eventActor.apply("ORDER_DELIVERY_CONFIRMED"),
-                eventActor.apply("ORDER_DELIVERED"),
-                supplierOrg == null || supplierOrg.teifEnabled(),
-                supplierOrg == null || supplierOrg.tejEnabled());
+                eventActor.apply("ORDER_DELIVERED"));
     }
 
     private java.util.List<OrderResponse> buildOrderResponses(
@@ -923,34 +911,6 @@ public class OrderController {
     }
 
     /**
-     * Détail d'une facture par son numéro de journal (FA-AAAA-NNNNNN), restreint
-     * au périmètre de l'utilisateur.
-     */
-    @GetMapping("/invoices/{invoiceNumber}")
-    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_MANAGER', 'SYSTEM_ADMIN')")
-    public ResponseEntity<InvoiceJournalResponse> getInvoiceByNumber(@PathVariable String invoiceNumber) {
-        var current = CurrentUser.get();
-        return invoiceJournalRepository.findByInvoiceNumber(invoiceNumber).stream()
-                .filter(e -> current.roles().contains("SYSTEM_ADMIN")
-                        || (current.organizationId() != null
-                        && (current.organizationId().equals(e.supplierId())
-                        || current.organizationId().equals(e.shopId()))))
-                .findFirst()
-                .map(this::toJournalResponse)
-                .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
-    }
-
-    private InvoiceJournalResponse toJournalResponse(
-            com.paymentplatform.organization.domain.model.InvoiceJournal e) {
-        return new InvoiceJournalResponse(
-                e.id(), e.invoiceNumber(), e.orderId(), e.orderReference(),
-                e.supplierId(), resolveOrgName(e.supplierId()),
-                e.shopId(), resolveOrgName(e.shopId()),
-                e.totalTtc(), e.vatAmount(), e.currency(), e.issuedAt());
-    }
-
-    /**
      * Télécharge la facture PDF d'une commande, restreinte à son périmètre.
      * Disponible dès la commande prête pour livraison (facture émise avant la livraison).
      *
@@ -1003,49 +963,6 @@ public class OrderController {
     }
 
     /**
-     * Télécharge le bon de commande PDF, accessible aux deux parties.
-     */
-    @GetMapping("/{id}/purchase-order")
-    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_MANAGER', 'SYSTEM_ADMIN')")
-    public void downloadPurchaseOrder(@PathVariable UUID id, HttpServletResponse response) throws Exception {
-        var current = CurrentUser.get();
-        var order = orderRepository.findById(id);
-        if (order.isEmpty()) {
-            response.sendError(HttpServletResponse.SC_NOT_FOUND, "Commande non trouvée");
-            return;
-        }
-        var o = order.get();
-        if (!canAccessOrder(o, current)) {
-            response.sendError(HttpServletResponse.SC_FORBIDDEN, "Accès refusé");
-            return;
-        }
-        var items = orderItemRepository.findByOrderId(id);
-        byte[] pdf = invoicePdfService.generatePurchaseOrderPdf(o, items,
-                toInvoiceParty(o.getSupplierId()), toInvoiceParty(o.getShopId()));
-
-        response.setContentType("application/pdf");
-        response.setHeader(HttpHeaders.CONTENT_DISPOSITION,
-                "attachment; filename=\"bon-commande-" + o.getReference() + ".pdf\"");
-        response.setContentLength(pdf.length);
-        response.getOutputStream().write(pdf);
-        response.getOutputStream().flush();
-    }
-
-    private boolean canAccessOrder(com.paymentplatform.organization.domain.model.Order o,
-                                   com.paymentplatform.shared.infrastructure.security.AuthenticatedUser current) {
-        if (current.roles().contains("SYSTEM_ADMIN")) {
-            return true;
-        }
-        if (current.organizationId() == null) {
-            return false;
-        }
-        boolean isSupplier = o.getSupplierId() != null && o.getSupplierId().equals(current.organizationId());
-        boolean isShop = o.getShopId() != null && o.getShopId().equals(current.organizationId());
-        boolean isDeliveryAgent = o.getDeliveryAgentId() != null && o.getDeliveryAgentId().equals(current.userId());
-        return isSupplier || isShop || isDeliveryAgent;
-    }
-
-    /**
      * Télécharge la facture électronique TEIF v1.8.8 (XML TTN/El Fatoora),
      * mêmes droits et périmètre que la facture PDF.
      * Fichier à signer (XAdES, certificat client) puis déposer sur TTN.
@@ -1071,14 +988,6 @@ public class OrderController {
                 response.sendError(HttpServletResponse.SC_FORBIDDEN, "Accès refusé");
                 return;
             }
-        }
-        var supplierOrg = o.getSupplierId() != null
-                ? organizationRepository.findById(OrganizationId.of(o.getSupplierId())).orElse(null)
-                : null;
-        if (supplierOrg != null && !supplierOrg.teifEnabled()) {
-            response.sendError(HttpServletResponse.SC_CONFLICT,
-                    "Le fournisseur a désactivé la génération des documents TEIF");
-            return;
         }
         String status = o.getStatus();
         if (!OrderStatus.isInvoiceAvailable(status)) {
@@ -1132,18 +1041,6 @@ public class OrderController {
     }
 
     /**
-     * Consulte un certificat de retenue par son numéro (QR du certificat).
-     */
-    @GetMapping("/withholding-certificates/number/{number}")
-    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_MANAGER', 'SYSTEM_ADMIN')")
-    public ResponseEntity<WithholdingCertificateResponse> getWithholdingCertificateByNumber(
-            @PathVariable String number) {
-        var current = CurrentUser.get();
-        return ResponseEntity.ok(getWithholdingCertificate.executeByNumber(number,
-                current.organizationId(), current.roles().contains("SYSTEM_ADMIN")));
-    }
-
-    /**
      * Télécharge le certificat de retenue en PDF (QR + référence), restreint à son périmètre.
      * Pour les bénéficiaires non-inscrits TEJ : copie à remettre (papier/électronique).
      */
@@ -1154,11 +1051,6 @@ public class OrderController {
         var current = CurrentUser.get();
         var certificate = getWithholdingCertificate.execute(id, current.organizationId(),
                 current.roles().contains("SYSTEM_ADMIN"));
-        if (!isSupplierTejEnabled(id)) {
-            response.sendError(HttpServletResponse.SC_CONFLICT,
-                    "Le fournisseur a désactivé la génération des certificats de retenue (TEJ)");
-            return;
-        }
         if (WithholdingCertificateStatus.CANCELLED.name().equals(certificate.status())) {
             response.sendError(HttpServletResponse.SC_CONFLICT, "Le certificat de retenue est annulé");
             return;
@@ -1182,11 +1074,6 @@ public class OrderController {
         var current = CurrentUser.get();
         var certificate = getWithholdingCertificate.execute(id, current.organizationId(),
                 current.roles().contains("SYSTEM_ADMIN"));
-        if (!isSupplierTejEnabled(id)) {
-            response.sendError(HttpServletResponse.SC_CONFLICT,
-                    "Le fournisseur a désactivé la génération des certificats de retenue (TEJ)");
-            return;
-        }
         if (WithholdingCertificateStatus.CANCELLED.name().equals(certificate.status())) {
             response.sendError(HttpServletResponse.SC_CONFLICT, "Le certificat de retenue est annulé");
             return;

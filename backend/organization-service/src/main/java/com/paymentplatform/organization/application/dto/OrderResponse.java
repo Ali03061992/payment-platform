@@ -62,9 +62,7 @@ public record OrderResponse(
         String assignedDeliveryByName,
         String acceptedDeliveryByName,
         String confirmedDeliveryByName,
-        String deliveredByName,
-        boolean supplierTeifEnabled,
-        boolean supplierTejEnabled
+        String deliveredByName
 ) {
     public static OrderResponse from(Order order, List<OrderItem> orderItems) {
         return from(order, orderItems, null, null, null, null, null, null, null, null, null, null, null, null);
@@ -91,17 +89,6 @@ public record OrderResponse(
                                      String confirmedByName, String preparedByName, String readyByName,
                                      String assignedDeliveryByName, String acceptedDeliveryByName,
                                      String confirmedDeliveryByName, String deliveredByName) {
-        return from(order, orderItems, supplierName, shopName, deliveryAgentName, receivedByName, createdByName,
-                confirmedByName, preparedByName, readyByName, assignedDeliveryByName, acceptedDeliveryByName,
-                confirmedDeliveryByName, deliveredByName, true, true);
-    }
-
-    public static OrderResponse from(Order order, List<OrderItem> orderItems, String supplierName, String shopName,
-                                     String deliveryAgentName, String receivedByName, String createdByName,
-                                     String confirmedByName, String preparedByName, String readyByName,
-                                     String assignedDeliveryByName, String acceptedDeliveryByName,
-                                     String confirmedDeliveryByName, String deliveredByName,
-                                     boolean supplierTeifEnabled, boolean supplierTejEnabled) {
         List<OrderItemResponse> items = orderItems.stream()
                 .map(OrderItemResponse::from)
                 .toList();
@@ -158,9 +145,7 @@ public record OrderResponse(
                 assignedDeliveryByName,
                 acceptedDeliveryByName,
                 confirmedDeliveryByName,
-                deliveredByName,
-                supplierTeifEnabled,
-                supplierTejEnabled
+                deliveredByName
         );
     }
 

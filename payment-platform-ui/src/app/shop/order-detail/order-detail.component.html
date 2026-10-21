@@ -13,16 +13,13 @@
         @if (canGenerateInvoice()) {
           <button class="btn btn-primary" (click)="downloadInvoice()" [attr.aria-label]="'ORDER_DETAIL.DOWNLOAD_ARIA' | translate">{{ 'ORDER_DETAIL.DOWNLOAD_INVOICE' | translate }}</button>
           <button class="btn btn-secondary" (click)="printInvoice()" [attr.aria-label]="'ORDER_DETAIL.PRINT_INVOICE_ARIA' | translate">{{ 'ORDER_DETAIL.PRINT_INVOICE' | translate }}</button>
-          @if (order.supplierTeifEnabled !== false) {
-            <button class="btn btn-secondary" (click)="downloadTeif()" [attr.aria-label]="'ORDER_DETAIL.DOWNLOAD_TEIF_ARIA' | translate">{{ 'ORDER_DETAIL.DOWNLOAD_TEIF' | translate }}</button>
-          }
-          @if (certificate && order.supplierTejEnabled !== false) {
+          <button class="btn btn-secondary" (click)="downloadTeif()" [attr.aria-label]="'ORDER_DETAIL.DOWNLOAD_TEIF_ARIA' | translate">{{ 'ORDER_DETAIL.DOWNLOAD_TEIF' | translate }}</button>
+          @if (certificate) {
             <button class="btn btn-secondary" (click)="downloadCertificatePdf()" [attr.aria-label]="'PAYMENT_DETAIL.DOWNLOAD_CERT_PDF' | translate">{{ 'PAYMENT_DETAIL.DOWNLOAD_CERT_PDF' | translate }}</button>
             <button class="btn btn-secondary" (click)="downloadCertificateXml()" [attr.aria-label]="'PAYMENT_DETAIL.DOWNLOAD_CERT_XML' | translate">{{ 'PAYMENT_DETAIL.DOWNLOAD_CERT_XML' | translate }}</button>
           }
         }
         <button class="btn btn-primary" (click)="printOrder()" [attr.aria-label]="'ORDER_DETAIL.PRINT_ARIA' | translate">{{ 'ORDER_DETAIL.PRINT' | translate }}</button>
-        <button class="btn btn-secondary" (click)="downloadPurchaseOrder()">{{ 'DOCUMENTS.DOWNLOAD_PURCHASE_ORDER' | translate }}</button>
         <a class="btn btn-secondary" routerLink="/dashboard/shop/orders" [attr.aria-label]="'ORDER_DETAIL.BACK_ARIA' | translate">{{ 'ORDER_DETAIL.BACK' | translate }}</a>
       </div>
     </div>
@@ -49,10 +46,11 @@
       <div class="detail-card">
         <div class="detail-label">{{ 'ORDER_DETAIL.EXTREF' | translate }}</div>
         <div class="detail-value">
-          <qrcode [qrdata]="orderQrData()" [width]="72" [margin]="1"></qrcode>
           @if (order.externalReference) {
             <strong>{{ order.externalReference }}</strong>
+            <qrcode [qrdata]="'FACTURE:' + order.externalReference + '|DOC:' + order.reference" [width]="72" [margin]="1"></qrcode>
           } @else {
+            <span class="text-placeholder">—</span>
             <button class="btn btn-sm btn-secondary" style="margin-left:8px;" (click)="toggleExtRefForm()">{{ 'ORDER_DETAIL.EXTREF_ADD' | translate }}</button>
           }
         </div>

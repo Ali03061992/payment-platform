@@ -55,10 +55,6 @@ export class ChatbotComponent implements OnInit, OnDestroy, AfterViewChecked {
     if (this.open) this.unread = 0;
   }
 
-  restart(): void {
-    this.chatbot.reset();
-  }
-
   send(): void {
     const text = this.input.trim();
     if (!text) return;

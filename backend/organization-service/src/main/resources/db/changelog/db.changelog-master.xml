@@ -28,6 +28,5 @@
     <include file="V17__quote_requests.sql" relativeToChangelogFile="true"/>
     <include file="V18__drop_global_discount.sql" relativeToChangelogFile="true"/>
     <include file="V19__invoice_journal.sql" relativeToChangelogFile="true"/>
-    <include file="V20__org_fiscal_feature_toggles.sql" relativeToChangelogFile="true"/>
 
 </databaseChangeLog>

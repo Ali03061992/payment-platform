@@ -4,7 +4,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { PaymentService } from '../../services/payment.service';
 import { Payment } from '../../models/payment.model';
 import { ToastService } from '../../services/toast.service';
-import { documentQrData } from '../../core/document-qr';
+import { environment } from '../../../environments/environment';
 import { Subscription } from 'rxjs';
 import { statusLabelFr } from '../../pipes/status-label.pipe';
 
@@ -42,7 +42,7 @@ export class PaymentDetailComponent implements OnInit, OnDestroy {
     this.subscriptions.add(request$.subscribe({
       next: (data: Payment) => {
         this.payment = data;
-        this.qrData = documentQrData('PAYMENT', data.reference);
+        this.qrData = `${environment.appUrl}/dashboard/payments/${data.reference}`;
         this.loading = false;
       },
       error: () => { this.loading = false; this.router.navigate(['/dashboard/payments']); }
@@ -91,7 +91,7 @@ export class PaymentDetailComponent implements OnInit, OnDestroy {
       navigator.share({
         title: `Paiement ${this.payment.reference}`,
         text: `Facture ${this.payment.reference} - ${this.payment.amount} ${this.payment.currency}`,
-        url: `${window.location.origin}/dashboard/payments/${encodeURIComponent(this.payment.reference)}`
+        url: this.qrData
       }).catch(() => {});
     }
   }

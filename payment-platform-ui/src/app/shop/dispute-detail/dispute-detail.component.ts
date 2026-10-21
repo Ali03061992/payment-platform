@@ -37,7 +37,7 @@ export class DisputeDetailComponent implements OnInit, OnDestroy {
     const id = this.route.snapshot.paramMap.get('id')!;
     this.subscriptions.add(this.disputeService.getById(id).subscribe({
       next: (data: Dispute) => { this.dispute = data; this.loading = false; },
-      error: () => { this.loading = false; this.router.navigate(['/dashboard/disputes']); }
+      error: () => { this.loading = false; this.router.navigate(['/dashboard/shop/orders']); }
     }));
   }
 
@@ -107,10 +107,6 @@ export class DisputeDetailComponent implements OnInit, OnDestroy {
   }
 
   backToOrder(): void {
-    if (this.dispute?.orderReference) {
-      this.router.navigate(['/dashboard/orders', this.dispute.orderReference]);
-      return;
-    }
     const roles = this.loginService.getCurrentUser()?.roles || [];
     if (roles.includes('SYSTEM_ADMIN')) {
       this.router.navigate(['/dashboard/admin/disputes']);

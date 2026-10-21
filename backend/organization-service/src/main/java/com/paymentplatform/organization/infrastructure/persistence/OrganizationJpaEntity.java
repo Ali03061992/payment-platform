@@ -50,12 +50,6 @@ public class OrganizationJpaEntity {
     @Column(name = "suspension_expiry_date")
     private java.time.LocalDate suspensionExpiryDate;
 
-    @Column(name = "teif_enabled", nullable = false)
-    private boolean teifEnabled = true;
-
-    @Column(name = "tej_enabled", nullable = false)
-    private boolean tejEnabled = true;
-
     @Version
     private Long version;
 
@@ -93,10 +87,6 @@ public class OrganizationJpaEntity {
     public void setSuspensionAttestationDate(java.time.LocalDate v) { this.suspensionAttestationDate = v; }
     public java.time.LocalDate getSuspensionExpiryDate() { return suspensionExpiryDate; }
     public void setSuspensionExpiryDate(java.time.LocalDate v) { this.suspensionExpiryDate = v; }
-    public boolean isTeifEnabled() { return teifEnabled; }
-    public void setTeifEnabled(boolean teifEnabled) { this.teifEnabled = teifEnabled; }
-    public boolean isTejEnabled() { return tejEnabled; }
-    public void setTejEnabled(boolean tejEnabled) { this.tejEnabled = tejEnabled; }
     public Long getVersion() { return version; }
     public void setVersion(Long version) { this.version = version; }
     public Instant getCreatedAt() { return createdAt; }

@@ -4,7 +4,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { Observable } from 'rxjs';
 import { Order, CreateOrderRequest, UpdateOrderRequest, OrderComment, OrderPage,
          WithholdingCertificate, WithholdingMonthlySummary,
-         InvoiceJournalPage, InvoiceJournalEntry } from '../models/order.model';
+         InvoiceJournalPage } from '../models/order.model';
 import { ToastService } from './toast.service';
 import { filenameFromDisposition, saveBlob } from '../core/file-download';
 
@@ -31,21 +31,6 @@ export class OrderService {
           `facture-${id}.pdf`
         );
         saveBlob(res.body, filename);
-      },
-      error: () => this.toast.error(this.translate.instant('PAYMENTS.INVOICE_DOWNLOAD_ERROR'))
-    });
-  }
-
-  /** Télécharge le bon de commande PDF (accessible aux deux parties). */
-  downloadPurchaseOrder(id: string): void {
-    this.http.get(`${this.apiUrl}/${id}/purchase-order`, { observe: 'response', responseType: 'blob' }).subscribe({
-      next: (res) => {
-        if (!res.body) {
-          this.toast.error(this.translate.instant('PAYMENTS.INVOICE_DOWNLOAD_ERROR'));
-          return;
-        }
-        saveBlob(res.body, filenameFromDisposition(
-          res.headers.get('Content-Disposition'), `bon-commande-${id}.pdf`));
       },
       error: () => this.toast.error(this.translate.instant('PAYMENTS.INVOICE_DOWNLOAD_ERROR'))
     });
@@ -230,17 +215,6 @@ export class OrderService {
   /** Récupère une commande par référence métier. */
   getByReference(reference: string): Observable<Order> {
     return this.http.get<Order>(`${this.apiUrl}/reference/${reference}`);
-  }
-
-  /** Détail du journal des factures par numéro (FA-AAAA-NNNNNN). */
-  getInvoiceByNumber(invoiceNumber: string): Observable<InvoiceJournalEntry> {
-    return this.http.get<InvoiceJournalEntry>(`${this.apiUrl}/invoices/${encodeURIComponent(invoiceNumber)}`);
-  }
-
-  /** Détail d'un certificat de retenue par son numéro (QR). */
-  getWithholdingCertificateByNumber(number: string): Observable<WithholdingCertificate> {
-    return this.http.get<WithholdingCertificate>(
-      `${this.apiUrl}/withholding-certificates/number/${encodeURIComponent(number)}`);
   }
 
   /** Confirme une commande côté fournisseur. */

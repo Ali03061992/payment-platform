@@ -56,11 +56,6 @@ import { ChatbotComponent } from './components/chatbot/chatbot.component';
 import { BalanceViewComponent } from './shop/balance-view/balance-view.component';
 import { PwaUpdateComponent } from './pwa-update/pwa-update.component';
 import { QrScannerComponent } from './qr-scanner/qr-scanner.component';
-import { OrderDocumentComponent } from './documents/order-document/order-document.component';
-import { InvoiceDocumentComponent } from './documents/invoice-document/invoice-document.component';
-import { QuoteDocumentComponent } from './documents/quote-document/quote-document.component';
-import { CertificateDocumentComponent } from './documents/certificate-document/certificate-document.component';
-import { SupplierFiscalSettingsComponent } from './supplier/fiscal-settings/fiscal-settings.component';
 import { AgentPaymentsComponent } from './supplier/agent-payments/agent-payments.component';
 import { SupplierFinancialComponent } from './supplier/supplier-financial/supplier-financial.component';
 import { SupplierBalanceComponent } from './supplier/supplier-balance/supplier-balance.component';
@@ -189,11 +184,6 @@ export function initApp(translate: TranslateService, loginService: LoginService)
         BalanceViewComponent,
         PwaUpdateComponent,
         QrScannerComponent,
-        OrderDocumentComponent,
-        InvoiceDocumentComponent,
-        QuoteDocumentComponent,
-        CertificateDocumentComponent,
-        SupplierFiscalSettingsComponent,
         AgentPaymentsComponent,
         SupplierFinancialComponent,
         SupplierBalanceComponent,

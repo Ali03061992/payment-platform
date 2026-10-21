@@ -42,11 +42,6 @@ public class Organization {
     private LocalDate suspensionAttestationDate;
     private LocalDate suspensionExpiryDate;
 
-    /** Le fournisseur autorise la generation des documents TEIF (TTN). */
-    private boolean teifEnabled = true;
-    /** Le fournisseur autorise la generation des certificats de retenue (TEJ). */
-    private boolean tejEnabled = true;
-
     private Organization(OrganizationId id, OrganizationName name, OrganizationType type,
                          OrganizationStatus status, long version, Instant createdAt, Instant updatedAt) {
         this.id = id;
@@ -81,8 +76,7 @@ public class Organization {
                                            String matriculeFiscal, String patente, String address,
                                            FiscalRegime fiscalRegime,
                                            String attestationNumber, LocalDate attestationDate,
-                                           LocalDate expiryDate, String tejIdentifier,
-                                           boolean teifEnabled, boolean tejEnabled) {
+                                           LocalDate expiryDate, String tejIdentifier) {
         Organization org = new Organization(id, name, type, status, version, createdAt, updatedAt);
         org.matriculeFiscal = matriculeFiscal;
         org.patente = patente;
@@ -92,16 +86,7 @@ public class Organization {
         org.suspensionAttestationNumber = attestationNumber;
         org.suspensionAttestationDate = attestationDate;
         org.suspensionExpiryDate = expiryDate;
-        org.teifEnabled = teifEnabled;
-        org.tejEnabled = tejEnabled;
         return org;
-    }
-
-    /** Active ou desactive les documents fiscaux optionnels du fournisseur. */
-    public void updateFiscalFeatureToggles(boolean teifEnabled, boolean tejEnabled) {
-        this.teifEnabled = teifEnabled;
-        this.tejEnabled = tejEnabled;
-        this.updatedAt = Instant.now();
     }
 
     public void disable() {
@@ -217,8 +202,6 @@ public class Organization {
     public String suspensionAttestationNumber() { return suspensionAttestationNumber; }
     public LocalDate suspensionAttestationDate() { return suspensionAttestationDate; }
     public LocalDate suspensionExpiryDate() { return suspensionExpiryDate; }
-    public boolean teifEnabled() { return teifEnabled; }
-    public boolean tejEnabled() { return tejEnabled; }
 
     @Override
     public String toString() {

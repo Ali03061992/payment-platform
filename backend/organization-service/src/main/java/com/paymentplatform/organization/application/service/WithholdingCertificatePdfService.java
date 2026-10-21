@@ -57,24 +57,18 @@ public class WithholdingCertificatePdfService {
         return out.toByteArray();
     }
 
-    /** Contenu du QR : type document + numéro de certificat, lu par le scanner. */
+    /** Contenu du QR : référence traçable du certificat (TEJ quand déposée). */
     public static String qrPayload(WithholdingCertificateResponse cert) {
-        return DocumentQrPayload.of(DocumentQrPayload.TYPE_WITHHOLDING_CERTIFICATE, cert.number());
+        String ref = cert.tejReference() != null && !cert.tejReference().isBlank()
+                ? cert.tejReference() : cert.number();
+        return "TEJ:CERT:" + ref
+                + "|DEB:" + nullSafe(cert.debtorMatricule())
+                + "|BEN:" + nullSafe(cert.beneficiaryMatricule())
+                + "|RAS:" + cert.withholdingAmount();
     }
 
-    private void addQrSection(Document document, WithholdingCertificateResponse cert) throws DocumentException {
-        document.add(new Paragraph(" "));
-        try {
-            BufferedImage qr = renderQr(qrPayload(cert), 140);
-            Image img = Image.getInstance(qr, null);
-            img.setAlignment(Element.ALIGN_CENTER);
-            document.add(img);
-        } catch (Exception e) {
-            document.add(new Paragraph("Référence de vérification: " + cert.number(), SMALL_FONT));
-        }
-        Paragraph ref = new Paragraph("Vérification: " + cert.number(), SMALL_FONT);
-        ref.setAlignment(Element.ALIGN_CENTER);
-        document.add(ref);
+    private static String nullSafe(String v) {
+        return v != null ? v : "-";
     }
 
     private void addHeader(Document document, WithholdingCertificateResponse cert) throws DocumentException {
@@ -191,6 +185,21 @@ public class WithholdingCertificatePdfService {
         v.setHorizontalAlignment(Element.ALIGN_RIGHT);
         v.setPadding(4f);
         table.addCell(v);
+    }
+
+    private void addQrSection(Document document, WithholdingCertificateResponse cert) throws DocumentException {
+        document.add(new Paragraph(" "));
+        try {
+            BufferedImage qr = renderQr(qrPayload(cert), 140);
+            Image img = Image.getInstance(qr, null);
+            img.setAlignment(Element.ALIGN_CENTER);
+            document.add(img);
+        } catch (Exception e) {
+            document.add(new Paragraph("Référence de vérification: " + qrPayload(cert), SMALL_FONT));
+        }
+        Paragraph ref = new Paragraph("Vérification: " + qrPayload(cert), SMALL_FONT);
+        ref.setAlignment(Element.ALIGN_CENTER);
+        document.add(ref);
     }
 
     static BufferedImage renderQr(String payload, int size) throws WriterException {

@@ -1,5 +1,4 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { OrderService } from '../../services/order.service';
 import { ToastService } from '../../services/toast.service';
@@ -26,7 +25,7 @@ export class InvoicesJournalComponent implements OnInit, OnDestroy {
   private subscriptions = new Subscription();
 
   constructor(private orderService: OrderService, private toast: ToastService,
-              private translate: TranslateService, private router: Router) {
+              private translate: TranslateService) {
     this.availableYears = [this.currentYear, this.currentYear - 1, this.currentYear - 2];
   }
 
@@ -75,9 +74,5 @@ export class InvoicesJournalComponent implements OnInit, OnDestroy {
 
   downloadPdf(entry: InvoiceJournalEntry): void {
     this.orderService.downloadInvoice(entry.orderId);
-  }
-
-  openInvoice(entry: InvoiceJournalEntry): void {
-    this.router.navigate(['/dashboard/invoices', entry.invoiceNumber]);
   }
 }

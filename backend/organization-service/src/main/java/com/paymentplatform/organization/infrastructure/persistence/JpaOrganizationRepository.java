@@ -99,8 +99,6 @@ public class JpaOrganizationRepository implements OrganizationRepository {
         e.setSuspensionAttestationNumber(org.suspensionAttestationNumber());
         e.setSuspensionAttestationDate(org.suspensionAttestationDate());
         e.setSuspensionExpiryDate(org.suspensionExpiryDate());
-        e.setTeifEnabled(org.teifEnabled());
-        e.setTejEnabled(org.tejEnabled());
         e.setVersion(org.version());
         e.setCreatedAt(org.createdAt());
         e.setUpdatedAt(org.updatedAt());
@@ -123,9 +121,7 @@ public class JpaOrganizationRepository implements OrganizationRepository {
                 e.getSuspensionAttestationNumber(),
                 e.getSuspensionAttestationDate(),
                 e.getSuspensionExpiryDate(),
-                e.getTejIdentifier(),
-                e.isTeifEnabled(),
-                e.isTejEnabled());
+                e.getTejIdentifier());
         if (e.getDefaultWithholdingNature() != null) {
             org.setDefaultWithholdingNature(e.getDefaultWithholdingNature());
         }

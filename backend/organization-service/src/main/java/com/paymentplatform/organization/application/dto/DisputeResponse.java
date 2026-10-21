@@ -18,17 +18,9 @@ public record DisputeResponse(
         List<DisputeMessageResponse> messages,
         Long version,
         Instant createdAt,
-        Instant updatedAt,
-        String orderReference,
-        String supplierName,
-        String shopName
+        Instant updatedAt
 ) {
     public static DisputeResponse from(Dispute dispute) {
-        return from(dispute, null, null, null);
-    }
-
-    public static DisputeResponse from(Dispute dispute, String orderReference,
-                                       String supplierName, String shopName) {
         List<DisputeMessageResponse> msgs = dispute.getMessages().stream()
                 .map(DisputeMessageResponse::from)
                 .toList();
@@ -43,10 +35,7 @@ public record DisputeResponse(
                 msgs,
                 dispute.getVersion(),
                 dispute.getCreatedAt(),
-                dispute.getUpdatedAt(),
-                orderReference,
-                supplierName,
-                shopName
+                dispute.getUpdatedAt()
         );
     }
 

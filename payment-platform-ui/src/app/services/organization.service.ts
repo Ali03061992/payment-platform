@@ -112,16 +112,6 @@ export class OrganizationService {
     return this.http.delete<void>(`/api/admin/supplier-shop-relations/${id}`);
   }
 
-  /** Récupère les réglages fiscaux du fournisseur connecté. */
-  getFiscalSettings(): Observable<Organization> {
-    return this.http.get<Organization>('/api/organizations/settings');
-  }
-
-  /** Active/désactive TEIF et TEJ pour le fournisseur connecté. */
-  updateFiscalSettings(settings: { teifEnabled?: boolean; tejEnabled?: boolean }): Observable<Organization> {
-    return this.http.patch<Organization>('/api/organizations/settings', settings);
-  }
-
   /** Liste paginée des utilisateurs (via l'endpoint admin). */
   listUsers(page = 0, size = 100): Observable<any[]> {
     const params = new HttpParams().set('page', page).set('size', size);

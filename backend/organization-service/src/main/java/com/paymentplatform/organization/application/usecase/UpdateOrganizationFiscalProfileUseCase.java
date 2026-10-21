@@ -62,11 +62,6 @@ public class UpdateOrganizationFiscalProfileUseCase {
         if (request.defaultWithholdingNature() != null) {
             org.setDefaultWithholdingNature(request.defaultWithholdingNature());
         }
-        if (request.teifEnabled() != null || request.tejEnabled() != null) {
-            org.updateFiscalFeatureToggles(
-                    request.teifEnabled() != null ? request.teifEnabled() : org.teifEnabled(),
-                    request.tejEnabled() != null ? request.tejEnabled() : org.tejEnabled());
-        }
 
         return OrganizationResponse.from(organizations.save(org));
     }

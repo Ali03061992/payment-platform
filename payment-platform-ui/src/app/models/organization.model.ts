@@ -20,8 +20,6 @@ export interface Organization {
   suspensionAttestationNumber?: string | null;
   suspensionAttestationDate?: string | null;
   suspensionExpiryDate?: string | null;
-  teifEnabled?: boolean;
-  tejEnabled?: boolean;
 }
 
 export interface SupplierShopRelation {

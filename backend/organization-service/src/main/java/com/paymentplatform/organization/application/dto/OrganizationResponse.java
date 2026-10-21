@@ -24,9 +24,7 @@ public record OrganizationResponse(
         String fiscalRegime,
         String suspensionAttestationNumber,
         java.time.LocalDate suspensionAttestationDate,
-        java.time.LocalDate suspensionExpiryDate,
-        boolean teifEnabled,
-        boolean tejEnabled
+        java.time.LocalDate suspensionExpiryDate
 ) {
     public static OrganizationResponse from(Organization org) {
         return from(org, List.of());
@@ -50,8 +48,6 @@ public record OrganizationResponse(
                 org.fiscalRegime().name(),
                 org.suspensionAttestationNumber(),
                 org.suspensionAttestationDate(),
-                org.suspensionExpiryDate(),
-                org.teifEnabled(),
-                org.tejEnabled());
+                org.suspensionExpiryDate());
     }
 }

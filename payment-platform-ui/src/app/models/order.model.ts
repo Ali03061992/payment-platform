@@ -48,8 +48,6 @@ export interface Order {
   confirmedDeliveryByName: string | null;
   deliveredByName: string | null;
   version: number;
-  supplierTeifEnabled?: boolean;
-  supplierTejEnabled?: boolean;
   createdAt: string;
   updatedAt: string;
   items: OrderItem[];

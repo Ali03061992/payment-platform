@@ -44,12 +44,6 @@ public class JpaInvoiceJournalRepository implements InvoiceJournalRepository {
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public java.util.List<InvoiceJournal> findByInvoiceNumber(String invoiceNumber) {
-        return journal.findByInvoiceNumber(invoiceNumber).stream().map(this::toDomain).toList();
-    }
-
-    @Override
     @Transactional
     public String nextInvoiceNumber(UUID supplierId) {
         int year = LocalDate.now().getYear();
