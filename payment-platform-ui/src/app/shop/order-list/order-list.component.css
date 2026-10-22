@@ -19,17 +19,8 @@
 }
 
 .filters-export {
-  margin-left: auto;
+  margin-inline-start: auto;
 }
-
-.payment-badge.draft { background: var(--bg-tertiary); color: var(--text-muted); border: 1px solid var(--border-color); }
-.payment-badge.preparing { background: var(--badge-inactive-bg); color: var(--badge-inactive-text); }
-.payment-badge.ready { background: var(--badge-confirmed-bg); color: var(--badge-confirmed-text); }
-.payment-badge.delivery { background: var(--badge-pending-bg); color: var(--badge-pending-text); }
-.payment-badge.delivered { background: var(--badge-confirmed-bg); color: var(--badge-confirmed-text); }
-.payment-badge.accepted { background: var(--badge-confirmed-bg); color: var(--badge-confirmed-text); }
-.payment-badge.rejected { background: var(--badge-rejected-bg); color: var(--badge-rejected-text); }
-.payment-badge.delivery-rejected { background: var(--badge-pending-bg); color: var(--badge-pending-text); }
 
 .search-container {
   position: relative;
@@ -37,7 +28,7 @@
 
 .search-spinner {
   position: absolute;
-  right: 12px;
+  inset-inline-end: 12px;
   top: 50%;
   transform: translateY(-50%);
   width: 16px;
@@ -113,18 +104,7 @@
   }
 
   .filters-export {
-    margin-left: 0;
+    margin-inline-start: 0;
     width: 100%;
-  }
-}
-
-[dir="rtl"] .filters-export {
-  margin-left: 0;
-  margin-right: auto;
-}
-
-@media (max-width: 768px) {
-  [dir="rtl"] .filters-export {
-    margin-right: 0;
   }
 }

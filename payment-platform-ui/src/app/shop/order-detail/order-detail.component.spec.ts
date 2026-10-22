@@ -313,17 +313,17 @@ describe('ShopOrderDetailComponent', () => {
 
   describe('statusClass', () => {
     it('should return correct classes', () => {
-      expect(component.statusClass('DRAFT')).toBe('draft');
-      expect(component.statusClass('CONFIRMED')).toBe('confirmed');
-      expect(component.statusClass('PREPARING')).toBe('preparing');
-      expect(component.statusClass('READY_FOR_DELIVERY')).toBe('ready');
-      expect(component.statusClass('DELIVERY_ACCEPTED')).toBe('confirmed');
-      expect(component.statusClass('IN_DELIVERY')).toBe('delivery');
-      expect(component.statusClass('DELIVERED')).toBe('delivered');
-      expect(component.statusClass('ACCEPTED')).toBe('accepted');
-      expect(component.statusClass('CANCELLED')).toBe('cancelled');
+      expect(component.statusClass('DRAFT')).toBe('badge-draft');
+      expect(component.statusClass('CONFIRMED')).toBe('badge-confirmed');
+      expect(component.statusClass('PREPARING')).toBe('badge-pending');
+      expect(component.statusClass('READY_FOR_DELIVERY')).toBe('badge-quoted');
+      expect(component.statusClass('DELIVERY_ACCEPTED')).toBe('badge-accepted');
+      expect(component.statusClass('IN_DELIVERY')).toBe('badge-pending');
+      expect(component.statusClass('DELIVERED')).toBe('badge-accepted');
+      expect(component.statusClass('ACCEPTED')).toBe('badge-accepted');
+      expect(component.statusClass('CANCELLED')).toBe('badge-cancelled');
       expect(component.statusClass('REJECTED')).toBe('rejected');
-      expect(component.statusClass('DELIVERY_REJECTED')).toBe('delivery-rejected');
+      expect(component.statusClass('DELIVERY_REJECTED')).toBe('rejected');
       expect(component.statusClass('UNKNOWN')).toBe('');
     });
   });

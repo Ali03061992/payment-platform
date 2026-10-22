@@ -483,7 +483,8 @@
     "ERROR": "Error",
     "SELECT": "-- Select --",
     "SAVE": "Save",
-    "SAVING": "Saving…"
+    "SAVING": "Saving…",
+    "CLOSE": "Close"
   },
   "STATUS": {
     "PENDING": "Pending",

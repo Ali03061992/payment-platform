@@ -33,7 +33,7 @@
         <div class="stat-label">{{ 'STOCK.OUT_OF_STOCK' | translate }}</div>
       </div>
     </div>
-    <div class="table-card" style="margin-top: 24px;">
+    <div class="table-card stock-table-card">
       <div class="table-wrapper">
         <table>
           <thead>
@@ -58,11 +58,7 @@
                 <td>{{ p.minQuantity }}</td>
                 <td>{{ (p.quantity * p.unitPrice) | number:'1.2-2' }} {{ p.currency }}</td>
                 <td>
-              <span class="stock-badge" [ngClass]="{
-                'stock-ok': getStockStatus(p) === 'OK',
-                'stock-low': getStockStatus(p) === 'LOW',
-                'stock-out': getStockStatus(p) === 'OUT_OF_STOCK'
-              }">
+              <span class="payment-badge" [ngClass]="stockStatusClass(getStockStatus(p))">
                     {{ getStockStatus(p) | statusLabel }}
                   </span>
                 </td>
@@ -139,7 +135,7 @@
         <button class="btn-close" (click)="closeHistory()">&times;</button>
       </div>
       @if (loadingHistory) {
-        <div class="loading" style="padding: 24px;">
+        <div class="loading history-loading">
           <div class="spinner"></div>
           <span>{{ 'COMMON.LOADING' | translate }}</span>
         </div>

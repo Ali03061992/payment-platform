@@ -53,6 +53,8 @@ export class DeliveryManagementComponent implements OnInit {
   /** QR de la fiche : scanné, il réouvre directement ce détail de livraison. */
   detailQrData = '';
   loadingDetail = false;
+  /** Etapes affichees dans la timeline du detail de livraison. */
+  readonly deliverySteps = ['READY_FOR_DELIVERY', 'DELIVERY_ACCEPTED', 'IN_DELIVERY', 'DELIVERED', 'ACCEPTED'];
 
   /** Référence à ouvrir automatiquement à l'arrivée (paramètre ?ref=). */
   private pendingDeliveryRef: string | null = null;
@@ -304,15 +306,66 @@ export class DeliveryManagementComponent implements OnInit {
   /** Traduit un statut de livraison en classe CSS de badge. */
   statusClass(s: string): string {
     const map: Record<string, string> = {
-      READY_FOR_DELIVERY: 'pending',
-      DELIVERY_ACCEPTED: 'confirmed',
-      IN_DELIVERY: 'in-delivery',
-      DELIVERED: 'delivered',
-      ACCEPTED: 'accepted',
+      READY_FOR_DELIVERY: 'badge-quoted',
+      DELIVERY_ACCEPTED: 'badge-accepted',
+      IN_DELIVERY: 'badge-pending',
+      DELIVERED: 'badge-accepted',
+      ACCEPTED: 'badge-accepted',
       DELIVERY_REJECTED: 'rejected',
-      CANCELLED: 'cancelled'
+      CANCELLED: 'badge-cancelled'
     };
     return map[s] || '';
+  }
+
+  /** Index du statut courant dans la timeline (-1 si hors parcours). */
+  deliveryStepIndex(status: string): number {
+    return this.deliverySteps.indexOf(status);
+  }
+
+  /** Vrai si la fiche propose au moins une action contextuelle. */
+  hasDetailActions(order: Order): boolean {
+    if (order.status === 'READY_FOR_DELIVERY'
+      || order.status === 'DELIVERY_ACCEPTED'
+      || order.status === 'IN_DELIVERY') {
+      return true;
+    }
+    return order.status === 'DELIVERED' && this.isShopUser();
+  }
+
+  /** Ferme le detail avant d'accepter la livraison. */
+  acceptDeliveryFromDetail(order: Order): void {
+    this.closeDetail();
+    this.acceptDelivery(order);
+  }
+
+  /** Ferme le detail avant d'ouvrir le rejet de livraison. */
+  rejectDeliveryFromDetail(order: Order): void {
+    this.closeDetail();
+    this.openRejectModal(order);
+  }
+
+  /** Ferme le detail avant de confirmer la date de livraison. */
+  confirmDateFromDetail(order: Order): void {
+    this.closeDetail();
+    this.openConfirmDate(order);
+  }
+
+  /** Ferme le detail avant de marquer la commande livree. */
+  deliverFromDetail(order: Order): void {
+    this.closeDetail();
+    this.openDeliver(order);
+  }
+
+  /** Ferme le detail avant d'accepter la reception boutique. */
+  acceptReceptionFromDetail(order: Order): void {
+    this.closeDetail();
+    this.acceptReception(order);
+  }
+
+  /** Ferme le detail avant de rejeter la reception boutique. */
+  rejectReceptionFromDetail(order: Order): void {
+    this.closeDetail();
+    this.rejectReception(order);
   }
 
   /** Ouvre le panneau de détail d'une commande (appel ciblé par id). */

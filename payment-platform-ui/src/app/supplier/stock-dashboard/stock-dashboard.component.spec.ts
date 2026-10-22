@@ -126,9 +126,9 @@ describe('StockDashboardComponent', () => {
 
   describe('movementTypeClass', () => {
     it('should return correct classes', () => {
-      expect(component.movementTypeClass('IN')).toBe('movement-in');
-      expect(component.movementTypeClass('OUT')).toBe('movement-out');
-      expect(component.movementTypeClass('ADJUSTMENT')).toBe('movement-adjust');
+      expect(component.movementTypeClass('IN')).toBe('badge-accepted');
+      expect(component.movementTypeClass('OUT')).toBe('rejected');
+      expect(component.movementTypeClass('ADJUSTMENT')).toBe('badge-quoted');
       expect(component.movementTypeClass('UNKNOWN')).toBe('');
     });
   });

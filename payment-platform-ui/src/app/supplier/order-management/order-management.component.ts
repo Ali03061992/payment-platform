@@ -41,6 +41,8 @@ export class OrderManagementComponent implements OnInit, OnDestroy {
   /** QR de la fiche : scanné, il réouvre directement ce détail de commande. */
   detailQrData = '';
   loadingDetail = false;
+  /** Etapes affichees dans la timeline du detail de commande. */
+  readonly orderSteps = ['DRAFT', 'CONFIRMED', 'PREPARING', 'READY_FOR_DELIVERY', 'DELIVERY_ACCEPTED', 'IN_DELIVERY', 'DELIVERED', 'ACCEPTED'];
   detailCertificate: WithholdingCertificate | null = null;
   showDetailDepositForm = false;
   detailTejReference = '';
@@ -324,19 +326,31 @@ export class OrderManagementComponent implements OnInit, OnDestroy {
 
   statusClass(s: string): string {
     const map: Record<string, string> = {
-      DRAFT: 'draft',
-      CONFIRMED: 'confirmed',
-      PREPARING: 'preparing',
-      READY_FOR_DELIVERY: 'ready',
-      DELIVERY_ACCEPTED: 'confirmed',
+      DRAFT: 'badge-draft',
+      CONFIRMED: 'badge-confirmed',
+      PREPARING: 'badge-pending',
+      READY_FOR_DELIVERY: 'badge-quoted',
+      DELIVERY_ACCEPTED: 'badge-accepted',
       DELIVERY_REJECTED: 'rejected',
-      IN_DELIVERY: 'in-delivery',
-      DELIVERED: 'delivered',
-      ACCEPTED: 'accepted',
-      CANCELLED: 'cancelled',
+      IN_DELIVERY: 'badge-pending',
+      DELIVERED: 'badge-accepted',
+      ACCEPTED: 'badge-accepted',
+      CANCELLED: 'badge-cancelled',
       REJECTED: 'rejected'
     };
     return map[s] || '';
+  }
+
+  /** Index du statut courant dans la timeline (-1 si hors parcours). */
+  orderStepIndex(status: string): number {
+    return this.orderSteps.indexOf(status);
+  }
+
+  /** Vrai si la commande porte au moins une information de livraison. */
+  hasDeliveryInfo(order: Order): boolean {
+    return !!(order.deliveryAgentName || order.plannedDeliveryDate || order.confirmedDeliveryDate
+      || order.estimatedArrival || order.deliveredAt || order.receivedByName || order.receivedAt
+      || order.deliveryRejectionReason);
   }
 
   viewDetail(order: Order): void {

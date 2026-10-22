@@ -10,137 +10,69 @@
     <div class="page-header no-print">
       <a class="btn-close" routerLink="/dashboard/shop/orders" [attr.aria-label]="'COMMON.CLOSE' | translate" [attr.title]="'COMMON.CLOSE' | translate">&times;</a>
       <h2>{{ 'ORDER_DETAIL.TITLE' | translate }} {{ order.reference }}</h2>
-      <div class="page-header-actions">
-        <button class="btn btn-primary" (click)="downloadPurchaseOrder()" [attr.aria-label]="'ORDER_DETAIL.DOWNLOAD_PURCHASE_ORDER_ARIA' | translate">{{ 'ORDER_DETAIL.DOWNLOAD_PURCHASE_ORDER' | translate }}</button>
-        @if (canGenerateInvoice()) {
-          <button class="btn btn-primary" (click)="downloadInvoice()" [attr.aria-label]="'ORDER_DETAIL.DOWNLOAD_ARIA' | translate">{{ 'ORDER_DETAIL.DOWNLOAD_INVOICE' | translate }}</button>
-          <button class="btn btn-secondary" (click)="printInvoice()" [attr.aria-label]="'ORDER_DETAIL.PRINT_INVOICE_ARIA' | translate">{{ 'ORDER_DETAIL.PRINT_INVOICE' | translate }}</button>
-          <button class="btn btn-secondary" (click)="downloadTeif()" [attr.aria-label]="'ORDER_DETAIL.DOWNLOAD_TEIF_ARIA' | translate">{{ 'ORDER_DETAIL.DOWNLOAD_TEIF' | translate }}</button>
-          @if (certificate) {
-            <button class="btn btn-secondary" (click)="downloadCertificatePdf()" [attr.aria-label]="'PAYMENT_DETAIL.DOWNLOAD_CERT_PDF' | translate">{{ 'PAYMENT_DETAIL.DOWNLOAD_CERT_PDF' | translate }}</button>
-            <button class="btn btn-secondary" (click)="downloadCertificateXml()" [attr.aria-label]="'PAYMENT_DETAIL.DOWNLOAD_CERT_XML' | translate">{{ 'PAYMENT_DETAIL.DOWNLOAD_CERT_XML' | translate }}</button>
-          }
-        }
-        <button class="btn btn-primary" (click)="printOrder()" [attr.aria-label]="'ORDER_DETAIL.PRINT_ARIA' | translate">{{ 'ORDER_DETAIL.PRINT' | translate }}</button>
-      </div>
+      <span class="payment-badge" [ngClass]="statusClass(order.status)"
+        [attr.aria-label]="('ORDER_DETAIL.STATUS_ARIA' | translate:{label: (order.status | statusLabel)})" role="status">{{ order.status | statusLabel }}</span>
     </div>
-    <div class="detail-grid">
-      <div class="detail-card">
-        <div class="detail-label">{{ 'ORDERS.REFERENCE' | translate }}</div>
-        <div class="detail-value">{{ order.reference }}</div>
-      </div>
-      <div class="detail-card">
-        <div class="detail-label">{{ 'ORDERS.SUPPLIER' | translate }}</div>
-        <div class="detail-value">{{ order.supplierName || order.supplierId }}</div>
-      </div>
-      <div class="detail-card">
-        <div class="detail-label">{{ 'ORDERS.STATUS' | translate }}</div>
-        <div class="detail-value">
-          <span class="payment-badge" [ngClass]="statusClass(order.status)"
-            [attr.aria-label]="('ORDER_DETAIL.STATUS_ARIA' | translate:{label: (order.status | statusLabel)})" role="status">{{ order.status | statusLabel }}</span>
+
+    <div class="order-summary">
+      <div class="order-summary-main">
+        <div class="order-summary-eyebrow">
+          <app-icon name="file-text" [size]="14"></app-icon>
+          {{ 'ORDER_DETAIL.TITLE' | translate }}
+        </div>
+        <h3 class="order-summary-ref">{{ order.reference }}</h3>
+        <span class="order-summary-amount">{{ order.total | number:'1.2-2' }} {{ order.currency }}</span>
+        <div class="order-summary-meta">
+          <span>
+            <app-icon name="factory" [size]="15"></app-icon>
+            {{ order.supplierName || order.supplierId }}
+          </span>
+          <span>
+            <app-icon name="calendar" [size]="15"></app-icon>
+            {{ order.createdAt | date:'dd/MM/yyyy HH:mm' }}
+          </span>
         </div>
       </div>
-      <div class="detail-card">
-        <div class="detail-label">{{ 'ORDERS.TOTAL' | translate }}</div>
-        <div class="detail-value amount">{{ order.total | number:'1.2-2' }} {{ order.currency }}</div>
-      </div>
-      <div class="detail-card">
-        <div class="detail-label">{{ 'ORDER_DETAIL.EXTREF' | translate }}</div>
-        <div class="detail-value">
-          @if (order.externalReference) {
-            <strong>{{ order.externalReference }}</strong>
-          } @else {
-            <span class="text-placeholder">—</span>
-            <button class="btn btn-sm btn-secondary" style="margin-left:8px;" (click)="toggleExtRefForm()">{{ 'ORDER_DETAIL.EXTREF_ADD' | translate }}</button>
-          }
-          @if (qrData) {
-            <div style="margin-top:6px;">
-              <qrcode [qrdata]="qrData" [width]="160" [margin]="1"></qrcode>
+      @if (qrData) {
+        <div class="order-summary-qr">
+          <qrcode [qrdata]="qrData" [width]="160" [margin]="1"></qrcode>
+        </div>
+      }
+    </div>
+
+    <div class="detail-toolbar no-print">
+      <button class="btn btn-primary" (click)="downloadPurchaseOrder()" [attr.aria-label]="'ORDER_DETAIL.DOWNLOAD_PURCHASE_ORDER_ARIA' | translate">{{ 'ORDER_DETAIL.DOWNLOAD_PURCHASE_ORDER' | translate }}</button>
+      @if (canGenerateInvoice()) {
+        <button class="btn btn-primary" (click)="downloadInvoice()" [attr.aria-label]="'ORDER_DETAIL.DOWNLOAD_ARIA' | translate">{{ 'ORDER_DETAIL.DOWNLOAD_INVOICE' | translate }}</button>
+        <button class="btn btn-secondary" (click)="printInvoice()" [attr.aria-label]="'ORDER_DETAIL.PRINT_INVOICE_ARIA' | translate">{{ 'ORDER_DETAIL.PRINT_INVOICE' | translate }}</button>
+        <button class="btn btn-secondary" (click)="downloadTeif()" [attr.aria-label]="'ORDER_DETAIL.DOWNLOAD_TEIF_ARIA' | translate">{{ 'ORDER_DETAIL.DOWNLOAD_TEIF' | translate }}</button>
+        @if (certificate) {
+          <button class="btn btn-secondary" (click)="downloadCertificatePdf()" [attr.aria-label]="'PAYMENT_DETAIL.DOWNLOAD_CERT_PDF' | translate">{{ 'PAYMENT_DETAIL.DOWNLOAD_CERT_PDF' | translate }}</button>
+          <button class="btn btn-secondary" (click)="downloadCertificateXml()" [attr.aria-label]="'PAYMENT_DETAIL.DOWNLOAD_CERT_XML' | translate">{{ 'PAYMENT_DETAIL.DOWNLOAD_CERT_XML' | translate }}</button>
+        }
+      }
+      <button class="btn btn-secondary" (click)="printOrder()" [attr.aria-label]="'ORDER_DETAIL.PRINT_ARIA' | translate">{{ 'ORDER_DETAIL.PRINT' | translate }}</button>
+    </div>
+
+    @if (order.status !== 'CANCELLED' && order.status !== 'REJECTED' && order.status !== 'DELIVERY_REJECTED') {
+      <div class="detail-section no-print">
+        <h4 class="detail-section-title">
+          <app-icon name="clock" [size]="16"></app-icon>
+          {{ 'ORDER_DETAIL.PROGRESS' | translate }}
+        </h4>
+        <div class="status-timeline">
+          @for (step of statusSteps; track step; let i = $index) {
+            <div class="timeline-step"
+              [class.done]="isStepCompleted(i) && !isCurrentStep(step)"
+              [class.current]="isCurrentStep(step)">
+              <span class="step-dot"></span>
+              <span class="step-label">{{ step | statusLabel }}</span>
             </div>
           }
         </div>
       </div>
-      <div class="detail-card">
-        <div class="detail-label">{{ 'ORDER_DETAIL.ASAP' | translate }}</div>
-        <div class="detail-value">{{ order.asapPayment ? ('ORDER_DETAIL.YES' | translate) : ('ORDER_DETAIL.NO' | translate) }}</div>
-      </div>
-      @if (order.paymentTerms) {
-        <div class="detail-card">
-          <div class="detail-label">{{ 'ORDER_DETAIL.PAYMENT_TERMS' | translate }}</div>
-          <div class="detail-value">{{ paymentTermsLabel(order.paymentTerms) }}</div>
-        </div>
-      }
-      @if (order.dueDate) {
-        <div class="detail-card">
-          <div class="detail-label">{{ 'ORDER_DETAIL.DUE_DATE' | translate }}</div>
-          <div class="detail-value" [class.text-reject]="isOverdue()" [class.text-total]="!isOverdue()" [style.font-weight]="isOverdue() ? '700' : '400'">{{ order.dueDate }}</div>
-        </div>
-      }
-      <div class="detail-card">
-        <div class="detail-label">{{ 'ORDER_DETAIL.CREATED_AT' | translate }}</div>
-        <div class="detail-value">{{ order.createdAt | date:'dd/MM/yyyy HH:mm:ss' }}</div>
-      </div>
-      @if (order.createdByName) {
-        <div class="detail-card">
-          <div class="detail-label">{{ 'ORDER_DETAIL.CREATED_BY' | translate }}</div>
-          <div class="detail-value">{{ order.createdByName }}</div>
-        </div>
-      }
-      @if (order.plannedDeliveryDate) {
-        <div class="detail-card">
-          <div class="detail-label">{{ 'ORDER_DETAIL.PLANNED_DATE' | translate }}</div>
-          <div class="detail-value">{{ order.plannedDeliveryDate }}</div>
-        </div>
-      }
-      @if (order.confirmedDeliveryDate) {
-        <div class="detail-card">
-          <div class="detail-label">{{ 'ORDER_DETAIL.CONFIRMED_DATE' | translate }}</div>
-          <div class="detail-value">{{ order.confirmedDeliveryDate }}</div>
-        </div>
-      }
-      @if (order.estimatedArrival) {
-        <div class="detail-card">
-          <div class="detail-label">{{ 'ORDER_DETAIL.ETA' | translate }}</div>
-          <div class="detail-value text-eta">{{ order.estimatedArrival | date:'dd/MM/yyyy HH:mm' }}</div>
-        </div>
-      }
-      @if (order.status === 'IN_DELIVERY' && countdown) {
-        <div class="detail-card">
-          <div class="detail-label">{{ 'ORDER_DETAIL.REMAINING' | translate }}</div>
-          <div class="detail-value text-ok" style="font-weight:700;">{{ countdown }}</div>
-        </div>
-      }
-      @if (order.deliveredAt) {
-        <div class="detail-card">
-          <div class="detail-label">{{ 'ORDER_DETAIL.DELIVERED_AT' | translate }}</div>
-          <div class="detail-value">{{ order.deliveredAt | date:'dd/MM/yyyy HH:mm:ss' }}</div>
-        </div>
-      }
-      @if (order.receivedAt) {
-        <div class="detail-card">
-          <div class="detail-label">{{ 'ORDER_DETAIL.RECEIVED_AT' | translate }}</div>
-          <div class="detail-value">{{ order.receivedAt | date:'dd/MM/yyyy HH:mm:ss' }}</div>
-        </div>
-      }
-      @if (order.deliveryAgentName) {
-        <div class="detail-card">
-          <div class="detail-label">{{ 'ORDERS.DRIVER' | translate }}</div>
-          <div class="detail-value">{{ order.deliveryAgentName }}</div>
-        </div>
-      }
-      @if (order.receivedByName) {
-        <div class="detail-card">
-          <div class="detail-label">{{ 'ORDER_DETAIL.RECEIVED_BY' | translate }}</div>
-          <div class="detail-value">{{ order.receivedByName }}</div>
-        </div>
-      }
-      @if (order.deliveryRejectionReason) {
-        <div class="detail-card" style="grid-column: 1 / -1;">
-          <div class="detail-label">{{ 'ORDER_DETAIL.REJECT_REASON' | translate }}</div>
-          <div class="detail-value text-reject">{{ order.deliveryRejectionReason }}</div>
-        </div>
-      }
-    </div>
+    }
+
     @if (order.status === 'DELIVERED') {
       <div class="action-bar no-print">
         <button class="btn btn-success" (click)="accept()" [attr.aria-label]="'ORDER_DETAIL.ACCEPT_ARIA' | translate">{{ 'ORDERS.ACCEPT_BTN' | translate }}</button>
@@ -162,116 +94,86 @@
         }
       </div>
       @if (showDisputeForm) {
-        <div class="table-card" style="margin-top:16px;">
-          <h3 style="padding:16px 20px 0;">{{ 'DISPUTES.OPEN_TITLE' | translate }}</h3>
-          <div style="padding:16px 20px;">
-            <textarea
-              [(ngModel)]="disputeReason"
-              [placeholder]="'DISPUTES.REASON_PLACEHOLDER' | translate"
-              rows="4"
-              style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-family:inherit;font-size:14px;resize:vertical;"
-              [disabled]="submittingDispute"
-              [attr.aria-label]="'DISPUTES.REASON_ARIA' | translate"></textarea>
-            <div style="margin-top:12px;display:flex;gap:8px;">
-              <button class="btn btn-primary" (click)="openDispute()" [disabled]="submittingDispute || !disputeReason.trim()"
-                [attr.aria-label]="submittingDispute ? ('DISPUTES.SENDING_ARIA' | translate) : ('DISPUTES.CONFIRM_ARIA' | translate)">
-                {{ submittingDispute ? ('DISPUTES.SENDING' | translate) : ('DISPUTES.CONFIRM' | translate) }}
-              </button>
-              <button class="btn btn-secondary" (click)="toggleDisputeForm()" [disabled]="submittingDispute" [attr.aria-label]="'DISPUTES.CANCEL_OPEN_ARIA' | translate">{{ 'DISPUTES.CANCEL' | translate }}</button>
-            </div>
+        <div class="dispute-form no-print">
+          <h4 class="detail-section-title">
+            <app-icon name="alert" [size]="16"></app-icon>
+            {{ 'DISPUTES.OPEN_TITLE' | translate }}
+          </h4>
+          <textarea
+            [(ngModel)]="disputeReason"
+            [placeholder]="'DISPUTES.REASON_PLACEHOLDER' | translate"
+            rows="4"
+            class="form-control"
+            [disabled]="submittingDispute"
+            [attr.aria-label]="'DISPUTES.REASON_ARIA' | translate"></textarea>
+          <div class="dispute-form-actions">
+            <button class="btn btn-primary" (click)="openDispute()" [disabled]="submittingDispute || !disputeReason.trim()"
+              [attr.aria-label]="submittingDispute ? ('DISPUTES.SENDING_ARIA' | translate) : ('DISPUTES.CONFIRM_ARIA' | translate)">
+              {{ submittingDispute ? ('DISPUTES.SENDING' | translate) : ('DISPUTES.CONFIRM' | translate) }}
+            </button>
+            <button class="btn btn-secondary" (click)="toggleDisputeForm()" [disabled]="submittingDispute" [attr.aria-label]="'DISPUTES.CANCEL_OPEN_ARIA' | translate">{{ 'DISPUTES.CANCEL' | translate }}</button>
           </div>
         </div>
       }
-    }
-    @if (order.status !== 'CANCELLED') {
-      <div class="status-timeline">
-        <h3>{{ 'ORDER_DETAIL.PROGRESS' | translate }}</h3>
-        <div class="timeline">
-          @for (step of statusSteps; track step) {
-            <div class="timeline-step"
-              [class.completed]="isStepCompleted(statusSteps.indexOf(step))"
-              [class.current]="isCurrentStep(step)">
-              <div class="step-dot"></div>
-              <div class="step-label">{{ step | statusLabel }}</div>
-            </div>
-          }
-        </div>
-      </div>
     }
     @if (order.status === 'CANCELLED') {
       <div class="info-box">
         <strong>{{ 'ORDER_DETAIL.STATUS_LABEL' | translate }}</strong> {{ 'ORDER_DETAIL.CANCELLED_INFO' | translate }}
       </div>
     }
-    @if (order.items.length > 0) {
-      <div class="table-card" style="margin-top:24px;">
-        <h3 style="padding:16px 20px 0;">{{ 'ORDER_DETAIL.ITEMS' | translate }}</h3>
-        <div class="table-wrapper">
-          <table>
-            <thead>
-              <tr>
-                <th>{{ 'ORDER_DETAIL.COL_PRODUCT' | translate }}</th>
-                <th>{{ 'ORDER_DETAIL.COL_QTY' | translate }}</th>
-                <th>{{ 'ORDER_DETAIL.COL_PRICE' | translate }}</th>
-                <th>{{ 'ORDER_DETAIL.COL_DISCOUNT' | translate }}</th>
-                <th>{{ 'ORDER_DETAIL.COL_VAT_RATE' | translate }}</th>
-                <th>{{ 'ORDER_DETAIL.COL_TOTAL' | translate }}</th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (item of order.items; track item) {
-                <tr>
-                  <td><strong>{{ item.productName }}</strong><br><small class="text-placeholder">{{ item.productRef }}</small></td>
-                  <td>{{ item.quantity }}</td>
-                  <td>{{ item.unitPrice | number:'1.2-2' }}@if (item.priceTtc) { <small class="text-ok">TTC</small> }</td>
-                  <td>{{ item.discount > 0 ? (item.discount | number:'1.2-2') + ' ' + order.currency : '-' }}</td>
-                  <td>{{ item.vatRate }} %</td>
-                  <td><strong>{{ item.lineTotal | number:'1.2-2' }}</strong></td>
-                </tr>
-              }
-            </tbody>
-            <tfoot>
-              <tr>
-                <td colspan="5" style="text-align:right;font-weight:600;">{{ 'ORDER_DETAIL.SUBTOTAL' | translate }}</td>
-                <td><strong>{{ order.subtotal | number:'1.2-2' }} {{ order.currency }}</strong></td>
-              </tr>
-              @if (order.fodecTotal > 0) {
-                <tr>
-                  <td colspan="5" style="text-align:right;font-weight:600;">{{ 'ORDER_DETAIL.FODEC' | translate }}</td>
-                  <td><strong>{{ order.fodecTotal | number:'1.2-2' }} {{ order.currency }}</strong></td>
-                </tr>
-              }
-              @for (line of (order.vatBreakdown || []); track line.rate) {
-                <tr>
-                  <td colspan="5" style="text-align:right;font-weight:600;">{{ 'ORDER_DETAIL.VAT_LINE' | translate:{rate: line.rate} }}</td>
-                  <td><strong>{{ line.amount | number:'1.2-2' }} {{ order.currency }}</strong></td>
-                </tr>
-              }
-              @if (!(order.vatBreakdown || []).length) {
-                <tr>
-                  <td colspan="5" style="text-align:right;font-weight:600;">{{ 'ORDER_DETAIL.VAT' | translate:{rate: order.taxRate} }}</td>
-                  <td><strong>{{ order.taxAmount | number:'1.2-2' }} {{ order.currency }}</strong></td>
-                </tr>
-              }
-              <tr>
-                <td colspan="5" style="text-align:right;font-weight:700;font-size:16px;">{{ 'ORDERS.TOTAL' | translate }}</td>
-                <td><strong class="text-total" style="font-size:16px;">{{ order.total | number:'1.2-2' }} {{ order.currency }}</strong></td>
-              </tr>
-              <tr>
-                <td colspan="5" style="text-align:right;font-weight:600;">{{ 'ORDER_DETAIL.STAMP' | translate }}</td>
-                <td><strong>{{ order.stampAmount | number:'1.2-2' }} {{ order.currency }}</strong></td>
-              </tr>
-              <tr>
-                <td colspan="5" style="text-align:right;font-weight:700;font-size:16px;">{{ 'ORDER_DETAIL.NET_PAYABLE' | translate }}</td>
-                <td><strong class="text-total" style="font-size:16px;">{{ order.netPayable | number:'1.2-2' }} {{ order.currency }}</strong></td>
-              </tr>
-            </tfoot>
-          </table>
+
+    <div class="detail-section">
+      <h4 class="detail-section-title">
+        <app-icon name="file-text" [size]="16"></app-icon>
+        {{ 'ORDER_DETAIL.TITLE' | translate }}
+      </h4>
+      <div class="detail-grid">
+        <div class="detail-card">
+          <div class="detail-label">{{ 'ORDERS.SUPPLIER' | translate }}</div>
+          <div class="detail-value">{{ order.supplierName || order.supplierId }}</div>
         </div>
+        <div class="detail-card">
+          <div class="detail-label">{{ 'ORDER_DETAIL.EXTREF' | translate }}</div>
+          <div class="detail-value">
+            @if (order.externalReference) {
+              {{ order.externalReference }}
+            } @else {
+              <span class="text-muted">—</span>
+              <button class="btn btn-sm btn-secondary detail-inline-action" (click)="toggleExtRefForm()">{{ 'ORDER_DETAIL.EXTREF_ADD' | translate }}</button>
+            }
+          </div>
+        </div>
+        <div class="detail-card">
+          <div class="detail-label">{{ 'ORDER_DETAIL.ASAP' | translate }}</div>
+          <div class="detail-value">{{ order.asapPayment ? ('ORDER_DETAIL.YES' | translate) : ('ORDER_DETAIL.NO' | translate) }}</div>
+        </div>
+        @if (order.paymentTerms) {
+          <div class="detail-card">
+            <div class="detail-label">{{ 'ORDER_DETAIL.PAYMENT_TERMS' | translate }}</div>
+            <div class="detail-value">{{ paymentTermsLabel(order.paymentTerms) }}</div>
+          </div>
+        }
+        @if (order.dueDate) {
+          <div class="detail-card">
+            <div class="detail-label">{{ 'ORDER_DETAIL.DUE_DATE' | translate }}</div>
+            <div class="detail-value" [class.text-reject]="isOverdue()" [class.text-total]="!isOverdue()" [class.detail-due-overdue]="isOverdue()">{{ order.dueDate }}</div>
+          </div>
+        }
+        <div class="detail-card">
+          <div class="detail-label">{{ 'ORDER_DETAIL.CREATED_AT' | translate }}</div>
+          <div class="detail-value">{{ order.createdAt | date:'dd/MM/yyyy HH:mm:ss' }}</div>
+        </div>
+        @if (order.createdByName) {
+          <div class="detail-card">
+            <div class="detail-label">{{ 'ORDER_DETAIL.CREATED_BY' | translate }}</div>
+            <div class="detail-value">{{ order.createdByName }}</div>
+          </div>
+        }
       </div>
-    }
-    @if (showExtRefForm && order) {
-      <div class="form-card" style="margin-bottom:16px;">
+    </div>
+
+    @if (showExtRefForm) {
+      <div class="detail-form-panel">
         <div class="form-group">
           <label for="extRef">{{ 'ORDER_DETAIL.EXTREF' | translate }}</label>
           <input id="extRef" type="text" [(ngModel)]="externalReference" name="externalReference" class="form-control"
@@ -286,33 +188,173 @@
         </div>
       </div>
     }
+
+    @if (hasDeliveryInfo()) {
+      <div class="detail-section">
+        <h4 class="detail-section-title">
+          <app-icon name="truck" [size]="16"></app-icon>
+          {{ 'DELIVERY.DETAIL_TITLE' | translate }}
+        </h4>
+        <div class="detail-grid">
+          @if (order.deliveryAgentName) {
+            <div class="detail-card">
+              <div class="detail-label">{{ 'ORDERS.DRIVER' | translate }}</div>
+              <div class="detail-value">{{ order.deliveryAgentName }}</div>
+            </div>
+          }
+          @if (order.plannedDeliveryDate) {
+            <div class="detail-card">
+              <div class="detail-label">{{ 'ORDER_DETAIL.PLANNED_DATE' | translate }}</div>
+              <div class="detail-value">{{ order.plannedDeliveryDate }}</div>
+            </div>
+          }
+          @if (order.confirmedDeliveryDate) {
+            <div class="detail-card">
+              <div class="detail-label">{{ 'ORDER_DETAIL.CONFIRMED_DATE' | translate }}</div>
+              <div class="detail-value">{{ order.confirmedDeliveryDate }}</div>
+            </div>
+          }
+          @if (order.estimatedArrival) {
+            <div class="detail-card">
+              <div class="detail-label">{{ 'ORDER_DETAIL.ETA' | translate }}</div>
+              <div class="detail-value text-eta">{{ order.estimatedArrival | date:'dd/MM/yyyy HH:mm' }}</div>
+            </div>
+          }
+          @if (order.status === 'IN_DELIVERY' && countdown) {
+            <div class="detail-card">
+              <div class="detail-label">{{ 'ORDER_DETAIL.REMAINING' | translate }}</div>
+              <div class="detail-value text-ok detail-strong">{{ countdown }}</div>
+            </div>
+          }
+          @if (order.deliveredAt) {
+            <div class="detail-card">
+              <div class="detail-label">{{ 'ORDER_DETAIL.DELIVERED_AT' | translate }}</div>
+              <div class="detail-value">{{ order.deliveredAt | date:'dd/MM/yyyy HH:mm:ss' }}</div>
+            </div>
+          }
+          @if (order.receivedAt) {
+            <div class="detail-card">
+              <div class="detail-label">{{ 'ORDER_DETAIL.RECEIVED_AT' | translate }}</div>
+              <div class="detail-value">{{ order.receivedAt | date:'dd/MM/yyyy HH:mm:ss' }}</div>
+            </div>
+          }
+          @if (order.receivedByName) {
+            <div class="detail-card">
+              <div class="detail-label">{{ 'ORDER_DETAIL.RECEIVED_BY' | translate }}</div>
+              <div class="detail-value">{{ order.receivedByName }}</div>
+            </div>
+          }
+          @if (order.deliveryRejectionReason) {
+            <div class="detail-card detail-card-full">
+              <div class="detail-label">{{ 'ORDER_DETAIL.REJECT_REASON' | translate }}</div>
+              <div class="detail-value text-reject">{{ order.deliveryRejectionReason }}</div>
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+    @if (order.items.length > 0) {
+      <div class="detail-section">
+        <div class="table-card">
+          <h4 class="table-card-title">{{ 'ORDER_DETAIL.ITEMS' | translate }}</h4>
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>{{ 'ORDER_DETAIL.COL_PRODUCT' | translate }}</th>
+                  <th>{{ 'ORDER_DETAIL.COL_QTY' | translate }}</th>
+                  <th>{{ 'ORDER_DETAIL.COL_PRICE' | translate }}</th>
+                  <th>{{ 'ORDER_DETAIL.COL_DISCOUNT' | translate }}</th>
+                  <th>{{ 'ORDER_DETAIL.COL_VAT_RATE' | translate }}</th>
+                  <th>{{ 'ORDER_DETAIL.COL_TOTAL' | translate }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (item of order.items; track item) {
+                  <tr>
+                    <td><strong>{{ item.productName }}</strong><br><small class="text-placeholder">{{ item.productRef }}</small></td>
+                    <td>{{ item.quantity }}</td>
+                    <td>{{ item.unitPrice | number:'1.2-2' }}@if (item.priceTtc) { <small class="text-ok">TTC</small> }</td>
+                    <td>{{ item.discount > 0 ? (item.discount | number:'1.2-2') + ' ' + order.currency : '-' }}</td>
+                    <td>{{ item.vatRate }} %</td>
+                    <td><strong>{{ item.lineTotal | number:'1.2-2' }}</strong></td>
+                  </tr>
+                }
+              </tbody>
+              <tfoot>
+                <tr class="total-row">
+                  <td colspan="5" class="total-label">{{ 'ORDER_DETAIL.SUBTOTAL' | translate }}</td>
+                  <td class="total-value">{{ order.subtotal | number:'1.2-2' }} {{ order.currency }}</td>
+                </tr>
+                @if (order.fodecTotal > 0) {
+                  <tr class="total-row">
+                    <td colspan="5" class="total-label">{{ 'ORDER_DETAIL.FODEC' | translate }}</td>
+                    <td class="total-value">{{ order.fodecTotal | number:'1.2-2' }} {{ order.currency }}</td>
+                  </tr>
+                }
+                @for (line of (order.vatBreakdown || []); track line.rate) {
+                  <tr class="total-row">
+                    <td colspan="5" class="total-label">{{ 'ORDER_DETAIL.VAT_LINE' | translate:{rate: line.rate} }}</td>
+                    <td class="total-value">{{ line.amount | number:'1.2-2' }} {{ order.currency }}</td>
+                  </tr>
+                }
+                @if (!(order.vatBreakdown || []).length) {
+                  <tr class="total-row">
+                    <td colspan="5" class="total-label">{{ 'ORDER_DETAIL.VAT' | translate:{rate: order.taxRate} }}</td>
+                    <td class="total-value">{{ order.taxAmount | number:'1.2-2' }} {{ order.currency }}</td>
+                  </tr>
+                }
+                <tr class="total-row grand-total">
+                  <td colspan="5" class="total-label">{{ 'ORDERS.TOTAL' | translate }}</td>
+                  <td class="total-value">{{ order.total | number:'1.2-2' }} {{ order.currency }}</td>
+                </tr>
+                <tr class="total-row">
+                  <td colspan="5" class="total-label">{{ 'ORDER_DETAIL.STAMP' | translate }}</td>
+                  <td class="total-value">{{ order.stampAmount | number:'1.2-2' }} {{ order.currency }}</td>
+                </tr>
+                <tr class="total-row grand-total">
+                  <td colspan="5" class="total-label">{{ 'ORDER_DETAIL.NET_PAYABLE' | translate }}</td>
+                  <td class="total-value">{{ order.netPayable | number:'1.2-2' }} {{ order.currency }}</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </div>
+      </div>
+    }
+
     @if (order.fiscalMention) {
-      <div class="info-box" style="border-left:4px solid #781e1e;margin-top:16px;">
+      <div class="info-box detail-fiscal">
         <strong>{{ 'ORDER_DETAIL.FISCAL_MENTION' | translate }}</strong> {{ order.fiscalMention }}
       </div>
     }
+
     @if (certificate) {
-      <div class="info-box" style="border-left:4px solid #0f3460;margin-top:16px;">
-        <strong>{{ 'PAYMENT_DETAIL.CERT_TITLE' | translate }} {{ certificate.number }}</strong><br>
-        <span>{{ 'PAYMENT_DETAIL.CERT_LINE' | translate:{rate: certificate.rate, amount: certificate.withholdingAmount, currency: certificate.currency} }}</span><br>
-        <span>{{ 'PAYMENT_DETAIL.CERT_DUE' | translate:{date: certificate.dueDate} }}</span>
-        @if (certificate.tejReference) {
-          <span> — {{ 'PAYMENT_DETAIL.CERT_TEJ_REF' | translate }} {{ certificate.tejReference }}</span>
-        } @else {
-          <span> — {{ 'PAYMENT_DETAIL.CERT_TEJ_PENDING' | translate }}</span>
-        }
-        <div style="margin-top:8px;">
-          <a routerLink="/dashboard/payments-help/tej">{{ 'PAYMENT_DETAIL.CERT_GUIDE_LINK' | translate }}</a>
-        </div>
-        @if ((certificate.status === 'READY' || certificate.status === 'REJECTED') && !showDepositForm) {
-          <div style="margin-top:8px;">
-            <button class="btn btn-sm btn-secondary" (click)="toggleDepositForm()">{{ 'PAYMENT_DETAIL.CERT_MARK_DEPOSITED' | translate }}</button>
+      <div class="info-box detail-cert">
+        <div>
+          <strong>{{ 'PAYMENT_DETAIL.CERT_TITLE' | translate }} {{ certificate.number }}</strong><br>
+          <span>{{ 'PAYMENT_DETAIL.CERT_LINE' | translate:{rate: certificate.rate, amount: certificate.withholdingAmount, currency: certificate.currency} }}</span><br>
+          <span>{{ 'PAYMENT_DETAIL.CERT_DUE' | translate:{date: certificate.dueDate} }}</span>
+          @if (certificate.tejReference) {
+            <span> — {{ 'PAYMENT_DETAIL.CERT_TEJ_REF' | translate }} {{ certificate.tejReference }}</span>
+          } @else {
+            <span> — {{ 'PAYMENT_DETAIL.CERT_TEJ_PENDING' | translate }}</span>
+          }
+          <div class="detail-cert-action">
+            <a routerLink="/dashboard/payments-help/tej">{{ 'PAYMENT_DETAIL.CERT_GUIDE_LINK' | translate }}</a>
           </div>
-        }
+          @if ((certificate.status === 'READY' || certificate.status === 'REJECTED') && !showDepositForm) {
+            <div class="detail-cert-action">
+              <button class="btn btn-sm btn-secondary" (click)="toggleDepositForm()">{{ 'PAYMENT_DETAIL.CERT_MARK_DEPOSITED' | translate }}</button>
+            </div>
+          }
+        </div>
       </div>
     }
+
     @if (showDepositForm && certificate) {
-      <div class="form-card" style="margin-bottom:16px;">
+      <div class="detail-form-panel">
         <div class="form-group">
           <label for="tejRef">{{ 'PAYMENT_DETAIL.CERT_TEJ_REF_INPUT' | translate }}</label>
           <input id="tejRef" type="text" [(ngModel)]="tejReference" name="tejReference" class="form-control"
@@ -326,95 +368,107 @@
         </div>
       </div>
     }
+
     @if ((order.events || []).length > 0) {
-      <div class="table-card" style="margin-top:24px;">
-        <h3 style="padding:16px 20px 0;">{{ 'ORDER_DETAIL.HISTORY' | translate }}</h3>
-        <div class="table-wrapper">
-          <table>
-            <thead>
-              <tr>
-                <th>{{ 'ORDER_DETAIL.COL_ACTION' | translate }}</th>
-                <th>{{ 'ORDER_DETAIL.COL_DATE' | translate }}</th>
-                <th>{{ 'ORDER_DETAIL.COL_DETAILS' | translate }}</th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (e of (order.events || []); track e) {
+      <div class="detail-section">
+        <div class="table-card">
+          <h4 class="table-card-title">{{ 'ORDER_DETAIL.HISTORY' | translate }}</h4>
+          <div class="table-wrapper">
+            <table>
+              <thead>
                 <tr>
-                  <td>
-                    <span class="payment-badge" [ngClass]="statusClass(e.action.replace('ORDER_', ''))"
-                      [attr.aria-label]="('ORDER_DETAIL.EVENT_ARIA' | translate:{label: actionLabel(e.action)})" role="status">
-                      {{ actionLabel(e.action) }}
-                    </span>
-                  </td>
-                  <td>{{ e.timestamp | date:'dd/MM/yyyy HH:mm:ss' }}</td>
-                  <td>{{ e.details || '-' }}</td>
+                  <th>{{ 'ORDER_DETAIL.COL_ACTION' | translate }}</th>
+                  <th>{{ 'ORDER_DETAIL.COL_DATE' | translate }}</th>
+                  <th>{{ 'ORDER_DETAIL.COL_DETAILS' | translate }}</th>
                 </tr>
-              }
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                @for (e of (order.events || []); track e) {
+                  <tr>
+                    <td>
+                      <span class="payment-badge" [ngClass]="statusClass(e.action.replace('ORDER_', ''))"
+                        [attr.aria-label]="('ORDER_DETAIL.EVENT_ARIA' | translate:{label: actionLabel(e.action)})" role="status">
+                        {{ actionLabel(e.action) }}
+                      </span>
+                    </td>
+                    <td>{{ e.timestamp | date:'dd/MM/yyyy HH:mm:ss' }}</td>
+                    <td>{{ e.details || '-' }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     }
-    <div class="table-card" style="margin-top:24px;">
-      <h3 style="padding:16px 20px 0;">{{ 'ORDER_DETAIL.COMMENTS' | translate }}</h3>
-      <div style="padding:16px 20px;">
-        @if (comments.length === 0) {
-          <p class="text-placeholder" style="font-size:14px;">{{ 'ORDER_DETAIL.NO_COMMENTS' | translate }}</p>
-        }
-        @for (c of comments; track c) {
-          <div style="border-bottom:1px solid #eee;padding:12px 0;">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
-              <strong style="font-size:14px;">{{ c.authorName }}</strong>
-              <small class="text-placeholder">{{ c.createdAt | date:'dd/MM/yyyy HH:mm' }}</small>
+
+    <div class="detail-section">
+      <div class="table-card">
+        <h4 class="table-card-title">{{ 'ORDER_DETAIL.COMMENTS' | translate }}</h4>
+        <div class="table-card-body">
+          @if (comments.length === 0) {
+            <p class="comments-empty">{{ 'ORDER_DETAIL.NO_COMMENTS' | translate }}</p>
+          } @else {
+            <div class="comment-list">
+              @for (c of comments; track c) {
+                <div class="comment-item">
+                  <div class="comment-head">
+                    <strong class="comment-author">{{ c.authorName }}</strong>
+                    <small class="comment-date">{{ c.createdAt | date:'dd/MM/yyyy HH:mm' }}</small>
+                  </div>
+                  <p class="comment-body">{{ c.content }}</p>
+                </div>
+              }
             </div>
-            <p style="margin:0;font-size:14px;white-space:pre-wrap;">{{ c.content }}</p>
+          }
+          <div class="comment-form">
+            <textarea
+              [(ngModel)]="newComment"
+              [placeholder]="'ORDER_DETAIL.COMMENT_PLACEHOLDER' | translate"
+              rows="2"
+              [disabled]="submittingComment"
+              [attr.aria-label]="'ORDER_DETAIL.COMMENT_ARIA' | translate"></textarea>
+            <button class="btn btn-primary" (click)="addComment()"
+              [disabled]="submittingComment || !newComment.trim()"
+              [attr.aria-label]="submittingComment ? ('ORDER_DETAIL.SENDING_ARIA' | translate) : ('ORDER_DETAIL.SEND_ARIA' | translate)">
+              {{ submittingComment ? ('ORDER_DETAIL.SENDING' | translate) : ('ORDER_DETAIL.SEND' | translate) }}
+            </button>
           </div>
-        }
-        <div class="comment-form">
-          <textarea
-            [(ngModel)]="newComment"
-            [placeholder]="'ORDER_DETAIL.COMMENT_PLACEHOLDER' | translate"
-            rows="2"
-            [disabled]="submittingComment"
-            [attr.aria-label]="'ORDER_DETAIL.COMMENT_ARIA' | translate"></textarea>
-          <button class="btn btn-primary" (click)="addComment()"
-            [disabled]="submittingComment || !newComment.trim()"
-            [attr.aria-label]="submittingComment ? ('ORDER_DETAIL.SENDING_ARIA' | translate) : ('ORDER_DETAIL.SEND_ARIA' | translate)">
-            {{ submittingComment ? ('ORDER_DETAIL.SENDING' | translate) : ('ORDER_DETAIL.SEND' | translate) }}
-          </button>
         </div>
       </div>
     </div>
+
     @if (disputes.length > 0) {
-      <div class="table-card" style="margin-top:24px;">
-        <h3 style="padding:16px 20px 0;">{{ 'DISPUTES.LIST_TITLE' | translate }}</h3>
-        <div class="table-wrapper">
-          <table>
-            <thead>
-              <tr>
-                <th>{{ 'DISPUTES.COL_REASON' | translate }}</th>
-                <th>{{ 'DISPUTES.COL_STATUS' | translate }}</th>
-                <th>{{ 'DISPUTES.COL_CREATED' | translate }}</th>
-                <th>{{ 'DISPUTES.COL_ACTION' | translate }}</th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (d of disputes; track d) {
+      <div class="detail-section">
+        <div class="table-card">
+          <h4 class="table-card-title">{{ 'DISPUTES.LIST_TITLE' | translate }}</h4>
+          <div class="table-wrapper">
+            <table>
+              <thead>
                 <tr>
-                  <td>{{ d.reason }}</td>
-                  <td>
-                    <span class="payment-badge" [ngClass]="statusClass(d.status)"
-                      [attr.aria-label]="('DISPUTES.STATUS_ARIA' | translate:{label: (d.status | statusLabel)})" role="status">{{ d.status | statusLabel }}</span>
-                  </td>
-                  <td>{{ d.createdAt | date:'dd/MM/yyyy HH:mm:ss' }}</td>
-                  <td>
-                    <button class="btn btn-sm btn-secondary" (click)="viewDispute(d.id)" [attr.aria-label]="('DISPUTES.VIEW_ARIA' | translate:{date: d.createdAt})">{{ 'DISPUTES.VIEW' | translate }}</button>
-                  </td>
+                  <th>{{ 'DISPUTES.COL_REASON' | translate }}</th>
+                  <th>{{ 'DISPUTES.COL_STATUS' | translate }}</th>
+                  <th>{{ 'DISPUTES.COL_CREATED' | translate }}</th>
+                  <th>{{ 'DISPUTES.COL_ACTION' | translate }}</th>
                 </tr>
-              }
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                @for (d of disputes; track d) {
+                  <tr>
+                    <td>{{ d.reason }}</td>
+                    <td>
+                      <span class="payment-badge" [ngClass]="statusClass(d.status)"
+                        [attr.aria-label]="('DISPUTES.STATUS_ARIA' | translate:{label: (d.status | statusLabel)})" role="status">{{ d.status | statusLabel }}</span>
+                    </td>
+                    <td>{{ d.createdAt | date:'dd/MM/yyyy HH:mm:ss' }}</td>
+                    <td>
+                      <button class="btn btn-sm btn-secondary" (click)="viewDispute(d.id)" [attr.aria-label]="('DISPUTES.VIEW_ARIA' | translate:{date: d.createdAt})">{{ 'DISPUTES.VIEW' | translate }}</button>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     }

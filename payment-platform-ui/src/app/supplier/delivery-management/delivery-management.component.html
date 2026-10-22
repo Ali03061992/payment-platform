@@ -86,7 +86,7 @@
       </div>
     }
     @if (activeDeliveries.length > 0) {
-      <div class="section-header" style="margin-top: 32px;">
+      <div class="section-header section-header-spaced">
         <h3>{{ 'DELIVERY.ACTIVE' | translate }}</h3>
         <span class="result-count">{{ 'DELIVERY.COUNT' | translate:{count: activeDeliveries.length} }}</span>
       </div>
@@ -170,7 +170,7 @@
       </div>
     }
     @if (isShopUser() && pendingReception.length > 0) {
-      <div class="section-header" style="margin-top: 32px;">
+      <div class="section-header section-header-spaced">
         <h3>{{ 'DELIVERY.PENDING_RECEPTION' | translate }}</h3>
         <span class="result-count">{{ 'DELIVERY.COUNT' | translate:{count: pendingReception.length} }}</span>
       </div>
@@ -246,7 +246,7 @@
       </div>
     }
     @if (completedDeliveries.length > 0) {
-      <div class="section-header" style="margin-top: 32px;">
+      <div class="section-header section-header-spaced">
         <h3>{{ 'DELIVERY.COMPLETED' | translate }}</h3>
         <span class="result-count">{{ 'DELIVERY.COUNT' | translate:{count: completedDeliveries.length} }}</span>
       </div>
@@ -322,7 +322,7 @@
       </div>
     }
     @if (rejectedDeliveries.length > 0) {
-      <div class="section-header" style="margin-top: 32px;">
+      <div class="section-header section-header-spaced">
         <h3>{{ 'DELIVERY.REJECTED' | translate }}</h3>
         <span class="result-count">{{ 'DELIVERY.COUNT' | translate:{count: rejectedDeliveries.length} }}</span>
       </div>
@@ -390,157 +390,226 @@
   </div>
 }
 @if (showDetail) {
-  <div class="modal-overlay" (click)="closeDetail()">
-    <div class="modal-content modal-lg" (click)="$event.stopPropagation()">
+  <div class="modal-overlay detail-overlay" (click)="closeDetail()">
+    <div class="modal-content modal-lg detail-modal" (click)="$event.stopPropagation()">
       <div class="modal-header">
-        <h3>{{ 'DELIVERY.DETAIL_TITLE' | translate }} {{ selectedDetailOrder?.reference }}</h3>
         <button class="btn-close" (click)="closeDetail()" [attr.aria-label]="'COMMON.CLOSE' | translate" [attr.title]="'COMMON.CLOSE' | translate">&times;</button>
+        <h3>{{ 'DELIVERY.DETAIL_TITLE' | translate }} <span class="text-muted">{{ selectedDetailOrder?.reference }}</span></h3>
+        @if (selectedDetailOrder) {
+          <span class="payment-badge" [ngClass]="statusClass(selectedDetailOrder.status)">{{ selectedDetailOrder.status | statusLabel }}</span>
+        }
       </div>
-      @if (selectedDetailOrder) {
-        <div>
-          <div class="detail-grid">
-            <div class="detail-card">
-              <div class="detail-label">{{ 'ORDERS.STATUS' | translate }}</div>
-              <div class="detail-value">
-                <span class="payment-badge" [ngClass]="statusClass(selectedDetailOrder.status)">{{ selectedDetailOrder.status | statusLabel }}</span>
+      <div class="detail-modal-body">
+        @if (loadingDetail && !selectedDetailOrder) {
+          <div class="loading">
+            <div class="spinner"></div>
+            <span>{{ 'COMMON.LOADING' | translate }}</span>
+          </div>
+        }
+        @if (selectedDetailOrder) {
+          <div class="order-summary">
+            <div class="order-summary-main">
+              <div class="order-summary-eyebrow">
+                <app-icon name="truck" [size]="14"></app-icon>
+                {{ 'DELIVERY.DETAIL_TITLE' | translate }}
+              </div>
+              <h4 class="order-summary-ref">{{ selectedDetailOrder.reference }}</h4>
+              <span class="order-summary-amount">{{ selectedDetailOrder.total | number:'1.2-2' }} {{ selectedDetailOrder.currency }}</span>
+              <div class="order-summary-meta">
+                <span>
+                  <app-icon name="store" [size]="15"></app-icon>
+                  {{ selectedDetailOrder.shopName || selectedDetailOrder.shopId }}
+                </span>
+                @if (selectedDetailOrder.confirmedDeliveryDate || selectedDetailOrder.plannedDeliveryDate) {
+                  <span>
+                    <app-icon name="calendar" [size]="15"></app-icon>
+                    {{ selectedDetailOrder.confirmedDeliveryDate || selectedDetailOrder.plannedDeliveryDate }}
+                  </span>
+                }
               </div>
             </div>
             @if (detailQrData) {
-              <div class="detail-card">
-                <div class="detail-value">
-                  <qrcode [qrdata]="detailQrData" [width]="160" [margin]="1"></qrcode>
-                </div>
-              </div>
-            }
-            <div class="detail-card">
-              <div class="detail-label">{{ 'ORDERS.TOTAL' | translate }}</div>
-              <div class="detail-value amount">{{ selectedDetailOrder.total | number:'1.2-2' }} {{ selectedDetailOrder.currency }}</div>
-            </div>
-            <div class="detail-card">
-              <div class="detail-label">{{ 'PAYMENTS.SHOP' | translate }}</div>
-              <div class="detail-value">{{ selectedDetailOrder.shopName || selectedDetailOrder.shopId }}</div>
-            </div>
-            <div class="detail-card">
-              <div class="detail-label">{{ 'SUPPLIER_ORDERS.ASAP_PAYMENT' | translate }}</div>
-              <div class="detail-value">{{ selectedDetailOrder.asapPayment ? ('SUPPLIER_ORDERS.YES' | translate) : ('SUPPLIER_ORDERS.NO' | translate) }}</div>
-            </div>
-            @if (selectedDetailOrder.createdByName) {
-              <div class="detail-card">
-                <div class="detail-label">{{ 'PAYMENTS.CREATED_BY' | translate }}</div>
-                <div class="detail-value">{{ selectedDetailOrder.createdByName }}</div>
-              </div>
-            }
-            <div class="detail-card">
-              <div class="detail-label">{{ 'PAYMENTS.CREATED_AT' | translate }}</div>
-              <div class="detail-value">{{ selectedDetailOrder.createdAt | date:'dd/MM/yyyy HH:mm:ss' }}</div>
-            </div>
-            @if (selectedDetailOrder.deliveryAgentName) {
-              <div class="detail-card">
-                <div class="detail-label">{{ 'ORDERS.DRIVER' | translate }}</div>
-                <div class="detail-value">{{ selectedDetailOrder.deliveryAgentName }}</div>
-              </div>
-            }
-            @if (selectedDetailOrder.plannedDeliveryDate) {
-              <div class="detail-card">
-                <div class="detail-label">{{ 'SUPPLIER_ORDERS.PLANNED_DATE' | translate }}</div>
-                <div class="detail-value">{{ selectedDetailOrder.plannedDeliveryDate }}</div>
-              </div>
-            }
-            @if (selectedDetailOrder.confirmedDeliveryDate) {
-              <div class="detail-card">
-                <div class="detail-label">{{ 'SUPPLIER_ORDERS.CONFIRMED_DATE' | translate }}</div>
-                <div class="detail-value">{{ selectedDetailOrder.confirmedDeliveryDate }}</div>
-              </div>
-            }
-            @if (selectedDetailOrder.deliveredAt) {
-              <div class="detail-card">
-                <div class="detail-label">{{ 'SUPPLIER_ORDERS.DELIVERED_AT' | translate }}</div>
-                <div class="detail-value">{{ selectedDetailOrder.deliveredAt | date:'dd/MM/yyyy HH:mm:ss' }}</div>
-              </div>
-            }
-            @if (selectedDetailOrder.receivedByName) {
-              <div class="detail-card">
-                <div class="detail-label">{{ 'SUPPLIER_ORDERS.RECEIVED_BY' | translate }}</div>
-                <div class="detail-value">{{ selectedDetailOrder.receivedByName }}</div>
-              </div>
-            }
-            @if (selectedDetailOrder.receivedAt) {
-              <div class="detail-card">
-                <div class="detail-label">{{ 'SUPPLIER_ORDERS.RECEIVED_AT' | translate }}</div>
-                <div class="detail-value">{{ selectedDetailOrder.receivedAt | date:'dd/MM/yyyy HH:mm:ss' }}</div>
-              </div>
-            }
-            @if (selectedDetailOrder.deliveryRejectionReason) {
-              <div class="detail-card" style="grid-column: 1 / -1;">
-                <div class="detail-label">{{ 'SUPPLIER_ORDERS.REJECT_REASON' | translate }}</div>
-                <div class="detail-value text-reject">{{ selectedDetailOrder.deliveryRejectionReason }}</div>
+              <div class="order-summary-qr">
+                <qrcode [qrdata]="detailQrData" [width]="160" [margin]="1"></qrcode>
               </div>
             }
           </div>
-          @if (selectedDetailOrder.items && selectedDetailOrder.items.length > 0) {
-            <div class="table-card" style="margin-top: 16px;">
-              <h4 style="padding: 16px 20px 0;">{{ 'SUPPLIER_ORDERS.ITEMS' | translate }}</h4>
-              <div class="table-wrapper">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>{{ 'SUPPLIER_ORDERS.PRODUCT' | translate }}</th>
-                      <th>{{ 'SUPPLIER_ORDERS.QUANTITY' | translate }}</th>
-                      <th>{{ 'SUPPLIER_ORDERS.UNIT_PRICE' | translate }}</th>
-                      <th>{{ 'SUPPLIER_ORDERS.DISCOUNT' | translate }}</th>
-                      <th>{{ 'ORDERS.TOTAL' | translate }}</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    @for (item of selectedDetailOrder.items; track item) {
-                      <tr>
-                        <td><strong>{{ item.productName }}</strong></td>
-                        <td>{{ item.quantity }}</td>
-                        <td>{{ item.unitPrice | number:'1.2-2' }}</td>
-                        <td>{{ item.discount > 0 ? (item.discount | number:'1.2-2') + ' ' + selectedDetailOrder.currency : '-' }}</td>
-                        <td>{{ item.lineTotal | number:'1.2-2' }}</td>
-                      </tr>
-                    }
-                  </tbody>
-                  <tfoot>
-                    <tr>
-                      <td colspan="4" style="text-align:right;font-weight:600;">{{ 'SUPPLIER_ORDERS.SUBTOTAL' | translate }}</td>
-                      <td><strong>{{ selectedDetailOrder.subtotal | number:'1.2-2' }} {{ selectedDetailOrder.currency }}</strong></td>
-                    </tr>
-                    @if (selectedDetailOrder.fodecTotal > 0) {
-                      <tr>
-                        <td colspan="4" style="text-align:right;font-weight:600;">{{ 'SUPPLIER_ORDERS.FODEC' | translate }}</td>
-                        <td><strong>{{ selectedDetailOrder.fodecTotal | number:'1.2-2' }} {{ selectedDetailOrder.currency }}</strong></td>
-                      </tr>
-                    }
-                    @for (line of (selectedDetailOrder.vatBreakdown || []); track line.rate) {
-                      <tr>
-                        <td colspan="4" style="text-align:right;font-weight:600;">{{ 'SUPPLIER_ORDERS.VAT_LINE' | translate:{rate: line.rate} }}</td>
-                        <td><strong>{{ line.amount | number:'1.2-2' }} {{ selectedDetailOrder.currency }}</strong></td>
-                      </tr>
-                    }
-                    @if (!(selectedDetailOrder.vatBreakdown || []).length) {
-                      <tr>
-                        <td colspan="4" style="text-align:right;font-weight:600;">{{ 'SUPPLIER_ORDERS.VAT' | translate }} ({{ selectedDetailOrder.taxRate }}%)</td>
-                        <td><strong>{{ selectedDetailOrder.taxAmount | number:'1.2-2' }} {{ selectedDetailOrder.currency }}</strong></td>
-                      </tr>
-                    }
-                    <tr>
-                      <td colspan="4" style="text-align:right;font-weight:700;font-size:16px;">{{ 'ORDERS.TOTAL' | translate }}</td>
-                      <td><strong class="text-total" style="font-size:16px;">{{ selectedDetailOrder.total | number:'1.2-2' }} {{ selectedDetailOrder.currency }}</strong></td>
-                    </tr>
-                    <tr>
-                      <td colspan="4" style="text-align:right;font-weight:600;">{{ 'SUPPLIER_ORDERS.STAMP' | translate }}</td>
-                      <td><strong>{{ selectedDetailOrder.stampAmount | number:'1.2-2' }} {{ selectedDetailOrder.currency }}</strong></td>
-                    </tr>
-                    <tr>
-                      <td colspan="4" style="text-align:right;font-weight:700;font-size:16px;">{{ 'SUPPLIER_ORDERS.NET_PAYABLE' | translate }}</td>
-                      <td><strong class="text-total" style="font-size:16px;">{{ selectedDetailOrder.netPayable | number:'1.2-2' }} {{ selectedDetailOrder.currency }}</strong></td>
-                    </tr>
-                  </tfoot>
-                </table>
+
+          @if (selectedDetailOrder.status !== 'DELIVERY_REJECTED' && selectedDetailOrder.status !== 'CANCELLED') {
+            <div class="status-timeline">
+              @for (step of deliverySteps; track step; let i = $index) {
+                <div class="timeline-step"
+                  [class.done]="deliveryStepIndex(selectedDetailOrder.status) > i"
+                  [class.current]="deliveryStepIndex(selectedDetailOrder.status) === i">
+                  <span class="step-dot"></span>
+                  <span class="step-label">{{ step | statusLabel }}</span>
+                </div>
+              }
+            </div>
+          }
+
+          <div class="detail-section">
+            <h4 class="detail-section-title">
+              <app-icon name="truck" [size]="16"></app-icon>
+              {{ 'DELIVERY.TITLE' | translate }}
+            </h4>
+            <div class="detail-grid">
+              @if (selectedDetailOrder.deliveryAgentName) {
+                <div class="detail-card">
+                  <div class="detail-label">{{ 'ORDERS.DRIVER' | translate }}</div>
+                  <div class="detail-value">{{ selectedDetailOrder.deliveryAgentName }}</div>
+                </div>
+              }
+              @if (selectedDetailOrder.plannedDeliveryDate) {
+                <div class="detail-card">
+                  <div class="detail-label">{{ 'SUPPLIER_ORDERS.PLANNED_DATE' | translate }}</div>
+                  <div class="detail-value">{{ selectedDetailOrder.plannedDeliveryDate }}</div>
+                </div>
+              }
+              @if (selectedDetailOrder.confirmedDeliveryDate) {
+                <div class="detail-card">
+                  <div class="detail-label">{{ 'SUPPLIER_ORDERS.CONFIRMED_DATE' | translate }}</div>
+                  <div class="detail-value">{{ selectedDetailOrder.confirmedDeliveryDate }}</div>
+                </div>
+              }
+              @if (selectedDetailOrder.deliveredAt) {
+                <div class="detail-card">
+                  <div class="detail-label">{{ 'SUPPLIER_ORDERS.DELIVERED_AT' | translate }}</div>
+                  <div class="detail-value">{{ selectedDetailOrder.deliveredAt | date:'dd/MM/yyyy HH:mm:ss' }}</div>
+                </div>
+              }
+              @if (selectedDetailOrder.receivedByName) {
+                <div class="detail-card">
+                  <div class="detail-label">{{ 'SUPPLIER_ORDERS.RECEIVED_BY' | translate }}</div>
+                  <div class="detail-value">{{ selectedDetailOrder.receivedByName }}</div>
+                </div>
+              }
+              @if (selectedDetailOrder.receivedAt) {
+                <div class="detail-card">
+                  <div class="detail-label">{{ 'SUPPLIER_ORDERS.RECEIVED_AT' | translate }}</div>
+                  <div class="detail-value">{{ selectedDetailOrder.receivedAt | date:'dd/MM/yyyy HH:mm:ss' }}</div>
+                </div>
+              }
+              @if (selectedDetailOrder.deliveryRejectionReason) {
+                <div class="detail-card detail-card-full">
+                  <div class="detail-label">{{ 'SUPPLIER_ORDERS.REJECT_REASON' | translate }}</div>
+                  <div class="detail-value text-reject">{{ selectedDetailOrder.deliveryRejectionReason }}</div>
+                </div>
+              }
+            </div>
+          </div>
+
+          <div class="detail-section">
+            <h4 class="detail-section-title">
+              <app-icon name="box" [size]="16"></app-icon>
+              {{ 'SUPPLIER_ORDERS.ORDER' | translate }}
+            </h4>
+            <div class="detail-grid">
+              <div class="detail-card">
+                <div class="detail-label">{{ 'PAYMENTS.SHOP' | translate }}</div>
+                <div class="detail-value">{{ selectedDetailOrder.shopName || selectedDetailOrder.shopId }}</div>
+              </div>
+              <div class="detail-card">
+                <div class="detail-label">{{ 'SUPPLIER_ORDERS.ASAP_PAYMENT' | translate }}</div>
+                <div class="detail-value">{{ selectedDetailOrder.asapPayment ? ('SUPPLIER_ORDERS.YES' | translate) : ('SUPPLIER_ORDERS.NO' | translate) }}</div>
+              </div>
+              @if (selectedDetailOrder.createdByName) {
+                <div class="detail-card">
+                  <div class="detail-label">{{ 'PAYMENTS.CREATED_BY' | translate }}</div>
+                  <div class="detail-value">{{ selectedDetailOrder.createdByName }}</div>
+                </div>
+              }
+              <div class="detail-card">
+                <div class="detail-label">{{ 'PAYMENTS.CREATED_AT' | translate }}</div>
+                <div class="detail-value">{{ selectedDetailOrder.createdAt | date:'dd/MM/yyyy HH:mm:ss' }}</div>
               </div>
             </div>
+          </div>
+
+          @if (selectedDetailOrder.items && selectedDetailOrder.items.length > 0) {
+            <div class="detail-section">
+              <div class="table-card">
+                <h4 class="table-card-title">{{ 'SUPPLIER_ORDERS.ITEMS' | translate }}</h4>
+                <div class="table-wrapper">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>{{ 'SUPPLIER_ORDERS.PRODUCT' | translate }}</th>
+                        <th>{{ 'SUPPLIER_ORDERS.QUANTITY' | translate }}</th>
+                        <th>{{ 'SUPPLIER_ORDERS.UNIT_PRICE' | translate }}</th>
+                        <th>{{ 'SUPPLIER_ORDERS.DISCOUNT' | translate }}</th>
+                        <th>{{ 'ORDERS.TOTAL' | translate }}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @for (item of selectedDetailOrder.items; track item) {
+                        <tr>
+                          <td><strong>{{ item.productName }}</strong></td>
+                          <td>{{ item.quantity }}</td>
+                          <td>{{ item.unitPrice | number:'1.2-2' }}</td>
+                          <td>{{ item.discount > 0 ? (item.discount | number:'1.2-2') + ' ' + selectedDetailOrder.currency : '-' }}</td>
+                          <td>{{ item.lineTotal | number:'1.2-2' }}</td>
+                        </tr>
+                      }
+                    </tbody>
+                    <tfoot>
+                      <tr class="total-row">
+                        <td colspan="4" class="total-label">{{ 'SUPPLIER_ORDERS.SUBTOTAL' | translate }}</td>
+                        <td class="total-value">{{ selectedDetailOrder.subtotal | number:'1.2-2' }} {{ selectedDetailOrder.currency }}</td>
+                      </tr>
+                      @if (selectedDetailOrder.fodecTotal > 0) {
+                        <tr class="total-row">
+                          <td colspan="4" class="total-label">{{ 'SUPPLIER_ORDERS.FODEC' | translate }}</td>
+                          <td class="total-value">{{ selectedDetailOrder.fodecTotal | number:'1.2-2' }} {{ selectedDetailOrder.currency }}</td>
+                        </tr>
+                      }
+                      @for (line of (selectedDetailOrder.vatBreakdown || []); track line.rate) {
+                        <tr class="total-row">
+                          <td colspan="4" class="total-label">{{ 'SUPPLIER_ORDERS.VAT_LINE' | translate:{rate: line.rate} }}</td>
+                          <td class="total-value">{{ line.amount | number:'1.2-2' }} {{ selectedDetailOrder.currency }}</td>
+                        </tr>
+                      }
+                      @if (!(selectedDetailOrder.vatBreakdown || []).length) {
+                        <tr class="total-row">
+                          <td colspan="4" class="total-label">{{ 'SUPPLIER_ORDERS.VAT' | translate }} ({{ selectedDetailOrder.taxRate }}%)</td>
+                          <td class="total-value">{{ selectedDetailOrder.taxAmount | number:'1.2-2' }} {{ selectedDetailOrder.currency }}</td>
+                        </tr>
+                      }
+                      <tr class="total-row grand-total">
+                        <td colspan="4" class="total-label">{{ 'ORDERS.TOTAL' | translate }}</td>
+                        <td class="total-value">{{ selectedDetailOrder.total | number:'1.2-2' }} {{ selectedDetailOrder.currency }}</td>
+                      </tr>
+                      <tr class="total-row">
+                        <td colspan="4" class="total-label">{{ 'SUPPLIER_ORDERS.STAMP' | translate }}</td>
+                        <td class="total-value">{{ selectedDetailOrder.stampAmount | number:'1.2-2' }} {{ selectedDetailOrder.currency }}</td>
+                      </tr>
+                      <tr class="total-row grand-total">
+                        <td colspan="4" class="total-label">{{ 'SUPPLIER_ORDERS.NET_PAYABLE' | translate }}</td>
+                        <td class="total-value">{{ selectedDetailOrder.netPayable | number:'1.2-2' }} {{ selectedDetailOrder.currency }}</td>
+                      </tr>
+                    </tfoot>
+                  </table>
+                </div>
+              </div>
+            </div>
+          }
+        }
+      </div>
+      @if (selectedDetailOrder && hasDetailActions(selectedDetailOrder)) {
+        <div class="detail-modal-footer">
+          @if (selectedDetailOrder.status === 'READY_FOR_DELIVERY') {
+            <button class="btn btn-success" (click)="acceptDeliveryFromDetail(selectedDetailOrder)">{{ 'ORDERS.ACCEPT_BTN' | translate }}</button>
+            <button class="btn btn-danger" (click)="rejectDeliveryFromDetail(selectedDetailOrder)">{{ 'ORDERS.REJECT_BTN' | translate }}</button>
+          }
+          @if (selectedDetailOrder.status === 'DELIVERY_ACCEPTED') {
+            <button class="btn btn-primary" (click)="confirmDateFromDetail(selectedDetailOrder)">{{ 'DELIVERY.CONFIRM_DATE' | translate }}</button>
+          }
+          @if (selectedDetailOrder.status === 'IN_DELIVERY') {
+            <button class="btn btn-success" (click)="deliverFromDetail(selectedDetailOrder)">{{ 'DELIVERY.MARK_DELIVERED' | translate }}</button>
+          }
+          @if (selectedDetailOrder.status === 'DELIVERED' && isShopUser()) {
+            <button class="btn btn-success" (click)="acceptReceptionFromDetail(selectedDetailOrder)">{{ 'ORDERS.ACCEPT_BTN' | translate }}</button>
+            <button class="btn btn-danger" (click)="rejectReceptionFromDetail(selectedDetailOrder)">{{ 'ORDERS.REJECT_BTN' | translate }}</button>
           }
         </div>
       }

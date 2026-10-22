@@ -268,12 +268,15 @@ export class ShopOrderDetailComponent implements OnInit, OnDestroy {
 
   statusClass(s: string): string {
     const map: Record<string, string> = {
-      DRAFT: 'draft', CONFIRMED: 'confirmed',
-      PREPARING: 'preparing', READY_FOR_DELIVERY: 'ready',
-      DELIVERY_ACCEPTED: 'confirmed',
-      IN_DELIVERY: 'delivery', DELIVERED: 'delivered',
-      ACCEPTED: 'accepted', CANCELLED: 'cancelled',
-      REJECTED: 'rejected', DELIVERY_REJECTED: 'delivery-rejected'
+      DRAFT: 'badge-draft', CONFIRMED: 'badge-confirmed',
+      CREATED: 'badge-draft',
+      PREPARING: 'badge-pending', READY_FOR_DELIVERY: 'badge-quoted',
+      DELIVERY_ACCEPTED: 'badge-accepted',
+      IN_DELIVERY: 'badge-pending', DELIVERED: 'badge-accepted',
+      ACCEPTED: 'badge-accepted', CANCELLED: 'badge-cancelled',
+      REJECTED: 'rejected', DELIVERY_REJECTED: 'rejected',
+      OPEN: 'badge-pending', IN_PROGRESS: 'badge-quoted',
+      RESOLVED: 'badge-accepted', CLOSED: 'badge-draft'
     };
     return map[s] || '';
   }
@@ -341,5 +344,14 @@ export class ShopOrderDetailComponent implements OnInit, OnDestroy {
 
   isCurrentStep(step: string): boolean {
     return this.order?.status === step;
+  }
+
+  /** Vrai si la commande porte au moins une information de livraison. */
+  hasDeliveryInfo(): boolean {
+    const o = this.order;
+    if (!o) return false;
+    return !!(o.deliveryAgentName || o.plannedDeliveryDate || o.confirmedDeliveryDate
+      || o.estimatedArrival || o.deliveredAt || o.receivedByName || o.receivedAt
+      || o.deliveryRejectionReason);
   }
 }

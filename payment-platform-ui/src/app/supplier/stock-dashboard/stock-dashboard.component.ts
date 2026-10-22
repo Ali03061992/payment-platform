@@ -177,8 +177,17 @@ export class StockDashboardComponent implements OnInit {
   }
 
   movementTypeClass(type: string): string {
-    const map: Record<string, string> = { IN: 'movement-in', OUT: 'movement-out', ADJUSTMENT: 'movement-adjust' };
+    const map: Record<string, string> = {
+      IN: 'badge-accepted', OUT: 'rejected', ADJUSTMENT: 'badge-quoted'
+    };
     return map[type] || '';
+  }
+
+  stockStatusClass(status: string): string {
+    const map: Record<string, string> = {
+      OK: 'badge-accepted', LOW: 'badge-pending', OUT_OF_STOCK: 'rejected'
+    };
+    return map[status] || '';
   }
 
   getStockStatus(product: Product): string {

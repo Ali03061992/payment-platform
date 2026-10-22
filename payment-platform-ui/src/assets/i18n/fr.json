@@ -483,7 +483,8 @@
     "ERROR": "Erreur",
     "SELECT": "-- Sélectionner --",
     "SAVE": "Enregistrer",
-    "SAVING": "Enregistrement…"
+    "SAVING": "Enregistrement…",
+    "CLOSE": "Fermer"
   },
   "STATUS": {
     "PENDING": "En attente",

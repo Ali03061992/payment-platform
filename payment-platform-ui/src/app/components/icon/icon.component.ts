@@ -44,35 +44,33 @@ const ICON_PATHS: Record<string, string> = {
   sparkles: '<path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M19 15l.9 2.1L22 18l-2.1.9L19 21l-.9-2.1L16 18l2.1-.9z"/>',
   info: '<circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>',
   logout: '<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>',
+  search: '<circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>',
+  filter: '<polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>',
+  calendar: '<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>',
+  'map-pin': '<path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>',
+  'chevron-right': '<polyline points="9 18 15 12 9 6"/>',
+  'chevron-down': '<polyline points="6 9 12 15 18 9"/>',
+  'arrow-left': '<line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>',
+  inbox: '<polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/>',
+  home: '<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>',
 };
 
 /**
- * Icone SVG realiste dessinee main (fini matiere, pas plat IA).
- * Variantes : `variant="realistic"` (defaut, halo + ombre + profondeur)
- * ou `variant="flat"` (trait sobre). `tone` teinte le trait en degrade
- * signature : sky (bleu ciel), rouge, noir, auto (currentColor).
- * Usage : `<app-icon name="users" [size]="20" tone="sky"></app-icon>`.
+ * Jeu d'icones SVG monochrome, trait unique et neutre.
+ * La couleur suit `currentColor` : les etats actifs sont geres par le texte
+ * ou le conteneur (tokens CSS), jamais par une icone coloree.
+ * Usage : `<app-icon name="users" [size]="20"></app-icon>`.
  */
 @Component({
     selector: 'app-icon',
-    template: `<svg [attr.width]="size" [attr.height]="size" viewBox="0 0 24 24" fill="none" [attr.stroke]="svgStroke" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><defs><linearGradient id="pp-sky-grad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7dd3fc"/><stop offset="0.55" stop-color="#38bdf0"/><stop offset="1" stop-color="#0284c7"/></linearGradient><linearGradient id="pp-rouge-grad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fca5a5"/><stop offset="0.55" stop-color="#e63946"/><stop offset="1" stop-color="#7f1d1d"/></linearGradient><linearGradient id="pp-noir-grad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#64748b"/><stop offset="0.6" stop-color="#1a1a2e"/><stop offset="1" stop-color="#0a0a0f"/></linearGradient></defs><g [innerHTML]="safePath"></g></svg>`,
-    host: { '[class.icon-realistic]': 'variant === "realistic"' },
+    template: `<svg [attr.width]="size" [attr.height]="size" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><g [innerHTML]="safePath"></g></svg>`,
     standalone: false
 })
 export class AppIconComponent {
   @Input() name = 'dashboard';
   @Input() size = 20;
-  @Input() variant: 'realistic' | 'flat' = 'realistic';
-  @Input() tone: 'auto' | 'sky' | 'rouge' | 'noir' = 'auto';
 
   constructor(private sanitizer: DomSanitizer) {}
-
-  get svgStroke(): string {
-    if (this.tone === 'sky') return 'url(#pp-sky-grad)';
-    if (this.tone === 'rouge') return 'url(#pp-rouge-grad)';
-    if (this.tone === 'noir') return 'url(#pp-noir-grad)';
-    return 'currentColor';
-  }
 
   get safePath(): SafeHtml {
     return this.sanitizer.bypassSecurityTrustHtml(ICON_PATHS[this.name] ?? ICON_PATHS['dashboard']);
