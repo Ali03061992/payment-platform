@@ -8,8 +8,8 @@
 @if (payment && !loading) {
   <div>
     <div class="page-header">
-      <h2>{{ 'PAYMENT_DETAIL.TITLE' | translate }} {{ payment.reference }}</h2>
       <a class="btn-close" routerLink="/dashboard/payments" [attr.aria-label]="'COMMON.CLOSE' | translate" [attr.title]="'COMMON.CLOSE' | translate">&times;</a>
+      <h2>{{ 'PAYMENT_DETAIL.TITLE' | translate }} {{ payment.reference }}</h2>
       <div class="header-actions">
         @if (payment.status === 'CONFIRMED') {
           <button class="btn btn-primary" (click)="downloadInvoice()" [attr.aria-label]="'PAYMENT_DETAIL.DOWNLOAD_INVOICE' | translate">{{ 'PAYMENT_DETAIL.DOWNLOAD_INVOICE' | translate }}</button>

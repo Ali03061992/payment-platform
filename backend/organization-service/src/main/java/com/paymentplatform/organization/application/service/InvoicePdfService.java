@@ -259,7 +259,6 @@ public class InvoicePdfService {
                 new Font(Font.HELVETICA, 11, Font.BOLD, accent)));
         textCell.addElement(new Paragraph("Scannez ce QR code pour ouvrir la commande "
                 + order.getReference() + " et suivre sa livraison sur la plateforme NEXTERA.", NORMAL_FONT));
-        textCell.addElement(new Paragraph(detailsUrl, SMALL_FONT));
         banner.addCell(textCell);
 
         document.add(banner);

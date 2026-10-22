@@ -483,8 +483,7 @@
     "ERROR": "Error",
     "SELECT": "-- Select --",
     "SAVE": "Save",
-    "SAVING": "Saving…",
-    "SCAN_TO_OPEN": "Scan to open this page"
+    "SAVING": "Saving…"
   },
   "STATUS": {
     "PENDING": "Pending",

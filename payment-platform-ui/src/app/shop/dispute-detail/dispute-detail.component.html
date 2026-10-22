@@ -8,8 +8,8 @@
 @if (dispute && !loading) {
   <div>
     <div class="page-header no-print">
-      <h2>{{ 'DISPUTES.DETAIL_TITLE' | translate }} #{{ dispute.id | slice:0:8 }}</h2>
       <button class="btn-close" (click)="backToOrder()" [attr.aria-label]="'COMMON.CLOSE' | translate" [attr.title]="'COMMON.CLOSE' | translate">&times;</button>
+      <h2>{{ 'DISPUTES.DETAIL_TITLE' | translate }} #{{ dispute.id | slice:0:8 }}</h2>
     </div>
     <div class="detail-grid">
       <div class="detail-card">
@@ -32,7 +32,6 @@
       </div>
       @if (qrData) {
         <div class="detail-card">
-          <div class="detail-label">{{ 'COMMON.SCAN_TO_OPEN' | translate }}</div>
           <div class="detail-value">
             <qrcode [qrdata]="qrData" [width]="160" [margin]="1"></qrcode>
           </div>

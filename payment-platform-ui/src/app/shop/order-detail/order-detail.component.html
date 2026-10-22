@@ -8,8 +8,8 @@
 @if (order && !loading) {
   <div>
     <div class="page-header no-print">
-      <h2>{{ 'ORDER_DETAIL.TITLE' | translate }} {{ order.reference }}</h2>
       <a class="btn-close" routerLink="/dashboard/shop/orders" [attr.aria-label]="'COMMON.CLOSE' | translate" [attr.title]="'COMMON.CLOSE' | translate">&times;</a>
+      <h2>{{ 'ORDER_DETAIL.TITLE' | translate }} {{ order.reference }}</h2>
       <div class="page-header-actions">
         <button class="btn btn-primary" (click)="downloadPurchaseOrder()" [attr.aria-label]="'ORDER_DETAIL.DOWNLOAD_PURCHASE_ORDER_ARIA' | translate">{{ 'ORDER_DETAIL.DOWNLOAD_PURCHASE_ORDER' | translate }}</button>
         @if (canGenerateInvoice()) {
@@ -56,7 +56,6 @@
           @if (qrData) {
             <div style="margin-top:6px;">
               <qrcode [qrdata]="qrData" [width]="160" [margin]="1"></qrcode>
-              <div style="margin-top:4px; font-size:11px; color:#64748b;">{{ 'COMMON.SCAN_TO_OPEN' | translate }}</div>
             </div>
           }
         </div>

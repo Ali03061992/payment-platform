@@ -1,15 +1,10 @@
 .header-actions {
   display: flex;
   gap: 8px;
-  order: 1;
 }
 
 .page-header h2 {
-  order: 0;
-}
-
-.page-header .btn-close {
-  order: 2;
+  margin-right: auto;
 }
 
 .qr-section {
@@ -77,10 +72,7 @@
   .page-header h2 {
     flex: 1 1 auto;
     min-width: 0;
-  }
-
-  .page-header .btn-close {
-    order: 1;
+    font-size: 18px;
   }
 
   .qr-card {
@@ -88,9 +80,10 @@
   }
 
   .header-actions {
-    order: 2;
     flex: 1 0 100%;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
     width: 100%;
   }
 

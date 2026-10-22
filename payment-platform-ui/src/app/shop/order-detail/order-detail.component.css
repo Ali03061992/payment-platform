@@ -1,15 +1,7 @@
 /* Component-specific styles only — global design system in styles.css */
 
 .page-header h2 {
-  order: 0;
-}
-
-.page-header .btn-close {
-  order: 2;
-}
-
-.page-header-actions {
-  order: 1;
+  margin-right: auto;
 }
 
 .status-timeline h3 {
@@ -108,16 +100,14 @@
   .page-header h2 {
     flex: 1 1 auto;
     min-width: 0;
-  }
-
-  .page-header .btn-close {
-    order: 1;
+    font-size: 18px;
   }
 
   .page-header-actions {
-    order: 2;
     flex: 1 0 100%;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
     width: 100%;
   }
 

@@ -407,7 +407,6 @@
             </div>
             @if (detailQrData) {
               <div class="detail-card">
-                <div class="detail-label">{{ 'COMMON.SCAN_TO_OPEN' | translate }}</div>
                 <div class="detail-value">
                   <qrcode [qrdata]="detailQrData" [width]="160" [margin]="1"></qrcode>
                 </div>
