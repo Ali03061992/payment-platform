@@ -39,9 +39,11 @@ class WebPushSenderTest {
     }
 
     @Test
-    void sanitizeUrl_acceptsHttpsAbsoluteUrls() {
+    void sanitizeUrl_rejectsAbsoluteUrls() {
         assertThat(WebPushSender.sanitizeUrl("https://app.example.com/orders/42"))
-                .isEqualTo("https://app.example.com/orders/42");
+                .isEqualTo("/dashboard");
+        assertThat(WebPushSender.sanitizeUrl("http://app.example.com/orders/42"))
+                .isEqualTo("/dashboard");
     }
 
     @Test

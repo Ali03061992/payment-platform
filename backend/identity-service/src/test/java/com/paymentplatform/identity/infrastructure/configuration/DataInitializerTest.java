@@ -11,6 +11,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 /**
  * Tests de DataInitializerTest.
  * Perimetre : infrastructure DataInitializer (messagerie/config/persistance).
@@ -26,7 +27,8 @@ class DataInitializerTest {
     @Autowired private PasswordEncoder passwordEncoder;
 
     private DataInitializer createInitializer() {
-        return new DataInitializer(users, passwordEncoder);
+        return new DataInitializer(users, passwordEncoder, "system.admin",
+                "system.admin@payment-platform.local", "TestPassword123!");
     }
 
     @Test
@@ -54,5 +56,14 @@ class DataInitializerTest {
         var admin = users.findByUsername(Username.of("system.admin")).orElseThrow();
         assertThat(admin.hasRole(com.paymentplatform.shared.domain.model.RoleCode.SYSTEM_ADMIN)).isTrue();
         assertThat(admin.status()).isEqualTo(UserStatus.ACTIVE);
+    }
+
+    @Test
+    void run_requiresExplicitPassword() {
+        DataInitializer init = new DataInitializer(users, passwordEncoder, "system.admin",
+                "system.admin@payment-platform.local", " ");
+        assertThatThrownBy(() -> init.run(null))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("SEED_ADMIN_PASSWORD");
     }
 }

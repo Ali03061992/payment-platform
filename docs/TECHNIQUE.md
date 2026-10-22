@@ -96,6 +96,8 @@ Consommateur principal : notification-service (SSE + push FCM).
 - CI (`.github/workflows/ci.yml`) : build, tests backend/frontend, Sonar, images Docker, budgets CSS (16 ko). **Pas d'e2e en CI** (lancé uniquement en local sur feu vert).
 - Branching : `release/**` → publication **auto vers TEST** ; `master` → publication **auto vers PROD** ; `develop` → build + tests **sans déploiement**. Publication **manuelle** : Actions → Run workflow → `test` ou `prod` (déploie la branche sélectionnée).
 - Déploiement : images **prébuildées en CI et poussées sur GHCR** (`test-latest` / `prod-latest`) ; les VM ne font que `pull` + `up -d` (**jamais de build**, pas de tests/sonar hors CI). Exécution root via `sudo -i`, `prune` auto (images pendantes + cache build) en fin de run, droits rendus à l'utilisateur SSH. Plafond heap JVM (`-Xmx384m`) pour la petite VM. Paquets GHCR publics (sinon `docker login ghcr.io` sur la VM).
+- **Traçabilité** : chaque déploiement épingle l’image immuable `sha-<12>` du commit déployé (`test-latest`/`prod-latest` restent des alias de commodité) ; un rollback consiste à redéployer un ancien tag `sha-*`.
+- **Approbation PROD** : l’environnement GitHub `production` doit avoir des reviewers obligatoires (Settings > Environments) ; la CI ne construit des images qu’après succès des jobs Sonar.
 ### Mise en route déploiement (VM OVH) — pas à pas
 
 VM TEST : `ubuntu@51.222.6.2` — **en service** (Docker 29, clone à jour, `.env` renseigné, clé CI installée). Déploiements CI exécutés **root** via `sudo -i` (droits rendus à l'utilisateur SSH en fin de run). Même procédure pour la PROD avec les secrets `OVH_PROD_*`.
@@ -125,7 +127,7 @@ VM TEST : `ubuntu@51.222.6.2` — **en service** (Docker 29, clone à jour, `.en
 
 ### HTTPS (443) sur les VMs OVH
 
-- **Architecture** : TLS terminé par le **nginx hôte de la VM** (systemd), qui reverse-proxy vers le conteneur `angular` (`127.0.0.1:8080`, mapping de base `8080:80`). Le conteneur reste en HTTP pur : aucun port 80/443 exposé par Docker (pas de conflit), renouvellement Let's Encrypt conservé sur l'hôte.
+- **Architecture** : TLS terminé par le **nginx hôte de la VM** (systemd), qui reverse-proxy vers le conteneur `angular` (`127.0.0.1:8080`, mapping `127.0.0.1:8080:8080` (nginx unprivileged, UID 101)). Le conteneur reste en HTTP pur : aucun port 80/443 exposé par Docker (pas de conflit), renouvellement Let's Encrypt conservé sur l'hôte.
 - **Vhosts** (repo → VM) : `deploy/nginx/host/default` → `/etc/nginx/sites-available/default` (port 80 → `301 https://$host$request_uri` + webroot ACME), `deploy/nginx/host/ip-https` → `/etc/nginx/sites-available/ip-https` (port 443 TLS par défaut → proxy app, HSTS, proxy sans buffering pour le SSE), `deploy/nginx/host/domain-https` (domaine de test `51-222-6-2.nip.io`) et `deploy/nginx/host/payment.tn-https` (domaine public `payment.tn` + `www.payment.tn` + `nextera.payment.tn`, voir passkeys) :
   ```bash
   sudo cp deploy/nginx/host/default /etc/nginx/sites-available/default

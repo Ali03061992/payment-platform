@@ -12,7 +12,9 @@
           "/manifest.json",
           "/*.js",
           "/*.css",
-          "/assets/**"
+          "/assets/**",
+          "!/assets/env.js",
+          "!/assets/env.template.js"
         ]
       }
     },
@@ -24,48 +26,6 @@
         "files": [
           "/assets/icons/**"
         ]
-      }
-    }
-  ],
-  "dataGroups": [
-    {
-      "name": "api-cache",
-      "urls": [
-        "/api/auth/me"
-      ],
-      "cacheConfig": {
-        "strategy": "freshness",
-        "maxSize": 10,
-        "maxAge": "1h",
-        "timeout": "5s"
-      }
-    },
-    {
-      "name": "api-financial",
-      "urls": [
-        "/api/payments/**",
-        "/api/orders/**"
-      ],
-      "cacheConfig": {
-        "strategy": "freshness",
-        "maxSize": 20,
-        "maxAge": "5m",
-        "timeout": "5s"
-      }
-    },
-    {
-      "name": "api-network",
-      "urls": [
-        "/api/**",
-        "!/api/notifications/stream",
-        "!/api/auth/**",
-        "!/api/push/**"
-      ],
-      "cacheConfig": {
-        "strategy": "freshness",
-        "maxSize": 50,
-        "maxAge": "24h",
-        "timeout": "10s"
       }
     }
   ]

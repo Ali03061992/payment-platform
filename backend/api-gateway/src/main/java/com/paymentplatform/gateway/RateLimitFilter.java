@@ -110,9 +110,12 @@ public class RateLimitFilter extends OncePerRequestFilter {
     }
 
     private String getClientIp(HttpServletRequest request) {
-        String xff = request.getHeader("X-Forwarded-For");
-        if (xff != null && !xff.isEmpty()) {
-            return xff.split(",")[0].trim();
+        // X-Real-IP est posé par le nginx de confiance (hôte puis conteneur).
+        // X-Forwarded-For reste utilisable par le client : ne jamais s'y fier
+        // pour le rate limiting.
+        String realIp = request.getHeader("X-Real-IP");
+        if (realIp != null && !realIp.isBlank()) {
+            return realIp.trim();
         }
         return request.getRemoteAddr();
     }

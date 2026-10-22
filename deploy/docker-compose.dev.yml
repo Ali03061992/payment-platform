@@ -8,7 +8,7 @@ services:
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     ports:
-      - "3307:3306"
+      - "127.0.0.1:3307:3306"
     volumes:
       - mysql-data:/var/lib/mysql
       - ./mysql-init:/docker-entrypoint-initdb.d
@@ -27,8 +27,8 @@ services:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
     ports:
-      - "5673:5672"
-      - "15673:15672"
+      - "127.0.0.1:5673:5672"
+      - "127.0.0.1:15673:15672"
     healthcheck:
       test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
       interval: 10s
@@ -41,7 +41,7 @@ services:
     image: redis:7-alpine
     container_name: payment-redis
     ports:
-      - "6379:6379"
+      - "127.0.0.1:6379:6379"
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
@@ -54,7 +54,7 @@ services:
     image: adminer:4.8.1
     container_name: payment-adminer
     ports:
-      - "8086:8080"
+      - "127.0.0.1:8086:8080"
     depends_on:
       mysql:
         condition: service_healthy
@@ -68,12 +68,12 @@ services:
     image: axllent/mailpit
     container_name: payment-mailpit
     ports:
-      - "8025:8025"
-      - "1025:1025"
+      - "127.0.0.1:8025:8025"
+      - "127.0.0.1:1025:1025"
     networks:
       - payment-net
 
-  # SonarQube – analyse qualité + coverage (profil local)
+  # SonarQube - analyse qualité + coverage (profil local)
   # Démarrage : docker compose -f docker-compose.dev.yml --profile sonar up -d
   # UI : http://localhost:9000 (admin/admin, change au premier login)
   # Pour scan local : SONAR_TOKEN=<token> mvn -f ../backend/pom.xml verify sonar:sonar -Dsonar.host.url=http://localhost:9000
@@ -87,7 +87,7 @@ services:
       SONAR_JDBC_USERNAME: sonar
       SONAR_JDBC_PASSWORD: sonar
     ports:
-      - "9000:9000"
+      - "127.0.0.1:9000:9000"
     volumes:
       - sonarqube-data:/opt/sonarqube/data
       - sonarqube-extensions:/opt/sonarqube/extensions

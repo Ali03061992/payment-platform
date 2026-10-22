@@ -15,7 +15,7 @@ RabbitMQ event → notification-service → persist + SSE + FCM
 ```
 
 1. FCM = déclencheur uniquement. À chaque push reçu : `GET /notifications?page=0&size=20` + `GET /unread-count`, dédup par `id`. Jamais d'affichage sur seul payload.
-2. Enregistrement : au login `getToken()` → `POST /api/fcm-tokens`, `onTokenRefresh` → POST, au logout `DELETE` puis clear. Multi-device OK.
+2. Enregistrement : au login `getToken()` → `POST /api/fcm-tokens`, `onTokenRefresh` → POST, au logout `DELETE` (suppression limitée au token de l’utilisateur courant) puis clear. Multi-device OK.
 3. Foreground (`onMessage`) : notif locale (`flutter_local_notifications`, canal `payment_high`, tag = collapse, badge iOS) + invalidation `unreadCountProvider` + navigation si tap.
 4. Background (`onBackgroundMessage` top-level `@pragma('vm:entry-point')`) : pas de refetch, juste notif système ; tap → `getInitialMessage` → deep-link.
 5. SSE mobile : foreground uniquement, optionnel si FCM configuré ; obligatoire en fallback web-like avec reconnect 5 s. Jamais en background (batterie).

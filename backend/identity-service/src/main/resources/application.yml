@@ -1,5 +1,6 @@
 server:
   port: 8082
+  forward-headers-strategy: framework
 
 spring:
   profiles:
@@ -68,6 +69,11 @@ app:
     url: ${FRONTEND_URL:http://localhost:8080}
   password-setup:
     token-expiry-hours: 24
+  seed:
+    enabled: ${SEED_ADMIN_ENABLED:false}
+    admin-username: ${SEED_ADMIN_USERNAME:system.admin}
+    admin-email: ${SEED_ADMIN_EMAIL:system.admin@payment-platform.local}
+    admin-password: ${SEED_ADMIN_PASSWORD:}
 
 springdoc:
   swagger-ui:

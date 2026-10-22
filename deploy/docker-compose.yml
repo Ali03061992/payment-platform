@@ -1,13 +1,22 @@
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
 
   mysql:
     image: mysql:8.4
+    restart: unless-stopped
+    logging: *default-logging
+    mem_limit: 768m
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     ports:
-      - "3307:3306"
+      - "127.0.0.1:3307:3306"
     volumes:
       - mysql-data:/var/lib/mysql
       - ./mysql-init:/docker-entrypoint-initdb.d
@@ -20,12 +29,15 @@ services:
       - payment-net
 
   # Backup MySQL : dump des 4 bases toutes les 8 h (BACKUP_INTERVAL_SECONDS),
-  # rétention 3 j (BACKUP_RETENTION_DAYS), fichiers dans ./backups/.
+  # rétention 7 j (BACKUP_RETENTION_DAYS), fichiers dans ./backups/.
   # Profil `backup` : actif en PROD uniquement (jamais sur TEST).
   # Manuel : docker compose --profile backup exec db-backup /scripts/backup-now.sh [tag]
   db-backup:
     image: mysql:8.4
     profiles: ["backup"]
+    restart: unless-stopped
+    logging: *default-logging
+    mem_limit: 128m
     depends_on:
       mysql:
         condition: service_healthy
@@ -33,7 +45,7 @@ services:
       MYSQL_HOST: mysql
       MYSQL_PWD: ${MYSQL_ROOT_PASSWORD}
       BACKUP_INTERVAL_SECONDS: ${BACKUP_INTERVAL_SECONDS:-28800}
-      BACKUP_RETENTION_DAYS: ${BACKUP_RETENTION_DAYS:-3}
+      BACKUP_RETENTION_DAYS: ${BACKUP_RETENTION_DAYS:-7}
     volumes:
       - ./backups:/backups
       - ./backup:/scripts:ro
@@ -43,12 +55,15 @@ services:
 
   rabbitmq:
     image: rabbitmq:4-management
+    restart: unless-stopped
+    logging: *default-logging
+    mem_limit: 384m
     environment:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
     ports:
-      - "5673:5672"
-      - "15673:15672"
+      - "127.0.0.1:5673:5672"
+      - "127.0.0.1:15673:15672"
     healthcheck:
       test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
       interval: 10s
@@ -59,8 +74,11 @@ services:
 
   redis:
     image: redis:7-alpine
+    restart: unless-stopped
+    logging: *default-logging
+    mem_limit: 128m
     ports:
-      - "6379:6379"
+      - "127.0.0.1:6379:6379"
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
@@ -77,10 +95,14 @@ services:
       dockerfile: Dockerfile
       args:
         SERVICE_NAME: identity-service
+    restart: unless-stopped
+    logging: *default-logging
     environment:
-      SPRING_PROFILES_ACTIVE: dev
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-prod}
       # Petite VM (3,8 Go) : plafond heap JVM, sinon OOM killer pendant le run.
       JAVA_TOOL_OPTIONS: "-Xmx384m"
+      # En PROD : prod. En TEST/local : surcharger via deploy/.env si besoin.
+      LIQUIBASE_CONTEXTS: ${LIQUIBASE_CONTEXTS:-prod}
       MYSQL_HOST: mysql
       MYSQL_PORT: 3306
       MYSQL_USER: ${MYSQL_USER}
@@ -95,17 +117,26 @@ services:
       AUTH_COOKIE_SECURE: ${AUTH_COOKIE_SECURE:-true}
       API_GATEWAY_URL: http://api-gateway:8081
       INTERNAL_SECRET: ${INTERNAL_SECRET}
-      SMTP_HOST: mailpit
-      SMTP_PORT: 1025
-      MAIL_FROM: noreply@payment-platform.local
+      SMTP_HOST: ${SMTP_HOST:?SMTP_HOST est requis (serveur SMTP réel)}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USERNAME: ${SMTP_USERNAME:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH: ${SMTP_AUTH:-false}
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE: ${SMTP_STARTTLS:-false}
+      MAIL_FROM: ${MAIL_FROM:-noreply@payment-platform.local}
       REDIS_HOST: redis
-      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:8080}
+      FRONTEND_URL: ${FRONTEND_URL:?FRONTEND_URL est requis (https://domaine)}
       ORGANIZATION_SERVICE_URL: organization-service
       ORGANIZATION_SERVICE_PORT: 8083
+      # Bootstrap admin : désactivé par défaut, mot de passe obligatoire si activé.
+      SEED_ADMIN_ENABLED: ${SEED_ADMIN_ENABLED:-false}
+      SEED_ADMIN_USERNAME: ${SEED_ADMIN_USERNAME:-system.admin}
+      SEED_ADMIN_EMAIL: ${SEED_ADMIN_EMAIL:-admin@system.com}
+      SEED_ADMIN_PASSWORD: ${SEED_ADMIN_PASSWORD:-}
       # Passkeys / WebAuthn — RP ID = domaine hébergeant la PWA (sans schéma ni port).
-      WEBAUTHN_RP_ID: ${WEBAUTHN_RP_ID:-localhost}
+      WEBAUTHN_RP_ID: ${WEBAUTHN_RP_ID:?WEBAUTHN_RP_ID est requis (domaine sans schéma)}
       WEBAUTHN_RP_NAME: ${WEBAUTHN_RP_NAME:-NEXTERA}
-      WEBAUTHN_ALLOWED_ORIGINS: ${WEBAUTHN_ALLOWED_ORIGINS:-http://localhost:8080,http://localhost:4200}
+      WEBAUTHN_ALLOWED_ORIGINS: ${WEBAUTHN_ALLOWED_ORIGINS:?WEBAUTHN_ALLOWED_ORIGINS est requis (https://...)}
       WEBAUTHN_CHALLENGE_TTL_SECONDS: ${WEBAUTHN_CHALLENGE_TTL_SECONDS:-300}
       WEBAUTHN_TIMEOUT_SECONDS: ${WEBAUTHN_TIMEOUT_SECONDS:-60}
     depends_on:
@@ -127,8 +158,11 @@ services:
       dockerfile: Dockerfile
       args:
         SERVICE_NAME: organization-service
+    restart: unless-stopped
+    logging: *default-logging
     environment:
-      SPRING_PROFILES_ACTIVE: dev
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-prod}
+      LIQUIBASE_CONTEXTS: ${LIQUIBASE_CONTEXTS:-prod}
       # Petite VM (3,8 Go) : plafond heap JVM, sinon OOM killer pendant le run.
       JAVA_TOOL_OPTIONS: "-Xmx384m"
       MYSQL_HOST: mysql
@@ -147,6 +181,8 @@ services:
       FRONTEND_URL: ${FRONTEND_URL:-https://nextera.payment.tn}
       PAYMENT_SERVICE_URL: payment-service
       PAYMENT_SERVICE_PORT: 8084
+    volumes:
+      - uploads-data:/app/uploads
     depends_on:
       mysql:
         condition: service_healthy
@@ -164,8 +200,11 @@ services:
       dockerfile: Dockerfile
       args:
         SERVICE_NAME: payment-service
+    restart: unless-stopped
+    logging: *default-logging
     environment:
-      SPRING_PROFILES_ACTIVE: dev
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-prod}
+      LIQUIBASE_CONTEXTS: ${LIQUIBASE_CONTEXTS:-prod}
       # Petite VM (3,8 Go) : plafond heap JVM, sinon OOM killer pendant le run.
       JAVA_TOOL_OPTIONS: "-Xmx384m"
       MYSQL_HOST: mysql
@@ -202,8 +241,11 @@ services:
       dockerfile: Dockerfile
       args:
         SERVICE_NAME: notification-service
+    restart: unless-stopped
+    logging: *default-logging
     environment:
-      SPRING_PROFILES_ACTIVE: dev
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-prod}
+      LIQUIBASE_CONTEXTS: ${LIQUIBASE_CONTEXTS:-prod}
       # Petite VM (3,8 Go) : plafond heap JVM, sinon OOM killer pendant le run.
       JAVA_TOOL_OPTIONS: "-Xmx384m"
       MYSQL_HOST: mysql
@@ -234,8 +276,11 @@ services:
 
   adminer:
     image: adminer:latest
+    restart: unless-stopped
+    logging: *default-logging
+    mem_limit: 128m
     ports:
-      - "8086:8080"
+      - "127.0.0.1:8086:8080"
     depends_on:
       mysql:
         condition: service_healthy
@@ -247,9 +292,12 @@ services:
 
   mailpit:
     image: axllent/mailpit
+    restart: unless-stopped
+    logging: *default-logging
+    mem_limit: 128m
     ports:
-      - "8025:8025"
-      - "1025:1025"
+      - "127.0.0.1:8025:8025"
+      - "127.0.0.1:1025:1025"
     networks:
       - payment-net
 
@@ -260,14 +308,16 @@ services:
       dockerfile: Dockerfile
       args:
         SERVICE_NAME: api-gateway
+    restart: unless-stopped
+    logging: *default-logging
     environment:
-      SPRING_PROFILES_ACTIVE: dev
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-prod}
       # Petite VM (3,8 Go) : plafond heap JVM, sinon OOM killer pendant le run.
       JAVA_TOOL_OPTIONS: "-Xmx384m"
       JWT_SECRET: ${JWT_SECRET}
       JWT_EXPIRATION: ${JWT_EXPIRATION}
       INTERNAL_SECRET: ${INTERNAL_SECRET}
-      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:?CORS_ALLOWED_ORIGINS est requis (https://...)}
       RATE_LIMIT_PER_MINUTE: ${RATE_LIMIT_PER_MINUTE}
       RATE_LIMIT_AUTH_PER_MINUTE: ${RATE_LIMIT_AUTH_PER_MINUTE:-10}
       # Vide = filtre IP désactivé (utile pour TEST exposée sur internet).
@@ -282,7 +332,7 @@ services:
       NOTIFICATION_SERVICE_URL: notification-service
       NOTIFICATION_SERVICE_PORT: 8085
     ports:
-      - "8081:8081"
+      - "127.0.0.1:8081:8081"
     depends_on:
       - identity-service
       - organization-service
@@ -296,8 +346,19 @@ services:
     build:
       context: ..
       dockerfile: Dockerfile
+    restart: unless-stopped
+    logging: *default-logging
+    mem_limit: 128m
+    environment:
+      FIREBASE_API_KEY: ${FIREBASE_API_KEY:-}
+      FIREBASE_AUTH_DOMAIN: ${FIREBASE_AUTH_DOMAIN:-}
+      FIREBASE_PROJECT_ID: ${FIREBASE_PROJECT_ID:-}
+      FIREBASE_STORAGE_BUCKET: ${FIREBASE_STORAGE_BUCKET:-}
+      FIREBASE_MESSAGING_SENDER_ID: ${FIREBASE_MESSAGING_SENDER_ID:-}
+      FIREBASE_APP_ID: ${FIREBASE_APP_ID:-}
+      FCM_VAPID_KEY: ${FCM_VAPID_KEY:-}
     ports:
-      - "8080:80"
+      - "127.0.0.1:8080:8080"
     depends_on:
       - api-gateway
     networks:
@@ -305,6 +366,7 @@ services:
 
 volumes:
   mysql-data:
+  uploads-data:
 
 networks:
   payment-net:

@@ -3,6 +3,7 @@ package com.paymentplatform.identity.application.usecase;
 import com.paymentplatform.identity.application.dto.CreateInternalUserRequest;
 import com.paymentplatform.identity.domain.repository.UserRepository;
 import com.paymentplatform.shared.domain.exception.ConflictException;
+import com.paymentplatform.shared.domain.exception.UnprocessableEntityException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -93,18 +94,20 @@ class InternalUserCreationUseCaseH2Test {
     }
 
     @Test
-    void createInternalUser_nullPassword_usesDefault() {
+    void createInternalUser_nullPassword_throwsUnprocessableEntity() {
         var request = new CreateInternalUserRequest("int.default.pass", "int.dp@x.com",
                 null, "Default", "Pass", null, UUID.fromString("00000000-0000-0000-0000-000000000042"), "SHOP_AGENT");
-        var response = useCase.createInternalUser(request);
-        assertThat(response.username()).isEqualTo("int.default.pass");
+        assertThatThrownBy(() -> useCase.createInternalUser(request))
+                .isInstanceOf(UnprocessableEntityException.class)
+                .hasMessageContaining("Mot de passe requis");
     }
 
     @Test
-    void createInternalUser_blankPassword_usesDefault() {
+    void createInternalUser_blankPassword_throwsUnprocessableEntity() {
         var request = new CreateInternalUserRequest("int.blank.pass", "int.bp@x.com",
                 "   ", "Blank", "Pass", null, UUID.fromString("00000000-0000-0000-0000-000000000042"), "SHOP_AGENT");
-        var response = useCase.createInternalUser(request);
-        assertThat(response.username()).isEqualTo("int.blank.pass");
+        assertThatThrownBy(() -> useCase.createInternalUser(request))
+                .isInstanceOf(UnprocessableEntityException.class)
+                .hasMessageContaining("Mot de passe requis");
     }
 }

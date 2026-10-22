@@ -36,7 +36,7 @@ public class FcmTokenController {
 
         Optional<FcmToken> existing = fcmTokenRepository.findByToken(token);
         if (existing.isPresent()) {
-            existing.get().touch();
+            existing.get().reassign(user.userId());
             fcmTokenRepository.save(existing.get());
             return ResponseEntity.ok().build();
         }
@@ -57,7 +57,9 @@ public class FcmTokenController {
             return ResponseEntity.badRequest().build();
         }
 
-        fcmTokenRepository.deleteByToken(token);
+        fcmTokenRepository.findByToken(token)
+                .filter(existing -> existing.userId().equals(user.userId()))
+                .ifPresent(fcmTokenRepository::delete);
         log.info("FCM token unregistered for user {}", user.userId());
         return ResponseEntity.ok().build();
     }

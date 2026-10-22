@@ -39,5 +39,5 @@ Write-Host "  Swagger:          http://localhost:8081/swagger-ui.html" -Foregrou
 Write-Host "  Adminer (MySQL):  http://localhost:8086" -ForegroundColor White
 Write-Host "  RabbitMQ Mgmt:    http://localhost:15673" -ForegroundColor White
 Write-Host ""
-Write-Host "  Default login: system.admin / Admin@123" -ForegroundColor Yellow
+Write-Host "  Admin bootstrap: SEED_ADMIN_* (aucun mot de passe par defaut)" -ForegroundColor Yellow
 Write-Host ""

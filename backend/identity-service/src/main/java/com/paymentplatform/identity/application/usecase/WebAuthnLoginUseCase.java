@@ -114,6 +114,7 @@ public class WebAuthnLoginUseCase {
                 .userVerification(UserVerificationRequirement.PREFERRED)
                 .build();
 
+        challenges.deleteExpired(Instant.now());
         challenges.save(WebAuthnChallenge.issue(userId, WebAuthnChallengePurpose.AUTHENTICATE,
                 options.getChallenge().getBytes(), codec.write(options),
                 Instant.now().plus(properties.challengeTtlSeconds(), ChronoUnit.SECONDS)));
@@ -129,8 +130,9 @@ public class WebAuthnLoginUseCase {
         Bytes challenge = codec.challengeFromClientData(credential.getResponse().getClientDataJSON());
         WebAuthnChallenge stored = challenges.findValid(challenge.getBytes(), WebAuthnChallengePurpose.AUTHENTICATE)
                 .orElseThrow(() -> new UnauthorizedException("Challenge WebAuthn invalide ou expiré"));
-        stored.consume();
-        challenges.save(stored);
+        if (!challenges.consumeIfValid(stored.id(), Instant.now())) {
+            throw new UnauthorizedException("Challenge WebAuthn invalide ou expiré");
+        }
 
         // Rejeu des options : challenge + rpId + userVerification entrent dans
         // la vérification webauthn4j (le JSON stocké sert d'audit).

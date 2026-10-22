@@ -138,30 +138,17 @@ public class WebPushSender {
     }
 
     /**
-     * Rejecte les URLs dangereuses (javascript:, data:, protocole relatif //) —
-     * fallback /dashboard. Accepte les deep-links relatifs et https (http en dev).
+     * N'accepte que les deep-links internes commençant par "/" (sans "//").
+     * Les URLs absolues sont rejetées pour éviter un open redirect via le
+     * service worker.
      */
     static String sanitizeUrl(String url) {
         if (url == null || url.isBlank()) {
             return "/dashboard";
         }
         String trimmed = url.trim();
-        String lower = trimmed.toLowerCase();
-        if (lower.startsWith("javascript:") || lower.startsWith("data:") || lower.startsWith("vbscript:")) {
-            return "/dashboard";
-        }
-        if (trimmed.startsWith("//")) {
-            return "/dashboard";
-        }
-        int colon = trimmed.indexOf(':');
-        int slash = trimmed.indexOf('/');
-        if (colon >= 0 && (slash < 0 || colon < slash)) {
-            // Un schéma est présent : seul http(s) est accepté.
-            if (!lower.startsWith("https://") && !lower.startsWith("http://")) {
-                return "/dashboard";
-            }
-        }
-        if (trimmed.length() > 2048) {
+        if (trimmed.length() > 2048 || !trimmed.startsWith("/") || trimmed.startsWith("//")
+                || trimmed.contains("\\") || trimmed.contains("\r") || trimmed.contains("\n")) {
             return "/dashboard";
         }
         return trimmed;

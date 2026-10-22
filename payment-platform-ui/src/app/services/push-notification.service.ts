@@ -12,6 +12,7 @@ import { BRAND } from '../core/brand.config';
 @Injectable({ providedIn: 'root' })
 export class PushNotificationService {
   private apiUrl = '/api/fcm-tokens';
+  private static readonly TOKEN_KEY = 'pp-fcm-token';
   private fcmTokenSubject = new BehaviorSubject<string | null>(null);
   private firebaseApp!: FirebaseApp;
   private messaging: Messaging | null = null;
@@ -69,6 +70,7 @@ export class PushNotificationService {
   }
 
   registerToken(token: string): Observable<void> {
+    try { localStorage.setItem(PushNotificationService.TOKEN_KEY, token); } catch {}
     return this.http.post<void>(this.apiUrl, { token }).pipe(
       catchError(err => {
         return of(undefined);

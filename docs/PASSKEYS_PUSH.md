@@ -46,6 +46,8 @@ Le défi est stocké côté serveur (challenge TTL par défaut 300 s), lié à l
 > En **prod**, `WEBAUTHN_RP_ID` et `WEBAUTHN_ALLOWED_ORIGINS` sont **obligatoires** (pas de
 > défaut dans `application-prod.yml`) : le service refuse de démarrer sans eux.
 
+> Les challenges sont **à usage unique** : consommation atomique en base et purge des challenges expirés avant chaque émission.
+
 ### 1.3 Frontend
 
 - **Login** : bouton « Se connecter avec une passkey » (affiché si `window.PublicKeyCredential`
@@ -114,6 +116,7 @@ npx web-push generate-vapid-keys
 
 - Abonnement via `SwPush.requestSubscription({ serverPublicKey })` puis enregistrement serveur ;
   désabonnement par `DELETE /api/push/subscriptions?endpoint=...`.
+- Au logout, le front désabonne le `PushSubscription` navigateur, supprime les tokens FCM/Web Push côté serveur et purge le Cache Storage (données utilisateur hors ligne).
 - Le service worker Angular (`ngsw-worker.js`) affiche la notification à partir du champ
   `notification` du payload (`title`, `body`, `icon`, `badge`, `tag`,
   `data.onActionClick.default` pour la navigation au clic).

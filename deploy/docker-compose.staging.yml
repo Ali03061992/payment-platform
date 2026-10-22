@@ -49,11 +49,23 @@ services:
       RABBITMQ_HOST: rabbitmq
       JWT_SECRET: ${JWT_SECRET}
       INTERNAL_SECRET: ${INTERNAL_SECRET}
-      LIQUIBASE_CONTEXTS: seed,dev,local,test,staging
+      LIQUIBASE_CONTEXTS: staging
+      SMTP_HOST: ${SMTP_HOST:-mailpit}
+      SMTP_PORT: ${SMTP_PORT:-1025}
+      SMTP_USERNAME: ${SMTP_USERNAME:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH: ${SMTP_AUTH:-false}
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE: ${SMTP_STARTTLS:-false}
+      MAIL_FROM: ${MAIL_FROM:-noreply@payment-platform.local}
+      SEED_ADMIN_ENABLED: ${SEED_ADMIN_ENABLED:-false}
+      SEED_ADMIN_USERNAME: ${SEED_ADMIN_USERNAME:-system.admin}
+      SEED_ADMIN_EMAIL: ${SEED_ADMIN_EMAIL:-system.admin@payment-platform.local}
+      SEED_ADMIN_PASSWORD: ${SEED_ADMIN_PASSWORD:-}
       # Passkeys / WebAuthn — RP ID = domaine hébergeant la PWA (sans schéma ni port).
-      WEBAUTHN_RP_ID: ${WEBAUTHN_RP_ID:-localhost}
+      WEBAUTHN_RP_ID: ${WEBAUTHN_RP_ID:?WEBAUTHN_RP_ID est requis (domaine sans schéma)}
       WEBAUTHN_RP_NAME: ${WEBAUTHN_RP_NAME:-NEXTERA}
-      WEBAUTHN_ALLOWED_ORIGINS: ${WEBAUTHN_ALLOWED_ORIGINS:-http://localhost:8080}
+      WEBAUTHN_ALLOWED_ORIGINS: ${WEBAUTHN_ALLOWED_ORIGINS:?WEBAUTHN_ALLOWED_ORIGINS est requis (https://...)}
+      FRONTEND_URL: ${FRONTEND_URL:?FRONTEND_URL est requis (https://domaine)}
       WEBAUTHN_CHALLENGE_TTL_SECONDS: ${WEBAUTHN_CHALLENGE_TTL_SECONDS:-300}
       WEBAUTHN_TIMEOUT_SECONDS: ${WEBAUTHN_TIMEOUT_SECONDS:-60}
     depends_on:
@@ -132,9 +144,12 @@ services:
       SPRING_PROFILES_ACTIVE: staging
       JWT_SECRET: ${JWT_SECRET}
       INTERNAL_SECRET: ${INTERNAL_SECRET}
-      RATE_LIMIT_AUTH_PER_MINUTE: 10
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:?CORS_ALLOWED_ORIGINS est requis (https://...)}
+      ALLOWED_IPS: ${ALLOWED_IPS:-127.0.0.1,0:0:0:0:0:0:0:1,172.16.0.0/12}
+      RATE_LIMIT_PER_MINUTE: ${RATE_LIMIT_PER_MINUTE:-100}
+      RATE_LIMIT_AUTH_PER_MINUTE: ${RATE_LIMIT_AUTH_PER_MINUTE:-10}
     ports:
-      - "8081:8081"
+      - "127.0.0.1:8081:8081"
     depends_on:
       - identity-service
       - organization-service

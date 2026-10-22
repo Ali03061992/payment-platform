@@ -12,7 +12,11 @@ COPY payment-platform-ui/tsconfig.app.json payment-platform-ui/ngsw-config.json 
 COPY payment-platform-ui/src ./src
 RUN npx ng build --configuration production
 
-FROM nginx:1.27-alpine
-COPY --from=build /app/dist/payment-platform-ui /usr/share/nginx/html
-COPY deploy/nginx/default.conf /etc/nginx/conf.d/default.conf
-EXPOSE 80
+FROM nginxinc/nginx-unprivileged:1.27-alpine
+COPY --chown=101:101 --from=build /app/dist/payment-platform-ui /usr/share/nginx/html
+COPY --chown=101:101 deploy/nginx/default.conf /etc/nginx/conf.d/default.conf
+COPY --chown=101:101 payment-platform-ui/src/assets/env.template.js /etc/nginx/templates/env.js.template
+RUN chown -R 101:101 /usr/share/nginx/html /etc/nginx/templates
+ENV NGINX_ENVSUBST_TEMPLATE_DIR=/etc/nginx/templates
+ENV NGINX_ENVSUBST_OUTPUT_DIR=/usr/share/nginx/html/assets
+EXPOSE 8080

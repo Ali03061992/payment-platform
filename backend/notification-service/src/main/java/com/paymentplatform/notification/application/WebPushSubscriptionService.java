@@ -26,9 +26,13 @@ public class WebPushSubscriptionService {
     public WebPushSubscription register(UUID userId, UUID organizationId, String endpoint,
                                         String p256dh, String auth, String userAgent) {
         var existing = repository.findByEndpoint(endpoint);
-        WebPushSubscription subscription = existing
-                .orElseGet(() -> new WebPushSubscription(userId, organizationId, endpoint, p256dh, auth, userAgent));
-        subscription.touch();
+        WebPushSubscription subscription;
+        if (existing.isPresent()) {
+            subscription = existing.get();
+            subscription.reassign(userId, organizationId, p256dh, auth, userAgent);
+        } else {
+            subscription = new WebPushSubscription(userId, organizationId, endpoint, p256dh, auth, userAgent);
+        }
         WebPushSubscription saved = repository.save(subscription);
         log.info("Web Push subscription registered for user {} (endpoint {}...)",
                 userId, endpoint.substring(0, Math.min(40, endpoint.length())));

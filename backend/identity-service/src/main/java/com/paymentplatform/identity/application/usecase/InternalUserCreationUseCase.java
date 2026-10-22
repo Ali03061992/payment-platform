@@ -10,6 +10,7 @@ import com.paymentplatform.identity.domain.valueobject.PhoneNumber;
 import com.paymentplatform.identity.domain.valueobject.Username;
 import com.paymentplatform.shared.domain.event.IdentityEvents.UserCreatedEvent;
 import com.paymentplatform.shared.domain.exception.ConflictException;
+import com.paymentplatform.shared.domain.exception.UnprocessableEntityException;
 import com.paymentplatform.shared.domain.model.OrganizationId;
 import com.paymentplatform.shared.domain.model.RoleCode;
 import com.paymentplatform.shared.domain.model.UserId;
@@ -65,10 +66,10 @@ public class InternalUserCreationUseCase {
             throw new ConflictException("Adresse email déjà utilisée");
         }
 
-        String rawPassword = (request.password() == null || request.password().isBlank())
-                ? "test1234"
-                : request.password();
-        PasswordHash hash = PasswordHash.of(passwordEncoder.encode(rawPassword));
+        if (request.password() == null || request.password().isBlank()) {
+            throw new UnprocessableEntityException("Mot de passe requis pour créer un utilisateur");
+        }
+        PasswordHash hash = PasswordHash.of(passwordEncoder.encode(request.password()));
 
         User user = User.create(new UserId(null), username, email, hash, request.firstName(), request.lastName(),
                 PhoneNumber.of(request.phone()), orgId == null ? null : OrganizationId.of(orgId), role);

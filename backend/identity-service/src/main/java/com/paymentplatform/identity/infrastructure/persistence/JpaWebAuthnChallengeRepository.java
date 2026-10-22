@@ -45,6 +45,12 @@ public class JpaWebAuthnChallengeRepository implements WebAuthnChallengeReposito
 
     @Override
     @Transactional
+    public boolean consumeIfValid(java.util.UUID id, Instant now) {
+        return jpa.consumeIfValid(id, now) == 1;
+    }
+
+    @Override
+    @Transactional
     public void deleteExpired(Instant before) {
         jpa.deleteByExpiresAtBefore(before);
     }

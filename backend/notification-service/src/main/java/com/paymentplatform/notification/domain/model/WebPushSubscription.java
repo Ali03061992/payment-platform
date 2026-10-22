@@ -60,6 +60,20 @@ public class WebPushSubscription {
         this.lastUsedAt = Instant.now();
     }
 
+    /**
+     * Réaffecte l'abonnement au compte courant (appareil partagé ou
+     * réinstallation) et rafraîchit les clés de chiffrement.
+     */
+    public void reassign(UUID userId, UUID organizationId, String p256dh, String auth, String userAgent) {
+        this.userId = userId;
+        this.organizationId = organizationId;
+        this.p256dh = p256dh;
+        this.auth = auth;
+        this.userAgent = userAgent != null && userAgent.length() > 512
+                ? userAgent.substring(0, 512) : userAgent;
+        touch();
+    }
+
     public UUID id() { return id; }
     public UUID userId() { return userId; }
     public UUID organizationId() { return organizationId; }

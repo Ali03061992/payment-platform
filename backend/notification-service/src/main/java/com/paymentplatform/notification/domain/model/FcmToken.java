@@ -47,4 +47,9 @@ public class FcmToken {
     public void touch() {
         this.lastUsedAt = Instant.now();
     }
+
+    public void reassign(UUID userId) {
+        this.userId = userId;
+        touch();
+    }
 }

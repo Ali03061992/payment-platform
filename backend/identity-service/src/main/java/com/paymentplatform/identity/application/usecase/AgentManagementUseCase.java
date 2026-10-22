@@ -83,9 +83,8 @@ public class AgentManagementUseCase {
             throw new ConflictException("Adresse email déjà utilisée");
         }
 
-        String rawPassword = request.password() != null && !request.password().isBlank()
-                ? request.password()
-                : "test1234";
+        boolean generated = request.password() == null || request.password().isBlank();
+        String rawPassword = generated ? generatePassword() : request.password();
         PasswordHash hash = PasswordHash.of(passwordEncoder.encode(rawPassword));
 
         User user = User.create(new UserId(null), username, email, hash, request.firstName(), request.lastName(),
@@ -97,8 +96,7 @@ public class AgentManagementUseCase {
         outbox.append(new UserCreatedEvent(UUID.randomUUID(), java.time.Instant.now(), saved.id().value(),
                 organizationId, List.of(role.name())), String.valueOf(saved.id().value()));
 
-        return new AgentCreatedResponse(UserResponse.from(saved),
-                request.password() == null || request.password().isBlank() ? rawPassword : null);
+        return new AgentCreatedResponse(UserResponse.from(saved), generated ? rawPassword : null);
     }
 
     @Transactional

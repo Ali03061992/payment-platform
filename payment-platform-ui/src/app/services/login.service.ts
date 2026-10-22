@@ -100,15 +100,51 @@ export class LoginService {
     const body: { refreshToken?: string } = legacy ? { refreshToken: legacy } : {};
     // Best-effort : la déconnexion locale ne doit jamais être bloquée par le réseau.
     this.http.post(`${this.apiUrl}/logout`, body).subscribe({ error: () => {} });
+    // Capture le token avant purge : les suppressions push sont asynchrones.
+    this.unsubscribePush(this.accessToken);
     this.purgeSession();
   }
 
-  /** Purge complète locale (mémoire + storages) — sans appel réseau. */
+  /** Purge complète locale (mémoire + storages + caches PWA) - sans appel réseau. */
   purgeSession(): void {
     this.accessToken = null;
     try { localStorage.removeItem(LoginService.USER_KEY); } catch {}
     try { sessionStorage.removeItem(LoginService.USER_KEY); } catch {}
     this.purgeLegacy();
+    this.clearPwaCaches();
+  }
+
+  /** Supprime l'abonnement push du navigateur et sa copie serveur. */
+  private unsubscribePush(authToken: string | null): void {
+    const headers = authToken ? { Authorization: `Bearer ${authToken}` } : undefined;
+    const fcmToken = localStorage.getItem('pp-fcm-token');
+    if (fcmToken) {
+      this.http.delete('/api/fcm-tokens', {
+        headers,
+        body: { token: fcmToken }
+      }).subscribe({ error: () => {} });
+      try { localStorage.removeItem('pp-fcm-token'); } catch {}
+    }
+    if (!('serviceWorker' in navigator)) return;
+    navigator.serviceWorker.ready
+      .then(reg => reg.pushManager.getSubscription())
+      .then(subscription => {
+        if (!subscription) return;
+        this.http.delete('/api/push/subscriptions', {
+          headers,
+          params: { endpoint: subscription.endpoint }
+        }).subscribe({ error: () => {} });
+        subscription.unsubscribe().catch(() => {});
+      })
+      .catch(() => {});
+  }
+
+  /** Supprime les caches du service worker (données potentiellement liées à l'utilisateur). */
+  private clearPwaCaches(): void {
+    if (typeof caches === 'undefined') return;
+    caches.keys()
+      .then(keys => Promise.all(keys.map(key => caches.delete(key))))
+      .catch(() => {});
   }
 
   /** Access token en mémoire, ou nul. */

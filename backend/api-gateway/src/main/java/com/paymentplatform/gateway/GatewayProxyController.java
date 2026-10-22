@@ -27,9 +27,6 @@ public class GatewayProxyController {
             .connectTimeout(java.time.Duration.ofSeconds(2))
             .build();
 
-    @Value("${app.internal-secret:}")
-    private String internalSecret;
-
     @Value("${IDENTITY_SERVICE_URL:localhost}")
     private String identityUrl;
     @Value("${IDENTITY_SERVICE_PORT:8082}")
@@ -47,7 +44,7 @@ public class GatewayProxyController {
     @Value("${NOTIFICATION_SERVICE_PORT:8085}")
     private String notificationPort;
 
-    @RequestMapping(value = {"/auth/**", "/users/**", "/suppliers/{supplierId}/agents/**", "/internal/**"}, method = {
+    @RequestMapping(value = {"/auth/**", "/users/**", "/suppliers/{supplierId}/agents/**"}, method = {
             org.springframework.web.bind.annotation.RequestMethod.GET,
             org.springframework.web.bind.annotation.RequestMethod.POST,
             org.springframework.web.bind.annotation.RequestMethod.PUT,
@@ -186,13 +183,6 @@ public class GatewayProxyController {
                 builder.header(name, request.getHeader(name));
             }
         }
-        String requestUri = request.getRequestURI();
-        if (requestUri != null && requestUri.contains("/internal/")
-                && internalSecret != null && !internalSecret.isBlank()
-                && request.getHeader("X-Internal-Token") == null) {
-            builder.header("X-Internal-Token", internalSecret);
-        }
-
         HttpResponse<byte[]> response = httpClient.send(builder.build(),
                 HttpResponse.BodyHandlers.ofByteArray());
 

@@ -112,6 +112,7 @@ public class WebAuthnRegistrationUseCase {
                 .attestation(AttestationConveyancePreference.NONE)
                 .build();
 
+        challenges.deleteExpired(Instant.now());
         challenges.save(WebAuthnChallenge.issue(userId, WebAuthnChallengePurpose.REGISTER,
                 options.getChallenge().getBytes(), codec.write(options),
                 Instant.now().plus(properties.challengeTtlSeconds(), ChronoUnit.SECONDS)));
@@ -136,8 +137,9 @@ public class WebAuthnRegistrationUseCase {
         if (stored.userId() == null || !stored.userId().equals(userId)) {
             throw new UnauthorizedException("Challenge WebAuthn invalide ou expiré");
         }
-        stored.consume();
-        challenges.save(stored);
+        if (!challenges.consumeIfValid(stored.id(), Instant.now())) {
+            throw new UnauthorizedException("Challenge WebAuthn invalide ou expiré");
+        }
 
         // Rejeu des options : seuls challenge + RP + user entrent dans la
         // vérification webauthn4j (le mixin Jackson ne sait pas désérialiser
