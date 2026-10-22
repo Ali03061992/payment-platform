@@ -8,7 +8,7 @@
 @if (order && !loading) {
   <div>
     <div class="page-header no-print">
-      <a class="btn-close" routerLink="/dashboard/shop/orders" [attr.aria-label]="'COMMON.CLOSE' | translate" [attr.title]="'COMMON.CLOSE' | translate">&times;</a>
+      <button type="button" class="btn-close" (click)="close()" [attr.aria-label]="'COMMON.CLOSE' | translate" [attr.title]="'COMMON.CLOSE' | translate">&times;</button>
       <h2>{{ 'ORDER_DETAIL.TITLE' | translate }} {{ order.reference }}</h2>
       <span class="payment-badge" [ngClass]="statusClass(order.status)"
         [attr.aria-label]="('ORDER_DETAIL.STATUS_ARIA' | translate:{label: (order.status | statusLabel)})" role="status">{{ order.status | statusLabel }}</span>

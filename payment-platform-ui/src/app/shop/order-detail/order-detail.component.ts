@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, OnChanges, SimpleChanges, Input, Output, EventEmitter } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { OrderService } from '../../services/order.service';
@@ -17,7 +17,11 @@ import { statusLabelFr } from '../../pipes/status-label.pipe';
     styleUrls: ['./order-detail.component.css'],
     standalone: false
 })
-export class ShopOrderDetailComponent implements OnInit, OnDestroy {
+export class ShopOrderDetailComponent implements OnInit, OnDestroy, OnChanges {
+  @Input() orderId: string | null = null;
+  @Input() embedded = false;
+  @Output() closed = new EventEmitter<void>();
+
   order: Order | null = null;
   loading = true;
   /** QR de la page : scanné, il ouvre directement ce détail de commande. */
@@ -56,7 +60,35 @@ export class ShopOrderDetailComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    const id = this.route.snapshot.paramMap.get('id')!;
+    this.loadOrder();
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['orderId'] && !changes['orderId'].firstChange) {
+      this.loadOrder();
+    }
+  }
+
+  private loadOrder(): void {
+    const id = this.orderId || this.route.snapshot.paramMap.get('id');
+    if (!id) {
+      this.loading = false;
+      this.close();
+      return;
+    }
+
+    this.subscriptions.unsubscribe();
+    this.subscriptions = new Subscription();
+    if (this.countdownInterval) clearInterval(this.countdownInterval);
+
+    this.loading = true;
+    this.order = null;
+    this.qrData = '';
+    this.disputes = [];
+    this.comments = [];
+    this.certificate = null;
+    this.countdown = '';
+
     const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
     const request$ = isUuid
       ? this.orderService.getById(id)
@@ -71,8 +103,19 @@ export class ShopOrderDetailComponent implements OnInit, OnDestroy {
         this.startCountdown();
         if (data.status === 'DELIVERED' || data.status === 'ACCEPTED') this.loadCertificate(data.id);
       },
-      error: () => { this.loading = false; this.router.navigate(['/dashboard/shop/orders']); }
+      error: () => {
+        this.loading = false;
+        this.close();
+      }
     }));
+  }
+
+  close(): void {
+    if (this.embedded) {
+      this.closed.emit();
+      return;
+    }
+    this.router.navigate(['/dashboard/shop/orders']);
   }
 
   loadCertificate(orderId: string): void {

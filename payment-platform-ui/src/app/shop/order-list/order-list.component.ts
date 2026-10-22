@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, HostListener, ElementRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, HostListener, ElementRef, ViewChild } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { OrderService } from '../../services/order.service';
 import { Order, OrderPage } from '../../models/order.model';
@@ -31,7 +31,11 @@ export class OrderListComponent implements OnInit, OnDestroy {
   searching = false;
   searchSubject = new Subject<string>();
 
+  selectedOrderId: string | null = null;
+  @ViewChild('detailDialog') detailDialog?: ElementRef<HTMLElement>;
+
   private subscriptions = new Subscription();
+  private lastFocusedElement: HTMLElement | null = null;
 
   constructor(private orderService: OrderService, private toast: ToastService, private confirmDialog: ConfirmDialogService, private elRef: ElementRef, private translate: TranslateService) {}
 
@@ -40,6 +44,11 @@ export class OrderListComponent implements OnInit, OnDestroy {
     if (!this.elRef.nativeElement.querySelector('.search-container')?.contains(event.target)) {
       this.showSearchDropdown = false;
     }
+  }
+
+  @HostListener('document:keydown.escape')
+  onEscape(): void {
+    if (this.selectedOrderId) this.closeDetail();
   }
 
   ngOnInit(): void {
@@ -70,10 +79,11 @@ export class OrderListComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.subscriptions.unsubscribe();
+    document.body.classList.remove('modal-open');
   }
 
-  load(): void {
-    this.loading = true;
+  load(showSpinner = true): void {
+    if (showSpinner) this.loading = true;
     this.subscriptions.add(this.orderService.listPaged(
       this.currentPage, this.pageSize, this.filterStatus || undefined
     ).subscribe({
@@ -102,6 +112,27 @@ export class OrderListComponent implements OnInit, OnDestroy {
     this.pageSize = size;
     this.currentPage = 0;
     this.load();
+  }
+
+  openDetail(id: string, event?: Event): void {
+    event?.stopPropagation();
+    if (this.selectedOrderId === id) return;
+    if (!this.selectedOrderId) {
+      this.lastFocusedElement = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    }
+    this.selectedOrderId = id;
+    this.showSearchDropdown = false;
+    document.body.classList.add('modal-open');
+    setTimeout(() => this.detailDialog?.nativeElement.focus());
+  }
+
+  closeDetail(): void {
+    if (!this.selectedOrderId) return;
+    this.selectedOrderId = null;
+    document.body.classList.remove('modal-open');
+    this.lastFocusedElement?.focus();
+    this.lastFocusedElement = null;
+    this.load(false);
   }
 
   get filteredOrders(): Order[] {

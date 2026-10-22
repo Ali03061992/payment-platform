@@ -14,7 +14,7 @@
       @if (showSearchDropdown && searchResults.length > 0) {
         <div class="search-dropdown">
           @for (r of searchResults; track r) {
-            <div class="search-dropdown-item" [routerLink]="['/dashboard/shop/orders', r.id]">
+            <div class="search-dropdown-item" role="button" tabindex="0" (click)="openDetail(r.id, $event)" (keydown.enter)="openDetail(r.id, $event)">
               <div class="search-dropdown-ref">{{ r.reference }}</div>
               <div class="search-dropdown-meta">
                 <span class="payment-badge" [ngClass]="statusClass(r.status)">{{ r.status | statusLabel }}</span>
@@ -69,7 +69,7 @@
         </thead>
         <tbody>
           @for (o of filteredOrders; track o) {
-            <tr class="clickable-row" [routerLink]="['/dashboard/shop/orders', o.id]">
+            <tr class="clickable-row" (click)="openDetail(o.id, $event)">
               <td><strong>{{ o.reference }}</strong></td>
               <td>{{ o.supplierName || o.supplierId }}</td>
               <td>{{ o.deliveryAgentName || '-' }}</td>
@@ -81,7 +81,7 @@
                 </span>
               </td>
               <td class="actions" (click)="$event.stopPropagation()">
-                <a class="btn btn-sm btn-secondary" [routerLink]="['/dashboard/shop/orders', o.id]">{{ 'ORDERS.DETAIL' | translate }}</a>
+                <button type="button" class="btn btn-sm btn-secondary" (click)="openDetail(o.id, $event)">{{ 'ORDERS.DETAIL' | translate }}</button>
                 @if (o.status === 'DELIVERED') {
                   <button class="btn btn-sm btn-success" (click)="accept(o.id)">{{ 'ORDERS.ACCEPT_BTN' | translate }}</button>
                 }
@@ -109,7 +109,7 @@
 @if (!loading) {
   <div class="list-cards show-mobile">
     @for (o of filteredOrders; track o) {
-      <div class="list-card" [routerLink]="['/dashboard/shop/orders', o.id]">
+      <div class="list-card" (click)="openDetail(o.id, $event)">
         <div class="list-card-head">
           <span class="list-card-ref">
             <app-icon name="box" [size]="20"></app-icon>
@@ -145,7 +145,7 @@
           <span class="list-card-value">{{ o.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
         </div>
         <div class="list-card-actions" (click)="$event.stopPropagation()">
-          <a class="btn btn-secondary" [routerLink]="['/dashboard/shop/orders', o.id]">{{ 'ORDERS.DETAIL' | translate }}</a>
+          <button type="button" class="btn btn-secondary" (click)="openDetail(o.id, $event)">{{ 'ORDERS.DETAIL' | translate }}</button>
           @if (o.status === 'DELIVERED') {
             <button class="btn btn-success" (click)="accept(o.id)">{{ 'ORDERS.ACCEPT_BTN' | translate }}</button>
             <button class="btn btn-danger" (click)="reject(o.id)">{{ 'ORDERS.REJECT_BTN' | translate }}</button>
@@ -165,4 +165,15 @@
 @if (!loading) {
   <app-pagination [page]="currentPage" [size]="pageSize" [totalElements]="totalElements"
     (pageChange)="onPageChange($event)" (sizeChange)="onSizeChange($event)"></app-pagination>
+}
+
+@if (selectedOrderId) {
+  <div #detailDialog class="modal-overlay detail-overlay" tabindex="-1" role="dialog" aria-modal="true"
+    [attr.aria-label]="'ORDER_DETAIL.TITLE' | translate" (click)="closeDetail()">
+    <div class="modal-content detail-modal order-detail-modal" (click)="$event.stopPropagation()">
+      <div class="detail-modal-body">
+        <app-order-detail class="is-embedded" [orderId]="selectedOrderId" [embedded]="true" (closed)="closeDetail()"></app-order-detail>
+      </div>
+    </div>
+  </div>
 }
