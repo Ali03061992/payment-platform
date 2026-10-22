@@ -117,8 +117,10 @@ services:
       AUTH_COOKIE_SECURE: ${AUTH_COOKIE_SECURE:-true}
       API_GATEWAY_URL: http://api-gateway:8081
       INTERNAL_SECRET: ${INTERNAL_SECRET}
-      SMTP_HOST: ${SMTP_HOST:?SMTP_HOST est requis (serveur SMTP réel)}
-      SMTP_PORT: ${SMTP_PORT:-587}
+      # Mailpit par défaut (TEST/local). En PROD, définir un vrai SMTP dans deploy/.env :
+      # OVH ssl0.ovh.net, port 587, SMTP_AUTH=true, SMTP_STARTTLS=true.
+      SMTP_HOST: ${SMTP_HOST:-mailpit}
+      SMTP_PORT: ${SMTP_PORT:-1025}
       SMTP_USERNAME: ${SMTP_USERNAME:-}
       SMTP_PASSWORD: ${SMTP_PASSWORD:-}
       SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH: ${SMTP_AUTH:-false}
@@ -261,6 +263,15 @@ services:
       INTERNAL_SECRET: ${INTERNAL_SECRET}
       API_GATEWAY_URL: http://api-gateway:8081
       REDIS_HOST: redis
+      # Email (désactivé par défaut ; mêmes réglages SMTP que identity-service).
+      SMTP_HOST: ${SMTP_HOST:-mailpit}
+      SMTP_PORT: ${SMTP_PORT:-1025}
+      SMTP_USER: ${SMTP_USERNAME:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH: ${SMTP_AUTH:-false}
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE: ${SMTP_STARTTLS:-false}
+      APP_MAIL_ENABLED: ${APP_MAIL_ENABLED:-false}
+      APP_MAIL_FROM: ${MAIL_FROM:-noreply@payment-platform.local}
       # Web Push (PWA) — VAPID ; vides = paire auto-générée et persistée (dev).
       WEBPUSH_ENABLED: ${WEBPUSH_ENABLED:-true}
       VAPID_PUBLIC_KEY: ${VAPID_PUBLIC_KEY:-}
