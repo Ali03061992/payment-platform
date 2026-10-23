@@ -510,19 +510,32 @@ jobs:
           echo " Simule (root) : git pull + pull GHCR + up -d + prune"
           echo "=============================================="
 
-      - name: Health check TEST (si URL configurée)
+      - name: Health check TEST (front + API)
+        if: steps.check.outputs.mode == 'real'
         run: |
-          if [ -z "${{ secrets.OVH_TEST_URL }}" ]; then
-            echo "OVH_TEST_URL non configurée : health check ignoré."
-            exit 0
+          URL="${{ secrets.OVH_TEST_URL }}"
+          if [ -z "$URL" ]; then
+            URL="https://nextera.payment.tn"
+            echo "OVH_TEST_URL non configurée : fallback sur $URL."
           fi
+          URL="${URL%/}"
           UP=0
           for i in $(seq 1 30); do
-            if curl -sf "${{ secrets.OVH_TEST_URL }}/actuator/health"; then echo "TEST up"; UP=1; break; fi
+            FRONT_OK=0
+            API_OK=0
+            curl -sf --max-time 10 "$URL/" >/dev/null && FRONT_OK=1
+            curl -sf --max-time 10 -X POST -H 'Content-Type: application/json' -d '{}' \
+              "$URL/api/auth/webauthn/login/options" >/dev/null && API_OK=1
+            if [ "$FRONT_OK" -eq 1 ] && [ "$API_OK" -eq 1 ]; then
+              echo "TEST up (front + API identity)."
+              UP=1
+              break
+            fi
+            echo "Tentative $i/30 : front=$FRONT_OK api=$API_OK"
             sleep 10
           done
           if [ "$UP" -ne 1 ]; then
-            echo "::error::Health check TEST échoué après 5 minutes."
+            echo "::error::Health check TEST échoué après 5 minutes ($URL)."
             exit 1
           fi
 
