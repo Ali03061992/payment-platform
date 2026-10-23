@@ -35,6 +35,9 @@ public class ResolveDisputeUseCase {
             throw new ConflictException("Seul RESOLVED ou CLOSED sont autorisés comme statut de résolution");
         }
 
+        if (newStatus == DisputeStatus.RESOLVED && DisputeStatus.OPEN.name().equals(dispute.getStatus())) {
+            dispute.transitionTo(DisputeStatus.IN_PROGRESS);
+        }
         dispute.transitionTo(newStatus);
         dispute = disputes.save(dispute);
 

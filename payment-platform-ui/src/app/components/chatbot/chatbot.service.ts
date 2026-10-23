@@ -23,6 +23,8 @@ type BotState =
   | 'awaitComplaintReasonText'
   | 'awaitComplaintConfirm';
 
+const MAX_DISPUTE_REASON_LENGTH = 255;
+
 /**
  * Petit assistant conversationnel (100% local, sans IA externe) : suivi de
  * commande, dépôt guidé de réclamation (litige), aide paiements/livraisons.
@@ -95,13 +97,18 @@ export class ChatbotService {
         [this.translate.instant('CHATBOT.OPT_TRACK'), this.translate.instant('CHATBOT.OPT_COMPLAINT'), this.translate.instant('CHATBOT.OPT_PAY'), this.translate.instant('CHATBOT.OPT_DELIVERY')]);
       return;
     }
-    if (/(commande|suivi|suivre|statut.*commande|ou en est|order|tracking|track|طلب|تتبع|فين)/.test(norm)) {
-      this.state = 'awaitOrderRef';
-      this.say(this.translate.instant('CHATBOT.ASK_ORDER_REF'));
+    if (/(mes reclamations|my disputes|my complaints|شكاوي|نزاعاتي)/.test(norm)) {
+      this.showMyDisputes();
       return;
     }
     if (/(reclamation|litige|probleme|plainte|sav|retour|dispute|complaint|شكوى|نزاع|مشكل)/.test(norm)) {
+      if (this.tryDirectComplaint(raw)) return;
       this.startComplaint();
+      return;
+    }
+    if (/(commande|suivi|suivre|statut.*commande|ou en est|order|tracking|track|طلب|تتبع|فين)/.test(norm)) {
+      this.state = 'awaitOrderRef';
+      this.say(this.translate.instant('CHATBOT.ASK_ORDER_REF'));
       return;
     }
     if (/(paiement|payer|facture|balance|solde|payment|pay|invoice|خلاص|دفع|مدفوع|فاتورة|رصيد)/.test(norm)) {
@@ -170,11 +177,8 @@ export class ChatbotService {
     this.orders.getByReference(ref).subscribe({
       next: (o: any) => {
         this.state = 'idle';
-        const detailRoute = this.isShop()
-          ? `/dashboard/shop/orders/${o.id}`
-          : `/dashboard/supplier/orders`;
         this.say(this.translate.instant('CHATBOT.ORDER_FOUND', { ref: o.reference, status: this.orderStatusLabel(o.status), total: Number(o.total).toFixed(2), currency: o.currency || 'TND' }),
-          [{ label: this.translate.instant('CHATBOT.LINK_DETAIL'), route: detailRoute }],
+          [{ label: this.translate.instant('CHATBOT.LINK_DETAIL'), route: this.orderDetailRoute(o) }],
           [this.translate.instant('CHATBOT.OPT_TRACK'), this.translate.instant('CHATBOT.OPT_COMPLAINT')]);
       },
       error: () => {
@@ -218,22 +222,87 @@ export class ChatbotService {
 
   // ── Réclamation guidée ──────────────────────────────────────
 
+  private showMyDisputes(): void {
+    this.state = 'idle';
+    if (this.isSupplier()) {
+      this.say(
+        this.translate.instant('CHATBOT.MY_DISPUTES_SUPPLIER'),
+        [{ label: this.translate.instant('CHATBOT.LINK_MY_ORDERS'), route: this.orderListRoute() }],
+        [this.translate.instant('CHATBOT.OPT_COMPLAINT'), this.translate.instant('CHATBOT.OPT_TRACK'), this.translate.instant('CHATBOT.OPT_PAY')]
+      );
+      return;
+    }
+    if (!this.canViewDisputes()) {
+      this.say(
+        this.translate.instant('CHATBOT.MY_DISPUTES_FORBIDDEN'),
+        [{ label: this.translate.instant('CHATBOT.LINK_MY_ORDERS'), route: this.orderListRoute() }],
+        [this.translate.instant('CHATBOT.OPT_TRACK'), this.translate.instant('CHATBOT.OPT_PAY'), this.translate.instant('CHATBOT.OPT_DELIVERY')]
+      );
+      return;
+    }
+    this.say(
+      this.translate.instant('CHATBOT.MY_DISPUTES'),
+      [{ label: this.translate.instant('CHATBOT.LINK_MY_DISPUTES'), route: this.disputesRoute() }],
+      [this.translate.instant('CHATBOT.OPT_COMPLAINT'), this.translate.instant('CHATBOT.OPT_TRACK'), this.translate.instant('CHATBOT.OPT_PAY')]
+    );
+  }
+
   private startComplaint(): void {
+    if (!this.canCreateDispute()) {
+      this.complaintForbidden();
+      return;
+    }
     this.state = 'awaitComplaintOrder';
     this.say(this.translate.instant('CHATBOT.COMPLAINT_START'));
+  }
+
+  private complaintForbidden(): void {
+    this.state = 'idle';
+    const canView = this.canViewDisputes();
+    this.say(
+      this.translate.instant('CHATBOT.COMPLAINT_FORBIDDEN'),
+      [{
+        label: this.translate.instant(canView ? 'CHATBOT.LINK_MY_DISPUTES' : 'CHATBOT.LINK_MY_ORDERS'),
+        route: canView ? this.disputesRoute() : this.orderListRoute()
+      }],
+      [this.translate.instant('CHATBOT.OPT_TRACK'), this.translate.instant('CHATBOT.OPT_PAY'), this.translate.instant('CHATBOT.OPT_DELIVERY')]
+    );
   }
 
   /** Création directe : référence + motif dans le même message, zéro question. */
   private tryDirectComplaint(text: string): boolean {
     const m = text.toUpperCase().match(/ORD-[A-Z0-9]{4,}/);
     if (!m) return false;
-    const reason = text.replace(/ORD-[A-Z0-9]{4,}/i, '').replace(/["'«»]/g, '').trim();
+    const reason = text
+      .replace(/ORD-[A-Z0-9]{4,}/i, '')
+      .replace(/["'«»]/g, '')
+      .replace(/^\s*(r[ée]clamation|litige|probl[èe]me|plainte|sav|retour|dispute|complaint)\s*[:\-]?\s*/i, '')
+      .trim();
     if (reason.replace(/[^a-zA-Z0-9]/g, '').length < 3) return false;
+    if (!this.canCreateDispute()) {
+      this.complaintForbidden();
+      return true;
+    }
+    if (reason.length > MAX_DISPUTE_REASON_LENGTH) {
+      this.state = 'idle';
+      this.say(this.translate.instant('CHATBOT.REASON_TOO_LONG'));
+      return true;
+    }
     this.orders.getByReference(m[0]).subscribe({
       next: (o: any) => {
-        this.createDisputeNow(o.id, o.reference, reason.length > 300 ? reason.slice(0, 300) : reason);
+        if (!this.isDisputeEligible(o.status)) {
+          this.state = 'idle';
+          this.say(
+            this.translate.instant('CHATBOT.COMPLAINT_NOT_ELIGIBLE', { ref: o.reference, status: this.orderStatusLabel(o.status) }),
+            [{ label: this.translate.instant('CHATBOT.LINK_DETAIL'), route: this.orderDetailRoute(o) }],
+            [this.translate.instant('CHATBOT.OPT_TRACK'), this.translate.instant('CHATBOT.OPT_COMPLAINT')]
+          );
+          return;
+        }
+        this.createDisputeNow(o.id, o.reference, reason);
       },
       error: () => {
+        this.state = 'idle';
         this.say(this.translate.instant('CHATBOT.ORDER_NOT_FOUND', { ref: m[0] }));
       }
     });
@@ -245,11 +314,9 @@ export class ChatbotService {
       next: (d: any) => {
         this.state = 'idle';
         this.pendingOrderId = this.pendingReason = this.pendingOrderRef = null;
-        const detailRoute = this.isShop()
-          ? `/dashboard/shop/disputes/${d.id}`
-          : `/dashboard/shop/orders`;
+        const labelKey = this.isSupplier() ? 'CHATBOT.LINK_MY_ORDERS' : 'CHATBOT.LINK_DISPUTE';
         this.say(this.translate.instant('CHATBOT.DISPUTE_CREATED', { ref, reason }),
-          [{ label: this.translate.instant('CHATBOT.LINK_DISPUTE'), route: detailRoute }],
+          [{ label: this.translate.instant(labelKey), route: this.disputeDetailRoute(d.id) }],
           [this.translate.instant('CHATBOT.OPT_TRACK'), this.translate.instant('CHATBOT.OPT_COMPLAINT')]);
       },
       error: (e: any) => {
@@ -281,6 +348,15 @@ export class ChatbotService {
     }
     this.orders.getByReference(ref).subscribe({
       next: (o: any) => {
+        if (!this.isDisputeEligible(o.status)) {
+          this.state = 'idle';
+          this.say(
+            this.translate.instant('CHATBOT.COMPLAINT_NOT_ELIGIBLE', { ref: o.reference, status: this.orderStatusLabel(o.status) }),
+            [{ label: this.translate.instant('CHATBOT.LINK_DETAIL'), route: this.orderDetailRoute(o) }],
+            [this.translate.instant('CHATBOT.OPT_TRACK'), this.translate.instant('CHATBOT.OPT_COMPLAINT')]
+          );
+          return;
+        }
         this.pendingOrderId = o.id;
         this.pendingOrderRef = o.reference;
         this.state = 'awaitComplaintReasonText';
@@ -296,6 +372,10 @@ export class ChatbotService {
   private handleComplaintReasonText(text: string): void {
     if (/^(autre|other|أخرى|اخرى)/.test(text.toLowerCase())) {
       this.say(this.translate.instant('CHATBOT.DESCRIBE_ONE_SENTENCE'));
+      return;
+    }
+    if (text.length > MAX_DISPUTE_REASON_LENGTH) {
+      this.say(this.translate.instant('CHATBOT.REASON_TOO_LONG'));
       return;
     }
     this.pendingReason = text;
@@ -351,6 +431,45 @@ export class ChatbotService {
     return r.includes('SHOP_ADMIN') || r.includes('SHOP_AGENT');
   }
 
+  private isSupplier(): boolean {
+    const r = this.roles();
+    return r.includes('SUPPLIER_ADMIN') || r.includes('SUPPLIER_AGENT');
+  }
+
+  private canCreateDispute(): boolean {
+    const r = this.roles();
+    return r.includes('SHOP_ADMIN') || r.includes('SHOP_MANAGER') || r.includes('SUPPLIER_ADMIN');
+  }
+
+  private canViewDisputes(): boolean {
+    const r = this.roles();
+    return r.includes('SYSTEM_ADMIN') || r.includes('SHOP_ADMIN');
+  }
+
+  private isDisputeEligible(status: string): boolean {
+    return status === 'REJECTED' || status === 'DELIVERY_REJECTED';
+  }
+
+  private disputesRoute(): string {
+    if (this.roles().includes('SYSTEM_ADMIN')) return '/dashboard/admin/disputes';
+    if (this.canViewDisputes()) return '/dashboard/shop/disputes';
+    return this.orderListRoute();
+  }
+
+  private orderListRoute(): string {
+    return this.isShop() ? '/dashboard/shop/orders' : '/dashboard/supplier/orders';
+  }
+
+  private disputeDetailRoute(id: string): string {
+    if (this.roles().includes('SYSTEM_ADMIN')) return `/dashboard/admin/disputes/${id}`;
+    if (this.isSupplier()) return '/dashboard/supplier/orders';
+    return `/dashboard/shop/disputes/${id}`;
+  }
+
+  private orderDetailRoute(order: any): string {
+    return this.isShop() ? `/dashboard/shop/orders/${order.id}` : '/dashboard/supplier/orders';
+  }
+
   private orderStatusLabel(s: string): string {
     const key = 'STATUS.' + s;
     const v = this.translate.instant(key);
@@ -361,6 +480,6 @@ export class ChatbotService {
     DRAFT: 'brouillon', CONFIRMED: 'confirmée', PREPARING: 'en préparation',
     READY_FOR_DELIVERY: 'prête pour livraison', DELIVERY_ACCEPTED: 'livraison acceptée',
     IN_DELIVERY: 'en livraison', DELIVERED: 'livrée', ACCEPTED: 'acceptée',
-    CANCELLED: 'annulée', REJECTED: 'rejetée',
+    CANCELLED: 'annulée', REJECTED: 'rejetée', DELIVERY_REJECTED: 'livraison rejetée',
   };
 }

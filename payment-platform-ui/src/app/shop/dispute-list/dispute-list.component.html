@@ -40,7 +40,7 @@
               <td><strong>{{ d.id | slice:0:8 }}</strong></td>
               <td>{{ d.orderId | slice:0:8 }}</td>
               <td>{{ d.reason }}</td>
-              <td><span class="payment-badge" [ngClass]="statusClass(d.status)">{{ d.status | statusLabel }}</span></td>
+              <td><span class="payment-badge" [ngClass]="statusClass(d.status)">{{ statusLabel(d.status) }}</span></td>
               <td>{{ d.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
               <td class="actions" (click)="$event.stopPropagation()">
                 <button class="btn btn-sm btn-secondary" (click)="openDispute(d.id)" [attr.aria-label]="('DISPUTES.VIEW_ARIA' | translate:{id: d.id})">{{ 'DISPUTES.VIEW' | translate }}</button>
@@ -62,7 +62,7 @@
       <div class="dispute-card" (click)="openDispute(d.id)">
         <div class="dispute-card-header">
           <span class="dispute-reference">{{ d.id | slice:0:8 }}</span>
-          <span class="payment-badge" [ngClass]="statusClass(d.status)">{{ d.status | statusLabel }}</span>
+          <span class="payment-badge" [ngClass]="statusClass(d.status)">{{ statusLabel(d.status) }}</span>
         </div>
         <div class="dispute-card-body">
           <div class="dispute-row">

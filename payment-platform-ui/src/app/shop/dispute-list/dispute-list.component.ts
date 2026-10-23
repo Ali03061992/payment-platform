@@ -87,7 +87,9 @@ export class DisputeListComponent implements OnInit, OnDestroy {
   }
 
   statusLabel(s: string): string {
-    return statusLabelFr(s);
+    const key = `STATUS.${s}`;
+    const translated = this.translate.instant(key);
+    return translated && translated !== key ? translated : statusLabelFr(s);
   }
 
   statusClass(s: string): string {

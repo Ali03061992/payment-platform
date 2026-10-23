@@ -15,7 +15,7 @@
       <div class="detail-card">
         <div class="detail-label">{{ 'DISPUTES.COL_STATUS' | translate }}</div>
         <div class="detail-value">
-          <span class="payment-badge" [ngClass]="statusClass(dispute.status)">{{ dispute.status | statusLabel }}</span>
+          <span class="payment-badge" [ngClass]="statusClass(dispute.status)">{{ statusLabel(dispute.status) }}</span>
         </div>
       </div>
       <div class="detail-card">
@@ -38,7 +38,7 @@
         </div>
       }
     </div>
-    @if (dispute.status !== 'CLOSED' && dispute.status !== 'RESOLVED') {
+    @if (canResolve() && dispute.status !== 'CLOSED' && dispute.status !== 'RESOLVED') {
       <div class="action-bar no-print">
         <button class="btn btn-success" (click)="resolveDispute()">{{ 'DISPUTES.RESOLVE' | translate }}</button>
         <button class="btn btn-danger" (click)="closeDispute()">{{ 'DISPUTES.CLOSE' | translate }}</button>
@@ -60,7 +60,7 @@
           </div>
         }
       </div>
-      @if (dispute.status !== 'CLOSED' && dispute.status !== 'RESOLVED') {
+      @if (canSendMessage() && dispute.status !== 'CLOSED' && dispute.status !== 'RESOLVED') {
         <div class="message-input comment-form no-print">
           <textarea
             [(ngModel)]="newMessage"

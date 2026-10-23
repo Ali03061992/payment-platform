@@ -41,7 +41,7 @@ export class DisputeDetailComponent implements OnInit, OnDestroy {
     this.qrData = `${environment.appUrl}${this.router.url}`;
     this.subscriptions.add(this.disputeService.getById(id).subscribe({
       next: (data: Dispute) => { this.dispute = data; this.loading = false; },
-      error: () => { this.loading = false; this.router.navigate(['/dashboard/shop/orders']); }
+      error: () => { this.loading = false; this.router.navigate([this.disputesListRoute()]); }
     }));
   }
 
@@ -49,8 +49,19 @@ export class DisputeDetailComponent implements OnInit, OnDestroy {
     this.subscriptions.unsubscribe();
   }
 
+  canSendMessage(): boolean {
+    const roles = this.loginService.getCurrentUser()?.roles || [];
+    return roles.includes('SHOP_ADMIN') || roles.includes('SHOP_MANAGER')
+      || roles.includes('SUPPLIER_ADMIN') || roles.includes('SUPPLIER_AGENT');
+  }
+
+  canResolve(): boolean {
+    const roles = this.loginService.getCurrentUser()?.roles || [];
+    return roles.includes('SYSTEM_ADMIN') || roles.includes('SHOP_ADMIN') || roles.includes('SUPPLIER_ADMIN');
+  }
+
   sendMessage(): void {
-    if (!this.dispute || !this.newMessage.trim()) return;
+    if (!this.canSendMessage() || !this.dispute || !this.newMessage.trim()) return;
     this.submitting = true;
     this.subscriptions.add(this.disputeService.addMessage(this.dispute.id, { content: this.newMessage.trim() }).subscribe({
       next: (data: Dispute) => {
@@ -64,7 +75,7 @@ export class DisputeDetailComponent implements OnInit, OnDestroy {
   }
 
   resolveDispute(): void {
-    if (!this.dispute) return;
+    if (!this.canResolve() || !this.dispute) return;
     const id = this.dispute.id;
     this.subscriptions.add(this.confirmDialog.confirm({
       title: this.translate.instant('DISPUTES.RESOLVE_TITLE'),
@@ -79,7 +90,7 @@ export class DisputeDetailComponent implements OnInit, OnDestroy {
   }
 
   closeDispute(): void {
-    if (!this.dispute) return;
+    if (!this.canResolve() || !this.dispute) return;
     const id = this.dispute.id;
     this.subscriptions.add(this.confirmDialog.confirm({
       title: this.translate.instant('DISPUTES.CLOSE_TITLE'),
@@ -95,7 +106,9 @@ export class DisputeDetailComponent implements OnInit, OnDestroy {
   }
 
   statusLabel(s: string): string {
-    return statusLabelFr(s);
+    const key = `STATUS.${s}`;
+    const translated = this.translate.instant(key);
+    return translated && translated !== key ? translated : statusLabelFr(s);
   }
 
   statusClass(s: string): string {
@@ -108,6 +121,13 @@ export class DisputeDetailComponent implements OnInit, OnDestroy {
 
   senderLabel(msg: any): string {
     return this.translate.instant(msg.senderRole === 'SUPPLIER' ? 'DISPUTES.SENDER_SUPPLIER' : 'DISPUTES.SENDER_SHOP');
+  }
+
+  private disputesListRoute(): string {
+    const roles = this.loginService.getCurrentUser()?.roles || [];
+    if (roles.includes('SYSTEM_ADMIN')) return '/dashboard/admin/disputes';
+    if (roles.includes('SUPPLIER_ADMIN') || roles.includes('SUPPLIER_AGENT')) return '/dashboard/supplier/orders';
+    return '/dashboard/shop/disputes';
   }
 
   backToOrder(): void {

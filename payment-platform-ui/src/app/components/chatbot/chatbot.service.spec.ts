@@ -44,6 +44,14 @@ const FR: Record<string, string> = {
   'CHATBOT.PENDING_SOME': 'paiement(s) en attente',
   'CHATBOT.PAYMENTS_ERROR': 'Impossible de charger les paiements',
   'CHATBOT.COMPLAINT_START': 'Décrivez le problème',
+  'CHATBOT.MY_DISPUTES': 'Retrouvez vos réclamations',
+  'CHATBOT.MY_DISPUTES_FORBIDDEN': 'Votre rôle ne permet pas de consulter la liste',
+  'CHATBOT.MY_DISPUTES_SUPPLIER': 'Liste fournisseur indisponible',
+  'CHATBOT.LINK_MY_DISPUTES': 'Voir mes réclamations',
+  'CHATBOT.LINK_MY_ORDERS': 'Voir mes commandes',
+  'CHATBOT.COMPLAINT_FORBIDDEN': 'Votre rôle ne permet pas',
+  'CHATBOT.COMPLAINT_NOT_ELIGIBLE': 'ne peut être ouverte que si la commande ou la livraison a été rejetée',
+  'CHATBOT.REASON_TOO_LONG': 'Le motif est trop long',
   'CHATBOT.DISPUTE_CREATED': 'Réclamation enregistrée',
   'CHATBOT.DISPUTE_FAILED': "Échec de l'enregistrement",
   'CHATBOT.CHOOSE_ORDER': 'Choisissez',
@@ -235,17 +243,43 @@ describe('ChatbotService', () => {
   describe('réclamation guidée', () => {
     it('should create directly on ref+motif (zero question)', () => {
       service.start();
-      orders.getByReference.and.returnValue(of({ id: 'o1', reference: 'ORD-A1B2C3' }));
+      orders.getByReference.and.returnValue(of({ id: 'o1', reference: 'ORD-A1B2C3', status: 'REJECTED' }));
       disputes.create.and.returnValue(of({ id: 'd1' }));
       service.send('litige');
       service.send('colis cassé ORD-A1B2C3');
-      expect(disputes.create).toHaveBeenCalled();
+      expect(disputes.create).toHaveBeenCalledWith({ orderId: 'o1', reason: 'colis cassé' });
       expect(lastBotText()).toContain('Réclamation enregistrée');
+    });
+
+    it('should create directly from the first complaint message', () => {
+      service.start();
+      orders.getByReference.and.returnValue(of({ id: 'o1', reference: 'ORD-A1B2C3', status: 'REJECTED' }));
+      disputes.create.and.returnValue(of({ id: 'd1' }));
+      service.send('réclamation colis cassé ORD-A1B2C3');
+      expect(disputes.create).toHaveBeenCalledWith({ orderId: 'o1', reason: 'colis cassé' });
+      expect((service as any).state).toBe('idle');
+    });
+
+    it('should refuse an order that is not rejected', () => {
+      service.start();
+      orders.getByReference.and.returnValue(of({ id: 'o1', reference: 'ORD-A1B2C3', status: 'DELIVERED' }));
+      service.send('réclamation ORD-A1B2C3 colis cassé');
+      expect(disputes.create).not.toHaveBeenCalled();
+      expect(lastBotText()).toContain('ne peut être ouverte');
+      expect((service as any).state).toBe('idle');
+    });
+
+    it('should refuse a reason longer than 255 characters', () => {
+      service.start();
+      service.send(`réclamation ORD-A1B2C3 ${'x'.repeat(256)}`);
+      expect(disputes.create).not.toHaveBeenCalled();
+      expect(lastBotText()).toContain('trop long');
+      expect((service as any).state).toBe('idle');
     });
 
     it('should follow reason flow then confirm', () => {
       service.start();
-      orders.getByReference.and.returnValue(of({ id: 'o1', reference: 'ORD-9' }));
+      orders.getByReference.and.returnValue(of({ id: 'o1', reference: 'ORD-9', status: 'REJECTED' }));
       disputes.create.and.returnValue(of({ id: 'd1' }));
       service.send('litige');
       service.send('ORD-9');
@@ -256,9 +290,19 @@ describe('ChatbotService', () => {
       expect(disputes.create).toHaveBeenCalledWith({ orderId: 'o1', reason: 'Retard de livraison' });
     });
 
+    it('should keep asking the reason when it is too long', () => {
+      service.start();
+      orders.getByReference.and.returnValue(of({ id: 'o1', reference: 'ORD-9', status: 'REJECTED' }));
+      service.send('litige');
+      service.send('ORD-9');
+      service.send('x'.repeat(256));
+      expect(lastBotText()).toContain('trop long');
+      expect((service as any).state).toBe('awaitComplaintReasonText');
+    });
+
     it('should ask describe on autre (FR/EN/AR)', () => {
       service.start();
-      orders.getByReference.and.returnValue(of({ id: 'o1', reference: 'ORD-9' }));
+      orders.getByReference.and.returnValue(of({ id: 'o1', reference: 'ORD-9', status: 'REJECTED' }));
       service.send('litige');
       service.send('ORD-9');
       service.send('أخرى (صِف)');
@@ -268,7 +312,7 @@ describe('ChatbotService', () => {
 
     it('should reset on cancel at confirm', () => {
       service.start();
-      orders.getByReference.and.returnValue(of({ id: 'o1', reference: 'ORD-9' }));
+      orders.getByReference.and.returnValue(of({ id: 'o1', reference: 'ORD-9', status: 'REJECTED' }));
       service.send('litige');
       service.send('ORD-9');
       service.send('Retard de livraison');
@@ -279,11 +323,30 @@ describe('ChatbotService', () => {
 
     it('should handle dispute creation error without blocking', () => {
       service.start();
-      orders.getByReference.and.returnValue(of({ id: 'o1', reference: 'ORD-9ABC' }));
+      orders.getByReference.and.returnValue(of({ id: 'o1', reference: 'ORD-9ABC', status: 'REJECTED' }));
       disputes.create.and.returnValue(throwError(() => ({ error: {} })));
       service.send('litige');
       service.send('emballage déchiré ORD-9ABC');
       expect(lastBotText()).toContain("Échec de l'enregistrement");
+      expect((service as any).state).toBe('idle');
+    });
+
+    it('should list disputes from a dedicated intent', () => {
+      service.start();
+      service.send('mes réclamations');
+      const last = (service as any).messagesSubject.getValue().filter((m: any) => m.from === 'bot').pop();
+      expect(last.text).toContain('Retrouvez vos réclamations');
+      expect(last.links[0].route).toBe('/dashboard/shop/disputes');
+      expect(disputes.create).not.toHaveBeenCalled();
+    });
+
+    it('should refuse complaint creation for a read-only shop role', () => {
+      login.getCurrentUser.and.returnValue({ firstName: 'Ali', roles: ['SHOP_AGENT'] } as any);
+      service.start();
+      service.send('réclamation ORD-A1B2C3 colis cassé');
+      expect(orders.getByReference).not.toHaveBeenCalled();
+      expect(disputes.create).not.toHaveBeenCalled();
+      expect(lastBotText()).toContain('Votre rôle ne permet pas');
       expect((service as any).state).toBe('idle');
     });
   });
