@@ -84,6 +84,10 @@ class WebAuthnUseCaseH2Test {
         assertThat(options.getUser().getId().toBase64UrlString())
                 .isEqualTo(WebAuthnSupport.userHandle(user.id().value()).toBase64UrlString());
         assertThat(options.getPubKeyCredParams()).isNotEmpty();
+        assertThat(options.getAuthenticatorSelection().getAuthenticatorAttachment())
+                .isEqualTo(org.springframework.security.web.webauthn.api.AuthenticatorAttachment.PLATFORM);
+        assertThat(options.getAuthenticatorSelection().getUserVerification())
+                .isEqualTo(org.springframework.security.web.webauthn.api.UserVerificationRequirement.REQUIRED);
     }
 
     @Test
@@ -142,6 +146,8 @@ class WebAuthnUseCaseH2Test {
         var requestOptions = login.startLogin("passkey.user");
         assertThat(requestOptions.getRpId()).isEqualTo("localhost");
         assertThat(requestOptions.getAllowCredentials()).hasSize(1);
+        assertThat(requestOptions.getUserVerification())
+                .isEqualTo(org.springframework.security.web.webauthn.api.UserVerificationRequirement.REQUIRED);
 
         var assertion = authenticator.get(requestOptions, WebAuthnSupport.userHandle(user.id().value()).getBytes());
         var response = login.finishLogin(assertion);
@@ -156,6 +162,8 @@ class WebAuthnUseCaseH2Test {
         var requestOptions = login.startLogin("ghost.user");
 
         assertThat(requestOptions.getAllowCredentials()).isEmpty();
+        assertThat(requestOptions.getUserVerification())
+                .isEqualTo(org.springframework.security.web.webauthn.api.UserVerificationRequirement.REQUIRED);
     }
 
     @Test

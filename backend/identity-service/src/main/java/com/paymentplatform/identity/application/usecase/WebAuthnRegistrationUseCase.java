@@ -19,6 +19,7 @@ import com.paymentplatform.shared.infrastructure.audit.AuditRecorder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.web.webauthn.api.AttestationConveyancePreference;
+import org.springframework.security.web.webauthn.api.AuthenticatorAttachment;
 import org.springframework.security.web.webauthn.api.AuthenticatorSelectionCriteria;
 import org.springframework.security.web.webauthn.api.Bytes;
 import org.springframework.security.web.webauthn.api.CredentialRecord;
@@ -105,9 +106,10 @@ public class WebAuthnRegistrationUseCase {
                 .timeout(Duration.ofSeconds(properties.timeoutSeconds()))
                 .excludeCredentials(exclude)
                 .authenticatorSelection(AuthenticatorSelectionCriteria.builder()
+                        .authenticatorAttachment(AuthenticatorAttachment.PLATFORM)
                         .residentKey(org.springframework.security.web.webauthn.api.ResidentKeyRequirement.PREFERRED)
                         .userVerification(
-                                org.springframework.security.web.webauthn.api.UserVerificationRequirement.PREFERRED)
+                                org.springframework.security.web.webauthn.api.UserVerificationRequirement.REQUIRED)
                         .build())
                 .attestation(AttestationConveyancePreference.NONE)
                 .build();
@@ -157,9 +159,10 @@ public class WebAuthnRegistrationUseCase {
                         org.springframework.security.web.webauthn.api.PublicKeyCredentialParameters.ES256,
                         org.springframework.security.web.webauthn.api.PublicKeyCredentialParameters.RS256))
                 .authenticatorSelection(AuthenticatorSelectionCriteria.builder()
+                        .authenticatorAttachment(AuthenticatorAttachment.PLATFORM)
                         .residentKey(org.springframework.security.web.webauthn.api.ResidentKeyRequirement.PREFERRED)
                         .userVerification(
-                                org.springframework.security.web.webauthn.api.UserVerificationRequirement.PREFERRED)
+                                org.springframework.security.web.webauthn.api.UserVerificationRequirement.REQUIRED)
                         .build())
                 .build();
         if (!creationOptions.getUser().getId().toBase64UrlString()

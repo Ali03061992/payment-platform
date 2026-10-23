@@ -111,7 +111,7 @@ public class WebAuthnLoginUseCase {
                 .timeout(Duration.ofSeconds(properties.timeoutSeconds()))
                 .rpId(properties.rpId())
                 .allowCredentials(allowCredentials)
-                .userVerification(UserVerificationRequirement.PREFERRED)
+                .userVerification(UserVerificationRequirement.REQUIRED)
                 .build();
 
         challenges.deleteExpired(Instant.now());
@@ -140,7 +140,7 @@ public class WebAuthnLoginUseCase {
                 .challenge(new Bytes(stored.challenge()))
                 .rpId(properties.rpId())
                 .allowCredentials(List.of())
-                .userVerification(UserVerificationRequirement.PREFERRED)
+                .userVerification(UserVerificationRequirement.REQUIRED)
                 .build();
         org.springframework.security.web.webauthn.api.PublicKeyCredentialUserEntity userEntity;
         try {
