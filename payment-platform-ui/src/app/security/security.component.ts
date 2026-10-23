@@ -5,6 +5,7 @@ import { NotificationPreferences, WebAuthnCredential } from '../models/passkey.m
 import { ToastService } from '../services/toast.service';
 import { WebAuthnService } from '../services/web-authn.service';
 import { WebPushService } from '../services/web-push.service';
+import { PASSKEYS_ENABLED } from '../core/passkeys.config';
 
 /**
  * Page Sécurité : gestion des passkeys (ajout / renommage / révocation)
@@ -18,6 +19,7 @@ import { WebPushService } from '../services/web-push.service';
 })
 export class SecurityComponent implements OnInit {
 
+  readonly passkeysEnabled = PASSKEYS_ENABLED;
   credentials: WebAuthnCredential[] = [];
   credentialsLoading = false;
   passkeySupported = false;
@@ -50,8 +52,10 @@ export class SecurityComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    void WebAuthnService.isAvailable().then((available) => this.passkeySupported = available);
-    this.loadCredentials();
+    if (this.passkeysEnabled) {
+      void WebAuthnService.isAvailable().then((available) => this.passkeySupported = available);
+      this.loadCredentials();
+    }
     if (this.pushSupported) {
       this.loadPushState();
     }

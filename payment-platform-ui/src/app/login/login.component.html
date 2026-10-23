@@ -26,7 +26,7 @@
         {{ loading ? ('AUTH.LOGIN_LOADING' | translate) : ('AUTH.LOGIN_BUTTON' | translate) }}
       </button>
 
-      @if (passkeySupported) {
+      @if (passkeysEnabled && passkeySupported) {
         <div class="passkey-separator" aria-hidden="true">
           <span></span>
           <small>{{ 'AUTH.PASSKEY_SEPARATOR' | translate }}</small>

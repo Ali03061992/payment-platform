@@ -6,6 +6,7 @@ import { PushNotificationService } from '../services/push-notification.service';
 import { ThemeService } from '../services/theme.service';
 import { WebAuthnService } from '../services/web-authn.service';
 import { BRAND } from '../core/brand.config';
+import { PASSKEYS_ENABLED } from '../core/passkeys.config';
 
 @Component({
     selector: 'app-login',
@@ -15,6 +16,7 @@ import { BRAND } from '../core/brand.config';
 })
 export class LoginComponent implements OnInit {
   readonly brand = BRAND;
+  readonly passkeysEnabled = PASSKEYS_ENABLED;
   form = { username: '', password: '' };
   error = '';
   loading = false;
@@ -36,6 +38,9 @@ export class LoginComponent implements OnInit {
     // par APP_INITIALIZER (cookie HttpOnly). On ne réaffiche pas le login.
     if (this.loginService.isLoggedIn()) {
       void this.router.navigateByUrl(this.safeReturnUrl() || '/dashboard');
+      return;
+    }
+    if (!this.passkeysEnabled) {
       return;
     }
     void WebAuthnService.isAvailable().then((available) => this.passkeySupported = available);
