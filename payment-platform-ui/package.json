@@ -42,7 +42,7 @@
     "@angular/service-worker": "^21.2.23",
     "@ngx-translate/core": "^15.0.0",
     "@ngx-translate/http-loader": "^8.0.0",
-    "@zxing/library": "^0.20.0",
+    "@zxing/library": "^0.23.0",
     "@zxing/ngx-scanner": "^21.0.0",
     "angularx-qrcode": "^20.0.0",
     "echarts": "^6.1.0",
