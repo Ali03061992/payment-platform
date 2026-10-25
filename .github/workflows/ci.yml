@@ -88,7 +88,7 @@ jobs:
           cache: maven
 
       - name: Cache Maven local repo
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ~/.m2/repository
           key: maven-${{ hashFiles('backend/pom.xml', 'backend/*/pom.xml') }}
@@ -231,7 +231,7 @@ jobs:
 
       - name: Cache Sonar packages
         if: steps.check-token.outputs.available == 'true'
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ~/.sonar/cache
           key: sonar-${{ runner.os }}-${{ hashFiles('backend/pom.xml') }}
@@ -239,7 +239,7 @@ jobs:
 
       - name: SonarCloud/Binary cache
         if: steps.check-token.outputs.available == 'true'
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ~/.m2/repository/org/sonarsource
           key: sonar-maven-${{ hashFiles('backend/pom.xml') }}
