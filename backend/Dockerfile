@@ -16,7 +16,7 @@ COPY . ./
 ARG SERVICE_NAME
 RUN --mount=type=cache,target=/root/.m2 mvn -pl ${SERVICE_NAME} -am package -DskipTests -B
 
-FROM eclipse-temurin:26-jre
+FROM eclipse-temurin:27-jre
 WORKDIR /app
 RUN groupadd --system app \
     && useradd --system --gid app --home-dir /app --shell /usr/sbin/nologin app \
