@@ -76,7 +76,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 45
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0 # full history for Sonar blame/branch analysis
 
@@ -155,7 +155,7 @@ jobs:
       run:
         working-directory: payment-platform-ui
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
@@ -216,7 +216,7 @@ jobs:
         id: check-token
         run: echo "available=${{ secrets.SONAR_TOKEN != '' }}" >> "$GITHUB_OUTPUT"
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         if: steps.check-token.outputs.available == 'true'
         with:
           fetch-depth: 0
@@ -283,7 +283,7 @@ jobs:
         id: check-token
         run: echo "available=${{ secrets.SONAR_TOKEN != '' }}" >> "$GITHUB_OUTPUT"
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         if: steps.check-token.outputs.available == 'true'
         with:
           fetch-depth: 0
@@ -342,7 +342,7 @@ jobs:
     outputs:
       sha_tag: ${{ steps.tags.outputs.sha_tag }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Login to GHCR (si publication prévue)
         if: github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/heads/release/') || github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/')
