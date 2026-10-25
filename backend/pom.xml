@@ -35,7 +35,7 @@
     <testcontainers.version>2.0.5</testcontainers.version>
     <lombok.version>1.18.48</lombok.version>
     <mapstruct.version>1.6.3</mapstruct.version>
-    <archunit.version>1.4.2</archunit.version>
+    <archunit.version>1.5.1</archunit.version>
     <maven.compiler.release>26</maven.compiler.release>
     <!-- JaCoCo / Sonar versions -->
     <jacoco.version>0.8.15</jacoco.version>
