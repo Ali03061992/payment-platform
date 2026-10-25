@@ -1,5 +1,5 @@
 # Production : frontend Angular servi par nginx (VM OVH + CI).
-FROM node:22-alpine AS build
+FROM node:26-alpine AS build
 WORKDIR /app
 COPY payment-platform-ui/package.json payment-platform-ui/package-lock.json ./
 # Cache BuildKit npm + install déterministe (lockfile).
