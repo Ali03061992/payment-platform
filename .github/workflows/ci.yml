@@ -81,7 +81,7 @@ jobs:
           fetch-depth: 0 # full history for Sonar blame/branch analysis
 
       - name: Set up JDK 26
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v6
         with:
           java-version: ${{ env.JAVA_VERSION }}
           distribution: ${{ env.JAVA_DISTRIBUTION }}
@@ -223,7 +223,7 @@ jobs:
 
       - name: Set up JDK 26
         if: steps.check-token.outputs.available == 'true'
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v6
         with:
           java-version: ${{ env.JAVA_VERSION }}
           distribution: ${{ env.JAVA_DISTRIBUTION }}
