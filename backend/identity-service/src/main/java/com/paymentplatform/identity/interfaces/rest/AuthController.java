@@ -14,17 +14,15 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthUseCase auth;
-    private final RegisterUseCase register;
     private final UserQueryUseCase users;
     private final ChangePasswordUseCase changePassword;
     private final RefreshTokenService refreshTokens;
     private final RefreshCookieSupport cookies;
 
-    public AuthController(AuthUseCase auth, RegisterUseCase register, UserQueryUseCase users,
+    public AuthController(AuthUseCase auth, UserQueryUseCase users,
                           ChangePasswordUseCase changePassword, RefreshTokenService refreshTokens,
                           RefreshCookieSupport cookies) {
         this.auth = auth;
-        this.register = register;
         this.users = users;
         this.changePassword = changePassword;
         this.refreshTokens = refreshTokens;
@@ -68,11 +66,6 @@ public class AuthController {
         return ResponseEntity.noContent()
                 .header(HttpHeaders.SET_COOKIE, cookies.clear().toString())
                 .build();
-    }
-
-    @PostMapping("/register")
-    public ResponseEntity<UserResponse> register(@Valid @RequestBody RegisterRequest request) {
-        return ResponseEntity.status(201).body(register.register(request));
     }
 
     @GetMapping("/me")

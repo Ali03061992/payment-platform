@@ -9,7 +9,7 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * B2 : le brute-force sur login/register/refresh doit être freiné.
+ * B2 : le brute-force sur login/refresh doit être freiné.
  * Test unitaire pur (pas de contexte Spring) du {@link RateLimitFilter}.
  */
 class RateLimitFilterTest {
@@ -47,15 +47,15 @@ class RateLimitFilterTest {
     }
 
     @Test
-    void registerAndRefresh_shareTheSameStrictAuthBucket() throws Exception {
+    void webauthnLoginAndRefresh_shareTheSameStrictAuthBucket() throws Exception {
         RateLimitFilter filter = new RateLimitFilter(120, 10);
 
         for (int i = 0; i < 10; i++) {
             doFilter(filter, authRequest("/api/auth/login", IP), new MockHttpServletResponse());
         }
 
-        // Même IP : register et refresh puisent dans le même bucket auth déjà épuisé.
-        assertThat(doFilter(filter, authRequest("/api/auth/register", IP), new MockHttpServletResponse()))
+        // Même IP : les autres endpoints d'auth puisent dans le même bucket déjà épuisé.
+        assertThat(doFilter(filter, authRequest("/api/auth/webauthn/login", IP), new MockHttpServletResponse()))
                 .isEqualTo(429);
         assertThat(doFilter(filter, authRequest("/api/auth/refresh", IP), new MockHttpServletResponse()))
                 .isEqualTo(429);

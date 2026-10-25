@@ -54,9 +54,10 @@ describe('11 - Navigation: Guards', () => {
     cy.url({ timeout: 5000 }).should('include', '/login');
   });
 
-  it('should redirect from root to login', () => {
+  it('should display the public landing page from root', () => {
     cy.visit('/');
-    cy.url({ timeout: 5000 }).should('include', '/login');
+    cy.url({ timeout: 5000 }).should('not.include', '/login');
+    cy.get('[data-testid="landing-page"]').should('exist');
   });
 
   it('should show 404 page for unknown routes', () => {

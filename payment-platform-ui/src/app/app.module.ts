@@ -7,8 +7,8 @@ import { QRCodeComponent } from 'angularx-qrcode';
 import { environment } from '../environments/environment';
 
 import { AppComponent } from './app.component';
+import { LandingComponent } from './landing/landing.component';
 import { LoginComponent } from './login/login.component';
-import { RegisterComponent } from './register/register.component';
 import { PasswordSetupComponent } from './password-setup/password-setup.component';
 import { ForgotPasswordComponent } from './forgot-password/forgot-password.component';
 import { ResetPasswordComponent } from './reset-password/reset-password.component';
@@ -135,8 +135,8 @@ export function initApp(translate: TranslateService, loginService: LoginService)
 
 @NgModule({ declarations: [
         AppComponent,
+        LandingComponent,
         LoginComponent,
-        RegisterComponent,
         PasswordSetupComponent,
         ForgotPasswordComponent,
         ResetPasswordComponent,

@@ -62,7 +62,6 @@ public class GatewaySecurityConfig {
                         .requestMatchers(
                                 "/api/auth/login",
                                 "/api/auth/password-reset/**",
-                                "/api/auth/register",
                                 "/api/auth/refresh",
                                 "/api/auth/logout",
                                 "/api/auth/password-setup/**",

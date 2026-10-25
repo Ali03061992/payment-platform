@@ -238,40 +238,10 @@ class AuthControllerTest {
     }
 
     @Test
-    void register_validRequest_returns201() throws Exception {
-        String uname = "reg." + System.nanoTime();
-        com.paymentplatform.identity.application.dto.RegisterRequest request =
-                new com.paymentplatform.identity.application.dto.RegisterRequest(
-                        uname, uname + "@example.com",
-                        "Password@1", "New", "User", "+21699123456", "SHOP_AGENT");
+    void register_endpointIsNotPubliclyAccessible() throws Exception {
         mockMvc.perform(post("/api/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.username").value(uname));
-    }
-
-    @Test
-    void register_duplicateUsername_returns409() throws Exception {
-        com.paymentplatform.identity.application.dto.RegisterRequest request =
-                new com.paymentplatform.identity.application.dto.RegisterRequest(
-                        testUsername, "another." + System.nanoTime() + "@example.com",
-                        "Password@1", "Another", "User", null, "SHOP_AGENT");
-        mockMvc.perform(post("/api/auth/register")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isConflict());
-    }
-
-    @Test
-    void register_invalidEmail_returns400() throws Exception {
-        com.paymentplatform.identity.application.dto.RegisterRequest request =
-                new com.paymentplatform.identity.application.dto.RegisterRequest(
-                        "valid." + System.nanoTime(), "not-an-email",
-                        "Password@1", "Valid", "User", null, "SHOP_AGENT");
-        mockMvc.perform(post("/api/auth/register")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest());
+                        .content("{}"))
+                .andExpect(status().isUnauthorized());
     }
 }

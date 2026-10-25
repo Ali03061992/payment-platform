@@ -39,11 +39,11 @@ payment-platform-mobile/
 
 - `POST /api/auth/login` → `{accessToken, refreshToken, expiresIn, user}`. Stockage secure tokens, cache user JSON.
 - Dio interceptor : `Authorization: Bearer`, refresh auto sur 401 via `POST /api/auth/refresh` (rotation, ancien révoqué), logout sur échec (`POST /api/auth/logout` + `DELETE /api/fcm-tokens` + clear).
-- `GET /api/auth/me` au boot pour resync rôle/statut. `POST /api/auth/register` (naît DISABLED), `POST /api/auth/change-password` (révoque refresh).
+- `GET /api/auth/me` au boot pour resync rôle/statut. Pas d'auto-inscription : un administrateur crée le compte et l'utilisateur reçoit un lien email sécurisé pour définir son mot de passe. `POST /api/auth/change-password` (révoque refresh).
 
 ## Router (go_router)
 
-- Publiques : `/login`, `/register`, `/setup-password`, `/403`, `/404`.
+- Publiques : `/login`, `/setup-password`, `/403`, `/404`.
 - Protégées `/` (ShellRoute bottom-nav + drawer par rôle) :
   - tous : `/`, `/payments`, `/payments/create` (sauf SUPPLIER_AGENT), `/payments/stats`, `/payments/:id`, `/scan`, `/export`, `/notifications`, `/change-password`
   - supplier : `/supplier/agent-payments`, `/supplier/financial` (ADMIN), `/supplier/balance` (ADMIN), `/supplier/stock`, `/supplier/optimization` (ADMIN), `/supplier/stock/create` (ADMIN), `/supplier/categories|families|products` (ADMIN), `/supplier/dashboard`, `/supplier/low-stock-alerts` (ADMIN), `/supplier/orders`, `/supplier/orders/create` (ADMIN), `/supplier/deliveries`

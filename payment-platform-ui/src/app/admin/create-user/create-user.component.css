@@ -30,6 +30,13 @@
 
 .required { color: #e53935; }
 
+.form-hint {
+  margin: 6px 0 0;
+  color: var(--text-secondary);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
 .phone-input {
   display: flex;
   align-items: stretch;

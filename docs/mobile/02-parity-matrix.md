@@ -9,8 +9,7 @@ Légende : ✅ à porter mobile, ❌ exclu mobile (desktop uniquement).
 | Route Angular | Écran Flutter | Rôles mobiles | Notes |
 |---|---|---|---|
 | `/login` | `features/auth/login` | tous | même DTO `{username,password}` |
-| `/register` | `features/auth/register` | tous | naît DISABLED (M5) |
-| `/setup-password` | `features/auth/setup_password` | tous | |
+| `/setup-password` | `features/auth/setup_password` | tous | lien reçu par email après création admin |
 | `/dashboard` | `features/dashboard` | tous | dispatch : supplier/shop/agent widgets |
 | `/dashboard/payments` | `/payments` | tous | paginé B5, filtre org auto JWT |
 | `/dashboard/payments/:id` | `/payments/:id` | tous | détail + historique, 403 hors périmètre |

@@ -77,7 +77,7 @@ class UserControllerTest {
     void create_validRequest_returns201() throws Exception {
         String uname = "newadmin." + System.nanoTime();
         CreateInternalUserRequest request = new CreateInternalUserRequest(
-                uname, uname + "@example.com", "Password@1",
+                uname, uname + "@example.com",
                 "New", "Admin", null, null, "SHOP_ADMIN");
 
         mockMvc.perform(post("/api/users")
@@ -136,7 +136,7 @@ class UserControllerTest {
     @Test
     void create_withoutAuth_returns401() throws Exception {
         CreateInternalUserRequest request = new CreateInternalUserRequest(
-                "noauth." + System.nanoTime(), "noauth." + System.nanoTime() + "@example.com", "Password@1",
+                "noauth." + System.nanoTime(), "noauth." + System.nanoTime() + "@example.com",
                 "No", "Auth", null, null, "SHOP_ADMIN");
 
         mockMvc.perform(post("/api/users")

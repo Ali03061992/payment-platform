@@ -4,8 +4,8 @@ import { AuthGuard } from './core/auth.guard';
 import { RoleGuard } from './core/role.guard';
 
 import { LayoutComponent } from './layout/layout.component';
+import { LandingComponent } from './landing/landing.component';
 import { LoginComponent } from './login/login.component';
-import { RegisterComponent } from './register/register.component';
 import { PasswordSetupComponent } from './password-setup/password-setup.component';
 import { ForgotPasswordComponent } from './forgot-password/forgot-password.component';
 import { ResetPasswordComponent } from './reset-password/reset-password.component';
@@ -66,9 +66,9 @@ export const shopRoles = ['SHOP_ADMIN', 'SHOP_AGENT'];
 export const allRoles = [...adminRoles, ...supplierRoles, ...shopRoles];
 
 const routes: Routes = [
-  { path: '', redirectTo: '/dashboard', pathMatch: 'full' },
+  { path: '', component: LandingComponent, pathMatch: 'full' },
   { path: 'login', component: LoginComponent },
-  { path: 'register', component: RegisterComponent },
+  { path: 'register', redirectTo: 'login', pathMatch: 'full' },
   { path: 'setup-password', component: PasswordSetupComponent },
   { path: 'forgot-password', component: ForgotPasswordComponent },
   { path: 'reset-password', component: ResetPasswordComponent },

@@ -20,7 +20,6 @@ export class JwtInterceptor implements HttpInterceptor {
    */
   private static readonly AUTH_URLS = [
     '/api/auth/login',
-    '/api/auth/register',
     '/api/auth/refresh',
     '/api/auth/logout',
     '/api/auth/password-setup',

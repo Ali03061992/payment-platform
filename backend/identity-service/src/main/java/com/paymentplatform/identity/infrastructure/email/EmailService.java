@@ -28,8 +28,9 @@ public class EmailService {
     }
 
     @Async
-    public void sendPasswordSetupEmail(String to, String firstName, String token) {        String link = frontendUrl + "/setup-password?token=" + token;
-        String subject = "NEXTERA - Configuration de votre mot de passe";
+    public void sendPasswordSetupEmail(String to, String firstName, String token) {
+        String link = frontendUrl + "/setup-password?token=" + token;
+        String subject = "Bienvenue sur NEXTERA - Créez votre mot de passe";
         String htmlBody = buildPasswordSetupHtml(firstName, link);
 
         try {
@@ -90,14 +91,15 @@ public class EmailService {
                         </div>
                         <div class="content">
                             <h2>Bonjour %s,</h2>
-                            <p>Votre compte a été créé avec succès. Veuillez configurer votre mot de passe en cliquant sur le bouton ci-dessous :</p>
+                            <p>Un administrateur NEXTERA vient de créer votre compte. Pour finaliser votre accès, choisissez votre mot de passe en cliquant sur le bouton ci-dessous :</p>
                             <p style="text-align: center;">
-                                <a href="%s" class="button">Configurer mon mot de passe</a>
+                                <a href="%s" class="button">Créer mon mot de passe</a>
                             </p>
                             <div class="warning">
-                                <strong>⚠️ Ce lien expire dans 24 heures.</strong>
+                                <strong>⚠️ Ce lien expire dans 24 heures et n'est utilisable qu'une seule fois.</strong>
                             </div>
-                            <p>Si vous n'avez pas demandé la création de ce compte, veuillez ignorer cet email.</p>
+                            <p>Une fois votre mot de passe défini, vous pourrez vous connecter avec vos identifiants NEXTERA.</p>
+                            <p>Si vous n'attendiez pas cette invitation, veuillez ignorer cet email ou contacter votre administrateur.</p>
                         </div>
                         <div class="footer">
                             <p>© 2026 NEXTERA. Tous droits réservés.</p>

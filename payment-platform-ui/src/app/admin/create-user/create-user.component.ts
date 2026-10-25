@@ -16,7 +16,6 @@ export class CreateUserComponent implements OnInit {
   form = {
     username: '',
     email: '',
-    password: '',
     firstName: '',
     lastName: '',
     phone: '',
@@ -76,7 +75,6 @@ export class CreateUserComponent implements OnInit {
     const payload: any = {
       username: this.form.username,
       email: this.form.email,
-      password: this.form.password,
       firstName: this.form.firstName,
       lastName: this.form.lastName,
       phone: this.form.phone,

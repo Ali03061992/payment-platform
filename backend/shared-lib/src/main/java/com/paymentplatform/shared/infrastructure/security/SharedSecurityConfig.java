@@ -37,7 +37,7 @@ public class SharedSecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/login", "/api/auth/register", "/api/auth/refresh",
+                        .requestMatchers("/api/auth/login", "/api/auth/refresh",
                                 "/api/auth/logout",
                                 "/api/auth/password-setup/**",
                                 "/api/auth/password-reset/**",

@@ -112,6 +112,18 @@ describe('CreateUserComponent', () => {
       expect(toast.success).toHaveBeenCalled();
     });
 
+    it('should never send a password (invitation by email instead)', () => {
+      userService.create.and.returnValue(of({} as any));
+      component.form.username = 'agent';
+      component.form.email = 'agent@example.com';
+      component.form.role = 'SHOP_AGENT';
+      component.form.organizationId = 2;
+      component.onSubmit();
+      const payload = userService.create.calls.mostRecent().args[0] as Record<string, unknown>;
+      expect(payload['password']).toBeUndefined();
+      expect(payload['email']).toBe('agent@example.com');
+    });
+
     it('should handle error', () => {
       userService.create.and.returnValue(throwError(() => ({ error: { message: 'Duplicate username' } })));
       component.onSubmit();

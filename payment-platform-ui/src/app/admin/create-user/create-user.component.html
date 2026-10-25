@@ -22,11 +22,8 @@
       </div>
       <div class="form-group">
         <label for="email">{{ 'AUTH.EMAIL' | translate }} <span class="required">*</span></label>
-        <input id="email" type="email" [(ngModel)]="form.email" name="email" required placeholder="jean@exemple.com">
-      </div>
-      <div class="form-group">
-        <label for="password">{{ 'AUTH.PASSWORD' | translate }} <span class="required">*</span></label>
-        <input id="password" type="password" [(ngModel)]="form.password" name="password" required minlength="8" autocomplete="new-password" placeholder="********">
+        <input id="email" type="email" [(ngModel)]="form.email" name="email" required placeholder="jean@exemple.com" autocomplete="email">
+        <p class="form-hint">{{ 'USERS.CREATE_EMAIL_HINT' | translate }}</p>
       </div>
       <div class="form-group">
         <label for="phone">{{ 'AUTH.PHONE' | translate }}</label>
@@ -54,7 +51,7 @@
           </select>
         </div>
       }
-      <button type="submit" class="btn btn-primary btn-block" [disabled]="loading || !form.password || (requiresOrganization && !form.organizationId)">
+      <button type="submit" class="btn btn-primary btn-block" [disabled]="loading || (requiresOrganization && !form.organizationId)">
         {{ loading ? ('USERS.CREATING' | translate) : ('USERS.CREATE_BUTTON' | translate) }}
       </button>
     </form>
@@ -65,9 +62,9 @@
   <div class="success-card">
     <div class="success-icon"><app-icon name="check-circle" [size]="40"></app-icon></div>
     <h2>{{ 'USERS.CREATED_TITLE' | translate }}</h2>
-    <p>{{ 'USERS.CREATED_MSG_PREFIX' | translate }} <strong>{{ form.username }}</strong> {{ 'USERS.CREATED_MSG_SUFFIX' | translate }} <strong>{{ form.password }}</strong>.</p>
+    <p>{{ 'USERS.CREATED_MSG_PREFIX' | translate }} <strong>{{ form.username }}</strong> {{ 'USERS.CREATED_MSG_SUFFIX' | translate }} <strong>{{ form.email }}</strong>.</p>
     <div class="success-actions">
-      <button class="btn btn-primary" (click)="success = false; form = {username:'',email:'',password:'',firstName:'',lastName:'',phone:'',role:'SHOP_AGENT',organizationId:null}">
+      <button class="btn btn-primary" (click)="success = false; form = {username:'',email:'',firstName:'',lastName:'',phone:'',role:'SHOP_AGENT',organizationId:null}">
         {{ 'USERS.CREATE_ANOTHER' | translate }}
       </button>
       <button class="btn btn-secondary" (click)="goBack()">{{ 'USERS.BACK_TO_LIST' | translate }}</button>

@@ -1,13 +1,12 @@
 // @ts-nocheck
 /**
  * Tests du service AuthService.
- * Perimetre : instanciation et blocs register (voir blocs describe/it).
+ * Perimetre : instanciation et changement de mot de passe (voir blocs describe/it).
  * Moyens : HttpTestingController, TestBed, client HTTP de test.
  */
 import { TestBed } from '@angular/core/testing';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { AuthService } from './auth.service';
-import { User } from '../models/user.model';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('AuthService', () => {
@@ -31,21 +30,13 @@ describe('AuthService', () => {
     expect(service).toBeTruthy();
   });
 
-  describe('register', () => {
-    it('should POST to register', () => {
-      const mock: User = {
-        id: 1, username: 'newuser', email: 'n@b.com', firstName: 'New', lastName: 'User',
-        phone: '123', organizationId: 1, roles: ['SHOP_AGENT'], status: 'ACTIVE', createdAt: '', updatedAt: ''
-      };
-      service.register({
-        username: 'newuser', email: 'n@b.com', password: 'pass123',
-        firstName: 'New', lastName: 'User', phone: '123', role: 'SHOP_AGENT'
-      }).subscribe(data => {
-        expect(data.username).toBe('newuser');
-      });
-      const req = httpMock.expectOne('/api/auth/register');
+  describe('changePassword', () => {
+    it('should POST to change-password', () => {
+      service.changePassword('OldPass@1', 'NewPass@1').subscribe();
+      const req = httpMock.expectOne('/api/auth/change-password');
       expect(req.request.method).toBe('POST');
-      req.flush(mock);
+      expect(req.request.body).toEqual({ currentPassword: 'OldPass@1', newPassword: 'NewPass@1' });
+      req.flush(null);
     });
   });
 });

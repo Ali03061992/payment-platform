@@ -22,7 +22,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Rate limiting par IP avec fenêtre glissante d'une minute.
  * Protège le gateway contre les abus et les attaques DDoS.
  *
- * <p>B2 : les endpoints d'authentification (login/register/refresh) ont un bucket
+ * <p>B2 : les endpoints d'authentification (login/refresh) ont un bucket
  * strict dédié (défaut 10/min/IP) pour freiner le brute-force. Les autres routes
  * gardent le bucket général. Les réponses 429 portent {@code Retry-After: 60}
  * (backoff progressif côté client — pas de sleep serveur pour ne pas épuiser
@@ -96,7 +96,6 @@ public class RateLimitFilter extends OncePerRequestFilter {
 
     private boolean isAuthPath(String path) {
         return path.startsWith("/api/auth/login")
-                || path.startsWith("/api/auth/register")
                 || path.startsWith("/api/auth/refresh")
                 || path.startsWith("/api/auth/logout")
                 // WebAuthn : login/options + login sont publics (rate-limit strict)

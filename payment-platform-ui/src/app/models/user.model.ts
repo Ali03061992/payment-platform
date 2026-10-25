@@ -27,16 +27,6 @@ export interface LoginResponse {
   refreshExpiresIn?: number;
 }
 
-export interface RegisterRequest {
-  username: string;
-  email: string;
-  password: string;
-  firstName: string;
-  lastName: string;
-  phone: string;
-  role: string;
-}
-
 /** Page d'utilisateurs telle que retournée par GET /api/users (page/size + filtres). */
 export interface UserPage {
   items: User[];

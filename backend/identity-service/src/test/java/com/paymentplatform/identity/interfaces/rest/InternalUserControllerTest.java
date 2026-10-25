@@ -43,7 +43,7 @@ class InternalUserControllerTest {
     @Test
     void create_validToken_returns201() throws Exception {
         CreateInternalUserRequest request = new CreateInternalUserRequest(
-                "internaluser." + System.nanoTime(), "internal." + System.nanoTime() + "@example.com", "Password@1",
+                "internaluser." + System.nanoTime(), "internal." + System.nanoTime() + "@example.com",
                 "Internal", "User", null, UUID.fromString("00000000-0000-0000-0000-000000000005"), "SHOP_ADMIN");
 
         mockMvc.perform(post("/api/internal/users")
@@ -57,7 +57,7 @@ class InternalUserControllerTest {
     @Test
     void create_invalidToken_returns401() throws Exception {
         CreateInternalUserRequest request = new CreateInternalUserRequest(
-                "internaluser." + System.nanoTime(), "internal." + System.nanoTime() + "@example.com", "Password@1",
+                "internaluser." + System.nanoTime(), "internal." + System.nanoTime() + "@example.com",
                 "Internal", "User", null, UUID.fromString("00000000-0000-0000-0000-000000000005"), "SHOP_ADMIN");
 
         mockMvc.perform(post("/api/internal/users")
@@ -70,7 +70,7 @@ class InternalUserControllerTest {
     @Test
     void create_missingToken_returns401() throws Exception {
         CreateInternalUserRequest request = new CreateInternalUserRequest(
-                "internaluser." + System.nanoTime(), "internal." + System.nanoTime() + "@example.com", "Password@1",
+                "internaluser." + System.nanoTime(), "internal." + System.nanoTime() + "@example.com",
                 "Internal", "User", null, UUID.fromString("00000000-0000-0000-0000-000000000005"), "SHOP_ADMIN");
 
         mockMvc.perform(post("/api/internal/users")
@@ -84,7 +84,7 @@ class InternalUserControllerTest {
     void getById_validToken_returnsUser() throws Exception {
         String uname = "getuser." + System.nanoTime();
         CreateInternalUserRequest createRequest = new CreateInternalUserRequest(
-                uname, uname + "@example.com", "Password@1",
+                uname, uname + "@example.com",
                 "Get", "User", null, UUID.fromString("00000000-0000-0000-0000-000000000005"), "SHOP_ADMIN");
 
         String responseBody = mockMvc.perform(post("/api/internal/users")

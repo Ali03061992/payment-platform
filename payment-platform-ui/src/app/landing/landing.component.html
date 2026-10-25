@@ -1,0 +1,280 @@
+<div class="landing" data-testid="landing-page">
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="brand" routerLink="/" [attr.aria-label]="brand.name + ' - Accueil'">
+        <span class="brand-mark">
+          <img [src]="brand.logoPath" [alt]="brand.name" class="brand-logo">
+        </span>
+        <span class="brand-name">{{ brand.name }}</span>
+      </a>
+
+      <nav class="main-nav" aria-label="Navigation principale">
+        <a href="#plateforme">{{ 'LANDING.NAV_PLATFORM' | translate }}</a>
+        <a href="#solutions">{{ 'LANDING.NAV_SOLUTIONS' | translate }}</a>
+        <a href="#contact">{{ 'LANDING.NAV_CONTACT' | translate }}</a>
+      </nav>
+
+      <div class="header-actions">
+        <a routerLink="/login" class="lp-btn lp-btn-ghost">{{ 'LANDING.LOGIN' | translate }}</a>
+        <a href="#contact" class="lp-btn lp-btn-primary">{{ 'LANDING.REQUEST_ACCESS' | translate }}</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="hero-inner">
+        <div class="hero-copy">
+          <span class="eyebrow">{{ 'LANDING.EYEBROW' | translate }}</span>
+          <h1 id="hero-title">{{ 'LANDING.HERO_TITLE' | translate }}</h1>
+          <p class="hero-subtitle">{{ 'LANDING.HERO_SUBTITLE' | translate }}</p>
+
+          <div class="hero-actions">
+            <a href="#contact" class="lp-btn lp-btn-primary lp-btn-lg">
+              {{ 'LANDING.HERO_PRIMARY' | translate }}
+              <app-icon name="chevron-right" [size]="17"></app-icon>
+            </a>
+            <a routerLink="/login" class="lp-btn lp-btn-outline lp-btn-lg">{{ 'LANDING.HERO_SECONDARY' | translate }}</a>
+          </div>
+
+          <p class="hero-note">
+            <app-icon name="lock" [size]="16"></app-icon>
+            <span>{{ 'LANDING.HERO_NOTE' | translate }}</span>
+          </p>
+
+          <ul class="trust-list">
+            <li><app-icon name="check-circle" [size]="17"></app-icon>{{ 'LANDING.TRUST_SECURE' | translate }}</li>
+            <li><app-icon name="check-circle" [size]="17"></app-icon>{{ 'LANDING.TRUST_ROLES' | translate }}</li>
+            <li><app-icon name="check-circle" [size]="17"></app-icon>{{ 'LANDING.TRUST_MOBILE' | translate }}</li>
+          </ul>
+        </div>
+
+        <div class="hero-visual" aria-hidden="true">
+          <div class="visual-glow"></div>
+
+          <div class="dashboard-mock">
+            <div class="mock-topbar">
+              <span class="mock-dots"><i></i><i></i><i></i></span>
+              <span class="mock-title">{{ 'LANDING.MOCK_TITLE' | translate }}</span>
+              <span class="mock-badge">{{ 'LANDING.MOCK_BADGE' | translate }}</span>
+            </div>
+
+            <div class="mock-kpis">
+              <div class="mock-kpi">
+                <span>{{ 'LANDING.MOCK_KPI_ORDERS' | translate }}</span>
+                <strong>128</strong>
+                <small>+12%</small>
+              </div>
+              <div class="mock-kpi">
+                <span>{{ 'LANDING.MOCK_KPI_DELIVERIES' | translate }}</span>
+                <strong>36</strong>
+                <small>+8%</small>
+              </div>
+              <div class="mock-kpi">
+                <span>{{ 'LANDING.MOCK_KPI_PAYMENTS' | translate }}</span>
+                <strong>24</strong>
+                <small>+5%</small>
+              </div>
+            </div>
+
+            <div class="mock-chart">
+              <div class="mock-chart-head">
+                <span>{{ 'LANDING.MOCK_CHART_TITLE' | translate }}</span>
+                <small>{{ 'LANDING.MOCK_SUBTITLE' | translate }}</small>
+              </div>
+              <div class="mock-bars">
+                <span style="--h: 42%"></span>
+                <span style="--h: 58%"></span>
+                <span style="--h: 49%"></span>
+                <span style="--h: 72%"></span>
+                <span style="--h: 64%"></span>
+                <span style="--h: 88%"></span>
+                <span style="--h: 76%"></span>
+                <span style="--h: 95%"></span>
+              </div>
+            </div>
+
+            <div class="mock-list">
+              <div class="mock-row">
+                <span class="mock-row-dot"></span>
+                <span class="mock-row-label">{{ 'LANDING.MOCK_ROW_1' | translate }}</span>
+                <span class="mock-row-status">OK</span>
+              </div>
+              <div class="mock-row">
+                <span class="mock-row-dot"></span>
+                <span class="mock-row-label">{{ 'LANDING.MOCK_ROW_2' | translate }}</span>
+                <span class="mock-row-status">OK</span>
+              </div>
+              <div class="mock-row">
+                <span class="mock-row-dot"></span>
+                <span class="mock-row-label">{{ 'LANDING.MOCK_ROW_3' | translate }}</span>
+                <span class="mock-row-status">OK</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="floating-card">
+            <span class="floating-icon"><app-icon name="check-circle" [size]="20"></app-icon></span>
+            <span>
+              <strong>{{ 'LANDING.MOCK_FLOATING_TITLE' | translate }}</strong>
+              <small>{{ 'LANDING.MOCK_FLOATING_SUBTITLE' | translate }}</small>
+            </span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="plateforme" class="section" aria-labelledby="features-title">
+      <div class="section-inner">
+        <div class="section-heading">
+          <span class="eyebrow eyebrow-dark">{{ 'LANDING.NAV_PLATFORM' | translate }}</span>
+          <h2 id="features-title">{{ 'LANDING.FEATURES_TITLE' | translate }}</h2>
+          <p>{{ 'LANDING.FEATURES_SUBTITLE' | translate }}</p>
+        </div>
+
+        <div class="feature-grid">
+          <article class="feature-card">
+            <span class="feature-icon"><app-icon name="list" [size]="22"></app-icon></span>
+            <h3>{{ 'LANDING.FEATURE_ORDERS_TITLE' | translate }}</h3>
+            <p>{{ 'LANDING.FEATURE_ORDERS_DESC' | translate }}</p>
+          </article>
+          <article class="feature-card">
+            <span class="feature-icon"><app-icon name="truck" [size]="22"></app-icon></span>
+            <h3>{{ 'LANDING.FEATURE_DELIVERY_TITLE' | translate }}</h3>
+            <p>{{ 'LANDING.FEATURE_DELIVERY_DESC' | translate }}</p>
+          </article>
+          <article class="feature-card">
+            <span class="feature-icon"><app-icon name="wallet" [size]="22"></app-icon></span>
+            <h3>{{ 'LANDING.FEATURE_PAYMENTS_TITLE' | translate }}</h3>
+            <p>{{ 'LANDING.FEATURE_PAYMENTS_DESC' | translate }}</p>
+          </article>
+          <article class="feature-card">
+            <span class="feature-icon"><app-icon name="box" [size]="22"></app-icon></span>
+            <h3>{{ 'LANDING.FEATURE_STOCK_TITLE' | translate }}</h3>
+            <p>{{ 'LANDING.FEATURE_STOCK_DESC' | translate }}</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="solutions" class="section section-alt" aria-labelledby="solutions-title">
+      <div class="section-inner">
+        <div class="section-heading">
+          <span class="eyebrow eyebrow-dark">{{ 'LANDING.NAV_SOLUTIONS' | translate }}</span>
+          <h2 id="solutions-title">{{ 'LANDING.SOLUTIONS_TITLE' | translate }}</h2>
+          <p>{{ 'LANDING.SOLUTIONS_SUBTITLE' | translate }}</p>
+        </div>
+
+        <div class="audience-grid">
+          <article class="audience-card">
+            <span class="audience-icon"><app-icon name="factory" [size]="24"></app-icon></span>
+            <h3>{{ 'LANDING.SOLUTION_SUPPLIER_TITLE' | translate }}</h3>
+            <p>{{ 'LANDING.SOLUTION_SUPPLIER_DESC' | translate }}</p>
+          </article>
+          <article class="audience-card">
+            <span class="audience-icon"><app-icon name="store" [size]="24"></app-icon></span>
+            <h3>{{ 'LANDING.SOLUTION_SHOP_TITLE' | translate }}</h3>
+            <p>{{ 'LANDING.SOLUTION_SHOP_DESC' | translate }}</p>
+          </article>
+          <article class="audience-card">
+            <span class="audience-icon"><app-icon name="users" [size]="24"></app-icon></span>
+            <h3>{{ 'LANDING.SOLUTION_TEAMS_TITLE' | translate }}</h3>
+            <p>{{ 'LANDING.SOLUTION_TEAMS_DESC' | translate }}</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section steps-section" aria-labelledby="steps-title">
+      <div class="section-inner">
+        <div class="section-heading">
+          <span class="eyebrow eyebrow-dark">{{ 'LANDING.STEPS_EYEBROW' | translate }}</span>
+          <h2 id="steps-title">{{ 'LANDING.STEPS_TITLE' | translate }}</h2>
+          <p>{{ 'LANDING.STEPS_SUBTITLE' | translate }}</p>
+        </div>
+
+        <div class="steps-grid">
+          <article class="step-card">
+            <span class="step-number">01</span>
+            <h3>{{ 'LANDING.STEP_1_TITLE' | translate }}</h3>
+            <p>{{ 'LANDING.STEP_1_DESC' | translate }}</p>
+          </article>
+          <article class="step-card">
+            <span class="step-number">02</span>
+            <h3>{{ 'LANDING.STEP_2_TITLE' | translate }}</h3>
+            <p>{{ 'LANDING.STEP_2_DESC' | translate }}</p>
+          </article>
+          <article class="step-card">
+            <span class="step-number">03</span>
+            <h3>{{ 'LANDING.STEP_3_TITLE' | translate }}</h3>
+            <p>{{ 'LANDING.STEP_3_DESC' | translate }}</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="contact" class="section contact-section" aria-labelledby="contact-title">
+      <div class="section-inner">
+        <div class="contact-panel">
+          <div class="contact-copy">
+            <span class="eyebrow">{{ 'LANDING.NAV_CONTACT' | translate }}</span>
+            <h2 id="contact-title">{{ 'LANDING.CONTACT_TITLE' | translate }}</h2>
+            <p>{{ 'LANDING.CONTACT_SUBTITLE' | translate }}</p>
+            <div class="contact-availability">
+              <app-icon name="clock" [size]="18"></app-icon>
+              <span>{{ 'LANDING.CONTACT_AVAILABILITY' | translate }}</span>
+            </div>
+          </div>
+
+          <div class="contact-links">
+            <a class="contact-card" [href]="contactEmailLink" [attr.aria-label]="'LANDING.CONTACT_EMAIL_TITLE' | translate">
+              <span class="contact-icon"><app-icon name="mail" [size]="21"></app-icon></span>
+              <span class="contact-text">
+                <strong>{{ 'LANDING.CONTACT_EMAIL_TITLE' | translate }}</strong>
+                <small>{{ 'LANDING.CONTACT_EMAIL_HINT' | translate }}</small>
+              </span>
+              <app-icon name="chevron-right" [size]="18"></app-icon>
+            </a>
+
+            <a class="contact-card" [href]="phoneLink" [attr.aria-label]="'LANDING.CONTACT_PHONE_TITLE' | translate">
+              <span class="contact-icon"><app-icon name="phone" [size]="21"></app-icon></span>
+              <span class="contact-text">
+                <strong>{{ 'LANDING.CONTACT_PHONE_TITLE' | translate }}</strong>
+                <small>{{ phoneDisplay }}</small>
+              </span>
+              <app-icon name="chevron-right" [size]="18"></app-icon>
+            </a>
+
+            <a class="contact-card contact-card-whatsapp" [href]="whatsappLink" target="_blank" rel="noopener noreferrer"
+              [attr.aria-label]="'LANDING.CONTACT_WHATSAPP_TITLE' | translate">
+              <span class="contact-icon"><app-icon name="phone" [size]="21"></app-icon></span>
+              <span class="contact-text">
+                <strong>{{ 'LANDING.CONTACT_WHATSAPP_TITLE' | translate }}</strong>
+                <small>{{ 'LANDING.CONTACT_WHATSAPP_HINT' | translate }}</small>
+              </span>
+              <app-icon name="chevron-right" [size]="18"></app-icon>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <span class="brand-mark"><img [src]="brand.logoPath" [alt]="brand.name" class="brand-logo"></span>
+        <span>
+          <strong>{{ brand.name }}</strong>
+          <small>{{ 'LANDING.FOOTER_TAGLINE' | translate }}</small>
+        </span>
+      </div>
+      <div class="footer-links">
+        <a routerLink="/login">{{ 'LANDING.FOOTER_LOGIN' | translate }}</a>
+        <a href="#contact">{{ 'LANDING.FOOTER_ACCESS' | translate }}</a>
+        <a href="#solutions">{{ 'LANDING.NAV_SOLUTIONS' | translate }}</a>
+      </div>
+      <p class="footer-copy">© {{ year }} {{ brand.name }}. {{ 'LANDING.FOOTER_RIGHTS' | translate }}</p>
+    </div>
+  </footer>
+</div>
