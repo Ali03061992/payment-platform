@@ -64,7 +64,7 @@
     <dependency>
       <groupId>com.google.firebase</groupId>
       <artifactId>firebase-admin</artifactId>
-      <version>9.2.0</version>
+      <version>9.11.0</version>
     </dependency>
     <!-- Web Push (VAPID) — FCM reste pour mobile, ce canal sert la PWA -->
     <dependency>
