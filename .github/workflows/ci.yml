@@ -124,7 +124,7 @@ jobs:
 
       - name: Upload JaCoCo reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: jacoco-reports
           path: |
@@ -136,7 +136,7 @@ jobs:
           if-no-files-found: warn
 
       - name: Upload backend artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: backend-jars
           path: backend/*/target/*.jar
@@ -185,7 +185,7 @@ jobs:
 
       - name: Upload coverage
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: frontend-coverage
           path: payment-platform-ui/coverage/**
@@ -193,7 +193,7 @@ jobs:
           if-no-files-found: warn
 
       - name: Upload frontend dist
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: frontend-dist
           path: payment-platform-ui/dist/
