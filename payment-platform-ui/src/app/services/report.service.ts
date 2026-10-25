@@ -1,7 +1,13 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { SupplierFinancialReport } from '../models/supplier-financial.model';
+import { ReportGranularity, SupplierFinancialReport } from '../models/supplier-financial.model';
+
+export interface SupplierFinancialQuery {
+  from?: string;
+  to?: string;
+  granularity?: ReportGranularity;
+}
 
 @Injectable({ providedIn: 'root' })
 export class ReportService {
@@ -9,7 +15,11 @@ export class ReportService {
 
   constructor(private http: HttpClient) {}
 
-  getSupplierFinancialReport(): Observable<SupplierFinancialReport> {
-    return this.http.get<SupplierFinancialReport>(`${this.apiUrl}/supplier-financial`);
+  getSupplierFinancialReport(query: SupplierFinancialQuery = {}): Observable<SupplierFinancialReport> {
+    let params = new HttpParams();
+    if (query.from) params = params.set('from', query.from);
+    if (query.to) params = params.set('to', query.to);
+    if (query.granularity) params = params.set('granularity', query.granularity);
+    return this.http.get<SupplierFinancialReport>(`${this.apiUrl}/supplier-financial`, { params });
   }
 }

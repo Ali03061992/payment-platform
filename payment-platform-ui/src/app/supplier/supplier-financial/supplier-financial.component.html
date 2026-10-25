@@ -1,154 +1,440 @@
-<div class="page-header">
-  <h2>{{ 'FINANCE.DASHBOARD_TITLE' | translate }}</h2>
-</div>
-@if (loading) {
-  <div class="loading">
-    <div class="spinner"></div>
-    <span>{{ 'COMMON.LOADING' | translate }}</span>
+@if (loading && !report) {
+  <div class="state-card">
+    <span class="spinner"></span>
+    <strong>{{ 'FINANCE360.LOADING' | translate }}</strong>
+    <small>{{ 'FINANCE360.LOADING_HINT' | translate }}</small>
   </div>
-}
-@if (loadError && !loading) {
-  <div class="error-card">
-    <p>{{ loadError }}</p>
-    <button class="btn btn-primary" (click)="loadReport()">{{ 'FINANCE.RETRY' | translate }}</button>
+} @else if (loadError && !report) {
+  <div class="state-card state-error">
+    <app-icon name="alert" [size]="28"></app-icon>
+    <strong>{{ loadError }}</strong>
+    <button type="button" class="btn btn-primary" (click)="refresh()">
+      {{ 'FINANCE.RETRY' | translate }}
+    </button>
   </div>
-}
-@if (report && !loading) {
-  <div class="stats-grid">
-    <div class="stat-card stat-confirmed">
-      <div class="stat-value">{{ report.paymentSummary.confirmedCount }}</div>
-      <div class="stat-label">{{ 'FINANCE.CONFIRMED_PAYMENTS' | translate }}</div>
-      <div class="stat-sub">{{ report.paymentSummary.confirmedTotal | number:'1.2-2' }} TND</div>
-    </div>
-    <div class="stat-card stat-pending">
-      <div class="stat-value">{{ report.paymentSummary.pendingCount }}</div>
-      <div class="stat-label">{{ 'FINANCE.PENDING_PAYMENTS' | translate }}</div>
-      <div class="stat-sub">{{ report.paymentSummary.pendingTotal | number:'1.2-2' }} TND</div>
-    </div>
-    <div class="stat-card stat-rejected">
-      <div class="stat-value">{{ report.paymentSummary.rejectedCount }}</div>
-      <div class="stat-label">{{ 'FINANCE.REJECTED_PAYMENTS' | translate }}</div>
-      <div class="stat-sub">{{ report.paymentSummary.rejectedTotal | number:'1.2-2' }} TND</div>
-    </div>
-    <div class="stat-card stat-balance">
-      <div class="stat-value">{{ totalDueByShops | number:'1.2-2' }} TND</div>
-      <div class="stat-label">{{ 'FINANCE.ENCOURS_CLIENTS' | translate }}</div>
-      <div class="stat-sub">{{ 'FINANCE.ACTIVE_SHOPS' | translate }} : {{ activeShopCount }}</div>
-    </div>
-  </div>
-  @if (shopBalances.length > 0) {
-    <div class="table-card">
-      <h3>{{ 'FINANCE.BALANCE_BY_SHOP' | translate }}</h3>
-      <div class="table-wrapper hide-mobile">
-        <table>
-          <thead>
-            <tr>
-              <th>{{ 'FINANCE.SHOP_COL' | translate }}</th>
-              <th>{{ 'FINANCE.CURRENT_BALANCE' | translate }}</th>
-              <th>{{ 'FINANCE.REMAINING_DUE' | translate }}</th>
-              <th>{{ 'FINANCE.TOTAL_ORDERS' | translate }}</th>
-              <th>{{ 'FINANCE.TOTAL_PAYMENTS' | translate }}</th>
-              <th>{{ 'FINANCE.LAST_TX' | translate }}</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (b of shopBalances; track b.shopId) {
-              <tr>
-                <td><strong>{{ b.shopName }}</strong></td>
-                <td>{{ b.currentBalance | number:'1.2-2' }} TND</td>
-                <td [class.due-positive]="b.remainingDue > 0">{{ b.remainingDue | number:'1.2-2' }} TND</td>
-                <td>{{ b.totalOrders }}</td>
-                <td>{{ b.totalPayments }}</td>
-                <td>{{ b.lastTransaction | date:'dd/MM/yyyy' }}</td>
-              </tr>
-            }
-          </tbody>
-        </table>
+} @else if (report) {
+  <div class="finance360" [class.is-refreshing]="loading">
+    @if (loading) {
+      <div class="refresh-line"></div>
+    }
+
+    @if (loadError) {
+      <div class="inline-error">
+        <app-icon name="alert" [size]="18"></app-icon>
+        <span>{{ loadError }}</span>
+        <button type="button" (click)="refresh()">{{ 'FINANCE.RETRY' | translate }}</button>
       </div>
-      <div class="balance-cards show-mobile">
-        @for (b of shopBalances; track b.shopId) {
-          <div class="balance-card">
-            <div class="balance-shop">{{ b.shopName }}</div>
-            <div class="balance-row">
-              <span>{{ 'FINANCE.CURRENT_BALANCE' | translate }}</span>
-              <strong>{{ b.currentBalance | number:'1.2-2' }} TND</strong>
-            </div>
-            <div class="balance-row">
-              <span>{{ 'FINANCE.REMAINING_DUE' | translate }}</span>
-              <strong [class.due-positive]="b.remainingDue > 0">{{ b.remainingDue | number:'1.2-2' }} TND</strong>
-            </div>
-            <div class="balance-row">
-              <span>{{ 'FINANCE.TOTAL_ORDERS' | translate }}</span>
-              <strong>{{ b.totalOrders }}</strong>
-            </div>
-            <div class="balance-row">
-              <span>{{ 'FINANCE.TOTAL_PAYMENTS' | translate }}</span>
-              <strong>{{ b.totalPayments }}</strong>
-            </div>
-            <div class="balance-row">
-              <span>{{ 'FINANCE.LAST_TX' | translate }}</span>
-              <strong>{{ b.lastTransaction | date:'dd/MM/yyyy' }}</strong>
-            </div>
+    }
+
+    <section class="hero-panel">
+      <span class="hero-orb hero-orb-one"></span>
+      <span class="hero-orb hero-orb-two"></span>
+
+      <div class="hero-copy">
+        <span class="eyebrow">
+          <span class="live-dot"></span>
+          {{ 'FINANCE360.EYEBROW' | translate }}
+        </span>
+        <h1>{{ 'FINANCE360.TITLE' | translate }}</h1>
+        <p>{{ 'FINANCE360.SUBTITLE' | translate }}</p>
+
+        <div class="hero-actions">
+          <a routerLink="/dashboard/supplier/balance" class="hero-btn hero-btn-primary">
+            {{ 'FINANCE360.VIEW_BALANCES' | translate }}
+            <app-icon name="chevron-right" [size]="15"></app-icon>
+          </a>
+          <a routerLink="/dashboard/supplier/invoices" class="hero-btn hero-btn-ghost">
+            {{ 'FINANCE360.VIEW_INVOICES' | translate }}
+          </a>
+        </div>
+
+        <div class="period-bar" role="group" [attr.aria-label]="'FINANCE360.PERIOD_LABEL' | translate">
+          <div class="period-tabs">
+            @for (option of periodOptions; track option.key) {
+              <button
+                type="button"
+                class="period-tab"
+                [class.active]="selectedPeriod === option.key"
+                [attr.aria-pressed]="selectedPeriod === option.key"
+                (click)="selectPeriod(option.key)">
+                {{ option.labelKey | translate }}
+              </button>
+            }
+          </div>
+          <button
+            type="button"
+            class="refresh-btn"
+            [attr.aria-label]="'FINANCE360.REFRESH' | translate"
+            [title]="'FINANCE360.REFRESH' | translate"
+            (click)="refresh()">
+            <app-icon name="refresh" [size]="16"></app-icon>
+          </button>
+        </div>
+
+        @if (selectedPeriod === 'CUSTOM') {
+          <div class="custom-range">
+            <label>
+              <span>{{ 'FINANCE360.FROM' | translate }}</span>
+              <input type="date" [(ngModel)]="customFrom" [attr.max]="customTo || null">
+            </label>
+            <label>
+              <span>{{ 'FINANCE360.TO' | translate }}</span>
+              <input type="date" [(ngModel)]="customTo" [attr.min]="customFrom || null">
+            </label>
+            <label>
+              <span>{{ 'FINANCE360.GRANULARITY' | translate }}</span>
+              <select [value]="customGranularity" (change)="onCustomGranularityChange($event)">
+                @for (granularity of granularities; track granularity) {
+                  <option [value]="granularity">{{ ('FINANCE360.GRANULARITY_' + granularity) | translate }}</option>
+                }
+              </select>
+            </label>
+            <button type="button" class="apply-btn" (click)="applyCustomRange()">
+              {{ 'FINANCE360.APPLY' | translate }}
+            </button>
+            @if (rangeError) {
+              <p class="range-error">{{ rangeError }}</p>
+            }
           </div>
         }
-      </div>
-    </div>
-  }
-  <div class="chart-card">
-    <h3>{{ 'FINANCE.MONTHLY_REVENUE' | translate }}</h3>
-    @if (report.monthlyRevenue && report.monthlyRevenue.length > 0) {
-      <div class="chart-container">
-        <div #revenueChart class="echart"></div>
-      </div>
-    } @else {
-      <div class="empty-chart">{{ 'FINANCE.NO_REVENUE' | translate }}</div>
-    }
-  </div>
-  <div class="charts-row">
-    <div class="chart-card chart-half">
-      <h3>{{ 'FINANCE.ORDER_STATUS' | translate }}</h3>
-      @if (report.orderCountByStatus && objectKeys(report.orderCountByStatus).length > 0) {
-        <div class="chart-container">
-          <div #statusChart class="echart"></div>
+
+        <div class="hero-meta">
+          <span><app-icon name="calendar" [size]="14"></app-icon> {{ rangeLabel }}</span>
+          <span><app-icon name="clock" [size]="14"></app-icon>
+            {{ 'FINANCE360.UPDATED' | translate }} {{ formatUpdatedAt() }}
+          </span>
         </div>
-      } @else {
-        <div class="empty-chart">{{ 'FINANCE.NO_DATA' | translate }}</div>
-      }
-    </div>
-    <div class="chart-card chart-half">
-      <h3>{{ 'FINANCE.TOP_PRODUCTS' | translate }}</h3>
-      @if (report.topProducts && report.topProducts.length > 0) {
-        <div class="chart-container chart-container-tall">
-          <div #productsChart class="echart"></div>
+      </div>
+
+      <div class="hero-visual">
+        <span class="visual-glow"></span>
+
+        <div class="mock-window">
+          <div class="mock-topbar">
+            <span class="mock-dots"><i></i><i></i><i></i></span>
+            <span class="mock-title">{{ 'FINANCE360.MOCK_TITLE' | translate }}</span>
+            <span class="mock-badge"><span class="live-dot"></span>{{ 'FINANCE360.REAL_TIME' | translate }}</span>
+          </div>
+
+          <div class="mock-kpis">
+            <div class="mock-kpi">
+              <span>{{ 'FINANCE360.REVENUE' | translate }}</span>
+              <strong>{{ formatCompact(summary.revenue) }}</strong>
+              <small>TND</small>
+            </div>
+            <div class="mock-kpi">
+              <span>{{ 'FINANCE360.ORDERS' | translate }}</span>
+              <strong>{{ summary.orderCount | number:'1.0-0' }}</strong>
+              <small>{{ 'FINANCE360.ORDERS_UNIT' | translate }}</small>
+            </div>
+            <div class="mock-kpi">
+              <span>{{ 'FINANCE360.AVG_BASKET' | translate }}</span>
+              <strong>{{ formatCompact(summary.averageBasket) }}</strong>
+              <small>TND</small>
+            </div>
+          </div>
+
+          <div class="mock-chart">
+            <div class="mock-chart-head">
+              <span>{{ 'FINANCE360.MOCK_CHART_TITLE' | translate }}</span>
+              <small>{{ rangeLabel }}</small>
+            </div>
+            <svg class="mini-chart" viewBox="0 0 240 70" role="img"
+                 [attr.aria-label]="'FINANCE360.CHART_TITLE' | translate">
+              <defs>
+                <linearGradient id="financeMiniArea" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#5eead4" stop-opacity="0.45"></stop>
+                  <stop offset="100%" stop-color="#5eead4" stop-opacity="0"></stop>
+                </linearGradient>
+              </defs>
+              @if (miniAreaPath) {
+                <path [attr.d]="miniAreaPath" fill="url(#financeMiniArea)"></path>
+              }
+              @if (miniPath) {
+                <path [attr.d]="miniPath" class="mini-line"></path>
+              }
+            </svg>
+          </div>
+
+          <div class="mock-footer">
+            <span class="mock-growth" [class]="growthClass(revenueGrowth)">{{ formatGrowth(revenueGrowth) }}</span>
+            <span>{{ 'FINANCE360.VS_PREVIOUS' | translate }}</span>
+          </div>
         </div>
-      } @else {
-        <div class="empty-chart">{{ 'FINANCE.NO_SALES' | translate }}</div>
-      }
+
+        <div class="floating-pill">
+          <span class="floating-icon"><app-icon name="sparkles" [size]="18"></app-icon></span>
+          <span>
+            <strong>{{ activeShopCount }} {{ 'FINANCE360.ACTIVE_SHOPS' | translate }}</strong>
+            <small>{{ formatMoney(totalDueByShops) }} {{ 'FINANCE360.OUTSTANDING' | translate }}</small>
+          </span>
+        </div>
+      </div>
+    </section>
+
+    <section class="kpi-grid">
+      <article class="kpi-card kpi-revenue">
+        <div class="kpi-head">
+          <span class="kpi-icon"><app-icon name="wallet" [size]="20"></app-icon></span>
+          <span class="growth-pill" [class]="growthClass(revenueGrowth)">{{ formatGrowth(revenueGrowth) }}</span>
+        </div>
+        <span class="kpi-label">{{ 'FINANCE360.REVENUE' | translate }}</span>
+        <strong class="kpi-value">{{ summary.revenue | number:'1.2-2' }} <small>TND</small></strong>
+        <span class="kpi-foot">{{ 'FINANCE360.PREVIOUS' | translate }} · {{ formatMoney(previousSummary.revenue) }}</span>
+      </article>
+
+      <article class="kpi-card kpi-orders">
+        <div class="kpi-head">
+          <span class="kpi-icon"><app-icon name="cart" [size]="20"></app-icon></span>
+          <span class="growth-pill" [class]="growthClass(ordersGrowth)">{{ formatGrowth(ordersGrowth) }}</span>
+        </div>
+        <span class="kpi-label">{{ 'FINANCE360.ORDERS' | translate }}</span>
+        <strong class="kpi-value">{{ summary.orderCount | number:'1.0-0' }}</strong>
+        <span class="kpi-foot">
+          {{ summary.openOrders }} {{ 'FINANCE360.OPEN_SHORT' | translate }} ·
+          {{ summary.deliveredOrders }} {{ 'FINANCE360.DELIVERED_SHORT' | translate }}
+        </span>
+      </article>
+
+      <article class="kpi-card kpi-basket">
+        <div class="kpi-head">
+          <span class="kpi-icon"><app-icon name="scale" [size]="20"></app-icon></span>
+          <span class="growth-pill" [class]="growthClass(basketGrowth)">{{ formatGrowth(basketGrowth) }}</span>
+        </div>
+        <span class="kpi-label">{{ 'FINANCE360.AVG_BASKET' | translate }}</span>
+        <strong class="kpi-value">{{ summary.averageBasket | number:'1.2-2' }} <small>TND</small></strong>
+        <span class="kpi-foot">{{ 'FINANCE360.PREVIOUS' | translate }} · {{ formatMoney(previousSummary.averageBasket) }}</span>
+      </article>
+
+      <article class="kpi-card kpi-due">
+        <div class="kpi-head">
+          <span class="kpi-icon"><app-icon name="users" [size]="20"></app-icon></span>
+          <span class="kpi-badge">{{ activeShopCount }} {{ 'FINANCE360.SHOPS_SHORT' | translate }}</span>
+        </div>
+        <span class="kpi-label">{{ 'FINANCE360.OUTSTANDING' | translate }}</span>
+        <strong class="kpi-value">{{ totalDueByShops | number:'1.2-2' }} <small>TND</small></strong>
+        <span class="kpi-foot">
+          @if (balancesLoading) {
+            {{ 'COMMON.LOADING' | translate }}
+          } @else {
+            {{ 'FINANCE360.OUTSTANDING_HINT' | translate }}
+          }
+        </span>
+      </article>
+    </section>
+
+    <div class="analytics-grid">
+      <section class="panel growth-panel">
+        <div class="panel-heading">
+          <div>
+            <h2>{{ 'FINANCE360.CHART_TITLE' | translate }}</h2>
+            <p>{{ 'FINANCE360.CHART_SUBTITLE' | translate }}</p>
+          </div>
+          <div class="chart-legend">
+            <span><i class="legend-line current"></i>{{ 'FINANCE360.CURRENT' | translate }}</span>
+            <span><i class="legend-line previous"></i>{{ 'FINANCE360.PREVIOUS' | translate }}</span>
+          </div>
+        </div>
+
+        @if (hasSeries) {
+          <div class="chart-frame">
+            <svg class="growth-chart" viewBox="0 0 1000 320" preserveAspectRatio="xMidYMid meet"
+                 role="img" [attr.aria-label]="'FINANCE360.CHART_ARIA' | translate">
+              <defs>
+                <linearGradient id="financeGrowthArea" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#0f9f8f" stop-opacity="0.28"></stop>
+                  <stop offset="100%" stop-color="#0f9f8f" stop-opacity="0.01"></stop>
+                </linearGradient>
+              </defs>
+
+              @for (grid of chartGrid; track grid.y) {
+                <line class="grid-line" [attr.x1]="58" [attr.x2]="982" [attr.y1]="grid.y" [attr.y2]="grid.y"></line>
+                <text class="axis-label" x="48" [attr.y]="grid.y + 4" text-anchor="end">{{ grid.label }}</text>
+              }
+
+              @for (point of chartPoints; track point.bucket) {
+                <rect
+                  class="order-bar"
+                  [attr.x]="point.x - 3"
+                  [attr.y]="282 - point.orderBarHeight"
+                  width="6"
+                  [attr.height]="point.orderBarHeight"></rect>
+              }
+
+              @if (previousPath) {
+                <path class="previous-line" [attr.d]="previousPath"></path>
+              }
+              <path class="growth-area" [attr.d]="areaPath"></path>
+              <path class="growth-line" [attr.d]="linePath"></path>
+
+              @for (point of chartPoints; track point.bucket) {
+                <circle class="growth-point" [attr.cx]="point.x" [attr.cy]="point.y" r="5">
+                  <title>{{ point.fullLabel }} — {{ formatMoney(point.revenue) }} · {{ point.orderCount }} {{ 'FINANCE360.ORDERS_UNIT' | translate }}</title>
+                </circle>
+              }
+            </svg>
+
+            <div class="chart-labels">
+              @for (point of chartPoints; track point.bucket) {
+                <span [class.is-hidden]="!point.showLabel">{{ point.label }}</span>
+              }
+            </div>
+          </div>
+          <div class="chart-footnote">
+            <span><i class="legend-dot revenue"></i>{{ 'FINANCE360.REVENUE' | translate }}</span>
+            <span><i class="legend-dot orders"></i>{{ 'FINANCE360.ORDERS' | translate }}</span>
+            <span class="comparison">{{ 'FINANCE360.COMPARISON' | translate }} · {{ comparisonLabel }}</span>
+          </div>
+        } @else {
+          <div class="empty-state">
+            <app-icon name="chart" [size]="30"></app-icon>
+            <p>{{ 'FINANCE360.NO_DATA' | translate }}</p>
+          </div>
+        }
+      </section>
+
+      <section class="panel pipeline-panel">
+        <div class="panel-heading">
+          <div>
+            <h2>{{ 'FINANCE360.PIPELINE' | translate }}</h2>
+            <p>{{ 'FINANCE360.PIPELINE_HINT' | translate }}</p>
+          </div>
+        </div>
+
+        @if (pipelineEntries.length > 0) {
+          <div class="pipeline-body">
+            <div class="donut" [style.background]="pipelineGradient" role="img"
+                 [attr.aria-label]="'FINANCE360.PIPELINE' | translate">
+              <div class="donut-hole">
+                <strong>{{ pipelineTotal }}</strong>
+                <span>{{ 'FINANCE360.ORDERS_UNIT' | translate }}</span>
+              </div>
+            </div>
+            <div class="pipeline-legend">
+              @for (entry of pipelineEntries; track entry.status) {
+                <div class="pipeline-row">
+                  <span class="legend-dot" [style.background]="entry.color"></span>
+                  <span class="pipeline-label">{{ entry.label }}</span>
+                  <strong>{{ entry.count }}</strong>
+                  <small>{{ entry.percent | number:'1.0-1' }}%</small>
+                </div>
+              }
+            </div>
+          </div>
+        } @else {
+          <div class="empty-state compact">
+            <app-icon name="inbox" [size]="26"></app-icon>
+            <p>{{ 'FINANCE360.NO_DATA' | translate }}</p>
+          </div>
+        }
+      </section>
     </div>
-  </div>
-  @if (report.topProducts && report.topProducts.length > 0) {
-    <div class="table-card">
-      <h3>{{ 'FINANCE.PRODUCT_DETAIL' | translate }}</h3>
-      <div class="table-wrapper">
-        <table>
-          <thead>
-            <tr>
-              <th>{{ 'FINANCE.PRODUCT' | translate }}</th>
-              <th>{{ 'FINANCE.QTY_SOLD' | translate }}</th>
-              <th>{{ 'FINANCE.TOTAL_REVENUE' | translate }}</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (p of report.topProducts; track p.productName) {
-              <tr>
-                <td><strong>{{ p.productName }}</strong></td>
-                <td>{{ p.totalQuantity }}</td>
-                <td>{{ p.totalRevenue | number:'1.2-2' }} TND</td>
-              </tr>
+
+    <div class="lower-grid">
+      <section class="panel payments-panel">
+        <div class="panel-heading">
+          <div>
+            <h2>{{ 'FINANCE360.PAYMENTS' | translate }}</h2>
+            <p>{{ 'FINANCE360.PAYMENTS_HINT' | translate }}</p>
+          </div>
+          <span class="panel-badge">{{ 'FINANCE360.GLOBAL' | translate }}</span>
+        </div>
+
+        @if (paymentTotal > 0) {
+          <div class="stacked-bar" [attr.aria-label]="'FINANCE360.PAYMENTS' | translate">
+            @for (segment of paymentSegments; track segment.labelKey) {
+              <span [style.width.%]="segment.percent" [style.background]="segment.color"></span>
             }
-          </tbody>
-        </table>
-      </div>
+          </div>
+          <div class="payment-total">
+            <span>{{ 'FINANCE360.TOTAL' | translate }}</span>
+            <strong>{{ formatMoney(paymentTotal) }}</strong>
+          </div>
+          <div class="payment-rows">
+            @for (segment of paymentSegments; track segment.labelKey) {
+              <div class="payment-row">
+                <span class="legend-dot" [style.background]="segment.color"></span>
+                <span>{{ segment.labelKey | translate }}</span>
+                <strong>{{ formatMoney(segment.amount) }}</strong>
+                <small>{{ segment.count }} {{ 'FINANCE360.PAYMENTS_UNIT' | translate }}</small>
+              </div>
+            }
+          </div>
+        } @else {
+          <div class="empty-state compact">
+            <app-icon name="card" [size]="26"></app-icon>
+            <p>{{ 'FINANCE360.NO_PAYMENTS' | translate }}</p>
+          </div>
+        }
+      </section>
+
+      <section class="panel shops-panel">
+        <div class="panel-heading">
+          <div>
+            <h2>{{ 'FINANCE360.TOP_SHOPS' | translate }}</h2>
+            <p>{{ 'FINANCE360.TOP_SHOPS_HINT' | translate }}</p>
+          </div>
+          <a routerLink="/dashboard/supplier/balance" class="panel-link">{{ 'FINANCE360.VIEW_ALL' | translate }}</a>
+        </div>
+
+        @if (balancesLoading) {
+          <div class="empty-state compact">
+            <span class="spinner small"></span>
+            <p>{{ 'COMMON.LOADING' | translate }}</p>
+          </div>
+        } @else if (topShops.length > 0) {
+          <div class="shop-list">
+            @for (entry of topShops; track entry.shop.shopId) {
+              <div class="shop-row">
+                <div class="shop-head">
+                  <span class="shop-name">{{ entry.shop.shopName }}</span>
+                  <strong>{{ formatMoney(entry.shop.remainingDue) }}</strong>
+                </div>
+                <div class="shop-bar"><span [style.width.%]="entry.width"></span></div>
+                <small>{{ entry.shop.totalOrders }} {{ 'FINANCE360.ORDERS_UNIT' | translate }} · {{ entry.shop.totalPayments }} {{ 'FINANCE360.PAYMENTS_UNIT' | translate }}</small>
+              </div>
+            }
+          </div>
+        } @else {
+          <div class="empty-state compact">
+            <app-icon name="store" [size]="26"></app-icon>
+            <p>{{ 'FINANCE360.NO_SHOPS' | translate }}</p>
+          </div>
+        }
+      </section>
+
+      <section class="panel products-panel">
+        <div class="panel-heading">
+          <div>
+            <h2>{{ 'FINANCE360.TOP_PRODUCTS' | translate }}</h2>
+            <p>{{ 'FINANCE360.TOP_PRODUCTS_HINT' | translate }}</p>
+          </div>
+          <a routerLink="/dashboard/supplier/orders" class="panel-link">{{ 'FINANCE360.VIEW_ALL' | translate }}</a>
+        </div>
+
+        @if (topProducts.length > 0) {
+          <div class="product-list">
+            @for (product of topProducts; track product.productName; let index = $index) {
+              <div class="product-row">
+                <span class="product-rank">{{ index + 1 }}</span>
+                <div class="product-content">
+                  <div class="product-head">
+                    <span class="product-name">{{ product.productName }}</span>
+                    <strong>{{ formatMoney(product.totalRevenue) }}</strong>
+                  </div>
+                  <div class="product-bar"><span [style.width.%]="productWidth(product)"></span></div>
+                  <small>{{ product.totalQuantity | number:'1.0-0' }} {{ 'FINANCE360.QTY_UNIT' | translate }}</small>
+                </div>
+              </div>
+            }
+          </div>
+        } @else {
+          <div class="empty-state compact">
+            <app-icon name="box" [size]="26"></app-icon>
+            <p>{{ 'FINANCE360.NO_PRODUCTS' | translate }}</p>
+          </div>
+        }
+      </section>
     </div>
-  }
+  </div>
 }

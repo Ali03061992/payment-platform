@@ -112,4 +112,27 @@ public interface OrderRepository extends JpaRepository<Order, UUID> {
             "LIMIT :limit",
             nativeQuery = true)
     List<Object[]> topSoldProductsForSupplier(@Param("supplierId") UUID supplierId, @Param("limit") int limit);
+
+    @Query("SELECT o.createdAt, o.total, o.status FROM Order o " +
+            "WHERE o.supplierId = :supplierId " +
+            "AND o.createdAt >= :from AND o.createdAt < :to")
+    List<Object[]> findOrderTotalsBySupplierAndPeriod(@Param("supplierId") UUID supplierId,
+                                                      @Param("from") Instant from,
+                                                      @Param("to") Instant to);
+
+    @Query(value = "SELECT oi.product_name, SUM(oi.quantity) AS total_qty, " +
+            "SUM(oi.line_total) AS total_revenue " +
+            "FROM order_items oi " +
+            "JOIN orders o ON oi.order_id = o.id " +
+            "WHERE o.supplier_id = :supplierId " +
+            "AND o.created_at >= :from AND o.created_at < :to " +
+            "AND o.status NOT IN ('CANCELLED', 'REJECTED') " +
+            "GROUP BY oi.product_name " +
+            "ORDER BY total_revenue DESC " +
+            "LIMIT :limit",
+            nativeQuery = true)
+    List<Object[]> topSoldProductsForSupplierBetween(@Param("supplierId") UUID supplierId,
+                                                     @Param("from") Instant from,
+                                                     @Param("to") Instant to,
+                                                     @Param("limit") int limit);
 }

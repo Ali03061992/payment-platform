@@ -5,13 +5,29 @@ import java.util.List;
 import java.util.Map;
 
 public record SupplierFinancialReportResponse(
-        List<MonthlyRevenue> monthlyRevenue,
+        String from,
+        String to,
+        String previousFrom,
+        String previousTo,
+        String granularity,
+        Summary summary,
+        Summary previousSummary,
+        List<SeriesPoint> series,
+        List<SeriesPoint> previousSeries,
         Map<String, Long> orderCountByStatus,
         List<TopProduct> topProducts,
         PaymentSummary paymentSummary
 ) {
-    public record MonthlyRevenue(
-            String month,
+    public record Summary(
+            BigDecimal revenue,
+            long orderCount,
+            BigDecimal averageBasket,
+            long openOrders,
+            long deliveredOrders
+    ) {}
+
+    public record SeriesPoint(
+            String bucket,
             long orderCount,
             BigDecimal revenue
     ) {}

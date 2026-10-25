@@ -1,12 +1,15 @@
-export interface SupplierFinancialReport {
-  monthlyRevenue: MonthlyRevenue[];
-  orderCountByStatus: Record<string, number>;
-  topProducts: TopProduct[];
-  paymentSummary: PaymentSummary;
+export type ReportGranularity = 'DAY' | 'WEEK' | 'MONTH' | 'YEAR';
+
+export interface ReportSummary {
+  revenue: number;
+  orderCount: number;
+  averageBasket: number;
+  openOrders: number;
+  deliveredOrders: number;
 }
 
-export interface MonthlyRevenue {
-  month: string;
+export interface ReportSeriesPoint {
+  bucket: string;
   orderCount: number;
   revenue: number;
 }
@@ -24,4 +27,19 @@ export interface PaymentSummary {
   pendingCount: number;
   rejectedTotal: number;
   rejectedCount: number;
+}
+
+export interface SupplierFinancialReport {
+  from: string;
+  to: string;
+  previousFrom: string;
+  previousTo: string;
+  granularity: ReportGranularity;
+  summary: ReportSummary;
+  previousSummary: ReportSummary;
+  series: ReportSeriesPoint[];
+  previousSeries: ReportSeriesPoint[];
+  orderCountByStatus: Record<string, number>;
+  topProducts: TopProduct[];
+  paymentSummary: PaymentSummary;
 }
