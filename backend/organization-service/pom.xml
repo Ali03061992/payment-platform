@@ -7,7 +7,7 @@
   <parent>
     <groupId>com.paymentplatform</groupId>
     <artifactId>payment-platform</artifactId>
-    <version>1.2.0</version>
+    <version>2.1.0</version>
   </parent>
 
   <artifactId>organization-service</artifactId>
@@ -57,10 +57,10 @@
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-data-redis</artifactId>
     </dependency>
-    <!-- spring-boot-data-redis amène spring-boot-netty en scope runtime uniquement.
-         L'AOT (process-aot/test-aot) génère des __BeanDefinitions référençant
-         NettyAutoConfiguration : la dépendance explicite en scope compile permet
-         de compiler ces sources générées. Aucun changement au runtime. -->
+    <!-- spring-boot-data-redis amï¿½ne spring-boot-netty en scope runtime uniquement.
+         L'AOT (process-aot/test-aot) gï¿½nï¿½re des __BeanDefinitions rï¿½fï¿½renï¿½ant
+         NettyAutoConfiguration : la dï¿½pendance explicite en scope compile permet
+         de compiler ces sources gï¿½nï¿½rï¿½es. Aucun changement au runtime. -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-netty</artifactId>
