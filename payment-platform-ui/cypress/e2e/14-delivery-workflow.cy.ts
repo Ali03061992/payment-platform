@@ -471,9 +471,9 @@ describe('14 - Delivery: Cross-role Access Control', () => {
         cy.get('table tbody tr.clickable-row').first().click();
         cy.get('.modal-overlay').should('be.visible');
         cy.get('.modal-content').should('contain', 'Commande');
+        cy.get('.modal-content .payment-badge').should('have.attr', 'aria-label').and('contain', 'Statut');
+        cy.get('.modal-content .order-summary-amount').invoke('text').should('match', /\d/);
         cy.get('.detail-grid').should('exist');
-        cy.get('.detail-grid .detail-label').should('contain', 'Statut');
-        cy.get('.detail-grid .detail-label').should('contain', 'Total');
         cy.get('.detail-grid .detail-label').should('contain', 'Boutique');
         cy.get('.btn-close').click();
         cy.get('.modal-overlay').should('not.exist');

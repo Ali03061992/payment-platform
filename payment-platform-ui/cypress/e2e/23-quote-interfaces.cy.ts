@@ -69,7 +69,9 @@ describe('23 - Interfaces dédiées devis', () => {
         cy.contains(d.body.reference).should('exist');
         cy.contains('button', 'Chiffrer').first().click();
         cy.get('#quote-modal-title', { timeout: 15000 }).should('exist');
-        cy.get('input[name="quoteDiscount_0"]').clear().type('10');
+        // Le [name] Angular part vers NgModel : le DOM n'a pas d'attribut name -> ciblage structurel (colonne remise = 2e input nombre).
+        cy.get('.modal-content table input[type="number"]', { timeout: 15000 }).should('have.length', 2);
+        cy.get('.modal-content table input[type="number"]').eq(1).clear().type('10');
         cy.contains('button', 'Envoyer le devis').click();
         cy.get('#quote-modal-title').should('not.exist');
       });

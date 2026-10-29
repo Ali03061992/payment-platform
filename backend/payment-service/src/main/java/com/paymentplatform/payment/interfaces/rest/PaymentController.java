@@ -136,21 +136,22 @@ public class PaymentController {
         var current = CurrentUser.get();
         int safePage = Math.max(0, page);
         int safeSize = Math.min(Math.max(1, size), 100);
-        if (current.organizationId() != null && current.roles() != null) {
-            boolean isShop = current.roles().stream().anyMatch(r -> r.contains("SHOP"));
-            boolean isSupplier = current.roles().stream().anyMatch(r -> r.contains("SUPPLIER"));
-            if (isShop && !isSupplier) {
-                return ResponseEntity.ok(listPayments.execute(current.organizationId(), safePage, safeSize));
-            } else if (isSupplier && !isShop) {
-                return ResponseEntity.ok(listPayments.executeBySupplier(current.organizationId(), safePage, safeSize));
-            } else if (isShop || isSupplier) {
-                if (isSupplier) {
-                    return ResponseEntity.ok(listPayments.executeBySupplier(current.organizationId(), safePage, safeSize));
-                }
-                return ResponseEntity.ok(listPayments.execute(current.organizationId(), safePage, safeSize));
-            }
+        if (current.roles() != null && current.roles().contains("SYSTEM_ADMIN")) {
+            return ResponseEntity.ok(listPayments.executeAll(safePage, safeSize));
         }
-        return ResponseEntity.ok(listPayments.executeAll(safePage, safeSize));
+        UUID orgId = current.organizationId();
+        if (orgId == null || current.roles() == null) {
+            return ResponseEntity.status(403).build();
+        }
+        boolean isShop = current.roles().stream().anyMatch(r -> r.contains("SHOP"));
+        boolean isSupplier = current.roles().stream().anyMatch(r -> r.contains("SUPPLIER"));
+        if (isShop && !isSupplier) {
+            return ResponseEntity.ok(listPayments.execute(orgId, safePage, safeSize));
+        }
+        if (isSupplier) {
+            return ResponseEntity.ok(listPayments.executeBySupplier(orgId, safePage, safeSize));
+        }
+        return ResponseEntity.status(403).build();
     }
 
     /**
@@ -161,7 +162,23 @@ public class PaymentController {
     @GetMapping("/stats")
     @PreAuthorize("hasAuthority('VIEW_PAYMENTS')")
     public ResponseEntity<PaymentStatsResponse> stats() {
-        return ResponseEntity.ok(listPayments.stats());
+        var current = CurrentUser.get();
+        if (current.roles() != null && current.roles().contains("SYSTEM_ADMIN")) {
+            return ResponseEntity.ok(listPayments.stats());
+        }
+        UUID orgId = current.organizationId();
+        if (orgId == null || current.roles() == null) {
+            return ResponseEntity.status(403).build();
+        }
+        boolean isShop = current.roles().stream().anyMatch(r -> r.contains("SHOP"));
+        boolean isSupplier = current.roles().stream().anyMatch(r -> r.contains("SUPPLIER"));
+        if (isShop && !isSupplier) {
+            return ResponseEntity.ok(listPayments.statsByShop(orgId));
+        }
+        if (isSupplier) {
+            return ResponseEntity.ok(listPayments.statsBySupplier(orgId));
+        }
+        return ResponseEntity.status(403).build();
     }
 
     /**
@@ -290,16 +307,21 @@ public class PaymentController {
         var current = CurrentUser.get();
         UUID supplierId = null;
         UUID shopId = null;
-        if (current.roles() != null && current.roles().contains("SYSTEM_ADMIN")) {
-        } else if (current.organizationId() != null && current.roles() != null) {
+        if (current.roles() == null || !current.roles().contains("SYSTEM_ADMIN")) {
+            UUID orgId = current.organizationId();
+            if (orgId == null || current.roles() == null) {
+                response.sendError(HttpServletResponse.SC_FORBIDDEN, "Accès refusé");
+                return;
+            }
             boolean isShop = current.roles().stream().anyMatch(r -> r.contains("SHOP"));
             boolean isSupplier = current.roles().stream().anyMatch(r -> r.contains("SUPPLIER"));
             if (isShop && !isSupplier) {
-                shopId = current.organizationId();
+                shopId = orgId;
             } else if (isSupplier) {
-                supplierId = current.organizationId();
-            } else if (isShop) {
-                shopId = current.organizationId();
+                supplierId = orgId;
+            } else {
+                response.sendError(HttpServletResponse.SC_FORBIDDEN, "Accès refusé");
+                return;
             }
         }
         Instant fromInstant = from.atStartOfDay().toInstant(ZoneOffset.UTC);
@@ -332,16 +354,21 @@ public class PaymentController {
         Instant fromInstant = null;
         Instant toInstant = null;
 
-        if (current.roles() == null || current.roles().contains("SYSTEM_ADMIN")) {
-        } else if (current.organizationId() != null) {
+        if (current.roles() == null || !current.roles().contains("SYSTEM_ADMIN")) {
+            UUID orgId = current.organizationId();
+            if (orgId == null || current.roles() == null) {
+                response.sendError(HttpServletResponse.SC_FORBIDDEN, "Accès refusé");
+                return;
+            }
             boolean isShop = current.roles().stream().anyMatch(r -> r.contains("SHOP"));
             boolean isSupplier = current.roles().stream().anyMatch(r -> r.contains("SUPPLIER"));
             if (isShop && !isSupplier) {
-                shopId = current.organizationId();
+                shopId = orgId;
             } else if (isSupplier) {
-                supplierId = current.organizationId();
-            } else if (isShop) {
-                shopId = current.organizationId();
+                supplierId = orgId;
+            } else {
+                response.sendError(HttpServletResponse.SC_FORBIDDEN, "Accès refusé");
+                return;
             }
         }
 

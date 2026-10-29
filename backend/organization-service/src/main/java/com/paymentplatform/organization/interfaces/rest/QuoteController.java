@@ -95,23 +95,30 @@ public class QuoteController {
      * Demandes visibles : les siennes (boutique), celles reçues (fournisseur).
      */
     @GetMapping("/requests")
-    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_AGENT', 'SHOP_MANAGER', 'SYSTEM_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_AGENT', 'SYSTEM_ADMIN')")
     public ResponseEntity<List<QuoteRequestResponse>> myRequests() {
         var current = CurrentUser.get();
-        if (isSupplier() && !isAdmin()) {
-            return ResponseEntity.ok(listRequests.forSupplier(current.organizationId()));
+        if (isAdmin()) {
+            return ResponseEntity.ok(List.of());
         }
-        if (!isAdmin()) {
-            return ResponseEntity.ok(listRequests.forShop(current.organizationId()));
+        UUID orgId = current.organizationId();
+        if (orgId == null) {
+            return ResponseEntity.status(403).build();
         }
-        return ResponseEntity.ok(List.of());
+        if (isSupplier()) {
+            return ResponseEntity.ok(listRequests.forSupplier(orgId));
+        }
+        if (current.roles().contains("SHOP_ADMIN") || current.roles().contains("SHOP_AGENT")) {
+            return ResponseEntity.ok(listRequests.forShop(orgId));
+        }
+        return ResponseEntity.status(403).build();
     }
 
     /**
      * Détail d'une demande + ses devis (périmètre boutique/fournisseur concernés).
      */
     @GetMapping("/requests/{id}")
-    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_AGENT', 'SHOP_MANAGER', 'SYSTEM_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_AGENT', 'SYSTEM_ADMIN')")
     public ResponseEntity<QuoteRequestResponse> getRequest(@PathVariable UUID id) {
         var request = requestRepository.findById(id);
         if (request.isEmpty()) {
@@ -119,9 +126,9 @@ public class QuoteController {
         }
         var r = request.get();
         var current = CurrentUser.get();
-        if (!isAdmin() && current.organizationId() != null
-                && !current.organizationId().equals(r.shopId())
-                && !current.organizationId().equals(r.supplierId())) {
+        UUID orgId = current.organizationId();
+        if (!isAdmin() && (orgId == null
+                || (!orgId.equals(r.shopId()) && !orgId.equals(r.supplierId())))) {
             return ResponseEntity.status(403).build();
         }
         var quotes = quoteRepository.findByRequestId(id).stream()
@@ -147,7 +154,7 @@ public class QuoteController {
      * Accepte un devis (boutique) : crée la commande CONFIRMÉE aux conditions figées.
      */
     @PostMapping("/quotes/{quoteId}/accept")
-    @PreAuthorize("hasAnyAuthority('SHOP_ADMIN', 'SHOP_AGENT', 'SHOP_MANAGER', 'SYSTEM_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('SHOP_ADMIN', 'SHOP_AGENT', 'SYSTEM_ADMIN')")
     public ResponseEntity<OrderResponse> accept(
             @PathVariable UUID quoteId) {
         var current = CurrentUser.get();
@@ -158,7 +165,7 @@ public class QuoteController {
      * Annule une demande (boutique demanderesse).
      */
     @PatchMapping("/requests/{id}/cancel")
-    @PreAuthorize("hasAnyAuthority('SHOP_ADMIN', 'SHOP_AGENT', 'SHOP_MANAGER', 'SYSTEM_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('SHOP_ADMIN', 'SHOP_AGENT', 'SYSTEM_ADMIN')")
     public ResponseEntity<QuoteRequestResponse> cancel(@PathVariable UUID id) {
         var current = CurrentUser.get();
         return ResponseEntity.ok(cancelRequest.execute(id, current.organizationId()));
@@ -168,7 +175,7 @@ public class QuoteController {
      * Télécharge un devis en PDF (mise en page facture, intitulé DEVIS).
      */
     @GetMapping("/requests/{requestId}/quotes/{version}/pdf")
-    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_AGENT', 'SHOP_MANAGER', 'SYSTEM_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_AGENT', 'SYSTEM_ADMIN')")
     public void downloadQuotePdf(@PathVariable UUID requestId, @PathVariable int version,
                                  HttpServletResponse response) throws Exception {
         var request = requestRepository.findById(requestId);
@@ -178,9 +185,9 @@ public class QuoteController {
         }
         var r = request.get();
         var current = CurrentUser.get();
-        if (!isAdmin() && current.organizationId() != null
-                && !current.organizationId().equals(r.shopId())
-                && !current.organizationId().equals(r.supplierId())) {
+        UUID orgId = current.organizationId();
+        if (!isAdmin() && (orgId == null
+                || (!orgId.equals(r.shopId()) && !orgId.equals(r.supplierId())))) {
             response.sendError(HttpServletResponse.SC_FORBIDDEN, "Accès refusé");
             return;
         }

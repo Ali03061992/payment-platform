@@ -420,7 +420,9 @@
                     {{ selectedOrder.externalReference }}
                   } @else {
                     <span class="text-muted">—</span>
-                    <button class="btn btn-sm btn-secondary detail-inline-action" (click)="toggleDetailExtRefForm()">{{ 'ORDER_DETAIL.EXTREF_ADD' | translate }}</button>
+                    @if (isSupplierAdmin()) {
+                      <button class="btn btn-sm btn-secondary detail-inline-action" (click)="toggleDetailExtRefForm()">{{ 'ORDER_DETAIL.EXTREF_ADD' | translate }}</button>
+                    }
                   }
                 </div>
               </div>
@@ -449,7 +451,7 @@
             </div>
           </div>
 
-          @if (showDetailExtRefForm) {
+          @if (showDetailExtRefForm && isSupplierAdmin()) {
             <div class="detail-form-panel">
               <div class="form-group">
                 <label for="detailExtRef">{{ 'ORDER_DETAIL.EXTREF' | translate }}</label>

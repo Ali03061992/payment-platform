@@ -3,9 +3,13 @@ package com.paymentplatform.organization.application.usecase;
 import com.paymentplatform.organization.application.dto.CreateOrderRequest;
 import com.paymentplatform.organization.application.dto.OrderItemRequest;
 import com.paymentplatform.organization.application.dto.OrderResponse;
+import com.paymentplatform.organization.application.security.TenantAccess;
+import com.paymentplatform.organization.domain.model.Order;
 import com.paymentplatform.organization.domain.repository.OrderItemRepository;
 import com.paymentplatform.organization.domain.repository.OrderRepository;
 import com.paymentplatform.shared.domain.exception.NotFoundException;
+import com.paymentplatform.shared.domain.model.RoleCode;
+import com.paymentplatform.shared.domain.security.ActorContext;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -24,11 +28,24 @@ public class ReorderUseCase {
         this.createOrder = createOrder;
     }
 
-    public OrderResponse execute(UUID orderId, UUID actorUserId, String actorRole) {
-        var order = orders.findById(orderId)
+    public OrderResponse execute(UUID orderId, ActorContext actor) {
+        Order order = orders.findById(orderId)
                 .orElseThrow(() -> new NotFoundException("Commande non trouvée : " + orderId));
+        TenantAccess.requireShop(actor, order.getShopId());
+        return reorder(order, actor);
+    }
 
-        var items = orderItems.findByOrderId(orderId);
+    @Deprecated
+    public OrderResponse execute(UUID orderId, UUID actorUserId, String actorRole) {
+        Order order = orders.findById(orderId)
+                .orElseThrow(() -> new NotFoundException("Commande non trouvée : " + orderId));
+        ActorContext actor = new ActorContext(actorUserId, order.getShopId(),
+                List.of(RoleCode.SHOP_ADMIN.name()));
+        return reorder(order, actor);
+    }
+
+    private OrderResponse reorder(Order order, ActorContext actor) {
+        var items = orderItems.findByOrderId(order.getId());
         if (items.isEmpty()) {
             throw new NotFoundException("La commande originale ne contient aucun article");
         }
@@ -48,6 +65,6 @@ public class ReorderUseCase {
                 itemRequests
         );
 
-        return createOrder.execute(request, actorUserId, actorRole);
+        return createOrder.execute(request, actor);
     }
 }

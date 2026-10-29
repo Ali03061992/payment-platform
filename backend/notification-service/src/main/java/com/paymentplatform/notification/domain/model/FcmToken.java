@@ -19,6 +19,9 @@ public class FcmToken {
     @Column(name = "user_id", nullable = false, columnDefinition = "VARCHAR(36)")
     private UUID userId;
 
+    @Column(name = "organization_id", columnDefinition = "VARCHAR(36)")
+    private UUID organizationId;
+
     @Column(nullable = false, length = 512)
     private String token;
 
@@ -30,9 +33,10 @@ public class FcmToken {
 
     protected FcmToken() {}
 
-    public FcmToken(UUID userId, String token) {
+    public FcmToken(UUID userId, UUID organizationId, String token) {
         this.id = UUID.randomUUID();
         this.userId = userId;
+        this.organizationId = organizationId;
         this.token = token;
         this.createdAt = Instant.now();
         this.lastUsedAt = Instant.now();
@@ -40,16 +44,13 @@ public class FcmToken {
 
     public UUID id() { return id; }
     public UUID userId() { return userId; }
+    public UUID organizationId() { return organizationId; }
     public String token() { return token; }
     public Instant createdAt() { return createdAt; }
     public Instant lastUsedAt() { return lastUsedAt; }
 
-    public void touch() {
+    public void touch(UUID organizationId) {
+        this.organizationId = organizationId;
         this.lastUsedAt = Instant.now();
-    }
-
-    public void reassign(UUID userId) {
-        this.userId = userId;
-        touch();
     }
 }

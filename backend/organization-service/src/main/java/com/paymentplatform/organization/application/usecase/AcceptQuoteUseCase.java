@@ -83,6 +83,12 @@ public class AcceptQuoteUseCase {
         if (request.status() != QuoteRequestStatus.QUOTED) {
             throw new ConflictException("Demande non acceptable en l'état : " + request.status());
         }
+        int latestVersion = quotes.findByRequestId(request.id()).stream()
+                .mapToInt(SupplierQuote::version).max().orElse(0);
+        if (quote.version() != latestVersion) {
+            throw new ConflictException("Une version plus récente du devis existe (v"
+                    + latestVersion + ")");
+        }
 
         Organization shop = organizations.findById(
                         new com.paymentplatform.organization.domain.valueobject.OrganizationId(request.shopId()))
@@ -97,30 +103,49 @@ public class AcceptQuoteUseCase {
         for (QuoteLine line : parseLines(quote.linesJson())) {
             Product product = products.findById(line.productId())
                     .orElseThrow(() -> new NotFoundException("Produit non trouvé : " + line.productId()));
+            if (!product.getSupplierId().equals(request.supplierId())) {
+                throw new ForbiddenException("Produit hors catalogue du fournisseur");
+            }
             int availableQty = product.getQuantity() - product.getReservedQty();
             if (availableQty < line.qty()) {
                 throw new ConflictException("Stock insuffisant pour le produit " + product.getName()
                         + " (disponible: " + availableQty + ", demandé: " + line.qty() + ")");
             }
-            BigDecimal discountAmount = product.getUnitPrice() != null
-                    ? product.getUnitPrice().multiply(BigDecimal.valueOf(line.qty()))
-                            .multiply(line.discountPct()).divide(new BigDecimal("100"), 4, RoundingMode.HALF_UP)
-                    : BigDecimal.ZERO;
+            BigDecimal unitPrice = line.unitPrice() != null ? line.unitPrice() : product.getUnitPrice();
+            BigDecimal discountAmount = line.discount();
+            if (discountAmount == null) {
+                discountAmount = unitPrice != null
+                        ? unitPrice.multiply(BigDecimal.valueOf(line.qty()))
+                                .multiply(line.discountPct()).divide(new BigDecimal("100"), 4, RoundingMode.HALF_UP)
+                        : BigDecimal.ZERO;
+            }
             OrderItem item = new OrderItem();
             item.setOrderId(savedOrder.getId());
             item.setProductId(product.getId());
             item.setProductRef(product.getSku());
             item.setProductName(product.getName());
             item.setQuantity(line.qty());
-            item.setUnitPrice(product.getUnitPrice());
+            item.setUnitPrice(unitPrice);
             item.setDiscount(discountAmount);
             CreateOrderUseCase.snapshotFiscalFields(item, product);
+            if (line.vatRate() != null) {
+                item.setVatRate(line.vatRate());
+            }
+            if (line.fodec() != null) {
+                item.setFodecApplicable(line.fodec());
+            }
+            if (line.priceTtc() != null) {
+                item.setPriceTtc(line.priceTtc());
+            }
             product.setReservedQty(product.getReservedQty() + line.qty());
             products.save(product);
             items.add(item);
         }
 
         OrderFiscalizer.apply(savedOrder, items, shop);
+        if (quote.total() != null && savedOrder.getTotal().compareTo(quote.total()) != 0) {
+            throw new ConflictException("Le devis ne correspond plus aux conditions fiscales actuelles");
+        }
         savedOrder.confirm();
         orders.save(savedOrder);
         List<OrderItem> savedItems = new ArrayList<>();
@@ -153,7 +178,8 @@ public class AcceptQuoteUseCase {
         return OrderResponse.from(savedOrder, savedItems);
     }
 
-    private record QuoteLine(UUID productId, int qty, BigDecimal discountPct) {}
+    private record QuoteLine(UUID productId, int qty, BigDecimal unitPrice, BigDecimal discount,
+                             BigDecimal discountPct, BigDecimal vatRate, Boolean fodec, Boolean priceTtc) {}
 
     private List<QuoteLine> parseLines(String json) {
         List<QuoteLine> lines = new ArrayList<>();
@@ -163,15 +189,14 @@ public class AcceptQuoteUseCase {
                 for (JsonNode n : root) {
                     UUID productId = UUID.fromString(n.get("productId").asText());
                     int qty = n.has("qty") ? n.get("qty").asInt(1) : 1;
-                    BigDecimal pct = BigDecimal.ZERO;
-                    try {
-                        if (n.has("discountPct") && !n.get("discountPct").isNull()) {
-                            pct = new BigDecimal(n.get("discountPct").asText("0"));
-                        }
-                    } catch (Exception ignored) {
-                        pct = BigDecimal.ZERO;
-                    }
-                    lines.add(new QuoteLine(productId, Math.max(1, qty), pct));
+                    BigDecimal pct = decimal(n, "discountPct", BigDecimal.ZERO);
+                    lines.add(new QuoteLine(productId, Math.max(1, qty),
+                            decimal(n, "unitPrice", null),
+                            decimal(n, "discount", null),
+                            pct,
+                            decimal(n, "vatRate", null),
+                            bool(n, "fodec"),
+                            bool(n, "priceTtc")));
                 }
             }
         } catch (Exception e) {
@@ -181,5 +206,20 @@ public class AcceptQuoteUseCase {
             throw new ConflictException("Devis vide, acceptation impossible");
         }
         return lines;
+    }
+
+    private BigDecimal decimal(JsonNode node, String field, BigDecimal fallback) {
+        if (!node.has(field) || node.get(field).isNull()) {
+            return fallback;
+        }
+        try {
+            return new BigDecimal(node.get(field).asText());
+        } catch (Exception e) {
+            return fallback;
+        }
+    }
+
+    private Boolean bool(JsonNode node, String field) {
+        return node.has(field) && !node.get(field).isNull() ? node.get(field).asBoolean() : null;
     }
 }

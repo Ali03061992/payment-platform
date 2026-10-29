@@ -170,4 +170,23 @@ public class ListPaymentsUseCase {
                 payments.countByStatus(PaymentStatus.CANCELLED)
         );
     }
+
+    @Transactional(readOnly = true)
+    public PaymentStatsResponse statsByShop(UUID shopId) {
+        return statsOf(payments.findByShopId(shopId));
+    }
+
+    @Transactional(readOnly = true)
+    public PaymentStatsResponse statsBySupplier(UUID supplierId) {
+        return statsOf(payments.findBySupplierId(supplierId));
+    }
+
+    private PaymentStatsResponse statsOf(List<Payment> scoped) {
+        long pending = scoped.stream().filter(p -> p.status() == PaymentStatus.PENDING).count();
+        long confirmed = scoped.stream().filter(p -> p.status() == PaymentStatus.CONFIRMED).count();
+        long rejected = scoped.stream().filter(p -> p.status() == PaymentStatus.REJECTED).count();
+        long cancelled = scoped.stream().filter(p -> p.status() == PaymentStatus.CANCELLED).count();
+        return new PaymentStatsResponse(pending + confirmed + rejected + cancelled,
+                pending, confirmed, rejected, cancelled);
+    }
 }

@@ -229,6 +229,52 @@ function createRelation(token: string, supplierId: string, shopId: string) {
 
 // ── User helpers ────────────────────────────────────────────────────
 
+const MAILPIT_URL = () => Cypress.env('mailpitUrl') || 'http://localhost:8025';
+
+/**
+ * POST /api/users n'applique PAS le mot de passe fourni : le backend génère un
+ * secret provisoire et envoie un email d'invitation (@Async) contenant un token
+ * setup-password (64 hex, validité 24h). On finalise donc le setup exactement
+ * comme le ferait l'utilisateur : token lu dans Mailpit puis
+ * POST /api/auth/password-setup/complete.
+ * Retourne true si le mot de passe est en place (y compris token déjà consommé
+ * = 409 : setup déjà fait sur un run précédent).
+ */
+function completeInvitation(email: string, password: string, attempt = 0): Cypress.Chainable<boolean> {
+  return cy.request({
+    method: 'GET',
+    url: `${MAILPIT_URL()}/api/v1/messages?limit=100`,
+    failOnStatusCode: false,
+  }).then((list) => {
+    const messages: any[] = list.body?.messages || [];
+    const invitation = messages.find((m: any) =>
+      (m.To || []).some((t: any) => String(t.Address || '').toLowerCase() === email.toLowerCase()));
+    if (invitation) {
+      return cy.request({
+        method: 'GET',
+        url: `${MAILPIT_URL()}/api/v1/message/${invitation.ID}`,
+        failOnStatusCode: false,
+      }).then((full) => {
+        const content = `${full.body?.Text || ''}\n${full.body?.HTML || ''}`;
+        const match = content.match(/token=([0-9a-f]{64})/);
+        if (!match) return cy.wrap(false);
+        return cy.request({
+          method: 'POST',
+          url: `${API_URL()}/api/auth/password-setup/complete`,
+          body: { token: match[1], newPassword: password },
+          failOnStatusCode: false,
+        }).then((res) => {
+          const done = (res.status >= 200 && res.status < 300) || res.status === 409;
+          return cy.wrap(done);
+        });
+      });
+    }
+    // Email encore en vol (envoi @Async) → on réessaie.
+    if (attempt >= 10) return cy.wrap(false);
+    return cy.wait(500).then(() => completeInvitation(email, password, attempt + 1));
+  });
+}
+
 function createUser(token: string, data: any) {
   const normalizeUser = (body: any) => {
     if (!body) return null;
@@ -236,17 +282,9 @@ function createUser(token: string, data: any) {
     if (u?.username) return u;
     return null;
   };
-  return cy.request({
-    method: 'POST',
-    url: `${API_URL()}/api/users`,
-    headers: authHeaders(token),
-    body: data,
-    failOnStatusCode: false,
-  }).then((r) => {
-    const created = normalizeUser(r.body);
-    if ((r.status === 200 || r.status === 201) && created) return created;
-    if ((r.status === 200 || r.status === 201) && r.body) return r.body;
-    return cy.request({
+
+  const loginWithPassword = () =>
+    cy.request({
       method: 'POST',
       url: `${API_URL()}/api/auth/login`,
       body: { username: data.username, password: data.password },
@@ -268,6 +306,28 @@ function createUser(token: string, data: any) {
           if (meUser) return meUser;
         }
         return { username: data.username };
+      });
+    });
+
+  return cy.request({
+    method: 'POST',
+    url: `${API_URL()}/api/users`,
+    headers: authHeaders(token),
+    body: data,
+    failOnStatusCode: false,
+  }).then((r) => {
+    const created = normalizeUser(r.body);
+    if ((r.status === 200 || r.status === 201) && created) {
+      // Compte créé : on finalise l'invitation avant de renvoyer l'utilisateur.
+      return completeInvitation(data.email, data.password).then(() => created);
+    }
+    if ((r.status === 200 || r.status === 201) && r.body) return r.body;
+    // Déjà existant : login direct, sinon setup d'invitation puis nouvel essai.
+    return loginWithPassword().then((user) => {
+      if (user) return user;
+      return completeInvitation(data.email, data.password).then((done) => {
+        if (!done) return null;
+        return loginWithPassword();
       });
     });
   });

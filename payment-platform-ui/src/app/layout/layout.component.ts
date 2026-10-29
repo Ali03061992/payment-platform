@@ -72,7 +72,7 @@ export class LayoutComponent implements OnInit, OnDestroy {
     { label: 'NAV.BALANCE', icon: 'scale', route: 'supplier/balance', roles: ['SUPPLIER_ADMIN'], group: 'NAV.GROUP_FINANCE' },
     { label: 'NAV.INVOICE_JOURNAL', icon: 'file-text', route: 'supplier/invoices', roles: ['SUPPLIER_ADMIN'], group: 'NAV.GROUP_FINANCE' },
     { label: 'NAV.DELIVERIES', icon: 'truck', route: 'supplier/deliveries', roles: ['SUPPLIER_ADMIN', 'SUPPLIER_AGENT'], group: 'NAV.GROUP_SALES' },
-    { label: 'NAV.MY_ORDERS', icon: 'cart', route: 'shop/orders', roles: ['SHOP_ADMIN', 'SHOP_AGENT'], group: 'NAV.GROUP_SHOP' },
+    { label: 'NAV.MY_ORDERS', icon: 'cart', route: 'shop/orders', roles: ['SHOP_ADMIN'], group: 'NAV.GROUP_SHOP' },
     { label: 'NAV.MY_QUOTES', icon: 'file-text', route: 'shop/quotes', roles: ['SHOP_ADMIN'], group: 'NAV.GROUP_SHOP' },
     { label: 'NAV.QUOTE_REQUEST', icon: 'file-plus', route: 'shop/quotes/request', roles: ['SHOP_ADMIN'], group: 'NAV.GROUP_SHOP' },
     { label: 'NAV.DELIVERIES', icon: 'truck', route: 'shop/deliveries', roles: ['SHOP_ADMIN', 'SHOP_AGENT'], group: 'NAV.GROUP_SHOP' },
@@ -83,7 +83,7 @@ export class LayoutComponent implements OnInit, OnDestroy {
     { label: 'NAV.PAYMENTS', icon: 'card', route: 'payments', roles: ['SYSTEM_ADMIN', 'SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_AGENT'], group: 'NAV.GROUP_PAYMENTS' },
     { label: 'NAV.PAYMENT_STATS', icon: 'chart', route: 'payments/stats', roles: ['SYSTEM_ADMIN', 'SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_AGENT'], group: 'NAV.GROUP_PAYMENTS' },
     { label: 'NAV.EXPORT', icon: 'upload', route: 'export', roles: ['SYSTEM_ADMIN', 'SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_AGENT'], group: 'NAV.GROUP_TOOLS' },
-    { label: 'NAV.AGENT_PAYMENTS', icon: 'users', route: 'supplier/agent-payments', roles: ['SUPPLIER_ADMIN', 'SUPPLIER_AGENT'], group: 'NAV.GROUP_SALES' },
+    { label: 'NAV.AGENT_PAYMENTS', icon: 'users', route: 'supplier/agent-payments', roles: ['SUPPLIER_ADMIN'], group: 'NAV.GROUP_SALES' },
     { label: 'LAYOUT.NOTIFICATIONS', icon: 'bell', route: 'notifications', roles: ['SYSTEM_ADMIN', 'SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_AGENT'], group: 'NAV.GROUP_TOOLS' },
     { label: 'NAV.CHANGE_PASSWORD', icon: 'lock', route: 'change-password', roles: ['SYSTEM_ADMIN', 'SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_AGENT'], group: 'NAV.GROUP_ACCOUNT' },
   ];

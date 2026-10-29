@@ -48,7 +48,7 @@ class WebPushSenderTest {
 
     @Test
     void buildPayload_usesNavigateLastFocusedOrOpenOperation() throws Exception {
-        WebPushSender sender = new WebPushSender(null, null, null, false, "mailto:test@example.com");
+        WebPushSender sender = new WebPushSender(null, null, null, null, false, "mailto:test@example.com");
         UUID orgId = UUID.randomUUID();
         String json = sender.buildPayload("Title", "Body", "tag-1", "/orders/42", orgId);
 
@@ -65,7 +65,7 @@ class WebPushSenderTest {
 
     @Test
     void buildPayload_defaultsWhenFieldsNull() throws Exception {
-        WebPushSender sender = new WebPushSender(null, null, null, false, "mailto:test@example.com");
+        WebPushSender sender = new WebPushSender(null, null, null, null, false, "mailto:test@example.com");
         String json = sender.buildPayload(null, null, null, "/dashboard", null);
 
         JsonNode root = new ObjectMapper().readTree(json);
@@ -75,3 +75,4 @@ class WebPushSenderTest {
         assertThat(root.at("/notification/data/organizationId").asText()).isEmpty();
     }
 }
+

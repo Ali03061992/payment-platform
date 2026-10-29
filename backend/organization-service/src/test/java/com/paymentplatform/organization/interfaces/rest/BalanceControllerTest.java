@@ -1,6 +1,9 @@
 package com.paymentplatform.organization.interfaces.rest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.paymentplatform.organization.domain.model.SupplierShopRelation;
+import com.paymentplatform.organization.domain.repository.SupplierShopRelationRepository;
+import com.paymentplatform.organization.domain.valueobject.OrganizationId;
 import com.paymentplatform.shared.infrastructure.security.AuthenticatedUser;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -38,6 +41,7 @@ class BalanceControllerTest {
 
     @Autowired private WebApplicationContext wac;
     @Autowired private ObjectMapper objectMapper;
+    @Autowired private SupplierShopRelationRepository relations;
 
     private MockMvc mockMvc;
 
@@ -46,6 +50,12 @@ class BalanceControllerTest {
         mockMvc = MockMvcBuilders.webAppContextSetup(wac)
                 .apply(SecurityMockMvcConfigurers.springSecurity())
                 .build();
+        OrganizationId supplierId = OrganizationId.of(UUID.fromString("00000000-0000-0000-0000-000000000010"));
+        OrganizationId shopId = OrganizationId.of(UUID.fromString("00000000-0000-0000-0000-000000000020"));
+        if (!relations.existsBySupplierIdAndShopIdAndStatus(supplierId, shopId,
+                com.paymentplatform.organization.domain.valueobject.RelationStatus.ACTIVE)) {
+            relations.save(SupplierShopRelation.create(supplierId, shopId));
+        }
     }
 
     private static UsernamePasswordAuthenticationToken auth(UUID userId, String username, List<String> perms, UUID orgId) {

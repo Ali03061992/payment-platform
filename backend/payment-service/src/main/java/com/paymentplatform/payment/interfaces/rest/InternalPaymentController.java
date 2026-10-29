@@ -3,6 +3,7 @@ package com.paymentplatform.payment.interfaces.rest;
 import com.paymentplatform.payment.application.dto.CreatePaymentRequest;
 import com.paymentplatform.payment.application.dto.PaymentResponse;
 import com.paymentplatform.payment.application.dto.SupplierPaymentSummaryResponse;
+import com.paymentplatform.payment.application.usecase.CancelPaymentUseCase;
 import com.paymentplatform.payment.application.usecase.CreatePaymentUseCase;
 import com.paymentplatform.payment.application.usecase.ListPaymentsUseCase;
 import com.paymentplatform.payment.infrastructure.http.PaymentInternalAuthGuard;
@@ -24,13 +25,16 @@ import java.util.UUID;
 public class InternalPaymentController {
 
     private final CreatePaymentUseCase createPayment;
+    private final CancelPaymentUseCase cancelPayment;
     private final ListPaymentsUseCase listPayments;
     private final PaymentInternalAuthGuard guard;
 
     public InternalPaymentController(CreatePaymentUseCase createPayment,
+                                     CancelPaymentUseCase cancelPayment,
                                      ListPaymentsUseCase listPayments,
                                      PaymentInternalAuthGuard guard) {
         this.createPayment = createPayment;
+        this.cancelPayment = cancelPayment;
         this.listPayments = listPayments;
         this.guard = guard;
     }
@@ -63,6 +67,24 @@ public class InternalPaymentController {
         String idempotencyKey = request.orderId() != null ? "asap-" + request.orderId() : null;
         return ResponseEntity.status(201).body(
                 createPayment.execute(request, actor, request.shopId(), idempotencyKey));
+    }
+
+    @PostMapping("/cancel-by-order/{orderId}")
+    public ResponseEntity<Void> cancelAuto(
+            @RequestHeader(value = "X-Internal-Token", required = false) String token,
+            @RequestHeader(value = "X-Actor-User-Id", required = false) String actorUserId,
+            @PathVariable UUID orderId) {
+        if (!guard.isValid(token)) {
+            throw new UnauthorizedException("Secret interne invalide ou manquant");
+        }
+        UUID actor;
+        try {
+            actor = UUID.fromString(actorUserId);
+        } catch (Exception e) {
+            throw new UnauthorizedException("Acteur interne invalide ou manquant");
+        }
+        cancelPayment.executeByOrderId(orderId, actor);
+        return ResponseEntity.noContent().build();
     }
 
     /**

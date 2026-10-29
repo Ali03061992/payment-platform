@@ -43,6 +43,33 @@ public class PaymentClient {
      * L'idempotence est portée par la commande (clé {@code asap-<orderId>},
      * cf. B1) : livraison + accept-asap ne créent qu'un seul paiement.
      */
+    public void cancelAutoPayment(UUID orderId, UUID actorUserId) {
+        if (orderId == null) {
+            return;
+        }
+        try {
+            String targetUri = "http://" + paymentUrl + ":" + paymentPort
+                    + "/api/internal/payments/cancel-by-order/" + orderId;
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(targetUri))
+                    .header("X-Internal-Token", internalSecret)
+                    .header("X-Actor-User-Id", actorUserId != null ? actorUserId.toString() : "")
+                    .timeout(Duration.ofSeconds(5))
+                    .POST(HttpRequest.BodyPublishers.noBody())
+                    .build();
+            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            if (response.statusCode() >= 300 && response.statusCode() != 404) {
+                log.warn("Failed to cancel auto payment for order {}: status={}, body={}",
+                        orderId, response.statusCode(), response.body());
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            log.error("Interrupted while cancelling auto payment for order {}", orderId, e);
+        } catch (Exception e) {
+            log.error("Failed to cancel auto payment for order {}", orderId, e);
+        }
+    }
+
     public void createAutoPayment(UUID shopId, UUID supplierId, String currency, UUID createdBy,
                                    BigDecimal amount, UUID orderId) {
         // 2 tentatives max (l'idempotence côté paiement rend le rejeu sûr).

@@ -1,6 +1,7 @@
 package com.paymentplatform.organization.application.usecase;
 
 import com.paymentplatform.organization.application.dto.DisputeResponse;
+import com.paymentplatform.organization.application.security.TenantAccess;
 import com.paymentplatform.organization.domain.model.Dispute;
 import com.paymentplatform.organization.domain.model.Order;
 import com.paymentplatform.organization.domain.repository.DisputeRepository;
@@ -8,6 +9,7 @@ import com.paymentplatform.organization.domain.repository.OrderRepository;
 import com.paymentplatform.shared.domain.event.DisputeEvents;
 import com.paymentplatform.shared.domain.exception.ConflictException;
 import com.paymentplatform.shared.domain.exception.NotFoundException;
+import com.paymentplatform.shared.domain.security.ActorContext;
 import com.paymentplatform.shared.infrastructure.outbox.OutboxEventStore;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,10 +31,23 @@ public class CreateDisputeUseCase {
     }
 
     @Transactional
+    public DisputeResponse execute(UUID orderId, ActorContext actor, String reason) {
+        Order order = orders.findById(orderId)
+                .orElseThrow(() -> new NotFoundException("Commande non trouvée : " + orderId));
+        TenantAccess.requireParticipant(actor, order.getShopId(), order.getSupplierId(), null);
+        return create(order, actor.userId(), reason);
+    }
+
+    @Deprecated
+    @Transactional
     public DisputeResponse execute(UUID orderId, UUID actorUserId, String actorRole, String reason) {
         Order order = orders.findById(orderId)
                 .orElseThrow(() -> new NotFoundException("Commande non trouvée : " + orderId));
+        return create(order, actorUserId, reason);
+    }
 
+    private DisputeResponse create(Order order, UUID actorUserId, String reason) {
+        UUID orderId = order.getId();
         String status = order.getStatus();
         if (!"REJECTED".equals(status) && !"DELIVERY_REJECTED".equals(status)) {
             throw new ConflictException("Un litige ne peut être ouvert que pour une commande rejetée (REJECTED ou DELIVERY_REJECTED)");

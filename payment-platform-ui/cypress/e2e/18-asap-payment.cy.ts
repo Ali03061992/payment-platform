@@ -1,7 +1,8 @@
 // ASAP : création commande (asapPayment=true) -> confirmation fournisseur ->
-// livraison créée (assign/accept/confirm/deliver) -> à la livraison, UN paiement
-// auto est créé (pendingTotal/count +delta du total commande) ; le second appel
-// (accept-asap) ne crée PAS de doublon (idempotence asap-<orderId>).
+// livraison créée (assign/accept/confirm/deliver) -> aucun paiement à la
+// livraison ; l'acceptation boutique (accept-asap) crée l'UNIQUE paiement
+// auto (pendingTotal/count +delta du total commande, sans doublon malgré
+// l'appel use case + contrôleur — idempotence asap-<orderId>).
 describe('18 - ASAP: order -> delivery -> auto-payment', () => {
   const API = () => Cypress.env('apiUrl') || 'http://localhost:8081';
 
@@ -96,18 +97,18 @@ describe('18 - ASAP: order -> delivery -> auto-payment', () => {
                         method: 'POST', url: `${API()}/api/orders/${orderId}/deliver`,
                         headers: authAgent, body: { receivedBy: agentId },
                       }).then((r) => expect(r.body.status).to.eq('DELIVERED'));
-                      // 4. À la livraison : UN paiement auto créé.
+                      // 4. À la livraison : AUCUN paiement (créé à l'acceptation).
                       cy.request({ method: 'GET', url: summaryUrl, headers: authSup }).then((after) => {
                         expect(after.status).to.eq(200);
-                        // closeTo : les totaux transitent en JSON (flottants).
-                        expect(after.body.pendingTotal - before.body.pendingTotal).to.be.closeTo(orderTotal, 0.01);
-                        expect(after.body.pendingCount - before.body.pendingCount).to.eq(1);
-                        // 5. accept-asap ne crée PAS de doublon (idempotence).
+                        expect(after.body.pendingTotal - before.body.pendingTotal).to.be.closeTo(0, 0.01);
+                        expect(after.body.pendingCount - before.body.pendingCount).to.eq(0);
+                        // 5. accept-asap : UN paiement auto créé, sans doublon.
                         cy.request({
                           method: 'POST', url: `${API()}/api/orders/${orderId}/accept-asap`,
                           headers: authShop, body: {},
                         }).then((r) => expect(r.body.status).to.eq('ACCEPTED'));
                         cy.request({ method: 'GET', url: summaryUrl, headers: authSup }).then((final) => {
+                          // closeTo : les totaux transitent en JSON (flottants).
                           expect(final.body.pendingTotal - before.body.pendingTotal).to.be.closeTo(orderTotal, 0.01);
                           expect(final.body.pendingCount - before.body.pendingCount).to.eq(1);
                         });

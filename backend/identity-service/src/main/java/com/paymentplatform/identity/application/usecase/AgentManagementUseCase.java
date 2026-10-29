@@ -94,7 +94,7 @@ public class AgentManagementUseCase {
         audit.record(actorUserId, organizationId, AuditActions.USER_CREATED, saved.id().value(),
                 "{\"username\":\"" + saved.username().value() + "\",\"role\":\"" + role + "\"}");
         outbox.append(new UserCreatedEvent(UUID.randomUUID(), java.time.Instant.now(), saved.id().value(),
-                organizationId, List.of(role.name())), String.valueOf(saved.id().value()));
+                organizationId, List.of(role.name()), saved.email().value()), String.valueOf(saved.id().value()));
 
         return new AgentCreatedResponse(UserResponse.from(saved), generated ? rawPassword : null);
     }

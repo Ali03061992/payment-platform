@@ -41,11 +41,18 @@ app:
     expiration: ${JWT_EXPIRATION:30m}
   gateway:
     base-url: ${API_GATEWAY_URL:http://localhost:8081}
+  internal-secret: ${INTERNAL_SECRET:local-internal-secret-change-me}
+  identity-service:
+    url: ${IDENTITY_SERVICE_URL:localhost}
+    port: ${IDENTITY_SERVICE_PORT:8082}
   push:
     enabled: ${PUSH_ENABLED:false}
     credentials-path: ${FIREBASE_CREDENTIALS_PATH:}
   webpush:
     enabled: ${WEBPUSH_ENABLED:true}
+    # Hôtes des services de push autorisés (séparés par des virgules, wildcard *.domaine).
+    allowed-hosts: "${WEBPUSH_ALLOWED_HOSTS:fcm.googleapis.com,updates.push.services.mozilla.com,push.services.mozilla.com,web.push.apple.com,*.notify.windows.com}"
+    max-subscriptions-per-user: ${WEBPUSH_MAX_SUBSCRIPTIONS_PER_USER:10}
     # Property-first ; si vides, une paire est générée et persistée (dev).
     vapid-public-key: ${VAPID_PUBLIC_KEY:}
     vapid-private-key: ${VAPID_PRIVATE_KEY:}

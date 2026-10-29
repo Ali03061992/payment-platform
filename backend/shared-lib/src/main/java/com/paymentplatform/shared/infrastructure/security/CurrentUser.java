@@ -1,6 +1,7 @@
 package com.paymentplatform.shared.infrastructure.security;
 
 import com.paymentplatform.shared.domain.exception.UnauthorizedException;
+import com.paymentplatform.shared.domain.security.ActorContext;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
@@ -18,6 +19,10 @@ public final class CurrentUser {
             return user;
         }
         throw new UnauthorizedException("Non authentifié");
+    }
+
+    public static ActorContext actor() {
+        return get().actor();
     }
 
     public static UUID id() {

@@ -139,7 +139,6 @@
               {{ order.externalReference }}
             } @else {
               <span class="text-muted">—</span>
-              <button class="btn btn-sm btn-secondary detail-inline-action" (click)="toggleExtRefForm()">{{ 'ORDER_DETAIL.EXTREF_ADD' | translate }}</button>
             }
           </div>
         </div>
@@ -171,23 +170,6 @@
         }
       </div>
     </div>
-
-    @if (showExtRefForm) {
-      <div class="detail-form-panel">
-        <div class="form-group">
-          <label for="extRef">{{ 'ORDER_DETAIL.EXTREF' | translate }}</label>
-          <input id="extRef" type="text" [(ngModel)]="externalReference" name="externalReference" class="form-control"
-            [placeholder]="'ORDER_DETAIL.EXTREF_PLACEHOLDER' | translate">
-          <span class="field-hint">{{ 'ORDER_DETAIL.EXTREF_HINT' | translate }}</span>
-        </div>
-        <div class="form-actions">
-          <button type="button" class="btn btn-secondary" (click)="toggleExtRefForm()">{{ 'COMMON.CANCEL' | translate }}</button>
-          <button type="button" class="btn btn-primary" [disabled]="savingExtRef || !externalReference.trim()" (click)="saveExternalReference()">
-            {{ savingExtRef ? ('COMMON.SAVING' | translate) : ('COMMON.SAVE' | translate) }}
-          </button>
-        </div>
-      </div>
-    }
 
     @if (hasDeliveryInfo()) {
       <div class="detail-section">

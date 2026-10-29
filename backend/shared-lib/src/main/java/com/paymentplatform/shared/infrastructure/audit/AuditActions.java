@@ -35,4 +35,6 @@ public final class AuditActions {
 
     public static final String CATEGORY_DELETED = "CATEGORY_DELETED";
     public static final String FAMILY_DELETED = "FAMILY_DELETED";
+
+    public static final String ORDER_EXTERNAL_REFERENCE_UPDATED = "ORDER_EXTERNAL_REFERENCE_UPDATED";
 }

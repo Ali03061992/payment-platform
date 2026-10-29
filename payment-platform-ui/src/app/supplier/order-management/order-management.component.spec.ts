@@ -16,6 +16,7 @@ import { SupplierAgentService } from '../../services/supplier-agent.service';
 import { StockService } from '../../services/stock.service';
 import { ToastService } from '../../services/toast.service';
 import { ConfirmDialogService } from '../../components/confirm-dialog/confirm-dialog.service';
+import { LoginService } from '../../services/login.service';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { TranslateStubPipe, translateServiceProvider } from '../../testing/translate-stubs';
 
@@ -26,6 +27,7 @@ describe('OrderManagementComponent', () => {
   let agentService: jasmine.SpyObj<SupplierAgentService>;
   let toast: jasmine.SpyObj<ToastService>;
   let confirmDialog: jasmine.SpyObj<ConfirmDialogService>;
+  let loginService: jasmine.SpyObj<LoginService>;
   let queryParamsSubject: Subject<any>;
 
   const mockOrder = {
@@ -49,6 +51,8 @@ describe('OrderManagementComponent', () => {
     const toastSpy = jasmine.createSpyObj('ToastService', ['success', 'error']);
     const confirmSpy = jasmine.createSpyObj('ConfirmDialogService', ['confirm']);
     confirmSpy.confirm.and.returnValue(of(true));
+    const loginSpy = jasmine.createSpyObj('LoginService', ['hasRole']);
+    loginSpy.hasRole.and.callFake((role: string) => role === 'SUPPLIER_ADMIN');
     const routerSpy = jasmine.createSpyObj('Router', ['navigate']);
     orderSpy.listPaged.and.returnValue(of({ items: [], totalElements: 0, totalPages: 1, number: 0 }));
     orderSpy.listDeliveries.and.returnValue(of([]));
@@ -69,6 +73,7 @@ describe('OrderManagementComponent', () => {
         { provide: StockService, useValue: stockSpy },
         { provide: ToastService, useValue: toastSpy },
         { provide: ConfirmDialogService, useValue: confirmSpy },
+        { provide: LoginService, useValue: loginSpy },
         { provide: Router, useValue: routerSpy },
         { provide: ActivatedRoute, useValue: { queryParams: queryParamsSubject.asObservable() } },
         provideHttpClient(withInterceptorsFromDi()),
@@ -81,6 +86,7 @@ describe('OrderManagementComponent', () => {
     agentService = TestBed.inject(SupplierAgentService) as jasmine.SpyObj<SupplierAgentService>;
     toast = TestBed.inject(ToastService) as jasmine.SpyObj<ToastService>;
     confirmDialog = TestBed.inject(ConfirmDialogService) as jasmine.SpyObj<ConfirmDialogService>;
+    loginService = TestBed.inject(LoginService) as jasmine.SpyObj<LoginService>;
   });
 
   it('should create', () => {
@@ -382,6 +388,10 @@ describe('OrderManagementComponent', () => {
   describe('canConfirm', () => {
     it('should return true for DRAFT', () => expect(component.canConfirm({ status: 'DRAFT' } as any)).toBeTrue());
     it('should return false for CONFIRMED', () => expect(component.canConfirm({ status: 'CONFIRMED' } as any)).toBeFalse());
+    it('should return false for supplier agents', () => {
+      loginService.hasRole.and.returnValue(false);
+      expect(component.canConfirm({ status: 'DRAFT' } as any)).toBeFalse();
+    });
   });
 
   describe('canPrepare', () => {
@@ -402,6 +412,10 @@ describe('OrderManagementComponent', () => {
   describe('canDeliveryReject', () => {
     it('should return true for IN_DELIVERY', () => expect(component.canDeliveryReject({ status: 'IN_DELIVERY' } as any)).toBeTrue());
     it('should return false for DELIVERED', () => expect(component.canDeliveryReject({ status: 'DELIVERED' } as any)).toBeFalse());
+    it('should allow supplier agents to reject a delivery', () => {
+      loginService.hasRole.and.returnValue(false);
+      expect(component.canDeliveryReject({ status: 'IN_DELIVERY' } as any)).toBeTrue();
+    });
   });
 
   describe('canCancel', () => {
@@ -414,6 +428,10 @@ describe('OrderManagementComponent', () => {
     it('should return false for CANCELLED', () => expect(component.canCancel({ status: 'CANCELLED' } as any)).toBeFalse());
     it('should return false for ACCEPTED', () => expect(component.canCancel({ status: 'ACCEPTED' } as any)).toBeFalse());
     it('should return false for REJECTED', () => expect(component.canCancel({ status: 'REJECTED' } as any)).toBeFalse());
+    it('should return false for supplier agents', () => {
+      loginService.hasRole.and.returnValue(false);
+      expect(component.canCancel({ status: 'DRAFT' } as any)).toBeFalse();
+    });
   });
 
   describe('canEdit', () => {

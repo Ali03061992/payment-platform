@@ -174,6 +174,24 @@ describe('DeliveryManagementComponent', () => {
     });
   });
 
+  describe('hasDetailActions', () => {
+    it('should hide supplier delivery actions from shop users', () => {
+      loginService.getCurrentUser.and.returnValue({ roles: ['SHOP_ADMIN'] } as any);
+      expect(component.hasDetailActions({ status: 'READY_FOR_DELIVERY' } as any)).toBeFalse();
+      expect(component.hasDetailActions({ status: 'IN_DELIVERY' } as any)).toBeFalse();
+    });
+
+    it('should show reception actions to shop users', () => {
+      loginService.getCurrentUser.and.returnValue({ roles: ['SHOP_ADMIN'] } as any);
+      expect(component.hasDetailActions({ status: 'DELIVERED' } as any)).toBeTrue();
+    });
+
+    it('should show delivery actions to supplier agents', () => {
+      loginService.getCurrentUser.and.returnValue({ roles: ['SUPPLIER_AGENT'] } as any);
+      expect(component.hasDetailActions({ status: 'READY_FOR_DELIVERY' } as any)).toBeTrue();
+    });
+  });
+
   describe('acceptReception', () => {
     it('should accept reception', () => {
       orderService.accept.and.returnValue(of({ ...mockOrder, status: 'ACCEPTED' }));

@@ -14,5 +14,9 @@ public interface DisputeRepository extends JpaRepository<Dispute, UUID> {
 
     List<Dispute> findBySupplierIdOrderByCreatedAtDesc(UUID supplierId);
 
+    List<Dispute> findByShopIdAndStatusOrderByCreatedAtDesc(UUID shopId, String status);
+
+    List<Dispute> findBySupplierIdAndStatusOrderByCreatedAtDesc(UUID supplierId, String status);
+
     List<Dispute> findByStatusOrderByCreatedAtDesc(String status);
 }

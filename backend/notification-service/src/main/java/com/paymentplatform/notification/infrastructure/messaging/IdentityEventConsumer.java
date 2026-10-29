@@ -63,6 +63,10 @@ public class IdentityEventConsumer {
         if (rolesNode != null && rolesNode.isArray()) {
             for (JsonNode role : rolesNode) {
                 if ("SUPPLIER_AGENT".equals(role.asText())) {
+                    if (!event.hasNonNull("organizationId") || !event.hasNonNull("userId")) {
+                        log.warn("Ignoring agent invitation without organization or user: {}", event);
+                        return;
+                    }
                     UUID organizationId = UUID.fromString(event.get("organizationId").asText());
                     UUID userId = UUID.fromString(event.get("userId").asText());
 
@@ -73,7 +77,11 @@ public class IdentityEventConsumer {
                             "USER", userId.toString()
                     )));
 
-                    emailService.sendAgentInvitation(null, "l'agent", "NEXTERA");
+                    if (event.hasNonNull("email") && !event.get("email").asText().isBlank()) {
+                        emailService.sendAgentInvitation(event.get("email").asText(), "l'agent", "NEXTERA");
+                    } else {
+                        log.warn("Agent invitation email skipped for user {}: no email in event", userId);
+                    }
                     return;
                 }
             }

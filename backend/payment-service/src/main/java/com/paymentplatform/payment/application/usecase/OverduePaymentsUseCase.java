@@ -6,6 +6,7 @@ import com.paymentplatform.payment.application.dto.PaymentResponse;
 import com.paymentplatform.payment.domain.model.Payment;
 import com.paymentplatform.payment.domain.repository.PaymentRepository;
 import com.paymentplatform.payment.infrastructure.http.OrganizationValidationClient;
+import com.paymentplatform.shared.domain.exception.ForbiddenException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,10 +41,10 @@ public class OverduePaymentsUseCase {
             } else if (role.contains("SUPPLIER")) {
                 overdue = payments.findOverdueBySupplier(today, organizationId);
             } else {
-                overdue = payments.findOverdue(today);
+                throw new ForbiddenException("Rôle non autorisé pour consulter les paiements échus");
             }
         } else {
-            overdue = payments.findOverdue(today);
+            throw new ForbiddenException("Organisation ou rôle manquant");
         }
 
         int start = Math.min(page * size, overdue.size());

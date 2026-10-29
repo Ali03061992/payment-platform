@@ -9,7 +9,7 @@
 }
 @if (!loading) {
   <div>
-    @if (pendingAcceptance.length > 0) {
+    @if (!isShopUser() && pendingAcceptance.length > 0) {
       <div class="section-header">
         <h3>{{ 'DELIVERY.PENDING_ACCEPTANCE' | translate }}</h3>
         <span class="result-count">{{ 'DELIVERY.COUNT' | translate:{count: pendingAcceptance.length} }}</span>
@@ -85,7 +85,7 @@
         }
       </div>
     }
-    @if (activeDeliveries.length > 0) {
+    @if (!isShopUser() && activeDeliveries.length > 0) {
       <div class="section-header section-header-spaced">
         <h3>{{ 'DELIVERY.ACTIVE' | translate }}</h3>
         <span class="result-count">{{ 'DELIVERY.COUNT' | translate:{count: activeDeliveries.length} }}</span>

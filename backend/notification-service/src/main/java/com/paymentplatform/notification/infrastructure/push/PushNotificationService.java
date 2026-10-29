@@ -32,20 +32,36 @@ public class PushNotificationService {
 
     @Async
     public void sendToUser(UUID userId, String title, String body, String tag, String url) {
+        if (userId == null) {
+            return;
+        }
+        dispatch("user " + userId, fcmTokenRepository.findByUserId(userId), title, body, tag, url);
+    }
+
+    /** Envoie aux appareils d'une organisation (les evenements portent un organizationId). */
+    @Async
+    public void sendToOrganization(UUID organizationId, String title, String body, String tag, String url) {
+        if (organizationId == null) {
+            return;
+        }
+        dispatch("organization " + organizationId,
+                fcmTokenRepository.findByOrganizationId(organizationId), title, body, tag, url);
+    }
+
+    private void dispatch(String target, List<FcmToken> tokens, String title, String body, String tag, String url) {
         if (!pushEnabled) {
-            log.debug("Push notifications disabled, skipping for user {}", userId);
+            log.debug("Push notifications disabled, skipping for {}", target);
             return;
         }
 
         FirebaseMessaging firebaseMessaging = firebaseMessagingProvider.getIfAvailable();
         if (firebaseMessaging == null) {
-            log.debug("FirebaseMessaging unavailable, skipping push for user {}", userId);
+            log.debug("FirebaseMessaging unavailable, skipping push for {}", target);
             return;
         }
 
-        List<FcmToken> tokens = fcmTokenRepository.findByUserId(userId);
         if (tokens.isEmpty()) {
-            log.debug("No FCM tokens found for user {}", userId);
+            log.debug("No FCM tokens found for {}", target);
             return;
         }
 

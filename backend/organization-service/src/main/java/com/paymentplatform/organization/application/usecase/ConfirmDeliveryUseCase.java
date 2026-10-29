@@ -1,6 +1,7 @@
 package com.paymentplatform.organization.application.usecase;
 
 import com.paymentplatform.organization.application.dto.OrderResponse;
+import com.paymentplatform.organization.application.security.TenantAccess;
 import com.paymentplatform.organization.domain.model.Order;
 import com.paymentplatform.organization.domain.model.OrderEvent;
 import com.paymentplatform.organization.domain.model.OrderItem;
@@ -10,6 +11,7 @@ import com.paymentplatform.organization.domain.repository.OrderRepository;
 import com.paymentplatform.shared.domain.event.OrderEvents;
 import com.paymentplatform.shared.domain.exception.ConflictException;
 import com.paymentplatform.shared.domain.exception.NotFoundException;
+import com.paymentplatform.shared.domain.security.ActorContext;
 import com.paymentplatform.shared.infrastructure.outbox.OutboxEventStore;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,10 +38,23 @@ public class ConfirmDeliveryUseCase {
     }
 
     @Transactional
+    public OrderResponse execute(UUID orderId, LocalDate confirmedDate, ActorContext actor) {
+        Order order = orders.findById(orderId)
+                .orElseThrow(() -> new NotFoundException("Commande non trouvée : " + orderId));
+        TenantAccess.requireDeliveryActor(actor, order.getSupplierId(), order.getDeliveryAgentId());
+        return confirm(order, confirmedDate, actor.userId());
+    }
+
+    @Deprecated
+    @Transactional
     public OrderResponse execute(UUID orderId, LocalDate confirmedDate, UUID actorUserId) {
         Order order = orders.findById(orderId)
                 .orElseThrow(() -> new NotFoundException("Commande non trouvée : " + orderId));
+        return confirm(order, confirmedDate, actorUserId);
+    }
 
+    private OrderResponse confirm(Order order, LocalDate confirmedDate, UUID actorUserId) {
+        UUID orderId = order.getId();
         if (order.getDeliveryAgentId() == null) {
             throw new ConflictException("Aucun agent de livraison assigné à cette commande");
         }

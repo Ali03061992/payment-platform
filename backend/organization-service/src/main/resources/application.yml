@@ -49,6 +49,11 @@ app:
     expiration: ${JWT_EXPIRATION:30m}
   gateway:
     base-url: ${API_GATEWAY_URL:http://localhost:8081}
+  identity-service:
+    # Client HTTP interne (IdentityClient) : defini ici sinon le @Value({app.identity-service.url:localhost})
+    # visait localhost dans le container et rendait assign-delivery toujours 403.
+    url: ${IDENTITY_SERVICE_URL:identity-service}
+    port: ${IDENTITY_SERVICE_PORT:8082}
   internal-secret: ${INTERNAL_SECRET:dev-internal-secret-change-me}
 
 springdoc:

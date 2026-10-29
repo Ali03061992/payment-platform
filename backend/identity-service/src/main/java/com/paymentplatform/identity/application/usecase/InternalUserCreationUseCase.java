@@ -87,7 +87,7 @@ public class InternalUserCreationUseCase {
                 "{\"username\":\"" + userInDb.username().value() + "\",\"role\":\"" + role
                         + "\",\"by\":\"admin\",\"invitation\":\"email\"}");
         outbox.append(new UserCreatedEvent(UUID.randomUUID(), Instant.now(), userInDb.id().value(), orgId,
-                List.of(role.name())), String.valueOf(userInDb.id().value()));
+                List.of(role.name()), userInDb.email().value()), String.valueOf(userInDb.id().value()));
 
         passwordSetup.initiateSetup(userInDb.username().value());
 

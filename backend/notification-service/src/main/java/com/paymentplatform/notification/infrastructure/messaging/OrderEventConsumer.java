@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.paymentplatform.notification.domain.model.Notification;
 import com.paymentplatform.notification.domain.model.NotificationRepository;
 import com.paymentplatform.notification.infrastructure.email.EmailNotificationService;
+import com.paymentplatform.notification.infrastructure.http.IdentityRecipientClient;
 import com.paymentplatform.notification.infrastructure.push.PushNotificationService;
 import com.paymentplatform.notification.infrastructure.push.WebPushSender;
 import com.paymentplatform.shared.infrastructure.eventing.EventDeduplicator;
@@ -28,6 +29,7 @@ public class OrderEventConsumer {
     private final EmailNotificationService emailService;
     private final PushNotificationService pushService;
     private final WebPushSender webPushSender;
+    private final IdentityRecipientClient identityRecipients;
 
     public OrderEventConsumer(NotificationRepository notifications,
                                EventDeduplicator deduplicator,
@@ -35,7 +37,8 @@ public class OrderEventConsumer {
                                NotificationBroadcaster broadcaster,
                                EmailNotificationService emailService,
                                PushNotificationService pushService,
-                               WebPushSender webPushSender) {
+                               WebPushSender webPushSender,
+                               IdentityRecipientClient identityRecipients) {
         this.notifications = notifications;
         this.deduplicator = deduplicator;
         this.objectMapper = objectMapper;
@@ -43,6 +46,7 @@ public class OrderEventConsumer {
         this.emailService = emailService;
         this.pushService = pushService;
         this.webPushSender = webPushSender;
+        this.identityRecipients = identityRecipients;
     }
 
     @RabbitListener(queues = "notification.orders")
@@ -99,7 +103,7 @@ public class OrderEventConsumer {
                 "ORDER", reference
         )));
 
-        pushService.sendToUser(supplierId, "Nouvelle commande",
+        pushService.sendToOrganization(supplierId, "Nouvelle commande",
                 "Nouvelle commande " + reference + " reçue", "ORDER_CREATED", "/dashboard/supplier/orders");
         webPushSender.sendToOrganization(supplierId, "Nouvelle commande",
                 "Nouvelle commande " + reference + " reçue", "ORDER_CREATED", "/dashboard/supplier/orders");
@@ -115,7 +119,7 @@ public class OrderEventConsumer {
                 "ORDER", reference
         )));
 
-        emailService.sendOrderConfirmation(null, "la boutique", reference, "");
+        sendOrderConfirmationEmail(shopId, reference);
 
         webPushSender.sendToOrganization(shopId, "Commande confirmée",
                 "La commande " + reference + " a été confirmée par le fournisseur",
@@ -162,9 +166,9 @@ public class OrderEventConsumer {
                 "ORDER", reference
         )));
 
-        emailService.sendDeliveryNotification(null, "la boutique", reference, "");
+        sendDeliveryEmail(shopId, reference);
 
-        pushService.sendToUser(shopId, "Commande livrée",
+        pushService.sendToOrganization(shopId, "Commande livrée",
                 "La commande " + reference + " est prête à être acceptée", "ORDER_DELIVERED", "/dashboard/shop/orders");
         webPushSender.sendToOrganization(shopId, "Commande livrée",
                 "La commande " + reference + " est prête à être acceptée", "ORDER_DELIVERED", "/dashboard/shop/orders");
@@ -180,7 +184,7 @@ public class OrderEventConsumer {
                 "ORDER", reference
         )));
 
-        pushService.sendToUser(supplierId, "Commande acceptée",
+        pushService.sendToOrganization(supplierId, "Commande acceptée",
                 "La commande " + reference + " a été acceptée par la boutique", "ORDER_ACCEPTED", "/dashboard/supplier/orders");
         webPushSender.sendToOrganization(supplierId, "Commande acceptée",
                 "La commande " + reference + " a été acceptée par la boutique", "ORDER_ACCEPTED", "/dashboard/supplier/orders");
@@ -299,7 +303,7 @@ public class OrderEventConsumer {
                 "QUOTE", reference
         )));
 
-        pushService.sendToUser(supplierId, "Demande de devis",
+        pushService.sendToOrganization(supplierId, "Demande de devis",
                 "Nouvelle demande " + reference + " à chiffrer", "QUOTE_REQUESTED", "/dashboard/supplier/quotes");
         webPushSender.sendToOrganization(supplierId, "Demande de devis",
                 "Nouvelle demande " + reference + " à chiffrer", "QUOTE_REQUESTED", "/dashboard/supplier/quotes");
@@ -318,7 +322,7 @@ public class OrderEventConsumer {
                 "QUOTE", reference
         )));
 
-        pushService.sendToUser(shopId, "Devis reçu",
+        pushService.sendToOrganization(shopId, "Devis reçu",
                 "Devis n°" + version + " pour la demande " + reference, "ORDER_QUOTE", "/dashboard/shop/quotes");
         webPushSender.sendToOrganization(shopId, "Devis reçu",
                 "Devis n°" + version + " pour la demande " + reference, "ORDER_QUOTE", "/dashboard/shop/quotes");
@@ -336,7 +340,7 @@ public class OrderEventConsumer {
                 "QUOTE", reference
         )));
 
-        pushService.sendToUser(supplierId, "Devis accepté",
+        pushService.sendToOrganization(supplierId, "Devis accepté",
                 "Devis " + reference + " accepté", "QUOTE_ACCEPTED", "/dashboard/supplier/quotes");
         webPushSender.sendToOrganization(supplierId, "Devis accepté",
                 "Devis " + reference + " accepté", "QUOTE_ACCEPTED", "/dashboard/supplier/quotes");
@@ -383,4 +387,25 @@ public class OrderEventConsumer {
                         + " disponible(s), minimum requis " + minQuantity,
                 "LOW_STOCK_ALERT", "/dashboard/supplier/products");
     }
+
+    private void sendOrderConfirmationEmail(UUID shopId, String reference) {
+        if (!emailService.isEmailEnabled()) {
+            return;
+        }
+        identityRecipients.emailForOrganizationRole(shopId, "SHOP_ADMIN")
+                .ifPresentOrElse(
+                        email -> emailService.sendOrderConfirmation(email, "la boutique", reference, ""),
+                        () -> log.warn("Order confirmation email skipped for shop {}: no recipient", shopId));
+    }
+
+    private void sendDeliveryEmail(UUID shopId, String reference) {
+        if (!emailService.isEmailEnabled()) {
+            return;
+        }
+        identityRecipients.emailForOrganizationRole(shopId, "SHOP_ADMIN")
+                .ifPresentOrElse(
+                        email -> emailService.sendDeliveryNotification(email, "la boutique", reference, ""),
+                        () -> log.warn("Delivery email skipped for shop {}: no recipient", shopId));
+    }
 }
+

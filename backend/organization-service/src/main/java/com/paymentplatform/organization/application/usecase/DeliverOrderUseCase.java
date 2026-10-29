@@ -1,15 +1,16 @@
 package com.paymentplatform.organization.application.usecase;
 
 import com.paymentplatform.organization.application.dto.OrderResponse;
+import com.paymentplatform.organization.application.security.TenantAccess;
 import com.paymentplatform.organization.domain.model.Order;
 import com.paymentplatform.organization.domain.model.OrderEvent;
 import com.paymentplatform.organization.domain.model.OrderItem;
 import com.paymentplatform.organization.domain.repository.OrderEventRepository;
 import com.paymentplatform.organization.domain.repository.OrderItemRepository;
 import com.paymentplatform.organization.domain.repository.OrderRepository;
-import com.paymentplatform.organization.infrastructure.http.PaymentClient;
 import com.paymentplatform.shared.domain.event.OrderEvents;
 import com.paymentplatform.shared.domain.exception.NotFoundException;
+import com.paymentplatform.shared.domain.security.ActorContext;
 import com.paymentplatform.shared.infrastructure.outbox.OutboxEventStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,18 +36,15 @@ public class DeliverOrderUseCase {
     private final OrderItemRepository orderItems;
     private final OrderEventRepository events;
     private final OutboxEventStore outbox;
-    private final PaymentClient paymentClient;
     private final IssueWithholdingCertificateUseCase withholding;
 
     public DeliverOrderUseCase(OrderRepository orders, OrderItemRepository orderItems,
                                OrderEventRepository events, OutboxEventStore outbox,
-                               PaymentClient paymentClient,
                                IssueWithholdingCertificateUseCase withholding) {
         this.orders = orders;
         this.orderItems = orderItems;
         this.events = events;
         this.outbox = outbox;
-        this.paymentClient = paymentClient;
         this.withholding = withholding;
     }
 
@@ -59,6 +57,20 @@ public class DeliverOrderUseCase {
      * @return commande livrée sous forme de réponse
      */
     @Transactional
+    public OrderResponse execute(UUID orderId, UUID receivedBy, ActorContext actor) {
+        return execute(orderId, receivedBy, actor, null);
+    }
+
+    @Transactional
+    public OrderResponse execute(UUID orderId, UUID receivedBy, ActorContext actor, String withholdingNature) {
+        Order order = orders.findById(orderId)
+                .orElseThrow(() -> new NotFoundException("Commande non trouvée : " + orderId));
+        TenantAccess.requireDeliveryActor(actor, order.getSupplierId(), order.getDeliveryAgentId());
+        return deliver(order, receivedBy, actor.userId(), withholdingNature);
+    }
+
+    @Deprecated
+    @Transactional
     public OrderResponse execute(UUID orderId, UUID receivedBy, UUID actorUserId) {
         return execute(orderId, receivedBy, actorUserId, null);
     }
@@ -70,11 +82,16 @@ public class DeliverOrderUseCase {
      *
      * @param withholdingNature nature du montant (MARCHANDISES par défaut)
      */
+    @Deprecated
     @Transactional
     public OrderResponse execute(UUID orderId, UUID receivedBy, UUID actorUserId, String withholdingNature) {
         Order order = orders.findById(orderId)
                 .orElseThrow(() -> new NotFoundException("Commande non trouvée : " + orderId));
+        return deliver(order, receivedBy, actorUserId, withholdingNature);
+    }
 
+    private OrderResponse deliver(Order order, UUID receivedBy, UUID actorUserId, String withholdingNature) {
+        UUID orderId = order.getId();
         order.deliver(receivedBy);
         orders.save(order);
 
@@ -92,18 +109,6 @@ public class DeliverOrderUseCase {
                 order.getShopId(), order.getSupplierId(),
                 actorUserId, receivedBy),
                 String.valueOf(orderId));
-
-        if (order.isAsapPayment()) {
-            // Note : paiement auto à la réception pour toutes les commandes (dette constatée),
-            // idempotent via asap-<orderId> — le flag ASAP ne conditionne que accept-asap.
-        }
-        try {
-            paymentClient.createAutoPayment(order.getShopId(), order.getSupplierId(),
-                    order.getCurrency(), actorUserId, order.getTotal(), orderId);
-            log.info("Paiement auto créé pour la commande {} lors de la réception confirmée", order.getReference());
-        } catch (Exception e) {
-            log.error("Erreur lors de la création du paiement auto pour la commande {}", order.getReference(), e);
-        }
 
         List<OrderItem> items = orderItems.findByOrderId(orderId);
         return OrderResponse.from(order, items);

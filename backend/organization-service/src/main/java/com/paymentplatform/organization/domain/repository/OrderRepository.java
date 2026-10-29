@@ -34,6 +34,8 @@ public interface OrderRepository extends JpaRepository<Order, UUID> {
 
     Page<Order> findByShopIdAndStatus(UUID shopId, String status, Pageable pageable);
 
+    Page<Order> findByStatus(String status, Pageable pageable);
+
     UUID countBySupplierId(UUID supplierId);
 
     long countBySupplierIdAndStatus(UUID supplierId, String status);

@@ -116,9 +116,11 @@
 
       <div class="info-card">
         <h3><app-icon name="zap" [size]="18"></app-icon> {{ 'DASHBOARD.QUICK_ACTIONS' | translate }}</h3>
-        <a routerLink="shop/orders" class="quick-action"><app-icon name="cart" [size]="18"></app-icon> {{ 'DASHBOARD.VIEW_MY_ORDERS' | translate }}</a>
-        <a routerLink="shop/orders/create" class="quick-action"><app-icon name="plus" [size]="18"></app-icon> {{ 'NAV.NEW_ORDER' | translate }}</a>
-        <a routerLink="shop/balance" class="quick-action"><app-icon name="scale" [size]="18"></app-icon> {{ 'DASHBOARD.VIEW_BALANCE' | translate }}</a>
+        @if (isShopAdmin()) {
+          <a routerLink="shop/orders" class="quick-action"><app-icon name="cart" [size]="18"></app-icon> {{ 'DASHBOARD.VIEW_MY_ORDERS' | translate }}</a>
+          <a routerLink="shop/orders/create" class="quick-action"><app-icon name="plus" [size]="18"></app-icon> {{ 'NAV.NEW_ORDER' | translate }}</a>
+          <a routerLink="shop/balance" class="quick-action"><app-icon name="scale" [size]="18"></app-icon> {{ 'DASHBOARD.VIEW_BALANCE' | translate }}</a>
+        }
         <a routerLink="shop/quotes" class="quick-action"><app-icon name="file-text" [size]="18"></app-icon> {{ 'NAV.MY_QUOTES' | translate }}</a>
       </div>
     </div>

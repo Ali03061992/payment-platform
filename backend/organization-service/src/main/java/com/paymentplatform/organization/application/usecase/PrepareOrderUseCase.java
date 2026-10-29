@@ -1,6 +1,7 @@
 package com.paymentplatform.organization.application.usecase;
 
 import com.paymentplatform.organization.application.dto.OrderResponse;
+import com.paymentplatform.organization.application.security.TenantAccess;
 import com.paymentplatform.organization.domain.model.Order;
 import com.paymentplatform.organization.domain.model.OrderEvent;
 import com.paymentplatform.organization.domain.model.OrderItem;
@@ -9,6 +10,7 @@ import com.paymentplatform.organization.domain.repository.OrderItemRepository;
 import com.paymentplatform.organization.domain.repository.OrderRepository;
 import com.paymentplatform.shared.domain.event.OrderEvents;
 import com.paymentplatform.shared.domain.exception.NotFoundException;
+import com.paymentplatform.shared.domain.security.ActorContext;
 import com.paymentplatform.shared.infrastructure.outbox.OutboxEventStore;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,10 +36,23 @@ public class PrepareOrderUseCase {
     }
 
     @Transactional
+    public OrderResponse execute(UUID orderId, ActorContext actor) {
+        Order order = orders.findById(orderId)
+                .orElseThrow(() -> new NotFoundException("Commande non trouvée : " + orderId));
+        TenantAccess.requireSupplier(actor, order.getSupplierId());
+        return prepare(order, actor.userId());
+    }
+
+    @Deprecated
+    @Transactional
     public OrderResponse execute(UUID orderId, UUID actorUserId) {
         Order order = orders.findById(orderId)
                 .orElseThrow(() -> new NotFoundException("Commande non trouvée : " + orderId));
+        return prepare(order, actorUserId);
+    }
 
+    private OrderResponse prepare(Order order, UUID actorUserId) {
+        UUID orderId = order.getId();
         order.prepare();
         orders.save(order);
 
@@ -52,10 +67,23 @@ public class PrepareOrderUseCase {
     }
 
     @Transactional
+    public OrderResponse readyForDelivery(UUID orderId, ActorContext actor) {
+        Order order = orders.findById(orderId)
+                .orElseThrow(() -> new NotFoundException("Commande non trouvée : " + orderId));
+        TenantAccess.requireSupplier(actor, order.getSupplierId());
+        return ready(order, actor.userId());
+    }
+
+    @Deprecated
+    @Transactional
     public OrderResponse readyForDelivery(UUID orderId, UUID actorUserId) {
         Order order = orders.findById(orderId)
                 .orElseThrow(() -> new NotFoundException("Commande non trouvée : " + orderId));
+        return ready(order, actorUserId);
+    }
 
+    private OrderResponse ready(Order order, UUID actorUserId) {
+        UUID orderId = order.getId();
         order.readyForDelivery();
         orders.save(order);
 

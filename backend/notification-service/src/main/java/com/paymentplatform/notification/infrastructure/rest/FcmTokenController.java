@@ -5,6 +5,7 @@ import com.paymentplatform.notification.domain.model.FcmTokenRepository;
 import com.paymentplatform.shared.infrastructure.security.AuthenticatedUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -30,18 +31,23 @@ public class FcmTokenController {
             @RequestBody Map<String, String> body) {
 
         String token = body.get("token");
-        if (token == null || token.isBlank()) {
+        if (token == null || token.isBlank() || token.length() > 512) {
             return ResponseEntity.badRequest().build();
         }
 
         Optional<FcmToken> existing = fcmTokenRepository.findByToken(token);
         if (existing.isPresent()) {
-            existing.get().reassign(user.userId());
-            fcmTokenRepository.save(existing.get());
+            FcmToken fcmToken = existing.get();
+            if (!fcmToken.userId().equals(user.userId())) {
+                log.warn("FCM token reassignment rejected for user {}", user.userId());
+                return ResponseEntity.status(HttpStatus.CONFLICT).build();
+            }
+            fcmToken.touch(user.organizationId());
+            fcmTokenRepository.save(fcmToken);
             return ResponseEntity.ok().build();
         }
 
-        FcmToken fcmToken = new FcmToken(user.userId(), token);
+        FcmToken fcmToken = new FcmToken(user.userId(), user.organizationId(), token);
         fcmTokenRepository.save(fcmToken);
         log.info("FCM token registered for user {}", user.userId());
         return ResponseEntity.ok().build();

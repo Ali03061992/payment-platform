@@ -38,38 +38,55 @@ public class DisputeController {
     }
 
     @PostMapping
-    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SHOP_ADMIN', 'SHOP_MANAGER')")
+    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SHOP_ADMIN', 'SHOP_AGENT')")
     public ResponseEntity<DisputeResponse> createDispute(@Valid @RequestBody CreateDisputeRequest request) {
         var current = CurrentUser.get();
-        String role = current.roles().contains("SUPPLIER_ADMIN") ? "SUPPLIER" : "SHOP";
-        DisputeResponse response = createDispute.execute(request.orderId(), current.userId(), role, request.reason());
+        DisputeResponse response = createDispute.execute(request.orderId(), current.actor(), request.reason());
         return ResponseEntity.created(URI.create("/api/disputes/" + response.id())).body(response);
     }
 
     @GetMapping("/order/{orderId}")
-    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_MANAGER', 'SYSTEM_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_AGENT', 'SYSTEM_ADMIN')")
     public ResponseEntity<List<DisputeResponse>> getDisputesByOrder(@PathVariable UUID orderId) {
+        var current = CurrentUser.get();
         var disputes = disputeRepository.findByOrderIdOrderByCreatedAtDesc(orderId);
+        if (!current.roles().contains("SYSTEM_ADMIN")) {
+            UUID orgId = current.organizationId();
+            if (orgId == null) {
+                return ResponseEntity.status(403).build();
+            }
+            boolean allowed = disputes.isEmpty() || disputes.stream().anyMatch(d ->
+                    orgId.equals(d.getShopId()) || orgId.equals(d.getSupplierId()));
+            if (!allowed) {
+                return ResponseEntity.status(403).build();
+            }
+        }
         return ResponseEntity.ok(disputes.stream().map(DisputeResponse::from).toList());
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_MANAGER', 'SYSTEM_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_AGENT', 'SYSTEM_ADMIN')")
     public ResponseEntity<DisputeResponse> getDispute(@PathVariable UUID id) {
         var dispute = disputeRepository.findById(id);
         if (dispute.isEmpty()) return ResponseEntity.notFound().build();
+        var current = CurrentUser.get();
+        if (!current.roles().contains("SYSTEM_ADMIN")) {
+            UUID orgId = current.organizationId();
+            var d = dispute.get();
+            if (orgId == null || (!orgId.equals(d.getShopId()) && !orgId.equals(d.getSupplierId()))) {
+                return ResponseEntity.status(403).build();
+            }
+        }
         return ResponseEntity.ok(DisputeResponse.from(dispute.get()));
     }
 
     @PostMapping("/{id}/messages")
-    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_MANAGER')")
+    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_AGENT')")
     public ResponseEntity<DisputeResponse> addMessage(
             @PathVariable UUID id,
             @Valid @RequestBody AddDisputeMessageRequest request) {
         var current = CurrentUser.get();
-        String role = current.roles().contains("SUPPLIER_ADMIN") || current.roles().contains("SUPPLIER_AGENT")
-                ? "SUPPLIER" : "SHOP";
-        DisputeResponse response = addDisputeMessage.execute(id, current.userId(), role, request.content());
+        DisputeResponse response = addDisputeMessage.execute(id, current.actor(), request.content());
         return ResponseEntity.ok(response);
     }
 
@@ -80,7 +97,7 @@ public class DisputeController {
             @RequestBody Map<String, String> body) {
         var current = CurrentUser.get();
         String targetStatus = body.getOrDefault("status", "RESOLVED");
-        DisputeResponse response = resolveDispute.execute(id, current.userId(), targetStatus);
+        DisputeResponse response = resolveDispute.execute(id, current.actor(), targetStatus);
         return ResponseEntity.ok(response);
     }
 
@@ -88,9 +105,30 @@ public class DisputeController {
     @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SHOP_ADMIN', 'SYSTEM_ADMIN')")
     public ResponseEntity<List<DisputeResponse>> listDisputes(
             @RequestParam(required = false) String status) {
-        var disputes = (status != null && !status.isBlank())
-                ? disputeRepository.findByStatusOrderByCreatedAtDesc(status)
-                : disputeRepository.findAll();
+        var current = CurrentUser.get();
+        boolean hasStatus = status != null && !status.isBlank();
+        List<com.paymentplatform.organization.domain.model.Dispute> disputes;
+        if (current.roles().contains("SYSTEM_ADMIN")) {
+            disputes = hasStatus
+                    ? disputeRepository.findByStatusOrderByCreatedAtDesc(status)
+                    : disputeRepository.findAll();
+        } else {
+            UUID orgId = current.organizationId();
+            if (orgId == null) {
+                return ResponseEntity.status(403).build();
+            }
+            boolean supplierSide = current.roles().contains("SUPPLIER_ADMIN")
+                    || current.roles().contains("SUPPLIER_AGENT");
+            if (supplierSide) {
+                disputes = hasStatus
+                        ? disputeRepository.findBySupplierIdAndStatusOrderByCreatedAtDesc(orgId, status)
+                        : disputeRepository.findBySupplierIdOrderByCreatedAtDesc(orgId);
+            } else {
+                disputes = hasStatus
+                        ? disputeRepository.findByShopIdAndStatusOrderByCreatedAtDesc(orgId, status)
+                        : disputeRepository.findByShopIdOrderByCreatedAtDesc(orgId);
+            }
+        }
         return ResponseEntity.ok(disputes.stream().map(DisputeResponse::from).toList());
     }
 }

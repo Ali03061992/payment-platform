@@ -2,8 +2,11 @@ package com.paymentplatform.notification.application;
 
 import com.paymentplatform.notification.domain.model.WebPushSubscription;
 import com.paymentplatform.notification.domain.model.WebPushSubscriptionRepository;
+import com.paymentplatform.shared.domain.exception.ConflictException;
+import com.paymentplatform.shared.domain.exception.DomainException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,20 +20,37 @@ public class WebPushSubscriptionService {
     private static final Logger log = LoggerFactory.getLogger(WebPushSubscriptionService.class);
 
     private final WebPushSubscriptionRepository repository;
+    private final WebPushEndpointPolicy endpointPolicy;
+    private final int maxSubscriptionsPerUser;
 
-    public WebPushSubscriptionService(WebPushSubscriptionRepository repository) {
+    public WebPushSubscriptionService(WebPushSubscriptionRepository repository,
+                                      WebPushEndpointPolicy endpointPolicy,
+                                      @Value("${app.webpush.max-subscriptions-per-user:10}")
+                                      int maxSubscriptionsPerUser) {
         this.repository = repository;
+        this.endpointPolicy = endpointPolicy;
+        this.maxSubscriptionsPerUser = maxSubscriptionsPerUser;
     }
 
     @Transactional
     public WebPushSubscription register(UUID userId, UUID organizationId, String endpoint,
                                         String p256dh, String auth, String userAgent) {
+        if (!endpointPolicy.isAllowed(endpoint)) {
+            throw new DomainException("Endpoint Web Push invalide ou non autorise");
+        }
         var existing = repository.findByEndpoint(endpoint);
         WebPushSubscription subscription;
         if (existing.isPresent()) {
             subscription = existing.get();
-            subscription.reassign(userId, organizationId, p256dh, auth, userAgent);
+            if (!subscription.userId().equals(userId)) {
+                log.warn("Web Push reassignment rejected for user {} (endpoint owned by another account)", userId);
+                throw new ConflictException("Cet abonnement Web Push est deja associe a un autre compte");
+            }
+            subscription.refreshCredentials(organizationId, p256dh, auth, userAgent);
         } else {
+            if (repository.findByUserId(userId).size() >= maxSubscriptionsPerUser) {
+                throw new ConflictException("Nombre maximal d'abonnements Web Push atteint");
+            }
             subscription = new WebPushSubscription(userId, organizationId, endpoint, p256dh, auth, userAgent);
         }
         WebPushSubscription saved = repository.save(subscription);

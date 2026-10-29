@@ -189,6 +189,9 @@ public class User {
         if (status == UserStatus.ACTIVE) {
             return;
         }
+        if (organizationId == null && !roles.contains(RoleCode.SYSTEM_ADMIN)) {
+            throw new ConflictException("Une organisation est requise pour activer ce compte");
+        }
         this.status = UserStatus.ACTIVE;
         this.updatedAt = Instant.now();
     }

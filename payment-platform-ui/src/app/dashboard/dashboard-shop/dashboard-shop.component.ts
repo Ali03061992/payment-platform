@@ -55,6 +55,10 @@ export class DashboardShopComponent implements OnInit {
     this.loadStats();
   }
 
+  isShopAdmin(): boolean {
+    return this.loginService.hasRole('SHOP_ADMIN');
+  }
+
   loadStats(): void {
     this.loading = true;
     let completed = 0;

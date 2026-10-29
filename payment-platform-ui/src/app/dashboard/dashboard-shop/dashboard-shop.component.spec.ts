@@ -19,7 +19,8 @@ describe('DashboardShopComponent', () => {
   let quoteService: jasmine.SpyObj<QuoteService>;
 
   beforeEach(async () => {
-    const loginSpy = jasmine.createSpyObj('LoginService', ['getCurrentUser']);
+    const loginSpy = jasmine.createSpyObj('LoginService', ['getCurrentUser', 'hasRole']);
+    loginSpy.hasRole.and.returnValue(true);
     const orderSpy = jasmine.createSpyObj('OrderService', ['getRecent', 'listPaged', 'list']);
     const paymentSpy = jasmine.createSpyObj('PaymentService', ['list', 'getStats']);
     const balanceSpy = jasmine.createSpyObj('BalanceService', ['listByShop']);

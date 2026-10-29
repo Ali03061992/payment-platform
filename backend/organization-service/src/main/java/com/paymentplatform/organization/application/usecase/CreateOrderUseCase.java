@@ -3,6 +3,7 @@ package com.paymentplatform.organization.application.usecase;
 import com.paymentplatform.organization.application.dto.CreateOrderRequest;
 import com.paymentplatform.organization.application.dto.OrderItemRequest;
 import com.paymentplatform.organization.application.dto.OrderResponse;
+import com.paymentplatform.organization.application.security.TenantAccess;
 import com.paymentplatform.organization.domain.model.Order;
 import com.paymentplatform.organization.domain.model.OrderEvent;
 import com.paymentplatform.organization.domain.model.OrderFiscalizer;
@@ -13,7 +14,10 @@ import com.paymentplatform.organization.domain.repository.*;
 import com.paymentplatform.organization.domain.valueobject.VatRate;
 import com.paymentplatform.shared.domain.event.OrderEvents;
 import com.paymentplatform.shared.domain.exception.ConflictException;
+import com.paymentplatform.shared.domain.exception.ForbiddenException;
 import com.paymentplatform.shared.domain.exception.NotFoundException;
+import com.paymentplatform.shared.domain.model.RoleCode;
+import com.paymentplatform.shared.domain.security.ActorContext;
 import com.paymentplatform.shared.infrastructure.outbox.OutboxEventStore;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -52,7 +56,39 @@ public class CreateOrderUseCase {
     }
 
     @Transactional
+    public OrderResponse execute(CreateOrderRequest request, ActorContext actor) {
+        if (request == null) {
+            throw new ConflictException("Requête de commande manquante");
+        }
+        String actorRole;
+        if (actor != null && actor.isSystemAdmin()) {
+            actorRole = "SHOP";
+        } else if (actor != null && actor.hasAnyRole(RoleCode.SUPPLIER_ADMIN, RoleCode.SUPPLIER_AGENT)) {
+            TenantAccess.requireSupplier(actor, request.supplierId());
+            actorRole = "SUPPLIER";
+        } else {
+            TenantAccess.requireShop(actor, request.shopId());
+            actorRole = "SHOP";
+        }
+        return execute(request, actor, actorRole);
+    }
+
+    /**
+     * Compatibilité des appels historiques (tests, scripts internes).
+     * Les contrôleurs utilisent exclusivement {@link #execute(CreateOrderRequest, ActorContext)}.
+     */
+    @Deprecated
+    @Transactional
     public OrderResponse execute(CreateOrderRequest request, UUID actorUserId, String actorRole) {
+        String role = "SUPPLIER".equalsIgnoreCase(actorRole) ? "SUPPLIER" : "SHOP";
+        UUID organizationId = "SUPPLIER".equals(role) ? request.supplierId() : request.shopId();
+        RoleCode roleCode = "SUPPLIER".equals(role) ? RoleCode.SUPPLIER_ADMIN : RoleCode.SHOP_ADMIN;
+        return execute(request, new ActorContext(actorUserId, organizationId, List.of(roleCode.name())), role);
+    }
+
+    private OrderResponse execute(CreateOrderRequest request, ActorContext actor, String actorRole) {
+        ActorContext effectiveActor = actor != null ? actor : ActorContext.system();
+        UUID actorUserId = effectiveActor.userId();
         if (request.items() == null || request.items().isEmpty()) {
             throw new ConflictException("La commande doit contenir au moins un article");
         }
@@ -91,6 +127,9 @@ public class CreateOrderUseCase {
         for (OrderItemRequest itemReq : request.items()) {
             Product product = products.findById(itemReq.productId())
                     .orElseThrow(() -> new NotFoundException("Produit non trouvé : " + itemReq.productId()));
+            if (!request.supplierId().equals(product.getSupplierId())) {
+                throw new ForbiddenException("Produit hors catalogue du fournisseur");
+            }
 
             int availableQty = product.getQuantity() - product.getReservedQty();
             if (availableQty < itemReq.quantity()) {

@@ -16,14 +16,16 @@ describe('02 - Admin Dashboard', () => {
     cy.get('.welcome-section h1').should('exist');
   });
 
-  it('should show 5 stat cards for SYSTEM_ADMIN', () => {
+  it('should show 7 stat cards for SYSTEM_ADMIN', () => {
     cy.get('.stats-grid', { timeout: 20000 }).should('exist');
-    cy.get('.stat-card', { timeout: 20000 }).should('have.length', 5);
+    cy.get('.stat-card', { timeout: 20000 }).should('have.length', 7);
     cy.get('.stat-card').eq(0).should('contain', 'Total utilisateurs');
     cy.get('.stat-card').eq(1).should('contain', 'Comptes actifs');
     cy.get('.stat-card').eq(2).should('contain', 'Comptes désactivés');
     cy.get('.stat-card').eq(3).should('contain', 'Fournisseurs');
     cy.get('.stat-card').eq(4).should('contain', 'Boutiques');
+    cy.get('.stat-card').eq(5).should('contain', 'Litiges ouverts');
+    cy.get('.stat-card').eq(6).should('contain', 'Relations actives');
   });
 
   it('should display profile info card', () => {

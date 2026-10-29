@@ -3,6 +3,9 @@ package com.paymentplatform.organization.interfaces.rest;
 import com.paymentplatform.organization.application.dto.BalanceResponse;
 import com.paymentplatform.organization.application.usecase.BalanceUseCase;
 import com.paymentplatform.organization.domain.model.BalanceEntry;
+import com.paymentplatform.organization.domain.repository.SupplierShopRelationRepository;
+import com.paymentplatform.organization.domain.valueobject.OrganizationId;
+import com.paymentplatform.organization.domain.valueobject.RelationStatus;
 import com.paymentplatform.shared.infrastructure.security.CurrentUser;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -19,33 +22,38 @@ import java.util.UUID;
 public class BalanceController {
 
     private final BalanceUseCase balanceUseCase;
+    private final SupplierShopRelationRepository relations;
 
-    public BalanceController(BalanceUseCase balanceUseCase) {
+    public BalanceController(BalanceUseCase balanceUseCase,
+                             SupplierShopRelationRepository relations) {
         this.balanceUseCase = balanceUseCase;
+        this.relations = relations;
     }
 
     @GetMapping("/supplier/{supplierId}")
     @PreAuthorize("hasAuthority('SUPPLIER_ADMIN') or hasAuthority('SYSTEM_ADMIN')")
     public ResponseEntity<List<BalanceResponse>> listSupplierBalances(@PathVariable UUID supplierId) {
         var current = CurrentUser.get();
-        if (!current.roles().contains("SYSTEM_ADMIN") && !current.organizationId().equals(supplierId)) {
+        if (!current.roles().contains("SYSTEM_ADMIN")
+                && (current.organizationId() == null || !current.organizationId().equals(supplierId))) {
             return ResponseEntity.status(403).build();
         }
         return ResponseEntity.ok(balanceUseCase.getSupplierBalanceSummaries(supplierId));
     }
 
     @GetMapping("/shop/{shopId}")
-    @PreAuthorize("hasAuthority('SHOP_ADMIN') or hasAuthority('SHOP_MANAGER') or hasAuthority('SYSTEM_ADMIN')")
+    @PreAuthorize("hasAuthority('SHOP_ADMIN') or hasAuthority('SYSTEM_ADMIN')")
     public ResponseEntity<List<BalanceResponse>> listShopBalances(@PathVariable UUID shopId) {
         var current = CurrentUser.get();
-        if (!current.roles().contains("SYSTEM_ADMIN") && !current.organizationId().equals(shopId)) {
+        if (!current.roles().contains("SYSTEM_ADMIN")
+                && (current.organizationId() == null || !current.organizationId().equals(shopId))) {
             return ResponseEntity.status(403).build();
         }
         return ResponseEntity.ok(balanceUseCase.getShopBalanceSummaries(shopId));
     }
 
     @GetMapping("/supplier/{supplierId}/shop/{shopId}")
-    @PreAuthorize("hasAuthority('SUPPLIER_ADMIN') or hasAuthority('SHOP_ADMIN') or hasAuthority('SHOP_MANAGER') or hasAuthority('SYSTEM_ADMIN')")
+    @PreAuthorize("hasAuthority('SUPPLIER_ADMIN') or hasAuthority('SHOP_ADMIN') or hasAuthority('SYSTEM_ADMIN')")
     public ResponseEntity<List<BalanceEntry>> getBalanceHistory(
             @PathVariable UUID supplierId,
             @PathVariable UUID shopId) {
@@ -72,6 +80,14 @@ public class BalanceController {
         }
         if (request.amount().compareTo(BigDecimal.ZERO) <= 0) {
             return ResponseEntity.badRequest().build();
+        }
+        if (!current.roles().contains("SYSTEM_ADMIN")) {
+            boolean relationActive = relations.existsBySupplierIdAndShopIdAndStatus(
+                    OrganizationId.of(request.supplierId()), OrganizationId.of(request.shopId()),
+                    RelationStatus.ACTIVE);
+            if (!relationActive) {
+                return ResponseEntity.status(403).build();
+            }
         }
         BalanceEntry entry = balanceUseCase.adjustBalance(
                 request.supplierId(), request.shopId(), request.amount(),

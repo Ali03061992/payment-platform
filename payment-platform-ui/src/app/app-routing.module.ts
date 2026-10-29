@@ -63,6 +63,7 @@ import { InvoicesJournalComponent } from './components/invoices-journal/invoices
 export const adminRoles = ['SYSTEM_ADMIN'];
 export const supplierRoles = ['SUPPLIER_ADMIN', 'SUPPLIER_AGENT'];
 export const shopRoles = ['SHOP_ADMIN', 'SHOP_AGENT'];
+export const shopAdminRoles = ['SHOP_ADMIN'];
 export const allRoles = [...adminRoles, ...supplierRoles, ...shopRoles];
 
 const routes: Routes = [
@@ -96,7 +97,7 @@ const routes: Routes = [
       { path: 'payments-help/tej-prepare', component: WithholdingPrepareComponent, canActivate: [RoleGuard], data: { roles: allRoles } },
       { path: 'scan', component: QrScannerComponent, canActivate: [RoleGuard], data: { roles: allRoles } },
       { path: 'export', component: ExportComponent, canActivate: [RoleGuard], data: { roles: allRoles } },
-      { path: 'supplier/agent-payments', component: AgentPaymentsComponent, canActivate: [RoleGuard], data: { roles: supplierRoles } },
+      { path: 'supplier/agent-payments', component: AgentPaymentsComponent, canActivate: [RoleGuard], data: { roles: ['SUPPLIER_ADMIN'] } },
       { path: 'supplier/financial', component: SupplierFinancialComponent, canActivate: [RoleGuard], data: { roles: ['SUPPLIER_ADMIN'] } },
       { path: 'supplier/balance', component: SupplierBalanceComponent, canActivate: [RoleGuard], data: { roles: ['SUPPLIER_ADMIN'] } },
       { path: 'supplier/invoices', component: InvoicesJournalComponent, canActivate: [RoleGuard], data: { roles: ['SUPPLIER_ADMIN'] } },
@@ -113,16 +114,16 @@ const routes: Routes = [
       { path: 'supplier/orders/create', component: SupplierCreateOrderComponent, canActivate: [RoleGuard], data: { roles: ['SUPPLIER_ADMIN'] } },
       { path: 'supplier/deliveries', component: DeliveryManagementComponent, canActivate: [RoleGuard], data: { roles: ['SUPPLIER_ADMIN', 'SUPPLIER_AGENT'] } },
       { path: 'shop/deliveries', component: DeliveryManagementComponent, canActivate: [RoleGuard], data: { roles: shopRoles } },
-      { path: 'shop/orders', component: OrderListComponent, canActivate: [RoleGuard], data: { roles: shopRoles } },
-      { path: 'shop/orders/create', component: CreateOrderComponent, canActivate: [RoleGuard], data: { roles: shopRoles } },
+      { path: 'shop/orders', component: OrderListComponent, canActivate: [RoleGuard], data: { roles: shopAdminRoles } },
+      { path: 'shop/orders/create', component: CreateOrderComponent, canActivate: [RoleGuard], data: { roles: shopAdminRoles } },
       { path: 'shop/quotes', component: ShopQuotesComponent, canActivate: [RoleGuard], data: { roles: shopRoles } },
       { path: 'shop/quotes/request', component: QuoteRequestComponent, canActivate: [RoleGuard], data: { roles: shopRoles } },
-      { path: 'shop/orders/:id', component: ShopOrderDetailComponent, canActivate: [RoleGuard], data: { roles: shopRoles } },
+      { path: 'shop/orders/:id', component: ShopOrderDetailComponent, canActivate: [RoleGuard], data: { roles: shopAdminRoles } },
       { path: 'shop/disputes', component: DisputeListComponent, canActivate: [RoleGuard], data: { roles: shopRoles } },
       { path: 'shop/disputes/:id', component: DisputeDetailComponent, canActivate: [RoleGuard], data: { roles: shopRoles } },
       { path: 'admin/disputes', component: DisputeListComponent, canActivate: [RoleGuard], data: { roles: adminRoles, scope: 'all' } },
       { path: 'admin/disputes/:id', component: DisputeDetailComponent, canActivate: [RoleGuard], data: { roles: adminRoles } },
-      { path: 'shop/balance', component: BalanceViewComponent, canActivate: [RoleGuard], data: { roles: shopRoles } },
+      { path: 'shop/balance', component: BalanceViewComponent, canActivate: [RoleGuard], data: { roles: shopAdminRoles } },
       { path: 'shop/invoices', component: InvoicesJournalComponent, canActivate: [RoleGuard], data: { roles: ['SHOP_ADMIN'] } },
       { path: 'notifications', component: NotificationsComponent, canActivate: [RoleGuard], data: { roles: allRoles } },
       { path: 'change-password', component: ChangePasswordComponent },

@@ -3,6 +3,7 @@ package com.paymentplatform.organization.application.usecase;
 import com.paymentplatform.organization.application.dto.OrderItemRequest;
 import com.paymentplatform.organization.application.dto.OrderResponse;
 import com.paymentplatform.organization.application.dto.UpdateOrderRequest;
+import com.paymentplatform.organization.application.security.TenantAccess;
 import com.paymentplatform.organization.domain.model.Order;
 import com.paymentplatform.organization.domain.model.OrderEvent;
 import com.paymentplatform.organization.domain.model.OrderFiscalizer;
@@ -15,7 +16,9 @@ import com.paymentplatform.organization.domain.repository.OrderRepository;
 import com.paymentplatform.organization.domain.repository.OrganizationRepository;
 import com.paymentplatform.organization.domain.repository.ProductRepository;
 import com.paymentplatform.shared.domain.exception.ConflictException;
+import com.paymentplatform.shared.domain.exception.ForbiddenException;
 import com.paymentplatform.shared.domain.exception.NotFoundException;
+import com.paymentplatform.shared.domain.security.ActorContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -44,13 +47,28 @@ public class UpdateOrderUseCase {
     }
 
     @Transactional
+    public OrderResponse execute(UUID orderId, UpdateOrderRequest request, ActorContext actor) {
+        return execute(orderId, request, actor, true);
+    }
+
+    @Deprecated
+    @Transactional
     public OrderResponse execute(UUID orderId, UpdateOrderRequest request, UUID actorUserId) {
+        return execute(orderId, request, new ActorContext(actorUserId, null, List.of()), false);
+    }
+
+    private OrderResponse execute(UUID orderId, UpdateOrderRequest request, ActorContext actor,
+                                  boolean enforceTenant) {
         if (request.items() == null || request.items().isEmpty()) {
             throw new ConflictException("La commande doit contenir au moins un article");
         }
 
         Order order = orders.findById(orderId)
                 .orElseThrow(() -> new NotFoundException("Commande non trouvée : " + orderId));
+        if (enforceTenant) {
+            TenantAccess.requireParticipant(actor, order.getShopId(), order.getSupplierId(), null);
+        }
+        UUID actorUserId = actor != null ? actor.userId() : null;
 
         if (!"DRAFT".equals(order.getStatus())) {
             throw new ConflictException("Seules les commandes en statut BROUILLON peuvent être modifiées");
@@ -81,6 +99,9 @@ public class UpdateOrderUseCase {
         for (OrderItemRequest itemReq : request.items()) {
             Product product = products.findById(itemReq.productId())
                     .orElseThrow(() -> new NotFoundException("Produit non trouvé : " + itemReq.productId()));
+            if (!order.getSupplierId().equals(product.getSupplierId())) {
+                throw new ForbiddenException("Produit hors catalogue du fournisseur");
+            }
 
             int availableQty = product.getQuantity() - product.getReservedQty();
             if (availableQty < itemReq.quantity()) {
@@ -135,3 +156,4 @@ public class UpdateOrderUseCase {
         return value.replace("\\", "\\\\").replace("\"", "\\\"");
     }
 }
+

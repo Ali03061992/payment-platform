@@ -98,11 +98,10 @@ class OrderControllerTest {
     }
 
     @Test
-    void listOrders_asDeliveryAgent_returnsOk() throws Exception {
+    void listOrders_asDeliveryAgentWithoutOrganization_returnsForbidden() throws Exception {
         mockMvc.perform(get("/api/orders")
                         .with(SecurityMockMvcRequestPostProcessors.authentication(deliveryAgent())))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.items").isArray());
+                .andExpect(status().isForbidden());
     }
 
     @Test

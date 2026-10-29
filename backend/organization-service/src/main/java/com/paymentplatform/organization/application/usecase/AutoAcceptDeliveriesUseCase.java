@@ -4,6 +4,7 @@ import com.paymentplatform.organization.domain.model.Order;
 import com.paymentplatform.organization.domain.model.OrderEvent;
 import com.paymentplatform.organization.domain.repository.OrderEventRepository;
 import com.paymentplatform.organization.domain.repository.OrderRepository;
+import com.paymentplatform.shared.domain.security.ActorContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -53,7 +54,7 @@ public class AutoAcceptDeliveriesUseCase {
                 // AcceptOrderUseCase décrémente le stock et publie OrderAcceptedEvent ;
                 // on trace en plus l'origine automatique (audit local uniquement,
                 // un seul événement outbox pour ne pas notifier deux fois).
-                acceptOrder.execute(order.getId(), null);
+                acceptOrder.execute(order.getId(), ActorContext.system());
                 events.save(OrderEvent.create(order.getId(), "ORDER_AUTO_ACCEPTED", null,
                         "Réception acceptée automatiquement après " + autoAcceptMinutes + " min sans réponse"));
                 accepted++;

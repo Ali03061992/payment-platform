@@ -8,6 +8,7 @@ import com.paymentplatform.payment.domain.repository.PaymentRepository;
 import com.paymentplatform.payment.domain.valueobject.Money;
 import com.paymentplatform.payment.infrastructure.http.OrganizationValidationClient;
 import com.paymentplatform.shared.domain.event.PaymentEvents.PaymentCreatedEvent;
+import com.paymentplatform.shared.domain.exception.ForbiddenException;
 import com.paymentplatform.shared.infrastructure.audit.AuditActions;
 import com.paymentplatform.shared.infrastructure.audit.AuditRecorder;
 import com.paymentplatform.shared.infrastructure.outbox.OutboxEventStore;
@@ -68,10 +69,16 @@ public class CreatePaymentUseCase {
     @Transactional
     public PaymentResponse execute(CreatePaymentRequest request, UUID actorUserId, UUID organizationId,
                                    String idempotencyKey) {
+        if (organizationId == null || !organizationId.equals(request.shopId())) {
+            throw new ForbiddenException("Vous ne pouvez pas créer un paiement pour cette boutique");
+        }
         String key = (idempotencyKey != null && !idempotencyKey.isBlank()) ? idempotencyKey : null;
         if (key != null) {
             var existing = payments.findByIdempotencyKey(key);
             if (existing.isPresent()) {
+                if (!organizationId.equals(existing.get().shopId())) {
+                    throw new ForbiddenException("Clé d'idempotence associée à une autre organisation");
+                }
                 return PaymentResponse.from(existing.get(), nameResolver.toNameResolver());
             }
         }
@@ -93,6 +100,9 @@ public class CreatePaymentUseCase {
             if (key != null) {
                 var existing = payments.findByIdempotencyKey(key);
                 if (existing.isPresent()) {
+                    if (!organizationId.equals(existing.get().shopId())) {
+                        throw new ForbiddenException("Clé d'idempotence associée à une autre organisation");
+                    }
                     return PaymentResponse.from(existing.get(), nameResolver.toNameResolver());
                 }
             }

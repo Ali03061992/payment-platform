@@ -183,6 +183,10 @@ services:
       FRONTEND_URL: ${FRONTEND_URL:-https://nextera.payment.tn}
       PAYMENT_SERVICE_URL: payment-service
       PAYMENT_SERVICE_PORT: 8084
+      # Client interne identity (validateur d'agents assign-delivery) : sans
+      # hote, app.identity-service.url tombe sur localhost et refuse (403).
+      IDENTITY_SERVICE_URL: identity-service
+      IDENTITY_SERVICE_PORT: 8082
     volumes:
       - uploads-data:/app/uploads
     depends_on:

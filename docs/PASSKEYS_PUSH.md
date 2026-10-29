@@ -50,6 +50,11 @@ Le défi est stocké côté serveur (challenge TTL par défaut 300 s), lié à l
 
 ### 1.3 Frontend
 
+> **Disponibilité** : les passkeys sont conservées mais désactivées par défaut via
+> `PASSKEYS_ENABLED = false` (`payment-platform-ui/src/app/core/passkeys.config.ts`).
+> Dans cet état, le bouton de connexion et la section Passkeys de la page Sécurité sont
+> masqués ; les endpoints backend restent disponibles pour une réactivation contrôlée.
+
 - **Login** : bouton « Se connecter avec une passkey » (affiché si `window.PublicKeyCredential`
   existe). Si un nom d'utilisateur est saisi, flux *username-first* (`allowCredentials` renseigné) ;
   sinon flux *discoverable* (identifiant Resident Key / user handle).

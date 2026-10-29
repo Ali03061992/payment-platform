@@ -11,7 +11,7 @@ public final class IdentityEvents {
     }
 
     public record UserCreatedEvent(UUID eventId, Instant occurredAt, UUID userId, UUID organizationId,
-                                   List<String> roles) implements DomainEvent {
+                                   List<String> roles, String email) implements DomainEvent {
         public static final String EVENT_TYPE = "identity.user.created";
 
         @Override

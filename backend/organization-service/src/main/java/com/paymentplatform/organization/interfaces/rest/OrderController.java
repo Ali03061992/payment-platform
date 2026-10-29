@@ -13,7 +13,9 @@ import com.paymentplatform.organization.domain.model.OrderStatus;
 import com.paymentplatform.organization.domain.repository.OrderCommentRepository;
 import com.paymentplatform.organization.domain.repository.OrderEventRepository;
 import com.paymentplatform.organization.domain.repository.OrganizationRepository;
+import com.paymentplatform.organization.domain.repository.SupplierShopRelationRepository;
 import com.paymentplatform.organization.domain.valueobject.OrganizationId;
+import com.paymentplatform.organization.domain.valueobject.RelationStatus;
 import com.paymentplatform.organization.infrastructure.http.IdentityClient;
 import com.paymentplatform.organization.infrastructure.http.PaymentClient;
 import com.paymentplatform.shared.domain.event.OrderEvents;
@@ -62,6 +64,7 @@ public class OrderController {
     private final com.paymentplatform.organization.domain.repository.OrderRepository orderRepository;
     private final com.paymentplatform.organization.domain.repository.OrderItemRepository orderItemRepository;
     private final OrganizationRepository organizationRepository;
+    private final SupplierShopRelationRepository relationRepository;
     private final OrderEventRepository orderEventRepository;
     private final com.paymentplatform.organization.infrastructure.csv.OrderCsvExportService orderCsvExportService;
     private final InvoicePdfService invoicePdfService;
@@ -95,6 +98,7 @@ public class OrderController {
                            com.paymentplatform.organization.domain.repository.OrderRepository orderRepository,
                            com.paymentplatform.organization.domain.repository.OrderItemRepository orderItemRepository,
                            OrganizationRepository organizationRepository,
+                           SupplierShopRelationRepository relationRepository,
                            OrderEventRepository orderEventRepository,
                            com.paymentplatform.organization.infrastructure.csv.OrderCsvExportService orderCsvExportService,
                            InvoicePdfService invoicePdfService,
@@ -123,6 +127,7 @@ public class OrderController {
         this.orderRepository = orderRepository;
         this.orderItemRepository = orderItemRepository;
         this.organizationRepository = organizationRepository;
+        this.relationRepository = relationRepository;
         this.orderEventRepository = orderEventRepository;
         this.orderCsvExportService = orderCsvExportService;
         this.invoicePdfService = invoicePdfService;
@@ -230,11 +235,10 @@ public class OrderController {
      * @return commande créée (201)
      */
     @PostMapping
-    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SHOP_ADMIN', 'SHOP_MANAGER')")
+    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SHOP_ADMIN')")
     public ResponseEntity<OrderResponse> createOrder(@Valid @RequestBody CreateOrderRequest request) {
         var current = CurrentUser.get();
-        String role = current.roles().contains("SUPPLIER_ADMIN") ? "SUPPLIER" : "SHOP";
-        OrderResponse response = createOrder.execute(request, current.userId(), role);
+        OrderResponse response = createOrder.execute(request, current.actor());
         return ResponseEntity.created(URI.create("/api/orders/" + response.id())).body(response);
     }
 
@@ -246,10 +250,10 @@ public class OrderController {
      * @return commande mise à jour
      */
     @PutMapping("/{id}")
-    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SHOP_ADMIN', 'SHOP_MANAGER')")
+    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SHOP_ADMIN')")
     public ResponseEntity<OrderResponse> updateOrder(@PathVariable UUID id, @Valid @RequestBody UpdateOrderRequest request) {
         var current = CurrentUser.get();
-        OrderResponse response = updateOrderUseCase.execute(id, request, current.userId());
+        OrderResponse response = updateOrderUseCase.execute(id, request, current.actor());
         return ResponseEntity.ok(response);
     }
 
@@ -262,7 +266,7 @@ public class OrderController {
      * @return page de commandes enrichies
      */
     @GetMapping
-    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_MANAGER', 'SYSTEM_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SYSTEM_ADMIN')")
     public ResponseEntity<PageResponse<OrderResponse>> listOrders(
             @RequestParam(required = false) String status,
             @RequestParam(defaultValue = "0") int page,
@@ -272,24 +276,26 @@ public class OrderController {
         int safeSize = Math.min(Math.max(1, size), 100);
         var pageable = PageRequest.of(safePage, safeSize, Sort.by(Sort.Direction.DESC, "createdAt"));
         org.springframework.data.domain.Page<com.paymentplatform.organization.domain.model.Order> orderPage;
+        boolean supplierSide = current.roles().contains("SUPPLIER_ADMIN") || current.roles().contains("SUPPLIER_AGENT");
+        boolean shopSide = current.roles().contains("SHOP_ADMIN") || current.roles().contains("SHOP_AGENT");
 
-        if ((current.roles().contains("SUPPLIER_ADMIN") || current.roles().contains("SUPPLIER_AGENT")) && current.organizationId() != null) {
+        if (!current.roles().contains("SYSTEM_ADMIN") && current.organizationId() == null) {
+            return ResponseEntity.status(403).build();
+        }
+        if (supplierSide) {
             orderPage = (status != null && !status.isBlank())
                     ? orderRepository.findBySupplierIdAndStatus(current.organizationId(), status, pageable)
                     : orderRepository.findBySupplierId(current.organizationId(), pageable);
-        } else if ((current.roles().contains("SHOP_MANAGER") || current.roles().contains("SHOP_ADMIN")) && current.organizationId() != null) {
+        } else if (shopSide) {
             orderPage = (status != null && !status.isBlank())
                     ? orderRepository.findByShopIdAndStatus(current.organizationId(), status, pageable)
                     : orderRepository.findByShopId(current.organizationId(), pageable);
-        } else if (current.roles().contains("SUPPLIER_AGENT")) {
-            List<com.paymentplatform.organization.domain.model.Order> orders = orderRepository.findByDeliveryAgentId(current.userId());
-            List<OrderResponse> responses = buildOrderResponses(orders);
-            return ResponseEntity.ok(new PageResponse<>(responses, responses.size(), 1, 0));
+        } else if (current.roles().contains("SYSTEM_ADMIN")) {
+            orderPage = (status != null && !status.isBlank())
+                    ? orderRepository.findByStatus(status, pageable)
+                    : orderRepository.findAll(pageable);
         } else {
-            var pageResult = orderRepository.findAll(pageable);
-            List<OrderResponse> responses = buildOrderResponses(pageResult.getContent());
-            return ResponseEntity.ok(new PageResponse<>(responses, (int) pageResult.getTotalElements(),
-                    pageResult.getTotalPages(), pageResult.getNumber()));
+            return ResponseEntity.status(403).build();
         }
 
         List<OrderResponse> responses = buildOrderResponses(orderPage.getContent());
@@ -321,15 +327,20 @@ public class OrderController {
                         .filter(o -> orgId.equals(o.getSupplierId()) || orgId.equals(o.getShopId()))
                         .toList();
             }
-        } else if (current.roles().contains("SUPPLIER_AGENT")) {
-            orders = orderRepository.findByDeliveryAgentId(current.userId());
-        } else if (current.organizationId() != null) {
-            orders = orderRepository.findBySupplierId(current.organizationId()).stream()
-                    .filter(o -> o.getDeliveryAgentId() != null)
-                    .toList();
-        } else {
-            orders = List.of();
-        }
+      } else if (current.roles().contains("SUPPLIER_AGENT")) {
+          orders = orderRepository.findByDeliveryAgentId(current.userId());
+      } else if (current.organizationId() != null) {
+          UUID orgId = current.organizationId();
+          boolean supplierSide = current.roles().contains("SUPPLIER_ADMIN")
+                  || current.roles().contains("SUPPLIER_AGENT");
+          orders = (supplierSide
+                  ? orderRepository.findBySupplierId(orgId)
+                  : orderRepository.findByShopId(orgId)).stream()
+                  .filter(o -> o.getDeliveryAgentId() != null)
+                  .toList();
+      } else {
+          orders = List.of();
+      }
 
         List<OrderResponse> responses = buildOrderResponses(orders);
         return ResponseEntity.ok(responses);
@@ -344,6 +355,22 @@ public class OrderController {
     @GetMapping("/shop-agents")
     @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_AGENT', 'SYSTEM_ADMIN')")
     public ResponseEntity<List<Map<String, String>>> getShopAgents(@RequestParam UUID shopId) {
+        var current = CurrentUser.get();
+        if (!current.roles().contains("SYSTEM_ADMIN")) {
+            UUID orgId = current.organizationId();
+            if (orgId == null) {
+                return ResponseEntity.status(403).build();
+            }
+            boolean sameOrganization = orgId.equals(shopId);
+            boolean supplierSide = current.roles().contains("SUPPLIER_ADMIN")
+                    || current.roles().contains("SUPPLIER_AGENT");
+            boolean relatedSupplier = supplierSide && relationRepository
+                    .existsBySupplierIdAndShopIdAndStatus(
+                            OrganizationId.of(orgId), OrganizationId.of(shopId), RelationStatus.ACTIVE);
+            if (!sameOrganization && !relatedSupplier) {
+                return ResponseEntity.status(403).build();
+            }
+        }
         var users = identityClient.getUsersByOrganization(shopId);
         List<Map<String, String>> agents = new java.util.ArrayList<>();
         if (users != null && users.isArray()) {
@@ -376,20 +403,27 @@ public class OrderController {
      * @return commandes triées par date décroissante
      */
     @GetMapping("/recent")
-    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_MANAGER', 'SYSTEM_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SYSTEM_ADMIN')")
     public ResponseEntity<List<OrderResponse>> recentOrders(
             @RequestParam(defaultValue = "5") int limit) {
         var current = CurrentUser.get();
         int safeLimit = Math.min(Math.max(1, limit), 100);
         var pageable = PageRequest.of(0, safeLimit, Sort.by(Sort.Direction.DESC, "createdAt"));
         List<com.paymentplatform.organization.domain.model.Order> orders;
+        boolean supplierSide = current.roles().contains("SUPPLIER_ADMIN") || current.roles().contains("SUPPLIER_AGENT");
+        boolean shopSide = current.roles().contains("SHOP_ADMIN") || current.roles().contains("SHOP_AGENT");
 
-        if ((current.roles().contains("SUPPLIER_ADMIN") || current.roles().contains("SUPPLIER_AGENT")) && current.organizationId() != null) {
+        if (!current.roles().contains("SYSTEM_ADMIN") && current.organizationId() == null) {
+            return ResponseEntity.status(403).build();
+        }
+        if (supplierSide) {
             orders = orderRepository.findTopNBySupplierIdOrderByCreatedAtDesc(current.organizationId(), pageable);
-        } else if ((current.roles().contains("SHOP_MANAGER") || current.roles().contains("SHOP_ADMIN")) && current.organizationId() != null) {
+        } else if (shopSide) {
             orders = orderRepository.findTopNByShopIdOrderByCreatedAtDesc(current.organizationId(), pageable);
-        } else {
+        } else if (current.roles().contains("SYSTEM_ADMIN")) {
             orders = orderRepository.findAll(pageable).getContent();
+        } else {
+            return ResponseEntity.status(403).build();
         }
 
         List<OrderResponse> responses = buildOrderResponses(orders);
@@ -403,7 +437,7 @@ public class OrderController {
      * @return commande ou 403/404 selon périmètre et existence
      */
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_MANAGER', 'SYSTEM_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SYSTEM_ADMIN')")
     public ResponseEntity<OrderResponse> getOrder(@PathVariable UUID id) {
         var current = CurrentUser.get();
         var order = orderRepository.findById(id);
@@ -428,7 +462,7 @@ public class OrderController {
      * @return page de commandes correspondantes
      */
     @GetMapping("/search")
-    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_MANAGER', 'SYSTEM_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SYSTEM_ADMIN')")
     public ResponseEntity<PageResponse<OrderResponse>> searchOrders(
             @RequestParam String q,
             @RequestParam(defaultValue = "0") int page,
@@ -438,13 +472,20 @@ public class OrderController {
         int safeSize = Math.min(Math.max(1, size), 100);
         var pageable = PageRequest.of(safePage, safeSize, Sort.by(Sort.Direction.DESC, "createdAt"));
         org.springframework.data.domain.Page<com.paymentplatform.organization.domain.model.Order> orderPage;
+        boolean supplierSide = current.roles().contains("SUPPLIER_ADMIN") || current.roles().contains("SUPPLIER_AGENT");
+        boolean shopSide = current.roles().contains("SHOP_ADMIN") || current.roles().contains("SHOP_AGENT");
 
-        if ((current.roles().contains("SUPPLIER_ADMIN") || current.roles().contains("SUPPLIER_AGENT")) && current.organizationId() != null) {
+        if (!current.roles().contains("SYSTEM_ADMIN") && current.organizationId() == null) {
+            return ResponseEntity.status(403).build();
+        }
+        if (supplierSide) {
             orderPage = orderRepository.searchBySupplierId(q, current.organizationId(), pageable);
-        } else if ((current.roles().contains("SHOP_MANAGER") || current.roles().contains("SHOP_ADMIN")) && current.organizationId() != null) {
+        } else if (shopSide) {
             orderPage = orderRepository.searchByShopId(q, current.organizationId(), pageable);
-        } else {
+        } else if (current.roles().contains("SYSTEM_ADMIN")) {
             orderPage = orderRepository.search(q, pageable);
+        } else {
+            return ResponseEntity.status(403).build();
         }
 
         List<OrderResponse> searchResponses = buildOrderResponses(orderPage.getContent());
@@ -459,7 +500,7 @@ public class OrderController {
      * @return commande ou 403/404 selon périmètre et existence
      */
     @GetMapping("/reference/{reference}")
-    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_MANAGER', 'SYSTEM_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SYSTEM_ADMIN')")
     public ResponseEntity<OrderResponse> getOrderByReference(@PathVariable String reference) {
         var current = CurrentUser.get();
         var order = orderRepository.findByReference(reference);
@@ -485,7 +526,7 @@ public class OrderController {
     @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN')")
     public ResponseEntity<OrderResponse> confirmOrder(@PathVariable UUID id) {
         var current = CurrentUser.get();
-        return ResponseEntity.ok(confirmOrder.execute(id, current.userId()));
+        return ResponseEntity.ok(confirmOrder.execute(id, current.actor()));
     }
 
     /**
@@ -498,7 +539,7 @@ public class OrderController {
     @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN')")
     public ResponseEntity<OrderResponse> prepareOrder(@PathVariable UUID id) {
         var current = CurrentUser.get();
-        return ResponseEntity.ok(prepareOrder.execute(id, current.userId()));
+        return ResponseEntity.ok(prepareOrder.execute(id, current.actor()));
     }
 
     /**
@@ -511,7 +552,7 @@ public class OrderController {
     @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN')")
     public ResponseEntity<OrderResponse> readyForDelivery(@PathVariable UUID id) {
         var current = CurrentUser.get();
-        return ResponseEntity.ok(prepareOrder.readyForDelivery(id, current.userId()));
+        return ResponseEntity.ok(prepareOrder.readyForDelivery(id, current.actor()));
     }
 
     /**
@@ -529,7 +570,19 @@ public class OrderController {
         var current = CurrentUser.get();
         var order = orderRepository.findById(id);
         if (order.isEmpty()) return ResponseEntity.notFound().build();
+        if (!current.roles().contains("SYSTEM_ADMIN")
+                && (current.organizationId() == null
+                || !current.organizationId().equals(order.get().getSupplierId()))) {
+            return ResponseEntity.status(403).build();
+        }
+        if (body == null || body.get("agentId") == null) {
+            return ResponseEntity.badRequest().build();
+        }
         UUID agentId = UUID.fromString(body.get("agentId").toString());
+        var supplierUsers = identityClient.getUsersByOrganization(order.get().getSupplierId());
+        if (!isActiveUserWithAnyRole(supplierUsers, agentId, "SUPPLIER_ADMIN", "SUPPLIER_AGENT")) {
+            return ResponseEntity.status(403).build();
+        }
         order.get().assignDeliveryAgent(agentId);
         if (body.containsKey("plannedDeliveryDate") && body.get("plannedDeliveryDate") != null) {
             order.get().setPlannedDeliveryDate(LocalDate.parse(body.get("plannedDeliveryDate").toString()));
@@ -555,7 +608,7 @@ public class OrderController {
         var current = CurrentUser.get();
         boolean accepted = Boolean.TRUE.equals(body.get("accepted"));
         String reason = body.containsKey("reason") ? (String) body.get("reason") : null;
-        return ResponseEntity.ok(acceptDeliveryUseCase.execute(id, accepted, reason, current.userId()));
+        return ResponseEntity.ok(acceptDeliveryUseCase.execute(id, accepted, reason, current.actor()));
     }
 
     /**
@@ -572,7 +625,7 @@ public class OrderController {
             @RequestBody Map<String, String> body) {
         var current = CurrentUser.get();
         LocalDate confirmedDate = LocalDate.parse(body.get("confirmedDate"));
-        return ResponseEntity.ok(confirmDeliveryUseCase.execute(id, confirmedDate, current.userId()));
+        return ResponseEntity.ok(confirmDeliveryUseCase.execute(id, confirmedDate, current.actor()));
     }
 
     /**
@@ -594,7 +647,7 @@ public class OrderController {
         if (receivedBy == null) {
             return ResponseEntity.badRequest().build();
         }
-        return ResponseEntity.ok(deliverOrder.execute(id, receivedBy, current.userId(), withholdingNature));
+        return ResponseEntity.ok(deliverOrder.execute(id, receivedBy, current.actor(), withholdingNature));
     }
 
     /**
@@ -604,10 +657,10 @@ public class OrderController {
      * @return commande acceptée
      */
     @PostMapping("/{id}/accept")
-    @PreAuthorize("hasAnyAuthority('SHOP_MANAGER', 'SHOP_ADMIN', 'SHOP_AGENT')")
+    @PreAuthorize("hasAnyAuthority('SHOP_ADMIN', 'SHOP_AGENT')")
     public ResponseEntity<OrderResponse> acceptOrder(@PathVariable UUID id) {
         var current = CurrentUser.get();
-        return ResponseEntity.ok(acceptOrder.execute(id, current.userId()));
+        return ResponseEntity.ok(acceptOrder.execute(id, current.actor()));
     }
 
     /**
@@ -617,10 +670,10 @@ public class OrderController {
      * @return commande acceptée
      */
     @PostMapping("/{id}/accept-asap")
-    @PreAuthorize("hasAnyAuthority('SHOP_MANAGER', 'SHOP_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('SHOP_ADMIN')")
     public ResponseEntity<OrderResponse> acceptAsapOrder(@PathVariable UUID id) {
         var current = CurrentUser.get();
-        OrderResponse response = acceptOrder.execute(id, current.userId());
+        OrderResponse response = acceptOrder.execute(id, current.actor());
         if (response.asapPayment()) {
             paymentClient.createAutoPayment(response.shopId(), response.supplierId(),
                     response.currency(), current.userId(), response.total(), response.id());
@@ -635,10 +688,10 @@ public class OrderController {
      * @return commande annulée
      */
     @PostMapping("/{id}/cancel")
-    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SHOP_ADMIN', 'SHOP_MANAGER')")
+    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SHOP_ADMIN')")
     public ResponseEntity<OrderResponse> cancelOrder(@PathVariable UUID id) {
         var current = CurrentUser.get();
-        return ResponseEntity.ok(cancelOrder.execute(id, current.userId()));
+        return ResponseEntity.ok(cancelOrder.execute(id, current.actor()));
     }
 
     /**
@@ -648,11 +701,10 @@ public class OrderController {
      * @return nouvelle commande créée
      */
     @PostMapping("/{id}/reorder")
-    @PreAuthorize("hasAnyAuthority('SHOP_ADMIN', 'SHOP_MANAGER')")
+    @PreAuthorize("hasAnyAuthority('SHOP_ADMIN')")
     public ResponseEntity<OrderResponse> reorder(@PathVariable UUID id) {
         var current = CurrentUser.get();
-        String role = "SHOP";
-        return ResponseEntity.ok(reorderUseCase.execute(id, current.userId(), role));
+        return ResponseEntity.ok(reorderUseCase.execute(id, current.actor()));
     }
 
     /**
@@ -663,13 +715,13 @@ public class OrderController {
      * @return commande rejetée
      */
     @PostMapping("/{id}/reject")
-    @PreAuthorize("hasAnyAuthority('SHOP_MANAGER', 'SHOP_ADMIN', 'SHOP_AGENT')")
+    @PreAuthorize("hasAnyAuthority('SHOP_ADMIN', 'SHOP_AGENT')")
     public ResponseEntity<OrderResponse> rejectOrder(
             @PathVariable UUID id,
             @RequestBody(required = false) Map<String, String> body) {
         var current = CurrentUser.get();
         String returnReason = body != null ? body.get("returnReason") : null;
-        return ResponseEntity.ok(rejectOrder.execute(id, current.userId(), returnReason));
+        return ResponseEntity.ok(rejectOrder.execute(id, current.actor(), returnReason));
     }
 
     /**
@@ -686,7 +738,7 @@ public class OrderController {
             @RequestBody(required = false) Map<String, String> body) {
         var current = CurrentUser.get();
         String reason = body != null ? body.get("reason") : null;
-        return ResponseEntity.ok(deliveryRejectOrder.execute(id, current.userId(), reason));
+        return ResponseEntity.ok(deliveryRejectOrder.execute(id, current.actor(), reason));
     }
 
     /**
@@ -774,7 +826,7 @@ public class OrderController {
      * @return commentaire créé (201)
      */
     @PostMapping("/{id}/comments")
-    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_MANAGER', 'SYSTEM_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SYSTEM_ADMIN')")
     public ResponseEntity<OrderComment> addComment(
             @PathVariable UUID id,
             @Valid @RequestBody CreateOrderCommentRequest request) {
@@ -815,7 +867,7 @@ public class OrderController {
      * @return commentaires triés par date croissante
      */
     @GetMapping("/{id}/comments")
-    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_MANAGER', 'SYSTEM_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SYSTEM_ADMIN')")
     public ResponseEntity<List<OrderComment>> listComments(@PathVariable UUID id) {
         var current = CurrentUser.get();
         var order = orderRepository.findById(id);
@@ -841,7 +893,7 @@ public class OrderController {
      * @param response réponse HTTP recevant le fichier CSV
      */
     @GetMapping("/export/csv")
-    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_MANAGER', 'SYSTEM_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SYSTEM_ADMIN')")
     public void exportCsv(
             @RequestParam(required = false) String status,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateFrom,
@@ -854,12 +906,17 @@ public class OrderController {
         Instant toInstant = null;
 
         if (!current.roles().contains("SYSTEM_ADMIN")) {
-            if (current.organizationId() != null) {
-                if (current.roles().contains("SUPPLIER_ADMIN") || current.roles().contains("SUPPLIER_AGENT")) {
-                    supplierId = current.organizationId();
-                } else if (current.roles().contains("SHOP_ADMIN") || current.roles().contains("SHOP_MANAGER")) {
-                    shopId = current.organizationId();
-                }
+            if (current.organizationId() == null) {
+                response.sendError(HttpServletResponse.SC_FORBIDDEN, "Accès refusé");
+                return;
+            }
+            if (current.roles().contains("SUPPLIER_ADMIN") || current.roles().contains("SUPPLIER_AGENT")) {
+                supplierId = current.organizationId();
+            } else if (current.roles().contains("SHOP_ADMIN") || current.roles().contains("SHOP_AGENT")) {
+                shopId = current.organizationId();
+            } else {
+                response.sendError(HttpServletResponse.SC_FORBIDDEN, "Accès refusé");
+                return;
             }
         }
 
@@ -883,7 +940,7 @@ public class OrderController {
      * de ses commandes, SYSTEM_ADMIN = tout. Filtre année optionnel.
      */
     @GetMapping("/invoices/journal")
-    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SHOP_ADMIN', 'SHOP_MANAGER', 'SYSTEM_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SHOP_ADMIN', 'SYSTEM_ADMIN')")
     public ResponseEntity<PageResponse<InvoiceJournalResponse>> listInvoiceJournal(
             @RequestParam(required = false) Integer year,
             @RequestParam(defaultValue = "0") int page,
@@ -924,7 +981,7 @@ public class OrderController {
      * @param response réponse HTTP recevant le PDF
      */
     @GetMapping("/{id}/invoice")
-    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_MANAGER', 'SYSTEM_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SYSTEM_ADMIN')")
     public void downloadInvoice(@PathVariable UUID id, HttpServletResponse response) throws Exception {
         var current = CurrentUser.get();
         var order = orderRepository.findById(id);
@@ -973,7 +1030,7 @@ public class OrderController {
      * quel que soit le statut de la commande.
      */
     @GetMapping("/{id}/purchase-order")
-    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_MANAGER', 'SYSTEM_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SYSTEM_ADMIN')")
     public void downloadPurchaseOrder(@PathVariable UUID id, HttpServletResponse response) throws Exception {
         var current = CurrentUser.get();
         var order = orderRepository.findById(id);
@@ -1028,7 +1085,7 @@ public class OrderController {
      * Fichier à signer (XAdES, certificat client) puis déposer sur TTN.
      */
     @GetMapping("/{id}/teif.xml")
-    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_MANAGER', 'SYSTEM_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SYSTEM_ADMIN')")
     public void downloadTeif(@PathVariable UUID id, HttpServletResponse response) throws Exception {
         var current = CurrentUser.get();
         var order = orderRepository.findById(id);
@@ -1081,11 +1138,13 @@ public class OrderController {
     /**
      * Enregistre la référence électronique externe de la facture (TTN/TEJ).
      * Affichée avec QR en haut à droite de la facture.
-     */    @PatchMapping("/{id}/external-reference")
-    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SHOP_ADMIN', 'SHOP_MANAGER', 'SYSTEM_ADMIN')")
+     */
+    @PatchMapping("/{id}/external-reference")
+    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SYSTEM_ADMIN')")
     public ResponseEntity<OrderResponse> updateExternalReference(
             @PathVariable UUID id, @RequestBody Map<String, String> body) {
-        return ResponseEntity.ok(updateExternalReference.execute(id, body.get("reference")));
+        var current = CurrentUser.get();
+        return ResponseEntity.ok(updateExternalReference.execute(id, body.get("reference"), current.actor()));
     }
 
     /**
@@ -1093,7 +1152,7 @@ public class OrderController {
      * Le certificat est rattaché à la FACTURE (le paiement suit la facture).
      */
     @GetMapping("/{id}/withholding-certificate")
-    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_MANAGER', 'SYSTEM_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SYSTEM_ADMIN')")
     public ResponseEntity<WithholdingCertificateResponse> getWithholdingCertificate(@PathVariable UUID id) {
         var current = CurrentUser.get();
         return ResponseEntity.ok(getWithholdingCertificate.execute(id, current.organizationId(),
@@ -1105,7 +1164,7 @@ public class OrderController {
      * Pour les bénéficiaires non-inscrits TEJ : copie à remettre (papier/électronique).
      */
     @GetMapping("/{id}/withholding-certificate/pdf")
-    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_MANAGER', 'SYSTEM_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SYSTEM_ADMIN')")
     public void downloadWithholdingCertificatePdf(@PathVariable UUID id, HttpServletResponse response)
             throws Exception {
         var current = CurrentUser.get();
@@ -1128,7 +1187,7 @@ public class OrderController {
      * Télécharge le certificat au format XML d'échange (dépôt TEJ, fichier prêt à déposer).
      */
     @GetMapping("/{id}/withholding-certificate/xml")
-    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_MANAGER', 'SYSTEM_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SYSTEM_ADMIN')")
     public void downloadWithholdingCertificateXml(@PathVariable UUID id, HttpServletResponse response)
             throws Exception {
         var current = CurrentUser.get();
@@ -1152,7 +1211,7 @@ public class OrderController {
      * Enregistre la référence TEJ après dépôt manuel du certificat (débiteur ou admin).
      */
     @PatchMapping("/{id}/withholding-certificate/deposit")
-    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SHOP_ADMIN', 'SHOP_MANAGER', 'SYSTEM_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SHOP_ADMIN', 'SYSTEM_ADMIN')")
     public ResponseEntity<WithholdingCertificateResponse> markCertificateDeposited(
             @PathVariable UUID id, @RequestBody Map<String, String> body) {
         var current = CurrentUser.get();
@@ -1164,7 +1223,7 @@ public class OrderController {
      * Exporte le lot mensuel des certificats d'un débiteur (fichier XML à déposer sur TEJ).
      */
     @GetMapping("/withholding-certificates/batch")
-    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SHOP_ADMIN', 'SHOP_MANAGER', 'SYSTEM_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SHOP_ADMIN', 'SYSTEM_ADMIN')")
     public void downloadWithholdingBatch(
             @RequestParam UUID debtorId,
             @RequestParam String month,
@@ -1186,7 +1245,7 @@ public class OrderController {
      * Certificats à échéance proche pour un débiteur (rappel J-7 par défaut).
      */
     @GetMapping("/withholding-certificates/due")
-    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SHOP_ADMIN', 'SHOP_MANAGER', 'SYSTEM_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SHOP_ADMIN', 'SYSTEM_ADMIN')")
     public ResponseEntity<List<WithholdingCertificateResponse>> withholdingDueSoon(
             @RequestParam UUID debtorId,
             @RequestParam(defaultValue = "7") int days) {
@@ -1199,12 +1258,39 @@ public class OrderController {
      * Synthèse mensuelle des retenues d'un débiteur (réconciliation déclaration TEJ).
      */
     @GetMapping("/withholding-certificates/monthly-summary")
-    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SHOP_ADMIN', 'SHOP_MANAGER', 'SYSTEM_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SHOP_ADMIN', 'SYSTEM_ADMIN')")
     public ResponseEntity<com.paymentplatform.organization.application.usecase.WithholdingMonthlySummary> withholdingMonthlySummary(
             @RequestParam UUID debtorId,
             @RequestParam String month) {
         var current = CurrentUser.get();
         return ResponseEntity.ok(withholdingBatch.monthlySummary(debtorId, java.time.YearMonth.parse(month),
                 current.organizationId(), current.roles().contains("SYSTEM_ADMIN")));
+    }
+
+    private boolean isActiveUserWithAnyRole(com.fasterxml.jackson.databind.JsonNode users,
+                                            UUID userId, String... expectedRoles) {
+        if (users == null || !users.isArray()) {
+            return false;
+        }
+        for (var user : users) {
+            if (!user.has("id") || !userId.toString().equals(user.get("id").asText())) {
+                continue;
+            }
+            if (user.has("status") && "DISABLED".equalsIgnoreCase(user.get("status").asText())) {
+                return false;
+            }
+            if (!user.has("roles") || !user.get("roles").isArray()) {
+                return false;
+            }
+            for (var role : user.get("roles")) {
+                for (String expected : expectedRoles) {
+                    if (expected.equals(role.asText())) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+        return false;
     }
 }

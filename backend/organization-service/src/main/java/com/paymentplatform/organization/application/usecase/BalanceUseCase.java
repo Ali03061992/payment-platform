@@ -40,6 +40,20 @@ public class BalanceUseCase {
         return balanceRepository.save(entry);
     }
 
+    public BalanceEntry reverseOrderCredit(UUID supplierId, UUID shopId, BigDecimal amount,
+                                           UUID orderId, String reason, UUID createdBy) {
+        if (orderId == null || balanceRepository.existsByOrderIdAndType(orderId, BalanceEntry.REFUND)) {
+            return null;
+        }
+        BigDecimal currentBalance = getCurrentBalance(supplierId, shopId);
+        BigDecimal newBalance = currentBalance.subtract(amount);
+
+        BalanceEntry entry = BalanceEntry.create(
+                supplierId, shopId, BalanceEntry.REFUND, amount.negate(),
+                newBalance, orderId, null, null, reason, createdBy);
+        return balanceRepository.save(entry);
+    }
+
     public BalanceEntry adjustBalance(UUID supplierId, UUID shopId, BigDecimal amount, String reason, UUID createdBy) {
         BigDecimal currentBalance = getCurrentBalance(supplierId, shopId);
         BigDecimal newBalance = currentBalance.add(amount);

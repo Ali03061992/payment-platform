@@ -1,6 +1,7 @@
 package com.paymentplatform.organization.application.usecase;
 
 import com.paymentplatform.organization.application.dto.OrderResponse;
+import com.paymentplatform.organization.application.security.TenantAccess;
 import com.paymentplatform.organization.domain.model.Order;
 import com.paymentplatform.organization.domain.model.OrderEvent;
 import com.paymentplatform.organization.domain.model.OrderItem;
@@ -12,6 +13,7 @@ import com.paymentplatform.organization.domain.repository.ProductRepository;
 import com.paymentplatform.shared.domain.event.OrderEvents;
 import com.paymentplatform.shared.domain.exception.ConflictException;
 import com.paymentplatform.shared.domain.exception.NotFoundException;
+import com.paymentplatform.shared.domain.security.ActorContext;
 import com.paymentplatform.shared.infrastructure.outbox.OutboxEventStore;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -45,10 +47,23 @@ public class DeliveryRejectOrderUseCase {
      * est conservé pour audit.
      */
     @Transactional
+    public OrderResponse execute(UUID orderId, ActorContext actor, String reason) {
+        Order order = orders.findById(orderId)
+                .orElseThrow(() -> new NotFoundException("Commande non trouvée : " + orderId));
+        TenantAccess.requireDeliveryActor(actor, order.getSupplierId(), order.getDeliveryAgentId());
+        return reject(order, actor.userId(), reason);
+    }
+
+    @Deprecated
+    @Transactional
     public OrderResponse execute(UUID orderId, UUID actorUserId, String reason) {
         Order order = orders.findById(orderId)
                 .orElseThrow(() -> new NotFoundException("Commande non trouvée : " + orderId));
+        return reject(order, actorUserId, reason);
+    }
 
+    private OrderResponse reject(Order order, UUID actorUserId, String reason) {
+        UUID orderId = order.getId();
         String status = order.getStatus();
         if (!"READY_FOR_DELIVERY".equals(status) && !"IN_DELIVERY".equals(status)) {
             throw new ConflictException("La commande doit être en statut READY_FOR_DELIVERY ou IN_DELIVERY pour rejeter la livraison");

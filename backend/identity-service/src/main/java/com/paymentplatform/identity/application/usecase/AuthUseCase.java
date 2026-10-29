@@ -9,6 +9,7 @@ import com.paymentplatform.identity.domain.model.User;
 import com.paymentplatform.identity.domain.repository.UserRepository;
 import com.paymentplatform.identity.domain.valueobject.Username;
 import com.paymentplatform.shared.domain.exception.UnauthorizedException;
+import com.paymentplatform.shared.domain.model.RoleCode;
 import com.paymentplatform.shared.infrastructure.audit.AuditActions;
 import com.paymentplatform.shared.infrastructure.audit.AuditRecorder;
 import com.paymentplatform.shared.infrastructure.security.AuthenticatedUser;
@@ -56,6 +57,9 @@ public class AuthUseCase {
         }
         if (!user.isActive()) {
             throw new UnauthorizedException("Compte désactivé");
+        }
+        if (user.organizationId() == null && !user.hasRole(RoleCode.SYSTEM_ADMIN)) {
+            throw new UnauthorizedException("Compte sans organisation");
         }
         if (user.organizationId() != null) {
             var org = organizationStatus.getOrganizationStatus(user.organizationId().value());

@@ -1,6 +1,7 @@
 package com.paymentplatform.notification.infrastructure.push;
 
 import com.paymentplatform.notification.application.NotificationPreferenceService;
+import com.paymentplatform.notification.application.WebPushEndpointPolicy;
 import com.paymentplatform.notification.application.WebPushSubscriptionService;
 import com.paymentplatform.notification.domain.model.WebPushSubscription;
 import nl.martijndwars.webpush.Notification;
@@ -28,17 +29,20 @@ public class WebPushSender {
 
     private final WebPushSubscriptionService subscriptions;
     private final NotificationPreferenceService preferences;
+    private final WebPushEndpointPolicy endpointPolicy;
     private final VapidKeyProvider vapidKeys;
     private final boolean enabled;
     private final String vapidSubject;
 
     public WebPushSender(WebPushSubscriptionService subscriptions,
                          NotificationPreferenceService preferences,
+                         WebPushEndpointPolicy endpointPolicy,
                          VapidKeyProvider vapidKeys,
                          @Value("${app.webpush.enabled:true}") boolean enabled,
                          @Value("${app.webpush.vapid-subject:mailto:admin@paymentplatform.tn}") String vapidSubject) {
         this.subscriptions = subscriptions;
         this.preferences = preferences;
+        this.endpointPolicy = endpointPolicy;
         this.vapidKeys = vapidKeys;
         this.enabled = enabled;
         this.vapidSubject = vapidSubject;
@@ -84,6 +88,11 @@ public class WebPushSender {
     }
 
     private void send(WebPushSubscription subscription, String title, String body, String tag, String url) {
+        if (!endpointPolicy.isAllowed(subscription.endpoint())) {
+            subscriptions.removeByEndpoint(subscription.endpoint());
+            log.warn("Removed Web Push subscription with invalid or non-public endpoint");
+            return;
+        }
         try {
             PushService pushService = new PushService(vapidKeys.getKeyPair(), vapidSubject);
             String safeUrl = sanitizeUrl(url);

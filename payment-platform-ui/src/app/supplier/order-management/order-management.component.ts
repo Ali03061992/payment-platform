@@ -9,6 +9,7 @@ import { paginateItems, sortItems, toggleSortState, ariaSortFor, sortIndicatorFo
 import { environment } from '../../../environments/environment';
 import { ToastService } from '../../services/toast.service';
 import { ConfirmDialogService } from '../../components/confirm-dialog/confirm-dialog.service';
+import { LoginService } from '../../services/login.service';
 import { Subscription, Subject, debounceTime, distinctUntilChanged, switchMap, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { statusLabelFr } from '../../pipes/status-label.pipe';
@@ -89,7 +90,8 @@ export class OrderManagementComponent implements OnInit, OnDestroy {
     private toast: ToastService,
     private confirmDialog: ConfirmDialogService,
     private elRef: ElementRef,
-    private translate: TranslateService
+    private translate: TranslateService,
+    private loginService: LoginService
   ) {}
 
   @HostListener('document:click', ['$event'])
@@ -569,19 +571,19 @@ export class OrderManagementComponent implements OnInit, OnDestroy {
   }
 
   canConfirm(order: Order): boolean {
-    return order.status === 'DRAFT';
+    return this.isSupplierAdmin() && order.status === 'DRAFT';
   }
 
   canPrepare(order: Order): boolean {
-    return order.status === 'CONFIRMED';
+    return this.isSupplierAdmin() && order.status === 'CONFIRMED';
   }
 
   canReady(order: Order): boolean {
-    return order.status === 'PREPARING';
+    return this.isSupplierAdmin() && order.status === 'PREPARING';
   }
 
   canAssign(order: Order): boolean {
-    return order.status === 'READY_FOR_DELIVERY';
+    return this.isSupplierAdmin() && order.status === 'READY_FOR_DELIVERY';
   }
 
   canDeliveryReject(order: Order): boolean {
@@ -589,11 +591,16 @@ export class OrderManagementComponent implements OnInit, OnDestroy {
   }
 
   canCancel(order: Order): boolean {
-    return order.status !== 'DELIVERED' && order.status !== 'CANCELLED' && order.status !== 'ACCEPTED' && order.status !== 'REJECTED';
+    return this.isSupplierAdmin()
+      && order.status !== 'DELIVERED' && order.status !== 'CANCELLED' && order.status !== 'ACCEPTED' && order.status !== 'REJECTED';
   }
 
   canEdit(order: Order): boolean {
-    return order.status === 'DRAFT';
+    return this.isSupplierAdmin() && order.status === 'DRAFT';
+  }
+
+  isSupplierAdmin(): boolean {
+    return this.loginService.hasRole('SUPPLIER_ADMIN');
   }
 
   /** Facture disponible dès la commande prête pour livraison (émission avant livraison). */

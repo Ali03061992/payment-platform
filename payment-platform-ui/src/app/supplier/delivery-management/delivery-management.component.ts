@@ -324,9 +324,9 @@ export class DeliveryManagementComponent implements OnInit {
 
   /** Vrai si la fiche propose au moins une action contextuelle. */
   hasDetailActions(order: Order): boolean {
-    if (order.status === 'READY_FOR_DELIVERY'
+    if (!this.isShopUser() && (order.status === 'READY_FOR_DELIVERY'
       || order.status === 'DELIVERY_ACCEPTED'
-      || order.status === 'IN_DELIVERY') {
+      || order.status === 'IN_DELIVERY')) {
       return true;
     }
     return order.status === 'DELIVERED' && this.isShopUser();

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.paymentplatform.notification.domain.model.Notification;
 import com.paymentplatform.notification.domain.model.NotificationRepository;
 import com.paymentplatform.notification.infrastructure.email.EmailNotificationService;
+import com.paymentplatform.notification.infrastructure.http.IdentityRecipientClient;
 import com.paymentplatform.notification.infrastructure.push.PushNotificationService;
 import com.paymentplatform.notification.infrastructure.push.WebPushSender;
 import com.paymentplatform.shared.infrastructure.eventing.EventDeduplicator;
@@ -28,6 +29,7 @@ public class PaymentEventConsumer {
     private final EmailNotificationService emailService;
     private final PushNotificationService pushService;
     private final WebPushSender webPushSender;
+    private final IdentityRecipientClient identityRecipients;
 
     public PaymentEventConsumer(NotificationRepository notifications,
                                  EventDeduplicator deduplicator,
@@ -35,7 +37,8 @@ public class PaymentEventConsumer {
                                  NotificationBroadcaster broadcaster,
                                  EmailNotificationService emailService,
                                  PushNotificationService pushService,
-                                 WebPushSender webPushSender) {
+                                 WebPushSender webPushSender,
+                                 IdentityRecipientClient identityRecipients) {
         this.notifications = notifications;
         this.deduplicator = deduplicator;
         this.objectMapper = objectMapper;
@@ -43,6 +46,7 @@ public class PaymentEventConsumer {
         this.emailService = emailService;
         this.pushService = pushService;
         this.webPushSender = webPushSender;
+        this.identityRecipients = identityRecipients;
     }
 
     @RabbitListener(queues = "notification.payments")
@@ -117,9 +121,9 @@ public class PaymentEventConsumer {
                 "PAYMENT", reference
         )));
 
-        emailService.sendPaymentReceipt(null, "la boutique", reference, "", "", reference);
+        sendPaymentReceiptEmail(shopId, reference);
 
-        pushService.sendToUser(supplierId, "Paiement confirmé",
+        pushService.sendToOrganization(supplierId, "Paiement confirmé",
                 "Le paiement " + reference + " a été confirmé", "PAYMENT_CONFIRMED", "/dashboard/payments");
         webPushSender.sendToOrganization(supplierId, "Paiement confirmé",
                 "Le paiement " + reference + " a été confirmé", "PAYMENT_CONFIRMED", "/dashboard/payments");
@@ -164,5 +168,15 @@ public class PaymentEventConsumer {
         webPushSender.sendToOrganization(supplierId, "Paiement annul\u00e9",
                 "Le paiement " + reference + " a \u00e9t\u00e9 annul\u00e9 par la boutique",
                 "PAYMENT_CANCELLED", "/dashboard/payments");
+    }
+
+    private void sendPaymentReceiptEmail(UUID shopId, String reference) {
+        if (!emailService.isEmailEnabled()) {
+            return;
+        }
+        identityRecipients.emailForOrganizationRole(shopId, "SHOP_ADMIN")
+                .ifPresentOrElse(
+                        email -> emailService.sendPaymentReceipt(email, "la boutique", reference, "", "", reference),
+                        () -> log.warn("Payment receipt email skipped for shop {}: no recipient", shopId));
     }
 }

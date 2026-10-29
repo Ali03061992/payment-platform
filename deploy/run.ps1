@@ -22,6 +22,10 @@ if ($Build) {
     Write-Host "[1/2] Starting containers..." -ForegroundColor Yellow
     docker compose up -d
 }
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "docker compose failed (exit $LASTEXITCODE). Check deploy/.env" -ForegroundColor Red
+    exit $LASTEXITCODE
+}
 
 Write-Host "[2/2] Waiting for services..." -ForegroundColor Yellow
 Start-Sleep -Seconds 10

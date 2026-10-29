@@ -32,6 +32,10 @@ public class EmailNotificationService {
         this.templateService = templateService;
     }
 
+    public boolean isEmailEnabled() {
+        return mailEnabled;
+    }
+
     @Async
     public void sendOrderConfirmation(String to, String recipientName, String orderReference, String orderDetails) {
         if (!mailEnabled) {
@@ -78,6 +82,10 @@ public class EmailNotificationService {
     }
 
     private void sendHtmlEmail(String to, String subject, String htmlBody) {
+        if (to == null || to.isBlank()) {
+            log.warn("Email skipped: no recipient for subject {}", subject);
+            return;
+        }
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
@@ -87,7 +95,7 @@ public class EmailNotificationService {
             helper.setText(htmlBody, true);
             mailSender.send(message);
             log.info("Email envoyé à {} : {}", to, subject);
-        } catch (MessagingException e) {
+        } catch (Exception e) {
             log.error("Erreur lors de l'envoi de l'email à {} : {}", to, e.getMessage());
         }
     }

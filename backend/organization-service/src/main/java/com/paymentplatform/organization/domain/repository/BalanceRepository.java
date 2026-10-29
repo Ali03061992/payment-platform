@@ -20,6 +20,8 @@ public interface BalanceRepository extends JpaRepository<BalanceEntry, UUID> {
 
     Optional<BalanceEntry> findFirstBySupplierIdAndShopIdOrderByCreatedAtDesc(UUID supplierId, UUID shopId);
 
+    boolean existsByOrderIdAndType(UUID orderId, String type);
+
     @Query("SELECT COALESCE(SUM(e.amount), 0) FROM BalanceEntry e WHERE e.supplierId = :supplierId AND e.shopId = :shopId")
     BigDecimal sumBalance(@Param("supplierId") UUID supplierId, @Param("shopId") UUID shopId);
 

@@ -77,11 +77,11 @@ class PaymentUseCaseH2Test {
     }
 
     @Test
-    void confirmPayment_nullOrgId_succeeds() {
+    void confirmPayment_nullOrgId_throwsForbidden() {
         var created = createPayment.execute(
                 new CreatePaymentRequest(UUID.fromString("00000000-0000-0000-0000-000000000001"), UUID.fromString("00000000-0000-0000-0000-000000000002"), new BigDecimal("100"), "TND",null,null), UUID.fromString("00000000-0000-0000-0000-000000000010"), UUID.fromString("00000000-0000-0000-0000-000000000001"));
-        var confirmed = confirmPayment.execute(created.id(), UUID.fromString("00000000-0000-0000-0000-000000000020"), null);
-        assertThat(confirmed.status()).isEqualTo(PaymentStatus.CONFIRMED);
+        assertThatThrownBy(() -> confirmPayment.execute(created.id(), UUID.fromString("00000000-0000-0000-0000-000000000020"), null))
+                .isInstanceOf(ForbiddenException.class);
     }
 
     @Test
@@ -128,11 +128,11 @@ class PaymentUseCaseH2Test {
     }
 
     @Test
-    void cancelPayment_nullOrgId_succeeds() {
+    void cancelPayment_nullOrgId_throwsForbidden() {
         var created = createPayment.execute(
                 new CreatePaymentRequest(UUID.fromString("00000000-0000-0000-0000-000000000001"), UUID.fromString("00000000-0000-0000-0000-000000000002"), new BigDecimal("50"), "USD",null,null), UUID.fromString("00000000-0000-0000-0000-000000000010"), UUID.fromString("00000000-0000-0000-0000-000000000001"));
-        var cancelled = cancelPayment.execute(created.id(), UUID.fromString("00000000-0000-0000-0000-000000000010"), null);
-        assertThat(cancelled.status()).isEqualTo(PaymentStatus.CANCELLED);
+        assertThatThrownBy(() -> cancelPayment.execute(created.id(), UUID.fromString("00000000-0000-0000-0000-000000000010"), null))
+                .isInstanceOf(ForbiddenException.class);
     }
 
     @Test
@@ -178,7 +178,7 @@ class PaymentUseCaseH2Test {
     @Test
     void listPayments_bySupplier() {
         createPayment.execute(new CreatePaymentRequest(UUID.fromString("00000000-0000-0000-0000-000000000001"), UUID.fromString("00000000-0000-0000-0000-000000000002"), new BigDecimal("100"), "TND",null,null), UUID.fromString("00000000-0000-0000-0000-000000000010"), UUID.fromString("00000000-0000-0000-0000-000000000001"));
-        createPayment.execute(new CreatePaymentRequest(UUID.fromString("00000000-0000-0000-0000-000000000003"), UUID.fromString("00000000-0000-0000-0000-000000000002"), new BigDecimal("200"), "TND",null,null), UUID.fromString("00000000-0000-0000-0000-000000000010"), UUID.fromString("00000000-0000-0000-0000-000000000002"));
+        createPayment.execute(new CreatePaymentRequest(UUID.fromString("00000000-0000-0000-0000-000000000003"), UUID.fromString("00000000-0000-0000-0000-000000000002"), new BigDecimal("200"), "TND",null,null), UUID.fromString("00000000-0000-0000-0000-000000000010"), UUID.fromString("00000000-0000-0000-0000-000000000003"));
         var result = listPayments.executeBySupplier(UUID.fromString("00000000-0000-0000-0000-000000000002"), 0, 10);
         assertThat(result.items()).hasSize(2);
     }

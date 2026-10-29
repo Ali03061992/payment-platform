@@ -1,6 +1,6 @@
-// Parcours 20-delivery-payment.cy.ts : 20 - Delivery: reception -> paiement auto; rejet -> annulation sans paiement; popup Valider/Non.
+// Parcours 20-delivery-payment.cy.ts : 20 - Delivery: livraison puis acceptation boutique -> paiement auto ; rejet -> annulation sans paiement ; popup Valider/Non.
 // Prerequis : services live (gateway + microservices + UI), utilisateurs seedes via cy.ensureTestUsers(), API live (Cypress.env apiUrl).
-// Regle metier : commande assignee -> livraison ; reception confirmee (agent/boutique) -> paiement auto ; rejet -> commande CANCELLED, aucun paiement.
+// Regle metier : commande assignee -> livraison (aucun paiement) ; acceptation boutique (reception confirmee) -> paiement auto ; rejet -> commande CANCELLED, aucun paiement.
 // Jamais d'alert() native : les confirmations passent par la popup [data-testid="confirm-dialog"] (Valider/Non).
 const API = () => Cypress.env('apiUrl') || 'http://localhost:8081';
 
@@ -97,7 +97,7 @@ function setupTestData() {
 describe('20 - Delivery: reception confirmee cree le paiement', () => {
   before(() => cy.ensureTestUsers());
 
-  it('deliver (agent) cree un paiement PENDING du montant commande', () => {
+  it('deliver n cree aucun paiement, acceptation boutique cree un PENDING du montant commande', () => {
     cy.wrap(null).then(() => {
       return setupTestData().then((ctx) => {
         return createOrder(ctx, 'Delivery creates payment').then((order) => {
@@ -105,6 +105,14 @@ describe('20 - Delivery: reception confirmee cree le paiement', () => {
             cy.apiPost(ctx.agentToken, `/api/orders/${order.id}/deliver`, { receivedBy: ctx.agentId })
           ).then((r) => {
             expect(r.body.status).to.eq('DELIVERED');
+          }).then(() =>
+            paymentsForOrder(ctx.supplierToken, order.id)
+          ).then((found: any) => {
+            expect(found, 'aucun paiement avant acceptation').to.have.length(0);
+          }).then(() =>
+            cy.apiPost(ctx.shopToken, `/api/orders/${order.id}/accept`, {})
+          ).then((r) => {
+            expect(r.body.status).to.eq('ACCEPTED');
           }).then(() =>
             paymentsForOrder(ctx.supplierToken, order.id)
           ).then((found: any) => {

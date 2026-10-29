@@ -42,7 +42,20 @@ describe('01 - Auth: Login Page', () => {
     cy.window().then((win) => {
       const user = JSON.parse(win.sessionStorage.getItem('user') || '{}');
       expect(user.roles).to.include('SYSTEM_ADMIN');
-      expect(win.sessionStorage.getItem('token')).to.not.be.null;
+      // Contrat actuel : access token en mémoire uniquement, session portée par
+      // le refresh cookie HttpOnly — le legacy sessionStorage 'token' est
+      // purgé volontairement (LoginService.purgeLegacy).
+      expect(win.sessionStorage.getItem('token'), 'legacy token purged').to.be.null;
+    });
+    // La session doit être renouvelable depuis le cookie seul (pp_rt HttpOnly).
+    cy.request({
+      method: 'POST',
+      url: `${Cypress.env('apiUrl') || 'http://localhost:8081'}/api/auth/refresh`,
+      body: {},
+      failOnStatusCode: false,
+    }).then((r) => {
+      expect(r.status, 'refresh via cookie HttpOnly').to.eq(200);
+      expect(r.body?.accessToken, 'accessToken renouvelé').to.be.a('string').and.not.be.empty;
     });
   });
 

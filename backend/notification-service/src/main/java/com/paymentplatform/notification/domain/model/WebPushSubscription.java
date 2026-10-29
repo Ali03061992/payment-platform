@@ -61,11 +61,10 @@ public class WebPushSubscription {
     }
 
     /**
-     * Réaffecte l'abonnement au compte courant (appareil partagé ou
-     * réinstallation) et rafraîchit les clés de chiffrement.
+     * Rafraichit les cles de chiffrement du proprietaire courant sans jamais
+     * changer le user associe : la reassignation d'un endpoint est interdite.
      */
-    public void reassign(UUID userId, UUID organizationId, String p256dh, String auth, String userAgent) {
-        this.userId = userId;
+    public void refreshCredentials(UUID organizationId, String p256dh, String auth, String userAgent) {
         this.organizationId = organizationId;
         this.p256dh = p256dh;
         this.auth = auth;

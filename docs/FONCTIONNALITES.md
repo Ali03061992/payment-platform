@@ -12,7 +12,7 @@ NEXTERA est une plateforme B2B qui relie **fournisseurs** et **boutiques** : cat
 | `SUPPLIER_ADMIN` | Gestion complète côté fournisseur (catalogue, stocks, commandes, agents, finances) |
 | `SUPPLIER_AGENT` | Livreur : ses livraisons, acceptation, géolocalisation |
 | `SHOP_ADMIN` | Gestion complète côté boutique (commandes, réception, paiements, litiges) |
-| `SHOP_MANAGER` / `SHOP_AGENT` | Exploitation boutique (commandes, réception) |
+| `SHOP_AGENT` | Exploitation boutique : livraisons assignées, réception, litiges et devis (pas de création/gestion de commandes ni de solde) |
 
 ### Authentification et gestion des accès
 - Inscription, connexion, déconnexion, rafraîchissement de session (JWT).
@@ -74,7 +74,7 @@ NEXTERA est une plateforme B2B qui relie **fournisseurs** et **boutiques** : cat
 
 ## 5. Paiements
 
-- Création (manuelle ou **automatique** à la réception confirmée), liste, recherche par référence, fiche détail.
+- Création (manuelle ou **automatique** à la réception acceptée), liste, recherche par référence, fiche détail.
 - Validation : confirmation, rejet, annulation ; facture PDF du paiement.
 - **Paiements ASAP**, détection des **paiements en retard**, statistiques (par statut, par période, par fournisseur, synthèse agent).
 - Exports (données + CSV).
