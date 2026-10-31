@@ -69,9 +69,6 @@ public class CreatePaymentUseCase {
     @Transactional
     public PaymentResponse execute(CreatePaymentRequest request, UUID actorUserId, UUID organizationId,
                                    String idempotencyKey) {
-        if (organizationId == null || !organizationId.equals(request.shopId())) {
-            throw new ForbiddenException("Vous ne pouvez pas créer un paiement pour cette boutique");
-        }
         String key = (idempotencyKey != null && !idempotencyKey.isBlank()) ? idempotencyKey : null;
         if (key != null) {
             var existing = payments.findByIdempotencyKey(key);
@@ -79,8 +76,14 @@ public class CreatePaymentUseCase {
                 if (!organizationId.equals(existing.get().shopId())) {
                     throw new ForbiddenException("Clé d'idempotence associée à une autre organisation");
                 }
+                if (!organizationId.equals(request.shopId())) {
+                    throw new ForbiddenException("Vous ne pouvez pas réutiliser cette clé pour une autre boutique");
+                }
                 return PaymentResponse.from(existing.get(), nameResolver.toNameResolver());
             }
+        }
+        if (organizationId == null || !organizationId.equals(request.shopId())) {
+            throw new ForbiddenException("Vous ne pouvez pas créer un paiement pour cette boutique");
         }
 
         orgClient.validateShop(request.shopId());

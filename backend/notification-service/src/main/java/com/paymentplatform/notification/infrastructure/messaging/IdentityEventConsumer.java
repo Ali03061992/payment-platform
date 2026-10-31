@@ -63,12 +63,24 @@ public class IdentityEventConsumer {
         if (rolesNode != null && rolesNode.isArray()) {
             for (JsonNode role : rolesNode) {
                 if ("SUPPLIER_AGENT".equals(role.asText())) {
-                    if (!event.hasNonNull("organizationId") || !event.hasNonNull("userId")) {
+                    UUID organizationId = null;
+                    UUID userId = null;
+                    if (event.hasNonNull("organizationId") && event.hasNonNull("userId")) {
+                        try {
+                            organizationId = UUID.fromString(event.get("organizationId").asText());
+                            userId = UUID.fromString(event.get("userId").asText());
+                        } catch (IllegalArgumentException e) {
+                            log.warn("Invalid UUID in agent invitation: {}", event);
+                            return;
+                        }
+                        if (organizationId == null) {
+                            log.warn("Ignoring agent invitation without organization: {}", event);
+                            return;
+                        }
+                    } else {
                         log.warn("Ignoring agent invitation without organization or user: {}", event);
                         return;
                     }
-                    UUID organizationId = UUID.fromString(event.get("organizationId").asText());
-                    UUID userId = UUID.fromString(event.get("userId").asText());
 
                     broadcaster.broadcastNotification(notifications.save(new Notification(null,
                             organizationId,
