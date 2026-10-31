@@ -1,0 +1,119 @@
+<div class="page-header">
+  <h2>{{ 'RECLAMATIONS.TITLE' | translate }}</h2>
+  <button class="btn btn-primary" (click)="openForm()" [attr.aria-expanded]="showForm"
+    [attr.aria-label]="'RECLAMATIONS.NEW_ARIA' | translate">
+    <app-icon name="plus" [size]="16"></app-icon>
+    {{ 'RECLAMATIONS.NEW' | translate }}
+  </button>
+</div>
+
+@if (showForm) {
+  <div class="form-card" role="region" [attr.aria-label]="'RECLAMATIONS.FORM_ARIA' | translate">
+    <h3>{{ 'RECLAMATIONS.FORM_TITLE' | translate }}</h3>
+    <p class="form-hint">{{ 'RECLAMATIONS.ELIGIBILITY_HINT' | translate }}</p>
+    <form (ngSubmit)="create()">
+      <div class="form-group">
+        <label for="reclOrder">{{ 'RECLAMATIONS.ORDER_LABEL' | translate }}</label>
+        @if (loadingOrders) {
+          <p class="form-hint">{{ 'RECLAMATIONS.LOADING' | translate }}</p>
+        } @else {
+          <select [(ngModel)]="selectedOrderId" name="reclOrder" id="reclOrder" class="form-control"
+            required aria-required="true">
+            <option value="">{{ 'RECLAMATIONS.ORDER_PLACEHOLDER' | translate }}</option>
+            @for (o of eligibleOrders; track o.id) {
+              <option [value]="o.id">{{ orderLabel(o) }}</option>
+            }
+          </select>
+          @if (eligibleOrders.length === 0) {
+            <p class="form-hint">{{ 'RECLAMATIONS.NO_ELIGIBLE_ORDER' | translate }}</p>
+          }
+        }
+      </div>
+      <div class="form-group">
+        <label for="reclReason">{{ 'RECLAMATIONS.REASON_LABEL' | translate }}</label>
+        <textarea [(ngModel)]="reason" name="reclReason" id="reclReason" class="form-control" rows="3"
+          [attr.placeholder]="'RECLAMATIONS.REASON_PLACEHOLDER' | translate"
+          [attr.aria-label]="'RECLAMATIONS.REASON_LABEL' | translate"
+          required aria-required="true" maxlength="255"></textarea>
+      </div>
+      <div class="form-actions">
+        <button type="button" class="btn btn-secondary" (click)="closeForm()">
+          {{ 'RECLAMATIONS.CANCEL' | translate }}
+        </button>
+        <button type="submit" class="btn btn-primary" [disabled]="!canSubmit()">
+          {{ submitting ? ('RECLAMATIONS.SENDING' | translate) : ('RECLAMATIONS.SUBMIT' | translate) }}
+        </button>
+      </div>
+    </form>
+  </div>
+}
+
+@if (loading) {
+  <div class="loading">
+    <div class="spinner"></div>
+    <span>{{ 'RECLAMATIONS.LOADING' | translate }}</span>
+  </div>
+}
+
+@if (!loading) {
+  <div class="table-card hide-mobile">
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>{{ 'DISPUTES.COL_REF' | translate }}</th>
+            <th>{{ 'DISPUTES.COL_ORDER' | translate }}</th>
+            <th>{{ 'DISPUTES.COL_REASON' | translate }}</th>
+            <th>{{ 'DISPUTES.COL_STATUS' | translate }}</th>
+            <th>{{ 'DISPUTES.COL_CREATED' | translate }}</th>
+            <th>{{ 'DISPUTES.COL_ACTIONS' | translate }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (d of disputes; track d.id) {
+            <tr class="clickable-row" (click)="openDispute(d.id)">
+              <td><strong>{{ d.id | slice:0:8 }}</strong></td>
+              <td>{{ d.orderId | slice:0:8 }}</td>
+              <td>{{ d.reason }}</td>
+              <td><span class="payment-badge" [ngClass]="statusClass(d.status)">{{ statusLabel(d.status) }}</span></td>
+              <td>{{ d.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
+              <td class="actions" (click)="$event.stopPropagation()">
+                <button class="btn btn-sm btn-secondary" (click)="openDispute(d.id)"
+                  [attr.aria-label]="('DISPUTES.VIEW_ARIA' | translate:{id: d.id})">{{ 'DISPUTES.VIEW' | translate }}</button>
+              </td>
+            </tr>
+          }
+          @if (disputes.length === 0) {
+            <tr>
+              <td colspan="6" class="td-empty">{{ 'DISPUTES.NO_DISPUTES' | translate }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="dispute-cards show-mobile">
+    @for (d of disputes; track d.id) {
+      <div class="dispute-card" (click)="openDispute(d.id)">
+        <div class="dispute-card-header">
+          <span class="dispute-reference">{{ d.id | slice:0:8 }}</span>
+          <span class="payment-badge" [ngClass]="statusClass(d.status)">{{ statusLabel(d.status) }}</span>
+        </div>
+        <div class="dispute-card-body">
+          <div class="dispute-row">
+            <span class="dispute-label">{{ 'DISPUTES.COL_REASON' | translate }}</span>
+            <span class="dispute-value">{{ d.reason }}</span>
+          </div>
+          <div class="dispute-row">
+            <span class="dispute-label">{{ 'DISPUTES.COL_CREATED' | translate }}</span>
+            <span class="dispute-value">{{ d.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
+          </div>
+        </div>
+      </div>
+    }
+    @if (disputes.length === 0) {
+      <div class="empty-card">{{ 'DISPUTES.NO_DISPUTES' | translate }}</div>
+    }
+  </div>
+}

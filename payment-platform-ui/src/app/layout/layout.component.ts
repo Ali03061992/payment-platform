@@ -85,6 +85,7 @@ export class LayoutComponent implements OnInit, OnDestroy {
     { label: 'NAV.EXPORT', icon: 'upload', route: 'export', roles: ['SYSTEM_ADMIN', 'SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_AGENT'], group: 'NAV.GROUP_TOOLS' },
     { label: 'NAV.AGENT_PAYMENTS', icon: 'users', route: 'supplier/agent-payments', roles: ['SUPPLIER_ADMIN'], group: 'NAV.GROUP_SALES' },
     { label: 'LAYOUT.NOTIFICATIONS', icon: 'bell', route: 'notifications', roles: ['SYSTEM_ADMIN', 'SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_AGENT'], group: 'NAV.GROUP_TOOLS' },
+  { label: 'NAV.RECLAMATIONS', icon: 'alert', route: 'reclamations', roles: ['SYSTEM_ADMIN', 'SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_AGENT'], group: 'NAV.GROUP_TOOLS' },
     { label: 'NAV.CHANGE_PASSWORD', icon: 'lock', route: 'change-password', roles: ['SYSTEM_ADMIN', 'SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_AGENT'], group: 'NAV.GROUP_ACCOUNT' },
   ];
 

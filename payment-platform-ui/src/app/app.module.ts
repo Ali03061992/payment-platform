@@ -52,7 +52,7 @@ import { QuotesComponent } from './supplier/quotes/quotes.component';
 import { ShopOrderDetailComponent } from './shop/order-detail/order-detail.component';
 import { DisputeDetailComponent } from './shop/dispute-detail/dispute-detail.component';
 import { DisputeListComponent } from './shop/dispute-list/dispute-list.component';
-import { ChatbotComponent } from './components/chatbot/chatbot.component';
+import { ReclamationsComponent } from './shop/reclamations/reclamations.component';
 import { BalanceViewComponent } from './shop/balance-view/balance-view.component';
 import { PwaUpdateComponent } from './pwa-update/pwa-update.component';
 import { QrScannerComponent } from './qr-scanner/qr-scanner.component';
@@ -88,7 +88,7 @@ import { ThemePickerComponent } from './components/theme-picker/theme-picker.com
  * Bootstrap : restaure d'abord la session (cookie HttpOnly pp_rt → access
  * token mémoire → profil /me) pour que les guards voient un état cohérent,
  * puis précharge les traductions avant le premier render — les appels
- * synchrones TranslateService.instant() (chatbot, toasts, libellés TS)
+ * synchrones TranslateService.instant() (toasts, libellés TS)
  * renverraient sinon la clé brute tant que les JSON ./assets/i18n ne sont
  * pas chargés.
  */
@@ -180,7 +180,7 @@ export function initApp(translate: TranslateService, loginService: LoginService)
         ShopOrderDetailComponent,
         DisputeDetailComponent,
         DisputeListComponent,
-        ChatbotComponent,
+        ReclamationsComponent,
         BalanceViewComponent,
         PwaUpdateComponent,
         QrScannerComponent,

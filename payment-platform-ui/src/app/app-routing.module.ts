@@ -47,6 +47,7 @@ import { QuotesComponent } from './supplier/quotes/quotes.component';
 import { ShopOrderDetailComponent } from './shop/order-detail/order-detail.component';
 import { DisputeDetailComponent } from './shop/dispute-detail/dispute-detail.component';
 import { DisputeListComponent } from './shop/dispute-list/dispute-list.component';
+import { ReclamationsComponent } from './shop/reclamations/reclamations.component';
 import { BalanceViewComponent } from './shop/balance-view/balance-view.component';
 import { QrScannerComponent } from './qr-scanner/qr-scanner.component';
 import { AgentPaymentsComponent } from './supplier/agent-payments/agent-payments.component';
@@ -123,6 +124,8 @@ const routes: Routes = [
       { path: 'shop/disputes/:id', component: DisputeDetailComponent, canActivate: [RoleGuard], data: { roles: shopRoles } },
       { path: 'admin/disputes', component: DisputeListComponent, canActivate: [RoleGuard], data: { roles: adminRoles, scope: 'all' } },
       { path: 'admin/disputes/:id', component: DisputeDetailComponent, canActivate: [RoleGuard], data: { roles: adminRoles } },
+      { path: 'reclamations', component: ReclamationsComponent, canActivate: [RoleGuard], data: { roles: allRoles } },
+      { path: 'reclamations/:id', component: DisputeDetailComponent, canActivate: [RoleGuard], data: { roles: allRoles, listRoute: '/dashboard/reclamations' } },
       { path: 'shop/balance', component: BalanceViewComponent, canActivate: [RoleGuard], data: { roles: shopAdminRoles } },
       { path: 'shop/invoices', component: InvoicesJournalComponent, canActivate: [RoleGuard], data: { roles: ['SHOP_ADMIN'] } },
       { path: 'notifications', component: NotificationsComponent, canActivate: [RoleGuard], data: { roles: allRoles } },

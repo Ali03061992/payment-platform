@@ -38,7 +38,7 @@ public class DisputeController {
     }
 
     @PostMapping
-    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SHOP_ADMIN', 'SHOP_AGENT')")
+    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_AGENT', 'SYSTEM_ADMIN')")
     public ResponseEntity<DisputeResponse> createDispute(@Valid @RequestBody CreateDisputeRequest request) {
         var current = CurrentUser.get();
         DisputeResponse response = createDispute.execute(request.orderId(), current.actor(), request.reason());
@@ -102,7 +102,7 @@ public class DisputeController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SHOP_ADMIN', 'SYSTEM_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_AGENT', 'SYSTEM_ADMIN')")
     public ResponseEntity<List<DisputeResponse>> listDisputes(
             @RequestParam(required = false) String status) {
         var current = CurrentUser.get();

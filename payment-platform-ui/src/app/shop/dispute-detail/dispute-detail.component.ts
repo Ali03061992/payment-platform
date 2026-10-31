@@ -124,6 +124,8 @@ export class DisputeDetailComponent implements OnInit, OnDestroy {
   }
 
   private disputesListRoute(): string {
+    const configured = this.route.snapshot.data['listRoute'];
+    if (typeof configured === 'string' && configured) return configured;
     const roles = this.loginService.getCurrentUser()?.roles || [];
     if (roles.includes('SYSTEM_ADMIN')) return '/dashboard/admin/disputes';
     if (roles.includes('SUPPLIER_ADMIN') || roles.includes('SUPPLIER_AGENT')) return '/dashboard/supplier/orders';
