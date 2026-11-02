@@ -1,8 +1,8 @@
 # NEXTERA UI
 
-> Générique Angular CLI — pour le run local réel voir `npm run start:local` (port 4200),
-> `../deploy/LOCAL_DEV.md`, `../deploy/run-local.ps1` et [CYPRESS_E2E_GUIDE.md](CYPRESS_E2E_GUIDE.md).
-> Index docs : [../docs/README.md](../docs/README.md).
+> Application Angular 21 / PWA. Pour le run local réel : `npm run start:local` (port 4200).
+> Déploiement local et serveur : [../docs/TECHNIQUE.md](../docs/TECHNIQUE.md).
+> Documentation générale : [../README.md](../README.md).
 
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 16.2.16.
 

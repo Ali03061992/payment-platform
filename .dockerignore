@@ -9,6 +9,5 @@ payment-platform-ui/cypress-results.txt
 backend/**/target/
 deploy/backups/
 presentation/
-archive-docs/
 .git/
 *.log

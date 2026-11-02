@@ -11,7 +11,7 @@ import java.util.List;
 
 /**
  * Génère la facture électronique au format TEIF v1.8.8 (XML TTN/El Fatoora).
- * Référence : `docs/SPEC_EFACTURE_TTN.md` §4/§9 (XSD facture_INVOIC, codes I-*).
+ * Référence : spécification TEIF v1.8.8 (XSD facture_INVOIC, codes I-*).
  * Conventions appliquées : MF sur 13 caractères sans séparateur, dates ddMMyy,
  * montants 3 décimales, TVA ventilée par taux, timbre séparé des taxes,
  * RefTtnVal remplie si la référence externe est connue (sinon vide, TTN la remplit).

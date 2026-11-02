@@ -1,6 +1,7 @@
-# NEXTERA — Fonctionnalités de l'application
+# NEXTERA — Dossier fonctionnel
 
 > Inventaire complet de l'état implémenté (web + API). La partie mobile (`payment-platform-mobile/`) est volontairement exclue de ce document.
+> L'architecture, les API, la sécurité et le déploiement sont décrits dans [TECHNIQUE.md](TECHNIQUE.md).
 
 NEXTERA est une plateforme B2B qui relie **fournisseurs** et **boutiques** : catalogue, stocks, commandes, livraisons, paiements, facturation conforme au droit tunisien, retenues à la source TEJ et notifications temps réel.
 
@@ -16,6 +17,7 @@ NEXTERA est une plateforme B2B qui relie **fournisseurs** et **boutiques** : cat
 
 ### Authentification et gestion des accès
 - Inscription, connexion, déconnexion, rafraîchissement de session (JWT).
+- **Passkeys (WebAuthn)** : connexion sans mot de passe et gestion des appareils (renommage, révocation) depuis la page Sécurité ; fonctionnalité désactivée par défaut côté UI (`PASSKEYS_ENABLED`).
 - Changement de mot de passe connecté ; mot de passe oublié (demande → validation → confirmation) ; première activation par lien (validation → définition du mot de passe).
 - Création d'utilisateurs par l'admin, activation / désactivation de comptes.
 - Agents fournisseurs : création, modification, activation / désactivation, liste par fournisseur.
@@ -63,14 +65,14 @@ NEXTERA est une plateforme B2B qui relie **fournisseurs** et **boutiques** : cat
 
 ## 4. Espace boutique
 
-- **Commandes** : création (manuelle ou depuis le catalogue), liste, recherche, fiche détail, modification (brouillon), annulation, réclamation (rejet), **recommande**, paiement ASAP (acceptation + paiement immédiat).
+- **Commandes** : création (manuelle ou depuis le catalogue), liste, recherche, fiche détail, modification (brouillon), annulation, réclamation (tout statut), **recommande**, paiement ASAP (acceptation + paiement immédiat).
 - **Demande sans remise** : la boutique chiffre sans aucune remise (remises = devis fournisseur).
 - **Devis reçus** : historique versionné par commande (totaux, date), téléchargement de chaque devis en PDF, notification à chaque envoi.
 - **Réception** : acceptation / rejet de livraison, confirmation de date, personne ayant réceptionné.
 - **Factures** : téléchargement PDF, impression, facture électronique TEIF, référence externe + QR.
 - **Retenue à la source** : consultation du certificat de la facture, téléchargement PDF (QR + référence) et XML (dépôt TEJ), enregistrement de la référence TEJ après dépôt.
 - **Soldes** : solde boutique, détail par fournisseur.
-- **Réclamations** : page unifiée `/dashboard/reclamations` (boutique, fournisseur, admin), création sur commande éligible, détail et messagerie avec le fournisseur.
+- **Réclamations** : page unifiée `/dashboard/reclamations` (boutique, fournisseur, admin), création sur n'importe quelle commande, détail et messagerie avec le fournisseur.
 
 ## 5. Paiements
 
@@ -91,7 +93,7 @@ NEXTERA est une plateforme B2B qui relie **fournisseurs** et **boutiques** : cat
 ## 7. Litiges (réclamations)
 
 - Page unique `/dashboard/reclamations` pour tous les rôles métier (boutique, fournisseur, admin) : liste paginée des litiges de l'organisation avec recherche, filtres statut/priorité et accès à la fiche avec fil de messages.
-- Ouverture sur une commande **éligible** uniquement (`REJECTED` ou `DELIVERY_REJECTED`) ; un seul litige actif (`OPEN` / `IN_PROGRESS`) par commande (sinon `409`). La boutique peut ouvrir la réclamation depuis la fiche commande, le fournisseur depuis le détail de ses commandes.
+- Ouverture sur **n'importe quelle commande accessible, quel que soit son statut** (en cours, livrée, rejetée, annulée, etc.) ; un seul litige actif (`OPEN` / `IN_PROGRESS`) par commande (sinon `409`). La boutique peut ouvrir la réclamation depuis la fiche commande, le fournisseur depuis le détail de ses commandes.
 - Priorités et SLA : `LOW` (7 j), `NORMAL` (72 h), `HIGH` (24 h), `URGENT` (4 h) ; échéance recalculée à chaque changement de priorité, retard signalé dans la liste et la fiche.
 - Prise en charge et affectation : passage `OPEN` → `IN_PROGRESS`, assignation à un admin (ou à soi-même), affichage de l'assigné et de l'échéance.
 - Cycle de vie : `OPEN` → `IN_PROGRESS` → `RESOLVED` / `CLOSED` ; résolution et clôture réservées aux admins ; chaque transition est historisée (statut, auteur, date, commentaire).
@@ -101,7 +103,7 @@ NEXTERA est une plateforme B2B qui relie **fournisseurs** et **boutiques** : cat
 ## 8. Notifications
 
 - Centre de notifications in-app : liste, compteur de non-lus, marquage lu / tout marquer lu.
-- Temps réel : flux **SSE** + **push FCM** (enregistrement / suppression de token, service push web).
+- Temps réel : flux **SSE** + **push FCM** + **Web Push PWA** (abonnements, préférences, purge des endpoints expirés).
 - Événements couverts : commandes, livraisons, paiements, stocks bas, litiges, rappel J-7 des retenues ; messages i18n stockés (clé + paramètres) et rendus dans la langue de l'utilisateur.
 
 ## 9. Expérience utilisateur (web)
