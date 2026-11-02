@@ -302,14 +302,61 @@ class DisputeControllerTest {
     }
 
     @Test
-    void assign_withoutBody_assignsCurrentAdmin() throws Exception {
+    void assign_withoutBody_assignsCurrentSupplierAdmin() throws Exception {
         String disputeId = openDispute(UUID.fromString("00000000-0000-0000-0000-000000000037"),
-                "SHOP_ADMIN", shopId, "NORMAL");
-        var admin = auth(UUID.fromString("00000000-0000-0000-0000-000000000037"), "shop.admin", List.of("SHOP_ADMIN"), shopId);
+                "SUPPLIER_ADMIN", supplierId, "NORMAL");
+        var admin = auth(UUID.fromString("00000000-0000-0000-0000-000000000037"), "supplier.admin", List.of("SUPPLIER_ADMIN"), supplierId);
         mockMvc.perform(post("/api/disputes/{id}/assign", disputeId)
                         .with(SecurityMockMvcRequestPostProcessors.authentication(admin)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.assignedTo").value("00000000-0000-0000-0000-000000000037"));
+    }
+
+    @Test
+    void assign_byShopAdmin_returns403() throws Exception {
+        String disputeId = openDispute(UUID.fromString("00000000-0000-0000-0000-000000000040"),
+                "SHOP_ADMIN", shopId, "NORMAL");
+        var admin = auth(UUID.fromString("00000000-0000-0000-0000-000000000040"), "shop.admin", List.of("SHOP_ADMIN"), shopId);
+        mockMvc.perform(post("/api/disputes/{id}/assign", disputeId)
+                        .with(SecurityMockMvcRequestPostProcessors.authentication(admin)))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void resolve_bySystemAdmin_returnsResolved() throws Exception {
+        String disputeId = openDispute(UUID.fromString("00000000-0000-0000-0000-000000000041"),
+                "SHOP_ADMIN", shopId, "NORMAL");
+        var admin = auth(UUID.fromString("00000000-0000-0000-0000-000000000042"), "system.admin", List.of("SYSTEM_ADMIN"), null);
+        mockMvc.perform(post("/api/disputes/{id}/resolve", disputeId)
+                        .with(SecurityMockMvcRequestPostProcessors.authentication(admin))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"status\":\"RESOLVED\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("RESOLVED"));
+    }
+
+    @Test
+    void resolve_byShopAdmin_returns403() throws Exception {
+        String disputeId = openDispute(UUID.fromString("00000000-0000-0000-0000-000000000043"),
+                "SHOP_ADMIN", shopId, "NORMAL");
+        var admin = auth(UUID.fromString("00000000-0000-0000-0000-000000000043"), "shop.admin", List.of("SHOP_ADMIN"), shopId);
+        mockMvc.perform(post("/api/disputes/{id}/resolve", disputeId)
+                        .with(SecurityMockMvcRequestPostProcessors.authentication(admin))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"status\":\"RESOLVED\"}"))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void transition_toResolved_byShopAdmin_returns403() throws Exception {
+        String disputeId = openDispute(UUID.fromString("00000000-0000-0000-0000-000000000044"),
+                "SHOP_ADMIN", shopId, "NORMAL");
+        var admin = auth(UUID.fromString("00000000-0000-0000-0000-000000000044"), "shop.admin", List.of("SHOP_ADMIN"), shopId);
+        mockMvc.perform(post("/api/disputes/{id}/transition", disputeId)
+                        .with(SecurityMockMvcRequestPostProcessors.authentication(admin))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"status\":\"RESOLVED\"}"))
+                .andExpect(status().isForbidden());
     }
 
     @Test

@@ -95,8 +95,8 @@ NEXTERA est une plateforme B2B qui relie **fournisseurs** et **boutiques** : cat
 - Page unique `/dashboard/reclamations` pour tous les rôles métier (boutique, fournisseur, admin) : liste paginée des litiges de l'organisation avec recherche, filtres statut/priorité et accès à la fiche avec fil de messages.
 - Ouverture sur **n'importe quelle commande accessible, quel que soit son statut** (en cours, livrée, rejetée, annulée, etc.) ; un seul litige actif (`OPEN` / `IN_PROGRESS`) par commande (sinon `409`). La boutique peut ouvrir la réclamation depuis la fiche commande, le fournisseur depuis le détail de ses commandes.
 - Priorités et SLA : `LOW` (7 j), `NORMAL` (72 h), `HIGH` (24 h), `URGENT` (4 h) ; échéance recalculée à chaque changement de priorité, retard signalé dans la liste et la fiche.
-- Prise en charge et affectation : passage `OPEN` → `IN_PROGRESS`, assignation à un admin (ou à soi-même), affichage de l'assigné et de l'échéance.
-- Cycle de vie : `OPEN` → `IN_PROGRESS` → `RESOLVED` / `CLOSED` ; résolution et clôture réservées aux admins ; chaque transition est historisée (statut, auteur, date, commentaire).
+- Prise en charge : passage `OPEN` → `IN_PROGRESS` par les administrateurs boutique, fournisseur ou système ; affectation réservée aux administrateurs système et fournisseur (à un admin ou à soi-même), avec affichage de l'assigné et de l'échéance.
+- Cycle de vie : `OPEN` → `IN_PROGRESS` → `RESOLVED` / `CLOSED` ; résolution et clôture réservées aux administrateurs système et fournisseur ; chaque transition est historisée (statut, auteur, date, commentaire).
 - Pièces jointes : upload PDF/JPEG/PNG (5 Mo max) par les participants, téléchargement authentifié ; notes internes visibles uniquement par les admins (2 000 caractères max).
 - Notifications in-app et push aux deux parties, liens profonds vers `/dashboard/reclamations/{id}` ; les anciennes routes `shop/disputes` et `admin/disputes` redirigent vers la page unifiée.
 

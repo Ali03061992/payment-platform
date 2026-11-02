@@ -114,18 +114,23 @@ describe('DisputeDetailComponent', () => {
     expect(component.canSendMessage()).toBeFalse();
   });
 
-  it('should allow resolution for admins only', () => {
+  it('should restrict resolution and assignment to system or supplier admins', () => {
     configure(['SHOP_ADMIN']);
-    expect(component.canResolve()).toBeTrue();
+    expect(component.canResolve()).toBeFalse();
+    expect(component.canAssign()).toBeFalse();
+    expect(component.isAdmin()).toBeTrue();
 
     setRoles(['SUPPLIER_ADMIN']);
     expect(component.canResolve()).toBeTrue();
+    expect(component.canAssign()).toBeTrue();
 
     setRoles(['SYSTEM_ADMIN']);
     expect(component.canResolve()).toBeTrue();
+    expect(component.canAssign()).toBeTrue();
 
     setRoles(['SHOP_AGENT']);
     expect(component.canResolve()).toBeFalse();
+    expect(component.canAssign()).toBeFalse();
   });
 
   it('should send a trimmed message and update the dispute', () => {
@@ -151,8 +156,8 @@ describe('DisputeDetailComponent', () => {
     expect(disputeService.addMessage).not.toHaveBeenCalled();
   });
 
-  it('should resolve the dispute after confirmation', () => {
-    configure(['SHOP_ADMIN']);
+  it('should resolve the dispute after confirmation for supplier admins', () => {
+    configure(['SUPPLIER_ADMIN']);
     component.ngOnInit();
 
     component.resolveDispute();
@@ -160,6 +165,16 @@ describe('DisputeDetailComponent', () => {
     expect(confirmDialog.confirm).toHaveBeenCalled();
     expect(disputeService.resolve).toHaveBeenCalledWith('d1', 'RESOLVED');
     expect(toast.success).toHaveBeenCalledWith('DISPUTES.RESOLVED_MSG');
+  });
+
+  it('should not resolve a dispute for shop admins', () => {
+    configure(['SHOP_ADMIN']);
+    component.ngOnInit();
+
+    component.resolveDispute();
+
+    expect(confirmDialog.confirm).not.toHaveBeenCalled();
+    expect(disputeService.resolve).not.toHaveBeenCalled();
   });
 
   it('should close the dispute after confirmation', () => {
@@ -173,7 +188,7 @@ describe('DisputeDetailComponent', () => {
   });
 
   it('should not resolve when confirmation is cancelled', () => {
-    configure(['SHOP_ADMIN']);
+    configure(['SUPPLIER_ADMIN']);
     component.ngOnInit();
     confirmDialog.confirm.and.returnValue(of(false));
 
@@ -215,7 +230,7 @@ describe('DisputeDetailComponent', () => {
     expect(toast.success).toHaveBeenCalledWith('DISPUTES.TAKEN_CHARGE_MSG');
   });
 
-  it('should update priority and assign the dispute', () => {
+  it('should update priority for shop admins without allowing assignment', () => {
     configure(['SHOP_ADMIN']);
     component.ngOnInit();
     component.priorityDraft = 'URGENT';
@@ -223,6 +238,15 @@ describe('DisputeDetailComponent', () => {
     expect(disputeService.updatePriority).toHaveBeenCalledWith('d1', 'URGENT');
 
     component.assignToMe();
+    expect(disputeService.assign).not.toHaveBeenCalled();
+  });
+
+  it('should assign the dispute for supplier admins', () => {
+    configure(['SUPPLIER_ADMIN']);
+    component.ngOnInit();
+
+    component.assignToMe();
+
     expect(disputeService.assign).toHaveBeenCalledWith('d1');
     expect(component.dispute?.assignedTo).toBe('u1');
   });

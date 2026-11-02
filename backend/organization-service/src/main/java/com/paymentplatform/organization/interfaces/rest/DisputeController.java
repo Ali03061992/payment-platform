@@ -131,7 +131,7 @@ public class DisputeController {
     }
 
     @PostMapping("/{id}/resolve")
-    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SHOP_ADMIN', 'SYSTEM_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SYSTEM_ADMIN')")
     public ResponseEntity<DisputeResponse> resolveDispute(
             @PathVariable UUID id,
             @RequestBody Map<String, String> body) {
@@ -162,7 +162,7 @@ public class DisputeController {
     }
 
     @PostMapping("/{id}/assign")
-    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SHOP_ADMIN', 'SYSTEM_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SYSTEM_ADMIN')")
     public ResponseEntity<DisputeResponse> assign(
             @PathVariable UUID id,
             @RequestBody(required = false) Map<String, String> body) {

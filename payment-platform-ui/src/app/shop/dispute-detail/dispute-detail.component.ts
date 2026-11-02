@@ -71,7 +71,12 @@ export class DisputeDetailComponent implements OnInit, OnDestroy {
   }
 
   canResolve(): boolean {
-    return this.isAdmin();
+    const roles = this.loginService.getCurrentUser()?.roles || [];
+    return roles.includes('SYSTEM_ADMIN') || roles.includes('SUPPLIER_ADMIN');
+  }
+
+  canAssign(): boolean {
+    return this.canResolve();
   }
 
   isAdmin(): boolean {
@@ -80,7 +85,7 @@ export class DisputeDetailComponent implements OnInit, OnDestroy {
   }
 
   takeCharge(): void {
-    if (!this.canResolve() || !this.dispute || this.dispute.status !== 'OPEN') return;
+    if (!this.isAdmin() || !this.dispute || this.dispute.status !== 'OPEN') return;
     this.subscriptions.add(this.disputeService.transition(this.dispute.id, 'IN_PROGRESS').subscribe({
       next: (data: Dispute) => {
         this.dispute = data;
@@ -91,7 +96,7 @@ export class DisputeDetailComponent implements OnInit, OnDestroy {
   }
 
   savePriority(): void {
-    if (!this.canResolve() || !this.dispute || this.priorityDraft === this.dispute.priority) return;
+    if (!this.isAdmin() || !this.dispute || this.priorityDraft === this.dispute.priority) return;
     this.updatingPriority = true;
     this.subscriptions.add(this.disputeService.updatePriority(this.dispute.id, this.priorityDraft).subscribe({
       next: (data: Dispute) => {
@@ -107,7 +112,7 @@ export class DisputeDetailComponent implements OnInit, OnDestroy {
   }
 
   assignToMe(): void {
-    if (!this.canResolve() || !this.dispute) return;
+    if (!this.canAssign() || !this.dispute) return;
     this.subscriptions.add(this.disputeService.assign(this.dispute.id).subscribe({
       next: (data: Dispute) => {
         this.dispute = data;
@@ -118,7 +123,7 @@ export class DisputeDetailComponent implements OnInit, OnDestroy {
   }
 
   addNote(): void {
-    if (!this.canResolve() || !this.dispute || !this.noteContent.trim()) return;
+    if (!this.isAdmin() || !this.dispute || !this.noteContent.trim()) return;
     this.addingNote = true;
     const id = this.dispute.id;
     this.subscriptions.add(this.disputeService.addNote(id, this.noteContent.trim()).subscribe({

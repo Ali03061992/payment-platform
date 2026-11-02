@@ -39,6 +39,9 @@ public class ManageDisputeUseCase {
     @Transactional
     public DisputeResponse assign(UUID disputeId, ActorContext actor, UUID assigneeId) {
         Dispute dispute = loadForAdmin(disputeId, actor);
+        if (!actor.isSystemAdmin() && !actor.hasAnyRole(RoleCode.SUPPLIER_ADMIN)) {
+            throw new ForbiddenException("Seuls les administrateurs système et fournisseur peuvent assigner un litige");
+        }
         UUID target = assigneeId != null ? assigneeId : actor.userId();
         if (target == null) {
             throw new ConflictException("Aucun administrateur à assigner");

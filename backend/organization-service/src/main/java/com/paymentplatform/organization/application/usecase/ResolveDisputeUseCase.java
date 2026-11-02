@@ -9,7 +9,9 @@ import com.paymentplatform.organization.domain.repository.DisputeRepository;
 import com.paymentplatform.organization.domain.repository.DisputeStatusHistoryRepository;
 import com.paymentplatform.shared.domain.event.DisputeEvents;
 import com.paymentplatform.shared.domain.exception.ConflictException;
+import com.paymentplatform.shared.domain.exception.ForbiddenException;
 import com.paymentplatform.shared.domain.exception.NotFoundException;
+import com.paymentplatform.shared.domain.model.RoleCode;
 import com.paymentplatform.shared.domain.security.ActorContext;
 import com.paymentplatform.shared.infrastructure.outbox.OutboxEventStore;
 import org.springframework.stereotype.Service;
@@ -35,6 +37,11 @@ public class ResolveDisputeUseCase {
 
     @Transactional
     public DisputeResponse execute(UUID disputeId, ActorContext actor, String targetStatus) {
+        boolean finalStatus = DisputeStatus.RESOLVED.name().equals(targetStatus)
+                || DisputeStatus.CLOSED.name().equals(targetStatus);
+        if (finalStatus && !actor.isSystemAdmin() && !actor.hasAnyRole(RoleCode.SUPPLIER_ADMIN)) {
+            throw new ForbiddenException("Seuls les administrateurs système et fournisseur peuvent résoudre ou clôturer un litige");
+        }
         Dispute dispute = disputes.findById(disputeId)
                 .orElseThrow(() -> new NotFoundException("Litige non trouvé : " + disputeId));
         TenantAccess.requireParticipant(actor, dispute.getShopId(), dispute.getSupplierId(), null);

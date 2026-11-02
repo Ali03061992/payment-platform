@@ -22,7 +22,7 @@
         <div class="detail-label">{{ 'DISPUTES.COL_PRIORITY' | translate }}</div>
         <div class="detail-value">
           <span class="priority-badge" [ngClass]="priorityClass(dispute.priority)">{{ priorityLabel(dispute.priority) }}</span>
-          @if (canResolve()) {
+          @if (isAdmin()) {
             <div class="inline-control">
               <select class="form-control" [(ngModel)]="priorityDraft" [attr.aria-label]="'DISPUTES.COL_PRIORITY' | translate">
                 @for (p of priorities; track p) {
@@ -50,7 +50,7 @@
         <div class="detail-label">{{ 'DISPUTES.ASSIGNED_TO' | translate }}</div>
         <div class="detail-value">
           {{ dispute.assignedTo ? (dispute.assignedTo | slice:0:8) : ('DISPUTES.UNASSIGNED' | translate) }}
-          @if (canResolve()) {
+          @if (canAssign()) {
             <button type="button" class="btn btn-sm btn-secondary" (click)="assignToMe()">
               {{ 'DISPUTES.ASSIGN_ME' | translate }}
             </button>
@@ -77,13 +77,16 @@
         </div>
       }
     </div>
-    @if (canResolve() && dispute.status !== 'CLOSED' && dispute.status !== 'RESOLVED') {
+    @if (dispute.status !== 'CLOSED' && dispute.status !== 'RESOLVED'
+      && (canResolve() || (isAdmin() && dispute.status === 'OPEN'))) {
       <div class="action-bar no-print">
         @if (dispute.status === 'OPEN') {
           <button class="btn btn-primary" (click)="takeCharge()">{{ 'DISPUTES.TAKE_CHARGE' | translate }}</button>
         }
-        <button class="btn btn-success" (click)="resolveDispute()">{{ 'DISPUTES.RESOLVE' | translate }}</button>
-        <button class="btn btn-danger" (click)="closeDispute()">{{ 'DISPUTES.CLOSE' | translate }}</button>
+        @if (canResolve()) {
+          <button class="btn btn-success" (click)="resolveDispute()">{{ 'DISPUTES.RESOLVE' | translate }}</button>
+          <button class="btn btn-danger" (click)="closeDispute()">{{ 'DISPUTES.CLOSE' | translate }}</button>
+        }
       </div>
     }
 
@@ -114,7 +117,7 @@
       </div>
     </div>
 
-    @if (canResolve()) {
+    @if (isAdmin()) {
       <div class="table-card" style="margin-top:24px;">
         <h3 class="section-title">{{ 'DISPUTES.NOTES_TITLE' | translate }}</h3>
         <div class="notes-section">
