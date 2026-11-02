@@ -1,0 +1,103 @@
+name: Release
+
+# Publie une GitHub Release pour chaque tag v* et verifie que la version
+# du tag correspond bien aux versions backend (pom) et frontend (package.json).
+# Les images GHCR sont construites par CI (declenchee sur le meme tag).
+# Le controle TLS interroge OVH_PROD_URL si le secret est configure.
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  validate:
+    name: Validate version
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Check tag matches backend and frontend versions
+        run: |
+          TAG="${GITHUB_REF_NAME#v}"
+          POM_VERSION=$(awk '/<artifactId>payment-platform<\/artifactId>/{found=1} found && /<version>/{gsub(/.*<version>|<\/version>.*/,""); print; exit}' backend/pom.xml)
+          UI_VERSION=$(node -p "require('./payment-platform-ui/package.json').version")
+          echo "tag=$TAG backend=$POM_VERSION frontend=$UI_VERSION"
+          if [ "$TAG" != "$POM_VERSION" ]; then
+            echo "::error::Le tag $GITHUB_REF_NAME ne correspond pas a la version backend ($POM_VERSION)."
+            exit 1
+          fi
+          if [ "$TAG" != "$UI_VERSION" ]; then
+            echo "::error::Le tag $GITHUB_REF_NAME ne correspond pas a la version frontend ($UI_VERSION)."
+            exit 1
+          fi
+
+  tls-check:
+    name: Verify production TLS
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Check certificate and HTTPS endpoint
+        env:
+          PROD_URL: ${{ secrets.OVH_PROD_URL }}
+        run: |
+          if [ -z "$PROD_URL" ]; then
+            echo "::warning::OVH_PROD_URL non configure : controle TLS ignore."
+            exit 0
+          fi
+          PROD_URL="${PROD_URL%/}"
+          case "$PROD_URL" in
+            https://*) ;;
+            *)
+              echo "::error::OVH_PROD_URL doit utiliser HTTPS ($PROD_URL)."
+              exit 1
+              ;;
+          esac
+          HOST=$(echo "$PROD_URL" | sed -E 's#^https://##; s#/.*$##; s#:[0-9]+$##')
+          PORT=$(echo "$PROD_URL" | sed -nE 's#^https://[^/:]+:([0-9]+).*#\1#p')
+          PORT="${PORT:-443}"
+
+          EXPIRY=$(echo | openssl s_client -servername "$HOST" -connect "$HOST:$PORT" 2>/dev/null \
+            | openssl x509 -noout -enddate 2>/dev/null | cut -d= -f2)
+          if [ -z "$EXPIRY" ]; then
+            echo "::error::Impossible de lire le certificat TLS de $HOST:$PORT."
+            exit 1
+          fi
+          EXPIRY_EPOCH=$(date -d "$EXPIRY" +%s)
+          NOW_EPOCH=$(date +%s)
+          DAYS_LEFT=$(( (EXPIRY_EPOCH - NOW_EPOCH) / 86400 ))
+          echo "Certificat $HOST valide encore $DAYS_LEFT jours (expire le $EXPIRY)."
+          if [ "$DAYS_LEFT" -lt 14 ]; then
+            echo "::error::Certificat TLS de $HOST expire dans $DAYS_LEFT jours (< 14)."
+            exit 1
+          fi
+
+          if ! curl -sf --max-time 15 -o /dev/null "$PROD_URL/"; then
+            echo "::error::Endpoint production inaccessible : $PROD_URL/"
+            exit 1
+          fi
+          echo "TLS et endpoint production OK."
+
+  github-release:
+    name: Publish GitHub Release
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    needs: [validate, tls-check]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: NEXTERA ${{ github.ref_name }}
+          tag_name: ${{ github.ref_name }}
+          generate_release_notes: true
+          prerelease: ${{ contains(github.ref_name, '-rc') || contains(github.ref_name, '-beta') || contains(github.ref_name, '-alpha') }}

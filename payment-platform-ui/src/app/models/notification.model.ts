@@ -4,6 +4,8 @@ export interface Notification {
   recipientOrganizationId: string | null;
   type: string;
   message: string;
+  messageKey?: string | null;
+  messageParams?: string | null;
   readStatus: string;
   createdAt: string;
   readAt: string | null;

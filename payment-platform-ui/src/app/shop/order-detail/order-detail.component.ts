@@ -295,14 +295,14 @@ export class ShopOrderDetailComponent implements OnInit, OnDestroy, OnChanges {
         this.disputeReason = '';
         this.submittingDispute = false;
         this.toast.success(this.translate.instant('DISPUTES.OPENED_MSG'));
-        this.router.navigate(['/dashboard/shop/disputes', data.id]);
+        this.router.navigate(['/dashboard/reclamations', data.id]);
       },
       error: (e: any) => { this.submittingDispute = false; this.toast.error(e.error?.message || this.translate.instant('ORDER_DETAIL.ERROR')); }
     }));
   }
 
   viewDispute(disputeId: string): void {
-    this.router.navigate(['/dashboard/shop/disputes', disputeId]);
+    this.router.navigate(['/dashboard/reclamations', disputeId]);
   }
 
   statusLabel(s: string): string {

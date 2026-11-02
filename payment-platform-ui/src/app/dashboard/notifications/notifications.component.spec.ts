@@ -110,10 +110,22 @@ describe('NotificationsComponent', () => {
       expect(router.navigate).toHaveBeenCalledWith(['/dashboard/payments', 'pay-1']);
     });
 
-    it('should route DISPUTE notification to shop disputes for SHOP_ADMIN', () => {
+    it('should route DISPUTE notification to unified reclamations for SHOP_ADMIN', () => {
       setupRoles(['SHOP_ADMIN']);
       component.navigateNotification({ relatedEntityType: 'DISPUTE', relatedEntityId: 'd-1' } as any);
-      expect(router.navigate).toHaveBeenCalledWith(['/dashboard/shop/disputes', 'd-1']);
+      expect(router.navigate).toHaveBeenCalledWith(['/dashboard/reclamations', 'd-1']);
+    });
+
+    it('should route DISPUTE notification to unified reclamations for SUPPLIER_AGENT', () => {
+      setupRoles(['SUPPLIER_AGENT']);
+      component.navigateNotification({ relatedEntityType: 'DISPUTE', relatedEntityId: 'd-1' } as any);
+      expect(router.navigate).toHaveBeenCalledWith(['/dashboard/reclamations', 'd-1']);
+    });
+
+    it('should route DISPUTE notification to unified reclamations for SYSTEM_ADMIN', () => {
+      setupRoles(['SYSTEM_ADMIN']);
+      component.navigateNotification({ relatedEntityType: 'DISPUTE', relatedEntityId: 'd-1' } as any);
+      expect(router.navigate).toHaveBeenCalledWith(['/dashboard/reclamations', 'd-1']);
     });
 
     it('should do nothing without related entity', () => {

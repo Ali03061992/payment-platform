@@ -7,5 +7,10 @@ import java.util.UUID;
 
 public record CreateDisputeRequest(
         @NotNull(message = "L'ID de la commande est requis") UUID orderId,
-        @NotBlank(message = "Le motif est requis") String reason
-) {}
+        @NotBlank(message = "Le motif est requis") String reason,
+        String priority
+) {
+    public CreateDisputeRequest(UUID orderId, String reason) {
+        this(orderId, reason, null);
+    }
+}

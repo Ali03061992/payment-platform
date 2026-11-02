@@ -33,6 +33,15 @@ public class Dispute {
     @Column(nullable = false, length = 255)
     private String reason;
 
+    @Column(nullable = false, length = 20)
+    private String priority = DisputePriority.NORMAL.name();
+
+    @Column(name = "due_at")
+    private Instant dueAt;
+
+    @Column(name = "assigned_to", columnDefinition = "VARCHAR(36)")
+    private UUID assignedTo;
+
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @JoinColumn(name = "dispute_id", nullable = false)
     @OrderBy("timestamp ASC")
@@ -61,6 +70,11 @@ public class Dispute {
     }
 
     public static Dispute create(UUID orderId, UUID shopId, UUID supplierId, UUID openedBy, String reason) {
+        return create(orderId, shopId, supplierId, openedBy, reason, DisputePriority.NORMAL);
+    }
+
+    public static Dispute create(UUID orderId, UUID shopId, UUID supplierId, UUID openedBy,
+                                 String reason, DisputePriority priority) {
         Dispute dispute = new Dispute();
         dispute.orderId = orderId;
         dispute.shopId = shopId;
@@ -68,7 +82,22 @@ public class Dispute {
         dispute.openedBy = openedBy;
         dispute.reason = reason;
         dispute.status = DisputeStatus.OPEN.name();
+        DisputePriority resolved = priority == null ? DisputePriority.NORMAL : priority;
+        dispute.priority = resolved.name();
+        dispute.dueAt = resolved.dueAt(Instant.now());
         return dispute;
+    }
+
+    public void changePriority(DisputePriority priority) {
+        DisputePriority resolved = priority == null ? DisputePriority.NORMAL : priority;
+        this.priority = resolved.name();
+        this.dueAt = resolved.dueAt(Instant.now());
+        this.updatedAt = Instant.now();
+    }
+
+    public void assignTo(UUID userId) {
+        this.assignedTo = userId;
+        this.updatedAt = Instant.now();
     }
 
     public void transitionTo(DisputeStatus newStatus) {
@@ -90,6 +119,9 @@ public class Dispute {
     public UUID getOpenedBy() { return openedBy; }
     public String getStatus() { return status; }
     public String getReason() { return reason; }
+    public String getPriority() { return priority; }
+    public Instant getDueAt() { return dueAt; }
+    public UUID getAssignedTo() { return assignedTo; }
     public List<DisputeMessage> getMessages() { return messages; }
     public Long getVersion() { return version; }
     public Instant getCreatedAt() { return createdAt; }

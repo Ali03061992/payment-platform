@@ -3,6 +3,7 @@ package com.paymentplatform.notification.infrastructure.push;
 import com.google.firebase.messaging.*;
 import com.paymentplatform.notification.domain.model.FcmToken;
 import com.paymentplatform.notification.domain.model.FcmTokenRepository;
+import com.paymentplatform.notification.infrastructure.metrics.NotificationMetrics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
@@ -20,14 +21,17 @@ public class PushNotificationService {
 
     private final FcmTokenRepository fcmTokenRepository;
     private final ObjectProvider<FirebaseMessaging> firebaseMessagingProvider;
+    private final NotificationMetrics metrics;
 
     @Value("${app.push.enabled:false}")
     private boolean pushEnabled;
 
     public PushNotificationService(FcmTokenRepository fcmTokenRepository,
-                                    ObjectProvider<FirebaseMessaging> firebaseMessagingProvider) {
+                                    ObjectProvider<FirebaseMessaging> firebaseMessagingProvider,
+                                    NotificationMetrics metrics) {
         this.fcmTokenRepository = fcmTokenRepository;
         this.firebaseMessagingProvider = firebaseMessagingProvider;
+        this.metrics = metrics;
     }
 
     @Async
@@ -95,8 +99,10 @@ public class PushNotificationService {
                     .build();
 
             String messageId = firebaseMessaging.send(message);
+            metrics.fcmSent();
             log.debug("Push notification sent to token {}: messageId={}", token.substring(0, 10) + "...", messageId);
         } catch (FirebaseMessagingException e) {
+            metrics.fcmFailed();
             log.error("Failed to send push notification to token {}: {}", token.substring(0, 10) + "...", e.getMessage());
             if (e.getMessagingErrorCode() == MessagingErrorCode.UNREGISTERED ||
                 e.getMessagingErrorCode() == MessagingErrorCode.INVALID_ARGUMENT) {

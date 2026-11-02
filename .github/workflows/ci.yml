@@ -9,6 +9,7 @@ name: CI
 on:
   push:
     branches: [master, develop, 'release/**']
+    tags: ['v*']
   pull_request:
     branches: [master, develop, 'release/**']
   workflow_dispatch:

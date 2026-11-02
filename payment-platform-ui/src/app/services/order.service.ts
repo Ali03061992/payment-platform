@@ -179,8 +179,17 @@ export class OrderService {
   list(page = 0, size = 50, status?: string): Observable<Order[]> {
     let params = new HttpParams().set('page', page).set('size', size);
     if (status) params = params.set('status', status);
+    return this.requestOrderList(this.apiUrl, params);
+  }
+
+  listEligibleForDispute(page = 0, size = 100): Observable<Order[]> {
+    const params = new HttpParams().set('page', page).set('size', size);
+    return this.requestOrderList(`${this.apiUrl}/eligible-for-dispute`, params);
+  }
+
+  private requestOrderList(url: string, params: HttpParams): Observable<Order[]> {
     return new Observable<Order[]>(observer => {
-      this.http.get<any>(this.apiUrl, { params }).subscribe({
+      this.http.get<any>(url, { params }).subscribe({
         next: (res: any) => {
           if (Array.isArray(res)) observer.next(res as Order[]);
           else if (res && Array.isArray(res.items)) observer.next(res.items as Order[]);

@@ -36,6 +36,15 @@
           [attr.aria-label]="'RECLAMATIONS.REASON_LABEL' | translate"
           required aria-required="true" maxlength="255"></textarea>
       </div>
+      <div class="form-group">
+        <label for="reclPriority">{{ 'RECLAMATIONS.PRIORITY_LABEL' | translate }}</label>
+        <select [(ngModel)]="createPriority" name="reclPriority" id="reclPriority" class="form-control">
+          @for (p of priorities; track p) {
+            <option [value]="p">{{ priorityLabel(p) }}</option>
+          }
+        </select>
+        <p class="form-hint">{{ 'RECLAMATIONS.PRIORITY_HINT' | translate }}</p>
+      </div>
       <div class="form-actions">
         <button type="button" class="btn btn-secondary" (click)="closeForm()">
           {{ 'RECLAMATIONS.CANCEL' | translate }}
@@ -56,6 +65,31 @@
 }
 
 @if (!loading) {
+  <div class="filters-toolbar" role="search">
+    <input type="search" class="form-control" [(ngModel)]="searchTerm"
+      (keyup.enter)="onFilterChange()"
+      [attr.placeholder]="'RECLAMATIONS.SEARCH_PLACEHOLDER' | translate"
+      [attr.aria-label]="'RECLAMATIONS.SEARCH_PLACEHOLDER' | translate">
+    <select class="form-control" [(ngModel)]="statusFilter" (change)="onFilterChange()"
+      [attr.aria-label]="'RECLAMATIONS.FILTER_STATUS_ARIA' | translate">
+      <option value="">{{ 'RECLAMATIONS.ALL_STATUSES' | translate }}</option>
+      <option value="OPEN">{{ statusLabel('OPEN') }}</option>
+      <option value="IN_PROGRESS">{{ statusLabel('IN_PROGRESS') }}</option>
+      <option value="RESOLVED">{{ statusLabel('RESOLVED') }}</option>
+      <option value="CLOSED">{{ statusLabel('CLOSED') }}</option>
+    </select>
+    <select class="form-control" [(ngModel)]="priorityFilter" (change)="onFilterChange()"
+      [attr.aria-label]="'RECLAMATIONS.FILTER_PRIORITY_ARIA' | translate">
+      <option value="">{{ 'RECLAMATIONS.ALL_PRIORITIES' | translate }}</option>
+      @for (p of priorities; track p) {
+        <option [value]="p">{{ priorityLabel(p) }}</option>
+      }
+    </select>
+    <button type="button" class="btn btn-secondary" (click)="resetFilters()">
+      {{ 'RECLAMATIONS.RESET_FILTERS' | translate }}
+    </button>
+  </div>
+
   <div class="table-card hide-mobile">
     <div class="table-wrapper">
       <table>
@@ -64,7 +98,9 @@
             <th>{{ 'DISPUTES.COL_REF' | translate }}</th>
             <th>{{ 'DISPUTES.COL_ORDER' | translate }}</th>
             <th>{{ 'DISPUTES.COL_REASON' | translate }}</th>
+            <th>{{ 'DISPUTES.COL_PRIORITY' | translate }}</th>
             <th>{{ 'DISPUTES.COL_STATUS' | translate }}</th>
+            <th>{{ 'DISPUTES.COL_DUE' | translate }}</th>
             <th>{{ 'DISPUTES.COL_CREATED' | translate }}</th>
             <th>{{ 'DISPUTES.COL_ACTIONS' | translate }}</th>
           </tr>
@@ -75,7 +111,15 @@
               <td><strong>{{ d.id | slice:0:8 }}</strong></td>
               <td>{{ d.orderId | slice:0:8 }}</td>
               <td>{{ d.reason }}</td>
+              <td><span class="priority-badge" [ngClass]="priorityClass(d.priority)">{{ priorityLabel(d.priority) }}</span></td>
               <td><span class="payment-badge" [ngClass]="statusClass(d.status)">{{ statusLabel(d.status) }}</span></td>
+              <td [class.text-danger]="isOverdue(d)">
+                @if (d.dueAt) {
+                  {{ d.dueAt | date:'dd/MM/yyyy HH:mm' }}
+                } @else {
+                  -
+                }
+              </td>
               <td>{{ d.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
               <td class="actions" (click)="$event.stopPropagation()">
                 <button class="btn btn-sm btn-secondary" (click)="openDispute(d.id)"
@@ -85,7 +129,7 @@
           }
           @if (disputes.length === 0) {
             <tr>
-              <td colspan="6" class="td-empty">{{ 'DISPUTES.NO_DISPUTES' | translate }}</td>
+              <td colspan="8" class="td-empty">{{ 'DISPUTES.NO_DISPUTES' | translate }}</td>
             </tr>
           }
         </tbody>
@@ -106,6 +150,16 @@
             <span class="dispute-value">{{ d.reason }}</span>
           </div>
           <div class="dispute-row">
+            <span class="dispute-label">{{ 'DISPUTES.COL_PRIORITY' | translate }}</span>
+            <span class="priority-badge" [ngClass]="priorityClass(d.priority)">{{ priorityLabel(d.priority) }}</span>
+          </div>
+          <div class="dispute-row">
+            <span class="dispute-label">{{ 'DISPUTES.COL_DUE' | translate }}</span>
+            <span class="dispute-value" [class.text-danger]="isOverdue(d)">
+              {{ d.dueAt ? (d.dueAt | date:'dd/MM/yyyy HH:mm') : '-' }}
+            </span>
+          </div>
+          <div class="dispute-row">
             <span class="dispute-label">{{ 'DISPUTES.COL_CREATED' | translate }}</span>
             <span class="dispute-value">{{ d.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
           </div>
@@ -116,4 +170,19 @@
       <div class="empty-card">{{ 'DISPUTES.NO_DISPUTES' | translate }}</div>
     }
   </div>
+
+  @if (totalPages > 1) {
+    <div class="pagination-bar">
+      <button type="button" class="btn btn-secondary" [disabled]="page <= 0" (click)="previousPage()">
+        {{ 'RECLAMATIONS.PREVIOUS' | translate }}
+      </button>
+      <span class="pagination-info">
+        {{ 'RECLAMATIONS.PAGE' | translate }} {{ page + 1 }} / {{ totalPages }}
+        ({{ totalElements }} {{ 'DISPUTES.RESULT_COUNT' | translate }})
+      </span>
+      <button type="button" class="btn btn-secondary" [disabled]="page + 1 >= totalPages" (click)="nextPage()">
+        {{ 'RECLAMATIONS.NEXT' | translate }}
+      </button>
+    </div>
+  }
 }

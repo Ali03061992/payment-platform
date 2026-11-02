@@ -5,12 +5,11 @@ import { Subscription, forkJoin } from 'rxjs';
 import { DisputeService } from '../../services/dispute.service';
 import { OrderService } from '../../services/order.service';
 import { ToastService } from '../../services/toast.service';
-import { Dispute } from '../../models/dispute.model';
+import { Dispute, DisputePage, DisputePriority } from '../../models/dispute.model';
 import { Order } from '../../models/order.model';
 import { statusLabelFr } from '../../pipes/status-label.pipe';
 
 const REASON_MAX_LENGTH = 255;
-const ELIGIBLE_ORDER_STATUSES = ['REJECTED', 'DELIVERY_REJECTED'];
 
 /**
  * Page universelle « Réclamations » : liste les litiges de l'organisation
@@ -31,7 +30,17 @@ export class ReclamationsComponent implements OnInit, OnDestroy {
   showForm = false;
   selectedOrderId = '';
   reason = '';
+  createPriority: DisputePriority = 'NORMAL';
   submitting = false;
+
+  searchTerm = '';
+  statusFilter = '';
+  priorityFilter = '';
+  page = 0;
+  pageSize = 10;
+  totalElements = 0;
+  totalPages = 0;
+  readonly priorities: DisputePriority[] = ['LOW', 'NORMAL', 'HIGH', 'URGENT'];
   private subscriptions = new Subscription();
 
   constructor(
@@ -52,9 +61,18 @@ export class ReclamationsComponent implements OnInit, OnDestroy {
 
   load(): void {
     this.loading = true;
-    this.subscriptions.add(this.disputeService.list().subscribe({
-      next: (all) => {
-        this.disputes = all || [];
+    this.subscriptions.add(this.disputeService.listPaged({
+      status: this.statusFilter || undefined,
+      priority: this.priorityFilter || undefined,
+      search: this.searchTerm.trim() || undefined,
+      page: this.page,
+      size: this.pageSize
+    }).subscribe({
+      next: (result: DisputePage) => {
+        this.disputes = result.items || [];
+        this.totalElements = result.totalElements ?? this.disputes.length;
+        this.totalPages = result.totalPages ?? 0;
+        this.page = result.number ?? this.page;
         this.loading = false;
       },
       error: (err: { error?: { message?: string } }) => {
@@ -64,10 +82,50 @@ export class ReclamationsComponent implements OnInit, OnDestroy {
     }));
   }
 
+  onFilterChange(): void {
+    this.page = 0;
+    this.load();
+  }
+
+  resetFilters(): void {
+    this.searchTerm = '';
+    this.statusFilter = '';
+    this.priorityFilter = '';
+    this.onFilterChange();
+  }
+
+  previousPage(): void {
+    if (this.page <= 0) return;
+    this.page -= 1;
+    this.load();
+  }
+
+  nextPage(): void {
+    if (this.page + 1 >= this.totalPages) return;
+    this.page += 1;
+    this.load();
+  }
+
+  priorityLabel(priority?: string): string {
+    if (!priority) return '';
+    return this.translate.instant(`DISPUTES.PRIORITY_${priority}`);
+  }
+
+  priorityClass(priority?: string): string {
+    return priority ? `priority-${priority.toLowerCase()}` : '';
+  }
+
+  isOverdue(d: Dispute): boolean {
+    return !!d.dueAt
+      && new Date(d.dueAt).getTime() < Date.now()
+      && d.status !== 'RESOLVED' && d.status !== 'CLOSED';
+  }
+
   openForm(): void {
     this.showForm = true;
     this.selectedOrderId = '';
     this.reason = '';
+    this.createPriority = 'NORMAL';
     this.loadEligibleOrders();
   }
 
@@ -77,10 +135,9 @@ export class ReclamationsComponent implements OnInit, OnDestroy {
 
   private loadEligibleOrders(): void {
     this.loadingOrders = true;
-    this.subscriptions.add(this.orderService.list(0, 100).subscribe({
+    this.subscriptions.add(this.orderService.listEligibleForDispute(0, 100).subscribe({
       next: (orders) => {
-        this.eligibleOrders = (orders || []).filter((o) =>
-          ELIGIBLE_ORDER_STATUSES.includes(o.status));
+        this.eligibleOrders = orders || [];
         this.loadingOrders = false;
       },
       error: () => {
@@ -103,7 +160,8 @@ export class ReclamationsComponent implements OnInit, OnDestroy {
     this.submitting = true;
     this.subscriptions.add(this.disputeService.create({
       orderId: this.selectedOrderId,
-      reason: this.reason.trim()
+      reason: this.reason.trim(),
+      priority: this.createPriority
     }).subscribe({
       next: () => {
         this.toast.success(this.translate.instant('RECLAMATIONS.CREATED'));

@@ -51,7 +51,6 @@ import { ShopQuotesComponent } from './shop/quotes/shop-quotes.component';
 import { QuotesComponent } from './supplier/quotes/quotes.component';
 import { ShopOrderDetailComponent } from './shop/order-detail/order-detail.component';
 import { DisputeDetailComponent } from './shop/dispute-detail/dispute-detail.component';
-import { DisputeListComponent } from './shop/dispute-list/dispute-list.component';
 import { ReclamationsComponent } from './shop/reclamations/reclamations.component';
 import { BalanceViewComponent } from './shop/balance-view/balance-view.component';
 import { PwaUpdateComponent } from './pwa-update/pwa-update.component';
@@ -179,7 +178,6 @@ export function initApp(translate: TranslateService, loginService: LoginService)
         QuotesComponent,
         ShopOrderDetailComponent,
         DisputeDetailComponent,
-        DisputeListComponent,
         ReclamationsComponent,
         BalanceViewComponent,
         PwaUpdateComponent,

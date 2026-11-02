@@ -60,7 +60,7 @@
               </td>
               <td>
                 <span class="notif-icon-inline"><app-icon [name]="getNotificationIcon(n.type)" [size]="18"></app-icon></span>
-                <span class="notif-message-text">{{ n.message }}</span>
+                <span class="notif-message-text">{{ notificationMessage(n) }}</span>
               </td>
               <td>{{ n.createdAt | timeAgo }}</td>
               <td>
@@ -101,7 +101,7 @@
           }
         </div>
         <div class="notif-card-body">
-          <div class="notif-message-full">{{ n.message }}</div>
+          <div class="notif-message-full">{{ notificationMessage(n) }}</div>
         </div>
           @if (n.readStatus === 'UNREAD') {
             <div class="notif-card-actions" (click)="$event.stopPropagation()">

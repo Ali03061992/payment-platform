@@ -25,6 +25,12 @@ public class Notification {
     @Column(nullable = false, length = 500)
     private String message;
 
+    @Column(name = "message_key", length = 80)
+    private String messageKey;
+
+    @Column(name = "message_params", length = 500)
+    private String messageParams;
+
     @Column(name = "read_status", nullable = false, length = 20)
     private String readStatus;
 
@@ -44,10 +50,18 @@ public class Notification {
 
     public Notification(UUID recipientUserId, UUID recipientOrganizationId,
                         String type, String message, String relatedEntityType, String relatedEntityId) {
+        this(recipientUserId, recipientOrganizationId, type, message, null, null, relatedEntityType, relatedEntityId);
+    }
+
+    public Notification(UUID recipientUserId, UUID recipientOrganizationId,
+                        String type, String message, String messageKey, String messageParams,
+                        String relatedEntityType, String relatedEntityId) {
         this.recipientUserId = recipientUserId;
         this.recipientOrganizationId = recipientOrganizationId;
         this.type = type;
         this.message = message;
+        this.messageKey = messageKey;
+        this.messageParams = messageParams;
         this.readStatus = "UNREAD";
         this.createdAt = Instant.now();
         this.relatedEntityType = relatedEntityType;
@@ -64,6 +78,8 @@ public class Notification {
     public UUID recipientOrganizationId() { return recipientOrganizationId; }
     public String type() { return type; }
     public String message() { return message; }
+    public String messageKey() { return messageKey; }
+    public String messageParams() { return messageParams; }
     public String readStatus() { return readStatus; }
     public Instant createdAt() { return createdAt; }
     public Instant readAt() { return readAt; }

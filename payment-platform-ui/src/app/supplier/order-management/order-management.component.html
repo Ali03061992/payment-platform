@@ -659,6 +659,65 @@
 
           <div class="detail-section">
             <div class="table-card">
+              <h4 class="table-card-title">{{ 'DISPUTES.ALL_TITLE' | translate }}</h4>
+              <div class="table-card-body">
+                @if (!detailDisputesLoaded) {
+                  <button class="btn btn-secondary" (click)="loadDetailDisputes()" [disabled]="loadingDisputes">
+                    {{ loadingDisputes ? ('DISPUTES.LOADING' | translate) : ('DISPUTES.VIEW' | translate) }}
+                  </button>
+                } @else {
+                  @if (detailDisputes.length === 0) {
+                    <p class="comments-empty">{{ 'DISPUTES.NO_DISPUTES' | translate }}</p>
+                  } @else {
+                    <div class="comment-list">
+                      @for (d of detailDisputes; track d.id) {
+                        <div class="comment-item">
+                          <div class="comment-head">
+                            <strong class="comment-author">{{ d.id | slice:0:8 }}</strong>
+                            <small class="comment-date">{{ d.createdAt | date:'dd/MM/yyyy HH:mm' }}</small>
+                          </div>
+                          <p class="comment-body">{{ d.reason }}</p>
+                          <button class="btn btn-sm btn-secondary" (click)="viewOrderDispute(d.id)">
+                            {{ 'DISPUTES.VIEW' | translate }}
+                          </button>
+                        </div>
+                      }
+                    </div>
+                  }
+                  @if (canOpenSelectedDispute()) {
+                    <button class="btn btn-primary" (click)="toggleDisputeForm()">
+                      {{ 'DISPUTES.OPEN' | translate }}
+                    </button>
+                  }
+                  @if (showDisputeForm) {
+                    <div class="comment-form">
+                      <textarea [(ngModel)]="disputeReason" rows="2" maxlength="255"
+                        [placeholder]="'DISPUTES.REASON_PLACEHOLDER' | translate"
+                        [attr.aria-label]="'DISPUTES.REASON_ARIA' | translate"></textarea>
+                      <select class="form-control" [(ngModel)]="disputePriority"
+                        [attr.aria-label]="'DISPUTES.COL_PRIORITY' | translate">
+                        @for (p of disputePriorities; track p) {
+                          <option [value]="p">{{ 'DISPUTES.PRIORITY_' + p | translate }}</option>
+                        }
+                      </select>
+                      <div class="form-actions">
+                        <button class="btn btn-secondary" (click)="toggleDisputeForm()">
+                          {{ 'DISPUTES.CANCEL' | translate }}
+                        </button>
+                        <button class="btn btn-primary" (click)="openOrderDispute()"
+                          [disabled]="submittingDispute || !disputeReason.trim()">
+                          {{ 'DISPUTES.CONFIRM' | translate }}
+                        </button>
+                      </div>
+                    </div>
+                  }
+                }
+              </div>
+            </div>
+          </div>
+
+          <div class="detail-section">
+            <div class="table-card">
               <h4 class="table-card-title">{{ 'SUPPLIER_ORDERS.COMMENTS' | translate }}</h4>
               <div class="table-card-body">
                 @if (detailComments.length === 0) {

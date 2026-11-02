@@ -3,6 +3,7 @@ package com.paymentplatform.notification.infrastructure.messaging;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.paymentplatform.notification.application.dto.NotificationResponse;
 import com.paymentplatform.notification.domain.model.Notification;
+import com.paymentplatform.notification.infrastructure.metrics.NotificationMetrics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -21,9 +22,12 @@ public class NotificationBroadcaster {
 
     private final ConcurrentHashMap<String, List<SseEmitter>> emitters = new ConcurrentHashMap<>();
     private final ObjectMapper objectMapper;
+    private final NotificationMetrics metrics;
 
-    public NotificationBroadcaster(ObjectMapper objectMapper) {
+    public NotificationBroadcaster(ObjectMapper objectMapper, NotificationMetrics metrics) {
         this.objectMapper = objectMapper;
+        this.metrics = metrics;
+        metrics.registerSseGauge(this::getActiveCount);
     }
 
     public void register(String key, SseEmitter emitter) {
@@ -45,6 +49,7 @@ public class NotificationBroadcaster {
     }
 
     public void broadcastNotification(Notification notification) {
+        metrics.notificationCreated(notification.type());
         if (notification.recipientOrganizationId() != null) {
             sendToKey("org:" + notification.recipientOrganizationId(), notification);
         }
@@ -64,8 +69,10 @@ public class NotificationBroadcaster {
                 emitter.send(SseEmitter.event()
                         .name("notification")
                         .data(objectMapper.writeValueAsString(dto)));
+                metrics.sseDelivered();
             } catch (IOException | IllegalStateException e) {
                 dead.add(emitter);
+                metrics.sseDropped();
             }
         }
         list.removeAll(dead);

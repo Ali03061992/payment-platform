@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.Instant;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -35,6 +36,12 @@ public interface OrderRepository extends JpaRepository<Order, UUID> {
     Page<Order> findByShopIdAndStatus(UUID shopId, String status, Pageable pageable);
 
     Page<Order> findByStatus(String status, Pageable pageable);
+
+    Page<Order> findBySupplierIdAndStatusIn(UUID supplierId, Collection<String> statuses, Pageable pageable);
+
+    Page<Order> findByShopIdAndStatusIn(UUID shopId, Collection<String> statuses, Pageable pageable);
+
+    Page<Order> findByStatusIn(Collection<String> statuses, Pageable pageable);
 
     UUID countBySupplierId(UUID supplierId);
 

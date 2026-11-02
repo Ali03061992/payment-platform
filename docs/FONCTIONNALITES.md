@@ -70,7 +70,7 @@ NEXTERA est une plateforme B2B qui relie **fournisseurs** et **boutiques** : cat
 - **Factures** : téléchargement PDF, impression, facture électronique TEIF, référence externe + QR.
 - **Retenue à la source** : consultation du certificat de la facture, téléchargement PDF (QR + référence) et XML (dépôt TEJ), enregistrement de la référence TEJ après dépôt.
 - **Soldes** : solde boutique, détail par fournisseur.
-- **Litiges** : liste, création depuis une commande, détail, messagerie avec le fournisseur, résolution.
+- **Réclamations** : page unifiée `/dashboard/reclamations` (boutique, fournisseur, admin), création sur commande éligible, détail et messagerie avec le fournisseur.
 
 ## 5. Paiements
 
@@ -90,19 +90,25 @@ NEXTERA est une plateforme B2B qui relie **fournisseurs** et **boutiques** : cat
 
 ## 7. Litiges (réclamations)
 
-- Ouverture depuis une commande, liste (boutique / fournisseur), fiche avec fil de messages, résolution / clôture, notifications aux deux parties.
+- Page unique `/dashboard/reclamations` pour tous les rôles métier (boutique, fournisseur, admin) : liste paginée des litiges de l'organisation avec recherche, filtres statut/priorité et accès à la fiche avec fil de messages.
+- Ouverture sur une commande **éligible** uniquement (`REJECTED` ou `DELIVERY_REJECTED`) ; un seul litige actif (`OPEN` / `IN_PROGRESS`) par commande (sinon `409`). La boutique peut ouvrir la réclamation depuis la fiche commande, le fournisseur depuis le détail de ses commandes.
+- Priorités et SLA : `LOW` (7 j), `NORMAL` (72 h), `HIGH` (24 h), `URGENT` (4 h) ; échéance recalculée à chaque changement de priorité, retard signalé dans la liste et la fiche.
+- Prise en charge et affectation : passage `OPEN` → `IN_PROGRESS`, assignation à un admin (ou à soi-même), affichage de l'assigné et de l'échéance.
+- Cycle de vie : `OPEN` → `IN_PROGRESS` → `RESOLVED` / `CLOSED` ; résolution et clôture réservées aux admins ; chaque transition est historisée (statut, auteur, date, commentaire).
+- Pièces jointes : upload PDF/JPEG/PNG (5 Mo max) par les participants, téléchargement authentifié ; notes internes visibles uniquement par les admins (2 000 caractères max).
+- Notifications in-app et push aux deux parties, liens profonds vers `/dashboard/reclamations/{id}` ; les anciennes routes `shop/disputes` et `admin/disputes` redirigent vers la page unifiée.
 
 ## 8. Notifications
 
 - Centre de notifications in-app : liste, compteur de non-lus, marquage lu / tout marquer lu.
 - Temps réel : flux **SSE** + **push FCM** (enregistrement / suppression de token, service push web).
-- Événements couverts : commandes, livraisons, paiements, stocks bas, litiges, rappel J-7 des retenues.
+- Événements couverts : commandes, livraisons, paiements, stocks bas, litiges, rappel J-7 des retenues ; messages i18n stockés (clé + paramètres) et rendus dans la langue de l'utilisateur.
 
 ## 9. Expérience utilisateur (web)
 
 - **3 langues** : français, anglais, arabe avec **RTL** ; sélecteur premium ; formats tunisiens (dates, montants TND).
 - **Thèmes** : sélecteur d'accent persistant (base + saisie hexadécimale personnalisée), mode clair/sombre.
-- **Chatbot** d'aide intégré, **visite guidée** (tour) des écrans, bannière + toasts, dialogues de confirmation, pagination, scanner **QR**, PWA (mise à jour).
+- **Visite guidée** (tour) des écrans, bannière + toasts, dialogues de confirmation, pagination, scanner **QR**, PWA (mise à jour).
 - Tableaux de bord par rôle (admin, fournisseur, boutique, agent) avec notifications.
 
 ## 10. Socle technique (transverse)

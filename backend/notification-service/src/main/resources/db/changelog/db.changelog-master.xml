@@ -12,5 +12,6 @@
     <include file="V5__notification_preferences.sql" relativeToChangelogFile="true"/>
     <include file="V6__vapid_keypairs.sql" relativeToChangelogFile="true"/>
     <include file="V7__fcm_tokens_organization.sql" relativeToChangelogFile="true"/>
+    <include file="V8__notification_i18n.sql" relativeToChangelogFile="true"/>
 
 </databaseChangeLog>

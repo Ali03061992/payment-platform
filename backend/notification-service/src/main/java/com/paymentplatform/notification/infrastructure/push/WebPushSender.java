@@ -4,6 +4,7 @@ import com.paymentplatform.notification.application.NotificationPreferenceServic
 import com.paymentplatform.notification.application.WebPushEndpointPolicy;
 import com.paymentplatform.notification.application.WebPushSubscriptionService;
 import com.paymentplatform.notification.domain.model.WebPushSubscription;
+import com.paymentplatform.notification.infrastructure.metrics.NotificationMetrics;
 import nl.martijndwars.webpush.Notification;
 import nl.martijndwars.webpush.PushService;
 import org.apache.http.HttpResponse;
@@ -31,6 +32,7 @@ public class WebPushSender {
     private final NotificationPreferenceService preferences;
     private final WebPushEndpointPolicy endpointPolicy;
     private final VapidKeyProvider vapidKeys;
+    private final NotificationMetrics metrics;
     private final boolean enabled;
     private final String vapidSubject;
 
@@ -38,12 +40,14 @@ public class WebPushSender {
                          NotificationPreferenceService preferences,
                          WebPushEndpointPolicy endpointPolicy,
                          VapidKeyProvider vapidKeys,
+                         NotificationMetrics metrics,
                          @Value("${app.webpush.enabled:true}") boolean enabled,
                          @Value("${app.webpush.vapid-subject:mailto:admin@paymentplatform.tn}") String vapidSubject) {
         this.subscriptions = subscriptions;
         this.preferences = preferences;
         this.endpointPolicy = endpointPolicy;
         this.vapidKeys = vapidKeys;
+        this.metrics = metrics;
         this.enabled = enabled;
         this.vapidSubject = vapidSubject;
     }
@@ -90,6 +94,7 @@ public class WebPushSender {
     private void send(WebPushSubscription subscription, String title, String body, String tag, String url) {
         if (!endpointPolicy.isAllowed(subscription.endpoint())) {
             subscriptions.removeByEndpoint(subscription.endpoint());
+            metrics.webPushSubscriptionRemoved();
             log.warn("Removed Web Push subscription with invalid or non-public endpoint");
             return;
         }
@@ -106,14 +111,19 @@ public class WebPushSender {
             int status = response.getStatusLine().getStatusCode();
             if (status == 404 || status == 410) {
                 subscriptions.removeByEndpoint(subscription.endpoint());
+                metrics.webPushSubscriptionRemoved();
+                metrics.webPushFailed();
                 log.info("Removed expired Web Push subscription (endpoint {}...)",
                         subscription.endpoint().substring(0, Math.min(40, subscription.endpoint().length())));
             } else if (status >= 400) {
+                metrics.webPushFailed();
                 log.warn("Web Push endpoint rejected with status {}", status);
             } else {
+                metrics.webPushSent();
                 log.debug("Web Push sent to user {}", subscription.userId());
             }
         } catch (Exception e) {
+            metrics.webPushFailed();
             log.warn("Web Push delivery failed: {}", e.getMessage());
         }
     }

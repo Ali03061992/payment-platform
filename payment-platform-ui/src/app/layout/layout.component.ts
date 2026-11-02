@@ -1,5 +1,6 @@
 import { Component, HostListener, OnInit, OnDestroy, ElementRef, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
+import { TranslateService } from '@ngx-translate/core';
 import { LoginService } from '../services/login.service';
 import { NotificationService } from '../services/notification.service';
 import { StockService } from '../services/stock.service';
@@ -59,7 +60,6 @@ export class LayoutComponent implements OnInit, OnDestroy {
     { label: 'NAV.RELATIONS', icon: 'link', route: 'admin/relations', roles: ['SYSTEM_ADMIN'], group: 'NAV.GROUP_ADMIN' },
     { label: 'NAV.ORG_STATS', icon: 'chart', route: 'admin/org-stats', roles: ['SYSTEM_ADMIN'], group: 'NAV.GROUP_ADMIN' },
     { label: 'NAV.AUDIT_LOG', icon: 'list', route: 'admin/audit-logs', roles: ['SYSTEM_ADMIN'], group: 'NAV.GROUP_ADMIN' },
-    { label: 'NAV.DISPUTES', icon: 'alert', route: 'admin/disputes', roles: ['SYSTEM_ADMIN'], group: 'NAV.GROUP_ADMIN' },
     { label: 'NAV.CATEGORIES', icon: 'tag', route: 'supplier/categories', roles: ['SUPPLIER_ADMIN'], group: 'NAV.GROUP_CATALOG' },
     { label: 'NAV.FAMILIES', icon: 'folder', route: 'supplier/families', roles: ['SUPPLIER_ADMIN'], group: 'NAV.GROUP_CATALOG' },
     { label: 'NAV.PRODUCTS', icon: 'list', route: 'supplier/products', roles: ['SUPPLIER_ADMIN'], group: 'NAV.GROUP_CATALOG' },
@@ -79,7 +79,6 @@ export class LayoutComponent implements OnInit, OnDestroy {
     { label: 'NAV.NEW_ORDER', icon: 'plus', route: 'shop/orders/create', roles: ['SHOP_ADMIN'], group: 'NAV.GROUP_SHOP' },
     { label: 'NAV.BALANCE', icon: 'scale', route: 'shop/balance', roles: ['SHOP_ADMIN'], group: 'NAV.GROUP_SHOP' },
     { label: 'NAV.INVOICE_JOURNAL', icon: 'file-text', route: 'shop/invoices', roles: ['SHOP_ADMIN'], group: 'NAV.GROUP_SHOP' },
-    { label: 'NAV.DISPUTES', icon: 'alert', route: 'shop/disputes', roles: ['SHOP_ADMIN', 'SHOP_AGENT'], group: 'NAV.GROUP_SHOP' },
     { label: 'NAV.PAYMENTS', icon: 'card', route: 'payments', roles: ['SYSTEM_ADMIN', 'SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_AGENT'], group: 'NAV.GROUP_PAYMENTS' },
     { label: 'NAV.PAYMENT_STATS', icon: 'chart', route: 'payments/stats', roles: ['SYSTEM_ADMIN', 'SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_AGENT'], group: 'NAV.GROUP_PAYMENTS' },
     { label: 'NAV.EXPORT', icon: 'upload', route: 'export', roles: ['SYSTEM_ADMIN', 'SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_AGENT'], group: 'NAV.GROUP_TOOLS' },
@@ -97,6 +96,7 @@ export class LayoutComponent implements OnInit, OnDestroy {
     private notificationService: NotificationService,
     private stockService: StockService,
     public themeService: ThemeService,
+    private translate: TranslateService,
     private elRef: ElementRef
   ) {
     this.user = this.loginService.getCurrentUser();
@@ -285,6 +285,19 @@ export class LayoutComponent implements OnInit, OnDestroy {
     }
   }
 
+  notificationMessage(n: Notification): string {
+    if (!n.messageKey) return n.message;
+    let params: Record<string, string> = {};
+    if (n.messageParams) {
+      try {
+        params = JSON.parse(n.messageParams);
+      } catch {
+        params = {};
+      }
+    }
+    return this.translate.instant(`NOTIFICATIONS.${n.messageKey}`, params);
+  }
+
   navigateNotification(notif: Notification): void {
     if (notif.relatedEntityType === 'PAYMENT' && notif.relatedEntityId) {
       this.router.navigate(['/dashboard/payments', notif.relatedEntityId]);
@@ -309,15 +322,7 @@ export class LayoutComponent implements OnInit, OnDestroy {
         this.router.navigate(['/dashboard/supplier/quotes']);
       }
     } else if (notif.relatedEntityType === 'DISPUTE' && notif.relatedEntityId) {
-      // Réclamation : détail admin pour SYSTEM_ADMIN, détail boutique pour les
-      // boutiques, liste commandes pour les fournisseurs (pas de page dédiée).
-      if (this.user?.roles?.includes('SYSTEM_ADMIN')) {
-        this.router.navigate(['/dashboard/admin/disputes', notif.relatedEntityId]);
-      } else if (this.isShopUser()) {
-        this.router.navigate(['/dashboard/shop/disputes', notif.relatedEntityId]);
-      } else {
-        this.router.navigate(['/dashboard/supplier/orders']);
-      }
+      this.router.navigate(['/dashboard/reclamations', notif.relatedEntityId]);
     }
     this.showNotifications = false;
   }

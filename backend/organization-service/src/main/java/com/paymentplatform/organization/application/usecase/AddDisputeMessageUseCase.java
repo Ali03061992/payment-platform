@@ -4,7 +4,9 @@ import com.paymentplatform.organization.application.dto.DisputeResponse;
 import com.paymentplatform.organization.application.security.TenantAccess;
 import com.paymentplatform.organization.domain.model.Dispute;
 import com.paymentplatform.organization.domain.model.DisputeMessage;
+import com.paymentplatform.organization.domain.model.DisputeStatusHistory;
 import com.paymentplatform.organization.domain.repository.DisputeRepository;
+import com.paymentplatform.organization.domain.repository.DisputeStatusHistoryRepository;
 import com.paymentplatform.shared.domain.event.DisputeEvents;
 import com.paymentplatform.shared.domain.exception.ConflictException;
 import com.paymentplatform.shared.domain.exception.NotFoundException;
@@ -20,10 +22,14 @@ import java.util.UUID;
 public class AddDisputeMessageUseCase {
 
     private final DisputeRepository disputes;
+    private final DisputeStatusHistoryRepository history;
     private final OutboxEventStore outbox;
 
-    public AddDisputeMessageUseCase(DisputeRepository disputes, OutboxEventStore outbox) {
+    public AddDisputeMessageUseCase(DisputeRepository disputes,
+                                    DisputeStatusHistoryRepository history,
+                                    OutboxEventStore outbox) {
         this.disputes = disputes;
+        this.history = history;
         this.outbox = outbox;
     }
 
@@ -51,7 +57,10 @@ public class AddDisputeMessageUseCase {
         }
 
         if ("OPEN".equals(dispute.getStatus())) {
+            String fromStatus = dispute.getStatus();
             dispute.transitionTo(com.paymentplatform.organization.domain.model.DisputeStatus.IN_PROGRESS);
+            history.save(DisputeStatusHistory.record(disputeId, fromStatus, dispute.getStatus(),
+                    actorUserId, "Prise en charge automatique à la première réponse"));
         }
 
         DisputeMessage message = DisputeMessage.create(disputeId, actorUserId, actorRole, content);

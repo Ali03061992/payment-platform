@@ -19,6 +19,45 @@
         </div>
       </div>
       <div class="detail-card">
+        <div class="detail-label">{{ 'DISPUTES.COL_PRIORITY' | translate }}</div>
+        <div class="detail-value">
+          <span class="priority-badge" [ngClass]="priorityClass(dispute.priority)">{{ priorityLabel(dispute.priority) }}</span>
+          @if (canResolve()) {
+            <div class="inline-control">
+              <select class="form-control" [(ngModel)]="priorityDraft" [attr.aria-label]="'DISPUTES.COL_PRIORITY' | translate">
+                @for (p of priorities; track p) {
+                  <option [value]="p">{{ priorityLabel(p) }}</option>
+                }
+              </select>
+              <button type="button" class="btn btn-sm btn-secondary" (click)="savePriority()"
+                [disabled]="updatingPriority || priorityDraft === dispute.priority">
+                {{ 'DISPUTES.SAVE' | translate }}
+              </button>
+            </div>
+          }
+        </div>
+      </div>
+      <div class="detail-card">
+        <div class="detail-label">{{ 'DISPUTES.COL_DUE' | translate }}</div>
+        <div class="detail-value" [class.text-danger]="isOverdue()">
+          {{ dispute.dueAt ? (dispute.dueAt | date:'dd/MM/yyyy HH:mm') : '-' }}
+          @if (isOverdue()) {
+            <span class="overdue-hint">{{ 'DISPUTES.OVERDUE' | translate }}</span>
+          }
+        </div>
+      </div>
+      <div class="detail-card">
+        <div class="detail-label">{{ 'DISPUTES.ASSIGNED_TO' | translate }}</div>
+        <div class="detail-value">
+          {{ dispute.assignedTo ? (dispute.assignedTo | slice:0:8) : ('DISPUTES.UNASSIGNED' | translate) }}
+          @if (canResolve()) {
+            <button type="button" class="btn btn-sm btn-secondary" (click)="assignToMe()">
+              {{ 'DISPUTES.ASSIGN_ME' | translate }}
+            </button>
+          }
+        </div>
+      </div>
+      <div class="detail-card">
         <div class="detail-label">{{ 'DISPUTES.COL_REASON' | translate }}</div>
         <div class="detail-value">{{ dispute.reason }}</div>
       </div>
@@ -40,8 +79,67 @@
     </div>
     @if (canResolve() && dispute.status !== 'CLOSED' && dispute.status !== 'RESOLVED') {
       <div class="action-bar no-print">
+        @if (dispute.status === 'OPEN') {
+          <button class="btn btn-primary" (click)="takeCharge()">{{ 'DISPUTES.TAKE_CHARGE' | translate }}</button>
+        }
         <button class="btn btn-success" (click)="resolveDispute()">{{ 'DISPUTES.RESOLVE' | translate }}</button>
         <button class="btn btn-danger" (click)="closeDispute()">{{ 'DISPUTES.CLOSE' | translate }}</button>
+      </div>
+    }
+
+    <div class="table-card" style="margin-top:24px;">
+      <h3 class="section-title">{{ 'DISPUTES.ATTACHMENTS_TITLE' | translate }}</h3>
+      <div class="attachments-section">
+        @if ((dispute.attachments || []).length === 0) {
+          <p class="no-messages">{{ 'DISPUTES.NO_ATTACHMENTS' | translate }}</p>
+        }
+        <ul class="attachment-list">
+          @for (attachment of (dispute.attachments || []); track attachment.id) {
+            <li class="attachment-item">
+              <button type="button" class="attachment-link" (click)="downloadAttachment(attachment)">
+                {{ attachment.fileName }}
+              </button>
+              <span class="attachment-meta">{{ formatFileSize(attachment.sizeBytes) }}</span>
+            </li>
+          }
+        </ul>
+        @if (canSendMessage()) {
+          <label class="btn btn-secondary upload-btn no-print">
+            {{ uploading ? ('DISPUTES.UPLOADING' | translate) : ('DISPUTES.ADD_ATTACHMENT' | translate) }}
+            <input type="file" accept=".pdf,.jpg,.jpeg,.png" (change)="onFileSelected($event)"
+              [disabled]="uploading" hidden>
+          </label>
+          <p class="form-hint">{{ 'DISPUTES.ATTACHMENT_HINT' | translate }}</p>
+        }
+      </div>
+    </div>
+
+    @if (canResolve()) {
+      <div class="table-card" style="margin-top:24px;">
+        <h3 class="section-title">{{ 'DISPUTES.NOTES_TITLE' | translate }}</h3>
+        <div class="notes-section">
+          @if ((dispute.notes || []).length === 0) {
+            <p class="no-messages">{{ 'DISPUTES.NO_NOTES' | translate }}</p>
+          }
+          @for (note of (dispute.notes || []); track note.id) {
+            <div class="note-item">
+              <div class="note-meta">
+                <strong>{{ note.authorId | slice:0:8 }}</strong>
+                <span>{{ note.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
+              </div>
+              <p>{{ note.content }}</p>
+            </div>
+          }
+          <div class="note-form">
+            <textarea [(ngModel)]="noteContent" rows="2" maxlength="2000"
+              [placeholder]="'DISPUTES.NOTE_PLACEHOLDER' | translate"
+              [attr.aria-label]="'DISPUTES.NOTE_PLACEHOLDER' | translate"></textarea>
+            <button type="button" class="btn btn-primary" (click)="addNote()"
+              [disabled]="addingNote || !noteContent.trim()">
+              {{ addingNote ? ('DISPUTES.SAVING' | translate) : ('DISPUTES.ADD_NOTE' | translate) }}
+            </button>
+          </div>
+        </div>
       </div>
     }
     <div class="table-card" style="margin-top:24px;">
@@ -73,5 +171,22 @@
         </div>
       }
     </div>
+
+    @if ((dispute.history || []).length > 0) {
+      <div class="table-card" style="margin-top:24px;">
+        <h3 class="section-title">{{ 'DISPUTES.HISTORY_TITLE' | translate }}</h3>
+        <ol class="history-list">
+          @for (item of dispute.history; track item.id) {
+            <li class="history-item">
+              <span class="history-status">{{ statusLabel(item.toStatus) }}</span>
+              <span class="history-date">{{ item.changedAt | date:'dd/MM/yyyy HH:mm' }}</span>
+              @if (item.note) {
+                <span class="history-note">{{ item.note }}</span>
+              }
+            </li>
+          }
+        </ol>
+      </div>
+    }
   </div>
 }

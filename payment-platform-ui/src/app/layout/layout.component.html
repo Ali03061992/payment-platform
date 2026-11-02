@@ -109,7 +109,7 @@
             (click)="navigateNotification(n)">
             <span class="notif-icon"><app-icon [name]="getNotificationIcon(n.type)" [size]="20"></app-icon></span>
             <div class="notif-content">
-              <div class="notif-message">{{ n.message }}</div>
+              <div class="notif-message">{{ notificationMessage(n) }}</div>
               <div class="notif-time">{{ n.createdAt | timeAgo }}</div>
             </div>
           </div>

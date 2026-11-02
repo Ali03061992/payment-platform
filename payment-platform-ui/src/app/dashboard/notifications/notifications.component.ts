@@ -182,14 +182,7 @@ export class NotificationsComponent implements OnInit, OnDestroy {
     } else if (notif.relatedEntityType === 'SHOP_ORDER' && notif.relatedEntityId) {
       this.router.navigate(['/dashboard/shop/orders', notif.relatedEntityId]);
     } else if (notif.relatedEntityType === 'DISPUTE' && notif.relatedEntityId) {
-      const roles = this.loginService.getCurrentUser()?.roles || [];
-      if (roles.includes('SYSTEM_ADMIN')) {
-        this.router.navigate(['/dashboard/admin/disputes', notif.relatedEntityId]);
-      } else if (this.isShopUser()) {
-        this.router.navigate(['/dashboard/shop/disputes', notif.relatedEntityId]);
-      } else {
-        this.router.navigate(['/dashboard/supplier/orders']);
-      }
+      this.router.navigate(['/dashboard/reclamations', notif.relatedEntityId]);
     }
   }
 
@@ -227,6 +220,20 @@ export class NotificationsComponent implements OnInit, OnDestroy {
     if (type.includes('ORDER')) return 'type-order';
     if (type.includes('DELIVERY')) return 'type-delivery';
     return 'type-other';
+  }
+
+  notificationMessage(n: Notification): string {
+    if (!n.messageKey) return n.message;
+    return this.translate.instant(`NOTIFICATIONS.${n.messageKey}`, this.messageParams(n.messageParams));
+  }
+
+  private messageParams(raw?: string | null): Record<string, string> {
+    if (!raw) return {};
+    try {
+      return JSON.parse(raw);
+    } catch {
+      return {};
+    }
   }
 
   getTimeAgo(dateStr: string): string {

@@ -8,6 +8,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { Router } from '@angular/router';
 import { NO_ERRORS_SCHEMA, Pipe, PipeTransform } from '@angular/core';
+import { TranslateService } from '@ngx-translate/core';
 import { of, Subject } from 'rxjs';
 import { LayoutComponent } from './layout.component';
 import { LoginService } from '../services/login.service';
@@ -49,6 +50,7 @@ describe('LayoutComponent', () => {
         { provide: LoginService, useValue: loginSpy },
         { provide: NotificationService, useValue: notifSpy },
         { provide: Router, useValue: routerSpy },
+        { provide: TranslateService, useValue: { instant: (key: string) => key } },
         provideHttpClient(withInterceptorsFromDi()),
         provideHttpClientTesting()
     ]

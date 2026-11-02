@@ -52,7 +52,7 @@ Consommateur principal : notification-service (SSE + push FCM).
 | Stocks (`/stock`, `/catalog`) | produits CRUD + image, mouvements, `low-stock-alerts`, optimisation (`GET /api/suppliers/{supplierId}/optimization`, `POST …/configure`), familles/catégories |
 | Soldes (`/balances`) | soldes fournisseur/boutique, par couple, `POST /adjust` |
 | Paiements (`/payments`) | CRUD, `confirm|reject|cancel`, `/stats`, `/overdue`, `/agent-summary`, `/supplier-summary`, exports, facture, auto-création interne |
-| Litiges (`/disputes`) | création, par commande, messages, résolution |
+| Litiges (`/disputes`) | création (priorité/SLA), liste héritée + `/paged` (filtres statut/priorité/recherche), par commande, messages, `transition`, `priority`, `assign`, `notes`, pièces jointes (upload/download), résolution |
 | Notifications (`/notifications`) | liste, `unread-count`, `read-all`, `/{id}/read`, flux **SSE** `/stream`, tokens FCM |
 | Rapports (`/reports`) | financier fournisseur ; audit (`/audit-logs`) |
 

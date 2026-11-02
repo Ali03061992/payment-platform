@@ -2,6 +2,8 @@ package com.paymentplatform.notification.infrastructure.push;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.paymentplatform.notification.infrastructure.metrics.NotificationMetrics;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.junit.jupiter.api.Test;
 
 import java.util.UUID;
@@ -48,7 +50,8 @@ class WebPushSenderTest {
 
     @Test
     void buildPayload_usesNavigateLastFocusedOrOpenOperation() throws Exception {
-        WebPushSender sender = new WebPushSender(null, null, null, null, false, "mailto:test@example.com");
+        WebPushSender sender = new WebPushSender(null, null, null, null,
+                new NotificationMetrics(new SimpleMeterRegistry()), false, "mailto:test@example.com");
         UUID orgId = UUID.randomUUID();
         String json = sender.buildPayload("Title", "Body", "tag-1", "/orders/42", orgId);
 
@@ -65,7 +68,8 @@ class WebPushSenderTest {
 
     @Test
     void buildPayload_defaultsWhenFieldsNull() throws Exception {
-        WebPushSender sender = new WebPushSender(null, null, null, null, false, "mailto:test@example.com");
+        WebPushSender sender = new WebPushSender(null, null, null, null,
+                new NotificationMetrics(new SimpleMeterRegistry()), false, "mailto:test@example.com");
         String json = sender.buildPayload(null, null, null, "/dashboard", null);
 
         JsonNode root = new ObjectMapper().readTree(json);

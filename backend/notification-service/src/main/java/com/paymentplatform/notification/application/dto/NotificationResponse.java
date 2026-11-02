@@ -11,6 +11,8 @@ public record NotificationResponse(
         UUID recipientOrganizationId,
         String type,
         String message,
+        String messageKey,
+        String messageParams,
         String readStatus,
         Instant createdAt,
         Instant readAt,
@@ -20,7 +22,7 @@ public record NotificationResponse(
     public static NotificationResponse from(Notification n) {
         return new NotificationResponse(
                 n.id(), n.recipientUserId(), n.recipientOrganizationId(),
-                n.type(), n.message(), n.readStatus(),
+                n.type(), n.message(), n.messageKey(), n.messageParams(), n.readStatus(),
                 n.createdAt(), n.readAt(),
                 n.relatedEntityType(), n.relatedEntityId()
         );

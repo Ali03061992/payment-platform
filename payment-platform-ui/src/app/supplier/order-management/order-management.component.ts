@@ -2,6 +2,8 @@ import { Component, OnInit, OnDestroy, HostListener, ElementRef } from '@angular
 import { Router, ActivatedRoute } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { OrderService } from '../../services/order.service';
+import { DisputeService } from '../../services/dispute.service';
+import { Dispute, DisputePriority } from '../../models/dispute.model';
 import { SupplierAgentService } from '../../services/supplier-agent.service';
 import { StockService } from '../../services/stock.service';
 import { Order, OrderComment, OrderPage, WithholdingCertificate } from '../../models/order.model';
@@ -79,10 +81,20 @@ export class OrderManagementComponent implements OnInit, OnDestroy {
   detailNewComment = '';
   detailSubmittingComment = false;
 
+  detailDisputes: Dispute[] = [];
+  detailDisputesLoaded = false;
+  loadingDisputes = false;
+  showDisputeForm = false;
+  disputeReason = '';
+  disputePriority: DisputePriority = 'NORMAL';
+  submittingDispute = false;
+  readonly disputePriorities: DisputePriority[] = ['LOW', 'NORMAL', 'HIGH', 'URGENT'];
+
   private subscriptions = new Subscription();
 
   constructor(
     private orderService: OrderService,
+    private disputeService: DisputeService,
     private agentService: SupplierAgentService,
     private stockService: StockService,
     private router: Router,
@@ -362,6 +374,11 @@ export class OrderManagementComponent implements OnInit, OnDestroy {
     this.detailQrData = `${environment.appUrl}/dashboard/supplier/orders?ref=${encodeURIComponent(order.reference || order.id)}`;
     this.detailComments = [];
     this.detailNewComment = '';
+    this.detailDisputes = [];
+    this.detailDisputesLoaded = false;
+    this.showDisputeForm = false;
+    this.disputeReason = '';
+    this.disputePriority = 'NORMAL';
     const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(order.id);
     const request$ = isUuid
       ? this.orderService.getById(order.id)
@@ -479,6 +496,63 @@ export class OrderManagementComponent implements OnInit, OnDestroy {
   closeDetail(): void {
     this.showDetail = false;
     this.selectedOrder = null;
+  }
+
+  loadDetailDisputes(): void {
+    if (!this.selectedOrder) return;
+    this.loadingDisputes = true;
+    this.subscriptions.add(this.disputeService.getByOrder(this.selectedOrder.id).subscribe({
+      next: (disputes: Dispute[]) => {
+        this.detailDisputes = disputes || [];
+        this.detailDisputesLoaded = true;
+        this.loadingDisputes = false;
+      },
+      error: () => {
+        this.detailDisputes = [];
+        this.detailDisputesLoaded = true;
+        this.loadingDisputes = false;
+      }
+    }));
+  }
+
+  toggleDisputeForm(): void {
+    this.showDisputeForm = !this.showDisputeForm;
+    this.disputeReason = '';
+    this.disputePriority = 'NORMAL';
+  }
+
+  canOpenDispute(order: Order): boolean {
+    const hasActive = (this.detailDisputes || []).some(d => d.status === 'OPEN' || d.status === 'IN_PROGRESS');
+    return (order.status === 'REJECTED' || order.status === 'DELIVERY_REJECTED') && !hasActive;
+  }
+
+  canOpenSelectedDispute(): boolean {
+    return !!this.selectedOrder && this.canOpenDispute(this.selectedOrder);
+  }
+
+  openOrderDispute(): void {
+    if (!this.selectedOrder || !this.disputeReason.trim() || !this.canOpenDispute(this.selectedOrder)) return;
+    this.submittingDispute = true;
+    this.subscriptions.add(this.disputeService.create({
+      orderId: this.selectedOrder.id,
+      reason: this.disputeReason.trim(),
+      priority: this.disputePriority
+    }).subscribe({
+      next: (dispute: Dispute) => {
+        this.submittingDispute = false;
+        this.showDisputeForm = false;
+        this.toast.success(this.translate.instant('DISPUTES.OPENED_MSG'));
+        this.router.navigate(['/dashboard/reclamations', dispute.id]);
+      },
+      error: (e: any) => {
+        this.submittingDispute = false;
+        this.toast.error(e.error?.message || this.translate.instant('COMMON.ERROR'));
+      }
+    }));
+  }
+
+  viewOrderDispute(disputeId: string): void {
+    this.router.navigate(['/dashboard/reclamations', disputeId]);
   }
 
   confirm(order: Order): void {

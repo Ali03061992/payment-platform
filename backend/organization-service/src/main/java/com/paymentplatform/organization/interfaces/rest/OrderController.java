@@ -303,6 +303,38 @@ public class OrderController {
                 orderPage.getTotalPages(), orderPage.getNumber()));
     }
 
+    @GetMapping("/eligible-for-dispute")
+    @PreAuthorize("hasAnyAuthority('SUPPLIER_ADMIN', 'SUPPLIER_AGENT', 'SHOP_ADMIN', 'SHOP_AGENT', 'SYSTEM_ADMIN')")
+    public ResponseEntity<PageResponse<OrderResponse>> listEligibleForDispute(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "100") int size) {
+        var current = CurrentUser.get();
+        int safePage = Math.max(0, page);
+        int safeSize = Math.min(Math.max(1, size), 100);
+        var pageable = PageRequest.of(safePage, safeSize, Sort.by(Sort.Direction.DESC, "createdAt"));
+        var eligibleStatuses = List.of("REJECTED", "DELIVERY_REJECTED");
+        boolean supplierSide = current.roles().contains("SUPPLIER_ADMIN") || current.roles().contains("SUPPLIER_AGENT");
+        boolean shopSide = current.roles().contains("SHOP_ADMIN") || current.roles().contains("SHOP_AGENT");
+
+        if (!current.roles().contains("SYSTEM_ADMIN") && current.organizationId() == null) {
+            return ResponseEntity.status(403).build();
+        }
+        org.springframework.data.domain.Page<com.paymentplatform.organization.domain.model.Order> orderPage;
+        if (supplierSide) {
+            orderPage = orderRepository.findBySupplierIdAndStatusIn(current.organizationId(), eligibleStatuses, pageable);
+        } else if (shopSide) {
+            orderPage = orderRepository.findByShopIdAndStatusIn(current.organizationId(), eligibleStatuses, pageable);
+        } else if (current.roles().contains("SYSTEM_ADMIN")) {
+            orderPage = orderRepository.findByStatusIn(eligibleStatuses, pageable);
+        } else {
+            return ResponseEntity.status(403).build();
+        }
+
+        List<OrderResponse> responses = buildOrderResponses(orderPage.getContent());
+        return ResponseEntity.ok(new PageResponse<>(responses, (int) orderPage.getTotalElements(),
+                orderPage.getTotalPages(), orderPage.getNumber()));
+    }
+
     /**
      * Liste les livraisons (commandes avec livreur) visibles par l'acteur.
      *

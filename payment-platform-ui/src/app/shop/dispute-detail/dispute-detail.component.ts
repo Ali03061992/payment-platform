@@ -3,7 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { DisputeService } from '../../services/dispute.service';
 import { LoginService } from '../../services/login.service';
-import { Dispute } from '../../models/dispute.model';
+import { Dispute, DisputeAttachment, DisputePriority } from '../../models/dispute.model';
 import { environment } from '../../../environments/environment';
 import { ToastService } from '../../services/toast.service';
 import { ConfirmDialogService } from '../../components/confirm-dialog/confirm-dialog.service';
@@ -24,6 +24,13 @@ export class DisputeDetailComponent implements OnInit, OnDestroy {
   newMessage = '';
   submitting = false;
 
+  readonly priorities: DisputePriority[] = ['LOW', 'NORMAL', 'HIGH', 'URGENT'];
+  priorityDraft: DisputePriority = 'NORMAL';
+  noteContent = '';
+  addingNote = false;
+  uploading = false;
+  updatingPriority = false;
+
   private subscriptions = new Subscription();
 
   constructor(
@@ -39,8 +46,16 @@ export class DisputeDetailComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id')!;
     this.qrData = `${environment.appUrl}${this.router.url}`;
+    this.loadDispute(id);
+  }
+
+  private loadDispute(id: string): void {
     this.subscriptions.add(this.disputeService.getById(id).subscribe({
-      next: (data: Dispute) => { this.dispute = data; this.loading = false; },
+      next: (data: Dispute) => {
+        this.dispute = data;
+        this.priorityDraft = data.priority || 'NORMAL';
+        this.loading = false;
+      },
       error: () => { this.loading = false; this.router.navigate([this.disputesListRoute()]); }
     }));
   }
@@ -51,13 +66,131 @@ export class DisputeDetailComponent implements OnInit, OnDestroy {
 
   canSendMessage(): boolean {
     const roles = this.loginService.getCurrentUser()?.roles || [];
-    return roles.includes('SHOP_ADMIN') || roles.includes('SHOP_MANAGER')
+    return roles.includes('SHOP_ADMIN') || roles.includes('SHOP_AGENT')
       || roles.includes('SUPPLIER_ADMIN') || roles.includes('SUPPLIER_AGENT');
   }
 
   canResolve(): boolean {
+    return this.isAdmin();
+  }
+
+  isAdmin(): boolean {
     const roles = this.loginService.getCurrentUser()?.roles || [];
     return roles.includes('SYSTEM_ADMIN') || roles.includes('SHOP_ADMIN') || roles.includes('SUPPLIER_ADMIN');
+  }
+
+  takeCharge(): void {
+    if (!this.canResolve() || !this.dispute || this.dispute.status !== 'OPEN') return;
+    this.subscriptions.add(this.disputeService.transition(this.dispute.id, 'IN_PROGRESS').subscribe({
+      next: (data: Dispute) => {
+        this.dispute = data;
+        this.toast.success(this.translate.instant('DISPUTES.TAKEN_CHARGE_MSG'));
+      },
+      error: (e: any) => this.toast.error(e.error?.message || this.translate.instant('COMMON.ERROR'))
+    }));
+  }
+
+  savePriority(): void {
+    if (!this.canResolve() || !this.dispute || this.priorityDraft === this.dispute.priority) return;
+    this.updatingPriority = true;
+    this.subscriptions.add(this.disputeService.updatePriority(this.dispute.id, this.priorityDraft).subscribe({
+      next: (data: Dispute) => {
+        this.dispute = data;
+        this.updatingPriority = false;
+        this.toast.success(this.translate.instant('DISPUTES.PRIORITY_UPDATED'));
+      },
+      error: (e: any) => {
+        this.updatingPriority = false;
+        this.toast.error(e.error?.message || this.translate.instant('COMMON.ERROR'));
+      }
+    }));
+  }
+
+  assignToMe(): void {
+    if (!this.canResolve() || !this.dispute) return;
+    this.subscriptions.add(this.disputeService.assign(this.dispute.id).subscribe({
+      next: (data: Dispute) => {
+        this.dispute = data;
+        this.toast.success(this.translate.instant('DISPUTES.ASSIGNED_MSG'));
+      },
+      error: (e: any) => this.toast.error(e.error?.message || this.translate.instant('COMMON.ERROR'))
+    }));
+  }
+
+  addNote(): void {
+    if (!this.canResolve() || !this.dispute || !this.noteContent.trim()) return;
+    this.addingNote = true;
+    const id = this.dispute.id;
+    this.subscriptions.add(this.disputeService.addNote(id, this.noteContent.trim()).subscribe({
+      next: () => {
+        this.noteContent = '';
+        this.addingNote = false;
+        this.loadDispute(id);
+        this.toast.success(this.translate.instant('DISPUTES.NOTE_ADDED'));
+      },
+      error: (e: any) => {
+        this.addingNote = false;
+        this.toast.error(e.error?.message || this.translate.instant('COMMON.ERROR'));
+      }
+    }));
+  }
+
+  onFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file || !this.dispute) return;
+    this.uploading = true;
+    const id = this.dispute.id;
+    this.subscriptions.add(this.disputeService.uploadAttachment(id, file).subscribe({
+      next: (data: Dispute) => {
+        this.dispute = data;
+        this.uploading = false;
+        input.value = '';
+        this.toast.success(this.translate.instant('DISPUTES.ATTACHMENT_ADDED'));
+      },
+      error: (e: any) => {
+        this.uploading = false;
+        input.value = '';
+        this.toast.error(e.error?.message || this.translate.instant('COMMON.ERROR'));
+      }
+    }));
+  }
+
+  downloadAttachment(attachment: DisputeAttachment): void {
+    if (!this.dispute) return;
+    this.subscriptions.add(
+      this.disputeService.downloadAttachment(this.dispute.id, attachment.id).subscribe({
+        next: (blob: Blob) => {
+          const url = URL.createObjectURL(blob);
+          const anchor = document.createElement('a');
+          anchor.href = url;
+          anchor.download = attachment.fileName;
+          anchor.click();
+          URL.revokeObjectURL(url);
+        },
+        error: () => this.toast.error(this.translate.instant('COMMON.ERROR'))
+      })
+    );
+  }
+
+  priorityLabel(priority?: string): string {
+    return priority ? this.translate.instant(`DISPUTES.PRIORITY_${priority}`) : '';
+  }
+
+  priorityClass(priority?: string): string {
+    return priority ? `priority-${priority.toLowerCase()}` : '';
+  }
+
+  isOverdue(): boolean {
+    return !!this.dispute?.dueAt
+      && new Date(this.dispute.dueAt).getTime() < Date.now()
+      && this.dispute.status !== 'RESOLVED' && this.dispute.status !== 'CLOSED';
+  }
+
+  formatFileSize(bytes: number): string {
+    if (bytes < 1024) return `${bytes} o`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} Ko`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} Mo`;
   }
 
   sendMessage(): void {
@@ -125,27 +258,10 @@ export class DisputeDetailComponent implements OnInit, OnDestroy {
 
   private disputesListRoute(): string {
     const configured = this.route.snapshot.data['listRoute'];
-    if (typeof configured === 'string' && configured) return configured;
-    const roles = this.loginService.getCurrentUser()?.roles || [];
-    if (roles.includes('SYSTEM_ADMIN')) return '/dashboard/admin/disputes';
-    if (roles.includes('SUPPLIER_ADMIN') || roles.includes('SUPPLIER_AGENT')) return '/dashboard/supplier/orders';
-    return '/dashboard/shop/disputes';
+    return typeof configured === 'string' && configured ? configured : '/dashboard/reclamations';
   }
 
   backToOrder(): void {
-    const roles = this.loginService.getCurrentUser()?.roles || [];
-    if (roles.includes('SYSTEM_ADMIN')) {
-      this.router.navigate(['/dashboard/admin/disputes']);
-      return;
-    }
-    if (roles.includes('SUPPLIER_ADMIN') || roles.includes('SUPPLIER_AGENT')) {
-      this.router.navigate(['/dashboard/supplier/orders']);
-      return;
-    }
-    if (this.dispute) {
-      this.router.navigate(['/dashboard/shop/orders', this.dispute.orderId]);
-    } else {
-      this.router.navigate(['/dashboard/shop/orders']);
-    }
+    this.router.navigate([this.disputesListRoute()]);
   }
 }

@@ -46,7 +46,6 @@ import { ShopQuotesComponent } from './shop/quotes/shop-quotes.component';
 import { QuotesComponent } from './supplier/quotes/quotes.component';
 import { ShopOrderDetailComponent } from './shop/order-detail/order-detail.component';
 import { DisputeDetailComponent } from './shop/dispute-detail/dispute-detail.component';
-import { DisputeListComponent } from './shop/dispute-list/dispute-list.component';
 import { ReclamationsComponent } from './shop/reclamations/reclamations.component';
 import { BalanceViewComponent } from './shop/balance-view/balance-view.component';
 import { QrScannerComponent } from './qr-scanner/qr-scanner.component';
@@ -120,10 +119,10 @@ const routes: Routes = [
       { path: 'shop/quotes', component: ShopQuotesComponent, canActivate: [RoleGuard], data: { roles: shopRoles } },
       { path: 'shop/quotes/request', component: QuoteRequestComponent, canActivate: [RoleGuard], data: { roles: shopRoles } },
       { path: 'shop/orders/:id', component: ShopOrderDetailComponent, canActivate: [RoleGuard], data: { roles: shopAdminRoles } },
-      { path: 'shop/disputes', component: DisputeListComponent, canActivate: [RoleGuard], data: { roles: shopRoles } },
-      { path: 'shop/disputes/:id', component: DisputeDetailComponent, canActivate: [RoleGuard], data: { roles: shopRoles } },
-      { path: 'admin/disputes', component: DisputeListComponent, canActivate: [RoleGuard], data: { roles: adminRoles, scope: 'all' } },
-      { path: 'admin/disputes/:id', component: DisputeDetailComponent, canActivate: [RoleGuard], data: { roles: adminRoles } },
+      { path: 'shop/disputes', redirectTo: 'reclamations', pathMatch: 'full' },
+      { path: 'shop/disputes/:id', redirectTo: 'reclamations/:id' },
+      { path: 'admin/disputes', redirectTo: 'reclamations', pathMatch: 'full' },
+      { path: 'admin/disputes/:id', redirectTo: 'reclamations/:id' },
       { path: 'reclamations', component: ReclamationsComponent, canActivate: [RoleGuard], data: { roles: allRoles } },
       { path: 'reclamations/:id', component: DisputeDetailComponent, canActivate: [RoleGuard], data: { roles: allRoles, listRoute: '/dashboard/reclamations' } },
       { path: 'shop/balance', component: BalanceViewComponent, canActivate: [RoleGuard], data: { roles: shopAdminRoles } },

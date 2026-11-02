@@ -83,6 +83,14 @@ class PaymentControllerTest {
         return auth(UUID.fromString("00000000-0000-0000-0000-000000000003"), "admin", List.of("SYSTEM_ADMIN", "VIEW_PAYMENTS"), null);
     }
 
+    private UsernamePasswordAuthenticationToken foreignShopUser() {
+        return auth(UUID.fromString("00000000-0000-0000-0000-000000000004"), "foreign.shop", List.of("SHOP_CREATE_PAYMENTS", "SHOP_CANCEL_PAYMENTS", "VIEW_PAYMENTS"), UUID.fromString("00000000-0000-0000-0000-000000000099"));
+    }
+
+    private UsernamePasswordAuthenticationToken foreignSupplierUser() {
+        return auth(UUID.fromString("00000000-0000-0000-0000-000000000005"), "foreign.supplier", List.of("SUPPLIER_MANAGE_PAYMENTS", "VIEW_PAYMENTS"), UUID.fromString("00000000-0000-0000-0000-000000000098"));
+    }
+
     @Test
     void create_validRequest_returns201() throws Exception {
         CreatePaymentRequest request = new CreatePaymentRequest(UUID.fromString("00000000-0000-0000-0000-000000000010"), UUID.fromString("00000000-0000-0000-0000-000000000020"), new BigDecimal("150.00"), "TND", null, null);
@@ -94,6 +102,71 @@ class PaymentControllerTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.reference").isNotEmpty())
                 .andExpect(jsonPath("$.status").value("PENDING"));
+    }
+
+    @Test
+    void create_withForeignShopId_returns403() throws Exception {
+        CreatePaymentRequest request = new CreatePaymentRequest(
+                UUID.fromString("00000000-0000-0000-0000-000000000010"),
+                UUID.fromString("00000000-0000-0000-0000-000000000020"),
+                new BigDecimal("150.00"), "TND", null, null);
+
+        mockMvc.perform(post("/api/payments")
+                        .with(SecurityMockMvcRequestPostProcessors.authentication(foreignShopUser()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void create_withOwnShopIdFromForeignOrganization_returns403() throws Exception {
+        CreatePaymentRequest request = new CreatePaymentRequest(
+                UUID.fromString("00000000-0000-0000-0000-000000000099"),
+                UUID.fromString("00000000-0000-0000-0000-000000000020"),
+                new BigDecimal("150.00"), "TND", null, null);
+
+        mockMvc.perform(post("/api/payments")
+                        .with(SecurityMockMvcRequestPostProcessors.authentication(shopUser()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void getById_asForeignShop_returns403() throws Exception {
+        Payment p = createPayment(UUID.fromString("00000000-0000-0000-0000-000000000010"), UUID.fromString("00000000-0000-0000-0000-000000000020"), UUID.fromString("00000000-0000-0000-0000-000000000001"));
+
+        mockMvc.perform(get("/api/payments/" + p.id())
+                        .with(SecurityMockMvcRequestPostProcessors.authentication(foreignShopUser())))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void getById_asForeignSupplier_returns403() throws Exception {
+        Payment p = createPayment(UUID.fromString("00000000-0000-0000-0000-000000000010"), UUID.fromString("00000000-0000-0000-0000-000000000020"), UUID.fromString("00000000-0000-0000-0000-000000000001"));
+
+        mockMvc.perform(get("/api/payments/" + p.id())
+                        .with(SecurityMockMvcRequestPostProcessors.authentication(foreignSupplierUser())))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void getByReference_asForeignShop_returns403() throws Exception {
+        Payment p = createPayment(UUID.fromString("00000000-0000-0000-0000-000000000010"), UUID.fromString("00000000-0000-0000-0000-000000000020"), UUID.fromString("00000000-0000-0000-0000-000000000001"));
+
+        mockMvc.perform(get("/api/payments/reference/" + p.reference().value())
+                        .with(SecurityMockMvcRequestPostProcessors.authentication(foreignShopUser())))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void getById_asOwningSupplier_returnsPayment() throws Exception {
+        Payment p = createPayment(UUID.fromString("00000000-0000-0000-0000-000000000010"), UUID.fromString("00000000-0000-0000-0000-000000000020"), UUID.fromString("00000000-0000-0000-0000-000000000001"));
+
+        mockMvc.perform(get("/api/payments/" + p.id())
+                        .with(SecurityMockMvcRequestPostProcessors.authentication(supplierUser())))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.reference").value(p.reference().value()));
     }
 
     @Test
