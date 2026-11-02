@@ -312,7 +312,6 @@ public class OrderController {
         int safePage = Math.max(0, page);
         int safeSize = Math.min(Math.max(1, size), 100);
         var pageable = PageRequest.of(safePage, safeSize, Sort.by(Sort.Direction.DESC, "createdAt"));
-        var eligibleStatuses = List.of("REJECTED", "DELIVERY_REJECTED");
         boolean supplierSide = current.roles().contains("SUPPLIER_ADMIN") || current.roles().contains("SUPPLIER_AGENT");
         boolean shopSide = current.roles().contains("SHOP_ADMIN") || current.roles().contains("SHOP_AGENT");
 
@@ -321,11 +320,11 @@ public class OrderController {
         }
         org.springframework.data.domain.Page<com.paymentplatform.organization.domain.model.Order> orderPage;
         if (supplierSide) {
-            orderPage = orderRepository.findBySupplierIdAndStatusIn(current.organizationId(), eligibleStatuses, pageable);
+            orderPage = orderRepository.findBySupplierId(current.organizationId(), pageable);
         } else if (shopSide) {
-            orderPage = orderRepository.findByShopIdAndStatusIn(current.organizationId(), eligibleStatuses, pageable);
+            orderPage = orderRepository.findByShopId(current.organizationId(), pageable);
         } else if (current.roles().contains("SYSTEM_ADMIN")) {
-            orderPage = orderRepository.findByStatusIn(eligibleStatuses, pageable);
+            orderPage = orderRepository.findAll(pageable);
         } else {
             return ResponseEntity.status(403).build();
         }

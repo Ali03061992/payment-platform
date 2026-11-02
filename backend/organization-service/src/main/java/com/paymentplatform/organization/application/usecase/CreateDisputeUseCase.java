@@ -62,10 +62,6 @@ public class CreateDisputeUseCase {
 
     private DisputeResponse create(Order order, UUID actorUserId, String reason, String priority) {
         UUID orderId = order.getId();
-        String status = order.getStatus();
-        if (!"REJECTED".equals(status) && !"DELIVERY_REJECTED".equals(status)) {
-            throw new ConflictException("Un litige ne peut être ouvert que pour une commande rejetée (REJECTED ou DELIVERY_REJECTED)");
-        }
         if (disputes.existsByOrderIdAndStatusIn(orderId, List.of("OPEN", "IN_PROGRESS"))) {
             throw new ConflictException("Un litige actif existe déjà pour cette commande");
         }

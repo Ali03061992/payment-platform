@@ -280,6 +280,10 @@ export class ShopOrderDetailComponent implements OnInit, OnDestroy, OnChanges {
     }));
   }
 
+  canOpenDispute(): boolean {
+    return !this.disputes.some(d => d.status === 'OPEN' || d.status === 'IN_PROGRESS');
+  }
+
   toggleDisputeForm(): void {
     this.showDisputeForm = !this.showDisputeForm;
     this.disputeReason = '';

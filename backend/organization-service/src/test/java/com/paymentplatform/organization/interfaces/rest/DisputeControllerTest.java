@@ -148,17 +148,18 @@ class DisputeControllerTest {
     }
 
     @Test
-    void create_onNonRejectedOrder_returns409() throws Exception {
+    void create_onOngoingOrder_returns201() throws Exception {
         var response = createOrder.execute(
-                new CreateOrderRequest(supplierId, shopId, false, null, "TND", null, "Commande non rejetee",
+                new CreateOrderRequest(supplierId, shopId, false, null, "TND", null, "Commande en cours",
                         List.of(new OrderItemRequest(productId, 1, null))),
                 UUID.fromString("00000000-0000-0000-0000-000000000010"), "SHOP");
         var shopAdmin = auth(UUID.fromString("00000000-0000-0000-0000-000000000024"), "shop.admin", List.of("SHOP_ADMIN"), shopId);
         mockMvc.perform(post("/api/disputes")
                         .with(SecurityMockMvcRequestPostProcessors.authentication(shopAdmin))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(body(response.id(), "Motif premature")))
-                .andExpect(status().isConflict());
+                        .content(body(response.id(), "Motif en cours")))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.orderId").value(response.id().toString()));
     }
 
     @Test
@@ -177,17 +178,18 @@ class DisputeControllerTest {
     }
 
     @Test
-    void eligibleForDispute_asShopAgent_returnsOnlyEligibleOrders() throws Exception {
-        createOrder.execute(
-                new CreateOrderRequest(supplierId, shopId, false, null, "TND", null, "Commande brouillon",
+    void eligibleForDispute_asShopAgent_returnsOrdersWhateverTheirStatus() throws Exception {
+        var ongoing = createOrder.execute(
+                new CreateOrderRequest(supplierId, shopId, false, null, "TND", null, "Commande en cours",
                         List.of(new OrderItemRequest(productId, 1, null))),
                 UUID.fromString("00000000-0000-0000-0000-000000000010"), "SHOP");
         var agent = auth(UUID.fromString("00000000-0000-0000-0000-000000000027"), "shop.agent", List.of("SHOP_AGENT"), shopId);
         mockMvc.perform(get("/api/orders/eligible-for-dispute")
                         .with(SecurityMockMvcRequestPostProcessors.authentication(agent)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.items.length()").value(1))
-                .andExpect(jsonPath("$.items[0].id").value(rejectedOrderId.toString()));
+                .andExpect(jsonPath("$.items.length()").value(2))
+                .andExpect(jsonPath("$.items[*].id", org.hamcrest.Matchers.hasItem(rejectedOrderId.toString())))
+                .andExpect(jsonPath("$.items[*].id", org.hamcrest.Matchers.hasItem(ongoing.id().toString())));
     }
 
     @Test

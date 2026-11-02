@@ -521,17 +521,16 @@ export class OrderManagementComponent implements OnInit, OnDestroy {
     this.disputePriority = 'NORMAL';
   }
 
-  canOpenDispute(order: Order): boolean {
-    const hasActive = (this.detailDisputes || []).some(d => d.status === 'OPEN' || d.status === 'IN_PROGRESS');
-    return (order.status === 'REJECTED' || order.status === 'DELIVERY_REJECTED') && !hasActive;
+  canOpenDispute(): boolean {
+    return !(this.detailDisputes || []).some(d => d.status === 'OPEN' || d.status === 'IN_PROGRESS');
   }
 
   canOpenSelectedDispute(): boolean {
-    return !!this.selectedOrder && this.canOpenDispute(this.selectedOrder);
+    return !!this.selectedOrder && this.canOpenDispute();
   }
 
   openOrderDispute(): void {
-    if (!this.selectedOrder || !this.disputeReason.trim() || !this.canOpenDispute(this.selectedOrder)) return;
+    if (!this.selectedOrder || !this.disputeReason.trim() || !this.canOpenDispute()) return;
     this.submittingDispute = true;
     this.subscriptions.add(this.disputeService.create({
       orderId: this.selectedOrder.id,

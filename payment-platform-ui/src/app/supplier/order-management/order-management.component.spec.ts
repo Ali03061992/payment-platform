@@ -409,6 +409,20 @@ describe('OrderManagementComponent', () => {
     it('should return false for IN_DELIVERY', () => expect(component.canAssign({ status: 'IN_DELIVERY' } as any)).toBeFalse());
   });
 
+  describe('canOpenDispute', () => {
+    it('should allow a dispute on any selected order status', () => {
+      component.selectedOrder = { id: 'o1', status: 'IN_DELIVERY' } as any;
+      component.detailDisputes = [];
+      expect(component.canOpenSelectedDispute()).toBeTrue();
+    });
+
+    it('should prevent a second active dispute', () => {
+      component.selectedOrder = { id: 'o1', status: 'IN_DELIVERY' } as any;
+      component.detailDisputes = [{ status: 'OPEN' } as any];
+      expect(component.canOpenSelectedDispute()).toBeFalse();
+    });
+  });
+
   describe('canDeliveryReject', () => {
     it('should return true for IN_DELIVERY', () => expect(component.canDeliveryReject({ status: 'IN_DELIVERY' } as any)).toBeTrue());
     it('should return false for DELIVERED', () => expect(component.canDeliveryReject({ status: 'DELIVERED' } as any)).toBeFalse());

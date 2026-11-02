@@ -13,8 +13,8 @@ const REASON_MAX_LENGTH = 255;
 
 /**
  * Page universelle « Réclamations » : liste les litiges de l'organisation
- * et permet à chaque rôle métier d'en ouvrir un nouveau sur une commande
- * éligible (rejetée ou livraison rejetée).
+ * et permet à chaque rôle métier d'en ouvrir un nouveau sur n'importe quelle
+ * commande accessible, quel que soit son statut.
  */
 @Component({
     selector: 'app-reclamations',

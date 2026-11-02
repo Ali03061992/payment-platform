@@ -328,6 +328,20 @@ describe('ShopOrderDetailComponent', () => {
     });
   });
 
+  describe('canOpenDispute', () => {
+    it('should allow a dispute on an order whatever its status', () => {
+      component.disputes = [];
+      expect(component.canOpenDispute()).toBeTrue();
+    });
+
+    it('should prevent a second active dispute', () => {
+      component.disputes = [{ status: 'OPEN' } as any];
+      expect(component.canOpenDispute()).toBeFalse();
+      component.disputes = [{ status: 'IN_PROGRESS' } as any];
+      expect(component.canOpenDispute()).toBeFalse();
+    });
+  });
+
   describe('actionLabel', () => {
     it('should return correct labels', () => {
       expect(component.actionLabel('ORDER_CREATED')).toBe('ORDER_DETAIL.ACTION_CREATED');

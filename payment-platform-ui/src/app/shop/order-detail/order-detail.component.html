@@ -87,7 +87,7 @@
         <button class="btn btn-danger" (click)="cancel()" [attr.aria-label]="'ORDER_DETAIL.CANCEL_ARIA' | translate">{{ 'ORDERS.CANCEL_BTN' | translate }}</button>
       </div>
     }
-    @if (order.status === 'REJECTED' || order.status === 'DELIVERY_REJECTED') {
+    @if (canOpenDispute()) {
       <div class="action-bar no-print">
         @if (!showDisputeForm) {
           <button class="btn btn-warning" (click)="toggleDisputeForm()" [attr.aria-label]="'ORDER_DETAIL.OPEN_DISPUTE_ARIA' | translate">{{ 'DISPUTES.OPEN' | translate }}</button>
