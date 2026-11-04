@@ -10,8 +10,13 @@ describe('24 - Landing page', () => {
   it('should expose the public presentation content', () => {
     cy.contains('Pilotez vos échanges fournisseurs-boutiques').should('be.visible');
     cy.contains('Une plateforme, tout votre cycle commercial').should('exist');
+    cy.contains('La fiscalité tunisienne intégrée au quotidien').should('exist');
+    cy.contains('Une interface pensée pour le terrain').should('exist');
     cy.contains('Démarrer en trois étapes').should('exist');
     cy.contains('Parlons de votre projet').should('exist');
+    cy.get('.feature-card').should('have.length', 6);
+    cy.get('.compliance-card').should('have.length', 4);
+    cy.get('.screen-card').should('have.length', 3);
   });
 
   it('should not expose public self-registration', () => {

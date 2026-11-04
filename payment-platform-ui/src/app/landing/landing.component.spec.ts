@@ -46,4 +46,16 @@ describe('LandingComponent', () => {
       link.getAttribute('href') === '/login' || link.getAttribute('routerLink') === '/login'
     )).toBeTrue();
   });
+
+  it('should present the real platform scope, compliance and product preview', () => {
+    const root: HTMLElement = fixture.nativeElement;
+    expect(root.querySelectorAll('.feature-card').length).toBe(6);
+    expect(root.querySelectorAll('.compliance-card').length).toBe(4);
+    expect(root.querySelectorAll('.screen-card').length).toBe(3);
+    expect(root.querySelectorAll('.screen-shot').length).toBe(3);
+    expect(root.querySelector('a[href="#conformite"]')).toBeTruthy();
+    expect(root.textContent).toContain('LANDING.FEATURE_FISCAL_TITLE');
+    expect(root.textContent).toContain('LANDING.COMPLIANCE_TEJ_TITLE');
+    expect(root.textContent).toContain('LANDING.PREVIEW_SHOP_TITLE');
+  });
 });

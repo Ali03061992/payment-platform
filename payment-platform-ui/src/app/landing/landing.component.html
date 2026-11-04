@@ -10,6 +10,7 @@
 
       <nav class="main-nav" aria-label="Navigation principale">
         <a href="#plateforme">{{ 'LANDING.NAV_PLATFORM' | translate }}</a>
+        <a href="#conformite">{{ 'LANDING.NAV_COMPLIANCE' | translate }}</a>
         <a href="#solutions">{{ 'LANDING.NAV_SOLUTIONS' | translate }}</a>
         <a href="#contact">{{ 'LANDING.NAV_CONTACT' | translate }}</a>
       </nav>
@@ -43,8 +44,9 @@
           </p>
 
           <ul class="trust-list">
-            <li><app-icon name="check-circle" [size]="17"></app-icon>{{ 'LANDING.TRUST_SECURE' | translate }}</li>
+            <li><app-icon name="check-circle" [size]="17"></app-icon>{{ 'LANDING.TRUST_COMPLIANCE' | translate }}</li>
             <li><app-icon name="check-circle" [size]="17"></app-icon>{{ 'LANDING.TRUST_ROLES' | translate }}</li>
+            <li><app-icon name="check-circle" [size]="17"></app-icon>{{ 'LANDING.TRUST_I18N' | translate }}</li>
             <li><app-icon name="check-circle" [size]="17"></app-icon>{{ 'LANDING.TRUST_MOBILE' | translate }}</li>
           </ul>
         </div>
@@ -144,15 +146,95 @@
             <p>{{ 'LANDING.FEATURE_DELIVERY_DESC' | translate }}</p>
           </article>
           <article class="feature-card">
+            <span class="feature-icon"><app-icon name="box" [size]="22"></app-icon></span>
+            <h3>{{ 'LANDING.FEATURE_STOCK_TITLE' | translate }}</h3>
+            <p>{{ 'LANDING.FEATURE_STOCK_DESC' | translate }}</p>
+          </article>
+          <article class="feature-card">
             <span class="feature-icon"><app-icon name="wallet" [size]="22"></app-icon></span>
             <h3>{{ 'LANDING.FEATURE_PAYMENTS_TITLE' | translate }}</h3>
             <p>{{ 'LANDING.FEATURE_PAYMENTS_DESC' | translate }}</p>
           </article>
           <article class="feature-card">
-            <span class="feature-icon"><app-icon name="box" [size]="22"></app-icon></span>
-            <h3>{{ 'LANDING.FEATURE_STOCK_TITLE' | translate }}</h3>
-            <p>{{ 'LANDING.FEATURE_STOCK_DESC' | translate }}</p>
+            <span class="feature-icon"><app-icon name="file-text" [size]="22"></app-icon></span>
+            <h3>{{ 'LANDING.FEATURE_FISCAL_TITLE' | translate }}</h3>
+            <p>{{ 'LANDING.FEATURE_FISCAL_DESC' | translate }}</p>
           </article>
+          <article class="feature-card">
+            <span class="feature-icon"><app-icon name="bell" [size]="22"></app-icon></span>
+            <h3>{{ 'LANDING.FEATURE_DISPUTES_TITLE' | translate }}</h3>
+            <p>{{ 'LANDING.FEATURE_DISPUTES_DESC' | translate }}</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="conformite" class="section compliance-section" aria-labelledby="compliance-title">
+      <div class="section-inner">
+        <div class="section-heading">
+          <span class="eyebrow eyebrow-dark">{{ 'LANDING.COMPLIANCE_EYEBROW' | translate }}</span>
+          <h2 id="compliance-title">{{ 'LANDING.COMPLIANCE_TITLE' | translate }}</h2>
+          <p>{{ 'LANDING.COMPLIANCE_SUBTITLE' | translate }}</p>
+        </div>
+
+        <div class="compliance-grid">
+          <article class="compliance-card">
+            <span class="feature-icon"><app-icon name="scale" [size]="22"></app-icon></span>
+            <h3>{{ 'LANDING.COMPLIANCE_VAT_TITLE' | translate }}</h3>
+            <p>{{ 'LANDING.COMPLIANCE_VAT_DESC' | translate }}</p>
+          </article>
+          <article class="compliance-card">
+            <span class="feature-icon"><app-icon name="file-text" [size]="22"></app-icon></span>
+            <h3>{{ 'LANDING.COMPLIANCE_TEIF_TITLE' | translate }}</h3>
+            <p>{{ 'LANDING.COMPLIANCE_TEIF_DESC' | translate }}</p>
+          </article>
+          <article class="compliance-card">
+            <span class="feature-icon"><app-icon name="cash" [size]="22"></app-icon></span>
+            <h3>{{ 'LANDING.COMPLIANCE_TEJ_TITLE' | translate }}</h3>
+            <p>{{ 'LANDING.COMPLIANCE_TEJ_DESC' | translate }}</p>
+          </article>
+          <article class="compliance-card">
+            <span class="feature-icon"><app-icon name="lock" [size]="22"></app-icon></span>
+            <h3>{{ 'LANDING.COMPLIANCE_AUDIT_TITLE' | translate }}</h3>
+            <p>{{ 'LANDING.COMPLIANCE_AUDIT_DESC' | translate }}</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section preview-section" aria-labelledby="preview-title">
+      <div class="section-inner">
+        <div class="section-heading">
+          <span class="eyebrow eyebrow-dark">{{ 'LANDING.PREVIEW_EYEBROW' | translate }}</span>
+          <h2 id="preview-title">{{ 'LANDING.PREVIEW_TITLE' | translate }}</h2>
+          <p>{{ 'LANDING.PREVIEW_SUBTITLE' | translate }}</p>
+        </div>
+
+        <div class="screens-grid">
+          <figure class="screen-card">
+            <img class="screen-shot" src="assets/marketing/screens/01-admin-dashboard.png"
+              [alt]="'LANDING.PREVIEW_ADMIN_TITLE' | translate" loading="lazy">
+            <figcaption class="screen-caption">
+              <strong>{{ 'LANDING.PREVIEW_ADMIN_TITLE' | translate }}</strong>
+              <span>{{ 'LANDING.PREVIEW_ADMIN_DESC' | translate }}</span>
+            </figcaption>
+          </figure>
+          <figure class="screen-card">
+            <img class="screen-shot" src="assets/marketing/screens/02-supplier-orders.png"
+              [alt]="'LANDING.PREVIEW_SUPPLIER_TITLE' | translate" loading="lazy">
+            <figcaption class="screen-caption">
+              <strong>{{ 'LANDING.PREVIEW_SUPPLIER_TITLE' | translate }}</strong>
+              <span>{{ 'LANDING.PREVIEW_SUPPLIER_DESC' | translate }}</span>
+            </figcaption>
+          </figure>
+          <figure class="screen-card">
+            <img class="screen-shot" src="assets/marketing/screens/03-shop-reclamations.png"
+              [alt]="'LANDING.PREVIEW_SHOP_TITLE' | translate" loading="lazy">
+            <figcaption class="screen-caption">
+              <strong>{{ 'LANDING.PREVIEW_SHOP_TITLE' | translate }}</strong>
+              <span>{{ 'LANDING.PREVIEW_SHOP_DESC' | translate }}</span>
+            </figcaption>
+          </figure>
         </div>
       </div>
     </section>
@@ -170,16 +252,31 @@
             <span class="audience-icon"><app-icon name="factory" [size]="24"></app-icon></span>
             <h3>{{ 'LANDING.SOLUTION_SUPPLIER_TITLE' | translate }}</h3>
             <p>{{ 'LANDING.SOLUTION_SUPPLIER_DESC' | translate }}</p>
+            <ul class="audience-list">
+              <li><app-icon name="check-circle" [size]="15"></app-icon>{{ 'LANDING.SOLUTION_SUPPLIER_1' | translate }}</li>
+              <li><app-icon name="check-circle" [size]="15"></app-icon>{{ 'LANDING.SOLUTION_SUPPLIER_2' | translate }}</li>
+              <li><app-icon name="check-circle" [size]="15"></app-icon>{{ 'LANDING.SOLUTION_SUPPLIER_3' | translate }}</li>
+            </ul>
           </article>
           <article class="audience-card">
             <span class="audience-icon"><app-icon name="store" [size]="24"></app-icon></span>
             <h3>{{ 'LANDING.SOLUTION_SHOP_TITLE' | translate }}</h3>
             <p>{{ 'LANDING.SOLUTION_SHOP_DESC' | translate }}</p>
+            <ul class="audience-list">
+              <li><app-icon name="check-circle" [size]="15"></app-icon>{{ 'LANDING.SOLUTION_SHOP_1' | translate }}</li>
+              <li><app-icon name="check-circle" [size]="15"></app-icon>{{ 'LANDING.SOLUTION_SHOP_2' | translate }}</li>
+              <li><app-icon name="check-circle" [size]="15"></app-icon>{{ 'LANDING.SOLUTION_SHOP_3' | translate }}</li>
+            </ul>
           </article>
           <article class="audience-card">
             <span class="audience-icon"><app-icon name="users" [size]="24"></app-icon></span>
             <h3>{{ 'LANDING.SOLUTION_TEAMS_TITLE' | translate }}</h3>
             <p>{{ 'LANDING.SOLUTION_TEAMS_DESC' | translate }}</p>
+            <ul class="audience-list">
+              <li><app-icon name="check-circle" [size]="15"></app-icon>{{ 'LANDING.SOLUTION_TEAMS_1' | translate }}</li>
+              <li><app-icon name="check-circle" [size]="15"></app-icon>{{ 'LANDING.SOLUTION_TEAMS_2' | translate }}</li>
+              <li><app-icon name="check-circle" [size]="15"></app-icon>{{ 'LANDING.SOLUTION_TEAMS_3' | translate }}</li>
+            </ul>
           </article>
         </div>
       </div>

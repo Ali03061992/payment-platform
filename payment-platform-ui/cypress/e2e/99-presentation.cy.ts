@@ -1,4 +1,5 @@
-// Captures pour la présentation NEXTERA (supprimé après génération des assets).
+// Captures et video de presentation NEXTERA.
+// Prerequis : UI sur http://localhost:4200 et API sur http://localhost:8081.
 const cleanCapture = () => {
   cy.document().then((doc) => {
     doc.documentElement.style.setProperty('overflow', 'hidden', 'important');
@@ -36,13 +37,55 @@ const waitDashboard = () => {
   cy.wait(800);
 };
 
-describe('99 - Présentation NEXTERA', () => {
+const uiLogin = (username: string, password: string) => {
+  cy.visit('/login');
+  cy.get('#username').should('be.visible').clear().type(username);
+  cy.get('#password').clear().type(password);
+  cy.get('button[type="submit"]').click();
+  cy.url({ timeout: 20000 }).should('include', '/dashboard');
+  cy.waitForPageLoad();
+  cy.dismissOverlays();
+  cy.wait(800);
+};
+
+const visitDashboardPage = (path: string) => {
+  cy.visit(path);
+  cy.waitForPageLoad();
+  cy.dismissOverlays();
+  cy.wait(900);
+};
+
+describe('99 - Presentation NEXTERA', () => {
   before(() => cy.ensureTestUsers());
 
   beforeEach(() => {
     cy.clearAllSessionStorage();
     cy.clearAllLocalStorage();
-    cy.clearCookies();
+    cy.clearAllCookies();
+  });
+
+  it('capture la landing page et ses sections marketing', () => {
+    cy.viewport(1280, 720);
+    cy.visit('/');
+    cy.get('[data-testid="landing-page"]').should('exist');
+    cy.wait(900);
+    capture('00-landing-hero');
+
+    cy.get('#plateforme').scrollIntoView();
+    cy.wait(500);
+    capture('00b-landing-plateforme');
+
+    cy.get('#conformite').scrollIntoView();
+    cy.wait(500);
+    capture('00c-landing-conformite');
+
+    cy.get('.preview-section').scrollIntoView();
+    cy.wait(800);
+    capture('00d-landing-apercu');
+
+    cy.get('#solutions').scrollIntoView();
+    cy.wait(500);
+    capture('00e-landing-solutions');
   });
 
   it('capture le parcours administration', () => {
@@ -52,85 +95,78 @@ describe('99 - Présentation NEXTERA', () => {
     cy.wait(1200);
     capture('01-login');
 
-    cy.loginAsAdmin();
-    cy.wait(800);
-    cy.visit('/dashboard');
-    cy.waitForPageLoad();
+    uiLogin('system.admin', '@PAssword012345');
     waitDashboard();
+    cy.dismissOverlays();
     capture('02-admin-dashboard');
 
-    cy.visit('/dashboard/admin/suppliers');
-    cy.waitForPageLoad();
-    cy.wait(1000);
-    capture('03-admin-fournisseurs');
+    visitDashboardPage('/dashboard/admin/org-stats');
+    capture('03-admin-organisations', true);
 
-    cy.visit('/dashboard/payments');
-    cy.waitForPageLoad();
-    cy.wait(900);
+    visitDashboardPage('/dashboard/payments');
     capture('04-paiements', true);
 
-    cy.visit('/dashboard/notifications');
-    cy.wait(900);
+    visitDashboardPage('/dashboard/notifications');
     capture('05-notifications');
 
-    cy.visit('/dashboard/security');
-    cy.wait(900);
+    visitDashboardPage('/dashboard/security');
     capture('06-securite-passkeys');
 
     cy.viewport(390, 720);
     cy.visit('/dashboard');
     waitDashboard();
+    cy.dismissOverlays();
     cy.wait(1000);
     capture('07-mobile-dashboard');
   });
 
   it('capture le parcours fournisseur', () => {
     cy.viewport(1280, 720);
-    cy.loginAsSupplierAdmin();
-    cy.wait(800);
-    cy.visit('/dashboard');
-    cy.waitForPageLoad();
+    cy.getTestCtx().then((ctx) => uiLogin(ctx.users.supplierAdmin.username, 'test1234'));
     waitDashboard();
+    cy.dismissOverlays();
     capture('08-fournisseur-dashboard');
 
-    cy.visit('/dashboard/supplier/products');
-    cy.waitForPageLoad();
-    cy.wait(1000);
+    visitDashboardPage('/dashboard/supplier/products');
     capture('09-fournisseur-produits', true);
 
-    cy.visit('/dashboard/supplier/orders');
-    cy.waitForPageLoad();
-    cy.wait(1000);
+    visitDashboardPage('/dashboard/supplier/orders');
     capture('10-fournisseur-commandes', true);
 
-    cy.visit('/dashboard/supplier/invoices');
-    cy.waitForPageLoad();
-    cy.wait(1000);
+    visitDashboardPage('/dashboard/supplier/invoices');
     capture('11-journal-factures');
 
-    cy.visit('/dashboard/payments');
-    cy.waitForPageLoad();
-    cy.wait(900);
-    capture('12-fournisseur-paiements', true);
+    visitDashboardPage('/dashboard/supplier/financial');
+    capture('12-fournisseur-finances');
+
+    visitDashboardPage('/dashboard/supplier/deliveries');
+    capture('13-fournisseur-livraisons', true);
   });
 
-  it('capture le parcours boutique', () => {
+  it('capture le parcours boutique et les reclamations', () => {
     cy.viewport(1280, 720);
-    cy.loginAsShopAdmin();
-    cy.wait(800);
-    cy.visit('/dashboard');
-    cy.waitForPageLoad();
+    cy.getTestCtx().then((ctx) => uiLogin(ctx.users.shopAdmin.username, 'test1234'));
     waitDashboard();
-    capture('13-boutique-dashboard');
+    cy.dismissOverlays();
+    capture('14-boutique-dashboard');
 
-    cy.visit('/dashboard/shop/orders');
-    cy.waitForPageLoad();
-    cy.wait(1000);
-    capture('14-boutique-commandes');
+    visitDashboardPage('/dashboard/shop/orders');
+    capture('15-boutique-commandes');
 
-    cy.visit('/dashboard/shop/orders/create');
+    visitDashboardPage('/dashboard/shop/orders/create');
+    capture('16-nouvelle-commande');
+
+    visitDashboardPage('/dashboard/reclamations');
+    capture('17-reclamations');
+
+    visitDashboardPage('/dashboard/shop/quotes');
+    capture('18-devis-boutique');
+
+    cy.viewport(390, 720);
+    cy.visit('/dashboard/reclamations');
     cy.waitForPageLoad();
+    cy.dismissOverlays();
     cy.wait(1000);
-    capture('15-nouvelle-commande');
+    capture('19-mobile-reclamations');
   });
 });
