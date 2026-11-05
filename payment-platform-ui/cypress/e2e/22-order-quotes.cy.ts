@@ -52,12 +52,12 @@ function createDemande(ctx: any) {
   });
 }
 
-function sendDevis(ctx: any, requestId: string, discount: number) {
+function sendDevis(ctx: any, requestId: string, discount: number, asapPayment = false) {
   return cy.request({
     method: 'POST',
     url: `${API()}/api/quotes/requests/${requestId}/quotes`,
     headers: hdr(ctx.supplierToken),
-    body: { items: [{ productId: ctx.productId, quantity: 2, discount }] },
+    body: { items: [{ productId: ctx.productId, quantity: 2, discount }], asapPayment },
     failOnStatusCode: false,
   });
 }
@@ -109,6 +109,23 @@ describe('22 - Demandes de devis découplées', () => {
         return cy.apiGet(ctx.shopToken, `/api/quotes/requests/${d.id}`);
       }).then((g: any) => {
         expect(g.body.status).to.eq('ACCEPTED');
+      })));
+  });
+
+  it('devis ASAP repris en commande ASAP à l’acceptation', () => {
+    setupCtx().then((ctx) => createDemande(ctx).then((d: any) =>
+      sendDevis(ctx, d.id, 0, true).then((r) => {
+        expect(r.status).to.eq(200, JSON.stringify(r.body));
+        expect(r.body.asapPayment).to.be.true;
+        return cy.request({
+          method: 'POST',
+          url: `${API()}/api/quotes/quotes/${r.body.id}/accept`,
+          headers: hdr(ctx.shopToken),
+          failOnStatusCode: false,
+        });
+      }).then((a: any) => {
+        expect(a.status).to.eq(200, JSON.stringify(a.body));
+        expect(a.body.asapPayment, 'asap flag repris sur la commande').to.be.true;
       })));
   });
 

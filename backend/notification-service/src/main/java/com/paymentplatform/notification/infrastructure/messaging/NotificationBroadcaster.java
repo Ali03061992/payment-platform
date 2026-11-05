@@ -82,6 +82,28 @@ public class NotificationBroadcaster {
         return emitters.values().stream().mapToInt(List::size).sum();
     }
 
+    /**
+     * Signale à tous les clients connectés qu'une mutation a eu lieu : le
+     * frontend invalide alors son cache et revalide les pages actives. Le
+     * signal ne contient aucune donnée métier (aucun risque d'exposition).
+     */
+    public void broadcastDataChanged() {
+        List<SseEmitter> dead = new ArrayList<>();
+        for (var entry : emitters.entrySet()) {
+            for (SseEmitter emitter : entry.getValue()) {
+                try {
+                    emitter.send(SseEmitter.event().name("data-changed").data("{}"));
+                    metrics.sseDelivered();
+                } catch (IOException | IllegalStateException e) {
+                    dead.add(emitter);
+                    metrics.sseDropped();
+                }
+            }
+            entry.getValue().removeAll(dead);
+            dead.clear();
+        }
+    }
+
     public void sendHeartbeat() {
         List<SseEmitter> dead = new ArrayList<>();
         for (var entry : emitters.entrySet()) {

@@ -21,6 +21,7 @@ public final class SupplierQuote {
     private final BigDecimal stampAmount;
     private final String currency;
     private final String linesJson;
+    private final boolean asapPayment;
     private final UUID createdBy;
     private final Instant createdAt;
 
@@ -36,6 +37,7 @@ public final class SupplierQuote {
         this.stampAmount = b.stampAmount;
         this.currency = b.currency;
         this.linesJson = b.linesJson;
+        this.asapPayment = b.asapPayment;
         this.createdBy = b.createdBy;
         this.createdAt = b.createdAt;
     }
@@ -51,6 +53,7 @@ public final class SupplierQuote {
     public BigDecimal stampAmount() { return stampAmount; }
     public String currency() { return currency; }
     public String linesJson() { return linesJson; }
+    public boolean asapPayment() { return asapPayment; }
     public UUID createdBy() { return createdBy; }
     public Instant createdAt() { return createdAt; }
 
@@ -68,6 +71,7 @@ public final class SupplierQuote {
         private BigDecimal stampAmount = BigDecimal.ZERO;
         private String currency = "TND";
         private String linesJson = "[]";
+        private boolean asapPayment;
         private UUID createdBy;
         private Instant createdAt;
 
@@ -82,6 +86,7 @@ public final class SupplierQuote {
         public Builder stampAmount(BigDecimal v) { this.stampAmount = v; return this; }
         public Builder currency(String v) { this.currency = v; return this; }
         public Builder linesJson(String v) { this.linesJson = v; return this; }
+        public Builder asapPayment(boolean v) { this.asapPayment = v; return this; }
         public Builder createdBy(UUID v) { this.createdBy = v; return this; }
         public Builder createdAt(Instant v) { this.createdAt = v; return this; }
 

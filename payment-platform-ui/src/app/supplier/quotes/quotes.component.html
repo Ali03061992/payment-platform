@@ -69,7 +69,12 @@
               <tr>
                 <td>{{ 'ORDER_DETAIL.QUOTE_N' | translate:{version: q.version} }}</td>
                 <td>{{ q.total | number:'1.2-2' }} {{ q.currency }}</td>
-                <td>{{ q.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
+                <td>
+                  @if (q.asapPayment) {
+                    <span class="payment-badge badge-accepted">{{ 'QUOTES.ASAP_BADGE' | translate }}</span>
+                  }
+                  {{ q.createdAt | date:'dd/MM/yyyy HH:mm' }}
+                </td>
                 <td>
                   <button class="btn btn-sm btn-secondary" type="button" (click)="download(d.id, q.version, d.reference)">
                     {{ 'ORDER_DETAIL.QUOTE_DOWNLOAD' | translate }}
@@ -126,6 +131,9 @@
                 <span class="list-line-total">{{ q.total | number:'1.2-2' }} {{ q.currency }}</span>
               </div>
               <div class="list-quote-meta">
+                @if (q.asapPayment) {
+                  <span class="payment-badge badge-accepted">{{ 'QUOTES.ASAP_BADGE' | translate }}</span>
+                }
                 <span class="list-quote-date">{{ q.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
                 <button class="btn btn-secondary" type="button" (click)="download(d.id, q.version, d.reference)">
                   {{ 'ORDER_DETAIL.QUOTE_DOWNLOAD' | translate }}
@@ -184,6 +192,14 @@
             </div>
           </div>
         }
+        <div class="form-group">
+          <label class="toggle-label">
+            <input type="checkbox" [(ngModel)]="quoteAsapPayment" name="quoteAsapPayment"
+              [attr.aria-label]="'QUOTES.ASAP_ARIA' | translate">
+            <span>{{ 'QUOTES.ASAP_PAYMENT' | translate }}</span>
+          </label>
+          <p class="text-muted" style="margin:6px 0 0 28px;">{{ 'QUOTES.ASAP_HINT' | translate }}</p>
+        </div>
         <div class="form-actions">
           <button type="button" class="btn btn-secondary" (click)="closeQuote()">{{ 'ORDERS.CANCEL_BTN' | translate }}</button>
           <button type="submit" class="btn btn-primary" [disabled]="!canSubmitQuote()">

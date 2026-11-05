@@ -95,7 +95,7 @@ public class AcceptQuoteUseCase {
                 .orElseThrow(() -> new NotFoundException("Boutique non trouvée : " + request.shopId()));
 
         Order order = Order.create(request.supplierId(), request.shopId(), actorUserId,
-                "SHOP_ADMIN", "QUOTE", false, quote.currency(), PaymentTerms.IMMEDIATE);
+                "SHOP_ADMIN", "QUOTE", quote.asapPayment(), quote.currency(), PaymentTerms.IMMEDIATE);
         order.setNotes("Devis " + request.reference() + " n°" + quote.version() + " accepté");
         Order savedOrder = orders.save(order);
 

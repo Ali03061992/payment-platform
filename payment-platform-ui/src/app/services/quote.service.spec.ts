@@ -55,8 +55,15 @@ describe('QuoteService', () => {
     });
     const req = httpMock.expectOne('/api/quotes/requests/d1/quotes');
     expect(req.request.method).toBe('POST');
-    expect(req.request.body).toEqual({ items: [{ productId: 'p1', quantity: 2, discount: 10 }] });
+    expect(req.request.body).toEqual({ items: [{ productId: 'p1', quantity: 2, discount: 10 }], asapPayment: false });
     req.flush({ version: 1 } as any);
+  });
+
+  it('should POST quote with ASAP payment', () => {
+    service.sendQuote('d1', [{ productId: 'p1', quantity: 1, discount: 0 }], true).subscribe();
+    const req = httpMock.expectOne('/api/quotes/requests/d1/quotes');
+    expect(req.request.body).toEqual({ items: [{ productId: 'p1', quantity: 1, discount: 0 }], asapPayment: true });
+    req.flush({ version: 2, asapPayment: true } as any);
   });
 
   it('should POST accept and PATCH cancel', () => {

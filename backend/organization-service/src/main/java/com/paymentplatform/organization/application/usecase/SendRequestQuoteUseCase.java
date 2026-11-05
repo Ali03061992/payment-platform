@@ -130,6 +130,7 @@ public class SendRequestQuoteUseCase {
                 .stampAmount(transientOrder.getStampAmount())
                 .currency(transientOrder.getCurrency())
                 .linesJson(buildLinesJson(priced, discountPcts))
+                .asapPayment(request.asapPaymentEnabled())
                 .createdBy(actorUserId)
                 .createdAt(Instant.now())
                 .build();

@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { LoginService } from '../services/login.service';
 import { NotificationService } from '../services/notification.service';
+import { RealtimeService } from '../services/realtime.service';
 import { StockService } from '../services/stock.service';
 import { ThemeService, Theme } from '../services/theme.service';
 import { Notification } from '../models/notification.model';
@@ -94,6 +95,7 @@ export class LayoutComponent implements OnInit, OnDestroy {
     private loginService: LoginService,
     private router: Router,
     private notificationService: NotificationService,
+    private realtimeService: RealtimeService,
     private stockService: StockService,
     public themeService: ThemeService,
     private translate: TranslateService,
@@ -109,6 +111,7 @@ export class LayoutComponent implements OnInit, OnDestroy {
     // gelée) — sinon l'utilisateur ne voit les notifs qu'après refresh.
     this.notificationService.startPolling(60000);
     this.notificationService.startRealtime();
+    this.realtimeService.start();
     this.subs.push(
       this.notificationService.notifications$.subscribe(n => this.notifications = n),
       this.notificationService.unreadCount$.subscribe(c => this.unreadCount = c)
@@ -124,6 +127,7 @@ export class LayoutComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.notificationService.stopPolling();
     this.notificationService.stopRealtime();
+    this.realtimeService.stop();
     this.subs.forEach(s => s.unsubscribe());
   }
 

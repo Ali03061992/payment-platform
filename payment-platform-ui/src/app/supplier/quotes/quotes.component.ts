@@ -23,6 +23,7 @@ export class QuotesComponent implements OnInit, OnDestroy {
   quoteRequestId = '';
   quoteReference = '';
   quoteLines: { productId: string; productName: string; quantity: number; discount: number; unitPrice: number }[] = [];
+  quoteAsapPayment = false;
   sendingQuote = false;
 
   private subscriptions = new Subscription();
@@ -73,6 +74,7 @@ export class QuotesComponent implements OnInit, OnDestroy {
       discount: 0,
       unitPrice: l.unitPrice || 0
     }));
+    this.quoteAsapPayment = false;
     this.sendingQuote = false;
     this.showQuoteModal = true;
   }
@@ -81,6 +83,7 @@ export class QuotesComponent implements OnInit, OnDestroy {
     this.showQuoteModal = false;
     this.quoteRequestId = '';
     this.quoteLines = [];
+    this.quoteAsapPayment = false;
   }
 
   canSubmitQuote(): boolean {
@@ -93,7 +96,8 @@ export class QuotesComponent implements OnInit, OnDestroy {
     this.sendingQuote = true;
     this.subscriptions.add(this.quoteService.sendQuote(
       this.quoteRequestId,
-      this.quoteLines.map(l => ({ productId: l.productId, quantity: l.quantity, discount: l.discount }))
+      this.quoteLines.map(l => ({ productId: l.productId, quantity: l.quantity, discount: l.discount })),
+      this.quoteAsapPayment
     ).subscribe({
       next: (quote) => {
         this.toast.success(this.translate.instant('QUOTES.QUOTE_SENT', { version: quote.version }));

@@ -72,8 +72,18 @@ describe('23 - Interfaces dédiées devis', () => {
         // Le [name] Angular part vers NgModel : le DOM n'a pas d'attribut name -> ciblage structurel (colonne remise = 2e input nombre).
         cy.get('.modal-content table input[type="number"]', { timeout: 15000 }).should('have.length', 2);
         cy.get('.modal-content table input[type="number"]').eq(1).clear().type('10');
+        cy.get('.modal-content label.toggle-label input[type="checkbox"]').check({ force: true });
         cy.contains('button', 'Envoyer le devis').click();
         cy.get('#quote-modal-title').should('not.exist');
+        cy.request({
+          method: 'GET',
+          url: `${API()}/api/quotes/requests/${d.body.id}`,
+          headers: { Authorization: `Bearer ${ctx.shopToken}` },
+          failOnStatusCode: false,
+        }).then((g) => {
+          expect(g.status).to.eq(200, JSON.stringify(g.body));
+          expect(g.body.quotes[0].asapPayment, 'ASAP envoyé depuis la modal').to.be.true;
+        });
       });
     });
   });
@@ -93,7 +103,7 @@ describe('23 - Interfaces dédiées devis', () => {
         method: 'POST',
         url: `${API()}/api/quotes/requests/${d.body.id}/quotes`,
         headers: { Authorization: `Bearer ${ctx.supplierToken}` },
-        body: { items: [{ productId: ctx.productId, quantity: 1, discount: 20 }] },
+        body: { items: [{ productId: ctx.productId, quantity: 1, discount: 20 }], asapPayment: true },
         failOnStatusCode: false,
       })).then(() => {
         cy.loginAsShopAdmin();
@@ -101,9 +111,13 @@ describe('23 - Interfaces dédiées devis', () => {
         cy.dismissOverlays();
         cy.contains('Mes devis', { timeout: 15000 }).should('exist');
         cy.contains('Devis n°1').should('exist');
+        cy.get('.payment-badge').contains('ASAP').should('be.visible');
         cy.contains('button', "J'accepte ce devis").first().click();
         cy.contains('button', 'Valider', { timeout: 15000 }).first().click({ force: true });
         cy.url({ timeout: 20000 }).should('match', /\/dashboard\/shop\/orders\/[\w-]+/);
+        cy.contains('.detail-card', 'Paiement ASAP', { timeout: 15000 }).within(() => {
+          cy.contains('.detail-value', 'Oui').should('exist');
+        });
       });
     });
   });

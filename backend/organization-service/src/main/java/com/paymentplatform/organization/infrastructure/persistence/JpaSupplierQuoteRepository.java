@@ -49,6 +49,7 @@ public class JpaSupplierQuoteRepository implements SupplierQuoteRepository {
         e.setStampAmount(q.stampAmount());
         e.setCurrency(q.currency());
         e.setLinesJson(q.linesJson());
+        e.setAsapPayment(q.asapPayment());
         e.setCreatedBy(q.createdBy());
         e.setCreatedAt(q.createdAt());
         return e;
@@ -61,6 +62,7 @@ public class JpaSupplierQuoteRepository implements SupplierQuoteRepository {
                 .subtotal(e.getSubtotal())
                 .taxAmount(e.getTaxAmount()).total(e.getTotal()).stampAmount(e.getStampAmount())
                 .currency(e.getCurrency()).linesJson(e.getLinesJson())
+                .asapPayment(e.isAsapPayment())
                 .createdBy(e.getCreatedBy()).createdAt(e.getCreatedAt())
                 .build();
     }

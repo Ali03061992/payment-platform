@@ -1838,7 +1838,11 @@
     "SEND": "Send quote",
     "SENT_TITLE": "Quotes sent",
     "QUOTE_SENT": "Quote #{{version}} sent to the shop",
-    "QUOTE_ERROR": "Error sending the quote"
+    "QUOTE_ERROR": "Error sending the quote",
+    "ASAP_PAYMENT": "ASAP payment",
+    "ASAP_HINT": "The shop will be offered immediate payment when accepting this quote.",
+    "ASAP_ARIA": "Enable ASAP payment for the order created from this quote",
+    "ASAP_BADGE": "ASAP"
   },
   "MY_QUOTES": {
     "TITLE": "My quotes",
@@ -1861,7 +1865,8 @@
     "CANCEL_TITLE": "Cancel this request?",
     "CANCEL_MSG": "Cancel request {{ref}}?",
     "CANCELLED": "Request cancelled",
-    "CANCEL_ERROR": "Error cancelling"
+    "CANCEL_ERROR": "Error cancelling",
+    "ASAP_BADGE": "ASAP"
   },
   "SECURITY": {
     "TITLE": "Security",

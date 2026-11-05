@@ -99,7 +99,7 @@ class QuoteRequestH2Test {
     void chiffrage_versionne() {
         UUID requestId = demande();
         var quote = sendQuote.execute(requestId,
-                new SendQuoteRequest(List.of(new OrderItemRequest(productId, 2, new BigDecimal("10")))),
+                new SendQuoteRequest(List.of(new OrderItemRequest(productId, 2, new BigDecimal("10"))), false),
                 supplierId, actor);
         assertThat(quote.version()).isEqualTo(1);
         assertThat(quote.subtotal()).isEqualByComparingTo(new BigDecimal("1800.00"));
@@ -114,7 +114,7 @@ class QuoteRequestH2Test {
     void pdfDevis_totauxSnapshot() {
         UUID requestId = demande();
         sendQuote.execute(requestId,
-                new SendQuoteRequest(List.of(new OrderItemRequest(productId, 2, new BigDecimal("10")))),
+                new SendQuoteRequest(List.of(new OrderItemRequest(productId, 2, new BigDecimal("10"))), false),
                 supplierId, actor);
         var domain = quotes.findByRequestId(requestId).get(0);
         assertThat(domain.linesJson()).contains("\"lineTotal\":1800.0000");
@@ -132,7 +132,7 @@ class QuoteRequestH2Test {
     void acceptation_creeCommandeConfirmee() {
         UUID requestId = demande();
         var quote = sendQuote.execute(requestId,
-                new SendQuoteRequest(List.of(new OrderItemRequest(productId, 2, new BigDecimal("10")))),
+                new SendQuoteRequest(List.of(new OrderItemRequest(productId, 2, new BigDecimal("10"))), false),
                 supplierId, actor);
         var order = acceptQuote.execute(quote.id(), shopId, actor);
         assertThat(order.status()).isEqualTo("CONFIRMED");
@@ -142,11 +142,23 @@ class QuoteRequestH2Test {
     }
 
     @Test
+    @DisplayName("ASAP au devis : repris sur la commande créée")
+    void asapDevis_reprisSurCommande() {
+        UUID requestId = demande();
+        var quote = sendQuote.execute(requestId,
+                new SendQuoteRequest(List.of(new OrderItemRequest(productId, 2, null)), true),
+                supplierId, actor);
+        assertThat(quote.asapPayment()).isTrue();
+        var order = acceptQuote.execute(quote.id(), shopId, actor);
+        assertThat(order.asapPayment()).isTrue();
+    }
+
+    @Test
     @DisplayName("Boutique tierce : acceptation refusée")
     void acceptation_tiersRefusee() {
         UUID requestId = demande();
         var quote = sendQuote.execute(requestId,
-                new SendQuoteRequest(List.of(new OrderItemRequest(productId, 1, null))),
+                new SendQuoteRequest(List.of(new OrderItemRequest(productId, 1, null)), false),
                 supplierId, actor);
         assertThatThrownBy(() -> acceptQuote.execute(quote.id(), UUID.randomUUID(), actor))
                 .hasMessageContaining("boutique");
@@ -168,7 +180,7 @@ class QuoteRequestH2Test {
         var cancelled = cancelRequest.execute(requestId, shopId);
         assertThat(cancelled.status()).isEqualTo(QuoteRequestStatus.CANCELLED.name());
         assertThatThrownBy(() -> sendQuote.execute(requestId,
-                new SendQuoteRequest(List.of(new OrderItemRequest(productId, 1, null))),
+                new SendQuoteRequest(List.of(new OrderItemRequest(productId, 1, null)), false),
                 supplierId, actor))
                 .hasMessageContaining("clôturée");
     }

@@ -44,6 +44,12 @@ public class GatewayProxyController {
     @Value("${NOTIFICATION_SERVICE_PORT:8085}")
     private String notificationPort;
 
+    private final GatewayDataChangeBroadcaster dataChangeBroadcaster;
+
+    public GatewayProxyController(GatewayDataChangeBroadcaster dataChangeBroadcaster) {
+        this.dataChangeBroadcaster = dataChangeBroadcaster;
+    }
+
     @RequestMapping(value = {"/auth/**", "/users/**", "/suppliers/{supplierId}/agents/**"}, method = {
             org.springframework.web.bind.annotation.RequestMethod.GET,
             org.springframework.web.bind.annotation.RequestMethod.POST,
@@ -192,8 +198,25 @@ public class GatewayProxyController {
         for (String setCookie : response.headers().allValues("Set-Cookie")) {
             headers.add("Set-Cookie", setCookie);
         }
+        if (isBusinessMutation(request) && response.statusCode() / 100 == 2) {
+            dataChangeBroadcaster.broadcast();
+        }
         return ResponseEntity.status(response.statusCode())
                 .headers(headers)
                 .body(response.body());
+    }
+
+    /**
+     * Mutation métier = écriture hors authentification et notifications (ces
+     * dernières sont déjà couvertes par leurs propres événements SSE/polling).
+     */
+    private boolean isBusinessMutation(HttpServletRequest request) {
+        String method = request.getMethod();
+        if (!"POST".equals(method) && !"PUT".equals(method)
+                && !"PATCH".equals(method) && !"DELETE".equals(method)) {
+            return false;
+        }
+        String path = request.getRequestURI();
+        return !path.startsWith("/api/auth/") && !path.startsWith("/api/notifications");
     }
 }

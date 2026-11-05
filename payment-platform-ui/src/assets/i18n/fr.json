@@ -1838,7 +1838,11 @@
     "SEND": "Envoyer le devis",
     "SENT_TITLE": "Devis envoyés",
     "QUOTE_SENT": "Devis n°{{version}} envoyé à la boutique",
-    "QUOTE_ERROR": "Erreur lors de l'envoi du devis"
+    "QUOTE_ERROR": "Erreur lors de l'envoi du devis",
+    "ASAP_PAYMENT": "Paiement ASAP",
+    "ASAP_HINT": "La boutique pourra régler immédiatement dès l'acceptation de ce devis.",
+    "ASAP_ARIA": "Activer le paiement ASAP pour la commande issue de ce devis",
+    "ASAP_BADGE": "ASAP"
   },
   "MY_QUOTES": {
     "TITLE": "Mes devis",
@@ -1861,7 +1865,8 @@
     "CANCEL_TITLE": "Annuler cette demande ?",
     "CANCEL_MSG": "Annuler la demande {{ref}} ?",
     "CANCELLED": "Demande annulée",
-    "CANCEL_ERROR": "Erreur lors de l'annulation"
+    "CANCEL_ERROR": "Erreur lors de l'annulation",
+    "ASAP_BADGE": "ASAP"
   },
   "SECURITY": {
     "TITLE": "Sécurité",

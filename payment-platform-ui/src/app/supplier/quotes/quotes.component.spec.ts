@@ -77,8 +77,18 @@ describe('QuotesComponent', () => {
     component.quoteLines = [{ productId: 'p1', productName: 'Widget', quantity: 2, discount: 10 }];
     component.submitQuote();
     expect(quoteService.sendQuote).toHaveBeenCalledWith('d1',
-      [{ productId: 'p1', quantity: 2, discount: 10 }]);
+      [{ productId: 'p1', quantity: 2, discount: 10 }], false);
     expect(component.showQuoteModal).toBeFalse();
+  });
+
+  it('should send ASAP payment option with quote', () => {
+    quoteService.sendQuote.and.returnValue(of({ version: 2, asapPayment: true } as any));
+    component.quoteRequestId = 'd1';
+    component.quoteLines = [{ productId: 'p1', productName: 'Widget', quantity: 2, discount: 0 }];
+    component.quoteAsapPayment = true;
+    component.submitQuote();
+    expect(quoteService.sendQuote).toHaveBeenCalledWith('d1',
+      [{ productId: 'p1', quantity: 2, discount: 0 }], true);
   });
 
   it('should reject invalid discounts', () => {

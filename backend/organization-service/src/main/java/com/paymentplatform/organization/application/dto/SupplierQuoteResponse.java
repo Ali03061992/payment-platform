@@ -18,12 +18,13 @@ public record SupplierQuoteResponse(
         BigDecimal stampAmount,
         String currency,
         String linesJson,
+        boolean asapPayment,
         UUID createdBy,
         Instant createdAt) {
 
     public static SupplierQuoteResponse from(SupplierQuote q) {
         return new SupplierQuoteResponse(q.id(), q.requestId(), q.requestReference(), q.supplierId(),
                 q.version(), q.subtotal(), q.taxAmount(), q.total(),
-                q.stampAmount(), q.currency(), q.linesJson(), q.createdBy(), q.createdAt());
+                q.stampAmount(), q.currency(), q.linesJson(), q.asapPayment(), q.createdBy(), q.createdAt());
     }
 }

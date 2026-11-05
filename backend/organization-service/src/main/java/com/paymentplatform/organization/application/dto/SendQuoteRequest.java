@@ -12,5 +12,10 @@ import java.util.List;
  */
 public record SendQuoteRequest(
         @NotEmpty(message = "Le devis doit contenir au moins un article")
-        List<@Valid OrderItemRequest> items
-) {}
+        List<@Valid OrderItemRequest> items,
+        Boolean asapPayment
+) {
+    public boolean asapPaymentEnabled() {
+        return Boolean.TRUE.equals(asapPayment);
+    }
+}

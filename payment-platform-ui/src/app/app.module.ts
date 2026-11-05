@@ -74,6 +74,7 @@ import { InvoicesJournalComponent } from './components/invoices-journal/invoices
 import { StatusLabelPipe } from './pipes/status-label.pipe';
 import { TimeAgoPipe } from './pipes/time-ago.pipe';
 
+import { DataCacheInterceptor } from './core/data-cache.interceptor';
 import { JwtInterceptor } from './core/jwt.interceptor';
 import { AppRoutingModule } from './app-routing.module';
 import { AppTranslateModule } from './i18n/app-translate.module';
@@ -210,6 +211,9 @@ export function initApp(translate: TranslateService, loginService: LoginService)
         AppTranslateModule,
         ServiceWorkerModule.register('ngsw-worker.js', { enabled: environment.production })
     ], providers: [
+        // DataCache en premier : il capture la requête brute et délègue au JWT
+        // (y compris lors des revalidations, pour un token toujours frais).
+        { provide: HTTP_INTERCEPTORS, useClass: DataCacheInterceptor, multi: true },
         { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true },
         provideHttpClient(withInterceptorsFromDi()),
         { provide: APP_INITIALIZER, useFactory: initApp, deps: [TranslateService, LoginService], multi: true }

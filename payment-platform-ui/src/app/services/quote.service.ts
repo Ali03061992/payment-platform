@@ -33,9 +33,10 @@ export class QuoteService {
     return this.http.get<QuoteRequest>(`${this.apiUrl}/requests/${id}`);
   }
 
-  /** Chiffre et envoie un devis versionné (fournisseur) : remises lignes en %. */
-  sendQuote(requestId: string, items: { productId: string; quantity: number; discount: number }[]): Observable<SupplierQuote> {
-    return this.http.post<SupplierQuote>(`${this.apiUrl}/requests/${requestId}/quotes`, { items });
+  /** Chiffre et envoie un devis versionné (fournisseur) : remises lignes en %, option ASAP. */
+  sendQuote(requestId: string, items: { productId: string; quantity: number; discount: number }[],
+            asapPayment = false): Observable<SupplierQuote> {
+    return this.http.post<SupplierQuote>(`${this.apiUrl}/requests/${requestId}/quotes`, { items, asapPayment });
   }
 
   /** Accepte un devis (boutique) : crée la commande confirmée. */

@@ -36,7 +36,12 @@
           @for (row of allQuotes; track row.quote.id) {
             <tr>
               <td><strong>{{ row.demande.reference }}</strong></td>
-              <td>{{ 'ORDER_DETAIL.QUOTE_N' | translate:{version: row.quote.version} }}</td>
+              <td>
+                {{ 'ORDER_DETAIL.QUOTE_N' | translate:{version: row.quote.version} }}
+                @if (row.quote.asapPayment) {
+                  <span class="payment-badge badge-accepted">{{ 'MY_QUOTES.ASAP_BADGE' | translate }}</span>
+                }
+              </td>
               <td>{{ row.demande.supplierName || row.demande.supplierId }}</td>
               <td><strong>{{ row.quote.total | number:'1.2-2' }} {{ row.quote.currency }}</strong></td>
               <td>{{ row.quote.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
@@ -63,7 +68,12 @@
             <app-icon name="tag" [size]="20"></app-icon>
             {{ row.demande.reference }}
           </span>
-          <span class="list-card-tag">{{ 'ORDER_DETAIL.QUOTE_N' | translate:{version: row.quote.version} }}</span>
+          <span class="list-card-tag">
+            {{ 'ORDER_DETAIL.QUOTE_N' | translate:{version: row.quote.version} }}
+            @if (row.quote.asapPayment) {
+              <span class="payment-badge badge-accepted">{{ 'MY_QUOTES.ASAP_BADGE' | translate }}</span>
+            }
+          </span>
         </div>
         <div class="list-card-party">
           <app-icon name="factory" [size]="16"></app-icon>
@@ -159,6 +169,9 @@
           </span>
           <span class="amount-value">{{ q.total | number:'1.2-2' }} {{ q.currency }}</span>
         </div>
+        @if (q.asapPayment) {
+          <span class="payment-badge badge-accepted">{{ 'MY_QUOTES.ASAP_BADGE' | translate }}</span>
+        }
       }
       <div class="list-card-row">
         <span class="list-card-label">

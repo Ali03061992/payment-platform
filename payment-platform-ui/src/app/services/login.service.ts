@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of, throwError, finalize, shareReplay, map, catchError, switchMap, tap } from 'rxjs';
 import { LoginRequest, LoginResponse, User } from '../models/user.model';
+import { DataStoreService } from '../core/data-store.service';
 
 /** Réponse de /api/auth/refresh : accessToken + rotation éventuelle du refresh token. */
 interface RefreshResponse {
@@ -31,7 +32,7 @@ export class LoginService {
   /** Clés legacy (avant migration cookie) purgées dès qu'une session est adoptée. */
   private static readonly LEGACY_KEYS = ['token', 'refreshToken'];
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private dataStore: DataStoreService) {}
 
   /** Connecte un utilisateur et adopte la session (access token mémoire, cookie côté serveur). */
   login(data: LoginRequest): Observable<LoginResponse> {
@@ -108,6 +109,7 @@ export class LoginService {
   /** Purge complète locale (mémoire + storages + caches PWA) - sans appel réseau. */
   purgeSession(): void {
     this.accessToken = null;
+    this.dataStore.reset();
     try { localStorage.removeItem(LoginService.USER_KEY); } catch {}
     try { sessionStorage.removeItem(LoginService.USER_KEY); } catch {}
     this.purgeLegacy();

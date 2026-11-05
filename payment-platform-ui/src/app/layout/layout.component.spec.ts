@@ -13,6 +13,7 @@ import { of, Subject } from 'rxjs';
 import { LayoutComponent } from './layout.component';
 import { LoginService } from '../services/login.service';
 import { NotificationService } from '../services/notification.service';
+import { RealtimeService } from '../services/realtime.service';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 @Pipe({ name: 'translate', standalone: false })
@@ -25,6 +26,7 @@ describe('LayoutComponent', () => {
   let fixture: ComponentFixture<LayoutComponent>;
   let loginService: jasmine.SpyObj<LoginService>;
   let notificationService: jasmine.SpyObj<NotificationService>;
+  let realtimeService: jasmine.SpyObj<RealtimeService>;
   let router: jasmine.SpyObj<Router>;
   let notificationsSubject: Subject<any[]>;
   let unreadCountSubject: Subject<number>;
@@ -35,6 +37,7 @@ describe('LayoutComponent', () => {
     const loginSpy = jasmine.createSpyObj('LoginService', ['getCurrentUser', 'logout']);
     const notifSpy = jasmine.createSpyObj('NotificationService', ['startPolling', 'stopPolling', 'fetchNotifications', 'fetchUnreadCount', 'startRealtime', 'stopRealtime', 'markAllAsRead']);
     const routerSpy = jasmine.createSpyObj('Router', ['navigate']);
+    const realtimeSpy = jasmine.createSpyObj('RealtimeService', ['start', 'stop']);
     notifSpy.notifications$ = notificationsSubject.asObservable();
     notifSpy.unreadCount$ = unreadCountSubject.asObservable();
     notifSpy.fetchNotifications.and.returnValue(of([]));
@@ -49,6 +52,7 @@ describe('LayoutComponent', () => {
     providers: [
         { provide: LoginService, useValue: loginSpy },
         { provide: NotificationService, useValue: notifSpy },
+        { provide: RealtimeService, useValue: realtimeSpy },
         { provide: Router, useValue: routerSpy },
         { provide: TranslateService, useValue: { instant: (key: string) => key } },
         provideHttpClient(withInterceptorsFromDi()),
@@ -59,6 +63,7 @@ describe('LayoutComponent', () => {
     component = fixture.componentInstance;
     loginService = TestBed.inject(LoginService) as jasmine.SpyObj<LoginService>;
     notificationService = TestBed.inject(NotificationService) as jasmine.SpyObj<NotificationService>;
+    realtimeService = TestBed.inject(RealtimeService) as jasmine.SpyObj<RealtimeService>;
     router = TestBed.inject(Router) as jasmine.SpyObj<Router>;
   });
 
@@ -76,6 +81,7 @@ describe('LayoutComponent', () => {
       component.ngOnInit();
       expect(notificationService.startPolling).toHaveBeenCalled();
       expect(notificationService.startRealtime).toHaveBeenCalled();
+      expect(realtimeService.start).toHaveBeenCalled();
       notificationsSubject.next([{ id: 1 } as any]);
       unreadCountSubject.next(5);
       expect(component.notifications.length).toBe(1);
@@ -87,6 +93,7 @@ describe('LayoutComponent', () => {
       component.ngOnDestroy();
       expect(notificationService.stopPolling).toHaveBeenCalled();
       expect(notificationService.stopRealtime).toHaveBeenCalled();
+      expect(realtimeService.stop).toHaveBeenCalled();
     });
   });
 

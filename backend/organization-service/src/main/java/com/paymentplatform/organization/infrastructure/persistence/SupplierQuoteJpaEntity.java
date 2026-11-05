@@ -46,6 +46,9 @@ public class SupplierQuoteJpaEntity {
     @Column(name = "lines_json", nullable = false, columnDefinition = "MEDIUMTEXT")
     private String linesJson;
 
+    @Column(name = "asap_payment", nullable = false)
+    private boolean asapPayment;
+
     @Column(name = "created_by", nullable = false, columnDefinition = "VARCHAR(36)")
     private UUID createdBy;
 
@@ -74,6 +77,8 @@ public class SupplierQuoteJpaEntity {
     public void setCurrency(String currency) { this.currency = currency; }
     public String getLinesJson() { return linesJson; }
     public void setLinesJson(String linesJson) { this.linesJson = linesJson; }
+    public boolean isAsapPayment() { return asapPayment; }
+    public void setAsapPayment(boolean asapPayment) { this.asapPayment = asapPayment; }
     public UUID getCreatedBy() { return createdBy; }
     public void setCreatedBy(UUID createdBy) { this.createdBy = createdBy; }
     public Instant getCreatedAt() { return createdAt; }

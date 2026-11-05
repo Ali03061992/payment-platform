@@ -146,6 +146,7 @@ export interface SupplierQuote {
   stampAmount: number;
   currency: string;
   linesJson: string;
+  asapPayment: boolean;
   createdBy: string | null;
   createdAt: string;
 }

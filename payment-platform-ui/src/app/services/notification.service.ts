@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { BehaviorSubject, Observable, interval, Subscription, of } from 'rxjs';
+import { BehaviorSubject, Observable, Subject, interval, Subscription, of } from 'rxjs';
 import { switchMap, tap, map, catchError } from 'rxjs/operators';
 import { Notification, NotificationPage } from '../models/notification.model';
 import { NotificationSoundService } from './notification-sound.service';
@@ -11,6 +11,8 @@ import { BRAND } from '../core/brand.config';
 export class NotificationService {
   private apiUrl = '/api/notifications';
   private notificationsSubject = new BehaviorSubject<Notification[]>([]);
+  private realtimeNotificationsSubject = new Subject<Notification>();
+  private dataChangedSubject = new Subject<void>();
   private unreadCountSubject = new BehaviorSubject<number>(0);
   private pollingSub?: Subscription;
   private unreadCountPollingSub?: Subscription;
@@ -19,6 +21,8 @@ export class NotificationService {
   private reconnectTimer: any;
 
   notifications$ = this.notificationsSubject.asObservable();
+  realtimeNotifications$ = this.realtimeNotificationsSubject.asObservable();
+  dataChanged$ = this.dataChangedSubject.asObservable();
   unreadCount$ = this.unreadCountSubject.asObservable();
 
   constructor(
@@ -110,6 +114,10 @@ export class NotificationService {
       }
     });
 
+    // Signal global émis après toute mutation : les pages revalident leurs
+    // données via le store, sans rechargement ni attente du prochain polling.
+    this.eventSource.addEventListener('data-changed', () => this.dataChangedSubject.next());
+
     this.eventSource.onerror = () => {
       this.stopRealtime();
       this.reconnectTimer = setTimeout(() => this.startRealtime(), 5000);
@@ -133,6 +141,7 @@ export class NotificationService {
     if (!exists) {
       this.notificationsSubject.next([notification, ...current]);
       this.unreadCountSubject.next(this.unreadCountSubject.getValue() + 1);
+      this.realtimeNotificationsSubject.next(notification);
       this.sound.play();
       this.showBrowserNotification(notification);
     }
