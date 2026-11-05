@@ -9,17 +9,38 @@
       </a>
 
       <nav class="main-nav" aria-label="Navigation principale">
-        <a href="#plateforme">{{ 'LANDING.NAV_PLATFORM' | translate }}</a>
-        <a href="#conformite">{{ 'LANDING.NAV_COMPLIANCE' | translate }}</a>
-        <a href="#solutions">{{ 'LANDING.NAV_SOLUTIONS' | translate }}</a>
-        <a href="#contact">{{ 'LANDING.NAV_CONTACT' | translate }}</a>
+        <a href="#plateforme" [class.active]="activeSection === 'plateforme'"
+          (click)="scrollToSection($event, 'plateforme')">{{ 'LANDING.NAV_PLATFORM' | translate }}</a>
+        <a href="#conformite" [class.active]="activeSection === 'conformite'"
+          (click)="scrollToSection($event, 'conformite')">{{ 'LANDING.NAV_COMPLIANCE' | translate }}</a>
+        <a href="#solutions" [class.active]="activeSection === 'solutions'"
+          (click)="scrollToSection($event, 'solutions')">{{ 'LANDING.NAV_SOLUTIONS' | translate }}</a>
+        <a href="#contact" [class.active]="activeSection === 'contact'"
+          (click)="scrollToSection($event, 'contact')">{{ 'LANDING.NAV_CONTACT' | translate }}</a>
       </nav>
 
       <div class="header-actions">
         <a routerLink="/login" class="lp-btn lp-btn-ghost">{{ 'LANDING.LOGIN' | translate }}</a>
-        <a href="#contact" class="lp-btn lp-btn-primary">{{ 'LANDING.REQUEST_ACCESS' | translate }}</a>
+        <a href="#contact" class="lp-btn lp-btn-primary"
+          (click)="scrollToSection($event, 'contact')">{{ 'LANDING.REQUEST_ACCESS' | translate }}</a>
+        <button type="button" class="nav-toggle" [class.open]="menuOpen" [attr.aria-expanded]="menuOpen"
+          aria-controls="landing-mobile-nav" aria-label="Navigation" (click)="toggleMenu()">
+          <span></span><span></span><span></span>
+        </button>
       </div>
     </div>
+
+    <nav id="landing-mobile-nav" class="mobile-nav" [class.open]="menuOpen" aria-label="Navigation mobile">
+      <a href="#plateforme" [class.active]="activeSection === 'plateforme'"
+        (click)="scrollToSection($event, 'plateforme')">{{ 'LANDING.NAV_PLATFORM' | translate }}</a>
+      <a href="#conformite" [class.active]="activeSection === 'conformite'"
+        (click)="scrollToSection($event, 'conformite')">{{ 'LANDING.NAV_COMPLIANCE' | translate }}</a>
+      <a href="#solutions" [class.active]="activeSection === 'solutions'"
+        (click)="scrollToSection($event, 'solutions')">{{ 'LANDING.NAV_SOLUTIONS' | translate }}</a>
+      <a href="#contact" [class.active]="activeSection === 'contact'"
+        (click)="scrollToSection($event, 'contact')">{{ 'LANDING.NAV_CONTACT' | translate }}</a>
+      <a routerLink="/login" class="mobile-login">{{ 'LANDING.LOGIN' | translate }}</a>
+    </nav>
   </header>
 
   <main>
@@ -31,7 +52,8 @@
           <p class="hero-subtitle">{{ 'LANDING.HERO_SUBTITLE' | translate }}</p>
 
           <div class="hero-actions">
-            <a href="#contact" class="lp-btn lp-btn-primary lp-btn-lg">
+            <a href="#contact" class="lp-btn lp-btn-primary lp-btn-lg"
+              (click)="scrollToSection($event, 'contact')">
               {{ 'LANDING.HERO_PRIMARY' | translate }}
               <app-icon name="chevron-right" [size]="17"></app-icon>
             </a>
@@ -210,31 +232,48 @@
           <p>{{ 'LANDING.PREVIEW_SUBTITLE' | translate }}</p>
         </div>
 
-        <div class="screens-grid">
-          <figure class="screen-card">
-            <img class="screen-shot" src="assets/marketing/screens/01-admin-dashboard.png"
-              [alt]="'LANDING.PREVIEW_ADMIN_TITLE' | translate" loading="lazy">
-            <figcaption class="screen-caption">
-              <strong>{{ 'LANDING.PREVIEW_ADMIN_TITLE' | translate }}</strong>
-              <span>{{ 'LANDING.PREVIEW_ADMIN_DESC' | translate }}</span>
-            </figcaption>
-          </figure>
-          <figure class="screen-card">
-            <img class="screen-shot" src="assets/marketing/screens/02-supplier-orders.png"
-              [alt]="'LANDING.PREVIEW_SUPPLIER_TITLE' | translate" loading="lazy">
-            <figcaption class="screen-caption">
-              <strong>{{ 'LANDING.PREVIEW_SUPPLIER_TITLE' | translate }}</strong>
-              <span>{{ 'LANDING.PREVIEW_SUPPLIER_DESC' | translate }}</span>
-            </figcaption>
-          </figure>
-          <figure class="screen-card">
-            <img class="screen-shot" src="assets/marketing/screens/03-shop-reclamations.png"
-              [alt]="'LANDING.PREVIEW_SHOP_TITLE' | translate" loading="lazy">
-            <figcaption class="screen-caption">
-              <strong>{{ 'LANDING.PREVIEW_SHOP_TITLE' | translate }}</strong>
-              <span>{{ 'LANDING.PREVIEW_SHOP_DESC' | translate }}</span>
-            </figcaption>
-          </figure>
+        <div class="screens-marquee" role="region" [attr.aria-label]="'LANDING.PREVIEW_TITLE' | translate">
+          <div class="marquee-row">
+            <div class="marquee-track">
+              <div class="marquee-group">
+                @for (screen of galleryRowOne; track screen.src) {
+                  <figure class="screen-tile">
+                    <img [src]="screen.src" [alt]="screen.labelKey | translate" loading="lazy">
+                    <figcaption>{{ screen.labelKey | translate }}</figcaption>
+                  </figure>
+                }
+              </div>
+              <div class="marquee-group" aria-hidden="true">
+                @for (screen of galleryRowOne; track screen.src) {
+                  <figure class="screen-tile">
+                    <img [src]="screen.src" alt="" loading="lazy">
+                    <figcaption>{{ screen.labelKey | translate }}</figcaption>
+                  </figure>
+                }
+              </div>
+            </div>
+          </div>
+
+          <div class="marquee-row marquee-row-reverse">
+            <div class="marquee-track marquee-track-reverse">
+              <div class="marquee-group">
+                @for (screen of galleryRowTwo; track screen.src) {
+                  <figure class="screen-tile">
+                    <img [src]="screen.src" [alt]="screen.labelKey | translate" loading="lazy">
+                    <figcaption>{{ screen.labelKey | translate }}</figcaption>
+                  </figure>
+                }
+              </div>
+              <div class="marquee-group" aria-hidden="true">
+                @for (screen of galleryRowTwo; track screen.src) {
+                  <figure class="screen-tile">
+                    <img [src]="screen.src" alt="" loading="lazy">
+                    <figcaption>{{ screen.labelKey | translate }}</figcaption>
+                  </figure>
+                }
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -368,8 +407,8 @@
       </div>
       <div class="footer-links">
         <a routerLink="/login">{{ 'LANDING.FOOTER_LOGIN' | translate }}</a>
-        <a href="#contact">{{ 'LANDING.FOOTER_ACCESS' | translate }}</a>
-        <a href="#solutions">{{ 'LANDING.NAV_SOLUTIONS' | translate }}</a>
+        <a href="#contact" (click)="scrollToSection($event, 'contact')">{{ 'LANDING.FOOTER_ACCESS' | translate }}</a>
+        <a href="#solutions" (click)="scrollToSection($event, 'solutions')">{{ 'LANDING.NAV_SOLUTIONS' | translate }}</a>
       </div>
       <p class="footer-copy">© {{ year }} {{ brand.name }}. {{ 'LANDING.FOOTER_RIGHTS' | translate }}</p>
     </div>

@@ -222,6 +222,8 @@ NEXTERA repose sur des microservices Spring Boot derrière une API Gateway, une 
 
 ## Landing publique
 
+Navigation par ancres avec section active, menu mobile, thème plus vif et **galerie animée de 19 écrans produit** sur deux rangées.
+
 | Plateforme | Conformité | Aperçu produit | Solutions |
 |---|---|---|---|
 | ![Plateforme](assets/screens/00b-landing-plateforme.png) | ![Conformité](assets/screens/00c-landing-conformite.png) | ![Aperçu](assets/screens/00d-landing-apercu.png) | ![Solutions](assets/screens/00e-landing-solutions.png) |

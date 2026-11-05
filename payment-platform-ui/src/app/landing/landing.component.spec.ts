@@ -51,11 +51,20 @@ describe('LandingComponent', () => {
     const root: HTMLElement = fixture.nativeElement;
     expect(root.querySelectorAll('.feature-card').length).toBe(6);
     expect(root.querySelectorAll('.compliance-card').length).toBe(4);
-    expect(root.querySelectorAll('.screen-card').length).toBe(3);
-    expect(root.querySelectorAll('.screen-shot').length).toBe(3);
+    expect(component.galleryScreens.length).toBe(19);
+    expect(root.querySelectorAll('.screen-tile').length).toBe(38);
+    expect(root.querySelector('.screens-marquee')).toBeTruthy();
     expect(root.querySelector('a[href="#conformite"]')).toBeTruthy();
     expect(root.textContent).toContain('LANDING.FEATURE_FISCAL_TITLE');
     expect(root.textContent).toContain('LANDING.COMPLIANCE_TEJ_TITLE');
     expect(root.textContent).toContain('LANDING.PREVIEW_SHOP_TITLE');
+  });
+
+  it('should expose a mobile navigation and section anchors', () => {
+    const root: HTMLElement = fixture.nativeElement;
+    expect(root.querySelector('.nav-toggle')).toBeTruthy();
+    expect(root.querySelector('#landing-mobile-nav')).toBeTruthy();
+    expect(root.querySelectorAll('.main-nav a').length).toBe(4);
+    expect(root.querySelectorAll('.mobile-nav a').length).toBe(5);
   });
 });

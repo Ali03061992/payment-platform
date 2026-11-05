@@ -16,7 +16,26 @@ describe('24 - Landing page', () => {
     cy.contains('Parlons de votre projet').should('exist');
     cy.get('.feature-card').should('have.length', 6);
     cy.get('.compliance-card').should('have.length', 4);
-    cy.get('.screen-card').should('have.length', 3);
+    cy.get('.screens-marquee').should('exist');
+    cy.get('.screen-tile').should('have.length', 38);
+  });
+
+  it('should navigate to every navbar section', () => {
+    ['plateforme', 'conformite', 'solutions', 'contact'].forEach((sectionId) => {
+      cy.get(`.main-nav a[href="#${sectionId}"]`).click();
+      cy.location('hash').should('eq', `#${sectionId}`);
+      cy.get(`#${sectionId}`).should('be.visible');
+      cy.window().its('scrollY').should('be.greaterThan', 100);
+    });
+  });
+
+  it('should navigate from the mobile menu', () => {
+    cy.viewport(390, 720);
+    cy.get('.nav-toggle').click();
+    cy.get('#landing-mobile-nav').should('be.visible');
+    cy.get('#landing-mobile-nav a[href="#solutions"]').click();
+    cy.location('hash').should('eq', '#solutions');
+    cy.get('#solutions').should('be.visible');
   });
 
   it('should not expose public self-registration', () => {
