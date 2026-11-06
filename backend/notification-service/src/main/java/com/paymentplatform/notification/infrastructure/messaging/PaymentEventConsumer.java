@@ -4,8 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.paymentplatform.notification.domain.model.Notification;
 import com.paymentplatform.notification.domain.model.NotificationRepository;
-import com.paymentplatform.notification.infrastructure.email.EmailNotificationService;
-import com.paymentplatform.notification.infrastructure.http.IdentityRecipientClient;
 import com.paymentplatform.notification.infrastructure.push.PushNotificationService;
 import com.paymentplatform.notification.infrastructure.push.WebPushSender;
 import com.paymentplatform.shared.infrastructure.eventing.EventDeduplicator;
@@ -26,27 +24,21 @@ public class PaymentEventConsumer {
     private final EventDeduplicator deduplicator;
     private final ObjectMapper objectMapper;
     private final NotificationBroadcaster broadcaster;
-    private final EmailNotificationService emailService;
     private final PushNotificationService pushService;
     private final WebPushSender webPushSender;
-    private final IdentityRecipientClient identityRecipients;
 
     public PaymentEventConsumer(NotificationRepository notifications,
                                  EventDeduplicator deduplicator,
                                  ObjectMapper objectMapper,
                                  NotificationBroadcaster broadcaster,
-                                 EmailNotificationService emailService,
                                  PushNotificationService pushService,
-                                 WebPushSender webPushSender,
-                                 IdentityRecipientClient identityRecipients) {
+                                 WebPushSender webPushSender) {
         this.notifications = notifications;
         this.deduplicator = deduplicator;
         this.objectMapper = objectMapper;
         this.broadcaster = broadcaster;
-        this.emailService = emailService;
         this.pushService = pushService;
         this.webPushSender = webPushSender;
-        this.identityRecipients = identityRecipients;
     }
 
     @RabbitListener(queues = "notification.payments")
@@ -121,8 +113,6 @@ public class PaymentEventConsumer {
                 "PAYMENT", reference
         )));
 
-        sendPaymentReceiptEmail(shopId, reference);
-
         pushService.sendToOrganization(supplierId, "Paiement confirmé",
                 "Le paiement " + reference + " a été confirmé", "PAYMENT_CONFIRMED", "/dashboard/payments");
         webPushSender.sendToOrganization(supplierId, "Paiement confirmé",
@@ -170,13 +160,4 @@ public class PaymentEventConsumer {
                 "PAYMENT_CANCELLED", "/dashboard/payments");
     }
 
-    private void sendPaymentReceiptEmail(UUID shopId, String reference) {
-        if (!emailService.isEmailEnabled()) {
-            return;
-        }
-        identityRecipients.emailForOrganizationRole(shopId, "SHOP_ADMIN")
-                .ifPresentOrElse(
-                        email -> emailService.sendPaymentReceipt(email, "la boutique", reference, "", "", reference),
-                        () -> log.warn("Payment receipt email skipped for shop {}: no recipient", shopId));
-    }
 }

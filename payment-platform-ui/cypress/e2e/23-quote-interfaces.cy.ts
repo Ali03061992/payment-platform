@@ -72,7 +72,8 @@ describe('23 - Interfaces dédiées devis', () => {
         // Le [name] Angular part vers NgModel : le DOM n'a pas d'attribut name -> ciblage structurel (colonne remise = 2e input nombre).
         cy.get('.modal-content table input[type="number"]', { timeout: 15000 }).should('have.length', 2);
         cy.get('.modal-content table input[type="number"]').eq(1).clear().type('10');
-        cy.get('.modal-content label.toggle-label input[type="checkbox"]').check({ force: true });
+        cy.get('.modal-content label.toggle-label input[type="checkbox"]').check();
+        cy.get('.modal-content label.toggle-label input[type="checkbox"]').should('be.checked');
         cy.contains('button', 'Envoyer le devis').click();
         cy.get('#quote-modal-title').should('not.exist');
         cy.request({

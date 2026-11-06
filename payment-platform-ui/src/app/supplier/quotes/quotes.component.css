@@ -37,6 +37,32 @@ td .form-control,
 .modal-content .text-muted {
   font-size: 0.8125rem;
 }
+.toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2.75rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+.toggle-label input[type="checkbox"] {
+  width: 1.125rem;
+  height: 1.125rem;
+  min-width: 1.125rem;
+  min-height: 1.125rem;
+  cursor: pointer;
+  accent-color: var(--sky-dark);
+}
+.asap-hint {
+  margin: 0.375rem 0 0 1.75rem;
+}
+[dir="rtl"] .asap-hint {
+  margin-right: 1.75rem;
+  margin-left: 0;
+  text-align: right;
+}
 [dir="rtl"] .demande-head strong {
   margin-right: 0;
   margin-left: 0.5rem;

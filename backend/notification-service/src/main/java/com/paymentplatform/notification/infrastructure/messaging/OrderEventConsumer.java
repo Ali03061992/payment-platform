@@ -4,8 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.paymentplatform.notification.domain.model.Notification;
 import com.paymentplatform.notification.domain.model.NotificationRepository;
-import com.paymentplatform.notification.infrastructure.email.EmailNotificationService;
-import com.paymentplatform.notification.infrastructure.http.IdentityRecipientClient;
 import com.paymentplatform.notification.infrastructure.push.PushNotificationService;
 import com.paymentplatform.notification.infrastructure.push.WebPushSender;
 import com.paymentplatform.shared.infrastructure.eventing.EventDeduplicator;
@@ -26,27 +24,21 @@ public class OrderEventConsumer {
     private final EventDeduplicator deduplicator;
     private final ObjectMapper objectMapper;
     private final NotificationBroadcaster broadcaster;
-    private final EmailNotificationService emailService;
     private final PushNotificationService pushService;
     private final WebPushSender webPushSender;
-    private final IdentityRecipientClient identityRecipients;
 
     public OrderEventConsumer(NotificationRepository notifications,
                                EventDeduplicator deduplicator,
                                ObjectMapper objectMapper,
                                NotificationBroadcaster broadcaster,
-                               EmailNotificationService emailService,
                                PushNotificationService pushService,
-                               WebPushSender webPushSender,
-                               IdentityRecipientClient identityRecipients) {
+                               WebPushSender webPushSender) {
         this.notifications = notifications;
         this.deduplicator = deduplicator;
         this.objectMapper = objectMapper;
         this.broadcaster = broadcaster;
-        this.emailService = emailService;
         this.pushService = pushService;
         this.webPushSender = webPushSender;
-        this.identityRecipients = identityRecipients;
     }
 
     @RabbitListener(queues = "notification.orders")
@@ -119,8 +111,6 @@ public class OrderEventConsumer {
                 "ORDER", reference
         )));
 
-        sendOrderConfirmationEmail(shopId, reference);
-
         webPushSender.sendToOrganization(shopId, "Commande confirmée",
                 "La commande " + reference + " a été confirmée par le fournisseur",
                 "ORDER_CONFIRMED", "/dashboard/shop/orders");
@@ -165,8 +155,6 @@ public class OrderEventConsumer {
                 "Commande " + reference + " livrée — en attente d'acceptation",
                 "ORDER", reference
         )));
-
-        sendDeliveryEmail(shopId, reference);
 
         pushService.sendToOrganization(shopId, "Commande livrée",
                 "La commande " + reference + " est prête à être acceptée", "ORDER_DELIVERED", "/dashboard/shop/orders");
@@ -388,24 +376,5 @@ public class OrderEventConsumer {
                 "LOW_STOCK_ALERT", "/dashboard/supplier/products");
     }
 
-    private void sendOrderConfirmationEmail(UUID shopId, String reference) {
-        if (!emailService.isEmailEnabled()) {
-            return;
-        }
-        identityRecipients.emailForOrganizationRole(shopId, "SHOP_ADMIN")
-                .ifPresentOrElse(
-                        email -> emailService.sendOrderConfirmation(email, "la boutique", reference, ""),
-                        () -> log.warn("Order confirmation email skipped for shop {}: no recipient", shopId));
-    }
-
-    private void sendDeliveryEmail(UUID shopId, String reference) {
-        if (!emailService.isEmailEnabled()) {
-            return;
-        }
-        identityRecipients.emailForOrganizationRole(shopId, "SHOP_ADMIN")
-                .ifPresentOrElse(
-                        email -> emailService.sendDeliveryNotification(email, "la boutique", reference, ""),
-                        () -> log.warn("Delivery email skipped for shop {}: no recipient", shopId));
-    }
 }
 
