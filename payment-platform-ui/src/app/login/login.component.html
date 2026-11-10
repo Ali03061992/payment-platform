@@ -1,54 +1,56 @@
-<div class="login-container">
-  <div class="login-card">
-    <div class="login-logo">
-      <img [src]="brand.logoPath" class="logo-img" [alt]="brand.name">
-    </div>
-    <h1>{{ 'AUTH.LOGIN_TITLE' | translate }}</h1>
-    <p class="subtitle">{{ 'AUTH.LOGIN_SUBTITLE' | translate }}</p>
-
-    <form (ngSubmit)="onSubmit()">
-      <div class="form-group">
-        <label for="username">{{ 'AUTH.USERNAME' | translate }}</label>
-        <input id="username" type="text" [(ngModel)]="form.username" name="username" required placeholder="system.admin" autocomplete="username" aria-required="true">
+<div class="auth-page login-container">
+  <div class="auth-card login-card">
+    <div class="auth-body">
+      <div class="login-logo">
+        <img [src]="brand.logoPath" class="logo-img" [alt]="brand.name">
       </div>
+      <h1>{{ 'AUTH.LOGIN_TITLE' | translate }}</h1>
+      <p class="subtitle">{{ 'AUTH.LOGIN_SUBTITLE' | translate }}</p>
 
-      <div class="form-group">
-        <label for="password">{{ 'AUTH.PASSWORD' | translate }}</label>
-        <input id="password" type="password" [(ngModel)]="form.password" name="password" required placeholder="••••••••" autocomplete="current-password" aria-required="true">
-      </div>
-
-      @if (error) {
-        <div class="error-message" role="alert" aria-live="assertive">{{ error }}</div>
-      }
-
-      <button type="submit" class="btn btn-primary btn-block" [disabled]="loading || passkeyLoading"
-        [attr.aria-label]="loading ? ('AUTH.LOGIN_LOADING' | translate) : ('AUTH.LOGIN_BUTTON' | translate)">
-        {{ loading ? ('AUTH.LOGIN_LOADING' | translate) : ('AUTH.LOGIN_BUTTON' | translate) }}
-      </button>
-
-      @if (passkeysEnabled && passkeySupported) {
-        <div class="passkey-separator" aria-hidden="true">
-          <span></span>
-          <small>{{ 'AUTH.PASSKEY_SEPARATOR' | translate }}</small>
-          <span></span>
+      <form (ngSubmit)="onSubmit()">
+        <div class="form-group">
+          <label for="username">{{ 'AUTH.USERNAME' | translate }}</label>
+          <input id="username" type="text" [(ngModel)]="form.username" name="username" required placeholder="system.admin" autocomplete="username" aria-required="true">
         </div>
-        <button type="button" class="btn btn-passkey btn-block" (click)="onPasskeyLogin()"
-          [disabled]="loading || passkeyLoading"
-          [attr.aria-label]="passkeyLoading ? ('AUTH.PASSKEY_LOGIN_LOADING' | translate) : ('AUTH.PASSKEY_LOGIN_BUTTON' | translate)">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"
-               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <circle cx="8" cy="15" r="4"/>
-            <path d="M10.85 12.15L19 4"/>
-            <path d="M18 5l2 2"/>
-            <path d="M15 8l2 2"/>
-          </svg>
-          {{ passkeyLoading ? ('AUTH.PASSKEY_LOGIN_LOADING' | translate) : ('AUTH.PASSKEY_LOGIN_BUTTON' | translate) }}
-        </button>
-      }
-    </form>
 
-    <p class="register-link">
-      <a routerLink="/forgot-password">{{ 'AUTH.FORGOT_PASSWORD' | translate }}</a>
-    </p>
+        <div class="form-group">
+          <label for="password">{{ 'AUTH.PASSWORD' | translate }}</label>
+          <input id="password" type="password" [(ngModel)]="form.password" name="password" required placeholder="••••••••" autocomplete="current-password" aria-required="true">
+        </div>
+
+        @if (error) {
+          <div class="auth-error" role="alert" aria-live="assertive">{{ error }}</div>
+        }
+
+        <button type="submit" class="btn btn-primary auth-submit" [disabled]="loading || passkeyLoading"
+          [attr.aria-label]="loading ? ('AUTH.LOGIN_LOADING' | translate) : ('AUTH.LOGIN_BUTTON' | translate)">
+          {{ loading ? ('AUTH.LOGIN_LOADING' | translate) : ('AUTH.LOGIN_BUTTON' | translate) }}
+        </button>
+
+        @if (passkeysEnabled && passkeySupported) {
+          <div class="passkey-separator" aria-hidden="true">
+            <span></span>
+            <small>{{ 'AUTH.PASSKEY_SEPARATOR' | translate }}</small>
+            <span></span>
+          </div>
+          <button type="button" class="btn btn-passkey auth-submit" (click)="onPasskeyLogin()"
+            [disabled]="loading || passkeyLoading"
+            [attr.aria-label]="passkeyLoading ? ('AUTH.PASSKEY_LOGIN_LOADING' | translate) : ('AUTH.PASSKEY_LOGIN_BUTTON' | translate)">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"
+                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="8" cy="15" r="4"/>
+              <path d="M10.85 12.15L19 4"/>
+              <path d="M18 5l2 2"/>
+              <path d="M15 8l2 2"/>
+            </svg>
+            {{ passkeyLoading ? ('AUTH.PASSKEY_LOGIN_LOADING' | translate) : ('AUTH.PASSKEY_LOGIN_BUTTON' | translate) }}
+          </button>
+        }
+      </form>
+
+      <p class="auth-link">
+        <a routerLink="/forgot-password">{{ 'AUTH.FORGOT_PASSWORD' | translate }}</a>
+      </p>
+    </div>
   </div>
 </div>

@@ -4,7 +4,7 @@
 </div>
 
 @if (!success) {
-  <div class="form-card">
+  <div class="form-card form-card-narrow">
     <form (ngSubmit)="onSubmit()">
       <div class="form-section">
         <h3>{{ 'CATALOG.SECTION_INFO' | translate }}</h3>
@@ -142,7 +142,7 @@
 
 <!-- Success State -->
 @if (success) {
-  <div class="success-card">
+  <div class="form-card form-card-narrow success-card">
     <div class="success-icon"><app-icon name="check-circle" [size]="40"></app-icon></div>
     <h2>{{ 'CATALOG.SUCCESS_ADD_TITLE' | translate }}</h2>
     <p class="success-text">{{ form.name }} {{ 'CATALOG.SUCCESS_ADD_TEXT' | translate }}</p>

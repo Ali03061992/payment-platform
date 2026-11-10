@@ -50,15 +50,15 @@
 }
 
 .camera-error .btn-retry {
-  margin-left: auto;
+  margin-inline-start: auto;
   flex-shrink: 0;
   padding: 6px 14px;
   font-size: 12px;
 }
 
 .https-warning {
-  background: linear-gradient(135deg, #e3f2fd, #f3e5f5);
-  border: 1px solid #90caf9;
+  background: linear-gradient(135deg, var(--sky-soft), var(--bg-tertiary));
+  border: 1px solid var(--sky-border);
   border-radius: 12px;
   padding: 20px;
   margin-bottom: 20px;
@@ -155,7 +155,7 @@
   position: absolute;
   width: 30px;
   height: 30px;
-  border-color: #4fc3f7;
+  border-color: var(--sky);
   border-style: solid;
   border-width: 0;
 }
@@ -170,7 +170,7 @@
   left: 10px;
   right: 10px;
   height: 2px;
-  background: linear-gradient(90deg, transparent, #4fc3f7, transparent);
+  background: linear-gradient(90deg, transparent, var(--sky), transparent);
   animation: scanMove 2s ease-in-out infinite;
 }
 

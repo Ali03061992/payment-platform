@@ -79,7 +79,7 @@
 }
 
 @if (!loading) {
-  <div class="table-card">
+  <div class="table-card table-stack">
     <div class="table-wrapper">
       <table>
         <thead>
@@ -94,16 +94,16 @@
         <tbody>
           @for (s of sortedShops; track s) {
             <tr>
-              <td><strong>{{ s.name }}</strong></td>
-              <td>
+              <td [attr.data-label]="'ORGS.NAME' | translate"><strong>{{ s.name }}</strong></td>
+              <td [attr.data-label]="'DASHBOARD.STATUS' | translate">
                 <span class="status-badge" [class.active]="s.status === 'ACTIVE'" [class.disabled]="s.status === 'DISABLED'"
                   [attr.aria-label]="('ORGS.SHOP_STATUS_ARIA' | translate) + (s.status === 'ACTIVE' ? ('STATUS.ACTIVE' | translate) : ('USERS.STATUS_DISABLED' | translate))" role="status">
                   {{ s.status === 'ACTIVE' ? ('STATUS.ACTIVE' | translate) : ('USERS.STATUS_DISABLED' | translate) }}
                 </span>
               </td>
-              <td>{{ s.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
-              <td>{{ s.matriculeFiscal || '-' }}</td>
-              <td>
+              <td [attr.data-label]="'ORGS.CREATED_AT' | translate">{{ s.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
+              <td [attr.data-label]="'ORGS.MATRICULE_FISCAL' | translate">{{ s.matriculeFiscal || '-' }}</td>
+              <td class="actions">
                 <button class="btn btn-sm btn-secondary" (click)="openFiscalEdit(s)"
                   [attr.aria-label]="('ORGS.EDIT_FISCAL_ARIA' | translate) + ' ' + s.name">
                   {{ 'ORGS.EDIT_FISCAL' | translate }}

@@ -90,7 +90,7 @@
       </div>
     }
 
-    <div class="table-card" style="margin-top:24px;">
+    <div class="table-card mt-24">
       <h3 class="section-title">{{ 'DISPUTES.ATTACHMENTS_TITLE' | translate }}</h3>
       <div class="attachments-section">
         @if ((dispute.attachments || []).length === 0) {
@@ -112,13 +112,13 @@
             <input type="file" accept=".pdf,.jpg,.jpeg,.png" (change)="onFileSelected($event)"
               [disabled]="uploading" hidden>
           </label>
-          <p class="form-hint">{{ 'DISPUTES.ATTACHMENT_HINT' | translate }}</p>
+          <p class="field-hint">{{ 'DISPUTES.ATTACHMENT_HINT' | translate }}</p>
         }
       </div>
     </div>
 
     @if (isAdmin()) {
-      <div class="table-card" style="margin-top:24px;">
+      <div class="table-card mt-24">
         <h3 class="section-title">{{ 'DISPUTES.NOTES_TITLE' | translate }}</h3>
         <div class="notes-section">
           @if ((dispute.notes || []).length === 0) {
@@ -133,7 +133,7 @@
               <p>{{ note.content }}</p>
             </div>
           }
-          <div class="note-form">
+          <div class="note-form comment-form">
             <textarea [(ngModel)]="noteContent" rows="2" maxlength="2000"
               [placeholder]="'DISPUTES.NOTE_PLACEHOLDER' | translate"
               [attr.aria-label]="'DISPUTES.NOTE_PLACEHOLDER' | translate"></textarea>
@@ -145,8 +145,8 @@
         </div>
       </div>
     }
-    <div class="table-card" style="margin-top:24px;">
-      <h3 style="padding:16px 20px 0;">{{ 'DISPUTES.MESSAGES_TITLE' | translate }}</h3>
+    <div class="table-card mt-24">
+      <h3 class="section-title">{{ 'DISPUTES.MESSAGES_TITLE' | translate }}</h3>
       <div class="messages-container">
         @if ((dispute.messages || []).length === 0) {
           <p class="no-messages">{{ 'DISPUTES.NO_MESSAGES' | translate }}</p>
@@ -176,7 +176,7 @@
     </div>
 
     @if ((dispute.history || []).length > 0) {
-      <div class="table-card" style="margin-top:24px;">
+      <div class="table-card mt-24">
         <h3 class="section-title">{{ 'DISPUTES.HISTORY_TITLE' | translate }}</h3>
         <ol class="history-list">
           @for (item of dispute.history; track item.id) {

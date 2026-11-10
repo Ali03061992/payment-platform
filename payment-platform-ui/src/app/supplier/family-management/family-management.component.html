@@ -46,7 +46,7 @@
 }
 
 @if (!loading) {
-  <div class="table-card">
+  <div class="table-card table-stack">
     <div class="table-wrapper">
       <table>
         <thead>
@@ -61,10 +61,10 @@
         <tbody>
           @for (fam of pagedFamilies; track fam) {
             <tr>
-              <td><strong>{{ fam.name }}</strong></td>
-              <td><code>{{ fam.code }}</code></td>
-              <td>{{ getCategoryNames(fam) }}</td>
-              <td><span class="badge badge-active">{{ fam.status }}</span></td>
+              <td [attr.data-label]="'CATALOG.COL_NAME' | translate"><strong>{{ fam.name }}</strong></td>
+              <td [attr.data-label]="'CATALOG.COL_CODE' | translate"><code>{{ fam.code }}</code></td>
+              <td [attr.data-label]="'CATALOG.COL_CATEGORIES' | translate">{{ getCategoryNames(fam) }}</td>
+              <td [attr.data-label]="'CATALOG.COL_STATUS' | translate"><span class="badge badge-active">{{ fam.status }}</span></td>
               <td class="actions">
                 <button class="btn btn-sm btn-secondary" (click)="openEdit(fam)">{{ 'CATALOG.BTN_EDIT' | translate }}</button>
                 <button class="btn btn-sm btn-danger" (click)="deleteFamily(fam)">{{ 'CATALOG.BTN_DELETE' | translate }}</button>

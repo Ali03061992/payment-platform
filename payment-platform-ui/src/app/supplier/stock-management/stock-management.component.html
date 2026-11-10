@@ -144,7 +144,7 @@
 <!-- Mouvement Modal -->
 @if (showMovementModal) {
   <div class="modal-overlay" (click)="closeMovement()">
-    <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-content modal-sm" (click)="$event.stopPropagation()">
       <div class="modal-header">
         <h3>{{ movementTypeLabel(movementType) }} — {{ selectedProduct?.name }}</h3>
         <button class="btn-close" (click)="closeMovement()">&times;</button>

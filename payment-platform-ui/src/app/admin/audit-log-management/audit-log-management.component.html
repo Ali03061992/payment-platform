@@ -28,11 +28,11 @@
 }
 
 @if (error) {
-  <div class="error-message">{{ error }}</div>
+  <div class="alert alert-error">{{ error }}</div>
 }
 
 @if (!loading && !error) {
-  <div class="table-card">
+  <div class="table-card table-stack">
     <div class="table-wrapper">
       <table>
         <thead>
@@ -47,11 +47,11 @@
         <tbody>
           @for (log of sortedLogs; track log.id) {
             <tr>
-              <td>{{ log.timestamp | date:'dd/MM/yyyy HH:mm:ss' }}</td>
-              <td><code>{{ log.userId || '-' }}</code></td>
-              <td><span class="action-badge">{{ formatAction(log.action) }}</span></td>
-              <td><code>{{ log.entityId || '-' }}</code></td>
-              <td class="details-cell">{{ log.details || '-' }}</td>
+              <td [attr.data-label]="'AUDIT.DATE_TIME' | translate">{{ log.timestamp | date:'dd/MM/yyyy HH:mm:ss' }}</td>
+              <td [attr.data-label]="'AUDIT.USER' | translate"><code>{{ log.userId || '-' }}</code></td>
+              <td [attr.data-label]="'AUDIT.ACTION' | translate"><span class="badge badge-info">{{ formatAction(log.action) }}</span></td>
+              <td [attr.data-label]="'AUDIT.ENTITY' | translate"><code>{{ log.entityId || '-' }}</code></td>
+              <td class="details-cell" [attr.data-label]="'AUDIT.DETAILS' | translate">{{ log.details || '-' }}</td>
             </tr>
           }
           @if (logs.length === 0) {

@@ -2,7 +2,7 @@
   <h2>{{ 'SUPPLIER_ORDERS.TITLE' | translate }}</h2>
   <a class="btn btn-primary" routerLink="/dashboard/supplier/orders/create" [attr.aria-label]="'SUPPLIER_ORDERS.CREATE_ARIA' | translate">{{ 'ORDERS.NEW_ORDER' | translate }}</a>
 </div>
-<div class="tabs" style="margin-bottom: 24px;" role="tablist" [attr.aria-label]="'SUPPLIER_ORDERS.TABS_ARIA' | translate">
+<div class="tabs mb-24" role="tablist" [attr.aria-label]="'SUPPLIER_ORDERS.TABS_ARIA' | translate">
   <button class="tab-btn" [class.active]="activeTab === 'orders'" (click)="switchTab('orders')" role="tab" [attr.aria-selected]="activeTab === 'orders'" id="tab-orders">{{ 'ORDERS.TITLE' | translate }}</button>
   <button class="tab-btn" [class.active]="activeTab === 'deliveries'" (click)="switchTab('deliveries')" role="tab" [attr.aria-selected]="activeTab === 'deliveries'" id="tab-deliveries">{{ 'SUPPLIER_ORDERS.TAB_DELIVERIES' | translate }}</button>
 </div>
@@ -802,12 +802,12 @@
             [placeholder]="'SUPPLIER_ORDERS.SEARCH_PRODUCT_PLACEHOLDER' | translate">
         </div>
         @if (loadingEditProducts) {
-          <div class="text-muted" style="padding:12px;">{{ 'SUPPLIER_ORDERS.LOADING_PRODUCTS' | translate }}</div>
+          <div class="text-muted p-12">{{ 'SUPPLIER_ORDERS.LOADING_PRODUCTS' | translate }}</div>
         }
         @if (!loadingEditProducts && filteredEditProducts.length > 0) {
-          <div class="table-card" style="margin-bottom:16px;">
-            <h4 style="padding:12px 16px 0;">{{ 'SUPPLIER_ORDERS.AVAILABLE_PRODUCTS' | translate }}</h4>
-            <div class="table-wrapper" style="max-height:200px;overflow-y:auto;">
+          <div class="table-card mb-16">
+            <h4 class="table-card-title">{{ 'SUPPLIER_ORDERS.AVAILABLE_PRODUCTS' | translate }}</h4>
+            <div class="table-wrapper table-wrapper-scroll">
               <table>
                 <thead>
                   <tr>
@@ -834,8 +834,8 @@
           </div>
         }
         @if (editOrderLines.length > 0) {
-          <div class="table-card" style="margin-bottom:16px;">
-            <h4 style="padding:12px 16px 0;">{{ 'SUPPLIER_ORDERS.ORDER_ITEMS' | translate }}</h4>
+          <div class="table-card mb-16">
+            <h4 class="table-card-title">{{ 'SUPPLIER_ORDERS.ORDER_ITEMS' | translate }}</h4>
             <div class="table-wrapper">
               <table>
                 <thead>
@@ -852,12 +852,12 @@
                       <td>{{ line.productName }}</td>
                       <td>
                         <input type="number" [(ngModel)]="line.quantity" [name]="'editQty_' + i"
-                          class="form-control" min="1" style="width:80px;" required
+                          class="form-control input-qty" min="1" required
                           [attr.aria-label]="('SUPPLIER_ORDERS.QTY_ARIA' | translate) + ' ' + line.productName">
                       </td>
                       <td>
                         <input type="number" [(ngModel)]="line.discount" [name]="'editDiscount_' + i"
-                          class="form-control" min="0" max="100" style="width:80px;"
+                          class="form-control input-qty" min="0" max="100"
                           [attr.aria-label]="('SUPPLIER_ORDERS.DISCOUNT_ARIA' | translate) + ' ' + line.productName">
                       </td>
                       <td>

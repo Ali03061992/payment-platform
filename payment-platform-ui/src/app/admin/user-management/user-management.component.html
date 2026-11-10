@@ -27,7 +27,7 @@
 }
 
 @if (!loading) {
-  <div class="table-card">
+  <div class="table-card table-stack">
     <div class="table-wrapper">
       <table>
         <thead>
@@ -44,12 +44,12 @@
         <tbody>
           @for (user of sortedUsers; track user) {
             <tr>
-              <td><strong>{{ user.username }}</strong></td>
-              <td>{{ user.firstName }} {{ user.lastName }}</td>
-              <td>{{ user.email }}</td>
-              <td>{{ user.phone || '-' }}</td>
-              <td><span class="role-badge">{{ user.roles[0] }}</span></td>
-              <td>
+              <td [attr.data-label]="'AUTH.USERNAME' | translate"><strong>{{ user.username }}</strong></td>
+              <td [attr.data-label]="'USERS.FULL_NAME' | translate">{{ user.firstName }} {{ user.lastName }}</td>
+              <td [attr.data-label]="'AUTH.EMAIL' | translate">{{ user.email }}</td>
+              <td [attr.data-label]="'USERS.PHONE' | translate">{{ user.phone || '-' }}</td>
+              <td [attr.data-label]="'AUTH.ROLE' | translate"><span class="role-badge">{{ user.roles[0] }}</span></td>
+              <td [attr.data-label]="'DASHBOARD.STATUS' | translate">
                 <span class="status-badge" [class.active]="user.status === 'ACTIVE'" [class.disabled]="user.status === 'DISABLED'"
                   [attr.aria-label]="('USERS.STATUS_ARIA' | translate) + (user.status === 'ACTIVE' ? ('STATUS.ACTIVE' | translate) : ('USERS.STATUS_DISABLED' | translate))" role="status">
                   {{ (user.status === 'ACTIVE' ? ('STATUS.ACTIVE' | translate) : ('USERS.STATUS_DISABLED' | translate)) }}

@@ -3,8 +3,8 @@
 </div>
 
 <div class="search-bar">
-  <input type="text" [(ngModel)]="searchQuery" [placeholder]="'USERS.SEARCH_PLACEHOLDER' | translate" class="search-input">
-  <select [(ngModel)]="filterStatus" class="filter-select">
+  <input type="text" [(ngModel)]="searchQuery" [placeholder]="'USERS.SEARCH_PLACEHOLDER' | translate" class="form-control search-input" [attr.aria-label]="'USERS.SEARCH_PLACEHOLDER' | translate">
+  <select [(ngModel)]="filterStatus" class="form-control filter-select" [attr.aria-label]="'USERS.ALL_STATUSES' | translate">
     <option value="">{{ 'USERS.ALL_STATUSES' | translate }}</option>
     <option value="ACTIVE">{{ 'STATUS.ACTIVE' | translate }}</option>
     <option value="DISABLED">{{ 'USERS.STATUS_DISABLED' | translate }}</option>

@@ -1,40 +1,5 @@
-/* Component-specific overrides for create-user page */
-
-.form-card .form-row {
-  display: flex;
-  gap: 16px;
-}
-
-.form-card .form-row .form-group { flex: 1; }
-
-.form-card input,
-.form-card select {
-  width: 100%;
-  padding: 12px 14px;
-  border: 2px solid var(--border-input);
-  border-radius: 8px;
-  font-size: 15px;
-  transition: border-color 0.2s, box-shadow 0.2s;
-  box-sizing: border-box;
-  font-family: inherit;
-  background: var(--input-bg);
-  color: var(--text-primary);
-}
-
-.form-card input:focus,
-.form-card select:focus {
-  outline: none;
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(15, 52, 96, 0.1);
-}
-
-.required { color: #e53935; }
-
-.form-hint {
-  margin: 6px 0 0;
-  color: var(--text-secondary);
-  font-size: 12px;
-  line-height: 1.45;
+.required {
+  color: var(--badge-rejected-text);
 }
 
 .phone-input {
@@ -43,11 +8,12 @@
 }
 
 .phone-prefix {
-  padding: 12px 14px;
+  padding: 10px 14px;
   background: var(--bg-tertiary);
   border: 2px solid var(--border-input);
-  border-right: none;
-  border-radius: 8px 0 0 8px;
+  border-inline-end: none;
+  border-start-start-radius: 8px;
+  border-end-start-radius: 8px;
   font-size: 15px;
   font-weight: 600;
   color: var(--text-secondary);
@@ -56,8 +22,9 @@
 }
 
 .phone-field {
-  border-radius: 0 8px 8px 0;
   flex: 1;
+  border-start-start-radius: 0;
+  border-end-start-radius: 0;
 }
 
 .info-box {
@@ -72,23 +39,34 @@
   color: var(--badge-info-text);
 }
 
-.info-icon { font-size: 18px; flex-shrink: 0; }
+.info-icon {
+  font-size: 18px;
+  flex-shrink: 0;
+}
 
-.btn-block { width: 100%; margin-top: 8px; }
+.btn-block {
+  width: 100%;
+  margin-top: 8px;
+}
 
 .success-card {
-  background: var(--card-bg);
-  border-radius: 12px;
-  padding: 32px;
-  max-width: 600px;
-  box-shadow: var(--shadow-sm);
   text-align: center;
 }
 
-.success-icon { font-size: 48px; margin-bottom: 16px; }
-.success-card h2 { color: #2e7d32; margin-bottom: 8px; }
-.success-card p { color: var(--text-muted); margin-bottom: 12px; }
-.email-sent { color: var(--badge-info-text); font-size: 14px; margin-bottom: 24px; }
+.success-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.success-card h2 {
+  color: var(--badge-confirmed-text);
+  margin-bottom: 8px;
+}
+
+.success-card p {
+  color: var(--text-muted);
+  margin-bottom: 12px;
+}
 
 .success-actions {
   display: flex;
@@ -96,5 +74,12 @@
   justify-content: center;
 }
 
-[data-theme="dark"] .success-card h2 { color: #81c784; }
-[data-theme="dark"] .error-content h2 { color: #ef9a9a; }
+@media (max-width: 600px) {
+  .success-actions {
+    flex-direction: column;
+  }
+
+  .success-actions .btn {
+    width: 100%;
+  }
+}

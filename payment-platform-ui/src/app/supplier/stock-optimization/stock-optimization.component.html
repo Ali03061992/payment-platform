@@ -121,7 +121,7 @@
             </div>
           </div>
         </div>
-        <div class="card" style="margin-top:16px">
+        <div class="card mt-16">
           <h3>{{ 'STOCK.OPTIM_MATRIX' | translate }}</h3>
           <div class="matrix-grid">
             @for (item of data.abcxzDistribution | keyvalue; track item) {
@@ -132,7 +132,7 @@
             }
           </div>
         </div>
-        <div class="card" style="margin-top:16px">
+        <div class="card mt-16">
           <h3>{{ 'STOCK.OPTIM_ACTIONS' | translate }}</h3>
           <div class="bar-chart">
             @for (item of data.actionDistribution | keyvalue; track item) {
@@ -291,7 +291,7 @@
             }
           </div>
         </div>
-        <div class="card" style="margin-top:16px">
+        <div class="card mt-16">
           <h3>{{ 'STOCK.OPTIM_HIGH_RISK' | translate }}</h3>
           @for (p of data.products | filterByRisk; track p) {
             <div class="risk-row">

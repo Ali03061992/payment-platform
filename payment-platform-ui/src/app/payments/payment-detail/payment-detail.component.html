@@ -114,8 +114,8 @@
       </div>
     }
     @if (showReject) {
-      <div class="form-card" style="margin-top:16px;">
-        <h3 style="margin-bottom:12px;">{{ 'PAYMENT_DETAIL.REJECTION_REASON' | translate }}</h3>
+      <div class="form-card mt-16">
+        <h3 class="mb-12">{{ 'PAYMENT_DETAIL.REJECTION_REASON' | translate }}</h3>
         <div class="form-group">
           <textarea [(ngModel)]="rejectReason" class="form-control" rows="3"
           [placeholder]="'PAYMENT_DETAIL.REJECT_PLACEHOLDER' | translate" required [attr.aria-label]="'PAYMENT_DETAIL.REJECTION_REASON' | translate"></textarea>
@@ -124,8 +124,8 @@
       </div>
     }
     @if ((payment.events || []).length > 0) {
-      <div class="table-card" style="margin-top:24px;">
-        <h3 style="padding:16px 20px 0;">{{ 'PAYMENT_DETAIL.HISTORY' | translate }}</h3>
+      <div class="table-card table-stack mt-24">
+        <h3 class="table-card-title">{{ 'PAYMENT_DETAIL.HISTORY' | translate }}</h3>
         <div class="table-wrapper">
           <table>
             <thead>
@@ -138,9 +138,9 @@
             <tbody>
               @for (e of (payment.events || []); track e) {
                 <tr>
-                  <td><span class="payment-badge" [ngClass]="e.action.toLowerCase().replace('payment_', '')">{{ actionLabel(e.action) }}</span></td>
-                  <td>{{ e.timestamp | date:'dd/MM/yyyy HH:mm:ss' }}</td>
-                  <td>{{ e.details || '-' }}</td>
+                  <td [attr.data-label]="'PAYMENT_DETAIL.ACTION' | translate"><span class="payment-badge" [ngClass]="e.action.toLowerCase().replace('payment_', '')">{{ actionLabel(e.action) }}</span></td>
+                  <td [attr.data-label]="'PAYMENT_DETAIL.DATE' | translate">{{ e.timestamp | date:'dd/MM/yyyy HH:mm:ss' }}</td>
+                  <td [attr.data-label]="'PAYMENT_DETAIL.DETAILS' | translate">{{ e.details || '-' }}</td>
                 </tr>
               }
             </tbody>

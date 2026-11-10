@@ -33,7 +33,7 @@
         <div class="stat-label">{{ 'STOCK.OUT_OF_STOCK' | translate }}</div>
       </div>
     </div>
-    <div class="table-card stock-table-card">
+    <div class="table-card table-stack stock-table-card">
       <div class="table-wrapper">
         <table>
           <thead>
@@ -51,13 +51,13 @@
           <tbody>
             @for (p of pagedProducts; track p) {
               <tr [class.low-stock]="getStockStatus(p) === 'LOW'" [class.out-of-stock]="getStockStatus(p) === 'OUT_OF_STOCK'">
-                <td><code>{{ p.sku }}</code></td>
-                <td><strong>{{ p.name }}</strong></td>
-                <td>{{ p.unitPrice | number:'1.2-2' }} {{ p.currency }}</td>
-                <td class="qty-cell">{{ p.quantity }}</td>
-                <td>{{ p.minQuantity }}</td>
-                <td>{{ (p.quantity * p.unitPrice) | number:'1.2-2' }} {{ p.currency }}</td>
-                <td>
+                <td [attr.data-label]="'STOCK.COL_SKU' | translate"><code>{{ p.sku }}</code></td>
+                <td [attr.data-label]="'STOCK.COL_PRODUCT' | translate"><strong>{{ p.name }}</strong></td>
+                <td [attr.data-label]="'STOCK.COL_PRICE' | translate">{{ p.unitPrice | number:'1.2-2' }} {{ p.currency }}</td>
+                <td class="qty-cell" [attr.data-label]="'STOCK.COL_QTY' | translate">{{ p.quantity }}</td>
+                <td [attr.data-label]="'STOCK.COL_MIN_QTY' | translate">{{ p.minQuantity }}</td>
+                <td [attr.data-label]="'STOCK.COL_STOCK_VALUE' | translate">{{ (p.quantity * p.unitPrice) | number:'1.2-2' }} {{ p.currency }}</td>
+                <td [attr.data-label]="'STOCK.COL_STATUS' | translate">
               <span class="payment-badge" [ngClass]="stockStatusClass(getStockStatus(p))">
                     {{ getStockStatus(p) | statusLabel }}
                   </span>
@@ -141,7 +141,8 @@
         </div>
       }
       @if (!loadingHistory) {
-        <div class="table-wrapper">
+        <div class="table-card table-stack">
+          <div class="table-wrapper">
           <table>
             <thead>
               <tr>
@@ -155,15 +156,15 @@
             <tbody>
               @for (m of pagedHistory; track m) {
                 <tr>
-                  <td>{{ m.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
-                  <td>
+                  <td [attr.data-label]="'STOCK.MOVEMENT_COL_DATE' | translate">{{ m.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
+                  <td [attr.data-label]="'STOCK.MOVEMENT_COL_TYPE' | translate">
                     <span class="payment-badge" [ngClass]="movementTypeClass(m.type)">
                       {{ movementTypeLabel(m.type) }}
                     </span>
                   </td>
-                  <td>{{ m.quantity }}</td>
-                  <td>{{ m.reference || '-' }}</td>
-                  <td>{{ m.notes || '-' }}</td>
+                  <td [attr.data-label]="'STOCK.MOVEMENT_COL_QTY' | translate">{{ m.quantity }}</td>
+                  <td [attr.data-label]="'STOCK.MOVEMENT_COL_REF' | translate">{{ m.reference || '-' }}</td>
+                  <td [attr.data-label]="'STOCK.MOVEMENT_COL_NOTES' | translate">{{ m.notes || '-' }}</td>
                 </tr>
               }
               @if (historyMovements.length === 0) {
@@ -173,6 +174,7 @@
               }
             </tbody>
           </table>
+          </div>
         </div>
         @if (historyMovements.length > 0) {
           <app-pagination [page]="historyPage" [size]="historySize" [totalElements]="historyMovements.length"

@@ -1,41 +1,18 @@
-/* Component-specific overrides for account-activation page */
-
 .search-bar {
   display: flex;
   gap: 12px;
   margin-bottom: 20px;
+  flex-wrap: wrap;
 }
 
 .search-input {
   flex: 1;
-  padding: 12px 16px;
-  border: 2px solid #e0e0e0;
-  border-radius: 8px;
-  font-size: 14px;
-  transition: border-color 0.2s, box-shadow 0.2s;
-  font-family: inherit;
-}
-
-.search-input:focus {
-  outline: none;
-  border-color: #0f3460;
-  box-shadow: 0 0 0 3px rgba(15, 52, 96, 0.1);
+  min-width: 12rem;
 }
 
 .filter-select {
-  padding: 12px 16px;
-  border: 2px solid #e0e0e0;
-  border-radius: 8px;
-  font-size: 14px;
-  background: #fff;
-  transition: border-color 0.2s;
-  font-family: inherit;
-  cursor: pointer;
-}
-
-.filter-select:focus {
-  outline: none;
-  border-color: #0f3460;
+  width: auto;
+  min-width: 11rem;
 }
 
 .cards-grid {
@@ -45,20 +22,22 @@
 }
 
 .user-card {
-  background: #fff;
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
   border-radius: 12px;
   padding: 20px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-  transition: all 0.2s;
-  border: 2px solid transparent;
+  box-shadow: var(--shadow-sm);
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
 
 .user-card:hover {
-  border-color: #e3f2fd;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+  border-color: var(--sky-border);
+  box-shadow: var(--shadow-md);
 }
 
-.user-card.disabled { opacity: 0.7; }
+.user-card.disabled {
+  opacity: 0.7;
+}
 
 .card-header {
   display: flex;
@@ -71,7 +50,7 @@
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #0f3460, #1a1a2e);
+  background: var(--grad-noir-bleu);
   color: #fff;
   display: flex;
   align-items: center;
@@ -81,43 +60,72 @@
   flex-shrink: 0;
 }
 
-.card-name { font-weight: 700; font-size: 16px; color: #1a1a2e; }
-.card-username { font-size: 13px; color: #8896ab; }
-.card-info { flex: 1; min-width: 0; }
-
-.status-badge {
-  padding: 4px 12px;
-  border-radius: 12px;
-  font-size: 11px;
-  font-weight: 600;
-  white-space: nowrap;
+.card-info {
+  flex: 1;
+  min-width: 0;
 }
 
-.status-badge.active { background: #e8f5e9; color: #2e7d32; }
-.status-badge.disabled { background: #fce4ec; color: #c62828; }
-
-.card-details { margin-bottom: 16px; }
-.detail-row { font-size: 13px; color: #666; padding: 4px 0; }
-
-.card-actions { display: flex; gap: 8px; }
-
-.card-actions .btn {
-  padding: 10px 20px;
-  border-radius: 8px;
-  font-size: 14px;
+.card-name {
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--text-primary);
 }
 
-.card-actions .btn-success { background: #2e7d32; color: #fff; }
-.card-actions .btn-success:hover { background: #1b5e20; }
-.card-actions .btn-danger { background: #c62828; color: #fff; }
-.card-actions .btn-danger:hover { background: #b71c1c; }
-.card-actions .btn-sm { padding: 8px 16px; font-size: 13px; }
+.card-username {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.card-details {
+  margin-bottom: 16px;
+}
+
+.detail-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--text-muted);
+  padding: 4px 0;
+  overflow-wrap: anywhere;
+}
+
+.card-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
 
 .empty-state {
-  text-align: center;
-  padding: 48px;
-  color: #8896ab;
-  background: #fff;
-  border-radius: 12px;
   grid-column: 1 / -1;
+  padding: 48px;
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  box-shadow: var(--shadow-sm);
+}
+
+@media (max-width: 480px) {
+  .search-bar {
+    flex-direction: column;
+  }
+
+  .search-input,
+  .filter-select {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .cards-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .card-header {
+    flex-wrap: wrap;
+  }
+
+  .card-actions .btn {
+    flex: 1;
+    min-height: 2.75rem;
+  }
 }

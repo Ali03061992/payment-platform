@@ -89,12 +89,12 @@
   white-space: nowrap;
 }
 .counter-pill.ok {
-  background: var(--badge-confirmed-bg, #dcfce7);
-  color: var(--badge-confirmed-text, #166534);
-  border: 1px solid var(--badge-confirmed-border, #86efac);
+  background: var(--badge-confirmed-bg);
+  color: var(--badge-confirmed-text);
+  border: 1px solid var(--badge-confirmed-text);
 }
 .counter-pill.muted {
-  background: var(--bg-tertiary, #f1f5f9);
+  background: var(--bg-tertiary);
   color: var(--text-muted);
   border: 1px solid var(--border-color);
 }

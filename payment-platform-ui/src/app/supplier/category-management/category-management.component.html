@@ -34,7 +34,7 @@
 }
 
 @if (!loading) {
-  <div class="table-card">
+  <div class="table-card table-stack">
     <div class="table-wrapper">
       <table>
         <thead>
@@ -48,10 +48,10 @@
         <tbody>
           @for (cat of pagedCategories; track cat) {
             <tr>
-              <td><strong>{{ cat.name }}</strong></td>
-              <td><code>{{ cat.code }}</code></td>
-              <td><span class="badge badge-active">{{ cat.status }}</span></td>
-              <td>
+              <td [attr.data-label]="'CATALOG.COL_NAME' | translate"><strong>{{ cat.name }}</strong></td>
+              <td [attr.data-label]="'CATALOG.COL_CODE' | translate"><code>{{ cat.code }}</code></td>
+              <td [attr.data-label]="'CATALOG.COL_STATUS' | translate"><span class="badge badge-active">{{ cat.status }}</span></td>
+              <td class="actions">
                 <button class="btn btn-sm btn-danger" (click)="deleteCategory(cat)">{{ 'CATALOG.BTN_DELETE' | translate }}</button>
               </td>
             </tr>

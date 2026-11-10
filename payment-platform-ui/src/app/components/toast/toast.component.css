@@ -1,7 +1,7 @@
 .toast-container {
   position: fixed;
-  bottom: 24px;
-  right: 24px;
+  bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+  inset-inline-end: calc(24px + env(safe-area-inset-right, 0px));
   z-index: 99999;
   display: flex;
   flex-direction: column-reverse;
@@ -47,23 +47,23 @@
 }
 
 .toast-success .toast-icon {
-  background: #e8f5e9;
-  color: #2e7d32;
+  background: var(--badge-confirmed-bg);
+  color: var(--badge-confirmed-text);
 }
 
 .toast-error .toast-icon {
-  background: #fce4ec;
-  color: #c62828;
+  background: var(--badge-rejected-bg);
+  color: var(--badge-rejected-text);
 }
 
 .toast-warning .toast-icon {
-  background: #fff3e0;
-  color: #e65100;
+  background: var(--badge-pending-bg);
+  color: var(--badge-pending-text);
 }
 
 .toast-info .toast-icon {
-  background: #e3f2fd;
-  color: #1565c0;
+  background: var(--sky-soft);
+  color: var(--sky-text);
 }
 
 .toast-message {
@@ -75,16 +75,21 @@
 }
 
 .toast-close {
-  background: none;
-  border: none;
-  font-size: 20px;
-  color: var(--text-muted);
-  cursor: pointer;
-  padding: 4px;
-  line-height: 1;
-  border-radius: 4px;
-  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  padding: 4px;
+  border: none;
+  border-radius: 8px;
+  background: none;
+  color: var(--text-muted);
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
 }
 
 .toast-close:hover {
@@ -93,11 +98,31 @@
 }
 
 /* Mobile responsive */
+[dir="rtl"] .toast-container {
+  inset-inline-end: auto;
+  inset-inline-start: calc(24px + env(safe-area-inset-left, 0px));
+}
+
+[dir="rtl"] .toast {
+  animation-name: toastSlideInRtl;
+}
+
+@keyframes toastSlideInRtl {
+  from {
+    transform: translateX(-100%) scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0) scale(1);
+    opacity: 1;
+  }
+}
+
 @media (max-width: 600px) {
   .toast-container {
-    bottom: 16px;
-    right: 16px;
-    left: 16px;
+    bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+    right: calc(16px + env(safe-area-inset-right, 0px));
+    left: calc(16px + env(safe-area-inset-left, 0px));
   }
 
   .toast {
@@ -108,9 +133,9 @@
 
 @media (max-width: 400px) {
   .toast-container {
-    bottom: 12px;
-    right: 12px;
-    left: 12px;
+    bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+    right: calc(12px + env(safe-area-inset-right, 0px));
+    left: calc(12px + env(safe-area-inset-left, 0px));
   }
 
   .toast {

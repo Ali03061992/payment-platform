@@ -9,32 +9,32 @@
       <div class="form-row">
         <div class="form-group">
           <label for="lastName">{{ 'AUTH.LAST_NAME' | translate }}</label>
-          <input id="lastName" type="text" [(ngModel)]="form.lastName" name="lastName" required placeholder="Dupont">
+          <input id="lastName" type="text" [(ngModel)]="form.lastName" name="lastName" required placeholder="Dupont" class="form-control">
         </div>
         <div class="form-group">
           <label for="firstName">{{ 'AUTH.FIRST_NAME' | translate }}</label>
-          <input id="firstName" type="text" [(ngModel)]="form.firstName" name="firstName" required placeholder="Jean">
+          <input id="firstName" type="text" [(ngModel)]="form.firstName" name="firstName" required placeholder="Jean" class="form-control">
         </div>
       </div>
       <div class="form-group">
         <label for="username">{{ 'AUTH.USERNAME' | translate }}</label>
-        <input id="username" type="text" [(ngModel)]="form.username" name="username" required placeholder="jean.dupont">
+        <input id="username" type="text" [(ngModel)]="form.username" name="username" required placeholder="jean.dupont" class="form-control">
       </div>
       <div class="form-group">
         <label for="email">{{ 'AUTH.EMAIL' | translate }} <span class="required">*</span></label>
-        <input id="email" type="email" [(ngModel)]="form.email" name="email" required placeholder="jean@exemple.com" autocomplete="email">
-        <p class="form-hint">{{ 'USERS.CREATE_EMAIL_HINT' | translate }}</p>
+        <input id="email" type="email" [(ngModel)]="form.email" name="email" required placeholder="jean@exemple.com" autocomplete="email" class="form-control">
+        <p class="field-hint">{{ 'USERS.CREATE_EMAIL_HINT' | translate }}</p>
       </div>
       <div class="form-group">
         <label for="phone">{{ 'AUTH.PHONE' | translate }}</label>
         <div class="phone-input">
           <span class="phone-prefix">+216</span>
-          <input id="phone" type="tel" [(ngModel)]="form.phone" name="phone" [placeholder]="'AUTH.PHONE_PLACEHOLDER' | translate" class="phone-field">
+          <input id="phone" type="tel" [(ngModel)]="form.phone" name="phone" [placeholder]="'AUTH.PHONE_PLACEHOLDER' | translate" class="form-control phone-field">
         </div>
       </div>
       <div class="form-group">
         <label for="role">{{ 'AUTH.ROLE' | translate }}</label>
-        <select id="role" [(ngModel)]="form.role" name="role" required>
+        <select id="role" [(ngModel)]="form.role" name="role" required class="form-control">
           @for (r of roles; track r) {
             <option [value]="r.value">{{ r.label | translate }}</option>
           }
@@ -43,7 +43,7 @@
       @if (requiresOrganization) {
         <div class="form-group">
           <label for="org">{{ organizationLabel }} <span class="required">*</span></label>
-          <select id="org" [(ngModel)]="form.organizationId" name="organizationId" required>
+          <select id="org" [(ngModel)]="form.organizationId" name="organizationId" required class="form-control">
             <option [ngValue]="null">-- {{ 'USERS.SELECT_PREFIX' | translate }} {{ organizationLabel | lowercase }} --</option>
             @for (org of availableOrgs; track org) {
               <option [ngValue]="org.id">{{ org.name }}</option>
@@ -59,7 +59,7 @@
 }
 
 @if (success) {
-  <div class="success-card">
+  <div class="form-card form-card-narrow success-card">
     <div class="success-icon"><app-icon name="check-circle" [size]="40"></app-icon></div>
     <h2>{{ 'USERS.CREATED_TITLE' | translate }}</h2>
     <p>{{ 'USERS.CREATED_MSG_PREFIX' | translate }} <strong>{{ form.username }}</strong> {{ 'USERS.CREATED_MSG_SUFFIX' | translate }} <strong>{{ form.email }}</strong>.</p>

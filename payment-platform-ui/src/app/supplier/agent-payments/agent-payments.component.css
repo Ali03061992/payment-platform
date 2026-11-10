@@ -1,8 +1,9 @@
 .filter-card {
-  background: #fff;
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
   border-radius: 12px;
   padding: 20px 24px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  box-shadow: var(--shadow-sm);
   margin-bottom: 20px;
 }
 
@@ -21,7 +22,6 @@
   flex: 0 0 180px;
 }
 
-/* Totals bar */
 .totals-bar {
   display: flex;
   gap: 16px;
@@ -30,16 +30,17 @@
 
 .total-item {
   flex: 1;
-  background: #fff;
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
   border-radius: 12px;
   padding: 16px 20px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  box-shadow: var(--shadow-sm);
   text-align: center;
 }
 
 .total-label {
   font-size: 12px;
-  color: #8896ab;
+  color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.5px;
   margin-bottom: 4px;
@@ -48,18 +49,17 @@
 .total-value {
   font-size: 24px;
   font-weight: 700;
-  color: #1a1a2e;
+  color: var(--text-primary);
 }
 
 .total-value.green {
-  color: #2e7d32;
+  color: var(--badge-confirmed-text);
 }
 
 .total-confirmed {
-  border-left: 4px solid #2e7d32;
+  border-inline-start: 4px solid var(--badge-confirmed-text);
 }
 
-/* Agent list */
 .agent-list {
   display: flex;
   flex-direction: column;
@@ -67,19 +67,20 @@
 }
 
 .agent-card {
-  background: #fff;
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  box-shadow: var(--shadow-sm);
   overflow: hidden;
   transition: box-shadow 0.2s;
 }
 
 .agent-card:hover {
-  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+  box-shadow: var(--shadow-md);
 }
 
 .agent-card.expanded {
-  box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+  box-shadow: var(--shadow-md);
 }
 
 .agent-header {
@@ -88,6 +89,11 @@
   padding: 16px 20px;
   cursor: pointer;
   gap: 16px;
+}
+
+.agent-header:focus-visible {
+  outline: 2px solid var(--sky-dark);
+  outline-offset: -2px;
 }
 
 .agent-info {
@@ -102,7 +108,7 @@
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #0f3460, #1976d2);
+  background: var(--grad-theme);
   color: #fff;
   display: flex;
   align-items: center;
@@ -115,12 +121,12 @@
 .agent-name {
   font-size: 16px;
   font-weight: 600;
-  color: #1a1a2e;
+  color: var(--text-primary);
 }
 
 .agent-meta {
   font-size: 12px;
-  color: #8896ab;
+  color: var(--text-muted);
 }
 
 .agent-totals {
@@ -129,15 +135,17 @@
   align-items: center;
 }
 
-.confirmed-amount, .period-amount {
+.confirmed-amount,
+.period-amount {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
 }
 
-.confirmed-label, .period-label {
+.confirmed-label,
+.period-label {
   font-size: 11px;
-  color: #8896ab;
+  color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.3px;
 }
@@ -145,28 +153,26 @@
 .confirmed-value {
   font-size: 20px;
   font-weight: 700;
-  color: #2e7d32;
+  color: var(--badge-confirmed-text);
 }
 
 .period-value {
   font-size: 16px;
   font-weight: 600;
-  color: #1a1a2e;
+  color: var(--text-primary);
 }
 
 .expand-icon {
-  color: #8896ab;
+  color: var(--text-muted);
   font-size: 14px;
   flex-shrink: 0;
 }
 
-/* Detail section */
 .agent-detail {
-  border-top: 1px solid #f0f2f5;
+  border-top: 1px solid var(--border-color);
   padding: 0;
 }
 
-/* Cartes mobiles : cachées sur desktop (ne doivent jamais doubler le tableau). */
 .payment-cards {
   display: none;
 }
@@ -186,10 +192,10 @@
   padding: 10px 16px;
   font-size: 11px;
   text-transform: uppercase;
-  color: #8896ab;
-  background: #fafbfc;
-  border-bottom: 1px solid #f0f2f5;
-  text-align: left;
+  color: var(--text-muted);
+  background: var(--bg-tertiary);
+  border-bottom: 1px solid var(--border-color);
+  text-align: start;
   font-weight: 600;
   white-space: nowrap;
 }
@@ -197,8 +203,8 @@
 .detail-table td {
   padding: 12px 16px;
   font-size: 13px;
-  border-bottom: 1px solid #f0f2f5;
-  color: #333;
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-secondary);
 }
 
 .detail-table tr:last-child td {
@@ -208,7 +214,7 @@
 .ref-cell {
   font-family: monospace;
   font-size: 12px;
-  color: #0f3460;
+  color: var(--sky-dark);
 }
 
 .amount-cell {
@@ -221,7 +227,7 @@
   align-items: center;
   gap: 32px;
   padding: 12px 20px;
-  background: #f5f7fa;
+  background: var(--bg-tertiary);
   font-size: 14px;
   flex-wrap: wrap;
 }
@@ -235,43 +241,39 @@
 .total-amount {
   font-size: 18px;
   font-weight: 700;
-  color: #0f3460;
+  color: var(--sky-dark);
 }
 
 .total-amount.green {
-  color: #2e7d32;
-}
-
-/* Mobile Cards inside agent detail */
-.payment-cards {
-  display: none;
+  color: var(--badge-confirmed-text);
 }
 
 .payment-card {
-  border: 1px solid #f0f2f5;
+  border: 1px solid var(--border-color);
   border-radius: 10px;
   margin: 12px 16px;
-  background: #fafbfc;
+  background: var(--bg-tertiary);
   cursor: pointer;
   transition: box-shadow 0.15s;
 }
 
 .payment-card:hover {
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  box-shadow: var(--shadow-sm);
 }
 
 .payment-card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 12px;
   padding: 12px 14px;
-  border-bottom: 1px solid #f0f2f5;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .payment-reference {
   font-family: monospace;
   font-size: 12px;
-  color: #0f3460;
+  color: var(--sky-dark);
   font-weight: 600;
 }
 
@@ -283,29 +285,30 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 12px;
   padding: 5px 0;
 }
 
 .payment-label {
   font-size: 11px;
-  color: #8896ab;
+  color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.3px;
 }
 
 .payment-value {
   font-size: 13px;
-  color: #333;
+  color: var(--text-secondary);
   font-weight: 500;
+  text-align: end;
 }
 
 .payment-amount {
   font-size: 15px;
   font-weight: 700;
-  color: #1a1a2e;
+  color: var(--text-primary);
 }
 
-/* Mobile < 768px */
 @media (max-width: 768px) {
   .filter-card {
     padding: 16px;
@@ -349,6 +352,7 @@
     flex-wrap: wrap;
     padding: 14px 16px;
     gap: 10px;
+    position: relative;
   }
 
   .agent-avatar {
@@ -365,7 +369,7 @@
     width: 100%;
     justify-content: space-between;
     padding-top: 10px;
-    border-top: 1px solid #f0f2f5;
+    border-top: 1px solid var(--border-color);
     gap: 12px;
   }
 
@@ -379,12 +383,8 @@
 
   .expand-icon {
     position: absolute;
-    right: 16px;
+    inset-inline-end: 16px;
     top: 16px;
-  }
-
-  .agent-header {
-    position: relative;
   }
 
   .hide-mobile {
@@ -404,16 +404,15 @@
     padding: 12px 16px;
     align-items: flex-start;
   }
+
+  .payment-card {
+    min-height: 2.75rem;
+  }
 }
 
-/* Small phone < 400px */
 @media (max-width: 400px) {
   .filter-card {
     padding: 12px;
-  }
-
-  .page-header h2 {
-    font-size: 18px;
   }
 
   .agent-info {
@@ -434,7 +433,8 @@
     gap: 8px;
   }
 
-  .confirmed-label, .period-label {
+  .confirmed-label,
+  .period-label {
     font-size: 10px;
   }
 

@@ -21,6 +21,7 @@
   --grad-primary: linear-gradient(120deg, #06b6d4 0%, #6366f1 52%, #a855f7 100%);
   --grad-hot: linear-gradient(120deg, #22d3ee 0%, #818cf8 45%, #f472b6 100%);
   min-height: 100vh;
+  min-height: 100dvh;
   overflow-x: clip;
   background: var(--surface);
   color: var(--ink);
@@ -45,6 +46,7 @@
   position: sticky;
   top: 0;
   z-index: 50;
+  padding-top: env(safe-area-inset-top, 0px);
   background: linear-gradient(90deg, rgba(6, 10, 28, 0.96) 0%, rgba(30, 27, 75, 0.94) 52%, rgba(8, 51, 68, 0.94) 100%);
   border-bottom: 1px solid rgba(103, 232, 249, 0.2);
   backdrop-filter: blur(18px);
@@ -69,8 +71,7 @@
   width: 100%;
   max-width: 1180px;
   margin: 0 auto;
-  padding-right: 24px;
-  padding-left: 24px;
+  padding-inline: 24px;
 }
 
 .header-inner {
@@ -117,7 +118,7 @@
   display: flex;
   align-items: center;
   gap: 28px;
-  margin-left: auto;
+  margin-inline-start: auto;
 }
 
 .main-nav a {
@@ -165,9 +166,9 @@
   flex-direction: column;
   justify-content: center;
   gap: 4px;
-  width: 42px;
-  height: 42px;
-  padding: 9px;
+  width: 44px;
+  height: 44px;
+  padding: 10px;
   border: 1px solid rgba(103, 232, 249, 0.28);
   border-radius: 11px;
   color: #ffffff;
@@ -205,6 +206,7 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
+  min-height: 2.75rem;
   padding: 11px 18px;
   border: 1px solid transparent;
   border-radius: 10px;
@@ -457,7 +459,7 @@
 }
 
 .mock-badge {
-  margin-left: auto;
+  margin-inline-start: auto;
   padding: 4px 8px;
   border-radius: 999px;
   color: #0f766e;
@@ -591,7 +593,7 @@
 .floating-card {
   position: absolute;
   z-index: 3;
-  left: -20px;
+  inset-inline-start: -20px;
   bottom: 16px;
   display: flex;
   align-items: center;
@@ -1185,7 +1187,7 @@
 }
 
 .site-footer {
-  padding: 30px 0;
+  padding: 30px 0 calc(30px + env(safe-area-inset-bottom, 0px));
   color: #b9c9da;
   background: linear-gradient(90deg, #050818 0%, #15113c 55%, #052b3a 100%);
   border-top: 1px solid rgba(103, 232, 249, 0.18);
@@ -1264,14 +1266,14 @@
   .mobile-nav {
     position: absolute;
     top: 100%;
-    right: 0;
-    left: 0;
+    inset-inline: 0;
     z-index: 60;
     display: none;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 8px;
     max-height: calc(100vh - 64px);
-    padding: 10px 18px 18px;
+    max-height: calc(100dvh - 64px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+    padding: 10px 18px calc(18px + env(safe-area-inset-bottom, 0px));
     overflow-y: auto;
     border-top: 1px solid rgba(103, 232, 249, 0.16);
     background: #060a1c;
@@ -1342,8 +1344,7 @@
   .header-inner {
     gap: 14px;
     min-height: 64px;
-    padding-right: 16px;
-    padding-left: 16px;
+    padding-inline: 16px;
   }
 
   .brand-name {
@@ -1385,7 +1386,7 @@
   }
 
   .floating-card {
-    left: 8px;
+    inset-inline-start: 8px;
     bottom: -16px;
   }
 
@@ -1395,11 +1396,11 @@
 
   .section-heading {
     margin-bottom: 32px;
-    text-align: left;
+    text-align: start;
   }
 
   .section-heading h2::after {
-    left: 0;
+    inset-inline-start: 0;
     transform: none;
   }
 

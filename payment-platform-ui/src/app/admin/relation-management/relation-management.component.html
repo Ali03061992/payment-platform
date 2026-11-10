@@ -44,7 +44,7 @@
 }
 
 @if (!loading) {
-  <div class="table-card">
+  <div class="table-card table-stack">
     <div class="table-wrapper">
       <table>
         <thead>
@@ -59,15 +59,15 @@
         <tbody>
           @for (r of pagedRelations; track r) {
             <tr>
-              <td>{{ getSupplierName(r.supplierId) }}</td>
-              <td>{{ getShopName(r.shopId) }}</td>
-              <td>
+              <td [attr.data-label]="'ORGS.SUPPLIER' | translate">{{ getSupplierName(r.supplierId) }}</td>
+              <td [attr.data-label]="'ORGS.SHOP' | translate">{{ getShopName(r.shopId) }}</td>
+              <td [attr.data-label]="'DASHBOARD.STATUS' | translate">
                 <span class="status-badge" [class.active]="r.status === 'ACTIVE'" [class.disabled]="r.status === 'INACTIVE'">
                   {{ r.status === 'ACTIVE' ? ('STATUS.ACTIVE' | translate) : ('STATUS.INACTIVE' | translate) }}
                 </span>
               </td>
-              <td>{{ r.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
-              <td>
+              <td [attr.data-label]="'ORGS.CREATED_AT' | translate">{{ r.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
+              <td class="actions">
                 @if (r.status === 'ACTIVE') {
                   <button class="btn btn-sm btn-danger" (click)="deactivate(r.id)">
                     {{ 'USERS.DEACTIVATE' | translate }}

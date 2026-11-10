@@ -147,7 +147,7 @@
 }
 
 @if (!loading) {
-  <div class="table-card">
+  <div class="table-card table-stack">
     <div class="table-wrapper">
       <table>
         <thead>
@@ -166,16 +166,16 @@
         <tbody>
           @for (p of pagedProducts; track p) {
             <tr>
-              <td><code>{{ p.sku }}</code></td>
-              <td><strong>{{ p.name }}</strong>@if (p.description) {
+              <td [attr.data-label]="'CATALOG.COL_SKU' | translate"><code>{{ p.sku }}</code></td>
+              <td [attr.data-label]="'CATALOG.COL_NAME' | translate"><strong>{{ p.name }}</strong>@if (p.description) {
               <div class="desc">{{ p.description }}</div>
             }</td>
-            <td>{{ getCategoryName(p.categoryId) }}</td>
-            <td>{{ getFamilyName(p.familyId) }}</td>
-            <td>{{ p.unitPrice | number:'1.2-2' }} {{ p.currency }}</td>
-            <td>{{ p.vatRate ?? 19 }} %</td>
-            <td>{{ p.unit }}</td>
-            <td>
+            <td [attr.data-label]="'CATALOG.COL_CATEGORY' | translate">{{ getCategoryName(p.categoryId) }}</td>
+            <td [attr.data-label]="'CATALOG.COL_FAMILY' | translate">{{ getFamilyName(p.familyId) }}</td>
+            <td [attr.data-label]="'CATALOG.COL_PRICE' | translate">{{ p.unitPrice | number:'1.2-2' }} {{ p.currency }}</td>
+            <td [attr.data-label]="'CATALOG.COL_VAT' | translate">{{ p.vatRate ?? 19 }} %</td>
+            <td [attr.data-label]="'CATALOG.COL_UNIT' | translate">{{ p.unit }}</td>
+            <td [attr.data-label]="'CATALOG.COL_STATUS' | translate">
               <span class="badge" [class.badge-active]="p.status === 'ACTIVE'" [class.badge-inactive]="p.status !== 'ACTIVE'">
                 {{ p.status | statusLabel }}
               </span>

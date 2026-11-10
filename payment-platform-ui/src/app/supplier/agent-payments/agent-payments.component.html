@@ -5,15 +5,15 @@
   <div class="filter-row">
     <div class="form-group">
       <label>{{ 'AGENT_PAYMENTS.FROM_DATE' | translate }}</label>
-      <input type="date" [(ngModel)]="fromDate" class="form-control" (change)="load()">
+      <input type="date" [(ngModel)]="fromDate" class="form-control" (change)="load()" [attr.aria-label]="'AGENT_PAYMENTS.FROM_DATE' | translate">
     </div>
     <div class="form-group">
       <label>{{ 'AGENT_PAYMENTS.TO_DATE' | translate }}</label>
-      <input type="date" [(ngModel)]="toDate" class="form-control" (change)="load()">
+      <input type="date" [(ngModel)]="toDate" class="form-control" (change)="load()" [attr.aria-label]="'AGENT_PAYMENTS.TO_DATE' | translate">
     </div>
     <div class="form-group filter-status">
       <label>{{ 'PAYMENTS.STATUS' | translate }}</label>
-      <select [(ngModel)]="statusFilter" class="form-control">
+      <select [(ngModel)]="statusFilter" class="form-control" [attr.aria-label]="'PAYMENTS.STATUS' | translate">
         <option value="">{{ 'AGENT_PAYMENTS.ALL' | translate }}</option>
         <option value="PENDING">{{ 'PAYMENTS.PENDING' | translate }}</option>
         <option value="CONFIRMED">{{ 'PAYMENTS.CONFIRMED' | translate }}</option>
@@ -55,7 +55,7 @@
     @for (agent of sortedSummaries; track agent) {
       <div class="agent-card"
         [class.expanded]="expandedAgent === agent.userId">
-        <div class="agent-header" (click)="toggleAgent(agent.userId)">
+        <div class="agent-header" role="button" tabindex="0" [attr.aria-expanded]="expandedAgent === agent.userId" (click)="toggleAgent(agent.userId)" (keydown.enter)="toggleAgent(agent.userId)" (keydown.space)="toggleAgent(agent.userId); $event.preventDefault()">
           <div class="agent-info">
             <div class="agent-avatar">{{ agent.username.charAt(0) }}</div>
             <div class="agent-details">

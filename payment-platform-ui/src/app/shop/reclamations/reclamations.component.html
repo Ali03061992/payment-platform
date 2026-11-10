@@ -10,12 +10,12 @@
 @if (showForm) {
   <div class="form-card" role="region" [attr.aria-label]="'RECLAMATIONS.FORM_ARIA' | translate">
     <h3>{{ 'RECLAMATIONS.FORM_TITLE' | translate }}</h3>
-    <p class="form-hint">{{ 'RECLAMATIONS.ELIGIBILITY_HINT' | translate }}</p>
+    <p class="field-hint">{{ 'RECLAMATIONS.ELIGIBILITY_HINT' | translate }}</p>
     <form (ngSubmit)="create()">
       <div class="form-group">
         <label for="reclOrder">{{ 'RECLAMATIONS.ORDER_LABEL' | translate }}</label>
         @if (loadingOrders) {
-          <p class="form-hint">{{ 'RECLAMATIONS.LOADING' | translate }}</p>
+          <p class="field-hint">{{ 'RECLAMATIONS.LOADING' | translate }}</p>
         } @else {
           <select [(ngModel)]="selectedOrderId" name="reclOrder" id="reclOrder" class="form-control"
             required aria-required="true">
@@ -25,7 +25,7 @@
             }
           </select>
           @if (eligibleOrders.length === 0) {
-            <p class="form-hint">{{ 'RECLAMATIONS.NO_ELIGIBLE_ORDER' | translate }}</p>
+            <p class="field-hint">{{ 'RECLAMATIONS.NO_ELIGIBLE_ORDER' | translate }}</p>
           }
         }
       </div>
@@ -43,7 +43,7 @@
             <option [value]="p">{{ priorityLabel(p) }}</option>
           }
         </select>
-        <p class="form-hint">{{ 'RECLAMATIONS.PRIORITY_HINT' | translate }}</p>
+        <p class="field-hint">{{ 'RECLAMATIONS.PRIORITY_HINT' | translate }}</p>
       </div>
       <div class="form-actions">
         <button type="button" class="btn btn-secondary" (click)="closeForm()">
