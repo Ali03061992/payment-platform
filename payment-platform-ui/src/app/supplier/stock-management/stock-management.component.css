@@ -197,7 +197,6 @@ code {
 }
 
 .product-cards {
-  display: none;
   flex-direction: column;
   gap: 12px;
 }

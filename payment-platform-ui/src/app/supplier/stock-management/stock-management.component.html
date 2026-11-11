@@ -22,13 +22,13 @@
     @if (products.length > 0) {
       <div class="filter-bar">
         <input type="text" [(ngModel)]="searchTerm" (input)="applyFilters()" [placeholder]="'STOCK.SEARCH_PLACEHOLDER' | translate" class="search-input">
-        <select [(ngModel)]="filterStatus" (change)="applyFilters()" class="filter-select">
+        <select [(ngModel)]="filterStatus" (change)="applyFilters()" class="form-control filter-select">
           <option value="">{{ 'STOCK.FILTER_ALL' | translate }}</option>
           <option value="OK">{{ 'STOCK.FILTER_IN_STOCK' | translate }}</option>
           <option value="LOW">{{ 'STOCK.FILTER_LOW' | translate }}</option>
           <option value="OUT_OF_STOCK">{{ 'STOCK.FILTER_OUT' | translate }}</option>
         </select>
-        <select [(ngModel)]="sortBy" (change)="applyFilters()" class="filter-select">
+        <select [(ngModel)]="sortBy" (change)="applyFilters()" class="form-control filter-select">
           <option value="lowStock">{{ 'STOCK.SORT_LOW_FIRST' | translate }}</option>
           <option value="name">{{ 'STOCK.SORT_NAME' | translate }}</option>
           <option value="quantity">{{ 'STOCK.SORT_QUANTITY' | translate }}</option>
