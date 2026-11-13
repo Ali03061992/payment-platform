@@ -182,9 +182,6 @@
     "ERROR_TOAST": "Erreur lors de la modification du mot de passe"
   },
   "DASHBOARD": {
-    "MORNING": "Bonjour",
-    "AFTERNOON": "Bon après-midi",
-    "EVENING": "Bonsoir",
     "WELCOME_SUBTITLE": "Voici un aperçu de votre plateforme.",
     "TOTAL_USERS": "Total utilisateurs",
     "ACTIVE_ACCOUNTS": "Comptes actifs",

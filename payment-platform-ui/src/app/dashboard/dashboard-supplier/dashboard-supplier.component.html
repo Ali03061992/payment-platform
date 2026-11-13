@@ -1,9 +1,4 @@
 <div class="dashboard">
-  <div class="welcome-section">
-    <h1>{{ getGreeting() }}, {{ user?.firstName }} !</h1>
-    <p>{{ 'DASHBOARD.SUBTITLE_SUPPLIER' | translate }}</p>
-  </div>
-
   @if (loading) {
     <div class="loading">{{ 'COMMON.LOADING' | translate }}</div>
   } @else {
