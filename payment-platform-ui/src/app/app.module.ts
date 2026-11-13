@@ -82,6 +82,7 @@ import { LanguageSwitcherComponent } from './i18n/language-switcher.component';
 import { APP_INITIALIZER } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { LoginService } from './services/login.service';
+import { Title } from '@angular/platform-browser';
 import { ThemePickerComponent } from './components/theme-picker/theme-picker.component';
 
 /**

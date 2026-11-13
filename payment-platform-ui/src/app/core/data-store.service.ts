@@ -21,7 +21,7 @@ interface CacheEntry {
 @Injectable({ providedIn: 'root' })
 export class DataStoreService {
   /** Durée de fraîcheur avant revalidation en arrière-plan. */
-  static readonly TTL_MS = 20_000;
+  static readonly TTL_MS = 300_000; /* 5 minutes (was 20s) */
   private static readonly REFRESH_DEBOUNCE_MS = 350;
   private static readonly MAX_ENTRIES = 120;
 

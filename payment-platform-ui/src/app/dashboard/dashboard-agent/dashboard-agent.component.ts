@@ -5,6 +5,7 @@ import { User } from '../../models/user.model';
 import { Order } from '../../models/order.model';
 import { statusLabelFr } from '../../pipes/status-label.pipe';
 import { TranslateService } from '@ngx-translate/core';
+import { Title } from '@angular/platform-browser';
 
 @Component({
     selector: 'app-dashboard-agent',
@@ -25,10 +26,12 @@ export class DashboardAgentComponent implements OnInit {
   constructor(
     private loginService: LoginService,
     private orderService: OrderService,
-    private translate: TranslateService
+    private translate: TranslateService,
+    private title: Title
   ) {}
 
   ngOnInit(): void {
+    this.title.setTitle('NEXTERA - Livraisons');
     this.user = this.loginService.getCurrentUser();
     this.loadStats();
   }
@@ -63,10 +66,7 @@ export class DashboardAgentComponent implements OnInit {
   }
 
   getGreeting(): string {
-    const hour = new Date().getHours();
-    if (hour < 12) return this.translate.instant('DASHBOARD.MORNING');
-    if (hour < 18) return this.translate.instant('DASHBOARD.AFTERNOON');
-    return this.translate.instant('DASHBOARD.EVENING');
+    return 'Bienvenue';
   }
 
   getStatusLabel(status: string): string {

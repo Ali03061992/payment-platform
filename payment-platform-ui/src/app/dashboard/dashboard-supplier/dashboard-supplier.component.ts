@@ -11,6 +11,7 @@ import { PaymentStats } from '../../models/payment.model';
 import { BalanceSummary } from '../../models/balance.model';
 import { statusLabelFr } from '../../pipes/status-label.pipe';
 import { TranslateService } from '@ngx-translate/core';
+import { Title } from '@angular/platform-browser';
 
 @Component({
     selector: 'app-dashboard-supplier',
@@ -31,13 +32,13 @@ export class DashboardSupplierComponent implements OnInit {
   shopBalances: BalanceSummary[] = [];
   loading = true;
 
-  constructor(
+constructor(
     private loginService: LoginService,
     private stockService: StockService,
     private orderService: OrderService,
     private paymentService: PaymentService,
     private balanceService: BalanceService,
-    private translate: TranslateService
+    private title: Title
   ) {}
 
   /** Encours total dû par les boutiques (Σ remainingDue). */
@@ -51,6 +52,7 @@ export class DashboardSupplierComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.title.setTitle('NEXTERA - Fournisseur');
     this.user = this.loginService.getCurrentUser();
     this.loadStats();
   }
@@ -115,10 +117,7 @@ export class DashboardSupplierComponent implements OnInit {
   }
 
   getGreeting(): string {
-    const hour = new Date().getHours();
-    if (hour < 12) return this.translate.instant('DASHBOARD.MORNING');
-    if (hour < 18) return this.translate.instant('DASHBOARD.AFTERNOON');
-    return this.translate.instant('DASHBOARD.EVENING');
+    return 'Bienvenue';
   }
 
   getStatusLabel(status: string): string {

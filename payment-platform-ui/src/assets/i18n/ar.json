@@ -119,9 +119,7 @@
     "ERROR_TOAST": "خطأ أثناء تغيير كلمة المرور"
   },
   "DASHBOARD": {
-    "MORNING": "صباح الخير",
-    "AFTERNOON": "مساء الخير",
-    "EVENING": "مساء الخير",
+
     "WELCOME_SUBTITLE": "إليك نظرة على منصتك.",
     "TOTAL_USERS": "مجموع المستخدمين",
     "ACTIVE_ACCOUNTS": "الحسابات النشطة",

@@ -9,6 +9,7 @@ import { User } from '../../models/user.model';
 import { OrganizationStats } from '../../models/organization.model';
 import { PaymentStats } from '../../models/payment.model';
 import { TranslateService } from '@ngx-translate/core';
+import { Title } from '@angular/platform-browser';
 
 @Component({
     selector: 'app-dashboard-admin',
@@ -26,17 +27,18 @@ export class DashboardAdminComponent implements OnInit {
   relationsCount = 0;
   loading = true;
 
-  constructor(
+constructor(
     private loginService: LoginService,
     private userService: UserService,
     private organizationService: OrganizationService,
     private paymentService: PaymentService,
     private orderService: OrderService,
     private disputeService: DisputeService,
-    private translate: TranslateService
+    private title: Title
   ) {}
 
   ngOnInit(): void {
+    this.title.setTitle('NEXTERA - Administration');
     this.user = this.loginService.getCurrentUser();
     this.loadStats();
   }
@@ -101,9 +103,6 @@ export class DashboardAdminComponent implements OnInit {
   }
 
   getGreeting(): string {
-    const hour = new Date().getHours();
-    if (hour < 12) return this.translate.instant('DASHBOARD.MORNING');
-    if (hour < 18) return this.translate.instant('DASHBOARD.AFTERNOON');
-    return this.translate.instant('DASHBOARD.EVENING');
+    return 'Bienvenue';
   }
 }

@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { LoginService } from '../services/login.service';
 import { User } from '../models/user.model';
 import { TranslateService } from '@ngx-translate/core';
+import { Title } from '@angular/platform-browser';
 
 @Component({
     selector: 'app-dashboard',
@@ -13,9 +14,10 @@ export class DashboardComponent implements OnInit {
   user: User | null = null;
   activeRole: string | null = null;
 
-  constructor(private loginService: LoginService, private translate: TranslateService) {}
+  constructor(private loginService: LoginService, private translate: TranslateService, private title: Title) {}
 
   ngOnInit(): void {
+    this.title.setTitle('NEXTERA - Tableau de bord');
     this.user = this.loginService.getCurrentUser();
     this.activeRole = this.detectRole();
   }
@@ -31,9 +33,6 @@ export class DashboardComponent implements OnInit {
   }
 
   getGreeting(): string {
-    const hour = new Date().getHours();
-    if (hour < 12) return this.translate.instant('DASHBOARD.MORNING');
-    if (hour < 18) return this.translate.instant('DASHBOARD.AFTERNOON');
-    return this.translate.instant('DASHBOARD.EVENING');
+    return 'Bienvenue';
   }
 }

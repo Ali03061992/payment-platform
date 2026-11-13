@@ -8,8 +8,5 @@
   } @else if (activeRole === 'SHOP_ADMIN' || activeRole === 'SHOP_AGENT') {
     <app-dashboard-shop></app-dashboard-shop>
   } @else {
-    <div class="welcome-section">
-      <h1>{{ getGreeting() }}, {{ user?.firstName }} !</h1>
-    </div>
   }
 </div>

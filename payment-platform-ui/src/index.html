@@ -1,30 +1,43 @@
 <!doctype html>
 <html lang="fr">
-<head>
-  <meta charset="utf-8">
-  <title>NEXTERA</title>
-  <base href="/">
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover">
-  <meta name="theme-color" content="#12243A">
-  <meta name="description" content="NEXTERA - Gestion B2B fournisseurs et boutiques">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="NEXTERA">
-  <meta name="application-name" content="NEXTERA">
-  <meta name="msapplication-TileColor" content="#12243A">
-  <meta name="msapplication-tap-highlight" content="no">
-  <meta name="format-detection" content="telephone=no">
-  <link rel="icon" type="image/png" href="assets/icon.png">
-  <link rel="manifest" href="manifest.json">
-  <link rel="apple-touch-icon" href="assets/icon.png">
-  <!-- M7 : config runtime (clÃ©s push via env, jamais committÃ©es). GÃ©nÃ©rÃ© en
-       dÃ©ploiement depuis assets/env.template.js (envsubst). -->
-  <script src="assets/env.js"></script>
-  <!-- Anti-FOUC : thÃ¨me + 2 accents appliquÃ©s avant le premier paint (le
-       bootstrap Angular est trop tard : les couleurs "flashaient" dÃ©faut
-       puis utilisateur Ã  chaque authentification et reload). -->
-  <script src="assets/theme-init.js"></script>
+  <head>
+    <meta charset="utf-8">
+    <title>NEXTERA</title>
+    <base href="/">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover">
+    <meta name="theme-color" content="#12243A">
+    <meta name="description" content="NEXTERA - Gestion B2B fournisseurs et boutiques">
+    
+    <!-- SEO & Social Sharing Meta Tags -->
+    <meta property="og:title" content="NEXTERA - Plateforme B2B fournisseurs et boutiques">
+    <meta property="og:description" content="NEXTERA centralise commandes, devis, livraisons, stocks, paiements, factures et réclamations dans un espace unique, sécurisé et conforme à la réglementation tunisienne">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://payment.tn">
+    <meta property="og:image" content="https://payment.tn/assets/icon.png">
+    <meta property="og:locale" content="fr_FR">
+    
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="NEXTERA - Plateforme B2B fournisseurs et boutiques">
+    <meta name="twitter:description" content="NEXTERA centralise commandes, devis, livraisons, stocks, paiements, factures et réclamations">
+    <meta name="twitter:image" content="https://payment.tn/assets/icon.png">
+    
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="NEXTERA">
+    <meta name="application-name" content="NEXTERA">
+    <meta name="msapplication-TileColor" content="#12243A">
+    <meta name="msapplication-tap-highlight" content="no">
+    <meta name="format-detection" content="telephone=no">
+    <link rel="icon" type="image/png" href="assets/icon.png">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="assets/icon.png">
+    <!-- M7 : config runtime (clé push via env, jamais committées). Généré en déploiement depuis assets/env.template.js (envsubst). -->
+    <script src="assets/env.js"></script>
+    <!-- Anti-FOUC : thème + 2 accents appliqués avant le premier paint (le
+         bootstrap Angular est trop tard : les couleurs "flashaient" défaut
+         puis utilisateur à chaque authentification et reload). -->
+    <script src="assets/theme-init.js"></script>
 </head>
 <body>
   <app-root></app-root>

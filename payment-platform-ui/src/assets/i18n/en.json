@@ -224,9 +224,6 @@
     "ERROR_TOAST": "Error changing password"
   },
   "DASHBOARD": {
-    "MORNING": "Good morning",
-    "AFTERNOON": "Good afternoon",
-    "EVENING": "Good evening",
     "WELCOME_SUBTITLE": "Here is an overview of your platform.",
     "TOTAL_USERS": "Total Users",
     "ACTIVE_ACCOUNTS": "Active Accounts",
