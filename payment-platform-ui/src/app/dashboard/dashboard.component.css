@@ -1,7 +1,6 @@
 /* Parent dashboard wrapper — role-specific styles in sub-components */
 
 .dashboard { width: 100%; max-width: none; }
-
 /* Mobile optimizations */
 @media (max-width: 768px) {
   .dashboard { padding: 0; }
