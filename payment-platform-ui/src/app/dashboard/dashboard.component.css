@@ -1,10 +1,6 @@
 /* Parent dashboard wrapper — role-specific styles in sub-components */
 
 .dashboard { width: 100%; max-width: none; }
-
-.welcome-section { margin-bottom: 24px; }
-.welcome-section h1 { margin: 0 0 4px 0; font-size: 26px; color: var(--text-primary); }
-
 /* Mobile optimizations */
 @media (max-width: 768px) {
   .dashboard { padding: 0; }
