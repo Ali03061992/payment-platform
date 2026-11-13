@@ -33,6 +33,9 @@ export class DashboardComponent implements OnInit {
   }
 
   getGreeting(): string {
-    return 'Bienvenue';
+    const hour = new Date().getHours();
+    if (hour < 12) return this.translate.instant('DASHBOARD.MORNING');
+    if (hour < 18) return this.translate.instant('DASHBOARD.AFTERNOON');
+    return this.translate.instant('DASHBOARD.EVENING');
   }
 }
