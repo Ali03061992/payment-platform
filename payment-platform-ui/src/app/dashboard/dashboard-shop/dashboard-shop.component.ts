@@ -38,6 +38,7 @@ constructor(
     private paymentService: PaymentService,
     private balanceService: BalanceService,
     private quoteService: QuoteService,
+    private translate: TranslateService,
     private title: Title
   ) {}
 
